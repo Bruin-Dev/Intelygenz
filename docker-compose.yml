@@ -8,3 +8,12 @@ services:
     ports:
       - 4222:4222
       - 8222:8222
+  
+  bruin-bridge:
+    build:
+      context: ./bruin-bridge/
+      dockerfile: Dockerfile
+    environment:
+      - PYTHONUNBUFFERED= 1
+    depends_on:
+      - "nats-streaming"
