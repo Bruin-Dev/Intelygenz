@@ -1,57 +1,49 @@
 import asyncio
 from nats.aio.client import Client as NATS
-from nats.aio.errors import ErrConnectionClosed, ErrTimeout, ErrNoServers
+from stan.aio.client import Client as STAN
+
 
 async def run(loop):
+    # Use borrowed connection for NATS then mount NATS Streaming
+    # client on top.
     nc = NATS()
+    await nc.connect(servers=["nats://nats-streaming:4222"], io_loop=loop)
 
-    await nc.connect("nats-streaming:4222", loop=loop)
+    # Start session with NATS Streaming cluster.
+    sc = STAN()
+    await sc.connect("automation-engine-nats", "client-123", nats=nc)
 
-    async def message_handler(msg):
-        subject = msg.subject
-        reply = msg.reply
-        data = msg.data.decode()
-        print("Received a message on '{subject} {reply}': {data}".format(
-            subject=subject, reply=reply, data=data))
+    # Synchronous Publisher, does not return until an ack
+    # has been received from NATS Streaming.
+    await sc.publish("hi", b'hello')
+    await sc.publish("hi", b'world')
 
-    # Simple publisher and async subscriber via coroutine.
-    sid = await nc.subscribe("foo", cb=message_handler)
+    total_messages = 0
+    future = asyncio.Future(loop=loop)
 
-    # Stop receiving after 2 messages.
-    await nc.auto_unsubscribe(sid, 2)
-    await nc.publish("foo", b'Hello')
-    await nc.publish("foo", b'World')
-    await nc.publish("foo", b'!!!!!')
+    async def cb(msg):
+        nonlocal future
+        nonlocal total_messages
+        print("Received a message (seq={}): {}".format(msg.seq, msg.data))
+        total_messages += 1
+        if total_messages >= 2:
+            future.set_result(None)
 
-    async def help_request(msg):
-        subject = msg.subject
-        reply = msg.reply
-        data = msg.data.decode()
-        print("Received a message on '{subject} {reply}': {data}".format(
-            subject=subject, reply=reply, data=data))
-        await nc.publish(reply, b'I can help')
+    # Subscribe to get all messages since beginning.
+    sub = await sc.subscribe("hi", start_at='first', cb=cb)
+    await asyncio.wait_for(future, 1, loop=loop)
 
-    # Use queue named 'workers' for distributing requests
-    # among subscribers.
-    sid = await nc.subscribe("help", "workers", help_request)
+    # Stop receiving messages
+    await sub.unsubscribe()
 
-    # Send a request and expect a single response
-    # and trigger timeout if not faster than 200 ms.
-    try:
-        response = await nc.request("help", b'help me', 0.2)
-        print("Received response: {message}".format(
-            message=response.data.decode()))
-    except ErrTimeout:
-        print("Request timed out")
+    # Close NATS Streaming session
+    await sc.close()
 
-    # Remove interest in subscription.
-    await nc.unsubscribe(sid)
-
-    # Terminate connection to NATS.
+    # We are using a NATS borrowed connection so we need to close manually.
     await nc.close()
 
 if __name__ == '__main__':
-    print("Bruin bridge alive and ready")
+    print("Bruin bridge starting...")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(run(loop))
     loop.close()
