@@ -1,15 +1,21 @@
 # Getting started
 - Install python 3
 - Install pip for python 3
-- Install virtual env for python 3
+- Install virtualenv for python 3
 
-## Activating pipenv and installing dependencies
+Then create and activate the virtualenv like this:
 ````
-virtualenv bruin-bridge
+python3 -m venv env
 source ./env/bin/activate
-pip install virtualenv
-pip install pipenv
-pipenv shell
-pipenv sync
-pip freeze (This one for checking the installation)
+pip install -r requirements.txt
 ````
+
+# Adding new libraries to the project
+
+With virtualenv activated
+
+````
+pip install some-package
+pip freeze | grep -v "pkg-resources" > requirements.txt #The grep -v is needed only if you use Ubuntu due a harmless bug
+````
+Remember to commit the new requirements.txt file
