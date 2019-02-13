@@ -23,8 +23,17 @@ Remember to commit the new requirements.txt file
 
 # Fast development in local environment
 
+- [JUST ONCE] Go to /etc/hosts and add ``127.0.0.1	nats-streaming``
 - Go to project root
 - Type the following ``docker-compose up nats-streaming``
-- [JUST ONCE] Go to /etc/hosts and add ``127.0.0.1	nats-streaming``
 
 Now you can execute your python code related to NATS connections, using nats-streaming as host name
+
+
+# Technologies used
+
+- [Asyncio nats streaming](https://github.com/nats-io/asyncio-nats-streaming)
+- [ASGI library for async](https://pypi.org/project/asgiref/)
+
+# Useful documentation
+- [Python async simplified with asgiref and asyncio](https://www.aeracode.org/2018/02/19/python-async-simplified/)
