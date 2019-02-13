@@ -1,49 +1,54 @@
-import asyncio
+from asgiref.sync import async_to_sync
 from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
 
 
-async def run(loop):
+async def connect_to_nats():
     # Use borrowed connection for NATS then mount NATS Streaming
     # client on top.
+    global nc
     nc = NATS()
-    await nc.connect(servers=["nats://nats-streaming:4222"], io_loop=loop)
+    await nc.connect(servers=["nats://nats-streaming:4222"])
 
     # Start session with NATS Streaming cluster.
+    global sc
     sc = STAN()
     await sc.connect("automation-engine-nats", "client-123", nats=nc)
 
-    # Synchronous Publisher, does not return until an ack
-    # has been received from NATS Streaming.
-    await sc.publish("hi", b'hello')
-    await sc.publish("hi", b'world')
 
-    total_messages = 0
-    future = asyncio.Future(loop=loop)
+async def publish_message(topic, message):
+    await sc.publish(topic, message)
 
-    async def cb(msg):
-        nonlocal future
-        nonlocal total_messages
-        print("Received a message (seq={}): {}".format(msg.seq, msg.data))
-        total_messages += 1
-        if total_messages >= 2:
-            future.set_result(None)
 
-    # Subscribe to get all messages since beginning.
-    sub = await sc.subscribe("hi", start_at='first', cb=cb)
-    await asyncio.wait_for(future, 1, loop=loop)
+async def cb(msg):
+    print("Received a message (seq={}): {}".format(msg.seq, msg.data))
 
-    # Stop receiving messages
+
+async def register_consumer(topic):
+    global sub
+    sub = await sc.subscribe(topic, start_at='first', cb=cb)
+
+
+async def close_nats_connections():
+    # Stop recieving messages
     await sub.unsubscribe()
-
     # Close NATS Streaming session
     await sc.close()
 
     # We are using a NATS borrowed connection so we need to close manually.
     await nc.close()
 
+
+@async_to_sync
+async def run():
+    await connect_to_nats()
+    await publish_message("Some-topic", b'Some message')
+    await publish_message("Some-topic", b'Some message2')
+    await publish_message("Some-topic", b'Some message3')
+    await register_consumer("Some-topic")
+    await close_nats_connections()
+
+
 if __name__ == '__main__':
     print("Bruin bridge starting...")
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run(loop))
-    loop.close()
+    run()
