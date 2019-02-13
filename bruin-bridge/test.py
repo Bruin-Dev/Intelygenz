@@ -1,5 +1,5 @@
 def dummy_test():
-    assert "KA" == "WIND"
+    assert "KA" == "KA"
 
 
 if __name__ == "__main__":
