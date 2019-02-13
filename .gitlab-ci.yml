@@ -1,0 +1,10 @@
+stages:
+  - test
+
+test:
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install -r bruin-bridge/requirements.txt
+  script:
+    - python3.6 bruin-bridge/test.py
