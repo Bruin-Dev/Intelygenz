@@ -17,8 +17,8 @@ class NATSClient(unittest.TestCase):
         self.assertIsInstance(nats_connector.nc, NATS)
         self.assertIsInstance(nats_connector.sc, STAN)
 
-    def test_project_is_structured(self):
-        self.assertEqual("Project structure", "FALSE")
+    # def test_project_is_structured(self):
+    #     self.assertEqual("Project structure", "FALSE")
 
 
 if __name__ == '__main__':
