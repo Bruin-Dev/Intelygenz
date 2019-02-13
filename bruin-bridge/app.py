@@ -15,7 +15,6 @@ class NATSConnector:
         await self.nc.connect(servers=["nats://nats-streaming:4222"])
 
         # Start session with NATS Streaming cluster.
-        self.sc
         self.sc = STAN()
         await self.sc.connect("automation-engine-nats", "client-123", nats=self.nc)
 
