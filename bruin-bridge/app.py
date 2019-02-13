@@ -1,3 +1,4 @@
+from asyncio import sleep as aiosleep
 from asgiref.sync import async_to_sync
 from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
@@ -46,6 +47,8 @@ async def run():
     await publish_message("Some-topic", b'Some message2')
     await publish_message("Some-topic", b'Some message3')
     await register_consumer("Some-topic")
+    print("Waiting 5 seconds to consume messages...")
+    await aiosleep(5)
     await close_nats_connections()
 
 
