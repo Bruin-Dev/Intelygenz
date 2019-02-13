@@ -6,7 +6,7 @@ from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
 
 
-class DummyTest(unittest.TestCase):
+class NATSClient(unittest.TestCase):
     @async_to_sync
     async def test_is_instance_of(self):
         NATS.connect = sync_to_async(MagicMock())
