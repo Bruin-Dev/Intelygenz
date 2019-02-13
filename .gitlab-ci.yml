@@ -7,4 +7,4 @@ test:
     - apt-get update -q -y
     - pip install -r bruin-bridge/requirements.txt
   script:
-    - python3.6 -m unittest bruin-bridge/test.py
+    - python3.6 -m unittest -v bruin-bridge/test_base.py

@@ -1,5 +1,5 @@
 import unittest
-from app import NATSConnector
+from . import app
 from unittest.mock import MagicMock
 from asgiref.sync import async_to_sync, sync_to_async
 from nats.aio.client import Client as NATS
@@ -11,7 +11,7 @@ class DummyTest(unittest.TestCase):
     async def test_is_instance_of(self):
         NATS.connect = sync_to_async(MagicMock())
         STAN.connect = sync_to_async(MagicMock())
-        nats_connector = NATSConnector()
+        nats_connector = app.NATSConnector()
         await nats_connector.connect_to_nats()
         self.assertIsInstance(nats_connector.nc, NATS)
         self.assertIsInstance(nats_connector.sc, STAN)
