@@ -1,7 +1,11 @@
-def dummy_test():
-    assert "KA" == "KA"
+import unittest
 
 
-if __name__ == "__main__":
-    dummy_test()
-    print("Tests passed!")
+class DummyTest(unittest.TestCase):
+
+    def test_dummy(self):
+        self.assertEqual('KA', 'KA')
+
+
+if __name__ == '__main__':
+    unittest.main()
