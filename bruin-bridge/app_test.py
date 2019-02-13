@@ -1,5 +1,6 @@
 import unittest
-from . import app
+#TODO try to fix imports in order to work with unittest too
+import app
 from unittest.mock import MagicMock
 from asgiref.sync import async_to_sync, sync_to_async
 from nats.aio.client import Client as NATS
