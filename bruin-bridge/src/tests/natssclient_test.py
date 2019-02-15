@@ -1,13 +1,13 @@
 import pytest
 from ..application.clients.natssclient import NATSSClient
 from unittest.mock import MagicMock
-from asgiref.sync import async_to_sync, sync_to_async
+from asgiref.sync import sync_to_async
 from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
 
 
-class NATSSClientTest():
-    @async_to_sync
+class TestNATSSClient():
+    @pytest.mark.asyncio
     async def test_is_instance_of(self):
         NATS.connect = sync_to_async(MagicMock())
         STAN.connect = sync_to_async(MagicMock())
