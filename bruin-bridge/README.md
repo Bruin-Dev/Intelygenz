@@ -38,3 +38,4 @@ Now you can execute your python code related to NATS connections, using nats-str
 # Useful documentation
 - [Python async simplified with asgiref and asyncio](https://www.aeracode.org/2018/02/19/python-async-simplified/)
 - [Getting started with testing in Python](https://realpython.com/python-testing/#choosing-a-test-runner)
+- [Pytest documentation](https://docs.pytest.org/en/latest/getting-started.html)

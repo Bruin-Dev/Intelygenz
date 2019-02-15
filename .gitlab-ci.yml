@@ -7,5 +7,4 @@ test:
     - apt-get update -q -y
     - pip install -r bruin-bridge/requirements.txt
   script:
-    - python3.6 -m coverage run bruin-bridge/app_test.py
-    - python3.6 -m coverage report bruin-bridge/app.py
+    - pytest --cov=. bruin-bridge/src/tests/
