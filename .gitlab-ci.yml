@@ -7,4 +7,4 @@ test:
     - apt-get update -q -y
     - pip install -r bruin-bridge/requirements.txt
   script:
-    - pytest --cov=. bruin-bridge/src/tests/
+    - pytest --cov=bruin-bridge src/tests/

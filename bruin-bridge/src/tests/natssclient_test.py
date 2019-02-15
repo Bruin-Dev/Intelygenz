@@ -16,7 +16,6 @@ class NATSSClientTest():
         assert isinstance(nats_s_client.nc, NATS)
         assert isinstance(nats_s_client.sc, STAN)
 
-    @staticmethod
     @pytest.mark.xfail(reason="Will fail as a reminder of preeliminar project structure")
     def test_project_is_structured(self):
         assert "Project structure" == "FALSE"

@@ -6,4 +6,4 @@ RUN pip install -r requirements.txt
 
 ENV PYTHONUNBUFFERED 1
 
-CMD ["python3", "-u", "app.py"]
+CMD ["python3", "-u", "src/app.py"]
