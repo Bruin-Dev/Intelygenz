@@ -1,5 +1,5 @@
 import pytest
-from ..application.clients.nats_streaming_client import NatsStreamingClient
+from src.application.clients.nats_streaming_client import NatsStreamingClient
 from unittest.mock import MagicMock
 from asgiref.sync import sync_to_async
 from nats.aio.client import Client as NATS
