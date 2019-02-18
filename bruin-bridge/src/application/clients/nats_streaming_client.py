@@ -17,7 +17,7 @@ class NatsStreamingClient:
         await self.sc.connect("automation-engine-nats", "client-123", nats=self.nc)
 
     async def publish_message(self, topic, message):
-        await self.sc.publish(topic, message)
+        await self.sc.publish(topic, message.encode())
 
     async def _cb(self, msg):
         print("Received a message (seq={}): {}".format(msg.seq, msg.data))

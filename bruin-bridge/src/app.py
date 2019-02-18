@@ -7,9 +7,9 @@ from asgiref.sync import async_to_sync
 async def run():
     nats_s_client = NatsStreamingClient()
     await nats_s_client.connect_to_nats()
-    await nats_s_client.publish_message("Some-topic", b'Some message')
-    await nats_s_client.publish_message("Some-topic", b'Some message2')
-    await nats_s_client.publish_message("Some-topic", b'Some message3')
+    await nats_s_client.publish_message("Some-topic", "Some message")
+    await nats_s_client.publish_message("Some-topic", "Some message2")
+    await nats_s_client.publish_message("Some-topic", "Some message3")
     await nats_s_client.register_consumer("Some-topic")
     print("Waiting 5 seconds to consume messages...")
     await aiosleep(5)
