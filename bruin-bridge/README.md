@@ -1,3 +1,13 @@
+# Table of contents
+- [Getting started](#getting-started)
+- [Adding new libraries to the project](#adding-new-libraries-to-the-project)
+- [Fast development in local environment](#fast-development-in-local-environment)
+- [Testing](#testing)
+  * [Develop new tests](#develop-new-tests)
+  * [Coverage configuration](#coverage-configuration)
+- [Technologies used](#technologies-used)
+- [Useful documentation](#useful-documentation)
+
 # Getting started
 - Install python 3
 - Install pip for python 3
@@ -29,6 +39,13 @@ Remember to commit the new requirements.txt file
 
 Now you can execute your python code related to NATS connections, using nats-streaming as host name
 
+# Testing
+This project uses pytest, you can find more information in the [Useful documentation section](#useful-documentation)
+## Develop new tests
+Conventions for files, classes and functions can be found in the [pytest.ini file](pytest.ini)
+
+## Coverage configuration
+Coverage is configured in the [.coveragerc file](.coveragerc)
 
 # Technologies used
 
