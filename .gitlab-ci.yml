@@ -5,6 +5,7 @@ test:
   image: python:3.6
   before_script:
     - apt-get update -q -y
-    - pip install -r bruin-bridge/requirements.txt
+    - cd bruin-bridge
+    - pip install -r requirements.txt
   script:
-    - pytest --cov=. bruin-bridge/src/tests/
+    - pytest -c pytest.ini --cov-config=.coveragerc --cov=. src/tests/
