@@ -1,6 +1,6 @@
 # This will be executed everytime we make a pip install
+# The find_packages is very important since it's used to make all our packages visible to each other inside the project
 
-# TODO take a look in case we can automate the requirements.txt in a "dependencies" block in this file
 from setuptools import setup, find_packages
 setup(
     name='bruin-bridge',
