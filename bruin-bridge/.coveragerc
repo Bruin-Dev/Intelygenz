@@ -9,6 +9,9 @@ omit =
     *__init__.py**
     *_test.py
     *app.py
+[paths]
+source =
+    src/
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =
@@ -24,6 +27,9 @@ exclude_lines =
     if __name__ == .__main__.:
 
 ignore_errors = False
+fail_under = 70
+precision = 2
+show_missing = True
 
 [html]
 directory = coverage_html_report
