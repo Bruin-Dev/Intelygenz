@@ -2,7 +2,7 @@ from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
 
 
-class NATSSClient:
+class NatsStreamingClient:
     nc = None
     sc = None
 

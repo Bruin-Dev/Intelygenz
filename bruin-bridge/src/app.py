@@ -1,11 +1,11 @@
-from application.clients.natssclient import NATSSClient
+from application.clients.nats_streaming_client import NatsStreamingClient
 from asyncio import sleep as aiosleep
 from asgiref.sync import async_to_sync
 
 
 @async_to_sync
 async def run():
-    nats_s_client = NATSSClient()
+    nats_s_client = NatsStreamingClient()
     await nats_s_client.connect_to_nats()
     await nats_s_client.publish_message("Some-topic", b'Some message')
     await nats_s_client.publish_message("Some-topic", b'Some message2')
