@@ -9,9 +9,12 @@
 
 # Project structure
 ## Naming conventions
-- For folders: kebab-case
-## Root of the project
-- New service: new folder with a project within.
+- For folders containing services: kebab-case
+- For a python package(directory): all lowercase, without underscores
+- For a python module(file): all lowercase, with underscores only if improves readability.
+- For a python class: should use CapsWord convention.
+
+From [PEP-0008](https://www.python.org/dev/peps/pep-0008/#package-and-module-names)
 
 # Technologies used
  - [Python 3.6](https://www.python.org/downloads/release/python-360/)
