@@ -20,7 +20,7 @@ class NatsStreamingClient:
         await self.sc.publish(topic, message.encode())
 
     def _cb(self, msg):
-        print("Received a message (seq={}): {}".format(msg.seq, msg.data))
+        print(f'Received a message (seq={msg.seq}): {msg.data.decode()}')
 
     async def register_consumer(self, topic):
         sub = await self.sc.subscribe(topic, start_at='first', cb=self._cb)
