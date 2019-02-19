@@ -5,6 +5,7 @@
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
 - [Run the project](#run-the-project)
+- [List of projects READMEs](#list-of-projects-readmes)
 - [Good Practices](#good-practices)
 
 # Project structure
@@ -34,11 +35,16 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 - When deploying to production, a certain revision of the dev branch will be tagged. That will trigger all the pipelines needed to deploy.
 
 # Run the project
-````
-docker-compose up --build
-````
+
+`docker-compose up --build`
+
+
+# List of projects READMEs
+- [Bruin bridge](bruin-bridge/README.md)
+
 
 # Good Practices
 - Documentation **must** be updated as frecuently as possible. It's recomended to annotate every action taken in the development phase, and afterwards, add to the documentation the actions or information considered relevant.
 - Pair programming is strongly reccomended when doing difficult or delicate tasks. It is **mandatory** when a new teammate arrives.
 - Solutions of hard problems should be put in common in order to use all the knowledge and points of view of the team.
+
