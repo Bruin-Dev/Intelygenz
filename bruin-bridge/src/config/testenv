@@ -1,2 +1,0 @@
-NATS_SERVER1="nats://nats-streaming:4222"
-NATS_CLUSTER_NAME="automation-engine-nats"
