@@ -31,7 +31,7 @@ class TestNatsStreamingSClient():
         assert nats_s_client.sc.publish.await_args[0] == ("Test-topic", b'Test-message')
 
     @pytest.mark.asyncio
-    async def register_consumer_test(self):
+    async def register_consumer_and_callback_test(self):
         nats_s_client = NatsStreamingClient()
         nats_s_client.subs.clear()
         nats_s_client.sc = MagicMock()
