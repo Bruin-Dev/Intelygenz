@@ -35,7 +35,10 @@ class TestNatsStreamingSClient():
         nats_s_client = NatsStreamingClient()
         nats_s_client.subs.clear()
         nats_s_client.sc = MagicMock()
-        nats_s_client.sc.subscribe = CoroutineMock()
+        message = MagicMock()
+        message.seq = MagicMock()
+        message.data = MagicMock()
+        nats_s_client.sc.subscribe = CoroutineMock(return_value=nats_s_client._cb(message))
         await nats_s_client.register_consumer("Topic")
         assert nats_s_client.sc.subscribe.await_args[0] == ("Topic", )
         assert nats_s_client.sc.subscribe.await_args[1]["start_at"] == "first"

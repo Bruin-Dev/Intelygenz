@@ -19,7 +19,7 @@ class NatsStreamingClient:
     async def publish_message(self, topic, message):
         await self.sc.publish(topic, message.encode())
 
-    def _cb(self, msg): # pragma: no cover
+    def _cb(self, msg):
         print("Received a message (seq={}): {}".format(msg.seq, msg.data))
 
     async def register_consumer(self, topic):
