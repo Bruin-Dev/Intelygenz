@@ -4,8 +4,6 @@ stages:
 test:
   image: python:3.6
   before_script:
-    - export NATS_SERVER1="nats://nats-streaming:4222"
-    - export NATS_CLUSTER_NAME="automation-engine-nats"
     - apt-get update -q -y
     - cd bruin-bridge
     - pip install -r requirements.txt

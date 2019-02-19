@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from asynctest import CoroutineMock
 from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
-from src.config import config
+from src.config import testconfig as config
 
 
 class TestNatsStreamingSClient():
