@@ -15,7 +15,7 @@
 - For a python class: should use CapsWord convention.
 
 From [PEP-0008](https://www.python.org/dev/peps/pep-0008/#package-and-module-names)
-
+Also check this, more synthesized [Python naming conventions](https://visualgit.readthedocs.io/en/latest/pages/naming_convention.html) 
 # Technologies used
  - [Python 3.6](https://www.python.org/downloads/release/python-360/)
  - [NATS(in streaming mode, as event bus)](https://nats.io/)
