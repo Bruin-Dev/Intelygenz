@@ -10,7 +10,6 @@ class NatsStreamingClient:
 
     def __init__(self, config):
         self.config = config
-        print(config)
 
     async def connect_to_nats(self):
         # Use borrowed connection for NATS then mount NATS Streaming

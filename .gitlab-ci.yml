@@ -9,3 +9,6 @@ test:
     - pip install -r requirements.txt
   script:
     - pytest --cov
+  env_file:
+    - bruin-bridge/src/config/testenv
+
