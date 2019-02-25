@@ -1,10 +1,10 @@
-from src.application.clients.nats_streaming_client import NatsStreamingClient
+from igz.nats.clients import NatsStreamingClient
 import pytest
 from unittest.mock import Mock
 from asynctest import CoroutineMock
 from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
-from src.config import testconfig as config
+from igz.config import testconfig as config
 
 
 class TestNatsStreamingClient():
@@ -19,7 +19,8 @@ class TestNatsStreamingClient():
         assert nats_s_client.nc.connect.called
         assert nats_s_client.sc.connect.called
         assert nats_s_client.nc.connect.await_args[1] == dict(servers=config.NATS_CONFIG["servers"])
-        assert nats_s_client.sc.connect.await_args[0] == (config.NATS_CONFIG["cluster_name"], config.NATS_CONFIG["client_ID"])
+        assert nats_s_client.sc.connect.await_args[0] == (config.NATS_CONFIG["cluster_name"],
+                                                          config.NATS_CONFIG["client_ID"])
         assert nats_s_client.sc.connect.await_args[1] == dict(nats=nats_s_client.nc)
 
     @pytest.mark.asyncio
@@ -42,7 +43,8 @@ class TestNatsStreamingClient():
         nats_s_client.sc.subscribe = CoroutineMock(return_value=nats_s_client._cb(message))
         await nats_s_client.register_consumer()
         assert nats_s_client.sc.subscribe.await_args[0] == (config.NATS_CONFIG["consumer"]["topic"], )
-        assert nats_s_client.sc.subscribe.await_args[1] == dict(start_at=config.NATS_CONFIG["consumer"]["start_at"], cb=nats_s_client._cb )
+        assert nats_s_client.sc.subscribe.await_args[1] == dict(start_at=config.NATS_CONFIG["consumer"]["start_at"],
+                                                                cb=nats_s_client._cb )
 
     @pytest.mark.asyncio
     async def close_nats_connection_test(self):

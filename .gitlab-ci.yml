@@ -1,12 +1,13 @@
 stages:
   - test
 
-test:
+igzpackages_test:
+  stage: test
   image: python:3.6
   before_script:
     - apt-get update -q -y
-    - cd bruin-bridge
-    - pip install -r requirements.txt
+    - cd custompackages/igzpackages
+    - python setup.py install
   script:
     - pytest --cov
 
