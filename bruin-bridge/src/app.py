@@ -1,7 +1,7 @@
-from application.clients.nats_streaming_client import NatsStreamingClient
 from asyncio import sleep as aiosleep
 from asgiref.sync import async_to_sync
 from config import config
+from igz.nats.clients import NatsStreamingClient
 
 
 @async_to_sync
@@ -37,5 +37,5 @@ def velocloud_hello_world():
 
 if __name__ == '__main__':
     print("Bruin bridge starting...")
-    velocloud_hello_world()
-    # run()
+    #velocloud_hello_world()
+    run()
