@@ -17,25 +17,25 @@ async def run():
     await nats_s_client.close_nats_connections()
 
 
-def velocloud_hello_world():
-    import velocloud
-    import os
-    from velocloud.rest import ApiException
-    client = velocloud.ApiClient(host=os.environ["VELOCLOUD_HOST"])
-    client.authenticate(os.environ["VELOCLOUD_USER"], os.environ["VELOCLOUD_PASS"], operator=True)
-
-    api = velocloud.AllApi(client)
-
-    print("### GETTING AGGREGATE ENTERPRISES EDGES: THIS MEANS GETTING ALL WE NEED TO START  ###")
-    body = {}
-    try:
-        res = api.monitoringGetAggregates(body=body)
-        print(res)
-    except ApiException as e:
-        print(e)
+# def velocloud_hello_world():
+#     import velocloud
+#     import os
+#     from velocloud.rest import ApiException
+#     client = velocloud.ApiClient(host=os.environ["VELOCLOUD_HOST"])
+#     client.authenticate(os.environ["VELOCLOUD_USER"], os.environ["VELOCLOUD_PASS"], operator=True)
+#
+#     api = velocloud.AllApi(client)
+#
+#     print("### GETTING AGGREGATE ENTERPRISES EDGES: THIS MEANS GETTING ALL WE NEED TO START  ###")
+#     body = {}
+#     try:
+#         res = api.monitoringGetAggregates(body=body)
+#         print(res)
+#     except ApiException as e:
+#         print(e)
 
 
 if __name__ == '__main__':
     print("Bruin bridge starting...")
-    #velocloud_hello_world()
+    # velocloud_hello_world()
     run()
