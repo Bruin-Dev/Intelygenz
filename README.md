@@ -1,7 +1,6 @@
 # Table of Contents
 - [Project structure](#project-structure)
   * [Naming conventions](#naming-conventions)
-  * [Root of the project](#root-of-the-project)
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
 - [Run the project](#run-the-project)
@@ -14,6 +13,8 @@
 - For a python package(directory): all lowercase, without underscores
 - For a python module(file): all lowercase, with underscores only if improves readability.
 - For a python class: should use CapsWord convention.
+- Virtual env folders should be `project-name-env`. In case it is in a custom package as a user test environment 
+it should be `package-example-env`
 
 From [PEP-0008](https://www.python.org/dev/peps/pep-0008/#package-and-module-names)
 Also check this, more synthesized [Python naming conventions](https://visualgit.readthedocs.io/en/latest/pages/naming_convention.html) 
