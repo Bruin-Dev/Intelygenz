@@ -31,6 +31,7 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
  - [Docker-compose](https://docs.docker.com/compose/)
  - [Kubernetes](https://kubernetes.io/)
  - [markdown-toc (for Table of Contents generation in READMEs)](https://github.com/jonschlinkert/markdown-toc)
+ - [PEP8 pre-commit hook](https://github.com/cbrueffer/pep8-git-hook) **MANDATORY**
 # Developing flow
 - Create a branch from development
 	- "feature" branches starts with feature/feature-name

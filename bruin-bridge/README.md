@@ -11,6 +11,7 @@
 - Install python 3.6
 - Install pip for python 3.6
 - Install virtualenv for python 3.6
+- Add the [precommit hook for PEP8](https://github.com/cbrueffer/pep8-git-hook) to automation-engine/.git/hooks/
 
 Then create and activate the virtualenv like this:
 ````
