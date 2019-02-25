@@ -1,4 +1,4 @@
-from igz.nats.clients import NatsStreamingClient
+from igz.packages.nats.clients import NatsStreamingClient
 import pytest
 from unittest.mock import Mock
 from asynctest import CoroutineMock

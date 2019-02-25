@@ -3,8 +3,13 @@
   * [Naming conventions](#naming-conventions)
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
+  * [Custom packages](#custom-packages)
+    + [Creation and testing](#creation-and-testing)
+    + [Import and installation in microservices](#import-and-installation-in-microservices)
 - [Run the project](#run-the-project)
-- [List of projects READMEs](#list-of-projects-readmes)
+- [Lists of projects READMEs](#lists-of-projects-readmes)
+  * [Packages](#packages)
+  * [Microservices](#microservices)
 - [Good Practices](#good-practices)
 
 # Project structure
@@ -34,6 +39,38 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 - **Remember that all code must have automated tests(unit and integration and must be part of an acceptance test) in it's pipeline.** 
 - Assign that merge request to a Maintainer of the repository. Also add any affected developer as Approver. I.E: if you are developing a microservice wich is part of a process, you should add as Approvers both the developers of the first microservice ahead and the first behind in the process chain. Those microservices will be the more affected by your changes. 
 - When deploying to production, a certain revision of the dev branch will be tagged. That will trigger all the pipelines needed to deploy.
+
+## Custom packages
+Custom packages are developed using the same branching name and workflow that is used in other pieces of the project.
+Custom packages are:
+    - Wrappers of other packages to adapt them to our needs
+    - SDKs or clients from 3rd party providers
+
+Since they are going to be used among various microservices it is important not to duplicate their code, in order to ease the maintenance of them.
+
+
+### Creation and testing
+For a wrapper of other package (I.E: httpclient parametrized for some provider) test are **mandatory**.
+If the package is a SDK provided by a 3rd party and will be used "as it is", no testing is needed.
+If there are any new development to create a specific wrapper for an SDK provided, test are **mandatory** for that part.
+
+To add an specific SDK for a 3rd party (I.E: VMWare's Velocloud), just add the SDK folder to the custompackages/ directory.
+
+To add a wrapper for a library:
+    - Create a package inside custompackages/igz/packages/ named mypackage
+    - Create a test folder under custompackages/igz/tests/mypackage
+    - Add your dependencies to custompackages/setup.py in the `REQUIRES` list.
+    - Replicate file and folder structure in both folders.
+    - Add config test variables under custompackages/igz/config/testconfig
+
+### Import and installation in microservices
+
+Add `../custompackages/packagename` to the microservice's requirements.txt file
+
+Make sure the dockerfile copies the custompackages directory to the container.
+
+**VERY IMPORTANT: If the microservice is using any custompackages, change any line related with them after each pip freeze for a relative import. I.E: If you are using velocloud package, change `velocloud==3.2.19` line to `../custompackages/velocloud`**
+
 
 # Run the project
 

@@ -12,7 +12,7 @@ omit =
     *app.py
 [paths]
 source =
-    igz/
+    packages/
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =

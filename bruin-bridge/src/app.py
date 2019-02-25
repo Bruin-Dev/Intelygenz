@@ -1,7 +1,7 @@
 from asyncio import sleep as aiosleep
 from asgiref.sync import async_to_sync
 from config import config
-from igz.nats.clients import NatsStreamingClient
+from igz.packages.nats.clients import NatsStreamingClient
 
 
 @async_to_sync
