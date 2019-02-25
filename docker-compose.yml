@@ -11,8 +11,8 @@ services:
   
   bruin-bridge:
     build:
-      context: ./bruin-bridge/
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: bruin-bridge/Dockerfile
     environment:
       - PYTHONUNBUFFERED= 1
       - NATS_SERVER1=nats://nats-streaming:4222
