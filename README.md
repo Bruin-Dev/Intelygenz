@@ -40,7 +40,12 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 `docker-compose up --build`
 
 
-# List of projects READMEs
+# Lists of projects READMEs
+
+## Packages
+- [Velocloud sdk](custompackages/velocloud/README.md)
+
+## Microservices
 - [Bruin bridge](bruin-bridge/README.md)
 
 
