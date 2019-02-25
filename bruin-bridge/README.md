@@ -68,6 +68,7 @@ pip freeze | grep -v "pkg-resources" > requirements.txt #The grep -v is needed o
 ````
 **Remember to commit the new requirements.txt file**
 
+**VERY IMPORTANT: If the microservice is using any custompackages, change any line related with them after each pip freeze for a relative import. I.E: If you are using velocloud package, change `velocloud==3.2.19` line to `../custompackages/velocloud`**
 
 # Technologies used
 
