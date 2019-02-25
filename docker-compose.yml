@@ -11,6 +11,7 @@ services:
   
   bruin-bridge:
     build:
+      # Context must be the root of the monorepo since we need to copy custompackages
       context: .
       dockerfile: bruin-bridge/Dockerfile
     environment:
