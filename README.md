@@ -49,6 +49,9 @@ Custom packages are:
 
 Since they are going to be used among various microservices it is important not to duplicate their code, in order to ease the maintenance of them.
 
+For the IDE to detect changes in custompackages, you need to uninstall & reinstall them via pip in your virtualenvs.
+
+If changes are going to be persistent, remember to test them and change the version depending on the changes made. [Check semver](https://semver.org/) for that.
 
 ### Creation and testing
 For a wrapper of other package (I.E: httpclient parametrized for some provider) test are **mandatory**.
