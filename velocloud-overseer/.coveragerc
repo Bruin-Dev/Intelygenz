@@ -4,6 +4,7 @@
 branch = True
 omit =
     .*
+    */env/*
     */*-env/*
     */config/*
     *setup.py*
