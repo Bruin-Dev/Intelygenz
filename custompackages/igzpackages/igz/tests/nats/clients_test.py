@@ -35,6 +35,10 @@ class TestNatsStreamingClient():
         assert nats_s_client._sc.publish.await_args[0] == ("Test-topic", b'Test-message')
 
     @pytest.mark.asyncio
+    async def register_sequence_consumer_test(self):
+        assert 1 == 2
+
+    @pytest.mark.asyncio
     async def register_basic_consumer_and_callback_test(self):
         nats_s_client = NatsStreamingClient(config)
         nats_s_client._subs.clear()
