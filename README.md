@@ -85,6 +85,7 @@ Make sure the dockerfile copies the custompackages directory to the container.
 
 ## Packages
 - [Velocloud sdk](custompackages/velocloud/README.md)
+- [IGZ packages](custompackages/igzpackages/README.md)
 
 ## Microservices
 - [Bruin bridge](bruin-bridge/README.md)
