@@ -75,6 +75,11 @@ Make sure the dockerfile copies the custompackages directory to the container.
 
 **VERY IMPORTANT: If the microservice is using any custompackages, change any line related with them after each pip freeze for a relative import. I.E: If you are using velocloud package, change `velocloud==3.2.19` line to `../custompackages/velocloud`**
 
+### Changes and debugging 
+
+If any change it's performed in a custom package, it must be uninstalled from the virtual environment and reinstalled with pip.
+
+To debug with PyCharm, you must put the breakpoint **in the copy in site-packages** of the custompackage. To find that files, cntrl + right click on the in a call in your code of the function you want to debug.
 
 # Run the project
 
@@ -88,7 +93,7 @@ Make sure the dockerfile copies the custompackages directory to the container.
 - [IGZ packages](custompackages/igzpackages/README.md)
 
 ## Microservices
-- [Bruin bridge](bruin-bridge/README.md)
+- [Base microservice](base-microservice/README.md)
 
 
 # Good Practices

@@ -3,39 +3,54 @@ from stan.aio.client import Client as STAN
 
 
 class NatsStreamingClient:
-    nc = None
-    sc = None
-    subs = list()
-    config = None
+    _nc = None
+    _sc = None
+    _subs = list()
+    _topic_action = dict()
+    _config = None
 
     def __init__(self, config):
-        self.config = config
+        self._config = config.NATS_CONFIG
 
     async def connect_to_nats(self):
         # Use borrowed connection for NATS then mount NATS Streaming
         # client on top.
-        self.nc = NATS()
-        await self.nc.connect(servers=self.config.NATS_CONFIG["servers"])
+        self._nc = NATS()
+        await self._nc.connect(servers=self._config["servers"])
         # Start session with NATS Streaming cluster.
-        self.sc = STAN()
-        await self.sc.connect(self.config.NATS_CONFIG["cluster_name"], self.config.NATS_CONFIG["client_ID"], nats=self.nc)
+        self._sc = STAN()
+        await self._sc.connect(self._config["cluster_name"], self._config["client_ID"],
+                               nats=self._nc, max_pub_acks_inflight=self._config["publisher"]["max_pub_acks_inflight"])
 
-    async def publish_message(self, topic, message):
-        await self.sc.publish(topic, message.encode())
+    async def publish(self, topic, message):
+        await self._sc.publish(topic, message.encode())
 
-    def _cb(self, msg):
-        print(f'Received a message (seq={msg.seq}): {msg.data.decode()}')
+    async def _cb_with_ack(self, msg):
+        event = msg.data.decode()
+        # if action fails, ack won't be performed
+        self._topic_action[msg.sub.subject](event)
+        await self._sc.ack(msg)
 
-    async def register_consumer(self):
-        sub = await self.sc.subscribe(self.config.NATS_CONFIG["consumer"]["topic"],
-                                      start_at=self.config.NATS_CONFIG["consumer"]["start_at"], cb=self._cb)
-        self.subs.append(sub)
+    async def subscribe(self, topic, callback,
+                        start_at='first', time=None, sequence=None, queue=None, durable_name=None):
+        self._topic_action[topic] = callback
+        sub = await self._sc.subscribe(topic,
+                                       start_at=start_at,
+                                       time=time,
+                                       sequence=sequence,
+                                       queue=queue,
+                                       durable_name=durable_name,
+                                       cb=self._cb_with_ack,
+                                       manual_acks=True,
+                                       max_inflight=self._config["subscriber"]["max_inflight"],
+                                       pending_limits=self._config["subscriber"]["pending_limits"])
+        self._subs.append(sub)
 
     async def close_nats_connections(self):
         # Stop recieving messages
-        for sub in self.subs:
+        for sub in self._subs:
             await sub.unsubscribe()
         # Close NATS Streaming session
-        await self.sc.close()
+        await self._sc.close()
         # We are using a NATS borrowed connection so we need to close manually.
-        await self.nc.close()
+        await self._nc.close()

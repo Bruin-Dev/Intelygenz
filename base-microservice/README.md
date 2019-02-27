@@ -15,8 +15,8 @@
 
 Then create and activate the virtualenv like this:
 ````
-python3 -m venv bruin-bridge-env
-source ./bruin-bridge-env/bin/activate
+python3 -m venv base-microservice-env
+source ./base-microservice-env/bin/activate
 pip install -r requirements.txt
 ````
 ## Get an instance of NATS cluster up in local environment
