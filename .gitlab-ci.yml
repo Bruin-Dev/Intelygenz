@@ -1,6 +1,15 @@
 stages:
   - test
 
+igzpackages_linter:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 custompackages/igzpackages/
+
 igzpackages_test:
   stage: test
   image: python:3.6
