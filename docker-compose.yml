@@ -8,20 +8,40 @@ services:
     ports:
       - 4222:4222
       - 8222:8222
-  
-  base-microservice:
+
+# base-microservice:
+#    build:
+#      # Context must be the root of the monorepo since we need to copy custompackages
+#      context: .
+#      dockerfile: base-microservice/Dockerfile
+#    environment:
+#      - PYTHONUNBUFFERED= 1
+#      - NATS_SERVER1=nats://nats-streaming:4222
+#      - NATS_CLUSTER_NAME=automation-engine-nats
+#    depends_on:
+#      - nats-streaming
+#    ports:
+#      - 9100:9100
+  velocloud-overseer:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
       context: .
-      dockerfile: base-microservice/Dockerfile
-    environment:
-      - PYTHONUNBUFFERED= 1
-      - NATS_SERVER1=nats://nats-streaming:4222
-      - NATS_CLUSTER_NAME=automation-engine-nats
+      dockerfile: velocloud-overseer/Dockerfile
+    env_file:
+      - velocloud-overseer/src/config/env
     depends_on:
-      - nats-streaming
-    ports:
-      - 9100:9100
+      - "nats-streaming"
+
+  velocloud-drone:
+    build:
+      # Context must be the root of the monorepo since we need to copy custompackages
+      context: .
+      dockerfile: velocloud-drone/Dockerfile
+    env_file:
+      - velocloud-drone/src/config/env
+    depends_on:
+      - "nats-streaming"
+
 
   prometheus:
     image: prom/prometheus:v2.7.2
@@ -44,3 +64,5 @@ services:
       - 3000:3000
     volumes:
       - ./metrics-dashboard/grafana/datasources:/etc/grafana/provisioning/datasources
+
+      - "nats-streaming"
