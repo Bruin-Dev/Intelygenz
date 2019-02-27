@@ -1,4 +1,3 @@
-from asyncio import sleep as aiosleep
 from asgiref.sync import async_to_sync
 from config import config
 from igz.packages.nats.clients import NatsStreamingClient
@@ -32,6 +31,7 @@ async def send_to_nats(edges):
     nats_s_client = NatsStreamingClient(config)
     await nats_s_client.connect_to_nats()
     for edge in edges:
+        print(f'Edge discovered with data {edge}! Sending it to NATS edge.status.request queue')
         await nats_s_client.publish("edge.status.request", repr(edge))
     await nats_s_client.close_nats_connections()
 
@@ -43,5 +43,5 @@ async def run():
 
 
 if __name__ == '__main__':
-    print("Base microservic starting...")
+    print("Velocloud overseer starting...")
     run()
