@@ -9,11 +9,11 @@ services:
       - 4222:4222
       - 8222:8222
   
-  bruin-bridge:
+  base-microservice:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
       context: .
-      dockerfile: bruin-bridge/Dockerfile
+      dockerfile: base-microservice/Dockerfile
     environment:
       - PYTHONUNBUFFERED= 1
       - NATS_SERVER1=nats://nats-streaming:4222

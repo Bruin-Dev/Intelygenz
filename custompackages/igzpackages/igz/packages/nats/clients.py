@@ -26,6 +26,7 @@ class NatsStreamingClient:
         await self._sc.publish(topic, message.encode())
 
     async def _cb_with_ack(self, msg):
+        print(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
         event = msg.data.decode()
         # if action fails, ack won't be performed
         self._topic_action[msg.sub.subject](event)

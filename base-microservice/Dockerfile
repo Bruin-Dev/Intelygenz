@@ -2,7 +2,7 @@
 FROM python:3.6
 
 
-COPY bruin-bridge/ /service/app
+COPY base-microservice/ /service/app
 # Add custom packages to the image in order to import them
 COPY custompackages/ /service/custompackages
 

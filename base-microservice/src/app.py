@@ -23,5 +23,4 @@ async def run():
 
 if __name__ == '__main__':
     print("Base microservic starting...")
-    # velocloud_hello_world()
     run()

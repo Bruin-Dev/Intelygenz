@@ -3,9 +3,9 @@
 
 from setuptools import setup, find_packages
 setup(
-    name='bruin-bridge',
+    name='base-microservice',
     version='1.0.0',
-    description='MetTel\'s automation bridge/adapter for Bruin system',
+    description='MetTel\'s automation base microservice',
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,
     setup_requires=[
