@@ -48,8 +48,8 @@ class TestNatsStreamingClient():
         message.sub.subject = "Test-topic"
         caller_callback = Mock()
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
-        await nats_s_client.subscribe("Test-topic", caller_callback, sequence=[1, 2, 3, 4])
-        assert nats_s_client._sc.subscribe.await_args[1]['sequence'] == [1, 2, 3, 4]
+        await nats_s_client.subscribe("Test-topic", caller_callback, sequence=5)
+        assert nats_s_client._sc.subscribe.await_args[1]['sequence'] == 5
 
     @pytest.mark.asyncio
     async def register_time_consumer_test(self):
