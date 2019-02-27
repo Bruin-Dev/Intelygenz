@@ -34,9 +34,55 @@ class TestNatsStreamingClient():
         assert nats_s_client._sc.publish.called
         assert nats_s_client._sc.publish.await_args[0] == ("Test-topic", b'Test-message')
 
+    # TO DO #
     @pytest.mark.asyncio
     async def register_sequence_consumer_test(self):
-        assert 1 == 2
+        nats_s_client = NatsStreamingClient(config)
+        nats_s_client._subs.clear()
+        nats_s_client._sc = Mock()
+        nats_s_client._sc.ack = CoroutineMock()
+        message = Mock()
+        message.seq = Mock()
+        message.data = Mock()
+        message.sub = Mock()
+        message.sub.subject = "Test-topic"
+        caller_callback = Mock()
+        nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
+        await nats_s_client.subscribe("Test-topic", caller_callback, sequence=[1, 2, 3, 4])
+        assert nats_s_client._sc.subscribe.await_args[1]['sequence'] == [1, 2, 3, 4]
+
+    @pytest.mark.asyncio
+    async def register_time_consumer_test(self):
+        nats_s_client = NatsStreamingClient(config)
+        nats_s_client._subs.clear()
+        nats_s_client._sc = Mock()
+        nats_s_client._sc.ack = CoroutineMock()
+        message = Mock()
+        message.seq = Mock()
+        message.data = Mock()
+        message.sub = Mock()
+        message.sub.subject = "Test-topic"
+        caller_callback = Mock()
+        nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
+        await nats_s_client.subscribe("Test-topic", caller_callback, time='2/27/2019')
+        assert nats_s_client._sc.subscribe.await_args[1]['time'] == '2/27/2019'
+
+    @pytest.mark.asyncio
+    async def register_durable_name_consumer_test(self):
+        nats_s_client = NatsStreamingClient(config)
+        nats_s_client._subs.clear()
+        nats_s_client._sc = Mock()
+        nats_s_client._sc.ack = CoroutineMock()
+        message = Mock()
+        message.seq = Mock()
+        message.data = Mock()
+        message.sub = Mock()
+        message.sub.subject = "Test-topic"
+        caller_callback = Mock()
+        nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
+        await nats_s_client.subscribe("Test-topic", caller_callback, durable_name='Test_Name')
+        assert nats_s_client._sc.subscribe.await_args[1]['durable_name'] == 'Test_Name'
+    ##########################################
 
     @pytest.mark.asyncio
     async def register_basic_consumer_and_callback_test(self):
