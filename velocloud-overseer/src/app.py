@@ -28,12 +28,12 @@ def get_all_edges_by_enterprise():
 
 
 async def send_to_nats(edges):
-    nats_s_client = NatsStreamingClient(config)
-    await nats_s_client.connect_to_nats()
+    publisher = NatsStreamingClient(config, "velocloud-overseer-publisher")
+    await publisher.connect_to_nats()
     for edge in edges:
-        print(f'Edge discovered with data {edge}! Sending it to NATS edge.status.request queue')
-        await nats_s_client.publish("edge.status.request", repr(edge))
-    await nats_s_client.close_nats_connections()
+        print(f'Edge discovered with data {edge}! Sending it to NATS edge.status.task queue')
+        await publisher.publish("edge.status.task", repr(edge))
+    await publisher.close_nats_connections()
 
 
 @async_to_sync

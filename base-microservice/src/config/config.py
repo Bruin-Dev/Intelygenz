@@ -6,7 +6,6 @@ import os
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
     'cluster_name': os.environ["NATS_CLUSTER_NAME"],
-    'client_ID': 'base-microservice',
     'subscriber': {
         'max_inflight': 6000,
         'pending_limits': 6000

@@ -16,12 +16,12 @@ def print_callback(msg):
 
 @async_to_sync
 async def run():
-    nats_s_client = NatsStreamingClient(config)
+    nats_s_client = NatsStreamingClient(config, "base-microservice-client")
     await nats_s_client.connect_to_nats()
     await nats_s_client.publish("basemicroservice", "Some message")
     await nats_s_client.publish("basemicroservice", "Some message2")
     await nats_s_client.publish("basemicroservice", "Some message3")
-    await nats_s_client.subscribe(topic="basemicroservice", callback=print_callback)
+    await nats_s_client.subscribe(topic="edge.status.ko", callback=print_callback)
     print("Waiting 5 seconds to consume messages...")
     await aiosleep(5)
     await nats_s_client.close_nats_connections()

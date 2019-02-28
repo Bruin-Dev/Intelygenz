@@ -8,9 +8,11 @@ class NatsStreamingClient:
     _subs = list()
     _topic_action = dict()
     _config = None
+    _client_id = ""
 
-    def __init__(self, config):
+    def __init__(self, config, client_id):
         self._config = config.NATS_CONFIG
+        self._client_id = client_id
 
     async def connect_to_nats(self):
         # Use borrowed connection for NATS then mount NATS Streaming
@@ -19,7 +21,7 @@ class NatsStreamingClient:
         await self._nc.connect(servers=self._config["servers"])
         # Start session with NATS Streaming cluster.
         self._sc = STAN()
-        await self._sc.connect(self._config["cluster_name"], self._config["client_ID"],
+        await self._sc.connect(self._config["cluster_name"], client_id=self._client_id,
                                nats=self._nc, max_pub_acks_inflight=self._config["publisher"]["max_pub_acks_inflight"])
 
     async def publish(self, topic, message):
@@ -27,7 +29,7 @@ class NatsStreamingClient:
 
     async def _cb_with_ack(self, msg):
         print(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
-        event = msg.data.decode()
+        event = msg.data
         # if action fails, ack won't be performed
         self._topic_action[msg.sub.subject](event)
         await self._sc.ack(msg)
