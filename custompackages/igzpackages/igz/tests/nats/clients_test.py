@@ -7,27 +7,33 @@ from stan.aio.client import Client as STAN
 from igz.config import testconfig as config
 
 
-class TestNatsStreamingClient():
+class TestNatsStreamingClient:
+
+    def instantiation_test(self):
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
+        assert nats_s_client._config == config.NATS_CONFIG
+        assert nats_s_client._client_id == "test-client-id"
+
     @pytest.mark.asyncio
     async def connect_to_nats_test(self):
         NATS.connect = CoroutineMock()
         STAN.connect = CoroutineMock()
-        nats_s_client = NatsStreamingClient(config)
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
         await nats_s_client.connect_to_nats()
         assert isinstance(nats_s_client._nc, NATS)
         assert isinstance(nats_s_client._sc, STAN)
         assert nats_s_client._nc.connect.called
         assert nats_s_client._sc.connect.called
         assert nats_s_client._nc.connect.await_args[1] == dict(servers=config.NATS_CONFIG["servers"])
-        assert nats_s_client._sc.connect.await_args[0] == (config.NATS_CONFIG["cluster_name"],
-                                                           config.NATS_CONFIG["client_ID"],)
+        assert nats_s_client._sc.connect.await_args[0] == (config.NATS_CONFIG["cluster_name"],)
         max_pub_acks = config.NATS_CONFIG["publisher"]["max_pub_acks_inflight"]
         assert nats_s_client._sc.connect.await_args[1] == dict(nats=nats_s_client._nc,
-                                                               max_pub_acks_inflight=max_pub_acks)
+                                                               max_pub_acks_inflight=max_pub_acks,
+                                                               client_id="test-client-id", )
 
     @pytest.mark.asyncio
     async def publish_message_test(self):
-        nats_s_client = NatsStreamingClient(config)
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
         nats_s_client._sc = Mock()
         nats_s_client._sc.publish = CoroutineMock()
         await nats_s_client.publish("Test-topic", "Test-message")
@@ -36,7 +42,7 @@ class TestNatsStreamingClient():
 
     @pytest.mark.asyncio
     async def register_sequence_consumer_test(self):
-        nats_s_client = NatsStreamingClient(config)
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -63,7 +69,7 @@ class TestNatsStreamingClient():
 
     @pytest.mark.asyncio
     async def register_time_consumer_test(self):
-        nats_s_client = NatsStreamingClient(config)
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -90,7 +96,7 @@ class TestNatsStreamingClient():
 
     @pytest.mark.asyncio
     async def register_durable_name_consumer_test(self):
-        nats_s_client = NatsStreamingClient(config)
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -117,7 +123,7 @@ class TestNatsStreamingClient():
 
     @pytest.mark.asyncio
     async def register_basic_consumer_and_callback_test(self):
-        nats_s_client = NatsStreamingClient(config)
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -146,7 +152,7 @@ class TestNatsStreamingClient():
 
     @pytest.mark.asyncio
     async def close_nats_connection_test(self):
-        nats_s_client = NatsStreamingClient(config)
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
         nats_s_client._subs = list()
         sub = Mock()
         sub.unsubscribe = CoroutineMock()
