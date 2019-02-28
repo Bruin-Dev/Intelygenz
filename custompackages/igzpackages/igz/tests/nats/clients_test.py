@@ -95,6 +95,33 @@ class TestNatsStreamingClient:
                                                                  )
 
     @pytest.mark.asyncio
+    async def register_durable_group_consumer_test(self):
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
+        nats_s_client._subs.clear()
+        nats_s_client._sc = Mock()
+        nats_s_client._sc.ack = CoroutineMock()
+        message = Mock()
+        message.seq = Mock()
+        message.data = Mock()
+        message.sub = Mock()
+        message.sub.subject = "Test-topic"
+        caller_callback = Mock()
+        nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
+        await nats_s_client.subscribe("Test-topic", caller_callback, durable_name="test-name", queue="test-queue")
+        assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
+                                                                 time=None,
+                                                                 sequence=None,
+                                                                 queue="test-queue",
+                                                                 durable_name="test-name",
+                                                                 cb=nats_s_client._cb_with_ack,
+                                                                 manual_acks=True,
+                                                                 max_inflight=config.NATS_CONFIG["subscriber"][
+                                                                     "max_inflight"],
+                                                                 pending_limits=config.NATS_CONFIG["subscriber"][
+                                                                     "pending_limits"]
+                                                                 )
+
+    @pytest.mark.asyncio
     async def register_durable_name_consumer_test(self):
         nats_s_client = NatsStreamingClient(config, "test-client-id")
         nats_s_client._subs.clear()
