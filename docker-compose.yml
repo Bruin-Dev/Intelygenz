@@ -9,19 +9,20 @@ services:
       - 4222:4222
       - 8222:8222
 
-# base-microservice:
+# EXAMPLE OF BASE-MICROSERVICE
+# ============================
+#  base-microservice:
 #    build:
 #      # Context must be the root of the monorepo since we need to copy custompackages
 #      context: .
 #      dockerfile: base-microservice/Dockerfile
-#    environment:
-#      - PYTHONUNBUFFERED= 1
-#      - NATS_SERVER1=nats://nats-streaming:4222
-#      - NATS_CLUSTER_NAME=automation-engine-nats
+#    env_file:
+#      - base-microservice/src/config/env
 #    depends_on:
-#      - nats-streaming
+#      - "nats-streaming"
 #    ports:
 #      - 9100:9100
+# ============================
   velocloud-overseer:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
@@ -41,6 +42,17 @@ services:
       - velocloud-drone/src/config/env
     depends_on:
       - "nats-streaming"
+
+  velocloud-notificator:
+    build:
+      # Context must be the root of the monorepo since we need to copy custompackages
+      context: .
+      dockerfile: velocloud-notificator/Dockerfile
+    env_file:
+      - velocloud-notificator/src/config/env
+    depends_on:
+      - "nats-streaming"
+
 
 
   prometheus:
