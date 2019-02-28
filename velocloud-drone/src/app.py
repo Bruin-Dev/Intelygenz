@@ -42,7 +42,7 @@ def report_edge_status(msg):
 async def connect_to_event_bus(subscriber):
     await publisher.connect_to_nats()
     await subscriber.connect_to_nats()
-    await subscriber.subscribe(topic="edge.status.task", callback=report_edge_status, start_at='first',
+    await subscriber.subscribe(topic="edge.status.task", callback=report_edge_status, durable_name="velocloud_drones",
                                queue='velocloud_drones')
 
 
