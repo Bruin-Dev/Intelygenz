@@ -48,7 +48,18 @@ class TestNatsStreamingClient():
         caller_callback = Mock()
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
         await nats_s_client.subscribe("Test-topic", caller_callback, sequence=5)
-        assert nats_s_client._sc.subscribe.await_args[1]['sequence'] == 5
+        assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
+                                                                 time=None,
+                                                                 sequence=5,
+                                                                 queue=None,
+                                                                 durable_name=None,
+                                                                 cb=nats_s_client._cb_with_ack,
+                                                                 manual_acks=True,
+                                                                 max_inflight=config.NATS_CONFIG["subscriber"][
+                                                                     "max_inflight"],
+                                                                 pending_limits=config.NATS_CONFIG["subscriber"][
+                                                                     "pending_limits"]
+                                                                 )
 
     @pytest.mark.asyncio
     async def register_time_consumer_test(self):
@@ -64,7 +75,18 @@ class TestNatsStreamingClient():
         caller_callback = Mock()
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
         await nats_s_client.subscribe("Test-topic", caller_callback, time='2/27/2019')
-        assert nats_s_client._sc.subscribe.await_args[1]['time'] == '2/27/2019'
+        assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
+                                                                 time='2/27/2019',
+                                                                 sequence=None,
+                                                                 queue=None,
+                                                                 durable_name=None,
+                                                                 cb=nats_s_client._cb_with_ack,
+                                                                 manual_acks=True,
+                                                                 max_inflight=config.NATS_CONFIG["subscriber"][
+                                                                     "max_inflight"],
+                                                                 pending_limits=config.NATS_CONFIG["subscriber"][
+                                                                     "pending_limits"]
+                                                                 )
 
     @pytest.mark.asyncio
     async def register_durable_name_consumer_test(self):
@@ -80,7 +102,18 @@ class TestNatsStreamingClient():
         caller_callback = Mock()
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
         await nats_s_client.subscribe("Test-topic", caller_callback, durable_name='Test_Name')
-        assert nats_s_client._sc.subscribe.await_args[1]['durable_name'] == 'Test_Name'
+        assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
+                                                                 time=None,
+                                                                 sequence=None,
+                                                                 queue=None,
+                                                                 durable_name='Test_Name',
+                                                                 cb=nats_s_client._cb_with_ack,
+                                                                 manual_acks=True,
+                                                                 max_inflight=config.NATS_CONFIG["subscriber"][
+                                                                     "max_inflight"],
+                                                                 pending_limits=config.NATS_CONFIG["subscriber"][
+                                                                     "pending_limits"]
+                                                                 )
 
     @pytest.mark.asyncio
     async def register_basic_consumer_and_callback_test(self):
