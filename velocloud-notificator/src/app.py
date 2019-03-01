@@ -7,35 +7,31 @@ import json
 
 
 def print_callback(msg):
-    # Slack Notificator
     print('Detected faulty edge. Taking notification actions...')
-    web_hook_url = "https://hooks.slack.com/services/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"
-    slack_msg = {'text': msg}
-    # Include a try and except to check for a ConnectionError
-    # so post wont try to send data to a failed link or failed connection
-    # requests.post(web_hook_url, data=json.dumps(slack_msg))
-    try:
-        print(msg)
-        requests.post(web_hook_url, data=json.dumps(slack_msg))
-    except ConnectionError as e:
-        print("Connection failed")
-        print(e)
+    web_hook_url = 'https://hooks.slack.com/services/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'
+    header = 'https://'
+    # Formats the msg to be dumped by json
+    slack_msg = {'text': str(msg)}
+    # Looks for header inside web_hook_url inorder to determine whether
+    # or not its a valid url
+    if header in web_hook_url:
+        response = requests.post(web_hook_url, data=json.dumps(slack_msg))
+    else:
+        print("Invalid URL")
+
+    # if an error arises prints out the status code
+    if response.status_code != 200:
+        print('HTTP error', response.status_code)
+    else:
+        print(str(msg))
 
 
 @async_to_sync
 async def run():
     nats_s_client = NatsStreamingClient(config, "velocloud-notificator-subscriber")
-
     await nats_s_client.connect_to_nats()
-    # actual code
-    #############
-    # await nats_s_client.subscribe(topic="edge.status.ko", callback=print_callback(slack_url=web_hook_url))
-    # test scenarios
-    #############
-    await nats_s_client.publish("successful_slack", "Connection to slack was successful")
-    await nats_s_client.subscribe(topic="successful_slack", callback=print_callback)
-    # await nats_s_client.publish("Failed_slack", "Connection to slack was unsuccessful")
-    # await nats_s_client.subscribe(topic="Failed_slack", callback=print_callback)
+    await nats_s_client.subscribe(topic="edge.status.ko", callback=print_callback, durable_name="name", queue="queue",
+                                  start_at='first')
     delay = 10
     print(f'Waiting {delay} seconds to consume messages...')
     await aiosleep(delay)
