@@ -3,6 +3,7 @@ from config import config
 from igz.packages.nats.clients import NatsStreamingClient
 import velocloud
 import os
+import asyncio
 
 
 def get_all_edges_by_enterprise():
@@ -45,3 +46,5 @@ async def run():
 if __name__ == '__main__':
     print("Velocloud overseer starting...")
     run()
+    loop = asyncio.new_event_loop()
+    loop.run_forever()

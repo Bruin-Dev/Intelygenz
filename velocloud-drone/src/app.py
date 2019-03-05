@@ -34,7 +34,7 @@ def report_edge_status(msg):
     else:
         print('Edge seems KO, failure! Sending it to topic edge.status.KO')
         topic = "edge.status.ko"
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     loop.run_until_complete(publisher.publish(topic, repr(edge_status)))
     loop.close()
 
@@ -50,11 +50,10 @@ async def connect_to_event_bus(subscriber):
 async def run():
     subscriber = NatsStreamingClient(config, "velocloud-drone-subscriber")
     await connect_to_event_bus(subscriber)
-    delay = 20
-    print(f'Waiting {delay} seconds before ending the process')
-    await aiosleep(delay)
 
 
 if __name__ == '__main__':
     print("Velocloud drone starting...")
     run()
+    loop = asyncio.new_event_loop()
+    loop.run_forever()
