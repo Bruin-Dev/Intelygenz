@@ -18,6 +18,7 @@ class TestSlackClient:
             post_mock.return_value = mock_response = Mock()
             mock_response.status_code = 200
             response = test__client.send_to_slack(test_msg)
+            test_response = str(test_msg) + str(200)
             assert post_mock.called
-            assert response == 200
+            assert response == test_response
 
