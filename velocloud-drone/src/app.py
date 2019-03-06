@@ -65,12 +65,9 @@ class Container:
 
     async def start(self):
         await self.event_bus.connect()
-        # await self.event_bus.subscribe_consumer(consumer_name="tasks", topic="edge.status.task",
-        #                                         action_wrapper=self.report_edge_action, durable_name="velocloud_drones",
-        #                                         queue="velocloud_drones")
-
         await self.event_bus.subscribe_consumer(consumer_name="tasks", topic="edge.status.task",
-                                                action_wrapper=self.report_edge_action)
+                                                action_wrapper=self.report_edge_action, durable_name="velocloud_drones",
+                                                queue="velocloud_drones")
 
     @async_to_sync
     async def run(self):
