@@ -31,7 +31,7 @@ def report_edge_status(msg):
         print('Edge seems OK, sending it to topic edge.status.ok')
         topic = "edge.status.ok"
     else:
-        print('Edge seems KO, failure! Sending it to topic edge.status.KO')
+        print('Edge seems KO, failure! Sending it to topic edge.status.ko')
         topic = "edge.status.ko"
     loop = asyncio.new_event_loop()
     loop.run_until_complete(publisher.publish(topic, repr(edge_status)))
