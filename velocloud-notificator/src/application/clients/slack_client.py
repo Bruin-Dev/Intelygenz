@@ -8,7 +8,7 @@ class SlackClient:
 
     def __init__(self, config):
         self._config = config.SLACK_CONFIG
-        self._url = self._config['webhook']
+        self._url = self._config['webhook'][0]
 
     def send_to_slack(self, msg):
         header = 'https://'
