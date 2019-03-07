@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 from config import testconfig as config
-from repositories.slack_repository import SlackRepository
+from application.repositories.slack_repository import SlackRepository
 
 
 class TestSlackRepository:

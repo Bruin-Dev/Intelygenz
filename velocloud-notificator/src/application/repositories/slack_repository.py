@@ -1,4 +1,3 @@
-
 class SlackRepository:
 
     _config = None

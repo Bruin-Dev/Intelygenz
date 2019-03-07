@@ -9,7 +9,7 @@ class TestSlackClient:
     def instantiation_test(self):
         test__client = SlackClient(config)
         assert test__client._config == config.SLACK_CONFIG
-        assert test__client._url == config.SLACK_CONFIG['webhook']
+        assert test__client._url == config.SLACK_CONFIG['webhook'][0]
 
     def send_to_slack_test(self):
         test_msg = {'text': str(Mock())}
