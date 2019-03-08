@@ -102,4 +102,4 @@ To debug with PyCharm, you must put the breakpoint **in the copy in site-package
 - Solutions of hard problems should be put in common in order to use all the knowledge and points of view of the team.
 
 # METRICS
-- [Grafana](http://localhost:3000)
+- [Grafana](http://localhost:3000) admin/q1w2e3r4

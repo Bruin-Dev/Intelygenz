@@ -19,7 +19,9 @@ services:
       - NATS_SERVER1=nats://nats-streaming:4222
       - NATS_CLUSTER_NAME=automation-engine-nats
     depends_on:
-      - "nats-streaming"
+      - nats-streaming
+    ports:
+      - 9100:9100
 
   prometheus:
     image: prom/prometheus:v2.7.2
