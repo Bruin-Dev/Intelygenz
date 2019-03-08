@@ -44,7 +44,9 @@ class NatsStreamingClient:
                 self._topic_action[msg.sub.subject].execute_stateful_action(event)
             await self._sc.ack(msg)
         except Exception:
-            print("Exception happened in action. Won't ACK message")
+            print(f"NATS ClientException in {self._client_id} client happened")
+            print(f"Error executing {self._topic_action[msg.sub.subject].execute_stateful_action} action")
+            print("Won't ACK message")
 
     async def _cb_with_ack(self, msg):
         print(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
@@ -56,7 +58,8 @@ class NatsStreamingClient:
             self._topic_action[msg.sub.subject](event)
             await self._sc.ack(msg)
         except Exception:
-            print("Exception happened in action. Won't ACK message")
+            print(f"NATS ClientException in {self._client_id} client happened")
+            print(f"Error executing {self._topic_action[msg.sub.subject]} function")
 
     async def subscribe_action(self, topic, action: ActionWrapper,
                                start_at='first', time=None, sequence=None, queue=None, durable_name=None):
