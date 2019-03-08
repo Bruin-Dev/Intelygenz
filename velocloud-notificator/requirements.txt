@@ -24,5 +24,6 @@ python-dateutil==2.8.0
 requests==2.21.0
 six==1.12.0
 urllib3==1.24.1
+prometheus_client==0.6.0
 ../custompackages/velocloud
 ../custompackages/igzpackages

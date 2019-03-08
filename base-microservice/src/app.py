@@ -4,7 +4,6 @@ from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from prometheus_client import start_http_server, Summary
-import time
 import asyncio
 
 MESSAGES_PROCESSED = Summary('nats_processed_messages', 'Messages processed from NATS')
@@ -12,26 +11,17 @@ REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing requ
 
 
 class DurableAction:
+    @MESSAGES_PROCESSED.time()
     def durable_print_callback(self, msg):
         print('DURABLE GROUP')
         print(msg)
 
 
-@MESSAGES_PROCESSED.time()
-def durable_print_callback(msg):
-    print('Im one of the members of the durable group!')
-
-
 class FromFirstAction:
+    @REQUEST_TIME.time()
     def first_print_callback(self, msg):
         print('SUBSCRIBER FROM FIRST')
         print(msg)
-
-
-@REQUEST_TIME.time()
-def first_print_callback(msg):
-    print('Im not a member of the durable group. I start_at=first')
-    print(msg)
 
 
 class Container:
