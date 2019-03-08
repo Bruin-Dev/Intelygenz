@@ -37,11 +37,14 @@ class NatsStreamingClient:
                 self._topic_action[msg.sub.subject]) is not ActionWrapper:
             print(f'No ActionWrapper defined for topic {msg.sub.subject}. Message not marked with ACK')
             return
-        if self._topic_action[msg.sub.subject].is_async:
-            await self._topic_action[msg.sub.subject].execute_stateful_action(event)
-        else:
-            self._topic_action[msg.sub.subject].execute_stateful_action(event)
-        await self._sc.ack(msg)
+        try:
+            if self._topic_action[msg.sub.subject].is_async:
+                await self._topic_action[msg.sub.subject].execute_stateful_action(event)
+            else:
+                self._topic_action[msg.sub.subject].execute_stateful_action(event)
+            await self._sc.ack(msg)
+        except Exception:
+            print("Exception happened in action. Won't ACK message")
 
     async def _cb_with_ack(self, msg):
         print(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
@@ -49,8 +52,11 @@ class NatsStreamingClient:
         if self._topic_action[msg.sub.subject] is None:
             print(f'No callback defined for topic {msg.sub.subject}. Message not marked with ACK')
             return
-        self._topic_action[msg.sub.subject](event)
-        await self._sc.ack(msg)
+        try:
+            self._topic_action[msg.sub.subject](event)
+            await self._sc.ack(msg)
+        except Exception:
+            print("Exception happened in action. Won't ACK message")
 
     async def subscribe_action(self, topic, action: ActionWrapper,
                                start_at='first', time=None, sequence=None, queue=None, durable_name=None):

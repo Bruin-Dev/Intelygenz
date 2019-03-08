@@ -179,6 +179,36 @@ class TestNatsStreamingClient:
                                                                  )
 
     @pytest.mark.asyncio
+    async def not_ack_on_callback_failure_test(self):
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
+        nats_s_client._subs.clear()
+        nats_s_client._sc = Mock()
+        nats_s_client._sc.ack = CoroutineMock()
+        message = Mock()
+        message.seq = Mock()
+        message.data = Mock()
+        message.sub = Mock()
+        message.sub.subject = "Test-topic"
+        caller_callback = Mock(side_effect=Exception())
+        nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
+        await nats_s_client.subscribe("Test-topic", caller_callback)
+        assert nats_s_client._topic_action["Test-topic"] == caller_callback
+        assert nats_s_client._sc.subscribe.await_args[0] == ("Test-topic",)
+        assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
+                                                                 time=None,
+                                                                 sequence=None,
+                                                                 queue=None,
+                                                                 durable_name=None,
+                                                                 cb=nats_s_client._cb_with_ack,
+                                                                 manual_acks=True,
+                                                                 max_inflight=config.NATS_CONFIG["subscriber"][
+                                                                     "max_inflight"],
+                                                                 pending_limits=config.NATS_CONFIG["subscriber"][
+                                                                     "pending_limits"]
+                                                                 )
+        assert not nats_s_client._sc.ack.called
+
+    @pytest.mark.asyncio
     async def register_basic_consumer_and_callback_KO_test(self):
         nats_s_client = NatsStreamingClient(config, "test-client-id")
         nats_s_client._subs.clear()
@@ -266,6 +296,39 @@ class TestNatsStreamingClient:
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
                                                                      "pending_limits"]
                                                                  )
+
+    @pytest.mark.asyncio
+    async def not_ack_on_action_failure_test(self):
+        nats_s_client = NatsStreamingClient(config, "test-client-id")
+        nats_s_client._subs.clear()
+        nats_s_client._sc = Mock()
+        nats_s_client._sc.ack = CoroutineMock()
+        message = Mock()
+        message.seq = Mock()
+        message.data = Mock()
+        message.sub = Mock()
+        message.sub.subject = "Test-topic"
+        caller = Mock()
+        caller.action = CoroutineMock(side_effect=Exception())
+        action_wrapped = ActionWrapper(caller, "action", is_async=True)
+        nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack_and_action(message))
+        await nats_s_client.subscribe_action("Test-topic", action=action_wrapped)
+        assert nats_s_client._topic_action["Test-topic"] is action_wrapped
+        assert nats_s_client._sc.subscribe.await_args[0] == ("Test-topic",)
+        assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
+                                                                 time=None,
+                                                                 sequence=None,
+                                                                 queue=None,
+                                                                 durable_name=None,
+                                                                 cb=nats_s_client._cb_with_ack_and_action,
+                                                                 manual_acks=True,
+                                                                 max_inflight=config.NATS_CONFIG["subscriber"][
+                                                                     "max_inflight"],
+                                                                 pending_limits=config.NATS_CONFIG["subscriber"][
+                                                                     "pending_limits"]
+                                                                 )
+        assert caller.action.called
+        assert not nats_s_client._sc.ack.called
 
     @pytest.mark.asyncio
     async def register_basic_consumer_with_not_sync_action_KO_test(self):
