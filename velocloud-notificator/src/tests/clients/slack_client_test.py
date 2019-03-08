@@ -21,4 +21,3 @@ class TestSlackClient:
             test_response = str(test_msg) + 'sent with status code of ' + str(200)
             assert post_mock.called
             assert response == test_response
-
