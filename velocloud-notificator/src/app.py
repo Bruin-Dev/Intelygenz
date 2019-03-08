@@ -22,7 +22,7 @@ class Container:
     actions = None
     store_stats_wrapper = None
     event_bus = None
-    time = 60
+    time = 600
 
     def setup(self):
         self.subscriber = NatsStreamingClient(config, "velocloud-notificator-subscriber")
