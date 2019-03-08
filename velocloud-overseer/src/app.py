@@ -37,7 +37,6 @@ async def send_to_nats(edges):
     await publisher.close_nats_connections()
 
 
-@async_to_sync
 async def run():
     edges = get_all_edges_by_enterprise()
     await send_to_nats(edges)
@@ -45,6 +44,6 @@ async def run():
 
 if __name__ == '__main__':
     print("Velocloud overseer starting...")
-    run()
-    loop = asyncio.new_event_loop()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(run())
     loop.run_forever()

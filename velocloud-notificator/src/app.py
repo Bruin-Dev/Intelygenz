@@ -35,7 +35,6 @@ class Container:
                                                 action_wrapper=self.base_notification_wrapper,
                                                 start_at='first')
 
-    @async_to_sync
     async def run(self):
         self.setup()
         await self.start()
@@ -43,7 +42,7 @@ class Container:
 
 if __name__ == '__main__':
     print("Velocloud notificator starting...")
+    loop = asyncio.get_event_loop()
     container = Container()
-    container.run()
-    loop = asyncio.new_event_loop()
+    loop.run_until_complete(container.run())
     loop.run_forever()

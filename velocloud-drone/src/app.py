@@ -36,9 +36,7 @@ class Actions:
         else:
             print('Edge seems KO, failure! Sending it to topic edge.status.ko')
             topic = "edge.status.ko"
-        task = asyncio.ensure_future(self.event_bus.publish_message(topic, repr(edge_status)))
-        task.result()
-        pass
+        asyncio.get_event_loop().run_until_complete(self.event_bus.publish_message(topic, repr(edge_status)))
 
 
 class Container:
@@ -69,7 +67,6 @@ class Container:
                                                 action_wrapper=self.report_edge_action, durable_name="velocloud_drones",
                                                 queue="velocloud_drones")
 
-    @async_to_sync
     async def run(self):
         self.setup()
         await self.start()
@@ -77,7 +74,7 @@ class Container:
 
 if __name__ == '__main__':
     print("Velocloud drone starting...")
+    loop = asyncio.get_event_loop()
     container = Container()
-    container.run()
-    loop = asyncio.new_event_loop()
+    loop.run_until_complete(container.run())
     loop.run_forever()

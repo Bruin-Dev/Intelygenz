@@ -60,8 +60,10 @@ class NatsStreamingClient:
                                        durable_name=durable_name,
                                        cb=self._cb_with_ack_and_action,
                                        manual_acks=True,
-                                       max_inflight=self._config["subscriber"]["max_inflight"],
-                                       pending_limits=self._config["subscriber"]["pending_limits"])
+                                       max_inflight=self._config["subscriber"][
+                                           "max_inflight"],
+                                       pending_limits=self._config["subscriber"][
+                                           "pending_limits"])
         self._subs.append(sub)
 
     async def subscribe(self, topic, callback,

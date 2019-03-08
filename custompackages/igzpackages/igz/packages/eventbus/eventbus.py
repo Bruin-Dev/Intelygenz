@@ -28,7 +28,6 @@ class EventBus:
         await self._consumers.get(consumer_name).subscribe_action(topic, action_wrapper, start_at, time, sequence,
                                                                   queue,
                                                                   durable_name)
-        pass
 
     async def publish_message(self, topic, msg):
         await self._producer.publish(topic, msg)
