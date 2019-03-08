@@ -37,7 +37,10 @@ class NatsStreamingClient:
                 self._topic_action[msg.sub.subject]) is not ActionWrapper:
             print(f'No ActionWrapper defined for topic {msg.sub.subject}. Message not marked with ACK')
             return
-        self._topic_action[msg.sub.subject].execute_stateful_action(event)
+        if self._topic_action[msg.sub.subject].is_async:
+            await self._topic_action[msg.sub.subject].execute_stateful_action(event)
+        else:
+            self._topic_action[msg.sub.subject].execute_stateful_action(event)
         await self._sc.ack(msg)
 
     async def _cb_with_ack(self, msg):

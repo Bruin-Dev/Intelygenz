@@ -23,7 +23,7 @@ class Actions:
             print(e)
         return res
 
-    def report_edge_status(self, msg):
+    async def report_edge_status(self, msg):
         import json
         edgeids = json.loads(msg.decode("utf-8").replace("\\", ' ').replace("'", '"'))
         print(f'Processing edge with data {msg}')
@@ -36,7 +36,7 @@ class Actions:
         else:
             print('Edge seems KO, failure! Sending it to topic edge.status.ko')
             topic = "edge.status.ko"
-        asyncio.get_event_loop().run_until_complete(self.event_bus.publish_message(topic, repr(edge_status)))
+        await self.event_bus.publish_message(topic, repr(edge_status))
 
 
 class Container:
@@ -59,7 +59,8 @@ class Container:
         self.event_bus.add_consumer(self.subscriber, consumer_name="tasks")
         self.event_bus.set_producer(self.publisher)
 
-        self.report_edge_action = ActionWrapper(Actions(self.event_bus, self.velocloud_client), "report_edge_status")
+        self.report_edge_action = ActionWrapper(Actions(self.event_bus, self.velocloud_client), "report_edge_status",
+                                                is_async=True)
 
     async def start(self):
         await self.event_bus.connect()
