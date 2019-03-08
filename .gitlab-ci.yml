@@ -20,3 +20,21 @@ igzpackages_test:
   script:
     - pytest --cov
 
+velocloud_notificator_test:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd velocloud-notificator
+    - pip install -r requirements.txt
+  script:
+    - pytest --cov
+
+velocloud_notificator_linter:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 velocloud-notificator
