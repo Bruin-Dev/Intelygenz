@@ -23,5 +23,5 @@ class SlackClient:
             print('HTTP error', response.status_code)
             return 'HTTP error ' + str(response.status_code)
         else:
-            print(str(msg))
-            return str(msg) + str(response.status_code)
+            print(str(msg) + 'sent with a status code of ' + str(response.status_code))
+            return str(msg) + 'sent with status code of ' + str(response.status_code)
