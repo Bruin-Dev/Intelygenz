@@ -46,5 +46,5 @@ class StatisticClient:
 
     # clear the dictionaries in order to restart after the minute
     def clear_dictionaries(self):
-        self._edge_dictionary.clear()
-        self._stats_dictionary.clear()
+        self._edge_dictionary = {}
+        self._stats_dictionary = {}

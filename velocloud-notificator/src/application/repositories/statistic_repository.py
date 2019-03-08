@@ -5,6 +5,8 @@ class StatisticRepository:
 
     _config = None
     _statistic_client = None
+    _activation_key = None
+    _edge_state = None
 
     def __init__(self, config, statistic_client):
         self._config = config
@@ -21,12 +23,10 @@ class StatisticRepository:
         decoded_msg = msg.decode('utf-8')
         msg_dict = literal_eval(decoded_msg)
         if msg_dict['activationKey'] is not None:
-            activation_key = msg_dict['activationKey']
-        else:
-            activation_key = 'None'
-        edge_state = msg_dict['edgeState']
+            self._activation_key = msg_dict['activationKey']
+        self._edge_state = msg_dict['edgeState']
         # relevant_info = {}
         # relevant_info['activationState'] = msg['activationState']
         # relevant_info['edgeState'] = msg['edgeState']
         # relevant_info['serviceState'] = msg['serviceState']
-        self._statistic_client.store_edge(activation_key, edge_state)
+        self._statistic_client.store_edge(self._activation_key, self._edge_state)
