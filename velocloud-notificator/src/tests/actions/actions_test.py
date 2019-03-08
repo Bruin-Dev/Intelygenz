@@ -28,4 +28,3 @@ class TestActions:
         test_actions._statistic_repository.send_to_stats_client = Mock()
         test_actions.store_stats(test_msg)
         assert test_actions._statistic_repository.send_to_stats_client.called
-
