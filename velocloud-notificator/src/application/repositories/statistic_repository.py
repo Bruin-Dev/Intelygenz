@@ -18,8 +18,8 @@ class StatisticRepository:
         # grab activation id as the key
         # puts service state, activation state, and edge state in a
         # relevant_info dictionary
-        decode_msg = msg.decode('utf-8')
-        msg_dict = literal_eval(decode_msg)
+        decoded_msg = msg.decode('utf-8')
+        msg_dict = literal_eval(decoded_msg)
         if msg_dict['activationKey'] is not None:
             activation_key = msg_dict['activationKey']
         else:

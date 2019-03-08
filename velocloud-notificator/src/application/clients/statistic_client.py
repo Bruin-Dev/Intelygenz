@@ -35,8 +35,7 @@ class StatisticClient:
     def get_statistics(self, time):
 
         if self._stats_dictionary:
-            sec_to_min = time/60
-            msg = "Edge Status Counters (last %d minutes)\n" % (sec_to_min)
+            msg = "Edge Status Counters (last %d minutes)\n" % (time)
             for status in self._stats_dictionary:
                 msg = msg + status + ": " + str(self._stats_dictionary[status]) + "\n"
             mysum = sum(self._stats_dictionary.values())

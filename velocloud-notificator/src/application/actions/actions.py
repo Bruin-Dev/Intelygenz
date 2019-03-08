@@ -9,7 +9,7 @@ class Actions:
         self._slack_repository = slack_repository
         self._statistic_repository = statistic_repository
 
-    def base_notification(self, msg):
+    def send_to_slack(self, msg):
         self._slack_repository.send_to_slack(msg)
 
     # Sends msg to stats repo to get stored

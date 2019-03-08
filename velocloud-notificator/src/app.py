@@ -1,5 +1,4 @@
 import asyncio
-from asgiref.sync import async_to_sync
 from config import config
 from igz.packages.nats.clients import NatsStreamingClient
 from application.clients.slack_client import SlackClient
@@ -22,7 +21,7 @@ class Container:
     actions = None
     store_stats_wrapper = None
     event_bus = None
-    time = 600
+    time = config.SLACK_CONFIG['time']
 
     def setup(self):
         self.subscriber = NatsStreamingClient(config, "velocloud-notificator-subscriber")
@@ -43,17 +42,19 @@ class Container:
         await self.event_bus.connect()
         await self.event_bus.subscribe_consumer(consumer_name="KO_subscription", topic="edge.status.ko",
                                                 action_wrapper=self.store_stats_wrapper,
-                                                start_at='first')
+                                                durable_name="velocloud_notificator",
+                                                queue="velocloud_notificator")
         self.timer_completion()
         # At the end of timer should then report the current status
         # Only the report is on the timer. Every time passed run the report
 
     def timer_completion(self):
-        msg = self.stats_client.get_statistics(self.time)
+        sec_to_min = self.time / 60
+        msg = self.stats_client.get_statistics(sec_to_min)
         if msg is not None:
-            self.actions.base_notification(msg)
+            self.actions.send_to_slack(msg)
         self.stats_client.clear_dictionaries()
-        print("A minute has passed")
+        print("Time has passed")
         Timer(self.time, self.timer_completion).start()
 
     async def run(self):

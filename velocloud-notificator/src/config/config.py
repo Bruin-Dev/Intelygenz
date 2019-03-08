@@ -16,5 +16,6 @@ NATS_CONFIG = {
 }
 
 SLACK_CONFIG = {
-    'webhook': [os.environ["SLACK_URL"]]
+    'webhook': [os.environ["SLACK_URL"]],
+    'time': 600
 }

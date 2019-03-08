@@ -11,11 +11,11 @@ class TestActions:
         test_actions = Actions(config,  mock_slack_repository, mock_stats_repo)
         assert test_actions._config == config
 
-    def base_notification_test(self):
+    def send_to_slack_test(self):
         test_msg = Mock()
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
         test_actions = Actions(config, mock_slack_repository, mock_stats_repo)
         test_actions._slack_repository.send_to_slack = Mock()
-        test_actions.base_notification(test_msg)
+        test_actions.send_to_slack(test_msg)
         assert test_actions._slack_repository.send_to_slack.called
