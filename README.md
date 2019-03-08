@@ -101,3 +101,5 @@ To debug with PyCharm, you must put the breakpoint **in the copy in site-package
 - Pair programming is strongly reccomended when doing difficult or delicate tasks. It is **mandatory** when a new teammate arrives.
 - Solutions of hard problems should be put in common in order to use all the knowledge and points of view of the team.
 
+# METRICS
+- [Grafana](http://localhost:3000)

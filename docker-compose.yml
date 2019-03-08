@@ -20,3 +20,25 @@ services:
       - NATS_CLUSTER_NAME=automation-engine-nats
     depends_on:
       - "nats-streaming"
+
+  prometheus:
+    image: prom/prometheus:v2.7.2
+    restart: unless-stopped
+    volumes:
+      - ./metrics-dashboard/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+
+  grafana:
+    image: grafana/grafana:6.0.1
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=q1w2e3r4
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - ./metrics-dashboard/grafana/datasources:/etc/grafana/provisioning/datasources
