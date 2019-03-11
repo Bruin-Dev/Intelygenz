@@ -22,11 +22,13 @@ class StatisticRepository:
         # relevant_info dictionary
         decoded_msg = msg.decode('utf-8')
         msg_dict = literal_eval(decoded_msg)
-        if msg_dict['activationKey'] is not None:
-            self._activation_key = msg_dict['activationKey']
+        self._activation_key = msg_dict['activationKey']
         self._edge_state = msg_dict['edgeState']
         # relevant_info = {}
         # relevant_info['activationState'] = msg['activationState']
         # relevant_info['edgeState'] = msg['edgeState']
         # relevant_info['serviceState'] = msg['serviceState']
+        if getattr(self._statistic_client, 'store_edge') is None:
+            print(f'The object {self._statistic_client} has no method named store_edge')
+            return None
         self._statistic_client.store_edge(self._activation_key, self._edge_state)

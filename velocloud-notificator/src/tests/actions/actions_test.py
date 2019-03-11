@@ -8,10 +8,10 @@ class TestActions:
     def instantiation_test(self):
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
-        test_actions = Actions(config,  mock_slack_repository, mock_stats_repo)
+        test_actions = Actions(config, mock_slack_repository, mock_stats_repo)
         assert test_actions._config == config
 
-    def send_to_slack_test(self):
+    def ok_send_to_slack_test(self):
         test_msg = Mock()
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
@@ -20,7 +20,16 @@ class TestActions:
         test_actions.send_to_slack(test_msg)
         assert test_actions._slack_repository.send_to_slack.called
 
-    def store_stats_test(self):
+    def ko_send_to_slack_test(self):
+        test_msg = Mock()
+        mock_slack_repository = Mock()
+        mock_stats_repo = Mock()
+        test_actions = Actions(config, mock_slack_repository, mock_stats_repo)
+        test_actions._slack_repository.send_to_slack = None
+        return_value = test_actions.send_to_slack(test_msg)
+        assert return_value is None
+
+    def ok_store_stats_test(self):
         test_msg = Mock()
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
@@ -28,3 +37,12 @@ class TestActions:
         test_actions._statistic_repository.send_to_stats_client = Mock()
         test_actions.store_stats(test_msg)
         assert test_actions._statistic_repository.send_to_stats_client.called
+
+    def ko_store_stats_test(self):
+        test_msg = Mock()
+        mock_slack_repository = Mock()
+        mock_stats_repo = Mock()
+        test_actions = Actions(config, mock_slack_repository, mock_stats_repo)
+        test_actions._statistic_repository.send_to_stats_client = None
+        return_value = test_actions.store_stats(test_msg)
+        assert return_value is None

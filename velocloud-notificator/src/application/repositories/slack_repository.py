@@ -13,4 +13,7 @@ class SlackRepository:
         # Does this here becuase the Slack Repo should be doing
         # the msg transformations
         slack_msg = {'text': str(msg)}
+        if getattr(self._slack_client, 'send_to_slack') is None:
+            print(f'The object {self._slack_client} has no method named send_to_slack')
+            return None
         self._slack_client.send_to_slack(slack_msg)
