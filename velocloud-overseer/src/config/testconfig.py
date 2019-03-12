@@ -12,3 +12,14 @@ NATS_CONFIG = {
         'max_pub_acks_inflight': 6000
     }
 }
+
+VELOCLOUD_CONFIG = {
+    'servers': [
+        {
+            'url': 'someurl',
+            'username': 'someusername',
+            'password': 'somepassword',
+
+        }
+    ]
+}
