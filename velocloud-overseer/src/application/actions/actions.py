@@ -16,6 +16,8 @@ class Actions:
             await self._event_bus.publish_message("edge.status.task", repr(edge))
 
     async def send_edge_status_task_interval(self, seconds, exec_on_start=True):
+        print(f'Scheduled task: send edge status configured to run each {seconds} seconds')
+        print(f'It will be executed when start = {exec_on_start}')
         if not exec_on_start:
             await asyncio.sleep(seconds)
         while True:
