@@ -17,6 +17,7 @@ class SlackClient:
             response = requests.post(self._url, data=json.dumps(msg))
         else:
             print("Invalid URL")
+            return response
 
         # if an error arises prints out the status code
         if response.status_code != 200:

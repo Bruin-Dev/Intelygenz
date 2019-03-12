@@ -22,7 +22,7 @@ class TestSlackClient:
             assert post_mock.called
             assert response == test_response
 
-    def ko_send_to_slack_test(self):
+    def ko_send_to_slack_bad_status_code_test(self):
         test_msg = {'text': str(Mock())}
         test__client = SlackClient(config)
         with patch.object(requests, 'post') as post_mock:
@@ -31,3 +31,10 @@ class TestSlackClient:
             response = test__client.send_to_slack(test_msg)
             test_response = 'HTTP error ' + str(mock_response.status_code)
             assert response == test_response
+
+    def ko_send_to_slack_invalid_url_test(self):
+        test_msg = {'text': str(Mock())}
+        test__client = SlackClient(config)
+        test__client._url = 'test_url.com'
+        response = test__client.send_to_slack(test_msg)
+        assert response is None
