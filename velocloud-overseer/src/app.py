@@ -1,49 +1,40 @@
-from asgiref.sync import async_to_sync
 from config import config
 from igz.packages.nats.clients import NatsStreamingClient
-import velocloud
-import os
+from igz.packages.eventbus.eventbus import EventBus
+from application.actions.actions import Actions
+from application.repositories.velocloud_repository import VelocloudRepository
+
 import asyncio
 
 
-def get_all_edges_by_enterprise():
-    velocloud.configuration.verify_ssl = False
-    client = velocloud.ApiClient(host=os.environ["VELOCLOUD_HOST"])
-    client.authenticate(os.environ["VELOCLOUD_USER"], os.environ["VELOCLOUD_PASS"], operator=True)
-    api = velocloud.AllApi(client)
-    try:
-        # res = api.monitoringGetAggregates(body={})
-        # enterprises = list()
-        # for enterprise in res._enterprises:
-        #     enterprises.append(enterprise._id)
-        enterprises = [1]
-        edges_by_enterprise = list()
-        for enterprise in enterprises:
-            fulledges = api.enterpriseGetEnterpriseEdges({"enterpriseId": enterprise})
-            for edge in fulledges:
-                new_edge = {"enterpriseId": enterprise, "id": edge.id}
-                edges_by_enterprise.append(new_edge)
-    except velocloud.rest.ApiException as e:
-        print(e)
-    return edges_by_enterprise
+class Container:
+    velocloud_repository = None
+    publisher = None
+    event_bus = None
+    report_edge_action = None
+    actions = None
 
+    def setup(self):
+        self.velocloud_repository = VelocloudRepository(config)
 
-async def send_to_nats(edges):
-    publisher = NatsStreamingClient(config, "velocloud-overseer-publisher")
-    await publisher.connect_to_nats()
-    for edge in edges:
-        print(f'Edge discovered with data {edge}! Sending it to NATS edge.status.task queue')
-        await publisher.publish("edge.status.task", repr(edge))
-    await publisher.close_nats_connections()
+        self.publisher = NatsStreamingClient(config, "velocloud-overseer-publisher")
+        self.event_bus = EventBus()
+        self.event_bus.set_producer(self.publisher)
 
+        self.actions = Actions(self.event_bus, self.velocloud_repository)
 
-async def run():
-    edges = get_all_edges_by_enterprise()
-    await send_to_nats(edges)
+    async def start(self):
+        await self.event_bus.connect()
+        await self.actions.send_edge_status_task_interval(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
+
+    async def run(self):
+        self.setup()
+        await self.start()
 
 
 if __name__ == '__main__':
     print("Velocloud overseer starting...")
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(run())
+    container = Container()
+    loop.run_until_complete(container.run())
     loop.run_forever()

@@ -28,5 +28,10 @@ def parse_velocloud_config():
 
 
 VELOCLOUD_CONFIG = {
+    'verify_ssl': os.environ["VELOCLOUD_VERIFY_SSL"],
     'servers': parse_velocloud_config()
+}
+
+OVERSEER_CONFIG = {
+    'interval_time': 600
 }
