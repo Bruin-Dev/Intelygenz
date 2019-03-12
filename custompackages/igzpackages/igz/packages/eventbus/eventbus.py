@@ -21,7 +21,8 @@ class EventBus:
     async def connect(self):
         for consumer_name, consumer in self._consumers.items():
             await consumer.connect_to_nats()
-        await self._producer.connect_to_nats()
+        if self._producer is not None:
+            await self._producer.connect_to_nats()
 
     async def subscribe_consumer(self, consumer_name: str, topic: str, action_wrapper: ActionWrapper, start_at='first',
                                  time=None, sequence=None, queue=None, durable_name=None):
@@ -35,4 +36,5 @@ class EventBus:
     async def close_connections(self):
         for consumer_name, consumer in self._consumers.items():
             await consumer.close_nats_connections()
-        await self._producer.close_nats_connections()
+        if self._producer is not None:
+            await self._producer.close_nats_connections()
