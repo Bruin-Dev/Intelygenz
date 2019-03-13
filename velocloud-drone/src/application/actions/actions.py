@@ -1,4 +1,5 @@
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.Logger.logger_client import LoggerClient
 import velocloud
 import json
 

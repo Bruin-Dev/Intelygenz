@@ -8,11 +8,8 @@ from igz.packages.Logger.logger_client import LoggerClient
 class SlackClient:
     _url = None
     _config = None
-
-    formatter = logging.Formatter('%(asctime)s: %(module)s: %(message)s')
-
-    info_log = LoggerClient().create_logger('slack_client_OK', sys.stdout, formatter, logging.INFO)
-    error_log = LoggerClient().create_logger('slack_client_KO', sys.stderr, formatter, logging.ERROR)
+    info_log = LoggerClient().create_logger('slack_client_OK', sys.stdout, logging.INFO)
+    error_log = LoggerClient().create_logger('slack_client_KO', sys.stderr, logging.ERROR)
 
     def __init__(self, config):
         self._config = config.SLACK_CONFIG

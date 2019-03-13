@@ -14,8 +14,7 @@ from threading import Timer
 from igz.packages.Logger.logger_client import LoggerClient
 
 
-formatter = logging.Formatter('%(asctime)s: %(module)s: %(message)s')
-info_log = LoggerClient().create_logger('app_OK', sys.stdout, formatter, logging.INFO)
+info_log = LoggerClient().create_logger('velocloud-notificator-info', sys.stdout, logging.INFO)
 
 
 class Container:

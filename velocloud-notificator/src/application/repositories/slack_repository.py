@@ -7,8 +7,7 @@ class SlackRepository:
 
     _config = None
     _slack_client = None
-    formatter = logging.Formatter('%(asctime)s: %(module)s: %(message)s')
-    error_log = LoggerClient().create_logger('slack_repo_KO', sys.stderr, formatter, logging.ERROR)
+    error_log = LoggerClient().create_logger('slack_repo_KO', sys.stderr, logging.ERROR)
 
     def __init__(self, config, slack_client):
         self._config = config

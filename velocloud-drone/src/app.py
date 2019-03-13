@@ -4,7 +4,13 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from application.actions.actions import Actions
 from application.repositories.velocloud_repository import VelocloudRepository
+from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
+import logging
+import sys
+
+
+info_log = LoggerClient().create_logger('velocloud-drone-OK', sys.stdout, logging.INFO)
 
 
 class Container:
@@ -41,7 +47,7 @@ class Container:
 
 
 if __name__ == '__main__':
-    print("Velocloud drone starting...")
+    info_log.info("Velocloud drone starting...")
     loop = asyncio.get_event_loop()
     container = Container()
     loop.run_until_complete(container.run())

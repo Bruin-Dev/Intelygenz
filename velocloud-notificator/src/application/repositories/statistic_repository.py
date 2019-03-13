@@ -10,8 +10,7 @@ class StatisticRepository:
     _statistic_client = None
     _activation_key = None
     _edge_state = None
-    formatter = logging.Formatter('%(asctime)s: %(module)s: %(message)s')
-    error_log = LoggerClient().create_logger('stats_repo_KO', sys.stderr, formatter, logging.ERROR)
+    error_log = LoggerClient().create_logger('stats_repo_KO', sys.stderr, logging.ERROR)
 
     def __init__(self, config, statistic_client):
         self._config = config

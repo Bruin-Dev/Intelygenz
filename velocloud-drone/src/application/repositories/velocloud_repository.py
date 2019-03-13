@@ -1,9 +1,13 @@
 import velocloud
+import logging
+import sys
+from igz.packages.Logger.logger_client import LoggerClient
 
 
 class VelocloudRepository:
     _config = None
     _clients = None
+    error_log = LoggerClient().create_logger('velocloud-repo-KO', sys.stderr, logging.ERROR)
 
     def __init__(self, config):
         self._config = config.VELOCLOUD_CONFIG
@@ -32,4 +36,4 @@ class VelocloudRepository:
             edge_information = target_host_client.edgeGetEdge(body=edgeids)
             return edge_information
         except velocloud.rest.ApiException as e:
-            print(e)
+            self.error_log.exception(e)

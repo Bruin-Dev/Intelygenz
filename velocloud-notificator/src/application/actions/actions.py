@@ -4,10 +4,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 
 
 class Actions:
-
-    formatter = logging.Formatter('%(asctime)s: %(module)s: %(message)s')
-    error_log = LoggerClient().create_logger('actions_KO', sys.stderr, formatter, logging.ERROR)
-
+    error_log = LoggerClient().create_logger('notificator-actions-KO', sys.stderr, logging.ERROR)
     _config = None
     _slack_repository = None
     _statistic_repository = None
