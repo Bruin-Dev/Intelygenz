@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import sys
 from config import config
 from igz.packages.nats.clients import NatsStreamingClient
 from application.clients.slack_client import SlackClient
@@ -9,6 +11,11 @@ from application.actions.actions import Actions
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from threading import Timer
+from igz.packages.Logger.logger_client import LoggerClient
+
+
+formatter = logging.Formatter('%(asctime)s: %(module)s: %(message)s')
+info_log = LoggerClient().create_logger('app_OK', sys.stdout, formatter, logging.INFO)
 
 
 class Container:
@@ -54,7 +61,7 @@ class Container:
         if msg is not None:
             self.actions.send_to_slack(msg)
         self.stats_client.clear_dictionaries()
-        print("Time has passed")
+        info_log.info("Time has passed")
         Timer(self.time, self.timer_completion).start()
 
     async def run(self):
@@ -63,7 +70,7 @@ class Container:
 
 
 if __name__ == '__main__':
-    print("Velocloud notificator starting...")
+    info_log.info("Velocloud notificator starting...")
     loop = asyncio.get_event_loop()
     container = Container()
     loop.run_until_complete(container.run())

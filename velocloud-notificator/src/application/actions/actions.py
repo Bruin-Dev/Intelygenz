@@ -1,4 +1,12 @@
+import logging
+import sys
+from igz.packages.Logger.logger_client import LoggerClient
+
+
 class Actions:
+
+    formatter = logging.Formatter('%(asctime)s: %(module)s: %(message)s')
+    error_log = LoggerClient().create_logger('actions_KO', sys.stderr, formatter, logging.ERROR)
 
     _config = None
     _slack_repository = None
@@ -11,13 +19,13 @@ class Actions:
 
     def send_to_slack(self, msg):
         if getattr(self._slack_repository, 'send_to_slack') is None:
-            print(f'The object {self._slack_repository} has no method named send_to_slack')
+            self.error_log.error(f'The object {self._slack_repository} has no method named send_to_slack')
             return None
         self._slack_repository.send_to_slack(msg)
 
     # Sends msg to stats repo to get stored
     def store_stats(self, msg):
         if getattr(self._statistic_repository, 'send_to_stats_client') is None:
-            print(f'The object {self._statistic_repository} has no method named send_to_stats_client')
+            self.error_log.error(f'The object {self._statistic_repository} has no method named send_to_stats_client')
             return None
         self._statistic_repository.send_to_stats_client(msg)
