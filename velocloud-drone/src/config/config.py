@@ -14,3 +14,20 @@ NATS_CONFIG = {
         'max_pub_acks_inflight': 6000
     }
 }
+
+
+def parse_velocloud_config():
+    credential_blocks = os.environ["VELOCLOUD_CREDENTIALS"].split(";")
+    credential_blocks_splitted = [credential_block.split("+") for credential_block in credential_blocks]
+    return [
+        {'url': cred_block[0],
+         'username': cred_block[1],
+         'password': cred_block[2]
+         }
+        for cred_block in credential_blocks_splitted]
+
+
+VELOCLOUD_CONFIG = {
+    'verify_ssl': os.environ["VELOCLOUD_VERIFY_SSL"],
+    'servers': parse_velocloud_config()
+}

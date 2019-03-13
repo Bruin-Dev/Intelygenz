@@ -76,5 +76,3 @@ services:
       - 3000:3000
     volumes:
       - ./metrics-dashboard/grafana/datasources:/etc/grafana/provisioning/datasources
-
-      - "nats-streaming"

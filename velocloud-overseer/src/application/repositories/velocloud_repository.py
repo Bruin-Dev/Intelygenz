@@ -32,8 +32,10 @@ class VelocloudRepository:
                     for edge in edges_by_enterprise:
                         edges_by_enterprise_and_host.append(
                             {"host": client.api_client.base_path.replace("/portal/rest", "").replace("https://", ""),
-                             "enterpriseId": enterprise._id, "id": edge._id})
+                             "enterpriseId": enterprise._id,
+                             "id": edge._id})
 
         except velocloud.rest.ApiException as e:
             print(f'Error, exception ocurred getting all velocloud enterprises from all velocloud clusters: {e}')
-        return edges_by_enterprise_and_host
+        # Remove this limitation when we have a development environment with velocloud
+        return edges_by_enterprise_and_host[0:250]

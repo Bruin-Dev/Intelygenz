@@ -14,7 +14,7 @@ NATS_CONFIG = {
 }
 
 VELOCLOUD_CONFIG = {
-    'verify_ssl': False,
+    'verify_ssl': 'no',
     'servers': [
         {
             'url': 'someurl',

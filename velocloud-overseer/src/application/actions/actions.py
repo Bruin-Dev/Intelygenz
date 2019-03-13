@@ -1,11 +1,12 @@
 import asyncio
+from igz.packages.eventbus.eventbus import EventBus
 
 
 class Actions:
     _event_bus = None
     _velocloud_repository = None
 
-    def __init__(self, event_bus, velocloud_repository):
+    def __init__(self, event_bus: EventBus, velocloud_repository):
         self._event_bus = event_bus
         self._velocloud_repository = velocloud_repository
 
@@ -23,4 +24,5 @@ class Actions:
         while True:
             print("Executing scheduled task: send edge status tasks")
             await self._send_edge_status_tasks()
+            print("Executed scheduled task: send edge status tasks")
             await asyncio.sleep(seconds)
