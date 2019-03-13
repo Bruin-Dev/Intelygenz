@@ -3,8 +3,12 @@ from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.eventbus import EventBus
 from application.actions.actions import Actions
 from application.repositories.velocloud_repository import VelocloudRepository
-
+from igz.packages.Logger.logger_client import LoggerClient
+import logging
+import sys
 import asyncio
+
+info_log = LoggerClient().create_logger('velocloud-overseer-OK', sys.stdout, logging.INFO)
 
 
 class Container:
@@ -33,7 +37,7 @@ class Container:
 
 
 if __name__ == '__main__':
-    print("Velocloud overseer starting...")
+    info_log.info("Velocloud overseer starting...")
     loop = asyncio.get_event_loop()
     container = Container()
     loop.run_until_complete(container.run())

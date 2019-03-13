@@ -1,9 +1,13 @@
 import velocloud
+import logging
+import sys
+from igz.packages.Logger.logger_client import LoggerClient
 
 
 class VelocloudRepository:
     _config = None
     _clients = None
+    error_log = LoggerClient().create_logger('slack_client_KO', sys.stderr, logging.ERROR)
 
     def __init__(self, config):
         self._config = config.VELOCLOUD_CONFIG
@@ -36,5 +40,6 @@ class VelocloudRepository:
                              "id": edge._id})
 
         except velocloud.rest.ApiException as e:
-            print(f'Error, exception ocurred getting all velocloud enterprises from all velocloud clusters: {e}')
+            self.error_log.exception(f'Error, exception ocurred getting all velocloud '
+                                     f'enterprises from all velocloud clusters: {e}')
         return edges_by_enterprise_and_host
