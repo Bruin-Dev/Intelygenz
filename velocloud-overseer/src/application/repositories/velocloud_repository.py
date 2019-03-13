@@ -37,5 +37,4 @@ class VelocloudRepository:
 
         except velocloud.rest.ApiException as e:
             print(f'Error, exception ocurred getting all velocloud enterprises from all velocloud clusters: {e}')
-        # Remove this limitation when we have a development environment with velocloud
-        return edges_by_enterprise_and_host[0:250]
+        return edges_by_enterprise_and_host

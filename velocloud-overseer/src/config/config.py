@@ -6,12 +6,8 @@ import os
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
     'cluster_name': os.environ["NATS_CLUSTER_NAME"],
-    'subscriber': {
-        'max_inflight': 6000,
-        'pending_limits': 6000
-    },
     'publisher': {
-        'max_pub_acks_inflight': 6000
+        'max_pub_acks_inflight': 1
     }
 }
 
