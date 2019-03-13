@@ -7,7 +7,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 class VelocloudRepository:
     _config = None
     _clients = None
-    error_log = LoggerClient().create_logger('slack_client_KO', sys.stderr, logging.ERROR)
+    error_log = LoggerClient().create_logger('velocloud-repo-KO', sys.stderr, logging.ERROR)
 
     def __init__(self, config):
         self._config = config.VELOCLOUD_CONFIG

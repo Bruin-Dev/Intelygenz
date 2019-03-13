@@ -8,7 +8,7 @@ from igz.packages.eventbus.eventbus import EventBus
 class Actions:
     _event_bus = None
     _velocloud_repository = None
-    info_log = LoggerClient().create_logger('overseer_action_OK', sys.stdout, logging.INFO)
+    info_log = LoggerClient().create_logger('overseer-action-OK', sys.stdout, logging.INFO)
 
     def __init__(self, event_bus: EventBus, velocloud_repository):
         self._event_bus = event_bus

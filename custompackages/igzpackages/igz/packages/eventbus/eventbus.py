@@ -1,17 +1,21 @@
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.action import ActionWrapper
+from igz.packages.Logger.logger_client import LoggerClient
+import logging
+import sys
 
 
 class EventBus:
     _consumers = None
     _producer = None
+    error_log = LoggerClient().create_logger('igz-action-KO', sys.stderr, logging.ERROR)
 
     def __init__(self):
         self._consumers = dict()
 
     def add_consumer(self, consumer: NatsStreamingClient, consumer_name: str):
         if self._consumers.get(consumer_name) is not None:
-            print(f'Consumer name {consumer_name} already registered. Skipping...')
+            self.error_log.error(f'Consumer name {consumer_name} already registered. Skipping...')
             return
         self._consumers[consumer_name] = consumer
 
