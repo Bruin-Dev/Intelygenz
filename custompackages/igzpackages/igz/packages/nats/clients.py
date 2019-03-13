@@ -50,7 +50,8 @@ class NatsStreamingClient:
             await self._sc.ack(msg)
         except Exception:
             self.error_log.error(f"NATS ClientException in {self._client_id} client happened")
-            self.error_log.error(f"Error executing {self._topic_action[msg.sub.subject].execute_stateful_action} action")
+            self.error_log.error(f"Error executing {self._topic_action[msg.sub.subject].execute_stateful_action} "
+                                 f"")
             self.error_log.error("Won't ACK message")
 
     async def _cb_with_ack(self, msg):
