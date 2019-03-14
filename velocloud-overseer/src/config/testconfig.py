@@ -24,3 +24,7 @@ VELOCLOUD_CONFIG = {
         }
     ]
 }
+
+LOG_CONFIG = {
+    'name': '',
+}

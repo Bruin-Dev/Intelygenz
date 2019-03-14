@@ -8,24 +8,24 @@ import logging
 import sys
 import asyncio
 
-info_log = LoggerClient().create_logger('velocloud-overseer-OK', sys.stdout, logging.INFO)
-
 
 class Container:
+    logger = None
     velocloud_repository = None
     publisher = None
     event_bus = None
     report_edge_action = None
     actions = None
+    logger = LoggerClient().create_logger(config.LOG_CONFIG['name'], sys.stdout, logging.INFO)
 
     def setup(self):
-        self.velocloud_repository = VelocloudRepository(config)
+        self.velocloud_repository = VelocloudRepository(config, self.logger)
 
         self.publisher = NatsStreamingClient(config, "velocloud-overseer-publisher")
         self.event_bus = EventBus()
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(self.event_bus, self.velocloud_repository)
+        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger)
 
     async def start(self):
         await self.event_bus.connect()
@@ -37,8 +37,8 @@ class Container:
 
 
 if __name__ == '__main__':
-    info_log.info("Velocloud overseer starting...")
-    loop = asyncio.get_event_loop()
     container = Container()
+    container.logger.info("Velocloud overseer starting...")
+    loop = asyncio.get_event_loop()
     loop.run_until_complete(container.run())
     loop.run_forever()

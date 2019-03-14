@@ -31,3 +31,7 @@ VELOCLOUD_CONFIG = {
 OVERSEER_CONFIG = {
     'interval_time': 600
 }
+
+LOG_CONFIG = {
+    'name': 'velocloud-overseer-log',
+}
