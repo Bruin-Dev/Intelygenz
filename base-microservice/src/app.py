@@ -4,24 +4,28 @@ from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from prometheus_client import start_http_server, Summary
+from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
+import logging
+import sys
 
 MESSAGES_PROCESSED = Summary('nats_processed_messages', 'Messages processed from NATS')
 REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
+logger = LoggerClient().create_logger(config.LOG_CONFIG['name'], sys.stdout, logging.INFO)
 
 
 class DurableAction:
     @MESSAGES_PROCESSED.time()
     def durable_print_callback(self, msg):
-        print('DURABLE GROUP')
-        print(msg)
+        logger.info('DURABLE GROUP')
+        logger.info(msg)
 
 
 class FromFirstAction:
     @REQUEST_TIME.time()
     def first_print_callback(self, msg):
-        print('SUBSCRIBER FROM FIRST')
-        print(msg)
+        logger.info('SUBSCRIBER FROM FIRST')
+        logger.info(msg)
 
 
 class Container:
@@ -64,7 +68,7 @@ class Container:
         # Start up the server to expose the metrics.
         start_http_server(9100)
         # Generate some requests.
-        print('starting metrics loop')
+        logger.info('starting metrics loop')
 
         await self.event_bus.publish_message("topic1", "Message 1")
         await self.event_bus.publish_message("topic1", "Message 2")
@@ -88,7 +92,7 @@ class Container:
 
 
 if __name__ == '__main__':
-    print("Base microservic starting...")
+    logger.info("Base microservic starting...")
     container = Container()
     container.run()
     loop = asyncio.new_event_loop()

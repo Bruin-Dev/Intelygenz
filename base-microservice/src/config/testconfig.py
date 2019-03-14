@@ -12,3 +12,7 @@ NATS_CONFIG = {
         'max_pub_acks_inflight': 6000
     }
 }
+
+LOG_CONFIG = {
+    'name': '',
+}
