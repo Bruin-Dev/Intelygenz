@@ -1,5 +1,4 @@
 from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.Logger.logger_client import LoggerClient
 import velocloud
 import json
 
@@ -7,10 +6,12 @@ import json
 class Actions:
     event_bus = None
     velocloud_repository = None
+    _logger = None
 
-    def __init__(self, event_bus: EventBus, velocloud_repository):
+    def __init__(self, event_bus: EventBus, velocloud_repository, logger):
         self.event_bus = event_bus
         self.velocloud_repository = velocloud_repository
+        self._logger = logger
 
     def _process_edge(self, edgeids):
         edge_status = None
@@ -19,19 +20,19 @@ class Actions:
                                                                          edgeids['enterpriseId'],
                                                                          edgeids['id'])
         except velocloud.rest.ApiException as e:
-            print(e)
+            self._logger.exception(e)
         return edge_status
 
     async def report_edge_status(self, msg):
         edgeids = json.loads(msg.decode("utf-8").replace("\\", ' ').replace("'", '"'))
-        print(f'Processing edge with data {msg}')
+        self._logger.info(f'Processing edge with data {msg}')
         edge_status = self._process_edge(edgeids)
-        print(f'Got edge status from Velocloud: {edge_status}')
+        self._logger.info(f'Got edge status from Velocloud: {edge_status}')
 
         if edge_status._edgeState == 'CONNECTED':
-            print('Edge seems OK, sending it to topic edge.status.ok')
+            self._logger.info('Edge seems OK, sending it to topic edge.status.ok')
             topic = "edge.status.ok"
         else:
-            print('Edge seems KO, failure! Sending it to topic edge.status.ko')
+            self._logger.error('Edge seems KO, failure! Sending it to topic edge.status.ko')
             topic = "edge.status.ko"
         await self.event_bus.publish_message(topic, repr(edge_status))

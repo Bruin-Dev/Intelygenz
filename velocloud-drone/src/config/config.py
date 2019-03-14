@@ -31,3 +31,7 @@ VELOCLOUD_CONFIG = {
     'verify_ssl': os.environ["VELOCLOUD_VERIFY_SSL"],
     'servers': parse_velocloud_config()
 }
+
+LOG_CONFIG = {
+    'name': 'velocloud-drone-log',
+}

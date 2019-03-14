@@ -10,9 +10,6 @@ import logging
 import sys
 
 
-info_log = LoggerClient().create_logger('velocloud-drone-OK', sys.stdout, logging.INFO)
-
-
 class Container:
     velocloud_repository = None
     publisher = None
@@ -20,9 +17,10 @@ class Container:
     event_bus = None
     actions = None
     report_edge_action = None
+    logger = LoggerClient().create_logger(config.LOG_CONFIG['name'], sys.stdout, logging.INFO)
 
     def setup(self):
-        self.velocloud_repository = VelocloudRepository(config)
+        self.velocloud_repository = VelocloudRepository(config, self.logger)
 
         self.publisher = NatsStreamingClient(config, "velocloud-drone-publisher")
         self.subscriber = NatsStreamingClient(config, "velocloud-drone-subscriber")
@@ -31,7 +29,7 @@ class Container:
         self.event_bus.add_consumer(self.subscriber, consumer_name="tasks")
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(self.event_bus, self.velocloud_repository)
+        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger)
         self.report_edge_action = ActionWrapper(self.actions, "report_edge_status",
                                                 is_async=True)
 
@@ -47,8 +45,8 @@ class Container:
 
 
 if __name__ == '__main__':
-    info_log.info("Velocloud drone starting...")
-    loop = asyncio.get_event_loop()
     container = Container()
+    Container.logger.info("Velocloud drone starting...")
+    loop = asyncio.get_event_loop()
     loop.run_until_complete(container.run())
     loop.run_forever()
