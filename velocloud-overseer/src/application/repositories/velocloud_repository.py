@@ -16,7 +16,7 @@ class VelocloudRepository:
             cred_block in self._config['servers']]
 
     def _create_and_connect_client(self, host, user, password):
-        if self._config is 'no':
+        if self._config['verify_ssl'] is 'no':
             velocloud.configuration.verify_ssl = False
         client = velocloud.ApiClient(host=host)
         client.authenticate(user, password, operator=True)
