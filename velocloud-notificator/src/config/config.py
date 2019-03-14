@@ -19,3 +19,7 @@ SLACK_CONFIG = {
     'webhook': [os.environ["SLACK_URL"]],
     'time': 600
 }
+
+LOG_CONFIG = {
+    'name': 'velocloud-notificator-log',
+}

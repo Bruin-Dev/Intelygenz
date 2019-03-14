@@ -1,7 +1,4 @@
 from ast import literal_eval
-import logging
-import sys
-from igz.packages.Logger.logger_client import LoggerClient
 
 
 class StatisticRepository:
@@ -10,11 +7,12 @@ class StatisticRepository:
     _statistic_client = None
     _activation_key = None
     _edge_state = None
-    error_log = LoggerClient().create_logger('stats_repo_KO', sys.stderr, logging.ERROR)
+    _logger = None
 
-    def __init__(self, config, statistic_client):
+    def __init__(self, config, statistic_client, logger):
         self._config = config
         self._statistic_client = statistic_client
+        self._logger = logger
 
     def send_to_stats_client(self, msg):
         # break up message
@@ -33,6 +31,6 @@ class StatisticRepository:
         # relevant_info['edgeState'] = msg['edgeState']
         # relevant_info['serviceState'] = msg['serviceState']
         if getattr(self._statistic_client, 'store_edge') is None:
-            self.error_log.error(f'The object {self._statistic_client} has no method named store_edge')
+            self._logger.error(f'The object {self._statistic_client} has no method named store_edge')
             return None
         self._statistic_client.store_edge(self._activation_key, self._edge_state)

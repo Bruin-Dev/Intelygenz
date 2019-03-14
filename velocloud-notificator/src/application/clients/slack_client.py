@@ -1,19 +1,16 @@
 import requests
 import json
-import logging
-import sys
-from igz.packages.Logger.logger_client import LoggerClient
 
 
 class SlackClient:
     _url = None
     _config = None
-    info_log = LoggerClient().create_logger('slack-client-OK', sys.stdout, logging.INFO)
-    error_log = LoggerClient().create_logger('slack-client-KO', sys.stderr, logging.ERROR)
+    _logger = None
 
-    def __init__(self, config):
+    def __init__(self, config, logger):
         self._config = config.SLACK_CONFIG
         self._url = self._config['webhook'][0]
+        self._logger = logger
 
     def send_to_slack(self, msg):
         header = 'https://'
@@ -21,13 +18,13 @@ class SlackClient:
         if header in self._url:
             response = requests.post(self._url, data=json.dumps(msg))
         else:
-            self.error_log.error("Invalid URL")
+            self._logger.error("Invalid URL")
             return response
 
         # if an error arises prints out the status code
         if response.status_code != 200:
-            self.error_log.error('HTTP error ' + str(response.status_code))
+            self._logger.error('HTTP error ' + str(response.status_code))
             return 'HTTP error ' + str(response.status_code)
         else:
-            self.info_log.info(str(msg) + 'sent with a status code of ' + str(response.status_code))
+            self._logger.info(str(msg) + ' sent with a status code of ' + str(response.status_code))
             return str(msg) + 'sent with status code of ' + str(response.status_code)

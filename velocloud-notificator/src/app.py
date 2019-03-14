@@ -14,10 +14,8 @@ from threading import Timer
 from igz.packages.Logger.logger_client import LoggerClient
 
 
-info_log = LoggerClient().create_logger('velocloud-notificator-info', sys.stdout, logging.INFO)
-
-
 class Container:
+
     subscriber = None
     publisher = None
     slack_client = None
@@ -28,15 +26,16 @@ class Container:
     store_stats_wrapper = None
     event_bus = None
     time = config.SLACK_CONFIG['time']
+    logger = LoggerClient().create_logger(config.LOG_CONFIG['name'], sys.stdout, logging.INFO)
 
     def setup(self):
         self.subscriber = NatsStreamingClient(config, "velocloud-notificator-subscriber")
         self.publisher = NatsStreamingClient(config, "velocloud-notificator-publisher")
-        self.slack_client = SlackClient(config)
-        self.slack_repo = SlackRepository(config, self.slack_client)
+        self.slack_client = SlackClient(config, self.logger)
+        self.slack_repo = SlackRepository(config, self.slack_client, self.logger)
         self.stats_client = StatisticClient(config)
-        self.stats_repo = StatisticRepository(config, self.stats_client)
-        self.actions = Actions(config, self.slack_repo, self.stats_repo)
+        self.stats_repo = StatisticRepository(config, self.stats_client, self.logger)
+        self.actions = Actions(config, self.slack_repo, self.stats_repo, self.logger)
         self.store_stats_wrapper = ActionWrapper(self.actions, "store_stats")
         self.event_bus = EventBus()
         self.event_bus.add_consumer(consumer=self.subscriber, consumer_name="KO_subscription")
@@ -60,7 +59,7 @@ class Container:
         if msg is not None:
             self.actions.send_to_slack(msg)
         self.stats_client.clear_dictionaries()
-        info_log.info("Time has passed")
+        self.logger.info("Time has passed")
         Timer(self.time, self.timer_completion).start()
 
     async def run(self):
@@ -69,8 +68,8 @@ class Container:
 
 
 if __name__ == '__main__':
-    info_log.info("Velocloud notificator starting...")
-    loop = asyncio.get_event_loop()
     container = Container()
+    container.logger.info("Velocloud notificator starting...")
+    loop = asyncio.get_event_loop()
     loop.run_until_complete(container.run())
     loop.run_forever()

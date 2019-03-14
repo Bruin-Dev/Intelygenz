@@ -17,3 +17,7 @@ SLACK_CONFIG = {
     'webhook': ['https://test-slack.com'],
     'time': 60
 }
+
+LOG_CONFIG = {
+    'name': '',
+}
