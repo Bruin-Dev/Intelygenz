@@ -8,7 +8,7 @@ import sys
 
 class TestSlackRepository:
 
-    logger = LoggerClient().create_logger(str(Mock()), sys.stdout, logging.INFO)
+    logger = LoggerClient().create_logger(str(Mock()))
 
     def instantiation_test(self):
         mock_client = Mock()
