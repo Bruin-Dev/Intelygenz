@@ -57,3 +57,22 @@ velocloud_overseer_linter:
     - pip install pycodestyle
   script:
     - pycodestyle --max-line-length=120 velocloud-overseer
+
+velocloud_drone_test:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd velocloud-drone
+    - pip install -r requirements.txt
+  script:
+    - pytest --cov
+
+velocloud_drone_linter:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 velocloud-drone
