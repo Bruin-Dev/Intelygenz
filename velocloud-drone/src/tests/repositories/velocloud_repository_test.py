@@ -10,7 +10,10 @@ class TestVelocloudRepository:
         client = Mock()
         client.authenticate = Mock()
         velocloud.ApiClient = Mock(return_value=client)
-        velocloud.AllApi = Mock(return_value=Mock())
+        all_api_client = Mock()
+        all_api_client.edgeGetEdge = Mock(return_value="Some Edge Information")
+        all_api_client.api_client.base_path = config.VELOCLOUD_CONFIG['servers'][0]['url']
+        velocloud.AllApi = Mock(return_value=all_api_client)
 
     def create_one_and_connect_clients_test(self):
         self.mock_velocloud()
@@ -28,11 +31,11 @@ class TestVelocloudRepository:
         assert velocloud.ApiClient().authenticate.call_args[1] == dict(operator=True)
         assert velocloud.AllApi.called
 
-    def create_and_connect_various_clients_test(self):
+    def create_and_connect_all_clients_test(self):
         self.mock_velocloud()
         mock_config = Mock()
         mock_config.VELOCLOUD_CONFIG = {
-            'verify_ssl': 'no',
+            'verify_ssl': 'yes',
             'servers': [
                 {
                     'url': 'someurl',
@@ -47,7 +50,18 @@ class TestVelocloudRepository:
 
                 }
             ]}
-        VelocloudRepository._create_and_connect_client = Mock(return_value=Mock())
         vr = VelocloudRepository(mock_config)
         assert len(vr._clients) is len(mock_config.VELOCLOUD_CONFIG['servers'])
-        assert VelocloudRepository._create_and_connect_client.call_count is len(vr._clients)
+
+    def get_edge_information_test(self):
+        self.mock_velocloud()
+        vr = VelocloudRepository(config)
+        edge_info = vr.get_edge_information(vr._config['servers'][0]['url'], 19, 99)
+        assert edge_info == "Some Edge Information"
+
+    def get_edge_information_ko_test(self):
+        self.mock_velocloud()
+        vr = VelocloudRepository(config)
+        vr._clients[0].edgeGetEdge = Mock(side_effect=velocloud.rest.ApiException())
+        edge_info = vr.get_edge_information(vr._config['servers'][0]['url'], 19, 99)
+        assert edge_info is None

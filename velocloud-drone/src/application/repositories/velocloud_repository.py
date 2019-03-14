@@ -28,7 +28,6 @@ class VelocloudRepository:
                               if host in
                               client.api_client.base_path][0]
         edgeids = {"enterpriseId": enterpriseid, "id": edgeid}
-        pass
         try:
             edge_information = target_host_client.edgeGetEdge(body=edgeids)
             return edge_information

@@ -1,5 +1,6 @@
 from igz.packages.eventbus.eventbus import EventBus
 import velocloud
+import json
 
 
 class Actions:
@@ -11,6 +12,7 @@ class Actions:
         self.velocloud_repository = velocloud_repository
 
     def _process_edge(self, edgeids):
+        edge_status = None
         try:
             edge_status = self.velocloud_repository.get_edge_information(edgeids['host'],
                                                                          edgeids['enterpriseId'],
@@ -20,7 +22,6 @@ class Actions:
         return edge_status
 
     async def report_edge_status(self, msg):
-        import json
         edgeids = json.loads(msg.decode("utf-8").replace("\\", ' ').replace("'", '"'))
         print(f'Processing edge with data {msg}')
         edge_status = self._process_edge(edgeids)
