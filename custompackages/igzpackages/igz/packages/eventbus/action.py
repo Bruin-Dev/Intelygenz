@@ -7,7 +7,7 @@ class ActionWrapper:
     state_instance = None
     target_function = None
     is_async = False
-    error_log = LoggerClient().create_logger('igz-action-KO', sys.stderr, logging.ERROR)
+    error_log = LoggerClient().create_logger('igz-action-KO')
 
     def __init__(self, state_instance: object, target_function: str, is_async=False):
         self.state_instance = state_instance

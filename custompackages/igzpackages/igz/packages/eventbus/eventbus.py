@@ -8,7 +8,7 @@ import sys
 class EventBus:
     _consumers = None
     _producer = None
-    error_log = LoggerClient().create_logger('igz-bus-KO', sys.stderr, logging.ERROR)
+    error_log = LoggerClient().create_logger('igz-bus-KO')
 
     def __init__(self):
         self._consumers = dict()

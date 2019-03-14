@@ -13,8 +13,8 @@ class NatsStreamingClient:
     _topic_action = None
     _config = None
     _client_id = ""
-    info_log = LoggerClient().create_logger('nats-client-OK', sys.stdout, logging.INFO)
-    error_log = LoggerClient().create_logger('nats-client-KO', sys.stderr, logging.ERROR)
+    info_log = LoggerClient().create_logger('nats-client-OK')
+    error_log = LoggerClient().create_logger('nats-client-KO')
 
     def __init__(self, config, client_id):
         self._config = config.NATS_CONFIG

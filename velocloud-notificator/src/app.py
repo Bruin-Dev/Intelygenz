@@ -26,7 +26,7 @@ class Container:
     store_stats_wrapper = None
     event_bus = None
     time = config.SLACK_CONFIG['time']
-    logger = LoggerClient().create_logger(config.LOG_CONFIG['name'], sys.stdout, logging.INFO)
+    logger = LoggerClient().create_logger(config.LOG_CONFIG['name'])
 
     def setup(self):
         self.subscriber = NatsStreamingClient(config, "velocloud-notificator-subscriber")
