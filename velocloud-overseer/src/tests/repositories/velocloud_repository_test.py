@@ -46,7 +46,7 @@ class TestVelocloudRepository:
         self.mock_velocloud()
         mock_config = Mock()
         mock_config.VELOCLOUD_CONFIG = {
-            'verify_ssl': 'no',
+            'verify_ssl': 'yes',
             'servers': [
                 {
                     'url': 'someurl',
@@ -70,3 +70,10 @@ class TestVelocloudRepository:
         edges_by_ent = vr.get_all_enterprises_edges_with_host()
         assert edges_by_ent == [{"host": "someurl", "enterpriseId": 1, "id": 19},
                                 {"host": "someurl", "enterpriseId": 1, "id": 77}]
+
+    def chatching_velocloud_exception_test(self):
+        self.mock_velocloud()
+        vr = VelocloudRepository(config)
+        vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
+        edges_by_ent = vr.get_all_enterprises_edges_with_host()
+        assert len(edges_by_ent) is 0
