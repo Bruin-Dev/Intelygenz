@@ -6,8 +6,6 @@ from application.actions.actions import Actions
 from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
-import logging
-import sys
 
 
 class Container:
@@ -17,19 +15,19 @@ class Container:
     event_bus = None
     actions = None
     report_edge_action = None
-    logger = LoggerClient().create_logger(config.LOG_CONFIG['name'])
+    logger = LoggerClient(config).get_logger()
 
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
 
-        self.publisher = NatsStreamingClient(config, "velocloud-drone-publisher")
-        self.subscriber = NatsStreamingClient(config, "velocloud-drone-subscriber")
+        self.publisher = NatsStreamingClient(config, "velocloud-drone-publisher", self.logger)
+        self.subscriber = NatsStreamingClient(config, "velocloud-drone-subscriber", self.logger)
 
-        self.event_bus = EventBus()
+        self.event_bus = EventBus(self.logger)
         self.event_bus.add_consumer(self.subscriber, consumer_name="tasks")
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger)
+        self.actions = Actions(self.logger, self.event_bus, self.velocloud_repository)
         self.report_edge_action = ActionWrapper(self.actions, "report_edge_status",
                                                 is_async=True)
 
