@@ -23,7 +23,7 @@ SLACK_CONFIG = {
 }
 
 LOG_CONFIG = {
-    'name': 'velocloud-drone',
+    'name': 'velocloud-notificator',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'

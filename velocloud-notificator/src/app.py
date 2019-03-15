@@ -1,6 +1,4 @@
 import asyncio
-import logging
-import sys
 from config import config
 from igz.packages.nats.clients import NatsStreamingClient
 from application.clients.slack_client import SlackClient
@@ -26,18 +24,18 @@ class Container:
     store_stats_wrapper = None
     event_bus = None
     time = config.SLACK_CONFIG['time']
-    logger = LoggerClient().create_logger(config.LOG_CONFIG['name'])
+    logger = LoggerClient(config).get_logger()
 
     def setup(self):
-        self.subscriber = NatsStreamingClient(config, "velocloud-notificator-subscriber")
-        self.publisher = NatsStreamingClient(config, "velocloud-notificator-publisher")
+        self.subscriber = NatsStreamingClient(config, "velocloud-notificator-subscriber", self.logger)
+        self.publisher = NatsStreamingClient(config, "velocloud-notificator-publisher", self.logger)
         self.slack_client = SlackClient(config, self.logger)
         self.slack_repo = SlackRepository(config, self.slack_client, self.logger)
         self.stats_client = StatisticClient(config)
         self.stats_repo = StatisticRepository(config, self.stats_client, self.logger)
         self.actions = Actions(config, self.slack_repo, self.stats_repo, self.logger)
-        self.store_stats_wrapper = ActionWrapper(self.actions, "store_stats")
-        self.event_bus = EventBus()
+        self.store_stats_wrapper = ActionWrapper(self.logger, self.actions, "store_stats")
+        self.event_bus = EventBus(self.logger)
         self.event_bus.add_consumer(consumer=self.subscriber, consumer_name="KO_subscription")
         self.event_bus.set_producer(producer=self.publisher)
 

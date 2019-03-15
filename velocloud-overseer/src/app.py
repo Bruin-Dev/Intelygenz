@@ -4,8 +4,6 @@ from igz.packages.eventbus.eventbus import EventBus
 from application.actions.actions import Actions
 from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
-import logging
-import sys
 import asyncio
 
 
@@ -16,13 +14,13 @@ class Container:
     event_bus = None
     report_edge_action = None
     actions = None
-    logger = LoggerClient().create_logger(config.LOG_CONFIG['name'])
+    logger = LoggerClient(config).get_logger()
 
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
 
-        self.publisher = NatsStreamingClient(config, "velocloud-overseer-publisher")
-        self.event_bus = EventBus()
+        self.publisher = NatsStreamingClient(config, "velocloud-overseer-publisher", self.logger)
+        self.event_bus = EventBus(self.logger)
         self.event_bus.set_producer(self.publisher)
 
         self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger)

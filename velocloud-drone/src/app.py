@@ -27,8 +27,8 @@ class Container:
         self.event_bus.add_consumer(self.subscriber, consumer_name="tasks")
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(self.logger, self.event_bus, self.velocloud_repository)
-        self.report_edge_action = ActionWrapper(self.actions, "report_edge_status",
+        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger)
+        self.report_edge_action = ActionWrapper(self.logger, self.actions, "report_edge_status",
                                                 is_async=True)
 
     async def start(self):
