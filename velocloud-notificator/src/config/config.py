@@ -2,6 +2,8 @@
 # use source env in this directory.
 # If you dont have any env files, ask for one they are not in VCS
 import os
+import logging
+import sys
 
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
@@ -21,5 +23,8 @@ SLACK_CONFIG = {
 }
 
 LOG_CONFIG = {
-    'name': 'velocloud-notificator-log',
+    'name': 'velocloud-drone',
+    'level': logging.DEBUG,
+    'stream_handler': logging.StreamHandler(sys.stdout),
+    'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }

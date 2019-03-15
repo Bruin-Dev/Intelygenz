@@ -1,4 +1,6 @@
 # You must replicate the structure of config.py, changing os.environ calls for mock values
+import logging
+import sys
 
 NATS_CONFIG = {
     'servers': 'nats://nats-streaming:4222',
@@ -19,5 +21,8 @@ SLACK_CONFIG = {
 }
 
 LOG_CONFIG = {
-    'name': '',
+    'name': 'test-name',
+    'level': logging.DEBUG,
+    'stream_handler': logging.StreamHandler(sys.stdout),
+    'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
