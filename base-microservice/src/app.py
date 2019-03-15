@@ -6,13 +6,10 @@ from igz.packages.eventbus.action import ActionWrapper
 from prometheus_client import start_http_server, Summary
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
-import logging
-import sys
 
 MESSAGES_PROCESSED = Summary('nats_processed_messages', 'Messages processed from NATS')
 REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
-log_creator = LoggerClient(config)
-logger = log_creator.get_logger()
+logger = LoggerClient(config).get_logger()
 
 
 class DurableAction:

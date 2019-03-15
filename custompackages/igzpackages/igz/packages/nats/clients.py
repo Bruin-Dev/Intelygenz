@@ -1,9 +1,6 @@
-import logging
-import sys
 from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
 from igz.packages.eventbus.action import ActionWrapper
-from igz.packages.Logger.logger_client import LoggerClient
 
 
 class NatsStreamingClient:
@@ -13,14 +10,14 @@ class NatsStreamingClient:
     _topic_action = None
     _config = None
     _client_id = ""
-    info_log = LoggerClient().create_logger('nats-client-OK')
-    error_log = LoggerClient().create_logger('nats-client-KO')
+    _logger = None
 
-    def __init__(self, config, client_id):
+    def __init__(self, config, client_id, logger):
         self._config = config.NATS_CONFIG
         self._client_id = client_id
         self._subs = list()
         self._topic_action = dict()
+        self._logger = logger
 
     async def connect_to_nats(self):
         # Use borrowed connection for NATS then mount NATS Streaming
@@ -36,11 +33,11 @@ class NatsStreamingClient:
         await self._sc.publish(topic, message.encode())
 
     async def _cb_with_ack_and_action(self, msg):
-        self.info_log.info(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
+        self._logger.info(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
         event = msg.data
         if self._topic_action[msg.sub.subject] is None or type(
                 self._topic_action[msg.sub.subject]) is not ActionWrapper:
-            self.error_log.error(f'No ActionWrapper defined for topic {msg.sub.subject}. Message not marked with ACK')
+            self._logger.error(f'No ActionWrapper defined for topic {msg.sub.subject}. Message not marked with ACK')
             return
         try:
             if self._topic_action[msg.sub.subject].is_async:
@@ -49,23 +46,22 @@ class NatsStreamingClient:
                 self._topic_action[msg.sub.subject].execute_stateful_action(event)
             await self._sc.ack(msg)
         except Exception:
-            self.error_log.error(f"NATS ClientException in {self._client_id} client happened")
-            self.error_log.error(f"Error executing {self._topic_action[msg.sub.subject].execute_stateful_action} "
-                                 f"")
-            self.error_log.error("Won't ACK message")
+            self._logger.error(f"NATS ClientException in {self._client_id} client happened")
+            self._logger.error(f"Error executing {self._topic_action[msg.sub.subject].execute_stateful_action} "f"")
+            self._logger.error("Won't ACK message")
 
     async def _cb_with_ack(self, msg):
-        self.info_log.info(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
+        self._logger.info(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
         event = msg.data
         if self._topic_action[msg.sub.subject] is None:
-            self.error_log.error(f'No callback defined for topic {msg.sub.subject}. Message not marked with ACK')
+            self._logger.error(f'No callback defined for topic {msg.sub.subject}. Message not marked with ACK')
             return
         try:
             self._topic_action[msg.sub.subject](event)
             await self._sc.ack(msg)
         except Exception:
-            self.error_log.error(f"NATS ClientException in {self._client_id} client happened")
-            self.error_log.error(f"Error executing {self._topic_action[msg.sub.subject]} function")
+            self._logger.error(f"NATS ClientException in {self._client_id} client happened")
+            self._logger.error(f"Error executing {self._topic_action[msg.sub.subject]} function")
 
     async def subscribe_action(self, topic, action: ActionWrapper,
                                start_at='first', time=None, sequence=None, queue=None, durable_name=None):
