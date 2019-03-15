@@ -11,7 +11,8 @@ import sys
 
 MESSAGES_PROCESSED = Summary('nats_processed_messages', 'Messages processed from NATS')
 REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
-logger = LoggerClient().create_logger(config.LOG_CONFIG['name'])
+log_creator = LoggerClient(config)
+logger = log_creator.get_logger()
 
 
 class DurableAction:

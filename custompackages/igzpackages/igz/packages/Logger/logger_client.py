@@ -1,14 +1,19 @@
 import logging
-import sys
 
 
 class LoggerClient:
 
-    def create_logger(self, name):
-        logger = logging.getLogger(name)
-        logger.setLevel(logging.DEBUG)
-        info_stream = logging.StreamHandler(sys.stdout)
-        format = logging.Formatter('%(asctime)s: %(module)s: %(levelname)s: %(message)s')
-        info_stream.setFormatter(format)
-        logger.addHandler(info_stream)
+    _config = None
+
+    def __init__(self, config):
+        self._config = config.LOG_CONFIG
+        self.get_logger()
+
+    def get_logger(self):
+        logger = logging.getLogger(self._config['name'])
+        logger.setLevel(self._config['level'])
+        log_handler = self._config['stream_handler']
+        format = logging.Formatter(self._config['format'])
+        log_handler.setFormatter(format)
+        logger.addHandler(log_handler)
         return logger
