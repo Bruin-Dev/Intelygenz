@@ -20,9 +20,12 @@ class NatsStreamingClient:
         self._subs = list()
         self._topic_action = dict()
         if logger is None:
-            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s: %(module)s: %(levelname)s: %(message)s',
-                                handlers=[logging.StreamHandler(sys.stdout)])
             logger = logging.getLogger('nats')
+            logger.setLevel(logging.DEBUG)
+            log_handler = logging.StreamHandler(sys.stdout)
+            formatter = logging.Formatter('%(asctime)s: %(module)s: %(levelname)s: %(message)s')
+            log_handler.setFormatter(formatter)
+            logger.addHandler(log_handler)
         self._logger = logger
 
     async def connect_to_nats(self):

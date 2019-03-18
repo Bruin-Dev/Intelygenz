@@ -1,16 +1,19 @@
 from igz.packages.eventbus.action import ActionWrapper
 from unittest.mock import Mock
+import logging
 
 
 class TestActionWrapper:
 
     def instantiation_test(self):
-        mock_logger = Mock()
         state_instance = Mock()
         state_instance.target_function = Mock()
-        action_wrapper = ActionWrapper(state_instance, state_instance.target_function, logger=mock_logger)
+        action_wrapper = ActionWrapper(state_instance, state_instance.target_function)
         assert action_wrapper.state_instance is state_instance
         assert action_wrapper.target_function is state_instance.target_function
+        assert isinstance(action_wrapper.logger, logging._loggerClass) is True
+        assert action_wrapper.logger.hasHandlers() is True
+        assert action_wrapper.logger.getEffectiveLevel() is 10
 
     def execute_action_with_action_test(self):
         mock_logger = Mock()

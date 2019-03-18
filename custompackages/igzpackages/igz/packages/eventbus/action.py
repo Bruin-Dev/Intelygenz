@@ -13,9 +13,12 @@ class ActionWrapper:
         self.target_function = target_function
         self.is_async = is_async
         if logger is None:
-            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s: %(module)s: %(levelname)s: %(message)s',
-                                handlers=[logging.StreamHandler(sys.stdout)])
             logger = logging.getLogger('action-wrapper')
+            logger.setLevel(logging.DEBUG)
+            log_handler = logging.StreamHandler(sys.stdout)
+            formatter = logging.Formatter('%(asctime)s: %(module)s: %(levelname)s: %(message)s')
+            log_handler.setFormatter(formatter)
+            logger.addHandler(log_handler)
         self.logger = logger
 
     def execute_stateful_action(self, data):

@@ -12,9 +12,12 @@ class EventBus:
     def __init__(self, logger=None):
         self._consumers = dict()
         if logger is None:
-            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s: %(module)s: %(levelname)s: %(message)s',
-                                handlers=[logging.StreamHandler(sys.stdout)])
             logger = logging.getLogger('event-bus')
+            logger.setLevel(logging.DEBUG)
+            log_handler = logging.StreamHandler(sys.stdout)
+            formatter = logging.Formatter('%(asctime)s: %(module)s: %(levelname)s: %(message)s')
+            log_handler.setFormatter(formatter)
+            logger.addHandler(log_handler)
         self._logger = logger
 
     def add_consumer(self, consumer: NatsStreamingClient, consumer_name: str):

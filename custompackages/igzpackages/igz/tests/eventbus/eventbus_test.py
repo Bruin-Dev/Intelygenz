@@ -5,14 +5,17 @@ import pytest
 from asynctest import CoroutineMock
 from igz.config import testconfig as config
 from unittest.mock import Mock
+import logging
 
 
 class TestEventBus:
 
     def instantiation_test(self):
-        mock_logger = Mock()
-        e = EventBus(logger=mock_logger)
+        e = EventBus()
         assert isinstance(e._consumers, dict)
+        assert isinstance(e._logger, logging._loggerClass) is True
+        assert e._logger.hasHandlers() is True
+        assert e._logger.getEffectiveLevel() is 10
 
     @pytest.mark.asyncio
     async def connect_OK_test(self):
