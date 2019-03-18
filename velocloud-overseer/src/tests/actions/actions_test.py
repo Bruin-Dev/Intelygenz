@@ -8,28 +8,31 @@ from igz.packages.eventbus.eventbus import EventBus
 
 class TestOverseerActions:
     def instance_test(self):
-        test_bus = EventBus()
+        mock_logger = Mock()
+        test_bus = EventBus(mock_logger)
         velocloud_repo = Mock()
-        actions = Actions(test_bus, velocloud_repo)
+        actions = Actions(test_bus, velocloud_repo, mock_logger)
         assert actions._event_bus is test_bus
         assert actions._velocloud_repository is velocloud_repo
 
     @pytest.mark.asyncio
     async def will_generate_tasks_test(self):
-        test_bus = EventBus()
+        mock_logger = Mock()
+        test_bus = EventBus(mock_logger)
         test_bus.publish_message = CoroutineMock()
         velocloud_repo = Mock()
         edges = ["task1", "task2"]
         velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
-        actions = Actions(test_bus, velocloud_repo)
+        actions = Actions(test_bus, velocloud_repo, mock_logger)
         await actions._send_edge_status_tasks()
         assert test_bus.publish_message.call_count is len(edges)
 
     @pytest.mark.asyncio
     async def will_perform_scheduled_task_test(self):
-        test_bus = EventBus()
+        mock_logger = Mock()
+        test_bus = EventBus(mock_logger)
         velocloud_repo = Mock()
-        actions = Actions(test_bus, velocloud_repo)
+        actions = Actions(test_bus, velocloud_repo, mock_logger)
         actions._send_edge_status_tasks = CoroutineMock()
         loop = asyncio.get_event_loop()
         asyncio.ensure_future(actions.send_edge_status_task_interval(0.1, False))
@@ -39,9 +42,10 @@ class TestOverseerActions:
 
     @pytest.mark.asyncio
     async def will_perform_scheduled_task_on_start_test(self):
-        test_bus = EventBus()
+        mock_logger = Mock()
+        test_bus = EventBus(mock_logger)
         velocloud_repo = Mock()
-        actions = Actions(test_bus, velocloud_repo)
+        actions = Actions(test_bus, velocloud_repo, mock_logger)
         actions._send_edge_status_tasks = CoroutineMock()
         loop = asyncio.get_event_loop()
         asyncio.ensure_future(actions.send_edge_status_task_interval(100, True))
