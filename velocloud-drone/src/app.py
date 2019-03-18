@@ -20,16 +20,16 @@ class Container:
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
 
-        self.publisher = NatsStreamingClient(config, "velocloud-drone-publisher", self.logger)
-        self.subscriber = NatsStreamingClient(config, "velocloud-drone-subscriber", self.logger)
+        self.publisher = NatsStreamingClient(config, "velocloud-drone-publisher", logger=self.logger)
+        self.subscriber = NatsStreamingClient(config, "velocloud-drone-subscriber", logger=self.logger)
 
-        self.event_bus = EventBus(self.logger)
+        self.event_bus = EventBus(logger=self.logger)
         self.event_bus.add_consumer(self.subscriber, consumer_name="tasks")
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger)
-        self.report_edge_action = ActionWrapper(self.logger, self.actions, "report_edge_status",
-                                                is_async=True)
+        self.actions = Actions(self.event_bus, self.velocloud_repository, logger=self.logger)
+        self.report_edge_action = ActionWrapper(self.actions, "report_edge_status",
+                                                is_async=True, logger=self.logger)
 
     async def start(self):
         await self.event_bus.connect()

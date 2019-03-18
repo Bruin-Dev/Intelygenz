@@ -19,8 +19,8 @@ class Container:
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
 
-        self.publisher = NatsStreamingClient(config, "velocloud-overseer-publisher", self.logger)
-        self.event_bus = EventBus(self.logger)
+        self.publisher = NatsStreamingClient(config, "velocloud-overseer-publisher", logger=self.logger)
+        self.event_bus = EventBus(logger=self.logger)
         self.event_bus.set_producer(self.publisher)
 
         self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger)

@@ -27,15 +27,15 @@ class Container:
     logger = LoggerClient(config).get_logger()
 
     def setup(self):
-        self.subscriber = NatsStreamingClient(config, "velocloud-notificator-subscriber", self.logger)
-        self.publisher = NatsStreamingClient(config, "velocloud-notificator-publisher", self.logger)
+        self.subscriber = NatsStreamingClient(config, "velocloud-notificator-subscriber", logger=self.logger)
+        self.publisher = NatsStreamingClient(config, "velocloud-notificator-publisher", logger=self.logger)
         self.slack_client = SlackClient(config, self.logger)
         self.slack_repo = SlackRepository(config, self.slack_client, self.logger)
         self.stats_client = StatisticClient(config)
         self.stats_repo = StatisticRepository(config, self.stats_client, self.logger)
         self.actions = Actions(config, self.slack_repo, self.stats_repo, self.logger)
-        self.store_stats_wrapper = ActionWrapper(self.logger, self.actions, "store_stats")
-        self.event_bus = EventBus(self.logger)
+        self.store_stats_wrapper = ActionWrapper(self.actions, "store_stats", logger=self.logger)
+        self.event_bus = EventBus(logger=self.logger)
         self.event_bus.add_consumer(consumer=self.subscriber, consumer_name="KO_subscription")
         self.event_bus.set_producer(producer=self.publisher)
 

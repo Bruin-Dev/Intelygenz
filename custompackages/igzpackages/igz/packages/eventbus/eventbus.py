@@ -1,5 +1,7 @@
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.action import ActionWrapper
+import logging
+import sys
 
 
 class EventBus:
@@ -7,8 +9,12 @@ class EventBus:
     _producer = None
     _logger = None
 
-    def __init__(self, logger):
+    def __init__(self, logger=None):
         self._consumers = dict()
+        if logger is None:
+            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s: %(module)s: %(levelname)s: %(message)s',
+                                handlers=[logging.StreamHandler(sys.stdout)])
+            logger = logging.getLogger('event-bus')
         self._logger = logger
 
     def add_consumer(self, consumer: NatsStreamingClient, consumer_name: str):

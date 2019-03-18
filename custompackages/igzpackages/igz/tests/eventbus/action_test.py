@@ -8,7 +8,7 @@ class TestActionWrapper:
         mock_logger = Mock()
         state_instance = Mock()
         state_instance.target_function = Mock()
-        action_wrapper = ActionWrapper(mock_logger, state_instance, state_instance.target_function)
+        action_wrapper = ActionWrapper(state_instance, state_instance.target_function, logger=mock_logger)
         assert action_wrapper.state_instance is state_instance
         assert action_wrapper.target_function is state_instance.target_function
 
@@ -16,12 +16,12 @@ class TestActionWrapper:
         mock_logger = Mock()
         state_instance = Mock()
         state_instance.target_function = Mock(return_value="OK")
-        action_wrapper = ActionWrapper(mock_logger, state_instance, "target_function")
+        action_wrapper = ActionWrapper(state_instance, "target_function", logger=mock_logger)
         assert action_wrapper.execute_stateful_action("SomeData") is "OK"
 
     def execute_action_KO_no_function_test(self):
         mock_logger = Mock()
         state_instance = Mock()
         state_instance.othermethod = None
-        action_wrapper = ActionWrapper(mock_logger, state_instance, "othermethod")
+        action_wrapper = ActionWrapper(state_instance, "othermethod", logger=mock_logger)
         assert action_wrapper.execute_stateful_action("SomeData") is not "OK"

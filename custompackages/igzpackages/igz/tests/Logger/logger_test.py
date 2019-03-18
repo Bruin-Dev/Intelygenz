@@ -11,9 +11,6 @@ class TestLoggerClient:
 
     def get_logger_test(self):
         test_log = LoggerClient(config).get_logger()
-        # Checks to see if test_log is a logger
         assert isinstance(test_log, logging._loggerClass) is True
-        # Checks to see if handlers exist
         assert test_log.hasHandlers() is True
-        # Checks to see if test_log is on the Debug level
         assert test_log.getEffectiveLevel() is 10

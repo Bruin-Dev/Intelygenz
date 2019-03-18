@@ -41,18 +41,18 @@ class Container:
         await self.start()
 
     def setup(self):
-        self.client1 = NatsStreamingClient(config, "base-microservice-client")
-        self.client2 = NatsStreamingClient(config, "base-microservice-client2")
-        self.client3 = NatsStreamingClient(config, "base-microservice-client3")
-        self.client4 = NatsStreamingClient(config, "base-microservice-client4")
+        self.client1 = NatsStreamingClient(config, "base-microservice-client", logger=logger)
+        self.client2 = NatsStreamingClient(config, "base-microservice-client2", logger=logger)
+        self.client3 = NatsStreamingClient(config, "base-microservice-client3", logger=logger)
+        self.client4 = NatsStreamingClient(config, "base-microservice-client4", logger=logger)
 
         base_durable_action = DurableAction()
         base_from_first_action = FromFirstAction()
 
-        self.durable_action = ActionWrapper(base_durable_action, "durable_print_callback")
-        self.from_first_action = ActionWrapper(base_from_first_action, "first_print_callback")
+        self.durable_action = ActionWrapper(base_durable_action, "durable_print_callback", logger=logger)
+        self.from_first_action = ActionWrapper(base_from_first_action, "first_print_callback", logger=logger)
 
-        self.event_bus = EventBus()
+        self.event_bus = EventBus(logger=logger)
 
         self.event_bus.set_producer(self.client1)
 

@@ -12,7 +12,7 @@ class TestNatsStreamingClient:
 
     def instantiation_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         assert nats_s_client._config == config.NATS_CONFIG
         assert nats_s_client._client_id == "test-client-id"
 
@@ -21,7 +21,7 @@ class TestNatsStreamingClient:
         NATS.connect = CoroutineMock()
         STAN.connect = CoroutineMock()
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         await nats_s_client.connect_to_nats()
         assert isinstance(nats_s_client._nc, NATS)
         assert isinstance(nats_s_client._sc, STAN)
@@ -37,7 +37,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def publish_message_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._sc = Mock()
         nats_s_client._sc.publish = CoroutineMock()
         await nats_s_client.publish("Test-topic", "Test-message")
@@ -47,7 +47,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def register_sequence_consumer_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -75,7 +75,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def register_time_consumer_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -103,7 +103,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def register_durable_group_consumer_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -131,7 +131,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def register_durable_name_consumer_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -159,7 +159,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def register_basic_consumer_and_callback_OK_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -189,7 +189,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def not_ack_on_callback_failure_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -220,7 +220,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def register_basic_consumer_and_callback_KO_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -250,7 +250,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def register_basic_consumer_with_sync_action_OK_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -261,7 +261,7 @@ class TestNatsStreamingClient:
         message.sub.subject = "Test-topic"
         caller = Mock()
         caller.action = Mock()
-        action_wrapped = ActionWrapper(mock_logger, caller, "action")
+        action_wrapped = ActionWrapper(caller, "action", logger=mock_logger)
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack_and_action(message))
         await nats_s_client.subscribe_action("Test-topic", action=action_wrapped)
         assert nats_s_client._topic_action["Test-topic"] == action_wrapped
@@ -283,7 +283,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def register_basic_consumer_with_sync_action_KO_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -312,7 +312,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def not_ack_on_action_failure_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -323,7 +323,7 @@ class TestNatsStreamingClient:
         message.sub.subject = "Test-topic"
         caller = Mock()
         caller.action = CoroutineMock(side_effect=Exception())
-        action_wrapped = ActionWrapper(mock_logger, caller, "action", is_async=True)
+        action_wrapped = ActionWrapper(caller, "action", is_async=True, logger=mock_logger)
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack_and_action(message))
         await nats_s_client.subscribe_action("Test-topic", action=action_wrapped)
         assert nats_s_client._topic_action["Test-topic"] is action_wrapped
@@ -346,7 +346,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def register_basic_consumer_with_not_sync_action_KO_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
@@ -357,7 +357,7 @@ class TestNatsStreamingClient:
         message.sub.subject = "Test-topic"
         caller = Mock()
         caller.action = CoroutineMock()
-        action_wrapped = ActionWrapper(mock_logger, caller, "action", is_async=True)
+        action_wrapped = ActionWrapper(caller, "action", is_async=True, logger=mock_logger)
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack_and_action(message))
         await nats_s_client.subscribe_action("Test-topic", action=action_wrapped)
         assert nats_s_client._topic_action["Test-topic"] is action_wrapped
@@ -379,7 +379,7 @@ class TestNatsStreamingClient:
     @pytest.mark.asyncio
     async def close_nats_connection_test(self):
         mock_logger = Mock()
-        nats_s_client = NatsStreamingClient(config, "test-client-id", mock_logger)
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
         nats_s_client._subs = list()
         sub = Mock()
         sub.unsubscribe = CoroutineMock()

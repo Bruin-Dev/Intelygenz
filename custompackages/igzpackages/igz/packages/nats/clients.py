@@ -1,6 +1,8 @@
 from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
 from igz.packages.eventbus.action import ActionWrapper
+import logging
+import sys
 
 
 class NatsStreamingClient:
@@ -12,11 +14,15 @@ class NatsStreamingClient:
     _client_id = ""
     _logger = None
 
-    def __init__(self, config, client_id, logger):
+    def __init__(self, config, client_id, logger=None):
         self._config = config.NATS_CONFIG
         self._client_id = client_id
         self._subs = list()
         self._topic_action = dict()
+        if logger is None:
+            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s: %(module)s: %(levelname)s: %(message)s',
+                                handlers=[logging.StreamHandler(sys.stdout)])
+            logger = logging.getLogger('nats')
         self._logger = logger
 
     async def connect_to_nats(self):

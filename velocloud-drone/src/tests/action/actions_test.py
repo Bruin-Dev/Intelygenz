@@ -11,7 +11,7 @@ class TestDroneActions:
 
     def instance_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(mock_logger)
+        test_bus = EventBus(logger=mock_logger)
         velocloud_repo = Mock()
         actions = Actions(test_bus, velocloud_repo, mock_logger)
         assert actions.event_bus is test_bus
@@ -19,7 +19,7 @@ class TestDroneActions:
 
     def process_edge_ok_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(mock_logger)
+        test_bus = EventBus(logger=mock_logger)
         velocloud_repo = Mock()
         velocloud_repo.get_edge_information = Mock(return_value="Edge is OK")
         actions = Actions(test_bus, velocloud_repo, mock_logger)
@@ -30,7 +30,7 @@ class TestDroneActions:
 
     def process_edge_ko_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(mock_logger)
+        test_bus = EventBus(logger=mock_logger)
         velocloud_repo = Mock()
         velocloud_repo.get_edge_information = Mock(side_effect=velocloud.rest.ApiException())
         actions = Actions(test_bus, velocloud_repo, mock_logger)
@@ -42,7 +42,7 @@ class TestDroneActions:
     @pytest.mark.asyncio
     async def report_edge_status_ko_status_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(mock_logger)
+        test_bus = EventBus(logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
         velocloud_repo = Mock()
         actions = Actions(test_bus, velocloud_repo, mock_logger)
@@ -58,7 +58,7 @@ class TestDroneActions:
     @pytest.mark.asyncio
     async def report_edge_status_ok_status_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(mock_logger)
+        test_bus = EventBus(logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
         velocloud_repo = Mock()
         actions = Actions(test_bus, velocloud_repo, mock_logger)
