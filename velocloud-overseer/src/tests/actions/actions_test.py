@@ -14,6 +14,8 @@ class TestOverseerActions:
         actions = Actions(test_bus, velocloud_repo, mock_logger)
         assert actions._event_bus is test_bus
         assert actions._velocloud_repository is velocloud_repo
+        assert actions._event_bus._logger is mock_logger
+        assert actions._logger is mock_logger
 
     @pytest.mark.asyncio
     async def will_generate_tasks_test(self):

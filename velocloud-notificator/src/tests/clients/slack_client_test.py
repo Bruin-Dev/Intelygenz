@@ -11,6 +11,7 @@ class TestSlackClient:
         test_client = SlackClient(config, mock_logger)
         assert test_client._config == config.SLACK_CONFIG
         assert test_client._url == config.SLACK_CONFIG['webhook'][0]
+        assert test_client._logger is mock_logger
 
     def ok_send_to_slack_test(self):
         test_msg = {'text': str(Mock())}

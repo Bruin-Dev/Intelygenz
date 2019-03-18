@@ -10,6 +10,8 @@ class TestStatisticRepository:
         mock_logger = Mock()
         test_repo = StatisticRepository(config, mock_client, mock_logger)
         assert test_repo._config == config
+        assert test_repo._statistic_client == mock_client
+        assert test_repo._logger is mock_logger
 
     def ok_send_to_stats_client_test(self):
         mock_client = Mock()

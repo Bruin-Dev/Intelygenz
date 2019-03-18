@@ -10,6 +10,8 @@ class TestSlackRepository:
         mock_logger = Mock()
         test_repo = SlackRepository(config, mock_client, mock_logger)
         assert test_repo._config == config
+        assert test_repo._slack_client is mock_client
+        assert test_repo._logger is mock_logger
 
     def ok_send_to_slack_test(self):
         test_msg = Mock()

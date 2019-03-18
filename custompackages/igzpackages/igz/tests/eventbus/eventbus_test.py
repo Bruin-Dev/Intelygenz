@@ -11,11 +11,14 @@ import logging
 class TestEventBus:
 
     def instantiation_test(self):
+        mock_logger = Mock()
         e = EventBus()
+        e2 = EventBus(logger=mock_logger)
         assert isinstance(e._consumers, dict)
         assert isinstance(e._logger, logging._loggerClass) is True
         assert e._logger.hasHandlers() is True
         assert e._logger.getEffectiveLevel() is 10
+        assert e2._logger is mock_logger
 
     @pytest.mark.asyncio
     async def connect_OK_test(self):

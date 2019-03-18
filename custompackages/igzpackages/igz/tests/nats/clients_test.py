@@ -12,12 +12,15 @@ import logging
 class TestNatsStreamingClient:
 
     def instantiation_test(self):
+        mock_logger = Mock()
         nats_s_client = NatsStreamingClient(config, "test-client-id")
+        nats_s_client_2 = NatsStreamingClient(config, "test-client-id-2", logger=mock_logger)
         assert nats_s_client._config == config.NATS_CONFIG
         assert nats_s_client._client_id == "test-client-id"
         assert isinstance(nats_s_client._logger, logging._loggerClass) is True
         assert nats_s_client._logger.hasHandlers() is True
         assert nats_s_client._logger.getEffectiveLevel() is 10
+        assert nats_s_client_2._logger is mock_logger
 
     @pytest.mark.asyncio
     async def connect_to_nats_test(self):

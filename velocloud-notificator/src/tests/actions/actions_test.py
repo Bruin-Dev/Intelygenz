@@ -11,6 +11,9 @@ class TestActions:
         mock_logger = Mock()
         test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger)
         assert test_actions._config == config
+        assert test_actions._slack_repository is mock_slack_repository
+        assert test_actions._statistic_repository is mock_stats_repo
+        assert test_actions._logger is mock_logger
 
     def ok_send_to_slack_test(self):
         test_msg = Mock()
