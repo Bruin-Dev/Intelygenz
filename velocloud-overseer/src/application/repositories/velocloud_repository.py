@@ -39,5 +39,5 @@ class VelocloudRepository:
 
         except velocloud.rest.ApiException as e:
             self._logger.exception(f'Error, exception ocurred getting all velocloud '
-                                     f'enterprises from all velocloud clusters: {e}')
+                                   f'enterprises from all velocloud clusters: {e}')
         return edges_by_enterprise_and_host
