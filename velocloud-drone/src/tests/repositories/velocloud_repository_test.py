@@ -16,8 +16,9 @@ class TestVelocloudRepository:
         velocloud.AllApi = Mock(return_value=all_api_client)
 
     def create_one_and_connect_clients_test(self):
+        mock_logger = Mock()
         self.mock_velocloud()
-        vr = VelocloudRepository(config)
+        vr = VelocloudRepository(config, mock_logger)
         if vr._config['verify_ssl'] is 'no':
             assert not velocloud.configuration.verify_ssl
         else:
@@ -32,6 +33,7 @@ class TestVelocloudRepository:
         assert velocloud.AllApi.called
 
     def create_and_connect_all_clients_test(self):
+        mock_logger = Mock()
         self.mock_velocloud()
         mock_config = Mock()
         mock_config.VELOCLOUD_CONFIG = {
@@ -50,18 +52,20 @@ class TestVelocloudRepository:
 
                 }
             ]}
-        vr = VelocloudRepository(mock_config)
+        vr = VelocloudRepository(mock_config, mock_logger)
         assert len(vr._clients) is len(mock_config.VELOCLOUD_CONFIG['servers'])
 
     def get_edge_information_test(self):
+        mock_logger = Mock()
         self.mock_velocloud()
-        vr = VelocloudRepository(config)
+        vr = VelocloudRepository(config, mock_logger)
         edge_info = vr.get_edge_information(vr._config['servers'][0]['url'], 19, 99)
         assert edge_info == "Some Edge Information"
 
     def get_edge_information_ko_test(self):
+        mock_logger = Mock()
         self.mock_velocloud()
-        vr = VelocloudRepository(config)
+        vr = VelocloudRepository(config, mock_logger)
         vr._clients[0].edgeGetEdge = Mock(side_effect=velocloud.rest.ApiException())
         edge_info = vr.get_edge_information(vr._config['servers'][0]['url'], 19, 99)
         assert edge_info is None
