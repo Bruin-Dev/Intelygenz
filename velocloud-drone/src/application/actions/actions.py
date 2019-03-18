@@ -27,7 +27,7 @@ class Actions:
         edge_status = self._process_edge(edgeids)
         print(f'Got edge status from Velocloud: {edge_status}')
 
-        if edge_status._edgeState is 'CONNECTED':
+        if edge_status._edgeState == 'CONNECTED':
             print('Edge seems OK, sending it to topic edge.status.ok')
             topic = "edge.status.ok"
         else:
