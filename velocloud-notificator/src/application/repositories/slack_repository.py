@@ -10,10 +10,6 @@ class SlackRepository:
         self._logger = logger
 
     def send_to_slack(self, msg):
-        # Converts message to format that can be dumped by json
-        # in the slack_client
-        # Does this here becuase the Slack Repo should be doing
-        # the msg transformations
         slack_msg = {'text': str(msg)}
         if getattr(self._slack_client, 'send_to_slack') is None:
             self._logger.error(f'The object {self._slack_client} has no method named send_to_slack')

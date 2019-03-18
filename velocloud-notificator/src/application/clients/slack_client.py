@@ -21,7 +21,6 @@ class SlackClient:
             self._logger.error("Invalid URL")
             return response
 
-        # if an error arises prints out the status code
         if response.status_code != 200:
             self._logger.error('HTTP error ' + str(response.status_code))
             return 'HTTP error ' + str(response.status_code)

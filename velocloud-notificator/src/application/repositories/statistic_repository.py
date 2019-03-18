@@ -15,13 +15,6 @@ class StatisticRepository:
         self._logger = logger
 
     def send_to_stats_client(self, msg):
-        # break up message
-        # decode the msg from byte form
-        # to string then convert to dict
-        # to allow us to
-        # grab activation id as the key
-        # puts service state, activation state, and edge state in a
-        # relevant_info dictionary
         decoded_msg = msg.decode('utf-8')
         msg_dict = literal_eval(decoded_msg)
         self._activation_key = msg_dict['activationKey']

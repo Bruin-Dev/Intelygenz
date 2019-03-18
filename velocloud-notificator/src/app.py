@@ -43,16 +43,12 @@ class Container:
         self.server = quart_server
 
     async def start(self):
-        # Start the interval
-        # Runs this for a minute and at the end of the minute get the current stats
         await self.event_bus.connect()
         await self.event_bus.subscribe_consumer(consumer_name="KO_subscription", topic="edge.status.ko",
                                                 action_wrapper=self.store_stats_wrapper,
                                                 durable_name="velocloud_notificator",
                                                 queue="velocloud_notificator")
         self.timer_completion()
-        # At the end of timer should then report the current status
-        # Only the report is on the timer. Every time passed run the report
 
     def start_server(self):
         self.server.run(host="0.0.0.0", debug=True)

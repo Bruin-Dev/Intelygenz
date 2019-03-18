@@ -16,7 +16,6 @@ class Actions:
             return None
         self._slack_repository.send_to_slack(msg)
 
-    # Sends msg to stats repo to get stored
     def store_stats(self, msg):
         if getattr(self._statistic_repository, 'send_to_stats_client') is None:
             self._logger.error(f'The object {self._statistic_repository} has no method named send_to_stats_client')
