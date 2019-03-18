@@ -20,7 +20,7 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def connect_OK_test(self):
         mock_logger = Mock()
-        e = EventBus(mock_logger)
+        e = EventBus(logger=mock_logger)
         subscriber = NatsStreamingClient(config, "Some-subs-ID", logger=mock_logger)
         publisher = NatsStreamingClient(config, "Some-pub-ID", logger=mock_logger)
 
@@ -39,7 +39,7 @@ class TestEventBus:
 
     def add_consumer_OK_test(self):
         mock_logger = Mock()
-        e = EventBus(mock_logger)
+        e = EventBus(logger=mock_logger)
         subscriber = NatsStreamingClient(config, "Some-subs-ID", logger=mock_logger)
         e.add_consumer(subscriber, "some-name")
 

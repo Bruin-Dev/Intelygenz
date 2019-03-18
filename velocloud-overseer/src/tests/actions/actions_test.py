@@ -9,7 +9,7 @@ from igz.packages.eventbus.eventbus import EventBus
 class TestOverseerActions:
     def instance_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(mock_logger)
+        test_bus = EventBus(logger=mock_logger)
         velocloud_repo = Mock()
         actions = Actions(test_bus, velocloud_repo, mock_logger)
         assert actions._event_bus is test_bus
@@ -18,7 +18,7 @@ class TestOverseerActions:
     @pytest.mark.asyncio
     async def will_generate_tasks_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(mock_logger)
+        test_bus = EventBus(logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
         velocloud_repo = Mock()
         edges = ["task1", "task2"]
@@ -30,7 +30,7 @@ class TestOverseerActions:
     @pytest.mark.asyncio
     async def will_perform_scheduled_task_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(mock_logger)
+        test_bus = EventBus(logger=mock_logger)
         velocloud_repo = Mock()
         actions = Actions(test_bus, velocloud_repo, mock_logger)
         actions._send_edge_status_tasks = CoroutineMock()
@@ -43,7 +43,7 @@ class TestOverseerActions:
     @pytest.mark.asyncio
     async def will_perform_scheduled_task_on_start_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(mock_logger)
+        test_bus = EventBus(logger=mock_logger)
         velocloud_repo = Mock()
         actions = Actions(test_bus, velocloud_repo, mock_logger)
         actions._send_edge_status_tasks = CoroutineMock()
