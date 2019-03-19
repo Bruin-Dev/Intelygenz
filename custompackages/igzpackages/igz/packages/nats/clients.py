@@ -55,9 +55,9 @@ class NatsStreamingClient:
                 self._topic_action[msg.sub.subject].execute_stateful_action(event)
             await self._sc.ack(msg)
         except Exception:
-            self._logger.error(f"NATS ClientException in {self._client_id} client happened")
-            self._logger.error(f"Error executing {self._topic_action[msg.sub.subject].execute_stateful_action} "f"")
-            self._logger.error("Won't ACK message")
+            self._logger.exception(f"NATS ClientException in {self._client_id} client happened")
+            self._logger.exception(f"Error executing {self._topic_action[msg.sub.subject].execute_stateful_action} "f"")
+            self._logger.exception("Won't ACK message")
 
     async def _cb_with_ack(self, msg):
         self._logger.info(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
@@ -69,8 +69,8 @@ class NatsStreamingClient:
             self._topic_action[msg.sub.subject](event)
             await self._sc.ack(msg)
         except Exception:
-            self._logger.error(f"NATS ClientException in {self._client_id} client happened")
-            self._logger.error(f"Error executing {self._topic_action[msg.sub.subject]} function")
+            self._logger.exception(f"NATS ClientException in {self._client_id} client happened")
+            self._logger.exception(f"Error executing {self._topic_action[msg.sub.subject]} function")
 
     async def subscribe_action(self, topic, action: ActionWrapper,
                                start_at='first', time=None, sequence=None, queue=None, durable_name=None):

@@ -169,6 +169,8 @@ class TestNatsStreamingClient:
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
+        nats_s_client._logger.error = Mock()
+        nats_s_client._logger.info = Mock()
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
@@ -177,6 +179,8 @@ class TestNatsStreamingClient:
         caller_callback = Mock()
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
         await nats_s_client.subscribe("Test-topic", caller_callback)
+        assert nats_s_client._logger.error.called is False
+        assert nats_s_client._logger.info.called
         assert nats_s_client._topic_action["Test-topic"] == caller_callback
         assert nats_s_client._sc.subscribe.await_args[0] == ("Test-topic",)
         assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
@@ -199,6 +203,8 @@ class TestNatsStreamingClient:
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
+        nats_s_client._logger.exception = Mock()
+        nats_s_client._logger.info = Mock()
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
@@ -207,6 +213,8 @@ class TestNatsStreamingClient:
         caller_callback = Mock(side_effect=Exception())
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
         await nats_s_client.subscribe("Test-topic", caller_callback)
+        assert nats_s_client._logger.exception.called
+        assert nats_s_client._logger.info.called
         assert nats_s_client._topic_action["Test-topic"] == caller_callback
         assert nats_s_client._sc.subscribe.await_args[0] == ("Test-topic",)
         assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
@@ -230,6 +238,8 @@ class TestNatsStreamingClient:
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
+        nats_s_client._logger.error = Mock()
+        nats_s_client._logger.info = Mock()
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
@@ -238,6 +248,8 @@ class TestNatsStreamingClient:
         caller_callback = None
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack(message))
         await nats_s_client.subscribe("Test-topic", caller_callback)
+        assert nats_s_client._logger.error.called
+        assert nats_s_client._logger.info.called
         assert nats_s_client._topic_action["Test-topic"] == caller_callback
         assert nats_s_client._sc.subscribe.await_args[0] == ("Test-topic",)
         assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
@@ -260,6 +272,8 @@ class TestNatsStreamingClient:
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
+        nats_s_client._logger.error = Mock()
+        nats_s_client._logger.info = Mock()
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
@@ -270,6 +284,8 @@ class TestNatsStreamingClient:
         action_wrapped = ActionWrapper(caller, "action", logger=mock_logger)
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack_and_action(message))
         await nats_s_client.subscribe_action("Test-topic", action=action_wrapped)
+        assert nats_s_client._logger.error.called is False
+        assert nats_s_client._logger.info.called
         assert nats_s_client._topic_action["Test-topic"] == action_wrapped
         assert nats_s_client._sc.subscribe.await_args[0] == ("Test-topic",)
         assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
@@ -293,6 +309,8 @@ class TestNatsStreamingClient:
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
+        nats_s_client._logger.error = Mock()
+        nats_s_client._logger.info = Mock()
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
@@ -300,6 +318,8 @@ class TestNatsStreamingClient:
         message.sub.subject = "Test-topic"
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack_and_action(message))
         await nats_s_client.subscribe_action("Test-topic", action=None)
+        assert nats_s_client._logger.error.called
+        assert nats_s_client._logger.info.called
         assert nats_s_client._topic_action["Test-topic"] is None
         assert nats_s_client._sc.subscribe.await_args[0] == ("Test-topic",)
         assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
@@ -322,6 +342,8 @@ class TestNatsStreamingClient:
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
+        nats_s_client._logger.exception = Mock()
+        nats_s_client._logger.info = Mock()
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
@@ -332,6 +354,8 @@ class TestNatsStreamingClient:
         action_wrapped = ActionWrapper(caller, "action", is_async=True, logger=mock_logger)
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack_and_action(message))
         await nats_s_client.subscribe_action("Test-topic", action=action_wrapped)
+        assert nats_s_client._logger.exception.called
+        assert nats_s_client._logger.info.called
         assert nats_s_client._topic_action["Test-topic"] is action_wrapped
         assert nats_s_client._sc.subscribe.await_args[0] == ("Test-topic",)
         assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
@@ -356,6 +380,8 @@ class TestNatsStreamingClient:
         nats_s_client._subs.clear()
         nats_s_client._sc = Mock()
         nats_s_client._sc.ack = CoroutineMock()
+        nats_s_client._logger.error = Mock()
+        nats_s_client._logger.info = Mock()
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
@@ -366,6 +392,8 @@ class TestNatsStreamingClient:
         action_wrapped = ActionWrapper(caller, "action", is_async=True, logger=mock_logger)
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack_and_action(message))
         await nats_s_client.subscribe_action("Test-topic", action=action_wrapped)
+        assert nats_s_client._logger.error.called is False
+        assert nats_s_client._logger.info.called
         assert nats_s_client._topic_action["Test-topic"] is action_wrapped
         assert nats_s_client._sc.subscribe.await_args[0] == ("Test-topic",)
         assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',

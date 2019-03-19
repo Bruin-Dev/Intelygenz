@@ -26,8 +26,10 @@ class TestActionWrapper:
         assert action_wrapper.execute_stateful_action("SomeData") is "OK"
 
     def execute_action_KO_no_function_test(self):
-        mock_logger = Mock()
+        mocklogger = Mock()
         state_instance = Mock()
         state_instance.othermethod = None
-        action_wrapper = ActionWrapper(state_instance, "othermethod", logger=mock_logger)
+        action_wrapper = ActionWrapper(state_instance, "othermethod", logger=mocklogger)
+        action_wrapper.logger.error = Mock()
         assert action_wrapper.execute_stateful_action("SomeData") is not "OK"
+        assert action_wrapper.logger.error.called

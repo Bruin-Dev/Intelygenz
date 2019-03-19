@@ -78,6 +78,8 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         self.mock_velocloud()
         vr = VelocloudRepository(config, mock_logger)
+        vr._logger.exception = Mock()
         vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
         edges_by_ent = vr.get_all_enterprises_edges_with_host()
         assert len(edges_by_ent) is 0
+        assert vr._logger.exception.called

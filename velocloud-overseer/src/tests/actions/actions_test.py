@@ -26,8 +26,10 @@ class TestOverseerActions:
         edges = ["task1", "task2"]
         velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         actions = Actions(test_bus, velocloud_repo, mock_logger)
+        actions._logger.info = Mock()
         await actions._send_edge_status_tasks()
         assert test_bus.publish_message.call_count is len(edges)
+        assert actions._logger.info.called
 
     @pytest.mark.asyncio
     async def will_perform_scheduled_task_test(self):

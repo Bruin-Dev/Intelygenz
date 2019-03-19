@@ -51,13 +51,14 @@ class TestEventBus:
     def add_consumer_KO_repeated_test(self):
         mock_logger = Mock()
         e = EventBus(logger=mock_logger)
+        e._logger.error = Mock()
         first_subscriber = NatsStreamingClient(config, "Some-subs-ID", logger=mock_logger)
         second_subscriber = NatsStreamingClient(config, "Some-subs-ID-2", logger=mock_logger)
         e.add_consumer(first_subscriber, "some-name")
         e.add_consumer(second_subscriber, "some-name")
-
         assert e._consumers["some-name"] is first_subscriber
         assert e._consumers["some-name"] is not second_subscriber
+        assert e._logger.error.called
 
     def set_producer_OK_test(self):
         mock_logger = Mock()

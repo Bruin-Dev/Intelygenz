@@ -23,6 +23,7 @@ class TestVelocloudRepository:
             assert not velocloud.configuration.verify_ssl
         else:
             assert velocloud.configuration.verify_ssl
+        assert vr._logger is mock_logger
         assert velocloud.ApiClient.called
         assert velocloud.ApiClient.call_args[1] == dict(host=vr._config['servers'][0]['url'])
         assert velocloud.ApiClient().authenticate.called
@@ -66,6 +67,8 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         self.mock_velocloud()
         vr = VelocloudRepository(config, mock_logger)
+        vr._logger.exception = Mock()
         vr._clients[0].edgeGetEdge = Mock(side_effect=velocloud.rest.ApiException())
         edge_info = vr.get_edge_information(vr._config['servers'][0]['url'], 19, 99)
         assert edge_info is None
+        assert vr._logger.exception.called
