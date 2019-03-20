@@ -39,8 +39,9 @@ class TestOverseerActions:
         actions = Actions(test_bus, velocloud_repo, mock_logger)
         actions._send_edge_status_tasks = CoroutineMock()
         loop = asyncio.get_event_loop()
-        asyncio.ensure_future(actions.send_edge_status_task_interval(0.1, False))
+        task = asyncio.ensure_future(actions.send_edge_status_task_interval(0.1, False))
         await asyncio.sleep(0.2)
+        task.cancel()
         loop.stop()
         assert actions._send_edge_status_tasks.called
 
@@ -52,7 +53,8 @@ class TestOverseerActions:
         actions = Actions(test_bus, velocloud_repo, mock_logger)
         actions._send_edge_status_tasks = CoroutineMock()
         loop = asyncio.get_event_loop()
-        asyncio.ensure_future(actions.send_edge_status_task_interval(100, True))
+        task = asyncio.ensure_future(actions.send_edge_status_task_interval(100, True))
         await asyncio.sleep(0.1)
+        task.cancel()
         loop.stop()
         assert actions._send_edge_status_tasks.called
