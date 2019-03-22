@@ -1,8 +1,9 @@
-from quart import Quart
+from quart_openapi import Pint, Resource
 
-app = Quart(__name__)
+app = Pint(__name__, title='Sample App')
 
 
 @app.route('/')
-async def hello():
-    return "Success", 200
+class HealthChecks(Resource):
+    async def get(self):
+        return "Success"
