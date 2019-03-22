@@ -52,7 +52,8 @@ services:
       - velocloud-notificator/src/config/env
     depends_on:
       - "nats-streaming"
-
+    ports:
+      - 5000:5000
 
 
   prometheus:

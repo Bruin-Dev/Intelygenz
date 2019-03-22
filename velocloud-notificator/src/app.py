@@ -1,5 +1,4 @@
 import asyncio
-import threading
 from config import config
 from igz.packages.nats.clients import NatsStreamingClient
 from application.clients.slack_client import SlackClient
@@ -11,7 +10,7 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from threading import Timer
 from igz.packages.Logger.logger_client import LoggerClient
-from application.server.api import api
+from application.server.api import app
 
 
 class Container:
@@ -69,10 +68,8 @@ class Container:
 
 if __name__ == '__main__':
     container = Container()
-    thread = threading.Thread(target=api.app.run)
-    thread.daemon = True
-    thread.start()
     container.logger.info("Velocloud notificator starting...")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(container.run())
+    app.run(host="0.0.0.0", debug=True, loop=loop)
     loop.run_forever()

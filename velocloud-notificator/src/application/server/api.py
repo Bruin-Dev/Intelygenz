@@ -1,11 +1,8 @@
-from flask import Flask
-from flask_restplus import Resource, Api
+from quart import Quart
 
-app = Flask(__name__)
-api = Api(app)
+app = Quart(__name__)
 
 
-@api.route('/hello')
-class HealthStatus(Resource):
-    def get(self):
-        return None
+@app.route('/')
+async def hello():
+    return "Success", 200
