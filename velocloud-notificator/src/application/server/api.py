@@ -1,9 +1,11 @@
 from quart_openapi import Pint, Resource
+from http import HTTPStatus
 
-app = Pint(__name__, title='Sample App')
+
+quart_server = Pint(__name__, title='velocloud-notificator-api')
 
 
-@app.route('/')
-class HealthChecks(Resource):
+@quart_server.route('/')
+class HealthCheck(Resource):
     async def get(self):
-        return "Success"
+        return '', HTTPStatus.OK, None

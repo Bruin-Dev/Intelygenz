@@ -10,7 +10,7 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from threading import Timer
 from igz.packages.Logger.logger_client import LoggerClient
-from application.server.api import app
+from application.server.api import quart_server
 
 
 class Container:
@@ -26,6 +26,7 @@ class Container:
     event_bus = None
     time = config.SLACK_CONFIG['time']
     logger = LoggerClient(config).get_logger()
+    server = None
 
     def setup(self):
         self.subscriber = NatsStreamingClient(config, "velocloud-notificator-subscriber", logger=self.logger)
@@ -39,6 +40,7 @@ class Container:
         self.event_bus = EventBus(logger=self.logger)
         self.event_bus.add_consumer(consumer=self.subscriber, consumer_name="KO_subscription")
         self.event_bus.set_producer(producer=self.publisher)
+        self.server = quart_server
 
     async def start(self):
         # Start the interval
@@ -51,6 +53,9 @@ class Container:
         self.timer_completion()
         # At the end of timer should then report the current status
         # Only the report is on the timer. Every time passed run the report
+
+    def start_server(self):
+        self.server.run(host="0.0.0.0", debug=True)
 
     def timer_completion(self):
         sec_to_min = self.time / 60
@@ -71,5 +76,5 @@ if __name__ == '__main__':
     container.logger.info("Velocloud notificator starting...")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(container.run())
-    app.run(host="0.0.0.0", debug=True, loop=loop)
+    container.start_server()
     loop.run_forever()
