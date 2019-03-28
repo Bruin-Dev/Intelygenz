@@ -28,9 +28,9 @@ class TestDroneActions:
         actions = Actions(test_bus, velocloud_repo, mock_logger)
         assert actions._logger is mock_logger
         assert test_bus._logger is mock_logger
-        assert actions.event_bus is test_bus
+        assert actions._event_bus is test_bus
         assert velocloud_repo._logger is mock_logger
-        assert actions.velocloud_repository is velocloud_repo
+        assert actions._velocloud_repository is velocloud_repo
 
     def process_edge_ok_test(self):
         mock_logger = ()
