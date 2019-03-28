@@ -43,7 +43,6 @@ if __name__ == '__main__':
     container = Container()
     container.logger.info("Velocloud overseer starting...")
     loop = asyncio.get_event_loop()
-    # container.setup()
     asyncio.ensure_future(container.run(), loop=loop)
     container.start_server()
     loop.run_forever()
