@@ -4,21 +4,21 @@ import json
 
 
 class Actions:
-    event_bus = None
-    velocloud_repository = None
+    _event_bus = None
+    _velocloud_repository = None
     _logger = None
 
     def __init__(self, event_bus: EventBus, velocloud_repository, logger):
-        self.event_bus = event_bus
-        self.velocloud_repository = velocloud_repository
+        self._event_bus = event_bus
+        self._velocloud_repository = velocloud_repository
         self._logger = logger
 
     def _process_edge(self, edgeids):
         edge_status = None
         try:
-            edge_status = self.velocloud_repository.get_edge_information(edgeids['host'],
-                                                                         edgeids['enterpriseId'],
-                                                                         edgeids['id'])
+            edge_status = self._velocloud_repository.get_edge_information(edgeids['host'],
+                                                                          edgeids['enterpriseId'],
+                                                                          edgeids['id'])
         except velocloud.rest.ApiException as e:
             self._logger.exception(e)
         return edge_status
@@ -35,4 +35,4 @@ class Actions:
         else:
             self._logger.error('Edge seems KO, failure! Sending it to topic edge.status.ko')
             topic = "edge.status.ko"
-        await self.event_bus.publish_message(topic, repr(edge_status))
+        await self._event_bus.publish_message(topic, repr(edge_status))
