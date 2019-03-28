@@ -11,6 +11,8 @@ from igz.packages.eventbus.action import ActionWrapper
 from threading import Timer
 from igz.packages.Logger.logger_client import LoggerClient
 from application.server.api import quart_server
+from hypercorn.asyncio import serve
+from hypercorn.config import Config as CornConfig
 
 
 class Container:
@@ -50,8 +52,10 @@ class Container:
                                                 queue="velocloud_notificator")
         self.timer_completion()
 
-    def start_server(self):
-        self.server.run(host="0.0.0.0", debug=True)
+    async def start_server(self):
+        corn_config = CornConfig()
+        corn_config.bind = ['0.0.0.0:5000']
+        await serve(self.server, corn_config)
 
     def timer_completion(self):
         sec_to_min = self.time / 60
@@ -72,5 +76,5 @@ if __name__ == '__main__':
     container.logger.info("Velocloud notificator starting...")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(container.run())
-    container.start_server()
+    asyncio.ensure_future(container.start_server(), loop=loop)
     loop.run_forever()

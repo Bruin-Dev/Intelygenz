@@ -7,6 +7,8 @@ from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from application.server.api import quart_server
+from hypercorn.asyncio import serve
+from hypercorn.config import Config as CornConfig
 
 
 class Container:
@@ -40,8 +42,10 @@ class Container:
                                                 action_wrapper=self.report_edge_action, durable_name="velocloud_drones",
                                                 queue="velocloud_drones")
 
-    def start_server(self):
-        self.server.run(host="0.0.0.0", debug=True)
+    async def start_server(self):
+        corn_config = CornConfig()
+        corn_config.bind = ['0.0.0.0:5000']
+        await serve(self.server, corn_config)
 
     async def run(self):
         self.setup()
@@ -53,5 +57,5 @@ if __name__ == '__main__':
     Container.logger.info("Velocloud drone starting...")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(container.run())
-    container.start_server()
+    asyncio.ensure_future(container.start_server(), loop=loop)
     loop.run_forever()

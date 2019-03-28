@@ -6,6 +6,8 @@ from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from application.server.api import quart_server
+from hypercorn.asyncio import serve
+from hypercorn.config import Config as CornConfig
 
 
 class Container:
@@ -31,8 +33,10 @@ class Container:
         await self.event_bus.connect()
         await self.actions.send_edge_status_task_interval(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
 
-    def start_server(self):
-        self.server.run(host="0.0.0.0", debug=True)
+    async def start_server(self):
+        corn_config = CornConfig()
+        corn_config.bind = ['0.0.0.0:5000']
+        await serve(self.server, corn_config)
 
     async def run(self):
         self.setup()
@@ -44,5 +48,5 @@ if __name__ == '__main__':
     container.logger.info("Velocloud overseer starting...")
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)
-    container.start_server()
+    asyncio.ensure_future(container.start_server(), loop=loop)
     loop.run_forever()
