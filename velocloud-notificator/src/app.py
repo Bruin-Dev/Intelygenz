@@ -12,7 +12,7 @@ from threading import Timer
 from igz.packages.Logger.logger_client import LoggerClient
 from application.server.api import quart_server
 from hypercorn.asyncio import serve
-from hypercorn.config import Config as CornConfig
+from hypercorn.config import Config as HyperCornConfig
 
 
 class Container:
@@ -53,8 +53,9 @@ class Container:
         self.timer_completion()
 
     async def start_server(self):
-        corn_config = CornConfig()
-        corn_config.bind = ['0.0.0.0:5000']
+        corn_config = HyperCornConfig()
+        new_bind = f'0.0.0.0:{config.HYPER_CORN_CONFIG["port"]}'
+        corn_config.bind = [new_bind]
         await serve(self.server, corn_config)
 
     def timer_completion(self):

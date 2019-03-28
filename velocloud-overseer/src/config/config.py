@@ -40,3 +40,7 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
+
+HYPER_CORN_CONFIG = {
+    'port': 5000
+}

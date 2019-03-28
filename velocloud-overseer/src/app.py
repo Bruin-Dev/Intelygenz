@@ -7,7 +7,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from application.server.api import quart_server
 from hypercorn.asyncio import serve
-from hypercorn.config import Config as CornConfig
+from hypercorn.config import Config as HyperCornConfig
 
 
 class Container:
@@ -34,8 +34,9 @@ class Container:
         await self.actions.send_edge_status_task_interval(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
 
     async def start_server(self):
-        corn_config = CornConfig()
-        corn_config.bind = ['0.0.0.0:5000']
+        corn_config = HyperCornConfig()
+        new_bind = f'0.0.0.0:{config.HYPER_CORN_CONFIG["port"]}'
+        corn_config.bind = [new_bind]
         await serve(self.server, corn_config)
 
     async def run(self):
