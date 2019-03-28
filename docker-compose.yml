@@ -32,6 +32,8 @@ services:
       - velocloud-overseer/src/config/env
     depends_on:
       - "nats-streaming"
+    ports:
+      - 5000:5000
 
   velocloud-drone:
     build:
@@ -42,6 +44,8 @@ services:
       - velocloud-drone/src/config/env
     depends_on:
       - "nats-streaming"
+    ports:
+      - 5001:5000
 
   velocloud-notificator:
     build:
@@ -53,8 +57,7 @@ services:
     depends_on:
       - "nats-streaming"
     ports:
-      - 5000:5000
-
+      - 5002:5000
 
   prometheus:
     image: prom/prometheus:v2.7.2

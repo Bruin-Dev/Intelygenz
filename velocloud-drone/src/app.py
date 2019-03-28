@@ -6,6 +6,7 @@ from application.actions.actions import Actions
 from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
+from application.server.api import quart_server
 
 
 class Container:
@@ -16,6 +17,7 @@ class Container:
     actions = None
     report_edge_action = None
     logger = LoggerClient(config).get_logger()
+    server = None
 
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
@@ -30,12 +32,16 @@ class Container:
         self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger)
         self.report_edge_action = ActionWrapper(self.actions, "report_edge_status",
                                                 is_async=True, logger=self.logger)
+        self.server = quart_server
 
     async def start(self):
         await self.event_bus.connect()
         await self.event_bus.subscribe_consumer(consumer_name="tasks", topic="edge.status.task",
                                                 action_wrapper=self.report_edge_action, durable_name="velocloud_drones",
                                                 queue="velocloud_drones")
+
+    def start_server(self):
+        self.server.run(host="0.0.0.0", debug=True)
 
     async def run(self):
         self.setup()
@@ -47,4 +53,5 @@ if __name__ == '__main__':
     Container.logger.info("Velocloud drone starting...")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(container.run())
+    container.start_server()
     loop.run_forever()
