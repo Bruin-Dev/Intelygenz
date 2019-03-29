@@ -23,6 +23,16 @@ class Actions:
             self._logger.exception(e)
         return edge_status
 
+    def _process_link(self, edgeids):
+        link_status = None
+        try:
+            link_status = self._velocloud_repository.get_link_information(edgeids['host'],
+                                                                          edgeids['enterpriseId'],
+                                                                          edgeids['id'])
+        except velocloud.rest.ApiException as e:
+            self._logger.exception(e)
+        return link_status
+
     async def report_edge_status(self, msg):
         edgeids = json.loads(msg.decode("utf-8").replace("\\", ' ').replace("'", '"'))
         self._logger.info(f'Processing edge with data {msg}')
@@ -35,4 +45,7 @@ class Actions:
         else:
             self._logger.error('Edge seems KO, failure! Sending it to topic edge.status.ko')
             topic = "edge.status.ko"
+            link_status = self._process_link(edgeids)
+            edge_status = {"edges": edge_status, "links": link_status}
+
         await self._event_bus.publish_message(topic, repr(edge_status))

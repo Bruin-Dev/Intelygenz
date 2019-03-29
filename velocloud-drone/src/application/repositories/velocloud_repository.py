@@ -35,3 +35,15 @@ class VelocloudRepository:
             return edge_information
         except velocloud.rest.ApiException as e:
             self._logger.exception(e)
+
+    def get_link_information(self, host, enterpriseid, edgeid):
+        target_host_client = [client
+                              for client in self._clients
+                              if host in
+                              client.api_client.base_path][0]
+        edgeids = {"enterpriseId": enterpriseid, "id": edgeid}
+        try:
+            link_information = target_host_client.metricsGetEdgeLinkMetrics(body=edgeids)
+            return link_information
+        except velocloud.rest.ApiException as e:
+            self._logger.exception(e)

@@ -9,7 +9,7 @@ class TestStatisticClient:
         test_client = StatisticClient(config)
         assert test_client._config == config
         assert test_client._edge_dictionary == {}
-        assert test_client._stats_dictionary == {}
+        assert test_client._edge_stats_dictionary == {}
 
     def store_edge_test(self):
         test_client = StatisticClient(config)
@@ -28,15 +28,15 @@ class TestStatisticClient:
         test_client.store_edge(test_key, new_state)
         assert test_client._edge_dictionary == {54321: "OFFLINE", test_key: new_state}
 
-    def store_statistics_dictionary_test(self):
+    def store_edge_statistics_dictionary_test(self):
         test_client = StatisticClient(config)
         test_client.clear_dictionaries()
         test_state = "OFFLINE"
         new_state = "NEVER_ACTIVATED"
-        test_client.store_statistics_dictionary(test_state)
-        test_client.store_statistics_dictionary(test_state)
-        test_client.store_statistics_dictionary(new_state)
-        assert test_client._stats_dictionary == {test_state: 2, new_state: 1}
+        test_client.store_edge_statistics_dictionary(test_state)
+        test_client.store_edge_statistics_dictionary(test_state)
+        test_client.store_edge_statistics_dictionary(new_state)
+        assert test_client._edge_stats_dictionary == {test_state: 2, new_state: 1}
 
     def get_statistics_test(self):
         test_client = StatisticClient(config)
@@ -56,6 +56,6 @@ class TestStatisticClient:
         test_client._stats_dictionary = test_dict
         test_client.clear_dictionaries()
         assert test_client._edge_dictionary is not test_dict
-        assert test_client._stats_dictionary is not test_dict
+        assert test_client._edge_stats_dictionary is not test_dict
         assert test_client._edge_dictionary == {}
-        assert test_client._stats_dictionary == {}
+        assert test_client._edge_stats_dictionary == {}
