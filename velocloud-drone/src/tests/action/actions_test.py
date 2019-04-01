@@ -115,7 +115,9 @@ class TestDroneActions:
         actions._logger.error = Mock()
         edge_status = namedtuple("edge_status", [])
         edge_status._edgeState = 'CONNECTED'
+        link_status = []
         actions._process_edge = Mock(return_value=edge_status)
+        actions._process_link = Mock(return_value=link_status)
         await actions.report_edge_status(b'{"SomeIds": "ids"}')
         assert test_bus.publish_message.called
         assert actions._process_edge.called
