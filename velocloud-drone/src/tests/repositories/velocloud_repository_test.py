@@ -12,6 +12,7 @@ class TestVelocloudRepository:
         velocloud.ApiClient = Mock(return_value=client)
         all_api_client = Mock()
         all_api_client.edgeGetEdge = Mock(return_value="Some Edge Information")
+        all_api_client.metricsGetEdgeLinkMetrics = Mock(return_value="Some Link Information")
         all_api_client.api_client.base_path = config.VELOCLOUD_CONFIG['servers'][0]['url']
         velocloud.AllApi = Mock(return_value=all_api_client)
 
@@ -71,4 +72,21 @@ class TestVelocloudRepository:
         vr._clients[0].edgeGetEdge = Mock(side_effect=velocloud.rest.ApiException())
         edge_info = vr.get_edge_information(vr._config['servers'][0]['url'], 19, 99)
         assert edge_info is None
+        assert vr._logger.exception.called
+
+    def get_link_information_test(self):
+        mock_logger = Mock()
+        self.mock_velocloud()
+        vr = VelocloudRepository(config, mock_logger)
+        link_info = vr.get_link_information(vr._config['servers'][0]['url'], 19, 99)
+        assert link_info == "Some Link Information"
+
+    def get_link_information_ko_test(self):
+        mock_logger = Mock()
+        self.mock_velocloud()
+        vr = VelocloudRepository(config, mock_logger)
+        vr._logger.exception = Mock()
+        vr._clients[0].metricsGetEdgeLinkMetrics = Mock(side_effect=velocloud.rest.ApiException())
+        link_info = vr.get_link_information(vr._config['servers'][0]['url'], 19, 99)
+        assert link_info is None
         assert vr._logger.exception.called

@@ -56,6 +56,30 @@ class TestDroneActions:
         assert edge_status is None
         assert velocloud_repo.get_edge_information.called
 
+    def process_link_ok_test(self):
+        mock_logger = Mock()
+        test_bus = EventBus(logger=mock_logger)
+        velocloud_repo = Mock()
+        velocloud_repo.get_link_information = Mock(return_value="Link is OK")
+        actions = Actions(test_bus, velocloud_repo, mock_logger)
+        edgeis = dict(host="somehost", enterpriseId=19, id=99)
+        link_status = actions._process_link(edgeis)
+        assert link_status == "Link is OK"
+        assert velocloud_repo.get_link_information.called
+
+    def process_link_ko_test(self):
+        mock_logger = Mock()
+        test_bus = EventBus(logger=mock_logger)
+        velocloud_repo = Mock()
+        velocloud_repo.get_link_information = Mock(side_effect=velocloud.rest.ApiException())
+        actions = Actions(test_bus, velocloud_repo, mock_logger)
+        actions._logger.exception = Mock()
+        edgeis = dict(host="somehost", enterpriseId=19, id=99)
+        link_status = actions._process_link(edgeis)
+        assert actions._logger.exception.called
+        assert link_status is None
+        assert velocloud_repo.get_link_information.called
+
     @pytest.mark.asyncio
     async def report_edge_status_ko_status_test(self):
         mock_logger = Mock()
@@ -67,11 +91,15 @@ class TestDroneActions:
         actions._logger.error = Mock()
         edge_status = namedtuple("edge_status", [])
         edge_status._edgeState = 'FAILING'
+        link_status = []
         actions._process_edge = Mock(return_value=edge_status)
+        actions._process_link = Mock(return_value=link_status)
         await actions.report_edge_status(b'{"SomeIds": "ids"}')
         assert test_bus.publish_message.called
         assert actions._process_edge.called
         assert actions._process_edge.call_args[0][0] == dict(SomeIds="ids")
+        assert actions._process_link.called
+        assert actions._process_link.call_args[0][0] == dict(SomeIds="ids")
         assert test_bus.publish_message.call_args[0][0] == 'edge.status.ko'
         assert actions._logger.info.called
         assert actions._logger.error.called
