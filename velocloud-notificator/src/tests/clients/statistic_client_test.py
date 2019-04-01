@@ -75,12 +75,15 @@ class TestStatisticClient:
         assert msg1 is None
         test_dict = {"OFFLINE": 2, "NEVER_ACTIVATED": 1}
         test_client._edge_stats_dictionary = test_dict
+        time = config.SLACK_CONFIG['time']
+        msg2_results = f"Edge Status Counters (last {time} minutes)\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3\n"
         msg2 = test_client.get_statistics(time)
-        assert msg2 == "Edge Status Counters (last 60 minutes)\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3\n"
+        assert msg2 == msg2_results
         test_client._link_stats_dictionary = test_dict
-        msg_results = msg2 + "Link Status Counters (last 60 minutes)\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3"
+        msg3_results = msg2_results + f"Link Status Counters (last {time} minutes)" \
+            "\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3"
         msg3 = test_client.get_statistics(time)
-        assert msg3 == msg_results
+        assert msg3 == msg3_results
 
     def clear_dictionaries_test(self):
         test_client = StatisticClient(config)

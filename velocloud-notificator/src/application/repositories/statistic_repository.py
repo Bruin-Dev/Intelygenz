@@ -22,6 +22,11 @@ class StatisticRepository:
         decoded_msg = decoded_msg.replace(', tzinfo=tzlocal()', '')
         decoded_msg = decoded_msg.replace(', tzinfo=tzutc()', '')
         msg_dict = literal_eval(decoded_msg)
+        for links in msg_dict['links']:
+            links['link'].pop('created', None)
+            links['link'].pop('lastActive', None)
+            links['link'].pop('lastEvent', None)
+            links['link'].pop('modified', None)
         edge_msg_dict = msg_dict["edges"]
         link_msg_dict = msg_dict["links"]
         self._activation_key = edge_msg_dict['activationKey']

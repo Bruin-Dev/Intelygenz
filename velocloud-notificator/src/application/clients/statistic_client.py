@@ -33,15 +33,15 @@ class StatisticClient:
         if self._edge_stats_dictionary:
             msg = "Edge Status Counters (last %d minutes)\n" % (time)
             for status in self._edge_stats_dictionary:
-                msg = msg + status + ": " + str(self._edge_stats_dictionary[status]) + "\n"
+                msg = f'{msg}{str(status)}: {self._edge_stats_dictionary[status]}\n'
             edgesum = sum(self._edge_stats_dictionary.values())
-            msg = msg + "Total: " + str(edgesum) + "\n"
+            msg = f'{msg}Total: {str(edgesum)}\n'
         if self._link_stats_dictionary:
             msg = msg + "Link Status Counters (last %d minutes)\n" % (time)
             for status in self._link_stats_dictionary:
-                msg = msg + str(status) + ": " + str(self._link_stats_dictionary[status]) + "\n"
+                msg = f'{msg}{str(status)}: {self._link_stats_dictionary[status]}\n'
             linksum = sum(self._link_stats_dictionary.values())
-            msg = msg + "Total: " + str(linksum)
+            msg = f'{msg}Total: {str(linksum)}'
         if msg == '':
             msg = None
         return msg
