@@ -1,6 +1,11 @@
 stages:
   - test
 
+services:
+  - name: samunozjigz/nats-s-cfile:latest
+    alias: nats-streaming
+    entrypoint: ["/nats-streaming-server"]
+
 igzpackages_linter:
   stage: test
   image: python:3.6
@@ -69,6 +74,16 @@ velocloud_drone_test:
     - pytest --cov
 
 velocloud_drone_linter:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 velocloud-drone
+
+
+integration_test_basic:
   stage: test
   image: python:3.6
   before_script:
