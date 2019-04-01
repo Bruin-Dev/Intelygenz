@@ -20,8 +20,8 @@ class StatisticRepository:
         decoded_msg = msg.decode('utf-8')
         decoded_msg = decoded_msg.replace('datetime.datetime', '')
         decoded_msg = decoded_msg.replace(', tzinfo=tzlocal()', '')
+        decoded_msg = decoded_msg.replace(', tzinfo=tzutc()', '')
         msg_dict = literal_eval(decoded_msg)
-        pass
         edge_msg_dict = msg_dict["edges"]
         link_msg_dict = msg_dict["links"]
         self._activation_key = edge_msg_dict['activationKey']
@@ -38,5 +38,4 @@ class StatisticRepository:
             if getattr(self._statistic_client, 'store_link') is None:
                 self._logger.error(f'The object {self._statistic_client} has no method named store_link')
                 return None
-            print(self._link_id, self._link_state)
             self._statistic_client.store_link(self._link_id, self._link_state)

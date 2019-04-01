@@ -10,16 +10,18 @@ class TestStatisticClient:
         assert test_client._config == config
         assert test_client._edge_dictionary == {}
         assert test_client._edge_stats_dictionary == {}
+        assert test_client._link_dictionary == {}
+        assert test_client._link_stats_dictionary == {}
 
     def store_edge_test(self):
         test_client = StatisticClient(config)
         test_client.clear_dictionaries()
         test_key = 54321
         test_state = "OFFLINE"
-        test_client.store_statistics_dictionary = Mock()
+        test_client.store_edge_statistics_dictionary = Mock()
         test_client.store_edge(test_key, test_state)
         assert test_client._edge_dictionary == {test_key: test_state}
-        assert test_client.store_statistics_dictionary.called
+        assert test_client.store_edge_statistics_dictionary.called
         test_key = 12345
         test_state = "CONNECTED"
         test_client.store_edge(test_key, test_state)
@@ -27,6 +29,23 @@ class TestStatisticClient:
         new_state = "NEVER_ACTIVATED"
         test_client.store_edge(test_key, new_state)
         assert test_client._edge_dictionary == {54321: "OFFLINE", test_key: new_state}
+
+    def store_link_test(self):
+        test_client = StatisticClient(config)
+        test_client.clear_dictionaries()
+        test_id = 54321
+        test_state = "STABLE"
+        test_client.store_link_statistics_dictionary = Mock()
+        test_client.store_link(test_id, test_state)
+        assert test_client._link_dictionary == {test_id: test_state}
+        assert test_client.store_link_statistics_dictionary.called
+        test_id = 12345
+        test_state = "OFFLINE"
+        test_client.store_link(test_id, test_state)
+        assert test_client._link_dictionary == {54321: "STABLE", test_id: test_state}
+        new_state = "NEVER_ACTIVATED"
+        test_client.store_link(test_id, new_state)
+        assert test_client._link_dictionary == {54321: "STABLE", test_id: new_state}
 
     def store_edge_statistics_dictionary_test(self):
         test_client = StatisticClient(config)
@@ -38,6 +57,16 @@ class TestStatisticClient:
         test_client.store_edge_statistics_dictionary(new_state)
         assert test_client._edge_stats_dictionary == {test_state: 2, new_state: 1}
 
+    def store_link_statistics_dictionary_test(self):
+        test_client = StatisticClient(config)
+        test_client.clear_dictionaries()
+        test_state = "OFFLINE"
+        new_state = "NEVER_ACTIVATED"
+        test_client.store_link_statistics_dictionary(test_state)
+        test_client.store_link_statistics_dictionary(test_state)
+        test_client.store_link_statistics_dictionary(new_state)
+        assert test_client._link_stats_dictionary == {test_state: 2, new_state: 1}
+
     def get_statistics_test(self):
         test_client = StatisticClient(config)
         test_client.clear_dictionaries()
@@ -45,17 +74,27 @@ class TestStatisticClient:
         msg1 = test_client.get_statistics(time)
         assert msg1 is None
         test_dict = {"OFFLINE": 2, "NEVER_ACTIVATED": 1}
-        test_client._stats_dictionary = test_dict
+        test_client._edge_stats_dictionary = test_dict
         msg2 = test_client.get_statistics(time)
-        assert msg2 == "Edge Status Counters (last 60 minutes)\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3"
+        assert msg2 == "Edge Status Counters (last 60 minutes)\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3\n"
+        test_client._link_stats_dictionary = test_dict
+        msg_results = msg2 + "Link Status Counters (last 60 minutes)\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3"
+        msg3 = test_client.get_statistics(time)
+        assert msg3 == msg_results
 
     def clear_dictionaries_test(self):
         test_client = StatisticClient(config)
         test_dict = {"TestId": "CONNECTED"}
         test_client._edge_dictionary = test_dict
-        test_client._stats_dictionary = test_dict
+        test_client._edge_stats_dictionary = test_dict
+        test_client._link_dictionary = test_dict
+        test_client._link_stats_dictionary = test_dict
         test_client.clear_dictionaries()
         assert test_client._edge_dictionary is not test_dict
         assert test_client._edge_stats_dictionary is not test_dict
+        assert test_client._link_dictionary is not test_dict
+        assert test_client._link_stats_dictionary is not test_dict
         assert test_client._edge_dictionary == {}
         assert test_client._edge_stats_dictionary == {}
+        assert test_client._link_dictionary == {}
+        assert test_client._link_stats_dictionary == {}
