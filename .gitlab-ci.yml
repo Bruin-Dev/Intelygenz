@@ -83,11 +83,16 @@ velocloud_drone_linter:
     - pycodestyle --max-line-length=120 velocloud-drone
 
 
-integration_test_basic:
+integration_test_basic_nats:
   stage: test
   image: python:3.6
   before_script:
+    - export $NATS_SERVER=nats://nats-streaming:4222
+    - export $NATS_CLUSTER_NAME=automation-engine-nats
     - apt-get update -q -y
-    - pip install pycodestyle
+    - cd integration-tests/basic-nats
+    - pip install -r requirements.txt
+    - pycodestyle --max-line-length=120 .
+
   script:
-    - pycodestyle --max-line-length=120 velocloud-drone
+    - python src/app.py
