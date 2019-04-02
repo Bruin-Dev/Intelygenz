@@ -24,7 +24,7 @@ class VelocloudRepository:
         client.authenticate(user, password, operator=True)
         return velocloud.AllApi(client)
 
-    def seek_host(self, host):
+    def get_client_by_host(self, host):
         host_client = [client
                        for client in self._clients
                        if host in
@@ -32,7 +32,7 @@ class VelocloudRepository:
         return host_client
 
     def get_edge_information(self, host, enterpriseid, edgeid):
-        target_host_client = self.seek_host(host)
+        target_host_client = self.get_client_by_host(host)
         edgeids = {"enterpriseId": enterpriseid, "id": edgeid}
         try:
             edge_information = target_host_client.edgeGetEdge(body=edgeids)
@@ -41,7 +41,7 @@ class VelocloudRepository:
             self._logger.exception(e)
 
     def get_link_information(self, host, enterpriseid, edgeid):
-        target_host_client = self.seek_host(host)
+        target_host_client = self.get_client_by_host(host)
         edgeids = {"enterpriseId": enterpriseid, "id": edgeid}
         try:
             link_information = target_host_client.metricsGetEdgeLinkMetrics(body=edgeids)
