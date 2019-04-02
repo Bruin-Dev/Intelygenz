@@ -39,6 +39,8 @@ class Actions:
         edge_status = self._process_edge(edgeids)
         self._logger.info(f'Got edge status from Velocloud: {edge_status}')
         link_status = self._process_link(edgeids)
+        if link_status != []:
+            self._logger.info(f'Got link status from Velocloud: {link_status}')
         if edge_status._edgeState == 'CONNECTED':
             self._logger.info('Edge seems OK, sending it to topic edge.status.ok')
             topic = "edge.status.ok"
