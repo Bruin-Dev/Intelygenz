@@ -4,6 +4,8 @@ stages:
 services:
   - name: samunozjigz/nats-s-cfile:latest
     alias: nats-streaming
+    entrypoint: ["/nats-streaming-server"]
+    command: ["-c", "/nats.conf"]
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
