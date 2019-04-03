@@ -2,6 +2,7 @@ version: '3.1'
 services:
   nats-streaming:
     image: samunozjigz/nats-s-cfile:latest
+    restart: on-failure
     build:
       context: ./nats-streaming-server
     ports:
