@@ -50,11 +50,10 @@ class TestActions:
     def ko_store_stats_test(self):
         test_msg = Mock()
         mock_slack_repository = Mock()
-        mock_stats_repo = Mock()
+        mock_stats_repo = Mock(spec=[])
         mock_logger = Mock()
         test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger)
         test_actions._logger.error = Mock()
-        test_actions._statistic_repository.send_to_stats_client = None
         return_value = test_actions.store_stats(test_msg)
         assert return_value is None
         assert test_actions._logger.error.called

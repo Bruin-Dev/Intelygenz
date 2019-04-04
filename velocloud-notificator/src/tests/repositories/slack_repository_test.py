@@ -25,11 +25,10 @@ class TestSlackRepository:
 
     def ko_send_to_slack_test(self):
         test_msg = Mock()
-        mock_client = Mock()
+        mock_client = Mock(spec=[])
         mock_logger = Mock()
         test_repo = SlackRepository(config, mock_client, mock_logger)
         test_repo._logger.error = Mock()
-        test_repo._slack_client.send_to_slack = None
         return_type = test_repo.send_to_slack(test_msg)
         assert return_type is None
         assert test_repo._logger.error.called

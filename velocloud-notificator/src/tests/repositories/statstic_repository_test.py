@@ -48,7 +48,7 @@ class TestStatisticRepository:
         assert test_repo._statistic_client.store_edge.called
 
     def ko_send_to_stats_client_edge_test(self):
-        mock_client = Mock()
+        mock_client = Mock(spec=[])
         mock_logger = Mock()
         test_repo = StatisticRepository(config, mock_client, mock_logger)
         test_repo._logger.error = Mock()
@@ -56,13 +56,12 @@ class TestStatisticRepository:
                         'links':[{'linkId': 4321, 'link':\
                         { 'created': datetime.datetime(2018, 1, 2, 3, 4, 5, tzinfo=tzlocal()),\
                           'state': 'STABLE'}}]}"
-        test_repo._statistic_client.store_edge = None
         return_type = test_repo.send_to_stats_client(test_dict_msg)
         assert return_type is None
         assert test_repo._logger.error.called
 
     def ko_send_to_stats_client_link_test(self):
-        mock_client = Mock()
+        mock_client = Mock(spec=[])
         mock_logger = Mock()
         test_repo = StatisticRepository(config, mock_client, mock_logger)
         test_repo._logger.error = Mock()
@@ -71,7 +70,6 @@ class TestStatisticRepository:
                         { 'created': datetime.datetime(2018, 1, 2, 3, 4, 5, tzinfo=tzlocal()),\
                           'state': 'STABLE'}}]}"
         test_repo._statistic_client.store_edge = Mock()
-        test_repo._statistic_client.store_link = None
         return_type = test_repo.send_to_stats_client(test_dict_msg)
         assert return_type is None
         assert test_repo._logger.error.called
