@@ -116,10 +116,9 @@ acceptance_test_basic_nats:
     BLUEPRINT: blueprint/bp.drYdHEY0P/environment/kUslBdEIItXQtJY3rAJMedcx
   before_script:
     - apt-get update -q -y
-    - apt install jq
-    - cd integration-tests/basic-nats
-    - pip install -r requirements.txt
+    - apt install jq -y
+    - (cd integration-tests/basic-nats && pip install -r requirements.txt)
   script:
-    - (cd src && behave src/test/acceptance/ -f json -o results.json)
+    - (cd integration-tests/basic-nats && behave src/test/acceptance/ -f json -o results.json)
   after_script:
-    - python3 utils/honestcode/src/post_behave_result.py ${JSON_FILE} ${BLUEPRINT}
+    - python utils/honestcode/src/post_behave_result.py ${JSON_FILE} ${BLUEPRINT}
