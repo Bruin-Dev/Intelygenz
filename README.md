@@ -3,14 +3,21 @@
   * [Naming conventions](#naming-conventions)
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
+  * [DOD(Definition of Done)](#doddefinition-of-done)
   * [Custom packages](#custom-packages)
     + [Creation and testing](#creation-and-testing)
     + [Import and installation in microservices](#import-and-installation-in-microservices)
+    + [Changes and debugging](#changes-and-debugging)
 - [Run the project](#run-the-project)
 - [Lists of projects READMEs](#lists-of-projects-readmes)
   * [Packages](#packages)
   * [Microservices](#microservices)
+- [Processes' overview](#processes-overview)
+  * [Monitoring edge and link status](#monitoring-edge-and-link-status)
+    + [Process goal](#process-goal)
+    + [Process flow](#process-flow)
 - [Good Practices](#good-practices)
+- [METRICS](#metrics) 
 
 # Project structure
 ## Naming conventions
@@ -49,6 +56,8 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 - When deploying to production, a certain revision of the dev branch will be tagged. That will trigger all the pipelines needed to deploy.
 
 ## DOD(Definition of Done)
+If any of the next requirements is not fulfilled in a merge request, merge request can't be merged. 
+
 - Each service must have unit tests with a coverage percent of the 80% or more.
 - Each service must have it's dockerfile and must be referenced in the docker-compose.
 - Each service must have a linter job and a unit tests job in the gitlab.ci pipeline.
@@ -108,6 +117,29 @@ To debug with PyCharm, you must put the breakpoint **in the copy in site-package
 
 ## Microservices
 - [Base microservice](base-microservice/README.md)
+- [Velocloud overseer](velocloud-overseer/README.md)
+- [Velocloud drone](velocloud-drone/README.md)
+- [Velocloud notificator](velocloud-notificator/README.md)
+
+# Processes' overview
+
+## Monitoring edge and link status
+Services involved: velocloud-overseer, velocloud-drone, velocloud-notificator.
+
+### Process goal
+- Given an interval, process all edges and links statuses in that interval.
+- Notify in a given channel. Just notify the faulty edges and a metric of it's statuses.
+
+### Process flow
+    - Overseer ask for all edges given a list of Velocloud clusters.
+    - For each edge it builds an event composed by the cluster's hostname, the edge ID and the company ID for that edge.
+    - Publish event on NATS.
+    - Drone consumes the events from Overseer.
+    - For each event, it fetches the edge and link data related to the given IDs
+    - Filter if the edge is faulty or not.
+    - Depending on the state of the edge, the Drone will put the result event in a different Message Queue (one Queue for faulty edges, other for ok edges)
+    - Notificator consumes the faulty edge queue and creates statistics. 
+    - Notificator has an interval set. For each interval will send the statistics to a Slack channel and reset the statistics for the next cycle.
 
 
 # Good Practices
