@@ -16,7 +16,7 @@ def format_json(json_path, upload_path):
 
     res.wait()
     if res.returncode != 0:
-        print("Error formatting result of behave file")
+        print("Error formatting results of behave file")
         exit(-1)
 
 
@@ -25,19 +25,23 @@ def upload_to_honestcode(json_path, test_hook_key):
         data = f.read()
     url = 'https://pro.honestcode.io/api/hooks/tr/{}'.format(test_hook_key)
     response = request.urlopen(url, data=data)
-    print(response)
+    if response.getcode() != 200:
+        print("Error uploading results to honestcode.")
+        exit(-1)
+    else:
+        print("Behave results successfully uploaded to honestcode.")
 
 
 def remove_process_files(src_path, out_path):
     if os.path.exists(src_path):
         os.remove(src_path)
     else:
-        print("Could not remove uploaded file.")
+        print("Could not remove behave results file.")
 
     if os.path.exists(out_path):
         os.remove(out_path)
     else:
-        print("Could not remove uploaded file.")
+        print("Could not remove formatted behave results file.")
 
 
 if __name__ == '__main__':

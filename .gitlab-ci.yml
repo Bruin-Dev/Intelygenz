@@ -119,6 +119,6 @@ acceptance_test_basic_nats:
     - apt install jq -y
     - (cd integration-tests/basic-nats && pip install -r requirements.txt)
   script:
-    - (cd integration-tests/basic-nats && behave src/test/acceptance/ -f json -o results.json)
+    - (cd integration-tests/basic-nats/src && behave test/acceptance/ -f json -o results.json)
   after_script:
     - python utils/honestcode/src/post_behave_result.py ${JSON_FILE} ${BLUEPRINT}
