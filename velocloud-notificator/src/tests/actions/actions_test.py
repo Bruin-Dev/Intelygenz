@@ -27,12 +27,11 @@ class TestActions:
 
     def ko_send_to_slack_test(self):
         test_msg = Mock()
-        mock_slack_repository = Mock()
+        mock_slack_repository = Mock(spec=[])
         mock_stats_repo = Mock()
         mock_logger = Mock()
         test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger)
         test_actions._logger.error = Mock()
-        test_actions._slack_repository.send_to_slack = None
         return_value = test_actions.send_to_slack(test_msg)
         assert return_value is None
         assert test_actions._logger.error.called

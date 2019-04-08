@@ -11,7 +11,7 @@ class Actions:
         self._logger = logger
 
     def send_to_slack(self, msg):
-        if getattr(self._slack_repository, 'send_to_slack') is None:
+        if hasattr(self._slack_repository, 'send_to_slack') is False:
             self._logger.error(f'The object {self._slack_repository} has no method named send_to_slack')
             return None
         self._slack_repository.send_to_slack(msg)
