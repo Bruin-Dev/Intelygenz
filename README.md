@@ -28,6 +28,9 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
  - [Python asyncio](https://docs.python.org/3/library/asyncio.html)
  - [Quart](http://pgjones.gitlab.io/quart/)
  - [Quart OpenAPI](https://github.com/factset/quart-openapi)
+ - [Pytest](https://docs.pytest.org/en/latest/)
+ - [Pip](https://pypi.org/project/pip/)
+ - [Virtualenv](https://virtualenv.pypa.io/en/latest/)
  - [Hypercorn to deploy Quart server](https://pgjones.gitlab.io/hypercorn/)
  - [Requests for python HTTP requests](http://docs.python-requests.org/en/master/)
  - [NATS(in streaming mode, as event bus)](https://nats.io/)
@@ -44,6 +47,13 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 - **Remember that all code must have automated tests(unit and integration and must be part of an acceptance test) in it's pipeline.** 
 - Assign that merge request to a any developer of the repository. Also add any affected developer as Approver. I.E: if you are developing a microservice wich is part of a process, you should add as Approvers both the developers of the first microservice ahead and the first behind in the process chain. Those microservices will be the more affected by your changes. 
 - When deploying to production, a certain revision of the dev branch will be tagged. That will trigger all the pipelines needed to deploy.
+
+## DOD(Definition of Done)
+- Each service must have unit tests with a coverage percent of the 80% or more.
+- Each service must have it's dockerfile and must be referenced in the docker-compose.
+- Each service must have a linter job and a unit tests job in the gitlab.ci pipeline.
+- Each service that interacts in a process should be part of an acceptance test.
+- Developers should take care of notify the devops of putting in the pipeline env any environment variable needed in the pipeline's execution.
 
 ## Custom packages
 Custom packages are developed using the same branching name and workflow that is used in other pieces of the project.
