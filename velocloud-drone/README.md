@@ -1,4 +1,8 @@
 # Table of contents
+- [Velocloud SDK integration](#velocloud-sdk-integration)
+  * [Connecting to several clusters](#connecting-to-several-clusters)
+  * [Service logic](#service-logic)
+  * [Parallel drones](#parallel-drones)
 
 # Velocloud SDK integration
 
