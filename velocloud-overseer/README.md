@@ -1,7 +1,7 @@
 # Table of contents
 - [Velocloud SDK integration](#velocloud-sdk-integration)
   * [Connecting to several clusters](#connecting-to-several-clusters)
-  * [Velocloud logic](#velocloud-logic) 
+  * [Service logic](#service-logic) 
 
 # Velocloud SDK integration
 
@@ -23,7 +23,7 @@ In the `config.py`script, there's a way to split this into an array of dictionar
          }
 ````
 
-## Velocloud logic
+## Service logic
 The service must ask, for each cluster, for a list of each edge, paired with it's enterprise. Once it has collected
 all the edges with it's enterprises, it must create a single task for each one.
 
