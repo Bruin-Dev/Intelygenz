@@ -11,6 +11,10 @@ Feature: Publish/receive msgs
       | test.topic2 | message 2 |
       | test.topic3 | message 3 |
     Then will receive all messages
+      | topic       | message   |
+      | test.topic1 | message 1 |
+      | test.topic2 | message 2 |
+      | test.topic3 | message 3 |
 
   Scenario: Receive published message
     Given an event bus
