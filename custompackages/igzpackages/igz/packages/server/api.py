@@ -8,13 +8,13 @@ from hypercorn.config import Config as HyperCornConfig
 class QuartServer:
 
     _title = None
-    _quart_server = None
     _port = None
 
     def __init__(self, config):
         self._title = config.QUART_CONFIG['title']
         self._port = config.QUART_CONFIG['port']
-        self._quart_server = Pint(__name__, title=self._title)
+
+    _quart_server = Pint(__name__, title=_title)
 
     async def run_server(self):
         corn_config = HyperCornConfig()
