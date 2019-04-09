@@ -107,3 +107,14 @@ integration_test_basic_nats:
 
   script:
     - python src/app.py
+
+acceptance_tests:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - apt-get install docker
+    - curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+    - chmod +x /usr/local/bin/docker-compose
+  script:
+    - docker-compose up --build nats-streaming
