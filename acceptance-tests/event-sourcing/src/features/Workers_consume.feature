@@ -15,11 +15,11 @@ Feature: Workers consume
       | event 2 |
       | event 3 |
     And consumers are subscribed this way to the topic "test.topic"
-      | consumer_name | subscripton_type |
-      | consumer_1    | individual       |
-      | consumer_2    | group            |
-      | consumer_3    | group            |
-      | consumer_4    | group            |
+      | consumer_name | subscription_type |
+      | consumer_1    | individual        |
+      | consumer_2    | group             |
+      | consumer_3    | group             |
+      | consumer_4    | group             |
     Then each individual consumer will receive all events
     And each group consumer will receive exactly one event
 
@@ -34,7 +34,7 @@ Feature: Workers consume
       | event 1 |
       | event 2 |
       | event 3 |
-    And consumers are subscribed as group to the topic "test.topic"
+    And consumers are subscribed as "group" to the topic "test.topic"
     Then each group consumer will receive exactly one event
 
   Scenario: Individual subscribers
@@ -48,5 +48,5 @@ Feature: Workers consume
       | event 1 |
       | event 2 |
       | event 3 |
-    And consumers are subscribed as individual to the topic "test.topic"
+    And consumers are subscribed as "individual" to the topic "test.topic"
     Then each individual consumer will receive all events
