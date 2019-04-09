@@ -77,10 +77,13 @@ def step_impl(context):
 @then('will receive all messages')
 def step_impl(context):
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(receive_msg(context))
+    for row in context.table:
+        context.topic = row['topic']
+        context.expected_event = row['message']
+        loop.run_until_complete(receive_msg(context))
+
+        assert context.validate_action.state_instance.received_msg == context.expected_event
 
     async def bus_disconnect():
         await context.event_bus.close_connections()
     loop.run_until_complete(bus_disconnect())
-
-    assert context.validate_action.state_instance.received_msg == context.expected_event
