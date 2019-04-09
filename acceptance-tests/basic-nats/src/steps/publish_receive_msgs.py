@@ -46,23 +46,23 @@ def step_impl(context):
     loop.run_until_complete(bus_connect())
 
 
-@when('a message is published')
+@when('an event is published')
 def step_impl(context):
     context.topic = "test.topic"
     loop = asyncio.get_event_loop()
     loop.run_until_complete(publish_msg(context))
 
 
-@when('messages are published to the following topics')
+@when('events are published to the following topics')
 def step_impl(context):
     for row in context.table:
         context.topic = row['topic']
-        context.expected_event = row['message']
+        context.expected_event = row['event']
         loop = asyncio.get_event_loop()
         loop.run_until_complete(publish_msg(context))
 
 
-@then('will receive the message')
+@then('will receive the event')
 def step_impl(context):
     loop = asyncio.get_event_loop()
     loop.run_until_complete(receive_msg(context))
@@ -74,12 +74,12 @@ def step_impl(context):
     assert context.validate_action.state_instance.received_msg == context.expected_event
 
 
-@then('will receive all messages')
+@then('will receive all events')
 def step_impl(context):
     loop = asyncio.get_event_loop()
     for row in context.table:
         context.topic = row['topic']
-        context.expected_event = row['message']
+        context.expected_event = row['event']
         loop.run_until_complete(receive_msg(context))
 
         assert context.validate_action.state_instance.received_msg == context.expected_event
