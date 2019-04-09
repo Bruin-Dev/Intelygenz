@@ -9,6 +9,7 @@ Feature: Workers consume
       | consumer_1    |
       | consumer_2    |
       | consumer_3    |
+      | consumer_4    |
     When events are published to the topic "test.topic"
       | event   |
       | event 1 |
