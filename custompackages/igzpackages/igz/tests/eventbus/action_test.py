@@ -27,7 +27,8 @@ class TestActionWrapper:
 
     def execute_action_KO_no_function_test(self):
         mocklogger = Mock()
-        state_instance = Mock(spec=[])
+        state_instance = Mock()
+        del state_instance.othermethod
         action_wrapper = ActionWrapper(state_instance, "othermethod", logger=mocklogger)
         action_wrapper.logger.error = Mock()
         assert action_wrapper.execute_stateful_action("SomeData") is not "OK"

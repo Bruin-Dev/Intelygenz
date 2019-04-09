@@ -31,16 +31,10 @@ class StatisticRepository:
         link_msg_dict = msg_dict["links"]
         self._activation_key = edge_msg_dict['activationKey']
         self._edge_state = edge_msg_dict['edgeState']
-        if hasattr(self._statistic_client, 'store_edge') is False:
-            self._logger.error(f'The object {self._statistic_client} has no method named store_edge')
-            return None
         self._statistic_client.store_edge(self._activation_key, self._edge_state)
 
         if link_msg_dict:
             for links in link_msg_dict:
                 self._link_id = links['linkId']
                 self._link_state = links['link']['state']
-            if hasattr(self._statistic_client, 'store_link') is False:
-                self._logger.error(f'The object {self._statistic_client} has no method named store_link')
-                return None
             self._statistic_client.store_link(self._link_id, self._link_state)
