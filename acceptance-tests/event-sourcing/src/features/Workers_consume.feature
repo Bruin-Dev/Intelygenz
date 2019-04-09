@@ -5,7 +5,6 @@ Feature: Workers consume
 
   Scenario: Mixed group and individual subscribers
     Given an event bus and the following consumers
-      |               |
       | consumer_name |
       | consumer_1    |
       | consumer_2    |
@@ -16,18 +15,16 @@ Feature: Workers consume
       | event 2 |
       | event 3 |
     And consumers are subscribed this way to the topic "test.topic"
-      |               |                      |
-      | consumer_name | type_of_subscription |
-      | consumer_1    | individual           |
-      | consumer_2    | group                |
-      | consumer_3    | group                |
-      | consumer_4    | group                |
+      | consumer_name | subscripton_type |
+      | consumer_1    | individual       |
+      | consumer_2    | group            |
+      | consumer_3    | group            |
+      | consumer_4    | group            |
     Then each individual consumer will receive all events
     And each group consumer will receive exactly one event
 
   Scenario: Queue group subscribers
     Given an event bus and the following consumers
-      |               |
       | consumer_name |
       | consumer_1    |
       | consumer_2    |
@@ -42,7 +39,6 @@ Feature: Workers consume
 
   Scenario: Individual subscribers
     Given an event bus and the following consumers
-      |               |
       | consumer_name |
       | consumer_1    |
       | consumer_2    |
