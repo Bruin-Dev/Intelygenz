@@ -3,20 +3,20 @@
 
 Feature: Publish/receive msgs
 
-  Scenario: Publish and receive from some topics
+  Scenario: Publish and receive events from some topics
     Given an event bus
     When events are published to the following topics
-      | topic       | message |
+      | topic       | event   |
       | test.topic1 | event 1 |
       | test.topic2 | event 2 |
       | test.topic3 | event 3 |
     Then will receive all events
-      | topic       | message |
+      | topic       | event   |
       | test.topic1 | event 1 |
       | test.topic2 | event 2 |
       | test.topic3 | event 3 |
 
-  Scenario: Receive published message
+  Scenario: Receive published event
     Given an event bus
     When an event is published
     Then will receive the event
