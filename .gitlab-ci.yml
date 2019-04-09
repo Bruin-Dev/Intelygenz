@@ -108,17 +108,17 @@ integration_test_basic_nats:
   script:
     - python src/app.py
 
-acceptance_tests_basic_nats:
+acceptance_tests_event_sourcing:
   stage: test
   image: python:3.6
   variables:
-    JSON_FILE: acceptance-tests/basic-nats/results.json
+    JSON_FILE: acceptance-tests/event-sourcing/results.json
     BLUEPRINT: blueprint/bp.drYdHEY0P/environment/kUslBdEIItXQtJY3rAJMedcx
   before_script:
     - apt-get update -q -y
     - apt install jq -y
-    - (cd acceptance-tests/basic-nats && pip install -r requirements.txt)
+    - (cd acceptance-tests/event-sourcing && pip install -r requirements.txt)
   script:
-    - (cd acceptance-tests/basic-nats && behave src -f json -o results.json)
+    - (cd acceptance-tests/event-sourcing && behave src -f json -o results.json)
   after_script:
     - python utils/honestcode/src/post_behave_result.py ${JSON_FILE} ${BLUEPRINT}
