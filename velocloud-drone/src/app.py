@@ -6,9 +6,7 @@ from application.actions.actions import Actions
 from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
-from application.server.api import quart_server
-from hypercorn.asyncio import serve
-from hypercorn.config import Config as HyperCornConfig
+from igz.packages.server.api import QuartServer
 
 
 class Container:
@@ -34,7 +32,7 @@ class Container:
         self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger)
         self.report_edge_action = ActionWrapper(self.actions, "report_edge_status",
                                                 is_async=True, logger=self.logger)
-        self.server = quart_server
+        self.server = QuartServer(config)
 
     async def start(self):
         await self.event_bus.connect()
@@ -43,10 +41,7 @@ class Container:
                                                 queue="velocloud_drones")
 
     async def start_server(self):
-        corn_config = HyperCornConfig()
-        new_bind = f'0.0.0.0:{config.HYPER_CORN_CONFIG["port"]}'
-        corn_config.bind = [new_bind]
-        await serve(self.server, corn_config)
+        await self.server.run_server()
 
     async def run(self):
         self.setup()

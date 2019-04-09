@@ -41,6 +41,7 @@ LOG_CONFIG = {
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
-HYPER_CORN_CONFIG = {
+QUART_CONFIG = {
+    'title': 'velocloud-drone',
     'port': 5000
 }
