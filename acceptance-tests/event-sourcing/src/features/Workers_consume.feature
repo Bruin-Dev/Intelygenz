@@ -3,36 +3,6 @@
 
 Feature: Workers consume
 
-  Scenario: Individual subscribers
-    Given an event bus and a the following consumers
-      |               |
-      | consumer_name |
-      | consumer_1    |
-      | consumer_2    |
-      | consumer_3    |
-    When events are published to the following topics
-      | topic       | event   |
-      | test.topic1 | event 1 |
-      | test.topic1 | event 2 |
-      | test.topic1 | event 3 |
-    And consumers are subscribed as individual
-    Then each individual consumer will receive all messages
-
-  Scenario: Queue group subscribers
-    Given an event bus and a the following consumers
-      |               |
-      | consumer_name |
-      | consumer_1    |
-      | consumer_2    |
-      | consumer_3    |
-    When events are published to the following topics
-      | topic       | event   |
-      | test.topic1 | event 1 |
-      | test.topic1 | event 2 |
-      | test.topic1 | event 3 |
-    And consumers are subscribed as group
-    Then each group consumer will receive exactly one event
-
   Scenario: Mixed group and individual subscribers
     Given an event bus and a the following consumers
       |               |
@@ -41,17 +11,47 @@ Feature: Workers consume
       | consumer_2    |
       | consumer_3    |
       | consumer_4    |
-    When events are published to the following topics
-      | topic       | event   |
-      | test.topic1 | event 1 |
-      | test.topic1 | event 2 |
-      | test.topic1 | event 3 |
-    And consumers are subscribed this way
+    When events are published to the topic "test.topic"
+      | event   |
+      | event 1 |
+      | event 2 |
+      | event 3 |
+    And consumers are subscribed this way to the topic "test.topic"
       |               |                      |
       | consumer_name | type_of_subscription |
       | consumer_1    | individual           |
       | consumer_2    | group                |
       | consumer_3    | group                |
       | consumer_4    | group                |
-    Then each individual consumer will receive all messages
+    Then each individual consumer will receive all events
     And each group consumer will receive exactly one event
+
+  Scenario: Queue group subscribers
+    Given an event bus and a the following consumers
+      |               |
+      | consumer_name |
+      | consumer_1    |
+      | consumer_2    |
+      | consumer_3    |
+    When events are published to the topic "test.topic"
+      | event   |
+      | event 1 |
+      | event 2 |
+      | event 3 |
+    And consumers are subscribed as group to the topic "test.topic"
+    Then each group consumer will receive exactly one event
+
+  Scenario: Individual subscribers
+    Given an event bus and the following consumers
+      |               |
+      | consumer_name |
+      | consumer_1    |
+      | consumer_2    |
+      | consumer_3    |
+    When events are published to the topic "test.topic"
+      | event   |
+      | event 1 |
+      | event 2 |
+      | event 3 |
+    And consumers are subscribed as individual to the topic "test.topic"
+    Then each individual consumer will receive all events
