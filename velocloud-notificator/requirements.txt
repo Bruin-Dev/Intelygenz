@@ -1,6 +1,4 @@
 prometheus-client==0.6.0
-Quart==0.6.12
-quart-openapi==1.4.3
 requests==2.21.0
 ../custompackages/velocloud
 ../custompackages/igzpackages
