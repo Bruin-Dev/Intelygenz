@@ -15,8 +15,10 @@ Feature: Basic consume
       | test.topic1 | event 1 |
       | test.topic2 | event 2 |
       | test.topic3 | event 3 |
+    And event bus connection is closed
 
   Scenario: Receive published event
     Given an event bus
     When an event is published
     Then will receive the event
+    And event bus connection is closed

@@ -23,6 +23,7 @@ Feature: Workers consume
       | consumer_4    | group             |
     Then each individual consumer will receive all events
     And group consumers will receive all events without repetitions
+    And event bus connection is closed
 
   Scenario: Queue group subscribers
     Given an event bus and the following consumers
@@ -37,6 +38,7 @@ Feature: Workers consume
       | event 3 |
     And consumers are subscribed as "group" to the topic "topic_group"
     Then group consumers will receive all events without repetitions
+    And event bus connection is closed
 
   Scenario: Individual subscribers
     Given an event bus and the following consumers
@@ -51,3 +53,4 @@ Feature: Workers consume
       | event 3 |
     And consumers are subscribed as "individual" to the topic "topic_individual"
     Then each individual consumer will receive all events
+    And event bus connection is closed
