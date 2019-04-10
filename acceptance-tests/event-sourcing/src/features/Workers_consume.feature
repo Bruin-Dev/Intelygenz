@@ -18,11 +18,11 @@ Feature: Workers consume
     And consumers are subscribed this way to the topic "test.topic"
       | consumer_name | subscription_type |
       | consumer_1    | individual        |
-      | consumer_2    | group             |
+      | consumer_2    | individual        |
       | consumer_3    | group             |
       | consumer_4    | group             |
     Then each individual consumer will receive all events
-    And each group consumer will receive exactly one event
+    And group consumers will receive all events without repetitions
 
   Scenario: Queue group subscribers
     Given an event bus and the following consumers
@@ -36,7 +36,7 @@ Feature: Workers consume
       | event 2 |
       | event 3 |
     And consumers are subscribed as "group" to the topic "test.topic"
-    Then each group consumer will receive exactly one event
+    Then group consumers will receive all events without repetitions
 
   Scenario: Individual subscribers
     Given an event bus and the following consumers
