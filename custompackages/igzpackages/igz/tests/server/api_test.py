@@ -1,3 +1,4 @@
+import igz
 from igz.packages.server.api import QuartServer
 import pytest
 from igz.config import testconfig as config
@@ -17,13 +18,13 @@ class Testapi:
         assert isinstance(testquarts._quart_server, Pint) is True
         assert testquarts._quart_server.title == testquarts._title
 
-    # @pytest.mark.asyncio
-    # async def run_server_test(self):
-    #     testquarts = QuartServer(config)
-    #     test_serve = CoroutineMock()
-    #     await testquarts.run_server()
-    #     assert testquarts._corn_config.bind == [testquarts._new_bind]
-    #     assert test_serve.called
+    @pytest.mark.asyncio
+    async def run_server_test(self):
+        testquarts = QuartServer(config)
+        mock_serve = igz.packages.server.api.serve = CoroutineMock()
+        await testquarts.run_server()
+        assert testquarts._corn_config.bind == [testquarts._new_bind]
+        assert mock_serve.called
 
     @pytest.mark.asyncio
     async def ok_app_test(self):
