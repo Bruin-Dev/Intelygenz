@@ -67,10 +67,6 @@ def step_impl(context):
     loop = asyncio.get_event_loop()
     loop.run_until_complete(receive_msg(context))
 
-    async def bus_disconnect():
-        await context.event_bus.close_connections()
-    loop.run_until_complete(bus_disconnect())
-
     assert context.validate_action.state_instance.received_msg == context.expected_event
 
 
@@ -83,7 +79,3 @@ def step_impl(context):
         loop.run_until_complete(receive_msg(context))
 
         assert context.validate_action.state_instance.received_msg == context.expected_event
-
-    async def bus_disconnect():
-        await context.event_bus.close_connections()
-    loop.run_until_complete(bus_disconnect())
