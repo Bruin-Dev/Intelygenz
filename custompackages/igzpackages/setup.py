@@ -16,7 +16,8 @@ REQUIRES = [
     "pytest-asyncio==0.10.0",
     "pytest-cov==2.6.1",
     "coverage == 4.5.2",
-
+    "Quart==0.6.12",
+    "quart-openapi==1.4.3"
 ]
 setup(
     name=NAME,

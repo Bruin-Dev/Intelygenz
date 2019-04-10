@@ -9,18 +9,20 @@ class QuartServer:
 
     _title = None
     _port = None
+    _corn_config = None
+    _new_bind = None
+    _quart_server = Pint(__name__)
 
     def __init__(self, config):
         self._title = config.QUART_CONFIG['title']
         self._port = config.QUART_CONFIG['port']
-
-    _quart_server = Pint(__name__, title=_title)
+        self._corn_config = HyperCornConfig()
+        self._new_bind = f'0.0.0.0:{self._port}'
+        self._quart_server.title = self._title
 
     async def run_server(self):
-        corn_config = HyperCornConfig()
-        new_bind = f'0.0.0.0:{self._port}'
-        corn_config.bind = [new_bind]
-        await serve(self._quart_server, corn_config)
+        self._corn_config.bind = [self._new_bind]
+        await serve(self._quart_server, self._corn_config)
 
     @_quart_server.route('/')
     class HealthCheck(Resource):
