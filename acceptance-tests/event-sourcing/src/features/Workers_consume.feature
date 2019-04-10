@@ -10,12 +10,12 @@ Feature: Workers consume
       | consumer_2    |
       | consumer_3    |
       | consumer_4    |
-    When events are published to the topic "test.topic"
+    When events are published to the topic "topic_mixed"
       | event   |
       | event 1 |
       | event 2 |
       | event 3 |
-    And consumers are subscribed this way to the topic "test.topic"
+    And consumers are subscribed this way to the topic "topic_mixed"
       | consumer_name | subscription_type |
       | consumer_1    | individual        |
       | consumer_2    | individual        |
@@ -30,12 +30,12 @@ Feature: Workers consume
       | consumer_1    |
       | consumer_2    |
       | consumer_3    |
-    When events are published to the topic "test.topic"
+    When events are published to the topic "topic_group"
       | event   |
       | event 1 |
       | event 2 |
       | event 3 |
-    And consumers are subscribed as "group" to the topic "test.topic"
+    And consumers are subscribed as "group" to the topic "topic_group"
     Then group consumers will receive all events without repetitions
 
   Scenario: Individual subscribers
@@ -44,10 +44,10 @@ Feature: Workers consume
       | consumer_1    |
       | consumer_2    |
       | consumer_3    |
-    When events are published to the topic "test.topic"
+    When events are published to the topic "topic_individual"
       | event   |
       | event 1 |
       | event 2 |
       | event 3 |
-    And consumers are subscribed as "individual" to the topic "test.topic"
+    And consumers are subscribed as "individual" to the topic "topic_individual"
     Then each individual consumer will receive all events
