@@ -22,7 +22,7 @@ class ActionWrapper:
         self.logger = logger
 
     def execute_stateful_action(self, data):
-        if getattr(self.state_instance, self.target_function) is None:
+        if hasattr(self.state_instance, self.target_function) is False:
             self.logger.error(f'The object {self.state_instance} has no method named {self.target_function}')
             return
         return getattr(self.state_instance, self.target_function)(data)
