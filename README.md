@@ -6,11 +6,14 @@
   * [Custom packages](#custom-packages)
     + [Creation and testing](#creation-and-testing)
     + [Import and installation in microservices](#import-and-installation-in-microservices)
+    + [Changes and debugging](#changes-and-debugging)
 - [Run the project](#run-the-project)
 - [Lists of projects READMEs](#lists-of-projects-readmes)
   * [Packages](#packages)
   * [Microservices](#microservices)
+  * [Acceptance Tests](#acceptance-tests)
 - [Good Practices](#good-practices)
+- [METRICS](#metrics)
 
 # Project structure
 ## Naming conventions
@@ -95,6 +98,8 @@ To debug with PyCharm, you must put the breakpoint **in the copy in site-package
 ## Microservices
 - [Base microservice](base-microservice/README.md)
 
+## Acceptance Tests
+- [Acceptance tests](acceptance-tests/README.md)
 
 # Good Practices
 - Documentation **must** be updated as frecuently as possible. It's recomended to annotate every action taken in the development phase, and afterwards, add to the documentation the actions or information considered relevant.

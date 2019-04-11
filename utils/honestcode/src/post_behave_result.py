@@ -54,5 +54,5 @@ if __name__ == '__main__':
         upload_to_honestcode(output_path, test_hook_key)
         remove_process_files(src_file, output_path)
     else:
-        print("Not enough args.")
+        print("Not enough args. Arg 1: behave output json path formatted by jq. Arg 2: HonestCode blueprint key,")
         exit(-1)

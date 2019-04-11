@@ -1,4 +1,6 @@
 import asyncio
+import string
+import random
 from behave import given, when, then
 
 from config import config
@@ -18,19 +20,21 @@ class EventValidator:
         self.received_msg = event.decode("utf-8")
 
 
-async def publish_msg(context):
-    await context.event_bus.publish_message(context.topic, context.expected_event)
+async def publish_msg(context, topic):
+    await context.event_bus.publish_message(topic, context.expected_event)
 
 
-async def receive_msg(context):
-    await context.event_bus.subscribe_consumer(consumer_name="base-test-consumer", topic=context.topic,
+async def receive_msg(context, topic):
+    await context.event_bus.subscribe_consumer(consumer_name="base-test-consumer", topic=topic,
                                                action_wrapper=context.validate_action,
                                                start_at='first')
 
 
 @given('an event bus')
 def step_impl(context):
-    loop = asyncio.get_event_loop()
+    context.loop = asyncio.get_event_loop()
+    context.topic_sufix = ''.join(random.choice(string.ascii_lowercase) for _ in range(4))
+
     consumer = NatsStreamingClient(config, "base-nats-test-consumer")
     producer = NatsStreamingClient(config, "base-nats-test-producer")
 
@@ -43,29 +47,26 @@ def step_impl(context):
 
     async def bus_connect():
         await context.event_bus.connect()
-    loop.run_until_complete(bus_connect())
+    context.loop.run_until_complete(bus_connect())
 
 
 @when('an event is published')
 def step_impl(context):
-    context.topic = "test.topic"
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(publish_msg(context))
+    context.topic = "test.topic" + context.topic_sufix
+    context.loop.run_until_complete(publish_msg(context, context.topic))
 
 
 @when('events are published to the following topics')
 def step_impl(context):
     for row in context.table:
-        context.topic = row['topic']
+        topic = row['topic'] + context.topic_sufix
         context.expected_event = row['event']
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(publish_msg(context))
+        context.loop.run_until_complete(publish_msg(context, topic))
 
 
 @then('will receive the event')
 def step_impl(context):
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(receive_msg(context))
+    context.loop.run_until_complete(receive_msg(context, context.topic))
 
     assert context.validate_action.state_instance.received_msg == context.expected_event
 
@@ -74,8 +75,8 @@ def step_impl(context):
 def step_impl(context):
     loop = asyncio.get_event_loop()
     for row in context.table:
-        context.topic = row['topic']
+        topic = row['topic'] + context.topic_sufix
         context.expected_event = row['event']
-        loop.run_until_complete(receive_msg(context))
+        loop.run_until_complete(receive_msg(context, topic))
 
         assert context.validate_action.state_instance.received_msg == context.expected_event

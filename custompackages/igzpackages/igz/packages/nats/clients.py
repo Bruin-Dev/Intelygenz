@@ -108,6 +108,7 @@ class NatsStreamingClient:
         # Stop recieving messages
         for sub in self._subs:
             await sub.unsubscribe()
+
         # Close NATS Streaming session
         await self._sc.close()
         # We are using a NATS borrowed connection so we need to close manually.
