@@ -1,116 +1,99 @@
 stages:
   - test
 
-services:
-  - name: samunozjigz/nats-s-cfile:latest
-    alias: nats-streaming
-    entrypoint: ["/nats-streaming-server"]
-    command: ["-c", "/nats.conf"]
-
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
   NATS_CLUSTER_NAME: "automation-engine-nats"
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
 
-#igzpackages_linter:
-#  stage: test
-#  image: python:3.6
-#  before_script:
-#    - apt-get update -q -y
-#    - pip install pycodestyle
-#  script:
-#    - pycodestyle --max-line-length=120 custompackages/igzpackages/
-#
-#igzpackages_test:
-#  stage: test
-#  image: python:3.6
-#  before_script:
-#    - apt-get update -q -y
-#    - cd custompackages/igzpackages
-#    - python setup.py install
-#  script:
-#    - pytest --cov
-#
-#velocloud_notificator_test:
-#  stage: test
-#  image: python:3.6
-#  before_script:
-#    - apt-get update -q -y
-#    - cd velocloud-notificator
-#    - pip install -r requirements.txt
-#  script:
-#    - pytest --cov
-#
-#velocloud_notificator_linter:
-#  stage: test
-#  image: python:3.6
-#  before_script:
-#    - apt-get update -q -y
-#    - pip install pycodestyle
-#  script:
-#    - pycodestyle --max-line-length=120 velocloud-notificator
-#
-#velocloud_overseer_test:
-#  stage: test
-#  image: python:3.6
-#  before_script:
-#    - apt-get update -q -y
-#    - cd velocloud-overseer
-#    - pip install -r requirements.txt
-#  script:
-#    - pytest --cov
-#
-#velocloud_overseer_linter:
-#  stage: test
-#  image: python:3.6
-#  before_script:
-#    - apt-get update -q -y
-#    - pip install pycodestyle
-#  script:
-#    - pycodestyle --max-line-length=120 velocloud-overseer
-#
-#velocloud_drone_test:
-#  stage: test
-#  image: python:3.6
-#  before_script:
-#    - apt-get update -q -y
-#    - cd velocloud-drone
-#    - pip install -r requirements.txt
-#  script:
-#    - pytest --cov
-#
-#velocloud_drone_linter:
-#  stage: test
-#  image: python:3.6
-#  before_script:
-#    - apt-get update -q -y
-#    - pip install pycodestyle
-#  script:
-#    - pycodestyle --max-line-length=120 velocloud-drone
-#
-#
-#integration_test_linter:
-#  stage: test
-#  image: python:3.6
-#  before_script:
-#    - apt-get update -q -y
-#    - pip install pycodestyle
-#  script:
-#    - pycodestyle --max-line-length=120 integration-tests
-#
-#integration_test_basic_nats:
-#  stage: test
-#  image: python:3.6
-#  before_script:
-#    - apt-get update -q -y
-#    - cd integration-tests/basic-nats
-#    - pip install -r requirements.txt
-#
-#  script:
-#    - python src/app.py
+igzpackages_linter:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 custompackages/igzpackages/
 
-acceptance_tests:
+igzpackages_test:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd custompackages/igzpackages
+    - python setup.py install
+  script:
+    - pytest --cov
+
+velocloud_notificator_test:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd velocloud-notificator
+    - pip install -r requirements.txt
+  script:
+    - pytest --cov
+
+velocloud_notificator_linter:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 velocloud-notificator
+
+velocloud_overseer_test:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd velocloud-overseer
+    - pip install -r requirements.txt
+  script:
+    - pytest --cov
+
+velocloud_overseer_linter:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 velocloud-overseer
+
+velocloud_drone_test:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd velocloud-drone
+    - pip install -r requirements.txt
+  script:
+    - pytest --cov
+
+velocloud_drone_linter:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 velocloud-drone
+
+
+integration_test_linter:
+  stage: test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 integration-tests
+
+basic_acceptance_tests:
   stage: test
   image: docker:stable
   services:
