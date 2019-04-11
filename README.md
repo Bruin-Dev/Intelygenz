@@ -3,6 +3,7 @@
   * [Naming conventions](#naming-conventions)
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
+  * [DOD(Definition of Done)](#doddefinition-of-done)
   * [Custom packages](#custom-packages)
     + [Creation and testing](#creation-and-testing)
     + [Import and installation in microservices](#import-and-installation-in-microservices)
@@ -12,8 +13,12 @@
   * [Packages](#packages)
   * [Microservices](#microservices)
   * [Acceptance Tests](#acceptance-tests)
+- [Processes' overview](#processes-overview)
+  * [Monitoring edge and link status](#monitoring-edge-and-link-status)
+    + [Process goal](#process-goal)
+    + [Process flow](#process-flow)
 - [Good Practices](#good-practices)
-- [METRICS](#metrics)
+- [METRICS](#metrics) 
 
 # Project structure
 ## Naming conventions
@@ -28,8 +33,16 @@ From [PEP-0008](https://www.python.org/dev/peps/pep-0008/#package-and-module-nam
 Also check this, more synthesized [Python naming conventions](https://visualgit.readthedocs.io/en/latest/pages/naming_convention.html) 
 # Technologies used
  - [Python 3.6](https://www.python.org/downloads/release/python-360/)
+ - [Python asyncio](https://docs.python.org/3/library/asyncio.html)
+ - [Quart](http://pgjones.gitlab.io/quart/)
+ - [Quart OpenAPI](https://github.com/factset/quart-openapi)
+ - [Pytest](https://docs.pytest.org/en/latest/)
+ - [Behave](https://pypi.org/project/behave/)
+ - [Pip](https://pypi.org/project/pip/)
+ - [Virtualenv](https://virtualenv.pypa.io/en/latest/)
+ - [Hypercorn to deploy Quart server](https://pgjones.gitlab.io/hypercorn/)
+ - [Requests for python HTTP requests](http://docs.python-requests.org/en/master/)
  - [NATS(in streaming mode, as event bus)](https://nats.io/)
- - [Flask for APIs in Python](http://flask.pocoo.org/)
  - [Docker](https://www.docker.com/)
  - [Docker-compose](https://docs.docker.com/compose/)
  - [Kubernetes](https://kubernetes.io/)
@@ -41,8 +54,17 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 	- "fix" branches starts with fix/issue-name
 - When taking a fix or a feature, create a new branch. After first push to the remote repository, start a Merge Request with the title like the following: "WIP: your title goes here". That way, Maintainer and Approvers can read your changes while you develop them.
 - **Remember that all code must have automated tests(unit and integration and must be part of an acceptance test) in it's pipeline.** 
-- Assign that merge request to a Maintainer of the repository. Also add any affected developer as Approver. I.E: if you are developing a microservice wich is part of a process, you should add as Approvers both the developers of the first microservice ahead and the first behind in the process chain. Those microservices will be the more affected by your changes. 
+- Assign that merge request to a any developer of the repository. Also add any affected developer as Approver. I.E: if you are developing a microservice wich is part of a process, you should add as Approvers both the developers of the first microservice ahead and the first behind in the process chain. Those microservices will be the more affected by your changes. 
 - When deploying to production, a certain revision of the dev branch will be tagged. That will trigger all the pipelines needed to deploy.
+
+## DOD(Definition of Done)
+If any of the next requirements is not fulfilled in a merge request, merge request can't be merged. 
+
+- Each service must have unit tests with a coverage percent of the 80% or more.
+- Each service must have it's dockerfile and must be referenced in the docker-compose.
+- Each service must have a linter job and a unit tests job in the gitlab.ci pipeline.
+- Each service that interacts in a process should be part of an acceptance test.
+- Developers should take care of notify the devops of putting in the pipeline env any environment variable needed in the pipeline's execution.
 
 ## Custom packages
 Custom packages are developed using the same branching name and workflow that is used in other pieces of the project.
@@ -97,9 +119,32 @@ To debug with PyCharm, you must put the breakpoint **in the copy in site-package
 
 ## Microservices
 - [Base microservice](base-microservice/README.md)
+- [Velocloud overseer](velocloud-overseer/README.md)
+- [Velocloud drone](velocloud-drone/README.md)
+- [Velocloud notificator](velocloud-notificator/README.md)
 
 ## Acceptance Tests
 - [Acceptance tests](acceptance-tests/README.md)
+
+# Processes' overview
+
+## Monitoring edge and link status
+Services involved: velocloud-overseer, velocloud-drone, velocloud-notificator.
+
+### Process goal
+- Given an interval, process all edges and links statuses in that interval.
+- Notify in a given channel. Just notify the faulty edges and a metric of it's statuses.
+
+### Process flow
+    - Overseer ask for all edges given a list of Velocloud clusters.
+    - For each edge it builds an event composed by the cluster's hostname, the edge ID and the company ID for that edge.
+    - Publish event on NATS.
+    - Drone consumes the events from Overseer.
+    - For each event, it fetches the edge and link data related to the given IDs
+    - Filter if the edge is faulty or not.
+    - Depending on the state of the edge, the Drone will put the result event in a different Message Queue (one Queue for faulty edges, other for ok edges)
+    - Notificator consumes the faulty edge queue and creates statistics. 
+    - Notificator has an interval set. For each interval will send the statistics to a Slack channel and reset the statistics for the next cycle.
 
 # Good Practices
 - Documentation **must** be updated as frecuently as possible. It's recomended to annotate every action taken in the development phase, and afterwards, add to the documentation the actions or information considered relevant.
