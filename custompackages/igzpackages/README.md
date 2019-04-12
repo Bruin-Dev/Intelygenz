@@ -15,3 +15,19 @@ This object accepts multiple subscriptions.
 
 The callback passed in the `subscribe` will be called with the decoded JSON that represents an event.
 If the callback fails, the message wont be ACKed.
+## quart
+### api
+`Quart` is an async version of `Flask`. Its used to check the status of the microservice its 
+attached to. 
+
+`QuartServer` is a class that builds the `Quart` app, and set up the configs for the `Hypercorn` server. It
+also contains the class `HealthCheck` which handles the calls made to the `Quart` app.
+
+`Hypercorn` is used to run the quart app. `Hypercorn` has a config file and within in it
+is a variable `bind`. `bind` is formatted to be IP address:Port. Default is `"127.0.0.1:8000"`.
+For our version we must change the bind to be `0.0.0.0:{self._port}`. With `self.port` being a port
+taken from the configs of the microservice that defines the `QuartServer` class.
+ 
+`HealthCheck` is the results of using `quart-open-api`. Which is an extension of `Quart` and the quart 
+equivalent to `flask-RESTful` we can recieve a status code of `200` or `OK` whenever a `GET` call it made to the
+`Hypercorn` server.
