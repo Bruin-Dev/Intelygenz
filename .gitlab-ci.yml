@@ -1,15 +1,11 @@
 stages:
   - test
 
-services:
-  - name: samunozjigz/nats-s-cfile:latest
-    alias: nats-streaming
-    entrypoint: ["/nats-streaming-server"]
-    command: ["-c", "/nats.conf"]
-
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
   NATS_CLUSTER_NAME: "automation-engine-nats"
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
 
 igzpackages_linter:
   stage: test
@@ -97,28 +93,16 @@ integration_test_linter:
   script:
     - pycodestyle --max-line-length=120 integration-tests
 
-integration_test_basic_nats:
+acceptance_tests:
   stage: test
-  image: python:3.6
+  image: docker:stable
+  services:
+    - docker:dind
   before_script:
-    - apt-get update -q -y
-    - cd integration-tests/basic-nats
-    - pip install -r requirements.txt
-
+    - apk add --no-cache py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
+    - pip install docker-compose
   script:
-    - python src/app.py
+    - docker-compose -f docker-compose-ci.yml up --build -d
 
-acceptance_tests_event_sourcing:
-  stage: test
-  image: python:3.6
-  variables:
-    JSON_FILE: acceptance-tests/event-sourcing/results.json
-    BLUEPRINT: blueprint/bp.drYdHEY0P/environment/kUslBdEIItXQtJY3rAJMedcx
-  before_script:
-    - apt-get update -q -y
-    - apt install jq -y
-    - (cd acceptance-tests/event-sourcing && pip install -r requirements.txt)
-  script:
-    - (cd acceptance-tests/event-sourcing && behave src -f json -o results.json)
   after_script:
-    - python utils/honestcode/src/post_behave_result.py ${JSON_FILE} ${BLUEPRINT}
+    - docker-compose -f docker-compose-ci.yml down && docker-compose -f docker-compose-ci.yml rm -v
