@@ -1,4 +1,3 @@
-from asgiref.sync import async_to_sync
 from config import config
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.eventbus import EventBus
@@ -35,7 +34,6 @@ class Container:
     durable_action = None
     from_first_action = None
 
-    @async_to_sync
     async def run(self):
         self.setup()
         await self.start()
@@ -90,8 +88,8 @@ class Container:
 
 
 if __name__ == '__main__':
-    logger.info("Base microservic starting...")
+    logger.info("Base microservice starting...")
     container = Container()
-    container.run()
     loop = asyncio.new_event_loop()
+    loop.run_until_complete(container.run())
     loop.run_forever()
