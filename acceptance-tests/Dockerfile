@@ -11,7 +11,6 @@ ENV BLUEPRINT $blueprint
 ENV JSON_FILE $json_file
 
 COPY acceptance-tests/ /service/acceptance-tests
-COPY utils/honestcode /service/utils/honestcode
 COPY custompackages/ /service/custompackages
 
 WORKDIR /service/
