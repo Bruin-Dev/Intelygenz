@@ -13,7 +13,7 @@ class Testapi:
         testquarts = QuartServer(config)
         assert testquarts._title == config.QUART_CONFIG['title']
         assert testquarts._port == config.QUART_CONFIG['port']
-        assert isinstance(testquarts._corn_config, HyperCornConfig) is True
+        assert isinstance(testquarts._hypercorn_config, HyperCornConfig) is True
         assert testquarts._new_bind == f'0.0.0.0:{testquarts._port}'
         assert isinstance(testquarts._quart_server, Pint) is True
         assert testquarts._quart_server.title == testquarts._title
@@ -23,14 +23,14 @@ class Testapi:
         testquarts = QuartServer(config)
         mock_serve = igz.packages.server.api.serve = CoroutineMock()
         await testquarts.run_server()
-        assert testquarts._corn_config.bind == [testquarts._new_bind]
+        assert testquarts._hypercorn_config.bind == [testquarts._new_bind]
         assert mock_serve.called
 
     @pytest.mark.asyncio
     async def ok_app_test(self):
         testquarts = QuartServer(config)
         client = testquarts._quart_server.test_client()
-        response = await client.get('/')
+        response = await client.get('/_health')
         data = await response.get_json()
         assert response.status_code == 200
         assert data is None

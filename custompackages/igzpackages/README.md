@@ -18,7 +18,8 @@ If the callback fails, the message wont be ACKed.
 ## quart
 ### api
 `Quart` is an async version of `Flask`. Its used to check the status of the microservice its 
-attached to. 
+attached to. By making a `Get` call when the microservices' address are up should return `null` and a 
+status code of `200`. 
 
 `QuartServer` is a class that builds the `Quart` app, and set up the configs for the `Hypercorn` server. It
 also contains the class `HealthCheck` which handles the calls made to the `Quart` app.
@@ -31,3 +32,11 @@ taken from the configs of the microservice that defines the `QuartServer` class.
 `HealthCheck` is the results of using `quart-open-api`. Which is an extension of `Quart` and the quart 
 equivalent to `flask-RESTful` we can recieve a status code of `200` or `OK` whenever a `GET` call it made to the
 `Hypercorn` server.
+
+__Microservices Address__
+
+velocloud-overseer: `http://0.0.0.0:5000/_health` or `http://localhost:5000/_health`
+
+velocloud-drone: `http://0.0.0.0:5001/_health` or `http://localhost:5001/_health`
+
+velocloud-notificator: `http://0.0.0.0:5002/_health` or `http://localhost:5002/_health`
