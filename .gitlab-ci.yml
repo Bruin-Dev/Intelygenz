@@ -93,7 +93,7 @@ integration_test_linter:
   script:
     - pycodestyle --max-line-length=120 integration-tests
 
-acceptance_tests:
+acceptance_test_event_sourcing:
   stage: test
   image: docker:stable
   services:

@@ -18,38 +18,9 @@ will be sent to [HonestCode](http://pro.honestcode.io).
 It is necessary to read [HonestCode documentation](https://honestcode.io/introduction-to-honestcode/) before updating project from within the platform.
 
 # Workflow
-- Install python 3.6
-- Install pip for python 3.6
-- Install virtualenv for python 3.6
-- Add the [precommit hook for PEP8](https://github.com/cbrueffer/pep8-git-hook) to automation-engine/.git/hooks/
-
-Then, we need to create and activate its virtualenv for every sub project we want to run acceptance tests for, like this:
-````
-cd <folder-name>
-python3 -m venv acc-tests-<folder-name>-env
-source ./acc-tests-<folder-name>-env/bin/activate
-pip install -r requirements.txt
-````
-## Get an instance of NATS cluster up in local environment
-- [JUST ONCE] Go to /etc/hosts and add ``127.0.0.1	nats-streaming``
-- Go to project root
-- Type the following ``docker-compose up nats-streaming``
-
-Now you can execute your python code related to NATS connections, using nats-streaming as host name
-
-## Configuration, environment variables and configuration files
-Some of the configuration parameters can change between environments.
-That's why the config module is there: a centralized file to keep both environment and constant parameters
-needed for our service to work.
-
-If you have an env file of the sub project you want to run acceptance tests for, place it in acceptance-tests/<project-folder>/config folder. If not, you should ask for it. That file should have the values of the environments variables set.
-To use it from local environment, you should use `export` before variables definitions.
-
-Make sure you use `source env` from the config directory or that **you point pycharm what env file to use before executing the service**
-
-
-The module `config` loads in a map all variables from the environment before each execution. If any is not present, the service won't get up and running.
-The module `testconfig` loads values in a map that is the same as the `config` one, but the values are **NEVER FETCHED FROM ENVIRONMENT VARIABLES** that way we keep our pipelines of acceptance tests clean.
+Follow instructions described in [base-microservice](../base-microservice/README.md) to:
+* Get an instance of NATS cluster up in local environment.
+* Configuration, environment variables and configuration files.
 
 ## Run acceptance tests for a sub project
 Currently we are using behave.
@@ -100,10 +71,7 @@ acceptance-tests/
 # Technologies used
 
 - [Asyncio nats streaming](https://github.com/nats-io/asyncio-nats-streaming)
-- [ASGI library for async](https://pypi.org/project/asgiref/)
 - [Behave for python](https://pypi.org/project/behave/)
 
 # Useful documentation
-- [Python async simplified with asgiref and asyncio](https://www.aeracode.org/2018/02/19/python-async-simplified/)
-- [Getting started with testing in Python](https://realpython.com/python-testing/#choosing-a-test-runner)
-- [Behave documentation](https://behave.readthedocs.io/en/latest/tutorial.html#features)
+- [Behave](https://behave.readthedocs.io/en/latest/tutorial.html#features)

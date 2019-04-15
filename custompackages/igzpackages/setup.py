@@ -16,6 +16,7 @@ REQUIRES = [
     "pytest-asyncio==0.10.0",
     "pytest-cov==2.6.1",
     "coverage == 4.5.2",
+    "behave == 1.2.6",
 
 ]
 setup(

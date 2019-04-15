@@ -44,7 +44,7 @@ def remove_process_files(src_path, out_path):
         print("Could not remove formatted behave results file.")
 
 
-if __name__ == '__main__':
+def main():
     if len(sys.argv) > 2:
         src_file = sys.argv[1]
         test_hook_key = sys.argv[2]
@@ -56,3 +56,7 @@ if __name__ == '__main__':
     else:
         print("Not enough args. Arg 1: behave output json path formatted by jq. Arg 2: HonestCode blueprint key,")
         exit(-1)
+
+
+if __name__ == '__main__':
+    main()
