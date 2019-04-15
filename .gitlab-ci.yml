@@ -1,4 +1,5 @@
 stages:
+  - validation
   - test
 
 variables:
@@ -8,7 +9,7 @@ variables:
   DOCKER_DRIVER: overlay2
 
 igzpackages_linter:
-  stage: test
+  stage: validation
   image: python:3.6
   before_script:
     - apt-get update -q -y
@@ -37,7 +38,7 @@ velocloud_notificator_test:
     - pytest --cov
 
 velocloud_notificator_linter:
-  stage: test
+  stage: validation
   image: python:3.6
   before_script:
     - apt-get update -q -y
@@ -56,7 +57,7 @@ velocloud_overseer_test:
     - pytest --cov
 
 velocloud_overseer_linter:
-  stage: test
+  stage: validation
   image: python:3.6
   before_script:
     - apt-get update -q -y
@@ -75,7 +76,7 @@ velocloud_drone_test:
     - pytest --cov
 
 velocloud_drone_linter:
-  stage: test
+  stage: validation
   image: python:3.6
   before_script:
     - apt-get update -q -y
@@ -85,7 +86,7 @@ velocloud_drone_linter:
 
 
 integration_test_linter:
-  stage: test
+  stage: validation
   image: python:3.6
   before_script:
     - apt-get update -q -y
