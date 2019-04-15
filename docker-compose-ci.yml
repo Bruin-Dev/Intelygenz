@@ -15,7 +15,7 @@ services:
       dockerfile: "./acceptance-tests/Dockerfile"
       args:
         - acc_test=event-sourcing
-        - blueprint=${HONESTCODE_EVENT_SOURCING_BLUEPRINT}
+        - blueprint=$HONESTCODE_EVENT_SOURCING_BLUEPRINT
         - json_file=acceptance-tests/event-sourcing/results.json
     environment:
       - "NATS_URI=nats://nats:4222"

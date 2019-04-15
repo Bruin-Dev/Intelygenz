@@ -84,20 +84,22 @@ velocloud_drone_linter:
     - pycodestyle --max-line-length=120 velocloud-drone
 
 
-integration_test_linter:
+acceptance_test_linter:
   stage: test
   image: python:3.6
   before_script:
     - apt-get update -q -y
     - pip install pycodestyle
   script:
-    - pycodestyle --max-line-length=120 integration-tests
+    - pycodestyle --max-line-length=120 acceptance-tests
 
 acceptance_test_event_sourcing:
   stage: test
   image: docker:stable
   services:
     - docker:dind
+  variables:
+    HONESTCODE_EVENT_SOURCING_BLUEPRINT: ${HONESTCODE_EVENT_SOURCING_BLUEPRINT}
   before_script:
     - apk add --no-cache py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
