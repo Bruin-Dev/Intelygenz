@@ -25,7 +25,7 @@ async def publish_msg(context, topic):
 
 
 async def receive_msg(context, topic):
-    await context.event_bus.subscribe_consumer(consumer_name="base-test-consumer", topic=topic,
+    await context.event_bus.subscribe_consumer(consumer_name="base-nats-test-consumer", topic=topic,
                                                action_wrapper=context.validate_action,
                                                start_at='first')
 
@@ -43,7 +43,7 @@ def step_impl(context):
     context.validate_action = ActionWrapper(event_validator, "check_event_cb")
     context.event_bus = EventBus()
     context.event_bus.set_producer(producer)
-    context.event_bus.add_consumer(consumer=consumer, consumer_name="base-test-consumer")
+    context.event_bus.add_consumer(consumer=consumer, consumer_name="base-nats-test-consumer")
 
     async def bus_connect():
         await context.event_bus.connect()
