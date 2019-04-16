@@ -15,12 +15,11 @@ services:
       dockerfile: "./acceptance-tests/Dockerfile"
       args:
         - acc_test=event-sourcing
-        - blueprint=$HONESTCODE_EVENT_SOURCING_BLUEPRINT
         - json_file=acceptance-tests/event-sourcing/results.json
     environment:
-      - "NATS_URI=nats://nats:4222"
-      - "NATS_SERVER1=nats://nats-streaming:4222"
-      - "NATS_CLUSTER_NAME=automation-engine-nats"
+      - "BLUEPRINT=${BLUEPRINT}"
+      - "NATS_SERVER1=${NATS_SERVER1}"
+      - "NATS_CLUSTER_NAME=${NATS_CLUSTER_NAME}"
     links:
       - nats-streaming
     depends_on:
