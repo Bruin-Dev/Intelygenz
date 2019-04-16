@@ -20,3 +20,8 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
+
+QUART_CONFIG = {
+    'title': 'test-name',
+    'port': 5000
+}
