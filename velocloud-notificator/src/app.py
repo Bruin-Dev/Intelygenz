@@ -8,7 +8,6 @@ from application.repositories.statistic_repository import StatisticRepository
 from application.actions.actions import Actions
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
-from threading import Timer
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.server.api import QuartServer
 
@@ -48,19 +47,10 @@ class Container:
                                                 action_wrapper=self.store_stats_wrapper,
                                                 durable_name="velocloud_notificator",
                                                 queue="velocloud_notificator")
-        self.timer_completion()
+        await self.actions.send_stats_to_slack_interval()
 
     async def start_server(self):
         await self.server.run_server()
-
-    def timer_completion(self):
-        sec_to_min = self.time / 60
-        msg = self.stats_client.get_statistics(sec_to_min)
-        if msg is not None:
-            self.actions.send_to_slack(msg)
-        self.stats_client.clear_dictionaries()
-        self.logger.info("Time has passed")
-        Timer(self.time, self.timer_completion).start()
 
     async def run(self):
         self.setup()
