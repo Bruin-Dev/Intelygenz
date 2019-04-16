@@ -104,7 +104,7 @@ acceptance_test_event_sourcing:
     - apk add --no-cache py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
   script:
-    - docker-compose -f docker-compose-ci.yml up --build -d
+    - docker-compose -f docker-compose-ci.yml up --build --abort-on-container-exit
 
   after_script:
     - docker-compose -f docker-compose-ci.yml down && docker-compose -f docker-compose-ci.yml rm -v
