@@ -17,7 +17,7 @@ NATS_CONFIG = {
 
 SLACK_CONFIG = {
     'webhook': ['https://test-slack.com'],
-    'time': 60
+    'time': 1
 }
 
 LOG_CONFIG = {
