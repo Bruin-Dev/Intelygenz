@@ -68,15 +68,23 @@ def step_impl(context):
 def step_impl(context):
     context.loop.run_until_complete(receive_msg(context, context.topic))
 
+    async def wait():
+        await asyncio.sleep(1, loop=context.loop)
+
+    context.loop.run_until_complete(wait())
+
     assert context.validate_action.state_instance.received_msg == context.expected_event
 
 
 @then('will receive all events')
 def step_impl(context):
-    loop = asyncio.get_event_loop()
+    async def wait():
+        await asyncio.sleep(1, loop=context.loop)
+
     for row in context.table:
         topic = row['topic'] + context.topic_sufix
         context.expected_event = row['event']
-        loop.run_until_complete(receive_msg(context, topic))
+        context.loop.run_until_complete(receive_msg(context, topic))
+        context.loop.run_until_complete(wait())
 
         assert context.validate_action.state_instance.received_msg == context.expected_event
