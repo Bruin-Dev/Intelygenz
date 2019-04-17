@@ -8,3 +8,19 @@ services:
     ports:
       - 4222:4222
       - 8222:8222
+
+  acceptance-tests-event-sourcing:
+    build:
+      context: .
+      dockerfile: "./acceptance-tests/Dockerfile"
+      args:
+        - acc_test=event-sourcing
+        - json_file=acceptance-tests/event-sourcing/results.json
+    environment:
+      - "BLUEPRINT=${BLUEPRINT}"
+      - "NATS_SERVER1=${NATS_SERVER1}"
+      - "NATS_CLUSTER_NAME=${NATS_CLUSTER_NAME}"
+    links:
+      - nats-streaming
+    depends_on:
+      - nats-streaming

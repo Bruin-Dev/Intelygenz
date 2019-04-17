@@ -10,9 +10,7 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from threading import Timer
 from igz.packages.Logger.logger_client import LoggerClient
-from application.server.api import quart_server
-from hypercorn.asyncio import serve
-from hypercorn.config import Config as HyperCornConfig
+from igz.packages.server.api import QuartServer
 
 
 class Container:
@@ -42,7 +40,7 @@ class Container:
         self.event_bus = EventBus(logger=self.logger)
         self.event_bus.add_consumer(consumer=self.subscriber, consumer_name="KO_subscription")
         self.event_bus.set_producer(producer=self.publisher)
-        self.server = quart_server
+        self.server = QuartServer(config)
 
     async def start(self):
         await self.event_bus.connect()
@@ -53,10 +51,7 @@ class Container:
         self.timer_completion()
 
     async def start_server(self):
-        corn_config = HyperCornConfig()
-        new_bind = f'0.0.0.0:{config.HYPER_CORN_CONFIG["port"]}'
-        corn_config.bind = [new_bind]
-        await serve(self.server, corn_config)
+        await self.server.run_server()
 
     def timer_completion(self):
         sec_to_min = self.time / 60

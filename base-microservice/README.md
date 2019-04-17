@@ -34,9 +34,10 @@ That's why the config module is there: a centralized file to keep both environme
 needed for our service to work.
 
 The [.template.env](/src/config/.template.env) file is an example, without values, of all the parameters from environment variables the service needs to work.
-You should ask for an env file to place under the config folder. That file should have the values of the environments variables set.
+You should ask for an env file to place under the config folder. That file should have the values of the environment variables set.
 
 Make sure you use `source env` from the config directory or that **you point pycharm what env file to use before execute the service**
+To use it from local environment execution, you should write `export` before each variable definitions.
 
 The module [config](src/config/config.py) loads in a map all variables from the environment before each execution. If any is not present, the service won't get up and running.
 The module [testconfig](src/config/testconfig.py) loads values in a map that is the same as the [config module](src/config/config.py) one, but the values are **NEVER FETCHED FROM ENVIRONMENT VARIABLES** that way we keep our pipelines of unit tests clean.

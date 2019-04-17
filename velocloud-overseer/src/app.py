@@ -5,9 +5,7 @@ from application.actions.actions import Actions
 from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
-from application.server.api import quart_server
-from hypercorn.asyncio import serve
-from hypercorn.config import Config as HyperCornConfig
+from igz.packages.server.api import QuartServer
 
 
 class Container:
@@ -18,7 +16,7 @@ class Container:
     report_edge_action = None
     actions = None
     logger = LoggerClient(config).get_logger()
-    server = quart_server
+    server = QuartServer(config)
 
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
@@ -34,10 +32,7 @@ class Container:
         await self.actions.send_edge_status_task_interval(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
 
     async def start_server(self):
-        corn_config = HyperCornConfig()
-        new_bind = f'0.0.0.0:{config.HYPER_CORN_CONFIG["port"]}'
-        corn_config.bind = [new_bind]
-        await serve(self.server, corn_config)
+        await self.server.run_server()
 
     async def run(self):
         self.setup()
