@@ -29,6 +29,16 @@ Features and Steps inside a sub project folder will be auto discovered by behave
 ```
 cd acceptance-tests/<sub-project-folder>/ && behave src
 ```
+To run acceptance tests in local environment and see results in HonestCode, you can do the following:
+* Export the BLUEPRINT env variable with the blueprint key you want to run tests for:
+```.bash
+export BLUEPRINT=blueprint/bp....
+```
+* Build and run docker-compose this way:
+```bash
+docker-compose -f docker-compose-ci.yml up --build --abort-on-container-exit
+```
+* Results of execution are shown on your terminal and HonestCode app.
 
 ## Run/Debug acceptance tests for a sub project in PyCharm
 1. Create a new Run/debug configuration.
