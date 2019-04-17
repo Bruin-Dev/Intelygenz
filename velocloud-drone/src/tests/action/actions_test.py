@@ -133,6 +133,13 @@ class TestDroneActions:
         actions._logger.error = Mock()
         edge_status = namedtuple("edge_status", [])
         edge_status._edgeState = 'CONNECTED'
+        _link = Mock()
+        _link._state = Mock()
+        link_status = MagicMock()
+        d = {_link._state()}
+        link_status.__iter__.side_effect = d.__iter__
+        actions._edge_counter.labels().inc = Mock()
+        actions._link_counter.labels().inc = Mock()
         actions._process_edge = Mock(return_value=edge_status)
         actions._process_link = Mock(return_value=link_status)
         await actions.report_edge_status(b'{"SomeIds": "ids"}')
@@ -143,4 +150,4 @@ class TestDroneActions:
         assert actions._logger.info.called
         assert actions._logger.error.called is False
         assert actions._edge_counter.labels().inc.called
-        # assert actions._link_counter.labels().inc.called
+        assert actions._link_counter.labels().inc.called
