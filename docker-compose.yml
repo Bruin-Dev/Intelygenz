@@ -46,6 +46,7 @@ services:
       - "nats-streaming"
     ports:
       - 5001:5000
+      - 9200:9200
 
   velocloud-notificator:
     build:
