@@ -25,8 +25,8 @@ class Container:
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
 
-        self.edge_status_gauge = Gauge('edge_state', 'Edge States', ['state'])
-        self.link_status_gauge = Gauge('link_state', 'Link States', ['state'])
+        self.edge_status_gauge = Gauge('edge_state', 'Edge States', ['enterpise_id', 'state'])
+        self.link_status_gauge = Gauge('link_state', 'Link States', ['enterpise_id', 'state'])
 
         self.publisher = NatsStreamingClient(config, "velocloud-drone-publisher", logger=self.logger)
         self.subscriber = NatsStreamingClient(config, "velocloud-drone-subscriber", logger=self.logger)
@@ -48,7 +48,7 @@ class Container:
         await self.event_bus.subscribe_consumer(consumer_name="tasks", topic="edge.status.task",
                                                 action_wrapper=self.report_edge_action, durable_name="velocloud_drones",
                                                 queue="velocloud_drones")
-        await self.actions.reset_counter()
+        # await self.actions.reset_counter()
 
     async def start_server(self):
         await self.server.run_server()
