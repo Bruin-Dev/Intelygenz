@@ -15,3 +15,9 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['base-microservice:9100']
+
+  - job_name: 'velocloud-drone'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['velocloud-drone:9200']
