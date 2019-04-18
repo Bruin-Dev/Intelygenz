@@ -47,5 +47,5 @@ QUART_CONFIG = {
 }
 
 GRAFANA_CONFIG = {
-    'time': 60
+    'time': 30
 }

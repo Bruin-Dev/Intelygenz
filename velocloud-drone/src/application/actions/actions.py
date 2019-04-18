@@ -12,7 +12,8 @@ class Actions:
     _edge_gauge = None
     _link_gauge = None
 
-    def __init__(self, config, event_bus: EventBus, velocloud_repository, logger, edge_gauge, link_gauge):
+    def __init__(self, config, event_bus: EventBus, velocloud_repository, logger, edge_gauge, link_gauge,):
+
         self._configs = config
         self._event_bus = event_bus
         self._velocloud_repository = velocloud_repository
@@ -46,12 +47,12 @@ class Actions:
         edge_status = self._process_edge(edgeids)
         # self._logger.info(f'Got edge status from Velocloud: {edge_status}')
 
-        self._edge_gauge.labels(state=edge_status._edgeState).inc()
+        self._edge_gauge.labels(state=edge_status._edgeState, enterpise_id=edgeids['enterpriseId']).inc()
         link_status = self._process_link(edgeids)
         if link_status != []:
             # self._logger.info(f'Got link status from Velocloud: {link_status}')
             for links in link_status:
-                self._link_gauge.labels(state=links._link._state).inc()
+                self._link_gauge.labels(state=links._link._state, enterpise_id=edgeids['enterpriseId']).inc()
 
         if edge_status._edgeState == 'CONNECTED':
             self._logger.info('Edge seems OK, sending it to topic edge.status.ok')
@@ -59,13 +60,13 @@ class Actions:
         else:
             self._logger.error('Edge seems KO, failure! Sending it to topic edge.status.ko')
             topic = "edge.status.ko"
-
+        # self._enterprise_faulty_gauge.labels(id=edgeids['enterpriseId'], state=edge_status._edgeState).inc()
         edge_status = {"edges": edge_status, "links": link_status}
 
         await self._event_bus.publish_message(topic, repr(edge_status))
 
-    async def reset_counter(self):
-        while True:
-            await asyncio.sleep(self._configs.GRAFANA_CONFIG['time'])
-            self._edge_gauge._metrics.clear()
-            self._link_gauge._metrics.clear()
+    # async def reset_counter(self):
+    #     while True:
+    #         await asyncio.sleep(self._configs.GRAFANA_CONFIG['time'])
+    #         self._edge_gauge._metrics.clear()
+    #         self._link_gauge._metrics.clear()
