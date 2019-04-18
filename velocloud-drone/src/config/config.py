@@ -45,3 +45,7 @@ QUART_CONFIG = {
     'title': 'velocloud-drone',
     'port': 5000
 }
+
+GRAFANA_CONFIG = {
+    'time': 1
+}
