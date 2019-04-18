@@ -9,20 +9,20 @@ services:
       - 4222:4222
       - 8222:8222
 
-# EXAMPLE OF BASE-MICROSERVICE
-# ============================
-#  base-microservice:
-#    build:
-#      # Context must be the root of the monorepo since we need to copy custompackages
-#      context: .
-#      dockerfile: base-microservice/Dockerfile
-#    env_file:
-#      - base-microservice/src/config/env
-#    depends_on:
-#      - "nats-streaming"
-#    ports:
-#      - 9100:9100
-# ============================
+  # EXAMPLE OF BASE-MICROSERVICE
+  # ============================
+  #  base-microservice:
+  #    build:
+  #      # Context must be the root of the monorepo since we need to copy custompackages
+  #      context: .
+  #      dockerfile: base-microservice/Dockerfile
+  #    env_file:
+  #      - base-microservice/src/config/env
+  #    depends_on:
+  #      - "nats-streaming"
+  #    ports:
+  #      - 9100:9100
+  # ============================
   velocloud-overseer:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
@@ -82,3 +82,5 @@ services:
       - 3000:3000
     volumes:
       - ./metrics-dashboard/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./metrics-dashboard/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./metrics-dashboard/grafana/dashboards-definitions:/var/lib/grafana/dashboards
