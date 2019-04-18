@@ -44,12 +44,12 @@ class Actions:
         edgeids = json.loads(msg.decode("utf-8").replace("\\", ' ').replace("'", '"'))
         self._logger.info(f'Processing edge with data {msg}')
         edge_status = self._process_edge(edgeids)
-        self._logger.info(f'Got edge status from Velocloud: {edge_status}')
+        # self._logger.info(f'Got edge status from Velocloud: {edge_status}')
 
         self._edge_gauge.labels(state=edge_status._edgeState).inc()
         link_status = self._process_link(edgeids)
         if link_status != []:
-            self._logger.info(f'Got link status from Velocloud: {link_status}')
+            # self._logger.info(f'Got link status from Velocloud: {link_status}')
             for links in link_status:
                 self._link_gauge.labels(state=links._link._state).inc()
 
@@ -69,4 +69,3 @@ class Actions:
             await asyncio.sleep(self._configs.GRAFANA_CONFIG['time'])
             self._edge_gauge._metrics.clear()
             self._link_gauge._metrics.clear()
-            self._logger.info('Time has passed')
