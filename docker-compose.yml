@@ -34,6 +34,7 @@ services:
       - "nats-streaming"
     ports:
       - 5000:5000
+      - 9110:9110
 
   velocloud-drone:
     build:
