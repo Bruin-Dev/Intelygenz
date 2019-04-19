@@ -7,13 +7,13 @@ from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
-from prometheus_client import start_http_server, Gauge
+from prometheus_client import start_http_server, Counter
 
 
 class Container:
     velocloud_repository = None
-    edge_status_gauge = None
-    link_status_gauge = None
+    edge_status_counter = None
+    link_status_counter = None
     publisher = None
     subscriber = None
     event_bus = None
@@ -25,8 +25,8 @@ class Container:
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
 
-        self.edge_status_gauge = Gauge('edge_state', 'Edge States', ['enterpise_id', 'state'])
-        self.link_status_gauge = Gauge('link_state', 'Link States', ['enterpise_id', 'state'])
+        self.edge_status_counter = Counter('edge_state', 'Edge States', ['enterpise_id', 'state'])
+        self.link_status_counter = Counter('link_state', 'Link States', ['enterpise_id', 'state'])
 
         self.publisher = NatsStreamingClient(config, "velocloud-drone-publisher", logger=self.logger)
         self.subscriber = NatsStreamingClient(config, "velocloud-drone-subscriber", logger=self.logger)
@@ -35,8 +35,8 @@ class Container:
         self.event_bus.add_consumer(self.subscriber, consumer_name="tasks")
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(config, self.event_bus, self.velocloud_repository, self.logger, self.edge_status_gauge,
-                               self.link_status_gauge)
+        self.actions = Actions(config, self.event_bus, self.velocloud_repository, self.logger, self.edge_status_counter,
+                               self.link_status_counter)
 
         self.report_edge_action = ActionWrapper(self.actions, "report_edge_status",
                                                 is_async=True, logger=self.logger)
