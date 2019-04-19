@@ -1,7 +1,6 @@
 from igz.packages.eventbus.eventbus import EventBus
 import velocloud
 import json
-import asyncio
 
 
 class Actions:
@@ -47,12 +46,12 @@ class Actions:
         edge_status = self._process_edge(edgeids)
         # self._logger.info(f'Got edge status from Velocloud: {edge_status}')
 
-        self._edge_counter.labels(state=edge_status._edgeState, enterpise_id=edgeids['enterpriseId']).inc()
+        self._edge_counter.labels(state=edge_status._edgeState, enterprise_id=edgeids['enterpriseId']).inc()
         link_status = self._process_link(edgeids)
         if link_status != []:
             # self._logger.info(f'Got link status from Velocloud: {link_status}')
             for links in link_status:
-                self._link_counter.labels(state=links._link._state, enterpise_id=edgeids['enterpriseId']).inc()
+                self._link_counter.labels(state=links._link._state, enterprise_id=edgeids['enterpriseId']).inc()
 
         if edge_status._edgeState == 'CONNECTED':
             self._logger.info('Edge seems OK, sending it to topic edge.status.ok')
