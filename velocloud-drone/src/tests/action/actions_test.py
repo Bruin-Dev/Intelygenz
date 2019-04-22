@@ -110,12 +110,16 @@ class TestDroneActions:
         actions._edge_counter.labels().inc = Mock()
         actions._process_edge = Mock(return_value=edge_status)
         actions._process_link = Mock(return_value=link_status)
-        await actions.report_edge_status(b'{"enterpriseId": "ids"}')
+        enterprise_info = Mock()
+        enterprise_info._name = Mock()
+        velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
+
+        await actions.report_edge_status(b'{"enterpriseId": "ids", "host": "host"}')
         assert test_bus.publish_message.called
         assert actions._process_edge.called
-        assert actions._process_edge.call_args[0][0] == dict(enterpriseId="ids")
+        assert actions._process_edge.call_args[0][0] == dict(enterpriseId="ids", host="host")
         assert actions._process_link.called
-        assert actions._process_link.call_args[0][0] == dict(enterpriseId="ids")
+        assert actions._process_link.call_args[0][0] == dict(enterpriseId="ids", host="host")
         assert test_bus.publish_message.call_args[0][0] == 'edge.status.ko'
         assert actions._logger.info.called
         assert actions._logger.error.called
@@ -137,14 +141,17 @@ class TestDroneActions:
         _link = Mock()
         _link._state = Mock()
         link_status = {_link._state()}
+        enterprise_info = Mock()
+        enterprise_info._name = Mock()
         actions._edge_counter.labels().inc = Mock()
         actions._link_counter.labels().inc = Mock()
         actions._process_edge = Mock(return_value=edge_status)
         actions._process_link = Mock(return_value=link_status)
-        await actions.report_edge_status(b'{"enterpriseId": "ids"}')
+        velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
+        await actions.report_edge_status(b'{"enterpriseId": "ids", "host": "host"}')
         assert test_bus.publish_message.called
         assert actions._process_edge.called
-        assert actions._process_edge.call_args[0][0] == dict(enterpriseId="ids")
+        assert actions._process_edge.call_args[0][0] == dict(enterpriseId="ids", host="host")
         assert test_bus.publish_message.call_args[0][0] == 'edge.status.ok'
         assert actions._logger.info.called
         assert actions._logger.error.called is False
