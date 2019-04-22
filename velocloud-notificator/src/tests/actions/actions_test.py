@@ -1,6 +1,8 @@
 from unittest.mock import Mock
 from application.actions.actions import Actions
 from config import testconfig as config
+import asyncio
+import pytest
 
 
 class TestActions:
@@ -34,3 +36,43 @@ class TestActions:
         test_actions._statistic_repository.send_to_stats_client = Mock()
         test_actions.store_stats(test_msg)
         assert test_actions._statistic_repository.send_to_stats_client.called
+
+    @pytest.mark.asyncio
+    async def send_stats_to_slack_interval_test(self):
+        mock_slack_repository = Mock()
+        mock_stats_repo = Mock()
+        mock_logger = Mock()
+        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger)
+        test_actions._statistic_repository._statistic_client.get_statistics = Mock(return_value='OK')
+        test_actions._statistic_repository._statistic_client.clear_dictionaries = Mock()
+        test_actions.send_to_slack = Mock()
+        test_actions._logger.info = Mock()
+        loop = asyncio.get_event_loop()
+        task = asyncio.ensure_future(test_actions.send_stats_to_slack_interval(), loop=loop)
+        await asyncio.sleep(1.1)
+        task.cancel()
+        loop.stop()
+        assert test_actions._statistic_repository._statistic_client.get_statistics.called
+        assert test_actions._statistic_repository._statistic_client.clear_dictionaries.called
+        assert test_actions.send_to_slack.called
+        assert test_actions._logger.info.called
+
+    @pytest.mark.asyncio
+    async def send_stats_to_slack_interval_no_message_test(self):
+        mock_slack_repository = Mock()
+        mock_stats_repo = Mock()
+        mock_logger = Mock()
+        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger)
+        test_actions._statistic_repository._statistic_client.get_statistics = Mock(return_value=None)
+        test_actions._statistic_repository._statistic_client.clear_dictionaries = Mock()
+        test_actions.send_to_slack = Mock()
+        test_actions._logger.info = Mock()
+        loop = asyncio.get_event_loop()
+        task = asyncio.ensure_future(test_actions.send_stats_to_slack_interval(), loop=loop)
+        await asyncio.sleep(1.1)
+        task.cancel()
+        loop.stop()
+        assert test_actions._statistic_repository._statistic_client.get_statistics.called
+        assert test_actions._statistic_repository._statistic_client.clear_dictionaries.called
+        assert test_actions.send_to_slack.called is False
+        assert test_actions._logger.info.called
