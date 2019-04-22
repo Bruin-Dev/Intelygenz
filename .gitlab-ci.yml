@@ -1,7 +1,7 @@
 stages:
   - validation
   - unit_test
-  - integration_test
+  - acceptance_tests
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -95,8 +95,8 @@ acceptance_test_linter:
   script:
     - pycodestyle --max-line-length=120 acceptance-tests
 
-acceptance_test_event_sourcing:
-  stage: integration_test
+event_sourcing_acceptance_test:
+  stage: acceptance_tests
   image: docker:stable
   services:
     - docker:dind
