@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1555930947555,
+  "iteration": 1555950619930,
   "links": [],
   "panels": [
     {
@@ -68,9 +68,9 @@
     },
     {
       "aliasColors": {
+        "DISCONNECTED": "#F2495C",
         "STABLE": "#73BF69",
-        "UNSTABLE": "#FADE2A",
-        "DISCONNECTED": "#F2495C"
+        "UNSTABLE": "#FADE2A"
       },
       "breakPoint": "50%",
       "cacheTimeout": null,
@@ -311,8 +311,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 0,
-        "desc": true
+        "col": 3,
+        "desc": false
       },
       "styles": [
         {
@@ -384,7 +384,7 @@
           "thresholds": [
             ""
           ],
-          "type": "number",
+          "type": "hidden",
           "unit": "short"
         },
         {
@@ -413,6 +413,22 @@
           "type": "string",
           "unit": "short",
           "valueMaps": []
+        },
+        {
+          "alias": "Enterprise name",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "enterprise_name",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -518,7 +534,7 @@
           "thresholds": [
             ""
           ],
-          "type": "number",
+          "type": "hidden",
           "unit": "short"
         },
         {
@@ -547,11 +563,27 @@
           "type": "string",
           "unit": "short",
           "valueMaps": []
+        },
+        {
+          "alias": "Enterprise Name",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "enterprise_name",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
         }
       ],
       "targets": [
         {
-          "expr": "link_state_total ",
+          "expr": "link_state_total",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
@@ -565,7 +597,7 @@
       "type": "table"
     }
   ],
-  "refresh": "5s",
+  "refresh": false,
   "schemaVersion": 18,
   "style": "dark",
   "tags": [],
@@ -583,8 +615,8 @@
     ]
   },
   "time": {
-    "from": "now-10m",
-    "to": "now"
+    "from": "2019-04-22T16:16:49.583Z",
+    "to": "2019-04-22T16:36:49.585Z"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -614,5 +646,5 @@
   "timezone": "",
   "title": "Current SD-WAN Status",
   "uid": "wXI1puRWz",
-  "version": 1
+  "version": 14
 }

@@ -25,8 +25,8 @@ class Container:
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
 
-        self.edge_status_counter = Counter('edge_state', 'Edge States', ['enterprise_id', 'state'])
-        self.link_status_counter = Counter('link_state', 'Link States', ['enterprise_id', 'state'])
+        self.edge_status_counter = Counter('edge_state', 'Edge States', ['enterprise_id', 'enterprise_name', 'state'])
+        self.link_status_counter = Counter('link_state', 'Link States', ['enterprise_id', 'enterprise_name', 'state'])
 
         self.publisher = NatsStreamingClient(config, "velocloud-drone-publisher", logger=self.logger)
         self.subscriber = NatsStreamingClient(config, "velocloud-drone-subscriber", logger=self.logger)

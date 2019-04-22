@@ -48,3 +48,12 @@ class VelocloudRepository:
             return link_information
         except velocloud.rest.ApiException as e:
             self._logger.exception(e)
+
+    def get_enterprise_information(self, host, enterpriseid):
+        target_host_client = self.get_client_by_host(host)
+        body = {"enterpriseId": enterpriseid}
+        try:
+            enterprise_information = target_host_client.enterpriseGetEnterprise(body=body)
+            return enterprise_information
+        except velocloud.rest.ApiException as e:
+            self._logger.exception(e)

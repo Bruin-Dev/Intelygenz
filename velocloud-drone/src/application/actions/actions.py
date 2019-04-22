@@ -44,14 +44,18 @@ class Actions:
         edgeids = json.loads(msg.decode("utf-8").replace("\\", ' ').replace("'", '"'))
         self._logger.info(f'Processing edge with data {msg}')
         edge_status = self._process_edge(edgeids)
+        enterprise_info = self._velocloud_repository.get_enterprise_information(edgeids['host'],
+                                                                                edgeids['enterpriseId'])
         # self._logger.info(f'Got edge status from Velocloud: {edge_status}')
 
-        self._edge_counter.labels(state=edge_status._edgeState, enterprise_id=edgeids['enterpriseId']).inc()
+        self._edge_counter.labels(state=edge_status._edgeState, enterprise_id=edgeids['enterpriseId'],
+                                  enterprise_name=enterprise_info._name).inc()
         link_status = self._process_link(edgeids)
         if link_status != []:
             # self._logger.info(f'Got link status from Velocloud: {link_status}')
             for links in link_status:
-                self._link_counter.labels(state=links._link._state, enterprise_id=edgeids['enterpriseId']).inc()
+                self._link_counter.labels(state=links._link._state, enterprise_id=edgeids['enterpriseId'],
+                                          enterprise_name=enterprise_info._name).inc()
 
         if edge_status._edgeState == 'CONNECTED':
             self._logger.info('Edge seems OK, sending it to topic edge.status.ok')
