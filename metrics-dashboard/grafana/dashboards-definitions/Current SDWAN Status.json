@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1555964910366,
+  "iteration": 1555968017596,
   "links": [],
   "panels": [
     {
@@ -57,6 +57,7 @@
         {
           "expr": "sum(edge_state_total) by (state)",
           "format": "time_series",
+          "instant": true,
           "intervalFactor": 1,
           "legendFormat": "{{state}}",
           "refId": "A"
@@ -89,7 +90,7 @@
         "y": 0
       },
       "id": 2,
-      "interval": null,
+      "interval": "10m",
       "legend": {
         "show": true,
         "sort": null,
@@ -106,13 +107,14 @@
         {
           "expr": "sum(link_state_total) by (state)",
           "format": "time_series",
+          "instant": true,
           "intervalFactor": 1,
           "legendFormat": "{{state}}",
           "refId": "A"
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
+      "timeFrom": "10m",
+      "timeShift": "10m",
       "title": "Link State (Pie Chart)",
       "type": "grafana-piechart-panel",
       "valueName": "current"
@@ -300,6 +302,7 @@
     },
     {
       "columns": [],
+      "datasource": "-- Mixed --",
       "fontSize": "100%",
       "gridPos": {
         "h": 8,
@@ -437,6 +440,7 @@
       ],
       "targets": [
         {
+          "datasource": "Prometheus",
           "expr": "edge_state_total",
           "format": "time_series",
           "instant": true,
