@@ -47,16 +47,6 @@ services:
     ports:
       - 5001:5000
 
-#  base-integration-test:
-#    build:
-#      # Context must be the root of the monorepo since we need to copy custompackages
-#      context: .
-#      dockerfile: integration-tests/basic-nats/Dockerfile
-#    env_file:
-#      - integration-tests/basic-nats/src/config/env
-#    depends_on:
-#      - "nats-streaming"
-
   velocloud-notificator:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
