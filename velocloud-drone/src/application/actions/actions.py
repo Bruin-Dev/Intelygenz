@@ -11,7 +11,7 @@ class Actions:
     _edge_counter = None
     _link_counter = None
 
-    def __init__(self, config, event_bus: EventBus, velocloud_repository, logger, edge_counter, link_counter,):
+    def __init__(self, config, event_bus: EventBus, velocloud_repository, logger, edge_counter, link_counter):
 
         self._configs = config
         self._event_bus = event_bus

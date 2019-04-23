@@ -15,50 +15,67 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
-  "iteration": 1555969899485,
+  "iteration": 1556033110171,
   "links": [],
   "panels": [
     {
-      "columns": [],
-      "fontSize": "100%",
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
       "gridPos": {
         "h": 3,
-        "w": 7,
+        "w": 8,
         "x": 8,
         "y": 0
       },
       "id": 8,
+      "interval": null,
       "links": [],
-      "pageSize": null,
-      "scroll": true,
-      "showHeader": true,
-      "sort": {
-        "col": 1,
-        "desc": true
-      },
-      "styles": [
+      "mappingType": 1,
+      "mappingTypes": [
         {
-          "alias": "Time",
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "pattern": "Time",
-          "type": "date"
+          "name": "value to text",
+          "value": 1
         },
         {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "decimals": 0,
-          "pattern": "/.*/",
-          "thresholds": [],
-          "type": "number",
-          "unit": "none"
+          "name": "range to text",
+          "value": 2
         }
       ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
       "targets": [
         {
           "expr": "edges_processed",
@@ -69,11 +86,20 @@
           "refId": "A"
         }
       ],
+      "thresholds": "",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Edges processed in a cycle of 10 minutes",
-      "transform": "timeseries_to_columns",
-      "type": "table"
+      "title": "Edges processed in last 10 minutes",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
     },
     {
       "aliasColors": {
@@ -359,10 +385,10 @@
     },
     {
       "columns": [],
-      "datasource": "-- Mixed --",
+      "datasource": "Prometheus",
       "fontSize": "100%",
       "gridPos": {
-        "h": 8,
+        "h": 4,
         "w": 12,
         "x": 0,
         "y": 16
@@ -370,6 +396,8 @@
       "id": 5,
       "links": [],
       "pageSize": 8,
+      "repeat": null,
+      "repeatDirection": "h",
       "scroll": true,
       "showHeader": true,
       "sort": {
@@ -453,7 +481,7 @@
         },
         {
           "alias": "State",
-          "colorMode": "value",
+          "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
             "rgba(237, 129, 40, 0.89)",
@@ -463,16 +491,11 @@
           "decimals": 2,
           "mappingType": 1,
           "pattern": "state",
-          "rangeMaps": [
-            {
-              "from": "",
-              "text": "",
-              "to": ""
-            }
-          ],
+          "preserveFormat": false,
+          "rangeMaps": [],
+          "sanitize": false,
           "thresholds": [
-            "0",
-            "3"
+            ""
           ],
           "type": "string",
           "unit": "short",
@@ -493,16 +516,142 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "Enterprise name",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "enterprise_name",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": []
+        },
+        {
+          "alias": "TOTAL",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "Value #A",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "CONNECTED",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "Value #B",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "OFFLINE",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "Value #C",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "NEVER ACTIVATED",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "Value #D",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "DEGRADED",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "Value #E",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
         }
       ],
       "targets": [
         {
-          "datasource": "Prometheus",
-          "expr": "(rate(edge_state_total[10m])) *600",
+          "expr": "sum by (enterprise_name) (rate(edge_state_total{state='CONNECTED'}[10m])) *600",
+          "format": "table",
+          "instant": true,
+          "interval": "10m",
+          "intervalFactor": 1,
+          "refId": "B"
+        },
+        {
+          "expr": "sum by (enterprise_name) (rate(edge_state_total{state='OFFLINE'}[10m])) *600",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 1,
+          "refId": "C"
+        },
+        {
+          "expr": "sum by (enterprise_name) (rate(edge_state_total{state='NEVER_ACTIVATED'}[10m])) *600",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 1,
+          "refId": "D"
+        },
+        {
+          "expr": "sum by (enterprise_name) (rate(edge_state_total{state='DEGRADED'}[10m])) *600",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
-          "legendFormat": "{{enterprise_name}}:{{state}}",
+          "refId": "E"
+        },
+        {
+          "expr": "sum by (enterprise_name) (rate(edge_state_total[10m])) *600",
+          "format": "table",
+          "instant": true,
+          "intervalFactor": 1,
           "refId": "A"
         }
       ],
@@ -516,7 +665,7 @@
       "columns": [],
       "fontSize": "100%",
       "gridPos": {
-        "h": 8,
+        "h": 4,
         "w": 12,
         "x": 12,
         "y": 16
@@ -631,7 +780,7 @@
           "valueMaps": []
         },
         {
-          "alias": "Enterprise Name:State",
+          "alias": "Enterprise Name",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -640,16 +789,102 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
+          "link": false,
           "mappingType": 1,
-          "pattern": "Value",
+          "pattern": "enterprise_name",
+          "thresholds": [],
+          "type": "string",
+          "unit": "none"
+        },
+        {
+          "alias": "TOTAL",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "Value #A",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "STABLE",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "Value #B",
           "thresholds": [],
           "type": "number",
           "unit": "none"
+        },
+        {
+          "alias": "UNSTABLE",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "Value #C",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "DISCONNECTED",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": null,
+          "mappingType": 1,
+          "pattern": "Value #D",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
         }
       ],
       "targets": [
         {
-          "expr": "(rate(link_state_total[10m])) *600",
+          "expr": "sum by (enterprise_name) (rate(link_state_total{state='STABLE'}[10m])) *600",
+          "format": "table",
+          "instant": true,
+          "intervalFactor": 1,
+          "refId": "B"
+        },
+        {
+          "expr": "sum by (enterprise_name) (rate(link_state_total{state='UNSTABLE'}[10m])) *600",
+          "format": "table",
+          "instant": true,
+          "intervalFactor": 1,
+          "refId": "C"
+        },
+        {
+          "expr": "sum by (enterprise_name) (rate(link_state_total{state='DISCONNECTED'}[10m])) *600",
+          "format": "table",
+          "instant": true,
+          "intervalFactor": 1,
+          "refId": "D"
+        },
+        {
+          "expr": "sum by (enterprise_name) (rate(link_state_total[10m])) *600",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
@@ -672,6 +907,15 @@
     "list": [
       {
         "datasource": null,
+        "filters": [],
+        "hide": 0,
+        "label": "",
+        "name": "Filters",
+        "skipUrlSync": false,
+        "type": "adhoc"
+      },
+      {
+        "datasource": "-- Mixed --",
         "filters": [],
         "hide": 0,
         "label": "",
@@ -713,5 +957,5 @@
   "timezone": "",
   "title": "Current SD-WAN Status",
   "uid": "wXI1puRWz",
-  "version": 1
+  "version": 19
 }
