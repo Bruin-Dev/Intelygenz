@@ -15,7 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1556033110171,
+  "id": 1,
+  "iteration": 1556054335058,
   "links": [],
   "panels": [
     {
@@ -548,7 +549,7 @@
           "pattern": "Value #A",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "none"
         },
         {
           "alias": "CONNECTED",
@@ -564,7 +565,7 @@
           "pattern": "Value #B",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "none"
         },
         {
           "alias": "OFFLINE",
@@ -580,7 +581,7 @@
           "pattern": "Value #C",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "none"
         },
         {
           "alias": "NEVER ACTIVATED",
@@ -596,7 +597,7 @@
           "pattern": "Value #D",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "none"
         },
         {
           "alias": "DEGRADED",
@@ -612,7 +613,7 @@
           "pattern": "Value #E",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "none"
         }
       ],
       "targets": [
@@ -810,7 +811,7 @@
           "pattern": "Value #A",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "none"
         },
         {
           "alias": "STABLE",
@@ -842,7 +843,7 @@
           "pattern": "Value #C",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "none"
         },
         {
           "alias": "DISCONNECTED",
@@ -858,7 +859,7 @@
           "pattern": "Value #D",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "none"
         }
       ],
       "targets": [
@@ -957,5 +958,5 @@
   "timezone": "",
   "title": "Current SD-WAN Status",
   "uid": "wXI1puRWz",
-  "version": 19
+  "version": 1
 }
