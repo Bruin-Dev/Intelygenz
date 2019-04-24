@@ -57,12 +57,12 @@ class TestStatisticClient:
         test_edge_dict = {'someId': 'OFFLINE', 'anotherId': 'NEVER_ACTIVATED', 'testID': 'OFFLINE'}
         test_client._edge_dictionary = test_edge_dict
         time = config.SLACK_CONFIG['time']
-        msg2_results = f"Edge Status Counters (last {time} minutes)\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3\n"
+        msg2_results = f"Failing Edge Status Counters (last {time} minutes)\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3\n"
         msg2 = test_client.get_statistics(time)
         assert msg2 == msg2_results
         test_link_dict = {'someId': 'OFFLINE', 'anotherId': 'NEVER_ACTIVATED', 'testID': 'OFFLINE'}
         test_client._link_dictionary = test_link_dict
-        msg3_results = msg2_results + f"Link Status Counters (last {time} minutes)" \
+        msg3_results = msg2_results + f"Failing Edges' Link Status Counters (last {time} minutes)" \
             "\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3"
         msg3 = test_client.get_statistics(time)
         assert msg3 == msg3_results
