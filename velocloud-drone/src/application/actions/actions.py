@@ -57,7 +57,7 @@ class Actions:
         self._edge_counter.labels(state=edge_status._edgeState, enterprise_id=edgeids['enterpriseId'],
                                   enterprise_name=enterprise_info._name).inc()
         self._edge_gauge.labels(state=edge_status._edgeState, enterprise_id=edgeids['enterpriseId'],
-                                  enterprise_name=enterprise_info._name).inc()
+                                enterprise_name=enterprise_info._name).inc()
         link_status = self._process_link(edgeids)
         if link_status != []:
             # self._logger.info(f'Got link status from Velocloud: {link_status}')
