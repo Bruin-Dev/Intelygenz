@@ -7,11 +7,13 @@ from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
-from prometheus_client import start_http_server, Counter
+from prometheus_client import start_http_server, Gauge, Counter
 
 
 class Container:
     velocloud_repository = None
+    edge_status_gauge = None
+    link_status_gauge = None
     edge_status_counter = None
     link_status_counter = None
     publisher = None
@@ -25,6 +27,8 @@ class Container:
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
 
+        self.edge_status_gauge = Gauge('edge_state_gauge', 'Edge States', ['enterprise_id', 'enterprise_name', 'state'])
+        self.link_status_gauge = Gauge('link_state_gauge', 'Link States', ['enterprise_id', 'enterprise_name', 'state'])
         self.edge_status_counter = Counter('edge_state', 'Edge States', ['enterprise_id', 'enterprise_name', 'state'])
         self.link_status_counter = Counter('link_state', 'Link States', ['enterprise_id', 'enterprise_name', 'state'])
 
@@ -35,8 +39,8 @@ class Container:
         self.event_bus.add_consumer(self.subscriber, consumer_name="tasks")
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(config, self.event_bus, self.velocloud_repository, self.logger, self.edge_status_counter,
-                               self.link_status_counter)
+        self.actions = Actions(config, self.event_bus, self.velocloud_repository, self.logger, self.edge_status_gauge,
+                               self.link_status_gauge, self.edge_status_counter, self.link_status_counter)
 
         self.report_edge_action = ActionWrapper(self.actions, "report_edge_status",
                                                 is_async=True, logger=self.logger)
@@ -48,7 +52,7 @@ class Container:
         await self.event_bus.subscribe_consumer(consumer_name="tasks", topic="edge.status.task",
                                                 action_wrapper=self.report_edge_action, durable_name="velocloud_drones",
                                                 queue="velocloud_drones")
-        # await self.actions.reset_counter()
+        await self.actions.reset_counter()
 
     async def start_server(self):
         await self.server.run_server()

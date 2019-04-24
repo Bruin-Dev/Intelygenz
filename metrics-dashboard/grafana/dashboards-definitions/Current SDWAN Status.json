@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1556054335058,
+  "iteration": 1556136420319,
   "links": [],
   "panels": [
     {
@@ -138,7 +138,7 @@
       "strokeWidth": 1,
       "targets": [
         {
-          "expr": " sum by (state) (rate(edge_state_total[10m])) *600",
+          "expr": " sum by (state) ((edge_state_gauge)) ",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -189,7 +189,7 @@
       "strokeWidth": 1,
       "targets": [
         {
-          "expr": "sum by (state) (rate(link_state_total[10m])) *600",
+          "expr": "sum by (state) ((link_state_gauge)) ",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -246,7 +246,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (state) (rate(edge_state_total[10m])) *600",
+          "expr": " sum by (state) ((edge_state_gauge)) ",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{state}}",
@@ -336,7 +336,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (state) (rate(link_state_total[10m])) *600",
+          "expr": "sum by (state) ((link_state_gauge))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{state}}",
@@ -618,7 +618,7 @@
       ],
       "targets": [
         {
-          "expr": "sum by (enterprise_name) (rate(edge_state_total{state='CONNECTED'}[10m])) *600",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='CONNECTED'}))",
           "format": "table",
           "instant": true,
           "interval": "10m",
@@ -626,7 +626,7 @@
           "refId": "B"
         },
         {
-          "expr": "sum by (enterprise_name) (rate(edge_state_total{state='OFFLINE'}[10m])) *600",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='OFFLINE'}))",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -634,7 +634,7 @@
           "refId": "C"
         },
         {
-          "expr": "sum by (enterprise_name) (rate(edge_state_total{state='NEVER_ACTIVATED'}[10m])) *600",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='NEVER_ACTIVATED'})) ",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -642,14 +642,14 @@
           "refId": "D"
         },
         {
-          "expr": "sum by (enterprise_name) (rate(edge_state_total{state='DEGRADED'}[10m])) *600",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='DEGRADED'})) ",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
           "refId": "E"
         },
         {
-          "expr": "sum by (enterprise_name) (rate(edge_state_total[10m])) *600",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge))",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
@@ -864,28 +864,28 @@
       ],
       "targets": [
         {
-          "expr": "sum by (enterprise_name) (rate(link_state_total{state='STABLE'}[10m])) *600",
+          "expr": "sum by (enterprise_name) ((link_state_total{state='STABLE'})) ",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
           "refId": "B"
         },
         {
-          "expr": "sum by (enterprise_name) (rate(link_state_total{state='UNSTABLE'}[10m])) *600",
+          "expr": "sum by (enterprise_name) ((link_state_total{state='UNSTABLE'}))",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
           "refId": "C"
         },
         {
-          "expr": "sum by (enterprise_name) (rate(link_state_total{state='DISCONNECTED'}[10m])) *600",
+          "expr": "sum by (enterprise_name) ((link_state_total{state='DISCONNECTED'})) ",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
           "refId": "D"
         },
         {
-          "expr": "sum by (enterprise_name) (rate(link_state_total[10m])) *600",
+          "expr": "sum by (enterprise_name) ((link_state_total)) ",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,

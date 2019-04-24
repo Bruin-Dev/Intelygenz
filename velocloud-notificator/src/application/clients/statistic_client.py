@@ -26,13 +26,13 @@ class StatisticClient:
         _link_stats_dictionary = self.create_statistics_dictionary(self._link_dictionary)
         msg = ''
         if _edge_stats_dictionary:
-            msg = "Edge Status Counters (last %d minutes)\n" % (time)
+            msg = "Failing Edge Status Counters (last %d minutes)\n" % (time)
             for status in _edge_stats_dictionary:
                 msg = f'{msg}{str(status)}: {_edge_stats_dictionary[status]}\n'
             edgesum = sum(_edge_stats_dictionary.values())
             msg = f'{msg}Total: {str(edgesum)}\n'
         if _link_stats_dictionary:
-            msg = msg + "Link Status Counters (last %d minutes)\n" % (time)
+            msg = msg + "Failing Edges' Link Status Counters (last %d minutes)\n" % (time)
             for status in _link_stats_dictionary:
                 msg = f'{msg}{str(status)}: {_link_stats_dictionary[status]}\n'
             linksum = sum(_link_stats_dictionary.values())

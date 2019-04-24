@@ -1,6 +1,7 @@
 from igz.packages.eventbus.eventbus import EventBus
 import velocloud
 import json
+import asyncio
 
 
 class Actions:
@@ -8,15 +9,20 @@ class Actions:
     _event_bus = None
     _velocloud_repository = None
     _logger = None
+    _edge_gauge = None
+    _link_gauge = None
     _edge_counter = None
     _link_counter = None
 
-    def __init__(self, config, event_bus: EventBus, velocloud_repository, logger, edge_counter, link_counter):
+    def __init__(self, config, event_bus: EventBus, velocloud_repository, logger, edge_gauge, link_gauge,
+                 edge_counter, link_counter):
 
         self._configs = config
         self._event_bus = event_bus
         self._velocloud_repository = velocloud_repository
         self._logger = logger
+        self._edge_gauge = edge_gauge
+        self._link_gauge = link_gauge
         self._edge_counter = edge_counter
         self._link_counter = link_counter
 
@@ -50,12 +56,16 @@ class Actions:
 
         self._edge_counter.labels(state=edge_status._edgeState, enterprise_id=edgeids['enterpriseId'],
                                   enterprise_name=enterprise_info._name).inc()
+        self._edge_gauge.labels(state=edge_status._edgeState, enterprise_id=edgeids['enterpriseId'],
+                                  enterprise_name=enterprise_info._name).inc()
         link_status = self._process_link(edgeids)
         if link_status != []:
             # self._logger.info(f'Got link status from Velocloud: {link_status}')
             for links in link_status:
                 self._link_counter.labels(state=links._link._state, enterprise_id=edgeids['enterpriseId'],
                                           enterprise_name=enterprise_info._name).inc()
+                self._link_gauge.labels(state=links._link._state, enterprise_id=edgeids['enterpriseId'],
+                                        enterprise_name=enterprise_info._name).inc()
 
         if edge_status._edgeState == 'CONNECTED':
             self._logger.info('Edge seems OK, sending it to topic edge.status.ok')
@@ -67,3 +77,10 @@ class Actions:
         edge_status = {"edges": edge_status, "links": link_status}
 
         await self._event_bus.publish_message(topic, repr(edge_status))
+
+    async def reset_counter(self):
+        while True:
+            await asyncio.sleep(self._configs.GRAFANA_CONFIG['time'])
+            self._edge_gauge._metrics.clear()
+            self._link_gauge._metrics.clear()
+            self._logger.info('Time has passed')
