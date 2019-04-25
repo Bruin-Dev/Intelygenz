@@ -124,8 +124,8 @@ velocloud-notificator-build:
     - pip install awscli
   script:
     - $(aws ecr get-login --no-include-email --region us-east-1)
-    - (cd ${MODULE_NAME} && docker build -t ${REPOSITORY_URL}-${MODULE_NAME} .)
-    - docker push $REPOSITORY_URL
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
 #  only:
 #    - master
 
@@ -140,8 +140,8 @@ velocloud-drone-build:
     - pip install awscli
   script:
     - $(aws ecr get-login --no-include-email --region us-east-1)
-    - (cd ${MODULE_NAME} && docker build -t ${REPOSITORY_URL}-${MODULE_NAME} .)
-    - docker push $REPOSITORY_URL
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
 #  only:
 #    - master
 
@@ -156,7 +156,7 @@ velocloud-overseer-build:
     - pip install awscli
   script:
     - $(aws ecr get-login --no-include-email --region us-east-1)
-    - (cd ${MODULE_NAME} && docker build -t ${REPOSITORY_URL}-${MODULE_NAME} .)
-    - docker push $REPOSITORY_URL
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
 #  only:
 #    - master
