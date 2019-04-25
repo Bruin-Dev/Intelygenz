@@ -2,12 +2,14 @@ stages:
   - validation
   - unit_test
   - acceptance_tests
+  - build
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
   NATS_CLUSTER_NAME: "automation-engine-nats"
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
+  REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/mettel-automation-pro
 
 igzpackages_linter:
   stage: validation
@@ -110,3 +112,51 @@ event_sourcing_acceptance_test:
 
   after_script:
     - docker-compose -f docker-compose-ci.yml down && docker-compose -f docker-compose-ci.yml rm -v
+
+velocloud-notificator-build:
+  stage: build
+  variables:
+    MODULE_NAME: velocloud-notificator
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache curl jq python py-pip
+    - pip install awscli
+  script:
+    - $(aws ecr get-login --no-include-email --region us-east-1)
+    - (cd ${MODULE_NAME} && docker build -t ${REPOSITORY_URL}-${MODULE_NAME} .)
+    - docker push $REPOSITORY_URL
+#  only:
+#    - master
+
+velocloud-drone-build:
+  stage: build
+  variables:
+    MODULE_NAME: velocloud-drone
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache curl jq python py-pip
+    - pip install awscli
+  script:
+    - $(aws ecr get-login --no-include-email --region us-east-1)
+    - (cd ${MODULE_NAME} && docker build -t ${REPOSITORY_URL}-${MODULE_NAME} .)
+    - docker push $REPOSITORY_URL
+#  only:
+#    - master
+
+velocloud-overseer-build:
+  stage: build
+  variables:
+    MODULE_NAME: velocloud-overseer
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache curl jq python py-pip
+    - pip install awscli
+  script:
+    - $(aws ecr get-login --no-include-email --region us-east-1)
+    - (cd ${MODULE_NAME} && docker build -t ${REPOSITORY_URL}-${MODULE_NAME} .)
+    - docker push $REPOSITORY_URL
+#  only:
+#    - master
