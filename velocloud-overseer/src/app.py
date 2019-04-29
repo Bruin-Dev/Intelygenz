@@ -31,7 +31,7 @@ class Container:
         self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger, self.edge_gauge)
 
     async def start(self):
-        start_http_server(9110)
+        start_http_server(config.GRAFANA_CONFIG['port'])
         await self.event_bus.connect()
         await self.actions.send_edge_status_task_interval(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
 

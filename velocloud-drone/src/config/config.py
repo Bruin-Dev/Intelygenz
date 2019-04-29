@@ -47,5 +47,6 @@ QUART_CONFIG = {
 }
 
 GRAFANA_CONFIG = {
+    'port': 9090,
     'time': 600
 }

@@ -45,3 +45,7 @@ QUART_CONFIG = {
     'title': 'velocloud-overseer',
     'port': 5000
 }
+
+GRAFANA_CONFIG = {
+    'port': 9090
+}

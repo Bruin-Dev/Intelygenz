@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1556136420319,
+  "iteration": 1556578399991,
   "links": [],
   "panels": [
     {
@@ -864,28 +864,28 @@
       ],
       "targets": [
         {
-          "expr": "sum by (enterprise_name) ((link_state_total{state='STABLE'})) ",
+          "expr": "sum by (enterprise_name) ((link_state_gauge{state='STABLE'})) ",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
           "refId": "B"
         },
         {
-          "expr": "sum by (enterprise_name) ((link_state_total{state='UNSTABLE'}))",
+          "expr": "sum by (enterprise_name) ((link_state_gauge{state='UNSTABLE'}))",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
           "refId": "C"
         },
         {
-          "expr": "sum by (enterprise_name) ((link_state_total{state='DISCONNECTED'})) ",
+          "expr": "sum by (enterprise_name) ((link_state_gauge{state='DISCONNECTED'})) ",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
           "refId": "D"
         },
         {
-          "expr": "sum by (enterprise_name) ((link_state_total)) ",
+          "expr": "sum by (enterprise_name) ((link_state_gauge)) ",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
