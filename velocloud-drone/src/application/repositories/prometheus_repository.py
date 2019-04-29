@@ -12,8 +12,10 @@ class PrometheusRepository:
 
     def __init__(self, config):
         self._config = config
-        self._edge_status_gauge = Gauge('edge_state_gauge', 'Edge States', ['enterprise_id', 'enterprise_name', 'state'])
-        self._link_status_gauge = Gauge('link_state_gauge', 'Link States', ['enterprise_id', 'enterprise_name', 'state'])
+        self._edge_status_gauge = Gauge('edge_state_gauge', 'Edge States',
+                                        ['enterprise_id', 'enterprise_name', 'state'])
+        self._link_status_gauge = Gauge('link_state_gauge', 'Link States',
+                                        ['enterprise_id', 'enterprise_name', 'state'])
         self._edge_status_counter = Counter('edge_state', 'Edge States', ['enterprise_id', 'enterprise_name', 'state'])
         self._link_status_counter = Counter('link_state', 'Link States', ['enterprise_id', 'enterprise_name', 'state'])
 
