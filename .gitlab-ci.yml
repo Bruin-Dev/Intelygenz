@@ -126,6 +126,9 @@ nats-streaming-build:
     - $(aws ecr get-login --no-include-email --region us-east-1)
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
+  only:
+    - /^v\d*.\d*.\d*$/
+
 
 grafana-build:
   stage: build
@@ -140,6 +143,8 @@ grafana-build:
     - $(aws ecr get-login --no-include-email --region us-east-1)
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
+  only:
+    - /^v\d*.\d*.\d*$/
 
 prometheus-build:
   stage: build
@@ -154,6 +159,8 @@ prometheus-build:
     - $(aws ecr get-login --no-include-email --region us-east-1)
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
+  only:
+    - /^v\d*.\d*.\d*$/
 
 velocloud-notificator-build:
   stage: build
@@ -168,8 +175,8 @@ velocloud-notificator-build:
     - $(aws ecr get-login --no-include-email --region us-east-1)
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-#  only:
-#    - master
+  only:
+    - /^v\d*.\d*.\d*$/
 
 velocloud-drone-build:
   stage: build
@@ -184,8 +191,8 @@ velocloud-drone-build:
     - $(aws ecr get-login --no-include-email --region us-east-1)
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-#  only:
-#    - master
+  only:
+    - /^v\d*.\d*.\d*$/
 
 velocloud-overseer-build:
   stage: build
@@ -200,5 +207,5 @@ velocloud-overseer-build:
     - $(aws ecr get-login --no-include-email --region us-east-1)
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-#  only:
-#    - master
+  only:
+    - /^v\d*.\d*.\d*$/
