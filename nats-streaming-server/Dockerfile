@@ -1,7 +1,7 @@
 FROM scratch
 
-COPY nats-streaming-server /nats-streaming-server
-COPY nats.conf /nats.conf
+COPY nats-streaming-server/nats-streaming-server /nats-streaming-server
+COPY nats-streaming-server/nats.conf /nats.conf
 # Expose client and management ports
 EXPOSE 4222 8222
 

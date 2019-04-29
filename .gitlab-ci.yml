@@ -113,6 +113,48 @@ event_sourcing_acceptance_test:
   after_script:
     - docker-compose -f docker-compose-ci.yml down && docker-compose -f docker-compose-ci.yml rm -v
 
+nats-streaming-build:
+  stage: build
+  variables:
+    MODULE_NAME: nats-streaming-server
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache curl jq python py-pip
+    - pip install awscli
+  script:
+    - $(aws ecr get-login --no-include-email --region us-east-1)
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
+
+grafana-build:
+  stage: build
+  variables:
+    MODULE_NAME: metrics-dashboard/grafana
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache curl jq python py-pip
+    - pip install awscli
+  script:
+    - $(aws ecr get-login --no-include-email --region us-east-1)
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
+
+prometheus-build:
+  stage: build
+  variables:
+    MODULE_NAME: metrics-dashboard/prometheus
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache curl jq python py-pip
+    - pip install awscli
+  script:
+    - $(aws ecr get-login --no-include-email --region us-east-1)
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
+
 velocloud-notificator-build:
   stage: build
   variables:
