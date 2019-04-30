@@ -220,9 +220,5 @@ terraform_apply:
   stage: deploy
   <<: *terraform_template
   script:
-    - terraform apply
-  only:
-    - /^v\d*.\d*.\d*$/
+    - terraform apply -auto-approve infra-as-code/dev
   when: manual
-  dependencies:
-    - terraform_plan

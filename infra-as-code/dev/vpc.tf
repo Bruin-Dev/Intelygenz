@@ -3,7 +3,7 @@ The VPC
 ======*/
 
 resource "aws_vpc" "automation-vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "${var.cdir_base}/16"
   enable_dns_hostnames = true
   enable_dns_support = true
 
@@ -64,7 +64,7 @@ resource "aws_nat_gateway" "automation-nat-1b" {
 /* Public subnet */
 resource "aws_subnet" "automation-public_subnet-1a" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  cidr_block = "10.0.1.0/24"
+  cidr_block = "${var.cdir_public_1}/24"
   availability_zone = "us-east-1a"
   map_public_ip_on_launch = true
 
@@ -75,7 +75,7 @@ resource "aws_subnet" "automation-public_subnet-1a" {
 }
 resource "aws_subnet" "automation-public_subnet-1b" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  cidr_block = "10.0.2.0/24"
+  cidr_block = "${var.cdir_public_2}/24"
   availability_zone = "us-east-1b"
   map_public_ip_on_launch = true
 
@@ -88,7 +88,7 @@ resource "aws_subnet" "automation-public_subnet-1b" {
 /* Private subnet */
 resource "aws_subnet" "automation-private_subnet-1a" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  cidr_block = "10.0.10.0/24"
+  cidr_block = "${var.cdir_private_1}/24"
   availability_zone = "us-east-1a"
   map_public_ip_on_launch = false
 
@@ -100,7 +100,7 @@ resource "aws_subnet" "automation-private_subnet-1a" {
 
 resource "aws_subnet" "automation-private_subnet-1b" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  cidr_block = "10.0.11.0/24"
+  cidr_block = "${var.cdir_private_2}/24"
   availability_zone = "us-east-1b"
   map_public_ip_on_launch = false
 
