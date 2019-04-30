@@ -24,18 +24,18 @@ resource "aws_ecs_task_definition" "automation-nats-server" {
   task_role_arn = "${aws_iam_role.ecs_execution_role.arn}"
 }
 
-resource "aws_alb_target_group" "automation-nats-server" {
-  name = "${var.environment}-nats-server"
-  port = 80
-  protocol = "HTTP"
-  vpc_id = "${aws_vpc.automation-vpc.id}"
-  target_type = "ip"
-  stickiness = []
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
+//resource "aws_alb_target_group" "automation-nats-server" {
+//  name = "${var.environment}-nats-server"
+//  port = 80
+//  protocol = "HTTP"
+//  vpc_id = "${aws_vpc.automation-vpc.id}"
+//  target_type = "ip"
+//  stickiness = []
+//
+//  lifecycle {
+//    create_before_destroy = true
+//  }
+//}
 
 resource "aws_security_group" "automation-nats_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
