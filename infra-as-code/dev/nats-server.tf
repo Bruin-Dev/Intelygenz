@@ -29,7 +29,7 @@ resource "aws_alb_target_group" "automation-nats-server" {
   port = 8222
   protocol = "TCP"
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  target_type = "instance"
+  target_type = "ip"
   stickiness = {
     type = "lb_cookie"
     enabled = false
