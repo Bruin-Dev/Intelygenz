@@ -33,7 +33,6 @@ class PrometheusRepository:
     async def reset_counter(self):
         while True:
             await asyncio.sleep(self._config.GRAFANA_CONFIG['time'])
-            print('here')
             self._edge_status_gauge._metrics.clear()
             self._link_status_gauge._metrics.clear()
 
