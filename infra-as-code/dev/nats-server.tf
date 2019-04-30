@@ -86,12 +86,12 @@ resource "aws_ecs_service" "automation-nats-server" {
     subnets = [
       "${aws_subnet.automation-private_subnet-1a.id}",
       "${aws_subnet.automation-private_subnet-1b.id}"]
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
-  load_balancer {
-    target_group_arn = "${aws_alb_target_group.automation-nats-server.arn}"
-    container_name = "nats"
-    container_port = 8222
-  }
+//  load_balancer {
+//    target_group_arn = "${aws_alb_target_group.automation-nats-server.arn}"
+//    container_name = "nats"
+//    container_port = 8222
+//  }
 }
