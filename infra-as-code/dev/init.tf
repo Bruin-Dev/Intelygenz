@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket = "mettel-automation-pro"
-    key = "terraform-mettel-automation-pro.tfstate"
+    bucket = "automation-infrastructure"
+    key = "terraform-automation-dev.tfstate"
     region = "us-east-2"
   }
 }
@@ -11,11 +11,11 @@ provider "aws" {
 }
 
 variable "environment" {
-  default = "mettel-automation-pro"
+  default = "automation-dev"
 }
 
 variable "subdomain" {
-  default = "mettel-automation-pro"
+  default = "automation-pro"
 }
 
 variable "build_number" {}
