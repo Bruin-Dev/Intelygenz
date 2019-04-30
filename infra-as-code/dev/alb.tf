@@ -48,6 +48,11 @@ resource "aws_security_group" "insights-dev-inbound" {
   }
 }
 
+data "aws_acm_certificate" "automation" {
+  domain = "*.mettel-automation.net"
+  most_recent = true
+}
+
 resource "aws_alb" "automation-alb" {
   name = "${var.environment}"
   subnets = [
