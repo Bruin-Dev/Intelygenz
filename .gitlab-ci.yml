@@ -213,6 +213,7 @@ terraform_plan:
   stage: build
   <<: *terraform_template
   script:
+    - export TF_VAR_build_number=${CI_PIPELINE_IID}
     - terraform init infra-as-code/dev
     - terraform plan infra-as-code/dev
 
@@ -220,5 +221,7 @@ terraform_apply:
   stage: deploy
   <<: *terraform_template
   script:
+    - export TF_VAR_build_number=${CI_PIPELINE_IID}
+    - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
   when: manual
