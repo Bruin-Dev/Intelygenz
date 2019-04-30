@@ -26,12 +26,12 @@ resource "aws_ecs_task_definition" "automation-nats-server" {
 
 resource "aws_alb_target_group" "automation-nats-server" {
   name = "${var.environment}-nats-server"
-  port = 8222
-  protocol = "TCP"
+  port = 80
+  protocol = "HTTP"
   vpc_id = "${aws_vpc.automation-vpc.id}"
   target_type = "ip"
   stickiness = []
-  
+
   lifecycle {
     create_before_destroy = true
   }
@@ -59,9 +59,9 @@ resource "aws_security_group" "automation-nats_service" {
   }
 
   ingress {
-    from_port = 8222
-    to_port = 8222
-    protocol = "TCP"
+    from_port = 80
+    to_port = 80
+    protocol = "HTTP"
     cidr_blocks = [
       "0.0.0.0/0"
     ]
