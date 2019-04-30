@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
     bucket = "automation-infrastructure"
     key = "terraform-automation-dev.tfstate"
-    region = "us-east-2"
+    region = "us-east-1"
   }
 }
 
