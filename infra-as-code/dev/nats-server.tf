@@ -30,7 +30,8 @@ resource "aws_alb_target_group" "automation-nats-server" {
   protocol = "TCP"
   vpc_id = "${aws_vpc.automation-vpc.id}"
   target_type = "ip"
-
+  stickiness = []
+  
   lifecycle {
     create_before_destroy = true
   }
