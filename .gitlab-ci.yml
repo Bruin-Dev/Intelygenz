@@ -3,6 +3,8 @@ stages:
   - unit_test
   - acceptance_tests
   - build
+  - terraform_plan
+  - terraform_apply
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -20,6 +22,8 @@ variables:
   before_script:
     - apt-get update -q -y
     - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 ${MODULE}
 
 .job_unittest_template: &unittest_module
   stage: unit_test
@@ -79,43 +83,42 @@ variables:
   only:
     - /^v\d*.\d*.\d*$/
 
+.job_terraform_template: &terraform_template
+  image:
+    name: hashicorp/terraform:light
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+
 #
 # Modules linters
 #
 igzpackages_linter:
-  <<: *lint_module
   variables:
     MODULE: custompackages/igzpackages/
-  script:
-    - pycodestyle --max-line-length=120 ${MODULE}
+  <<: *lint_module
 
 velocloud_notificator_linter:
-  <<: *lint_module
   variables:
     MODULE: velocloud-notificator
-  script:
-    - pycodestyle --max-line-length=120 ${MODULE}
+  <<: *lint_module
 
 velocloud_overseer_linter:
-  <<: *lint_module
   variables:
     MODULE: velocloud-overseer
-  script:
-    - pycodestyle --max-line-length=120 ${MODULE}
+  <<: *lint_module
 
 velocloud_drone_linter:
-  <<: *lint_module
   variables:
     MODULE: velocloud-drone
-  script:
-    - pycodestyle --max-line-length=120 ${MODULE}
+  <<: *lint_module
 
 acceptance_test_linter:
-  <<: *lint_module
   variables:
     MODULE: acceptance-tests
-  script:
-    - pycodestyle --max-line-length=120 ${MODULE}
+  <<: *lint_module
 
 #
 # Modules unit tests
@@ -193,3 +196,25 @@ velocloud-overseer-build:
   variables:
     MODULE_NAME: velocloud-overseer
   <<: *build_app_image
+
+terraform_plan:
+  stage: terraform_plan
+  <<: *terraform_template
+  script:
+    - terraform plan -out planfile
+  only:
+    - /^v\d*.\d*.\d*$/
+  artifacts:
+    paths:
+      - planfile
+
+terraform_apply:
+  stage: terraform_apply
+  <<: *terraform_template
+  script:
+    - terraform apply
+  only:
+    - /^v\d*.\d*.\d*$/
+  when: manual
+  dependencies:
+    - terraform_plan
