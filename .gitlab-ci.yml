@@ -11,99 +11,31 @@ variables:
   DOCKER_DRIVER: overlay2
   REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/mettel-automation-pro
 
-igzpackages_linter:
+#
+# Using gitlab-ci anchors to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
+#
+.job_linter_template: &lint_module
   stage: validation
   image: python:3.6
   before_script:
     - apt-get update -q -y
     - pip install pycodestyle
-  script:
-    - pycodestyle --max-line-length=120 custompackages/igzpackages/
 
-igzpackages_test:
+.job_unittest_template: &unittest_module
   stage: unit_test
   image: python:3.6
   before_script:
     - apt-get update -q -y
-    - cd custompackages/igzpackages
-    - python setup.py install
-  script:
-    - pytest --cov
-
-velocloud_notificator_test:
-  stage: unit_test
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - cd velocloud-notificator
+    - cd ${MODULE}
     - pip install -r requirements.txt
   script:
     - pytest --cov
 
-velocloud_notificator_linter:
-  stage: validation
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - pip install pycodestyle
-  script:
-    - pycodestyle --max-line-length=120 velocloud-notificator
-
-velocloud_overseer_test:
-  stage: unit_test
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - cd velocloud-overseer
-    - pip install -r requirements.txt
-  script:
-    - pytest --cov
-
-velocloud_overseer_linter:
-  stage: validation
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - pip install pycodestyle
-  script:
-    - pycodestyle --max-line-length=120 velocloud-overseer
-
-velocloud_drone_test:
-  stage: unit_test
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - cd velocloud-drone
-    - pip install -r requirements.txt
-  script:
-    - pytest --cov
-
-velocloud_drone_linter:
-  stage: validation
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - pip install pycodestyle
-  script:
-    - pycodestyle --max-line-length=120 velocloud-drone
-
-
-acceptance_test_linter:
-  stage: validation
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - pip install pycodestyle
-  script:
-    - pycodestyle --max-line-length=120 acceptance-tests
-
-event_sourcing_acceptance_test:
+.job_acceptance_test_template: &acceptante_test_module
   stage: acceptance_tests
   image: docker:stable
   services:
     - docker:dind
-  variables:
-    BLUEPRINT: ${HONESTCODE_EVENT_SOURCING_BLUEPRINT}
   before_script:
     - apk add --no-cache py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
@@ -113,10 +45,23 @@ event_sourcing_acceptance_test:
   after_script:
     - docker-compose -f docker-compose-ci.yml down && docker-compose -f docker-compose-ci.yml rm -v
 
-nats-streaming-build:
-  stage: build
-  variables:
-    MODULE_NAME: nats-streaming-server
+.job_app_build_template: &build_app_image
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache curl jq python py-pip
+    - pip install awscli
+  script:
+    - $(aws ecr get-login --no-include-email --region us-east-1)
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_COMMIT_TAG} -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
+  after_script:
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${CI_COMMIT_TAG}
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
+  only:
+    - /^v\d*.\d*.\d*$/
+
+.job_external_build_template: &build_external_image
   services:
     - docker:dind
   before_script:
@@ -128,84 +73,119 @@ nats-streaming-build:
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
   only:
     - /^v\d*.\d*.\d*$/
+
+#
+# Modules linters
+#
+igzpackages_linter:
+  <<: *lint_module
+  variables:
+    MODULE: custompackages/igzpackages/
+  script:
+    - pycodestyle --max-line-length=120 ${MODULE}
+
+velocloud_notificator_linter:
+  <<: *lint_module
+  variables:
+    MODULE: velocloud-notificator
+  script:
+    - pycodestyle --max-line-length=120 ${MODULE}
+
+velocloud_overseer_linter:
+  <<: *lint_module
+  variables:
+    MODULE: velocloud-overseer
+  script:
+    - pycodestyle --max-line-length=120 ${MODULE}
+
+velocloud_drone_linter:
+  <<: *lint_module
+  variables:
+    MODULE: velocloud-drone
+  script:
+    - pycodestyle --max-line-length=120 ${MODULE}
+
+acceptance_test_linter:
+  <<: *lint_module
+  variables:
+    MODULE: acceptance-tests
+  script:
+    - pycodestyle --max-line-length=120 ${MODULE}
+
+#
+# Modules unit tests
+#
+igzpackages_test:
+  variables:
+    MODULE: custompackages/igzpackages
+  stage: unit_test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd ${MODULE}
+    - python setup.py install
+  script:
+    - pytest --cov
+
+velocloud_notificator_test:
+  variables:
+    MODULE: velocloud-notificator
+  <<: *unittest_module
+
+velocloud_overseer_test:
+  variables:
+    MODULE: velocloud-overseer
+  <<: *unittest_module
+
+velocloud_drone_test:
+  variables:
+    MODULE: velocloud-drone
+  <<: *unittest_module
+
+#
+# Acceptance/Integration tests
+#
+event_sourcing_acceptance_test:
+  variables:
+    BLUEPRINT: ${HONESTCODE_EVENT_SOURCING_BLUEPRINT}
+  <<: *acceptante_test_module
+
+#
+# Images builds
+#
+nats-streaming-build:
+  stage: build
+  variables:
+    MODULE_NAME: nats-streaming-server
+  <<: *build_external_image
 
 
 grafana-build:
   stage: build
   variables:
     MODULE_NAME: metrics-dashboard/grafana
-  services:
-    - docker:dind
-  before_script:
-    - apk add --no-cache curl jq python py-pip
-    - pip install awscli
-  script:
-    - $(aws ecr get-login --no-include-email --region us-east-1)
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-  only:
-    - /^v\d*.\d*.\d*$/
+  <<: *build_external_image
 
 prometheus-build:
   stage: build
   variables:
     MODULE_NAME: metrics-dashboard/prometheus
-  services:
-    - docker:dind
-  before_script:
-    - apk add --no-cache curl jq python py-pip
-    - pip install awscli
-  script:
-    - $(aws ecr get-login --no-include-email --region us-east-1)
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-  only:
-    - /^v\d*.\d*.\d*$/
+  <<: *build_external_image
 
 velocloud-notificator-build:
   stage: build
   variables:
     MODULE_NAME: velocloud-notificator
-  services:
-    - docker:dind
-  before_script:
-    - apk add --no-cache curl jq python py-pip
-    - pip install awscli
-  script:
-    - $(aws ecr get-login --no-include-email --region us-east-1)
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-  only:
-    - /^v\d*.\d*.\d*$/
+  <<: *build_app_image
 
 velocloud-drone-build:
   stage: build
   variables:
     MODULE_NAME: velocloud-drone
-  services:
-    - docker:dind
-  before_script:
-    - apk add --no-cache curl jq python py-pip
-    - pip install awscli
-  script:
-    - $(aws ecr get-login --no-include-email --region us-east-1)
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-  only:
-    - /^v\d*.\d*.\d*$/
+  <<: *build_app_image
 
 velocloud-overseer-build:
   stage: build
   variables:
     MODULE_NAME: velocloud-overseer
-  services:
-    - docker:dind
-  before_script:
-    - apk add --no-cache curl jq python py-pip
-    - pip install awscli
-  script:
-    - $(aws ecr get-login --no-include-email --region us-east-1)
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-  only:
-    - /^v\d*.\d*.\d*$/
+  <<: *build_app_image
