@@ -206,6 +206,8 @@ terraform_validate:
     - export TF_VAR_build_number=${CI_PIPELINE_IID}
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
+    - terraform plan infra-as-code/dev
+    - terraform apply -auto-approve infra-as-code/dev
 
 terraform_plan:
   stage: build
