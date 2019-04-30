@@ -59,9 +59,9 @@ resource "aws_security_group" "automation-nats_service" {
   }
 
   ingress {
-    from_port = 80
-    to_port = 80
-    protocol = "HTTP"
+    from_port = 8222
+    to_port = 8222
+    protocol = "TCP"
     cidr_blocks = [
       "0.0.0.0/0"
     ]
@@ -86,7 +86,7 @@ resource "aws_ecs_service" "automation-nats-server" {
     subnets = [
       "${aws_subnet.automation-private_subnet-1a.id}",
       "${aws_subnet.automation-private_subnet-1b.id}"]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
 //  load_balancer {
