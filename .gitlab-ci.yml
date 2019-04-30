@@ -64,8 +64,6 @@ variables:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_COMMIT_TAG}
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
-  only:
-    - /^v\d*.\d*.\d*$/
 
 .job_external_build_template: &build_external_image
   services:
@@ -79,8 +77,6 @@ variables:
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
-  only:
-    - /^v\d*.\d*.\d*$/
 
 .job_terraform_template: &terraform_template
   image:
