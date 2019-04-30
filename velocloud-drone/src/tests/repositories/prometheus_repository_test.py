@@ -1,4 +1,5 @@
-from prometheus_client import Gauge, Counter, REGISTRY
+import application
+from prometheus_client import Gauge, Counter, REGISTRY, start_http_server
 from application.repositories.prometheus_repository import PrometheusRepository
 from config import testconfig as config
 from unittest.mock import Mock, MagicMock
@@ -59,6 +60,7 @@ class TestPrometheusRepository:
                                                                      'enterprise_name': test_enterprise_name,
                                                                      'state': 'OK'}) is None
 
-    def start_server(self):
-        self.test_pro_repo.start_http_server = Mock()
-        assert self.test_pro_repo.start_http_server.called is True
+    def start_server_test(self):
+        mock_server = application.repositories.prometheus_repository.start_http_server = Mock()
+        self.test_pro_repo.start_server()
+        assert mock_server.called is True
