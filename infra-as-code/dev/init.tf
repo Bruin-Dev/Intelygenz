@@ -20,10 +20,5 @@ variable "subdomain" {
 
 variable "build_number" {}
 
-variable "AWS_ACCESS_KEY_ID" {}
-variable "AWS_SECRET_ACCESS_KEY" {}
-variable "NATS_SERVER1" {}
-variable "NATS_CLUSTER_NAME" {}
-variable "VELOCLOUD_CREDENTIALS" {}
-variable "VELOCLOUD_VERIFY_SSL" {}
-variable "SLACK_URL" {}
+//variable "AWS_ACCESS_KEY_ID" {}
+//variable "AWS_SECRET_ACCESS_KEY" {}
