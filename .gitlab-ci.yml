@@ -10,7 +10,7 @@ variables:
   NATS_CLUSTER_NAME: "automation-engine-nats"
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
-  REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/mettel-automation-pro
+  REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation-dev
 
 #
 # Using gitlab-ci anchors to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
