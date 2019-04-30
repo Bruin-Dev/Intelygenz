@@ -3,8 +3,7 @@ stages:
   - unit_test
   - acceptance_tests
   - build
-  - terraform_plan
-  - terraform_apply
+  - deploy
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -197,8 +196,19 @@ velocloud-overseer-build:
     MODULE_NAME: velocloud-overseer
   <<: *build_app_image
 
+terraform_validate:
+  stage: validation
+  <<: *terraform_template
+  script:
+    - terraform validate -out planfile
+#  only:
+#    - /^v\d*.\d*.\d*$/
+  artifacts:
+    paths:
+      - planfile
+
 terraform_plan:
-  stage: terraform_plan
+  stage: build
   <<: *terraform_template
   script:
     - terraform plan -out planfile
@@ -209,7 +219,7 @@ terraform_plan:
       - planfile
 
 terraform_apply:
-  stage: terraform_apply
+  stage: deploy
   <<: *terraform_template
   script:
     - terraform apply
