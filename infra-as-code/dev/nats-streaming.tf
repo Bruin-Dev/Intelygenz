@@ -7,6 +7,8 @@ data "template_file" "automation-nats-server" {
 
   vars {
     image = "${aws_ecr_repository.automation-nats-server.repository_url}:${var.build_number}"
+    log_group = "${var.environment}"
+    log_prefix = "${var.environment}-${var.build_number}"
   }
 }
 
