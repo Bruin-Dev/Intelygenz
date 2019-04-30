@@ -200,6 +200,7 @@ terraform_validate:
   stage: validation
   <<: *terraform_template
   script:
+    - terraform init -out planfile infra-as-code/dev
     - terraform validate -out planfile infra-as-code/dev
 #  only:
 #    - /^v\d*.\d*.\d*$/
