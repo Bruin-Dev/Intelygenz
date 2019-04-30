@@ -1,12 +1,12 @@
-resource "aws_ecr_repository" "mettel-automation-pro-velocloud-notificator" {
+resource "aws_ecr_repository" "mettel-automation-velocloud-notificator" {
   name = "${var.environment}-velocloud-notificator"
 }
 
-data "template_file" "mettel-automation-pro-velocloud-notificator" {
+data "template_file" "mettel-automation-velocloud-notificator" {
   template = "${file("${path.module}/task-definitions/velocloud_notificator.json")}"
 
   vars {
-    image = "${aws_ecr_repository.mettel-automation-pro-velocloud-notificator.repository_url}:${var.build_number}"
+    image = "${aws_ecr_repository.mettel-automation-velocloud-notificator.repository_url}:${var.build_number}"
     PYTHONUNBUFFERED = 1
     NATS_SERVER1 = "${var.NATS_SERVER1}"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
@@ -14,9 +14,9 @@ data "template_file" "mettel-automation-pro-velocloud-notificator" {
   }
 }
 
-resource "aws_ecs_task_definition" "mettel-automation-pro-velocloud-notificator" {
+resource "aws_ecs_task_definition" "mettel-automation-velocloud-notificator" {
   family = "${var.environment}-velocloud-notificator"
-  container_definitions = "${data.template_file.mettel-automation-pro-velocloud-notificator.rendered}"
+  container_definitions = "${data.template_file.mettel-automation-velocloud-notificator.rendered}"
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"

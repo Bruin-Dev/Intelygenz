@@ -207,12 +207,8 @@ terraform_plan:
   stage: build
   <<: *terraform_template
   script:
-    - terraform plan -out planfile
-  only:
-    - /^v\d*.\d*.\d*$/
-  artifacts:
-    paths:
-      - planfile
+    - terraform init infra-as-code/dev
+    - terraform plan infra-as-code/dev
 
 terraform_apply:
   stage: deploy

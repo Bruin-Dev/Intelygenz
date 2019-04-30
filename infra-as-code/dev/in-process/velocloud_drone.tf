@@ -1,12 +1,12 @@
-resource "aws_ecr_repository" "mettel-automation-pro-velocloud-drone" {
+resource "aws_ecr_repository" "automation-velocloud-drone" {
   name = "${var.environment}-velocloud-drone"
 }
 
-data "template_file" "mettel-automation-pro-velocloud-drone" {
+data "template_file" "automation-velocloud-drone" {
   template = "${file("${path.module}/task-definitions/velocloud_drone.json")}"
 
   vars {
-    image = "${aws_ecr_repository.mettel-automation-pro-velocloud-drone.repository_url}:${var.build_number}"
+    image = "${aws_ecr_repository.automation-velocloud-drone.repository_url}:${var.build_number}"
     PYTHONUNBUFFERED = 1
     NATS_SERVER1 = "${var.NATS_SERVER1}"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
@@ -15,9 +15,9 @@ data "template_file" "mettel-automation-pro-velocloud-drone" {
   }
 }
 
-resource "aws_ecs_task_definition" "mettel-automation-pro-velocloud-drone" {
+resource "aws_ecs_task_definition" "automation-velocloud-drone" {
   family = "${var.environment}-velocloud-drone"
-  container_definitions = "${data.template_file.mettel-automation-pro-velocloud-drone.rendered}"
+  container_definitions = "${data.template_file.automation-velocloud-drone.rendered}"
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"

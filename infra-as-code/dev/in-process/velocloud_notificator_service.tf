@@ -1,8 +1,8 @@
-resource "aws_alb_target_group" "mettel-automation-pro-backend" {
+resource "aws_alb_target_group" "mettel-automation-backend" {
   name = "${var.environment}-backend"
   port = 80
   protocol = "HTTP"
-  vpc_id = "${aws_vpc.mettel-automation-pro-vpc.id}"
+  vpc_id = "${aws_vpc.mettel-automation-vpc.id}"
   target_type = "ip"
 
   health_check {
@@ -14,8 +14,8 @@ resource "aws_alb_target_group" "mettel-automation-pro-backend" {
   }
 }
 
-resource "aws_security_group" "mettel-automation-pro-backend_service" {
-  vpc_id = "${aws_vpc.mettel-automation-pro-vpc.id}"
+resource "aws_security_group" "mettel-automation-backend_service" {
+  vpc_id = "${aws_vpc.mettel-automation-vpc.id}"
   name = "${var.environment}-backend"
   description = "Allow egress from container"
 
@@ -50,24 +50,24 @@ resource "aws_security_group" "mettel-automation-pro-backend_service" {
   }
 }
 
-resource "aws_ecs_service" "mettel-automation-pro-backend" {
+resource "aws_ecs_service" "mettel-automation-velocloud-notificator" {
   name = "${var.environment}-backend"
-  task_definition = "${aws_ecs_task_definition.mettel-automation-pro-backend.family}:${aws_ecs_task_definition.mettel-automation-pro-backend.revision}"
+  task_definition = "${aws_ecs_task_definition.mettel-automation-velocloud-notificator.family}:${aws_ecs_task_definition.mettel-automation-velocloud-notificator.revision}"
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = "${aws_ecs_cluster.mettel-automation-pro.id}"
+  cluster = "${aws_ecs_cluster.mettel-automation.id}"
 
   network_configuration {
     security_groups = [
-      "${aws_security_group.mettel-automation-pro-backend_service.id}"]
+      "${aws_security_group.mettel-automation-backend_service.id}"]
     subnets = [
-      "${aws_subnet.mettel-automation-pro-private_subnet-1a.id}",
-      "${aws_subnet.mettel-automation-pro-private_subnet-1b.id}"]
+      "${aws_subnet.mettel-automation-private_subnet-1a.id}",
+      "${aws_subnet.mettel-automation-private_subnet-1b.id}"]
     assign_public_ip = false
   }
 
   load_balancer {
-    target_group_arn = "${aws_alb_target_group.mettel-automation-pro-backend.arn}"
+    target_group_arn = "${aws_alb_target_group.mettel-automation-backend.arn}"
     container_name = "backend"
     container_port = 80
   }
