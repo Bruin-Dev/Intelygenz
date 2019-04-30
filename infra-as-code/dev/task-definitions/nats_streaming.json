@@ -1,6 +1,6 @@
 [
   {
-    "name": "nats-streaming",
+    "name": "nats",
     "image": "${image}",
     "portMappings": [
       {
