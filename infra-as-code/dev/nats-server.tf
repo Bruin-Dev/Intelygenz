@@ -27,7 +27,7 @@ resource "aws_ecs_task_definition" "automation-nats-server" {
 resource "aws_alb_target_group" "automation-nats-server" {
   name = "${var.environment}-nats-server"
   port = 8222
-  protocol = "HTTP"
+  protocol = "TCP"
   vpc_id = "${aws_vpc.automation-vpc.id}"
   target_type = "ip"
 

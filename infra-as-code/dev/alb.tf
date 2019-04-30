@@ -48,7 +48,7 @@ resource "aws_security_group" "insights-dev-inbound" {
   }
 }
 
-resource "aws_alb" "insights-dev-alb" {
+resource "aws_alb" "automation-alb" {
   name = "${var.environment}"
   subnets = [
     "${aws_subnet.automation-public_subnet-1a.id}",
@@ -62,8 +62,8 @@ resource "aws_alb" "insights-dev-alb" {
   }
 }
 
-resource "aws_alb_listener" "grafana" {
-  load_balancer_arn = "${aws_alb.insights-dev-alb.arn}"
+resource "aws_alb_listener" "automation-nats" {
+  load_balancer_arn = "${aws_alb.automation-alb.arn}"
   port = "8222"
   protocol = "TCP"
 
