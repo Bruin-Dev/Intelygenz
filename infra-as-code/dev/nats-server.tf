@@ -3,7 +3,7 @@ resource "aws_ecr_repository" "automation-nats-server" {
 }
 
 data "template_file" "automation-nats-server" {
-  template = "${file("${path.module}/task-definitions/nats_streaming.json")}"
+  template = "${file("${path.module}/task-definitions/nats_server.json")}"
 
   vars {
     image = "${aws_ecr_repository.automation-nats-server.repository_url}:${var.build_number}"
@@ -41,13 +41,21 @@ resource "aws_security_group" "automation-nats_service" {
   name = "${var.environment}-nats-server"
   description = "Allow egress from container"
 
-  #  egress {
-  #    from_port = 0
-  #    to_port = 0
-  #    protocol = "-1"
-  #    cidr_blocks = [
-  #      "0.0.0.0/0"]
-  #  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = [
+      "0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 8
+    to_port = 0
+    protocol = "icmp"
+    cidr_blocks = [
+      "0.0.0.0/0"]
+  }
 
   ingress {
     from_port = 8222

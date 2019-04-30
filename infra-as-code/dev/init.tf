@@ -14,8 +14,12 @@ variable "environment" {
   default = "automation-dev"
 }
 
+variable "domain" {
+  default = "mettel-automation.net"
+}
+
 variable "subdomain" {
-  default = "automation-dev"
+  default = "dev"
 }
 
 variable "build_number" {}
