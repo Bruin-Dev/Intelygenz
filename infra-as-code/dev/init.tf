@@ -15,7 +15,7 @@ variable "environment" {
 }
 
 variable "subdomain" {
-  default = "automation-pro"
+  default = "automation-dev"
 }
 
 variable "build_number" {}
