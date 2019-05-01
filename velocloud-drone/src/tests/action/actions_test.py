@@ -23,25 +23,25 @@ class TestDroneActions:
     def instance_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
-        test_promethesus = Mock()
+        test_prometheus = Mock()
         self.mock_velocloud()
         velocloud_repo = VelocloudRepository(config, mock_logger)
-        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_promethesus)
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
         assert actions._configs is config
         assert actions._logger is mock_logger
         assert test_bus._logger is mock_logger
         assert actions._event_bus is test_bus
         assert velocloud_repo._logger is mock_logger
         assert actions._velocloud_repository is velocloud_repo
-        assert actions._promethesus_repository is test_promethesus
+        assert actions._prometheus_repository is test_prometheus
 
     def process_edge_ok_test(self):
         mock_logger = ()
         test_bus = EventBus(logger=mock_logger)
-        test_promethesus = Mock()
+        test_prometheus = Mock()
         velocloud_repo = Mock()
         velocloud_repo.get_edge_information = Mock(return_value="Edge is OK")
-        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_promethesus)
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
         edgeis = dict(host="somehost", enterpriseId=19, id=99)
         edge_status = actions._process_edge(edgeis)
         assert edge_status == "Edge is OK"
@@ -50,10 +50,10 @@ class TestDroneActions:
     def process_edge_ko_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
-        test_promethesus = Mock()
+        test_prometheus = Mock()
         velocloud_repo = Mock()
         velocloud_repo.get_edge_information = Mock(side_effect=velocloud.rest.ApiException())
-        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_promethesus)
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
         actions._logger.exception = Mock()
         edgeis = dict(host="somehost", enterpriseId=19, id=99)
         edge_status = actions._process_edge(edgeis)
@@ -64,10 +64,10 @@ class TestDroneActions:
     def process_link_ok_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
-        test_promethesus = Mock()
+        test_prometheus = Mock()
         velocloud_repo = Mock()
         velocloud_repo.get_link_information = Mock(return_value="Link is OK")
-        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_promethesus)
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
         edgeis = dict(host="somehost", enterpriseId=19, id=99)
         link_status = actions._process_link(edgeis)
         assert link_status == "Link is OK"
@@ -76,10 +76,10 @@ class TestDroneActions:
     def process_link_ko_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
-        test_promethesus = Mock()
+        test_prometheus = Mock()
         velocloud_repo = Mock()
         velocloud_repo.get_link_information = Mock(side_effect=velocloud.rest.ApiException())
-        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_promethesus)
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
         actions._logger.exception = Mock()
         edgeis = dict(host="somehost", enterpriseId=19, id=99)
         link_status = actions._process_link(edgeis)
@@ -92,15 +92,15 @@ class TestDroneActions:
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
-        test_promethesus = Mock()
+        test_prometheus = Mock()
         velocloud_repo = Mock()
-        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_promethesus)
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
         actions._logger.info = Mock()
         actions._logger.error = Mock()
         edge_status = namedtuple("edge_status", [])
         edge_status._edgeState = 'FAILING'
         link_status = []
-        actions._promethesus_repository.inc = Mock()
+        actions._prometheus_repository.inc = Mock()
         actions._process_edge = Mock(return_value=edge_status)
         actions._process_link = Mock(return_value=link_status)
         enterprise_info = Mock()
@@ -115,16 +115,16 @@ class TestDroneActions:
         assert test_bus.publish_message.call_args[0][0] == 'edge.status.ko'
         assert actions._logger.info.called
         assert actions._logger.error.called
-        assert actions._promethesus_repository.inc.called
+        assert actions._prometheus_repository.inc.called
 
     @pytest.mark.asyncio
     async def report_edge_status_ok_status_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
-        test_promethesus = Mock()
+        test_prometheus = Mock()
         velocloud_repo = Mock()
-        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_promethesus)
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
         actions._logger.info = Mock()
         actions._logger.error = Mock()
         edge_status = namedtuple("edge_status", [])
@@ -132,7 +132,7 @@ class TestDroneActions:
         link_status = 'OKAY'
         enterprise_info = Mock()
         enterprise_info._name = Mock()
-        actions._promethesus_repository.inc = Mock()
+        actions._prometheus_repository.inc = Mock()
         actions._process_edge = Mock(return_value=edge_status)
         actions._process_link = Mock(return_value=link_status)
         velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
@@ -143,4 +143,4 @@ class TestDroneActions:
         assert test_bus.publish_message.call_args[0][0] == 'edge.status.ok'
         assert actions._logger.info.called
         assert actions._logger.error.called is False
-        assert actions._promethesus_repository.inc.called
+        assert actions._prometheus_repository.inc.called

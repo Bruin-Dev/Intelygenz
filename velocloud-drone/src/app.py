@@ -12,7 +12,7 @@ from igz.packages.server.api import QuartServer
 
 class Container:
     velocloud_repository = None
-    promethesus_repository = None
+    prometheus_repository = None
     edge_status_gauge = None
     link_status_gauge = None
     edge_status_counter = None
@@ -27,7 +27,7 @@ class Container:
 
     def setup(self):
         self.velocloud_repository = VelocloudRepository(config, self.logger)
-        self.promethesus_repository = PrometheusRepository(config)
+        self.prometheus_repository = PrometheusRepository(config)
 
         self.publisher = NatsStreamingClient(config, "velocloud-drone-publisher", logger=self.logger)
         self.subscriber = NatsStreamingClient(config, "velocloud-drone-subscriber", logger=self.logger)
@@ -37,19 +37,19 @@ class Container:
         self.event_bus.set_producer(self.publisher)
 
         self.actions = Actions(config, self.event_bus, self.velocloud_repository, self.logger,
-                               self.promethesus_repository)
+                               self.prometheus_repository)
 
         self.report_edge_action = ActionWrapper(self.actions, "report_edge_status",
                                                 is_async=True, logger=self.logger)
         self.server = QuartServer(config)
 
     async def start(self):
-        self.promethesus_repository.start_server()
+        self.actions.start_prometheus_metrics_server()
         await self.event_bus.connect()
         await self.event_bus.subscribe_consumer(consumer_name="tasks", topic="edge.status.task",
                                                 action_wrapper=self.report_edge_action, durable_name="velocloud_drones",
                                                 queue="velocloud_drones")
-        await self.promethesus_repository.reset_counter()
+        await self.actions.reset_counter()
 
     async def start_server(self):
         await self.server.run_server()
