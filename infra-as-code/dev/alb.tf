@@ -51,17 +51,6 @@ resource "aws_alb" "automation-alb" {
   }
 }
 
-resource "aws_alb_listener" "automation-nats" {
-  load_balancer_arn = "${aws_alb.automation-alb.arn}"
-  port = "8222"
-  protocol = "HTTP"
-
-  default_action {
-    target_group_arn = "${aws_alb_target_group.automation-nats-server.arn}"
-    type = "forward"
-  }
-}
-
 //resource "aws_lb_listener" "front_end" {
 //  load_balancer_arn = "${aws_alb.automation-alb.arn}"
 //  port              = "80"
