@@ -60,7 +60,7 @@ class TestPrometheusRepository:
                                                                      'enterprise_name': test_enterprise_name,
                                                                      'state': 'OK'}) is None
 
-    def start_server_test(self):
+    def start_prometheus_metrics_server_test(self):
         mock_server = application.repositories.prometheus_repository.start_http_server = Mock()
-        self.test_pro_repo.start_server()
+        self.test_pro_repo.start_prometheus_metrics_server()
         assert mock_server.called is True

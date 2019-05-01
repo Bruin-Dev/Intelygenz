@@ -154,8 +154,10 @@ Services involved: velocloud-overseer, velocloud-drone, velocloud-notificator.
 # METRICS
 - [Prometheus](http://localhost:9090) 
   - Github [link](https://github.com/prometheus/client_python) to documentation of Prometheus
+  
   - Prometheus allows us to create counters/gauges in the velocloud-overseer and velocloud-drone to keep track of the metrics
     about edges processed in the overseer, amount of certain edges states found in the drone, and amount of certain link states found in the drone.
+  
   - Using prometheus `start_http_server` we can host our metrics on a server. By using the file `prometheus.yml`located at
 `/metrics-dashboard/prometheus/` and using the format below, you can add your server to the prometheus app. All the servers connected
 to the prometheus app can be found at `http://localhost:9090/targets`.
@@ -165,7 +167,7 @@ to the prometheus app can be found at `http://localhost:9090/targets`.
         static_configs:
       - targets: [' <the microservice thats hosting you server>:<that server's port>'] ```  
 - [Grafana](http://localhost:3000) admin/q1w2e3r4
-  
+   
   - Grafana allows us to create graphs, tables, charts, and etc with the metrics created using Prometheus and other 
     default metrics. 
   - [Link](https://prometheus.io/docs/prometheus/latest/querying/functions/) to functions you can use with your 
@@ -174,4 +176,14 @@ to the prometheus app can be found at `http://localhost:9090/targets`.
   - In Grafana you can export a dashboard as a json file. By going to `metrics-dashboard/grafana/dashboard-definitions`
     you can add that json file to that folder and whenever the Grafana app is loaded up you can choose to make a new
     dashboard or use the dashboard that you created.  
-  
+  - The docker_compose should include the credentials above,specifically the password, in the`GF_SECURITY_ADMIN_PASSWORD` 
+    area for the code below. Also the `GF_INSTALL_PLUGINS` field can be used to add any plugins you want to add to the
+    grafana dashboard.
+    
+    ```
+     grafana:
+        image: grafana/grafana:6.0.1
+        environment:
+            - GF_SECURITY_ADMIN_PASSWORD=q1w2e3r4
+            - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    ``` 
