@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "automation-nats-server" {
-  name = "${var.environment}-nats-server"
+  name = "${var.environment}-nats-streaming-server"
 }
 
 data "template_file" "automation-nats-server" {

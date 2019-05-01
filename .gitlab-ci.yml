@@ -199,25 +199,16 @@ terraform_validate:
   stage: validation
   <<: *terraform_template
   script:
-    - export TF_VAR_build_number=${CI_PIPELINE_IID}
+    - export TF_VAR_build_number=${CI_PIPELINE_ID}
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
     - terraform plan infra-as-code/dev
-    - terraform apply -auto-approve infra-as-code/dev
 
-terraform_plan:
+terraform_apply:
   stage: build
   <<: *terraform_template
   script:
-    - export TF_VAR_build_number=${CI_PIPELINE_IID}
-    - terraform init infra-as-code/dev
-    - terraform plan infra-as-code/dev
-
-terraform_apply:
-  stage: deploy
-  <<: *terraform_template
-  script:
-    - export TF_VAR_build_number=${CI_PIPELINE_IID}
+    - export TF_VAR_build_number=${CI_PIPELINE_ID}
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-  when: manual
+#  when: manual
