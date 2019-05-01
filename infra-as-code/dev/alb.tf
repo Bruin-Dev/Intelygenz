@@ -8,7 +8,7 @@ resource "aws_security_group" "insights-dev-inbound" {
     to_port = 8222
     protocol = "tcp"
     cidr_blocks = [
-      "0.0.0.0/0"]
+      "12.15.242.50/32"]
   }
 
   ingress {
