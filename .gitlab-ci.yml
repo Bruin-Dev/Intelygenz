@@ -56,7 +56,7 @@ variables:
     - pip install awscli
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_COMMIT_TAG} -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
   after_script:
@@ -71,7 +71,7 @@ variables:
     - pip install awscli
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_COMMIT_TAG} -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
   after_script:
