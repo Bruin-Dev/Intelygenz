@@ -6,7 +6,7 @@ from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
-from prometheus_client import start_http_server, Gauge
+from application.repositories.prometheus_repository import PrometheusRepository
 
 
 class Container:
@@ -14,7 +14,7 @@ class Container:
     velocloud_repository = None
     publisher = None
     event_bus = None
-    edge_gauge = None
+    prometheus_repository = None
     report_edge_action = None
     actions = None
     logger = LoggerClient(config).get_logger()
@@ -25,13 +25,13 @@ class Container:
 
         self.publisher = NatsStreamingClient(config, "velocloud-overseer-publisher", logger=self.logger)
         self.event_bus = EventBus(logger=self.logger)
-        self.edge_gauge = Gauge('edges_processed', 'Edges processed')
+        self.prometheus_repository = PrometheusRepository(config, self.velocloud_repository)
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger, self.edge_gauge)
+        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger, self.prometheus_repository)
 
     async def start(self):
-        start_http_server(config.GRAFANA_CONFIG['port'])
+        self.actions.start_prometheus_metrics_server()
         await self.event_bus.connect()
         await self.actions.send_edge_status_task_interval(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
 

@@ -144,3 +144,24 @@ class TestDroneActions:
         assert actions._logger.info.called
         assert actions._logger.error.called is False
         assert actions._prometheus_repository.inc.called
+
+    def start_prometheus_metrics_server_test(self):
+        mock_logger = ()
+        test_bus = EventBus(logger=mock_logger)
+        test_prometheus = Mock()
+        velocloud_repo = Mock()
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
+        actions._prometheus_repository.start_prometheus_metrics_server = Mock()
+        actions.start_prometheus_metrics_server()
+        assert actions._prometheus_repository.start_prometheus_metrics_server.called is True
+
+    @pytest.mark.asyncio
+    async def reset_counter_test(self):
+        mock_logger = ()
+        test_bus = EventBus(logger=mock_logger)
+        test_prometheus = Mock()
+        velocloud_repo = Mock()
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
+        actions._prometheus_repository.reset_counter = CoroutineMock()
+        await actions.reset_counter()
+        assert actions._prometheus_repository.reset_counter.called is True

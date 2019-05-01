@@ -15,6 +15,7 @@ class TestVelocloudRepository:
         enterprises_res = namedtuple("enterprise_res", [])
         enterprise = namedtuple("enterprise", [])
         enterprise._id = 1
+        enterprises_res._edgeCount = 123
         enterprises_res._enterprises = [enterprise]
         all_api_client.monitoringGetAggregates = Mock(return_value=enterprises_res)
         edge1 = namedtuple("edge", [])
@@ -82,4 +83,22 @@ class TestVelocloudRepository:
         vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
         edges_by_ent = vr.get_all_enterprises_edges_with_host()
         assert len(edges_by_ent) is 0
+        assert vr._logger.exception.called
+
+    def get_edge_count_test(self):
+        mock_logger = Mock()
+        self.mock_velocloud()
+        vr = VelocloudRepository(config, mock_logger)
+        sum = vr.get_edge_count()
+        print(sum)
+        assert sum == 123
+
+    def get_edge_count_KO_test(self):
+        mock_logger = Mock()
+        self.mock_velocloud()
+        vr = VelocloudRepository(config, mock_logger)
+        vr._logger.exception = Mock()
+        vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
+        sum = vr.get_edge_count()
+        assert sum is 0
         assert vr._logger.exception.called

@@ -176,6 +176,7 @@ to the prometheus app can be found at `http://localhost:9090/targets`.
   - In Grafana you can export a dashboard as a json file. By going to `metrics-dashboard/grafana/dashboard-definitions`
     you can add that json file to that folder and whenever the Grafana app is loaded up you can choose to make a new
     dashboard or use the dashboard that you created.  
+  - [Link](https://grafana.com/docs/reference/dashboard/) to the documentation to the dashboard's json file.
   - The docker_compose should include the credentials above,specifically the password, in the`GF_SECURITY_ADMIN_PASSWORD` 
     area for the code below. Also the `GF_INSTALL_PLUGINS` field can be used to add any plugins you want to add to the
     grafana dashboard.

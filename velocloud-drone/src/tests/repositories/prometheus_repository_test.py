@@ -1,5 +1,5 @@
 import application
-from prometheus_client import Gauge, Counter, REGISTRY, start_http_server
+from prometheus_client import Gauge, Counter, REGISTRY
 from application.repositories.prometheus_repository import PrometheusRepository
 from config import testconfig as config
 from unittest.mock import Mock, MagicMock

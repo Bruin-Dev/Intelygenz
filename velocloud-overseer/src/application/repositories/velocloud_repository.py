@@ -41,3 +41,15 @@ class VelocloudRepository:
             self._logger.exception(f'Error, exception ocurred getting all velocloud '
                                    f'enterprises from all velocloud clusters: {e}')
         return edges_by_enterprise_and_host
+
+    def get_edge_count(self):
+        sum = 0
+        try:
+            for client in self._clients:
+                res = client.monitoringGetAggregates(body={})
+                sum += res._edgeCount
+        except velocloud.rest.ApiException as e:
+            self._logger.exception(f'Error, exception ocurred getting all velocloud '
+                                   f'enterprises from all velocloud clusters: {e}')
+
+        return sum
