@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1556578399991,
+  "iteration": 1556815896789,
   "links": [],
   "panels": [
     {
@@ -90,7 +90,7 @@
       "thresholds": "",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Edges processed in last 10 minutes",
+      "title": "Edges processed in last cycle",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -927,7 +927,7 @@
     ]
   },
   "time": {
-    "from": "now-10m",
+    "from": "now-25m",
     "to": "now"
   },
   "timepicker": {
