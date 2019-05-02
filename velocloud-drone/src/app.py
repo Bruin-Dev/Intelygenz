@@ -8,9 +8,11 @@ from application.repositories.prometheus_repository import PrometheusRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
+from igz.packages.velocloud.velocloud_client import VelocloudClient
 
 
 class Container:
+    velocloud_client = None
     velocloud_repository = None
     prometheus_repository = None
     edge_status_gauge = None
@@ -26,7 +28,8 @@ class Container:
     server = None
 
     def setup(self):
-        self.velocloud_repository = VelocloudRepository(config, self.logger)
+        self.velocloud_client = VelocloudClient(config)
+        self.velocloud_repository = VelocloudRepository(config, self.logger, self.velocloud_client)
         self.prometheus_repository = PrometheusRepository(config)
 
         self.publisher = NatsStreamingClient(config, "velocloud-drone-publisher", logger=self.logger)
