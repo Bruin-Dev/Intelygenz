@@ -69,7 +69,7 @@ class TestOverseerActions:
         task.cancel()
         loop.stop()
         assert actions._send_edge_status_tasks.called
-        assert actions._prometheus_repository.reset_edges_counter.called is False
+        assert actions._prometheus_repository.reset_edges_counter.called
         assert actions._prometheus_repository.set_cycle_total_edges.called
 
     def start_prometheus_metrics_server_test(self):
