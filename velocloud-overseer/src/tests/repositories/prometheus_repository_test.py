@@ -6,24 +6,21 @@ from unittest.mock import Mock
 
 
 class TestPrometheusRepository:
-    test_velocloud_repo = Mock()
-    test_pro_repo = PrometheusRepository(config, test_velocloud_repo)
+    test_pro_repo = PrometheusRepository(config)
 
     def instance_test(self):
-
         assert self.test_pro_repo._config == config
-        assert self.test_pro_repo._velocloud_repository == self.test_velocloud_repo
         assert isinstance(self.test_pro_repo._edge_gauge, Gauge) is True
 
-    def inc_test(self):
-        self.test_pro_repo._velocloud_repository.get_edge_count = Mock(return_value=123)
-        self.test_pro_repo.inc()
+    def set_cycle_total_edges_test(self):
+        sum = 123
+        self.test_pro_repo.set_cycle_total_edges(sum)
         assert REGISTRY.get_sample_value('edges_processed') == 123
 
     def reset_counter_test(self):
-        self.test_pro_repo._velocloud_repository.get_edge_count = Mock(return_value=123)
-        self.test_pro_repo.inc()
-        self.test_pro_repo.reset_counter()
+        sum = 123
+        self.test_pro_repo.set_cycle_total_edges(sum)
+        self.test_pro_repo.reset_edges_counter()
         assert REGISTRY.get_sample_value('edges_processed') == 0
 
     def start_prometheus_metrics_server_test(self):

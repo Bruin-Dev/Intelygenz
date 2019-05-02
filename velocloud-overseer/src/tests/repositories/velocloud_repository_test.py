@@ -85,20 +85,20 @@ class TestVelocloudRepository:
         assert len(edges_by_ent) is 0
         assert vr._logger.exception.called
 
-    def get_edge_count_test(self):
+    def get_all_hosts_edge_count_test(self):
         mock_logger = Mock()
         self.mock_velocloud()
         vr = VelocloudRepository(config, mock_logger)
-        sum = vr.get_edge_count()
+        sum = vr.get_all_hosts_edge_count()
         print(sum)
         assert sum == 123
 
-    def get_edge_count_KO_test(self):
+    def get_all_hosts_edge_count_KO_test(self):
         mock_logger = Mock()
         self.mock_velocloud()
         vr = VelocloudRepository(config, mock_logger)
         vr._logger.exception = Mock()
         vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
-        sum = vr.get_edge_count()
+        sum = vr.get_all_hosts_edge_count()
         assert sum is 0
         assert vr._logger.exception.called

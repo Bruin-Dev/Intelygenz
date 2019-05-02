@@ -26,12 +26,17 @@ class Actions:
         if not exec_on_start:
             await asyncio.sleep(seconds)
         while True:
-            self._prometheus_repository.inc()
+            self._prometheus_repository.reset_edges_counter()
+            sum = self.sum_edges_all_hosts()
+            self._prometheus_repository.set_cycle_total_edges(sum)
             self._logger.info("Executing scheduled task: send edge status tasks")
             await self._send_edge_status_tasks()
             self._logger.info("Executed scheduled task: send edge status tasks")
             await asyncio.sleep(seconds)
-            self._prometheus_repository.reset_counter()
+
+    def sum_edges_all_hosts(self):
+        sum = self._velocloud_repository.get_all_hosts_edge_count()
+        return sum
 
     def start_prometheus_metrics_server(self):
         self._prometheus_repository.start_prometheus_metrics_server()

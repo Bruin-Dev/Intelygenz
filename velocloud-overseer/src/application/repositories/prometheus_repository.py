@@ -5,18 +5,15 @@ class PrometheusRepository:
 
     _config = None
     _edge_gauge = None
-    _velocloud_repository = None
 
-    def __init__(self, config, velocloud_repository):
+    def __init__(self, config):
         self._config = config
         self._edge_gauge = Gauge('edges_processed', 'Edges processed')
-        self._velocloud_repository = velocloud_repository
 
-    def inc(self):
-        sum = self._velocloud_repository.get_edge_count()
+    def set_cycle_total_edges(self, sum):
         self._edge_gauge.set(sum)
 
-    def reset_counter(self):
+    def reset_edges_counter(self):
         self._edge_gauge.set(0)
 
     def start_prometheus_metrics_server(self):

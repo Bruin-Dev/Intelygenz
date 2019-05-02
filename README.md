@@ -178,13 +178,7 @@ to the prometheus app can be found at `http://localhost:9090/targets`.
     dashboard or use the dashboard that you created.  
   - [Link](https://grafana.com/docs/reference/dashboard/) to the documentation to the dashboard's json file.
   - The docker_compose should include the credentials above,specifically the password, in the`GF_SECURITY_ADMIN_PASSWORD` 
-    area for the code below. Also the `GF_INSTALL_PLUGINS` field can be used to add any plugins you want to add to the
+    area for the [local docker-compose](docker-compose.yml). Also the `GF_INSTALL_PLUGINS` field can be used to add any plugins you want to add to the
     grafana dashboard.
     
-    ```
-     grafana:
-        image: grafana/grafana:6.0.1
-        environment:
-            - GF_SECURITY_ADMIN_PASSWORD=q1w2e3r4
-            - GF_INSTALL_PLUGINS=grafana-piechart-panel
-    ``` 
+   

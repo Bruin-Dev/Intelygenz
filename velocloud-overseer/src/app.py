@@ -25,7 +25,7 @@ class Container:
 
         self.publisher = NatsStreamingClient(config, "velocloud-overseer-publisher", logger=self.logger)
         self.event_bus = EventBus(logger=self.logger)
-        self.prometheus_repository = PrometheusRepository(config, self.velocloud_repository)
+        self.prometheus_repository = PrometheusRepository(config)
         self.event_bus.set_producer(self.publisher)
 
         self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger, self.prometheus_repository)

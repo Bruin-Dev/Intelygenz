@@ -42,16 +42,16 @@ class TestOverseerActions:
         test_prometheus_repository = Mock()
         actions = Actions(test_bus, velocloud_repo, mock_logger, test_prometheus_repository)
         actions._send_edge_status_tasks = CoroutineMock()
-        actions._prometheus_repository.inc = Mock()
-        actions._prometheus_repository.reset_counter = Mock()
+        actions._prometheus_repository.set_cycle_total_edges = Mock()
+        actions._prometheus_repository.reset_edges_counter = Mock()
         loop = asyncio.get_event_loop()
         task = asyncio.ensure_future(actions.send_edge_status_task_interval(0.1, False))
         await asyncio.sleep(0.3)
         task.cancel()
         loop.stop()
         assert actions._send_edge_status_tasks.called
-        assert actions._prometheus_repository.reset_counter.called
-        assert actions._prometheus_repository.inc.called
+        assert actions._prometheus_repository.reset_edges_counter.called
+        assert actions._prometheus_repository.set_cycle_total_edges.called
 
     @pytest.mark.asyncio
     async def will_perform_scheduled_task_on_start_test(self):
@@ -61,16 +61,16 @@ class TestOverseerActions:
         test_prometheus_repository = Mock()
         actions = Actions(test_bus, velocloud_repo, mock_logger, test_prometheus_repository)
         actions._send_edge_status_tasks = CoroutineMock()
-        actions._prometheus_repository.inc = Mock()
-        actions._prometheus_repository.reset_counter = Mock()
+        actions._prometheus_repository.set_cycle_total_edges = Mock()
+        actions._prometheus_repository.reset_edges_counter = Mock()
         loop = asyncio.get_event_loop()
         task = asyncio.ensure_future(actions.send_edge_status_task_interval(100, True))
         await asyncio.sleep(0.1)
         task.cancel()
         loop.stop()
         assert actions._send_edge_status_tasks.called
-        assert actions._prometheus_repository.reset_counter.called is False
-        assert actions._prometheus_repository.inc.called
+        assert actions._prometheus_repository.reset_edges_counter.called is False
+        assert actions._prometheus_repository.set_cycle_total_edges.called
 
     def start_prometheus_metrics_server_test(self):
         mock_logger = Mock()
