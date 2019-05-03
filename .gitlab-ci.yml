@@ -181,6 +181,15 @@ velocloud-overseer-build:
 
 # TERRAFORM
 
+terraform_validate_basic_infra:
+  stage: validation
+  <<: *terraform_template
+  script:
+    - export TF_VAR_build_number=${CI_PIPELINE_ID}
+    - terraform init infra-as-code/basic-infra
+    - terraform validate infra-as-code/basic-infra
+    - terraform plan infra-as-code/basic-infra
+
 terraform_validate:
   stage: validation
   <<: *terraform_template
