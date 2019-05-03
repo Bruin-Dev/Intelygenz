@@ -1,9 +1,8 @@
 stages:
   - validation
   - unit_test
-  - acceptance_tests
+#  - acceptance_tests
   - build
-  - deploy
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -133,10 +132,10 @@ velocloud_drone_test:
 #
 # Acceptance/Integration tests
 #
-event_sourcing_acceptance_test:
-  variables:
-    BLUEPRINT: ${HONESTCODE_EVENT_SOURCING_BLUEPRINT}
-  <<: *acceptance_test_module
+#event_sourcing_acceptance_test:
+#  variables:
+#    BLUEPRINT: ${HONESTCODE_EVENT_SOURCING_BLUEPRINT}
+#  <<: *acceptance_test_module
 
 #
 # Images builds
@@ -196,4 +195,4 @@ terraform_apply:
     - export TF_VAR_build_number=${CI_PIPELINE_ID}
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-  when: manual
+#  when: manual

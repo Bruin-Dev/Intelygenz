@@ -1,4 +1,4 @@
-resource "aws_security_group" "insights-dev-inbound" {
+resource "aws_security_group" "automation-dev-inbound" {
   name = "${var.environment}-inbound"
   description = "Allowed connections into ALB"
   vpc_id = "${aws_vpc.automation-vpc.id}"
@@ -10,14 +10,6 @@ resource "aws_security_group" "insights-dev-inbound" {
   ingress {
     from_port = 8222
     to_port = 8222
-    protocol = "tcp"
-    cidr_blocks = [
-      "12.15.242.50/32"]
-  }
-
-  ingress {
-    from_port = 5000
-    to_port = 5000
     protocol = "tcp"
     cidr_blocks = [
       "12.15.242.50/32"]
@@ -55,7 +47,7 @@ resource "aws_alb" "automation-alb" {
     "${aws_subnet.automation-public_subnet-1a.id}",
     "${aws_subnet.automation-public_subnet-1b.id}"]
   security_groups = [
-    "${aws_security_group.insights-dev-inbound.id}"]
+    "${aws_security_group.automation-dev-inbound.id}"]
 
   tags {
     Name = "${var.environment}"
