@@ -1,10 +1,10 @@
 version: '3.1'
 services:
   nats-streaming:
-    image: samunozjigz/nats-s-cfile:latest
     restart: on-failure
     build:
-      context: ./nats-streaming-server
+      context: .
+      dockerfile: nats-streaming-server/Dockerfile
     ports:
       - 4222:4222
       - 8222:8222
