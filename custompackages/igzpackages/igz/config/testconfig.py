@@ -21,18 +21,6 @@ LOG_CONFIG = {
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
-VELOCLOUD_CONFIG = {
-    'verify_ssl': 'no',
-    'servers': [
-        {
-            'url': 'someurl',
-            'username': 'someusername',
-            'password': 'somepassword',
-
-        }
-    ]
-}
-
 QUART_CONFIG = {
     'title': 'test-name',
     'port': 5000

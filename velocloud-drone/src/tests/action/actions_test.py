@@ -7,7 +7,7 @@ import velocloud
 from collections import namedtuple
 from config import testconfig as config
 from application.repositories.velocloud_repository import VelocloudRepository
-from igz.packages.velocloud.velocloud_client import VelocloudClient
+from velocloud_client.client.velocloud_client import VelocloudClient
 
 
 class TestDroneActions:

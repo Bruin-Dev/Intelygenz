@@ -20,7 +20,6 @@ REQUIRES = [
     "quart-openapi==1.4.3",
     "behave == 1.2.6",
 
-
 ]
 setup(
     name=NAME,
