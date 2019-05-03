@@ -105,7 +105,7 @@ resource "aws_ecs_service" "automation-velocloud-overseer" {
 
   load_balancer {
     target_group_arn = "${aws_alb_target_group.automation-overseer.arn}"
-    container_name = "velocloud-overseer"
+    container_name = "velocloud_overseer"
     container_port = 5000
   }
 }
