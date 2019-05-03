@@ -11,7 +11,7 @@ data "template_file" "automation-velocloud-overseer" {
     log_prefix = "${var.environment}-${var.build_number}"
 
     PYTHONUNBUFFERED = "${var.PYTHONUNBUFFERED}"
-    NATS_SERVER1 = "${aws_ecs_service.automation-nats-server.name}"
+    NATS_SERVER1 = "nats://${aws_ecs_service.automation-nats-server.name}:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
     VELOCLOUD_CREDENTIALS_PRO = "${var.VELOCLOUD_CREDENTIALS_PRO}"
     VELOCLOUD_VERIFY_SSL = "${var.VELOCLOUD_VERIFY_SSL}"
