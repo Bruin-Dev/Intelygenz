@@ -1,7 +1,11 @@
-resource "aws_security_group" "automation-dev-inbound" {
+resource "aws_security_group" "insights-dev-inbound" {
   name = "${var.environment}-inbound"
   description = "Allowed connections into ALB"
   vpc_id = "${aws_vpc.automation-vpc.id}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   ingress {
     from_port = 8222
@@ -51,7 +55,7 @@ resource "aws_alb" "automation-alb" {
     "${aws_subnet.automation-public_subnet-1a.id}",
     "${aws_subnet.automation-public_subnet-1b.id}"]
   security_groups = [
-    "${aws_security_group.automation-dev-inbound.id}"]
+    "${aws_security_group.insights-dev-inbound.id}"]
 
   tags {
     Name = "${var.environment}"
