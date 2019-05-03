@@ -18,7 +18,8 @@ REQUIRES = [
     "coverage == 4.5.2",
     "Quart==0.6.12",
     "quart-openapi==1.4.3",
-    "behave == 1.2.6"
+    "behave == 1.2.6",
+    "../velocloud"
 
 
 ]
@@ -28,7 +29,7 @@ setup(
     description='IGZ\'s utilities for Automation-Engine project',
     install_requires=REQUIRES,
     packages=[find_packages(exclude=['*tests']), 'velocloud'],
-    package_dir={'velocloud', 'custompackages/velocloud'},
+    package_dir={'velocloud', '../velocloud'},
     include_package_data=True,
     setup_requires=[
         'pytest-runner',
