@@ -24,6 +24,23 @@ variable "subdomain" {
 
 variable "build_number" {}
 
+
+variable "PYTHONUNBUFFERED" {
+  default = 1
+}
+
+variable "NATS_SERVER1" {
+  default = "nats://nats-streaming:4222"
+}
+
+variable "NATS_CLUSTER_NAME" {
+  default = "automation-engine-nats"
+}
+
+variable "VELOCLOUD_CREDENTIALS_PRO" {}
+
+variable "VELOCLOUD_VERIFY_SSL" {}
+
 //variable "AWS_ACCESS_KEY_ID" {}
 //variable "AWS_SECRET_ACCESS_KEY" {}
 

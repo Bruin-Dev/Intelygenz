@@ -18,6 +18,26 @@
       }
     },
     "environment": [
+      {
+        "name": "PYTHONUNBUFFERED",
+        "value": "${PYTHONUNBUFFERED}"
+      },
+      {
+        "name": "NATS_SERVER1",
+        "value": "${NATS_SERVER1}"
+      },
+      {
+        "name": "NATS_CLUSTER_NAME",
+        "value": "${NATS_CLUSTER_NAME}"
+      },
+      {
+        "name": "VELOCLOUD_CREDENTIALS",
+        "value": "${VELOCLOUD_CREDENTIALS_PRO}"
+      },
+      {
+        "name": "VELOCLOUD_VERIFY_SSL",
+        "value": "${VELOCLOUD_VERIFY_SSL}"
+      }
     ]
   }
 ]

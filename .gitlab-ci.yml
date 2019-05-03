@@ -148,29 +148,29 @@ nats-streaming-build:
     MODULE_NAME: nats-streaming-server
   <<: *build_app_image
 
-grafana-build:
-  stage: build
-  variables:
-    MODULE_NAME: metrics-dashboard/grafana
-  <<: *build_app_image
-
-prometheus-build:
-  stage: build
-  variables:
-    MODULE_NAME: metrics-dashboard/prometheus
-  <<: *build_app_image
-
-velocloud-notificator-build:
-  stage: build
-  variables:
-    MODULE_NAME: velocloud-notificator
-  <<: *build_app_image
-
-velocloud-drone-build:
-  stage: build
-  variables:
-    MODULE_NAME: velocloud-drone
-  <<: *build_app_image
+#grafana-build:
+#  stage: build
+#  variables:
+#    MODULE_NAME: metrics-dashboard/grafana
+#  <<: *build_app_image
+#
+#prometheus-build:
+#  stage: build
+#  variables:
+#    MODULE_NAME: metrics-dashboard/prometheus
+#  <<: *build_app_image
+#
+#velocloud-notificator-build:
+#  stage: build
+#  variables:
+#    MODULE_NAME: velocloud-notificator
+#  <<: *build_app_image
+#
+#velocloud-drone-build:
+#  stage: build
+#  variables:
+#    MODULE_NAME: velocloud-drone
+#  <<: *build_app_image
 
 velocloud-overseer-build:
   stage: build

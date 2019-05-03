@@ -9,6 +9,12 @@ data "template_file" "automation-velocloud-overseer" {
     image = "${data.aws_ecr_repository.automation-velocloud-overseer.repository_url}:${var.build_number}"
     log_group = "${var.environment}"
     log_prefix = "${var.environment}-${var.build_number}"
+
+    PYTHONUNBUFFERED = "${var.PYTHONUNBUFFERED}"
+    NATS_SERVER1 = "${var.NATS_SERVER1}"
+    NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
+    VELOCLOUD_CREDENTIALS_PRO = "${var.VELOCLOUD_CREDENTIALS_PRO}"
+    VELOCLOUD_VERIFY_SSL = "${var.VELOCLOUD_VERIFY_SSL}"
   }
 }
 
