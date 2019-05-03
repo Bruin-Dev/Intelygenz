@@ -44,6 +44,7 @@ velocloud_test:
     - apt-get update -q -y
     - cd custompackages/velocloud/
     - python setup.py install
+    - cd velocloud_client
   script:
     - pytest --cov
 
