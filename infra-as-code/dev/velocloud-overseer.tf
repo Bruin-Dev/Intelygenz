@@ -56,6 +56,10 @@ resource "aws_security_group" "automation-velocloud-overseer_service" {
   name = "${var.environment}-velocloud-overseer"
   description = "Allow egress from container"
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   egress {
     from_port = 0
     to_port = 0
