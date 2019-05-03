@@ -3,7 +3,7 @@ from config import testconfig as config
 from application.repositories.velocloud_repository import VelocloudRepository
 from collections import namedtuple
 import velocloud
-from igz.packages.velocloud.velocloud_client import VelocloudClient
+from velocloud_client.client.velocloud_client import VelocloudClient
 
 
 class TestVelocloudRepository:
