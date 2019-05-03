@@ -28,7 +28,7 @@ setup(
     description='IGZ\'s utilities for Automation-Engine project',
     install_requires=REQUIRES,
     packages=[find_packages(exclude=['*tests']), 'velocloud'],
-    package_dir={'velocloud', '../custompackages/velocloud'},
+    package_dir={'velocloud', 'custompackages/velocloud'},
     include_package_data=True,
     setup_requires=[
         'pytest-runner',
