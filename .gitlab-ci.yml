@@ -196,4 +196,4 @@ terraform_apply:
     - export TF_VAR_build_number=${CI_PIPELINE_ID}
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-#  when: manual
+  when: manual
