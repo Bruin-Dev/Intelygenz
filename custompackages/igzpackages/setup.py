@@ -18,8 +18,7 @@ REQUIRES = [
     "coverage == 4.5.2",
     "Quart==0.6.12",
     "quart-openapi==1.4.3",
-    "behave == 1.2.6",
-    "../velocloud"
+    "behave == 1.2.6"
 
 
 ]
