@@ -8,7 +8,7 @@ from application.repositories.prometheus_repository import PrometheusRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
-from igz.packages.velocloud.velocloud_client import VelocloudClient
+from velocloud_client.client.velocloud_client import VelocloudClient
 
 
 class Container:

@@ -1,6 +1,6 @@
 from unittest.mock import Mock
-from igz.config import testconfig as config
-from igz.packages.velocloud.velocloud_client import VelocloudClient
+from velocloud_client.config import testconfig as config
+from velocloud_client.client.velocloud_client import VelocloudClient
 import velocloud
 
 
