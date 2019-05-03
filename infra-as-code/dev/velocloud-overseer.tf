@@ -1,4 +1,4 @@
-resource "aws_ecr_repository" "automation-velocloud-overseer" {
+data "aws_ecr_repository" "automation-velocloud-overseer" {
   name = "${var.environment}-velocloud-overseer"
 }
 
@@ -6,7 +6,7 @@ data "template_file" "automation-velocloud-overseer" {
   template = "${file("${path.module}/task-definitions/velocloud_overseer.json")}"
 
   vars {
-    image = "${aws_ecr_repository.automation-velocloud-overseer.repository_url}:${var.build_number}"
+    image = "${data.aws_ecr_repository.automation-velocloud-overseer.repository_url}:${var.build_number}"
     log_group = "${var.environment}"
     log_prefix = "${var.environment}-${var.build_number}"
   }
@@ -45,6 +45,8 @@ resource "aws_alb_target_group" "automation-overseer" {
     type = "lb_cookie"
     enabled = false
   }
+
+  depends_on = ["aws_alb.automation-alb"]
 
   lifecycle {
     create_before_destroy = true

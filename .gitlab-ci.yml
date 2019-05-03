@@ -2,7 +2,9 @@ stages:
   - validation
   - unit_test
 #  - acceptance_tests
+  - basic_infra
   - build
+  - deploy
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -188,8 +190,16 @@ terraform_validate:
     - terraform validate infra-as-code/dev
     - terraform plan infra-as-code/dev
 
-terraform_apply:
-  stage: build
+basic_infra:
+  stage: basic_infra
+  <<: *terraform_template
+  script:
+    - export TF_VAR_build_number=${CI_PIPELINE_ID}
+    - terraform init infra-as-code/basic-infra
+    - terraform apply -auto-approve infra-as-code/basic-infra
+
+deploy:
+  stage: deploy
   <<: *terraform_template
   script:
     - export TF_VAR_build_number=${CI_PIPELINE_ID}
