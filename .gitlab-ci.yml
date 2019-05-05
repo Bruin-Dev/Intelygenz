@@ -4,6 +4,7 @@ stages:
 #  - acceptance_tests
   - basic_infra
   - build
+  - deploy
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
