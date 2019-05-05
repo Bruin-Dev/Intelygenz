@@ -72,30 +72,31 @@ variables:
   before_script:
     - terraform init -backend=true -get=true -input=false
 
-#
+# ===============
 # Modules linters
-#
-igzpackages_linter:
+# ===============
+
+igzpackages-linter:
   variables:
     MODULE: custompackages/igzpackages/
   <<: *lint_module
 
-velocloud_notificator_linter:
+velocloud-notificator-linter:
   variables:
     MODULE: velocloud-notificator
   <<: *lint_module
 
-velocloud_overseer_linter:
+velocloud-overseer-linter:
   variables:
     MODULE: velocloud-overseer
   <<: *lint_module
 
-velocloud_drone_linter:
+velocloud-drone-linter:
   variables:
     MODULE: velocloud-drone
   <<: *lint_module
 
-acceptance_test_linter:
+acceptance-test-linter:
   variables:
     MODULE: acceptance-tests
   <<: *lint_module
@@ -103,7 +104,7 @@ acceptance_test_linter:
 #
 # Modules unit tests
 #
-igzpackages_test:
+igzpackages-test:
   variables:
     MODULE: custompackages/igzpackages
   stage: unit_test
@@ -115,17 +116,17 @@ igzpackages_test:
   script:
     - pytest --cov
 
-velocloud_notificator_test:
+velocloud-notificator-test:
   variables:
     MODULE: velocloud-notificator
   <<: *unittest_module
 
-velocloud_overseer_test:
+velocloud-overseer-test:
   variables:
     MODULE: velocloud-overseer
   <<: *unittest_module
 
-velocloud_drone_test:
+velocloud-drone-test:
   variables:
     MODULE: velocloud-drone
   <<: *unittest_module
@@ -177,10 +178,11 @@ velocloud-overseer-build:
     MODULE_NAME: velocloud-overseer
   <<: *build_app_image
 
-
+# =========
 # TERRAFORM
+# =========
 
-terraform_validate_basic_infra:
+terraform-validate-basic-infra:
   stage: validation
   <<: *terraform_template
   script:
@@ -189,7 +191,7 @@ terraform_validate_basic_infra:
     - terraform validate infra-as-code/basic-infra
     - terraform plan infra-as-code/basic-infra
 
-terraform_validate:
+terraform-validate-dev:
   stage: validation
   <<: *terraform_template
   script:
@@ -198,7 +200,7 @@ terraform_validate:
     - terraform validate infra-as-code/dev
     - terraform plan infra-as-code/dev
 
-basic_infra:
+basic-infra:
   stage: basic_infra
   <<: *terraform_template
   script:
