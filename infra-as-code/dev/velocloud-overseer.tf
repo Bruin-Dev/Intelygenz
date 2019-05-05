@@ -6,14 +6,14 @@ data "template_file" "automation-velocloud-overseer" {
   template = "${file("${path.module}/task-definitions/velocloud_overseer.json")}"
 
   vars {
-    image = "${data.aws_ecr_repository.automation-velocloud-overseer.repository_url}:${var.build_number}"
+    image = "${data.aws_ecr_repository.automation-velocloud-overseer.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.environment}"
-    log_prefix = "${var.environment}-${var.build_number}"
+    log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
 
     PYTHONUNBUFFERED = "${var.PYTHONUNBUFFERED}"
     NATS_SERVER1 = "nats://${aws_ecs_service.automation-nats-server.name}:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
-    VELOCLOUD_CREDENTIALS_PRO = "${var.VELOCLOUD_CREDENTIALS_PRO}"
+    VELOCLOUD_CREDENTIALS_PRO = "${var.VELOCLOUD_CREDENTIALS}"
     VELOCLOUD_VERIFY_SSL = "${var.VELOCLOUD_VERIFY_SSL}"
   }
 }
@@ -52,7 +52,8 @@ resource "aws_alb_target_group" "automation-overseer" {
     enabled = false
   }
 
-  depends_on = ["aws_alb.automation-alb"]
+  depends_on = [
+    "aws_alb.automation-alb"]
 
   lifecycle {
     create_before_destroy = true

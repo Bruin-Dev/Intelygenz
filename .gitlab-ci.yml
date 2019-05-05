@@ -4,7 +4,6 @@ stages:
 #  - acceptance_tests
   - basic_infra
   - build
-  - deploy
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -203,15 +202,15 @@ basic_infra:
   stage: basic_infra
   <<: *terraform_template
   script:
-    - export TF_VAR_build_number=${CI_PIPELINE_ID}
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
 
-deploy:
+deploy-dev:
   stage: deploy
   <<: *terraform_template
   script:
-    - export TF_VAR_build_number=${CI_PIPELINE_ID}
+    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
+    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
 #  when: manual

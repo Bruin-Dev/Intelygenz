@@ -22,7 +22,7 @@ variable "subdomain" {
   default = "dev"
 }
 
-variable "build_number" {}
+variable "BUILD_NUMBER" {}
 
 
 variable "PYTHONUNBUFFERED" {
@@ -37,12 +37,11 @@ variable "NATS_CLUSTER_NAME" {
   default = "automation-engine-nats"
 }
 
-variable "VELOCLOUD_CREDENTIALS_PRO" {}
+variable "VELOCLOUD_CREDENTIALS" {}
 
-variable "VELOCLOUD_VERIFY_SSL" {}
-
-//variable "AWS_ACCESS_KEY_ID" {}
-//variable "AWS_SECRET_ACCESS_KEY" {}
+variable "VELOCLOUD_VERIFY_SSL" {
+  default = "yes"
+}
 
 variable "cdir_base" {
   default = "10.1.0.0"
