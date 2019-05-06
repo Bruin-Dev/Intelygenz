@@ -6,11 +6,13 @@ class Actions:
     _event_bus = None
     _velocloud_repository = None
     _logger = None
+    _prometheus_repository = None
 
-    def __init__(self, event_bus: EventBus, velocloud_repository, logger):
+    def __init__(self, event_bus: EventBus, velocloud_repository, logger, prometheus_repository):
         self._event_bus = event_bus
         self._velocloud_repository = velocloud_repository
         self._logger = logger
+        self._prometheus_repository = prometheus_repository
 
     async def _send_edge_status_tasks(self):
         edges_by_enterprise = self._velocloud_repository.get_all_enterprises_edges_with_host()
@@ -24,7 +26,17 @@ class Actions:
         if not exec_on_start:
             await asyncio.sleep(seconds)
         while True:
+            self._prometheus_repository.reset_edges_counter()
+            sum = self.sum_edges_all_hosts()
+            self._prometheus_repository.set_cycle_total_edges(sum)
             self._logger.info("Executing scheduled task: send edge status tasks")
             await self._send_edge_status_tasks()
             self._logger.info("Executed scheduled task: send edge status tasks")
             await asyncio.sleep(seconds)
+
+    def sum_edges_all_hosts(self):
+        sum = self._velocloud_repository.get_all_hosts_edge_count()
+        return sum
+
+    def start_prometheus_metrics_server(self):
+        self._prometheus_repository.start_prometheus_metrics_server()

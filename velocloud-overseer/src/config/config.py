@@ -31,7 +31,7 @@ VELOCLOUD_CONFIG = {
 }
 
 OVERSEER_CONFIG = {
-    'interval_time': 600
+    'interval_time': 1500
 }
 
 LOG_CONFIG = {
@@ -44,4 +44,8 @@ LOG_CONFIG = {
 QUART_CONFIG = {
     'title': 'velocloud-overseer',
     'port': 5000
+}
+
+GRAFANA_CONFIG = {
+    'port': 9090
 }

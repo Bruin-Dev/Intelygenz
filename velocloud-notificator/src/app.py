@@ -61,6 +61,6 @@ if __name__ == '__main__':
     container = Container()
     container.logger.info("Velocloud notificator starting...")
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(container.run())
+    asyncio.ensure_future(container.run(), loop=loop)
     asyncio.ensure_future(container.start_server(), loop=loop)
     loop.run_forever()

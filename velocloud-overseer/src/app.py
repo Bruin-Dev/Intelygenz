@@ -7,6 +7,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
 import socket
+from application.repositories.prometheus_repository import PrometheusRepository
 
 
 class Container:
@@ -14,6 +15,7 @@ class Container:
     velocloud_repository = None
     publisher = None
     event_bus = None
+    prometheus_repository = None
     report_edge_action = None
     actions = None
     logger = LoggerClient(config).get_logger()
@@ -24,11 +26,13 @@ class Container:
 
         self.publisher = NatsStreamingClient(config, "velocloud-overseer-publisher", logger=self.logger)
         self.event_bus = EventBus(logger=self.logger)
+        self.prometheus_repository = PrometheusRepository(config)
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger)
+        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger, self.prometheus_repository)
 
     async def start(self):
+        self.actions.start_prometheus_metrics_server()
         await self.event_bus.connect()
         await self.actions.send_edge_status_task_interval(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
 
@@ -53,7 +57,6 @@ def resolve_ns(host, port):
 if __name__ == '__main__':
     container = Container()
     container.logger.info("Velocloud overseer starting...")
-    resolve_ns('www.google.com', 80)
     resolve_ns(config.NATS_CONFIG['servers'][0][7:-5], 4222)
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)
