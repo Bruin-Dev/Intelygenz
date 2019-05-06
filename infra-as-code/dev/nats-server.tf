@@ -98,6 +98,25 @@ resource "aws_security_group" "automation-nats_service" {
   }
 }
 
+resource "aws_service_discovery_service" "nats-server" {
+  name = "nats-server"
+
+  dns_config {
+    namespace_id = "${aws_service_discovery_private_dns_namespace.nats-server.id}"
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+}
+
 resource "aws_ecs_service" "automation-nats-server" {
   name = "${var.environment}-nats-server"
   task_definition = "${aws_ecs_task_definition.automation-nats-server.family}:${aws_ecs_task_definition.automation-nats-server.revision}"
@@ -118,5 +137,12 @@ resource "aws_ecs_service" "automation-nats-server" {
     target_group_arn = "${aws_alb_target_group.automation-nats-server.arn}"
     container_name = "nats-streaming"
     container_port = 8222
+  }
+
+  service_registries {
+    registry_arn = "${aws_service_discovery_service.nats-server.arn}"
+    container_name = "nats-streaming"
+    container_port = 4222
+    port = 4222
   }
 }
