@@ -1,9 +1,9 @@
 data "aws_ecr_repository" "automation-metrics-prometheus" {
-  name = "${var.environment}-metrics-prometheus"
+  name = "${var.environment}-metrics-dashboard/prometheus"
 }
 
 data "template_file" "automation-metrics-prometheus" {
-  template = "${file("${path.module}/task-definitions/velocloud_notificator.json")}"
+  template = "${file("${path.module}/task-definitions/prometheus.json")}"
 
   vars {
     image = "${data.aws_ecr_repository.automation-metrics-prometheus.repository_url}:${var.BUILD_NUMBER}"

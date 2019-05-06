@@ -116,8 +116,5 @@ resource "aws_ecs_service" "automation-velocloud-overseer" {
 
   service_registries {
     registry_arn = "${aws_service_discovery_service.velocloud-overseer.arn}"
-    container_name = "velocloud-overseer"
-    container_port = 9090
-    port = 9090
   }
 }

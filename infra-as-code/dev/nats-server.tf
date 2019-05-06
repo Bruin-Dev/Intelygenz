@@ -142,8 +142,5 @@ resource "aws_ecs_service" "automation-nats-server" {
 
   service_registries {
     registry_arn = "${aws_service_discovery_service.nats-server.arn}"
-    container_name = "nats-streaming"
-    container_port = 4222
-    port = 4222
   }
 }

@@ -17,3 +17,7 @@ resource "aws_ecr_repository" "automation-velocloud-notificator" {
 resource "aws_ecr_repository" "automation-metrics-prometheus" {
   name = "${var.environment}-metrics-dashboard/prometheus"
 }
+
+resource "aws_ecr_repository" "automation-metrics-grafana" {
+  name = "${var.environment}-metrics-dashboard/grafana"
+}

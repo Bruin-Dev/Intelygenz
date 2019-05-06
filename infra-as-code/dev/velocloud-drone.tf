@@ -115,8 +115,5 @@ resource "aws_ecs_service" "automation-velocloud-drone" {
 
   service_registries {
     registry_arn = "${aws_service_discovery_service.velocloud-drone.arn}"
-    container_name = "velocloud-drone"
-    container_port = 9090
-    port = 9090
   }
 }
