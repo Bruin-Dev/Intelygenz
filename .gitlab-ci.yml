@@ -154,12 +154,12 @@ nats-streaming-build:
 #  variables:
 #    MODULE_NAME: metrics-dashboard/grafana
 #  <<: *build_app_image
-#
-#prometheus-build:
-#  stage: build
-#  variables:
-#    MODULE_NAME: metrics-dashboard/prometheus
-#  <<: *build_app_image
+
+prometheus-build:
+  stage: build
+  variables:
+    MODULE_NAME: metrics-dashboard/prometheus
+  <<: *build_app_image
 
 velocloud-notificator-build:
   stage: build

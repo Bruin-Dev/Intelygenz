@@ -10,7 +10,10 @@ resource "aws_ecr_repository" "automation-velocloud-drone" {
   name = "${var.environment}-velocloud-drone"
 }
 
-
 resource "aws_ecr_repository" "automation-velocloud-notificator" {
   name = "${var.environment}-velocloud-notificator"
+}
+
+resource "aws_ecr_repository" "automation-metrics-prometheus" {
+  name = "${var.environment}-metrics-dashboard/prometheus"
 }
