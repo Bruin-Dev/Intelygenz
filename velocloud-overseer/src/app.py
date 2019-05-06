@@ -6,6 +6,7 @@ from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
+import socket
 
 
 class Container:
@@ -39,9 +40,20 @@ class Container:
         await self.start()
 
 
+def resolve_ns():
+    container.logger.info('resolving \'%s\'' % config.NATS_CONFIG['servers'][7:-5])
+    ip_list = []
+    ais = socket.getaddrinfo(config.NATS_CONFIG['servers'][7:-5], 0, 0, 0, 0)
+    for result in ais:
+        ip_list.append(result[-1][0])
+    ip_list = list(set(ip_list))
+    container.logger.info(ip_list)
+
+
 if __name__ == '__main__':
     container = Container()
     container.logger.info("Velocloud overseer starting...")
+    resolve_ns()
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)
     asyncio.ensure_future(container.start_server(), loop=loop)
