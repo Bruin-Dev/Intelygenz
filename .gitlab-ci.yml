@@ -240,7 +240,7 @@ deploy-dev:
   <<: *terraform_template
   script:
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
+    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
 #  when: manual
