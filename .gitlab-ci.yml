@@ -160,7 +160,7 @@ grafana-build:
     - pip install awscli
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
-    - cp metrics-dashboard/grafana/datasources/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
+    - cp metrics-dashboard/grafana/configs/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}

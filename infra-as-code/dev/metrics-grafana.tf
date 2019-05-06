@@ -1,5 +1,5 @@
 data "aws_ecr_repository" "automation-metrics-grafana" {
-  name = "${var.environment}-nats-streaming-server"
+  name = "${var.environment}-metrics-dashboard/grafana"
 }
 
 data "template_file" "automation-metrics-grafana" {
@@ -19,7 +19,7 @@ resource "aws_ecs_task_definition" "automation-metrics-grafana" {
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
-  cpu = "256"
+  cpu = "512"
   memory = "1024"
   execution_role_arn = "${aws_iam_role.ecs_execution_role.arn}"
   task_role_arn = "${aws_iam_role.ecs_execution_role.arn}"
