@@ -17,6 +17,20 @@
         "awslogs-stream-prefix": "${log_prefix}"
       }
     },
-    "environment": []
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:3000/ || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
+    "environment": [
+      {
+        "name": "GF_SECURITY_ADMIN_PASSWORD",
+        "value": "${GF_SECURITY_ADMIN_PASSWORD}"
+      }]
   }
 ]

@@ -17,6 +17,16 @@
         "awslogs-stream-prefix": "${log_prefix}"
       }
     },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:9090/-/healthy || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
     "environment": []
   }
 ]
