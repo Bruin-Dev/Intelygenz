@@ -10,20 +10,14 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'base-microservice'
-
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['base-microservice:9100']
-
   - job_name: 'velocloud-overseer'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['velocloud-overseer:9090']
+      - targets: ['velocloud-overseer.automation-dev.local:9090']
 
   - job_name: 'velocloud-drone'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['velocloud-drone:9090']
+      - targets: ['velocloud-drone.automation-dev.local:9090']
