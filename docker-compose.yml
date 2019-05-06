@@ -73,9 +73,6 @@ services:
 
   grafana:
     image: grafana/grafana:6.0.1
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=q1w2e3r4
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel
     depends_on:
       - prometheus
     restart: unless-stopped
