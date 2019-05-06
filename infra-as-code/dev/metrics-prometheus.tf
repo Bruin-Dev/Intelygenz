@@ -64,6 +64,25 @@ resource "aws_security_group" "automation-metrics-prometheus_service" {
   }
 }
 
+resource "aws_service_discovery_service" "metrics-prometheus" {
+  name = "prometheus"
+
+  dns_config {
+    namespace_id = "${aws_service_discovery_private_dns_namespace.automation-zone.id}"
+
+    dns_records {
+      ttl = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+}
+
 resource "aws_ecs_service" "automation-metrics-prometheus" {
   name = "${var.environment}-metrics-prometheus"
   task_definition = "${aws_ecs_task_definition.automation-metrics-prometheus.family}:${aws_ecs_task_definition.automation-metrics-prometheus.revision}"
@@ -78,5 +97,9 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
       "${aws_subnet.automation-private_subnet-1a.id}",
       "${aws_subnet.automation-private_subnet-1b.id}"]
     assign_public_ip = false
+  }
+
+  service_registries {
+    registry_arn = "${aws_service_discovery_service.metrics-prometheus.arn}"
   }
 }
