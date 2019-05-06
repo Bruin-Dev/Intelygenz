@@ -1,5 +1,5 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
-FROM python:3.6
+FROM python:3.6-alpine
 
 
 COPY velocloud-overseer/ /service/app
