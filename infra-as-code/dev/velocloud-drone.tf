@@ -78,6 +78,24 @@ resource "aws_security_group" "automation-velocloud-drone_service" {
     Environment = "${var.environment}"
   }
 }
+resource "aws_service_discovery_service" "velocloud-drone" {
+  name = "velocloud-drone"
+
+  dns_config {
+    namespace_id = "${aws_service_discovery_private_dns_namespace.automation-zone.id}"
+
+    dns_records {
+      ttl = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+}
 
 resource "aws_ecs_service" "automation-velocloud-drone" {
   name = "${var.environment}-velocloud-drone"
@@ -93,5 +111,12 @@ resource "aws_ecs_service" "automation-velocloud-drone" {
       "${aws_subnet.automation-private_subnet-1a.id}",
       "${aws_subnet.automation-private_subnet-1b.id}"]
     assign_public_ip = false
+  }
+
+  service_registries {
+    registry_arn = "${aws_service_discovery_service.velocloud-drone.arn}"
+    container_name = "velocloud-drone"
+    container_port = 9090
+    port = 9090
   }
 }

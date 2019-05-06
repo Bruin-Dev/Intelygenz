@@ -1,6 +1,6 @@
 [
   {
-    "name": "prometheus",
+    "name": "metrics-prometheus",
     "image": "${image}",
     "portMappings": [
       {

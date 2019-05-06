@@ -79,6 +79,25 @@ resource "aws_security_group" "automation-velocloud-overseer_service" {
   }
 }
 
+resource "aws_service_discovery_service" "velocloud-overseer" {
+  name = "velocloud-overseer"
+
+  dns_config {
+    namespace_id = "${aws_service_discovery_private_dns_namespace.automation-zone.id}"
+
+    dns_records {
+      ttl = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+}
+
 resource "aws_ecs_service" "automation-velocloud-overseer" {
   name = "${var.environment}-velocloud-overseer"
   task_definition = "${aws_ecs_task_definition.automation-velocloud-overseer.family}:${aws_ecs_task_definition.automation-velocloud-overseer.revision}"
@@ -93,5 +112,12 @@ resource "aws_ecs_service" "automation-velocloud-overseer" {
       "${aws_subnet.automation-private_subnet-1a.id}",
       "${aws_subnet.automation-private_subnet-1b.id}"]
     assign_public_ip = false
+  }
+
+  service_registries {
+    registry_arn = "${aws_service_discovery_service.velocloud-overseer.arn}"
+    container_name = "velocloud-overseer"
+    container_port = 9090
+    port = 9090
   }
 }

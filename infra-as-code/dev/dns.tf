@@ -14,7 +14,7 @@ resource "aws_route53_record" "automation" {
   }
 }
 
-resource "aws_service_discovery_private_dns_namespace" "nats-server" {
+resource "aws_service_discovery_private_dns_namespace" "automation-zone" {
   name        = "${var.environment}.local"
   description = "private DNS zone for automation"
   vpc         = "${aws_vpc.automation-vpc.id}"

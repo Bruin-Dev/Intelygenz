@@ -46,7 +46,8 @@ resource "aws_alb_target_group" "automation-nats-server" {
     enabled = false
   }
 
-  depends_on = ["aws_alb.automation-alb"]
+  depends_on = [
+    "aws_alb.automation-alb"]
 
   lifecycle {
     create_before_destroy = true
@@ -102,10 +103,10 @@ resource "aws_service_discovery_service" "nats-server" {
   name = "nats-server"
 
   dns_config {
-    namespace_id = "${aws_service_discovery_private_dns_namespace.nats-server.id}"
+    namespace_id = "${aws_service_discovery_private_dns_namespace.automation-zone.id}"
 
     dns_records {
-      ttl  = 10
+      ttl = 10
       type = "A"
     }
 
