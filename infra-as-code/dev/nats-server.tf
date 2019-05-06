@@ -83,6 +83,15 @@ resource "aws_security_group" "automation-nats_service" {
     ]
   }
 
+  ingress {
+    from_port = 4222
+    to_port = 4222
+    protocol = "TCP"
+    cidr_blocks = [
+      "${var.cdir_base}/16"
+    ]
+  }
+
   tags {
     Name = "${var.environment}-nats-server"
     Environment = "${var.environment}"
@@ -107,7 +116,7 @@ resource "aws_ecs_service" "automation-nats-server" {
 
   load_balancer {
     target_group_arn = "${aws_alb_target_group.automation-nats-server.arn}"
-    container_name = "nats"
+    container_name = "nats-streaming"
     container_port = 8222
   }
 }

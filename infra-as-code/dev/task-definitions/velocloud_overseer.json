@@ -32,7 +32,7 @@
       },
       {
         "name": "VELOCLOUD_CREDENTIALS",
-        "value": "${VELOCLOUD_CREDENTIALS_PRO}"
+        "value": "${VELOCLOUD_CREDENTIALS}"
       },
       {
         "name": "VELOCLOUD_VERIFY_SSL",
