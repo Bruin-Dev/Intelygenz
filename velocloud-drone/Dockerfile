@@ -1,6 +1,7 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
 FROM python:3.6
 
+RUN apk --no-cache add curl
 
 COPY velocloud-drone/ /service/app
 # Add custom packages to the image in order to import them
