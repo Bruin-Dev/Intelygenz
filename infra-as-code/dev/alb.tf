@@ -19,6 +19,17 @@ resource "aws_security_group" "automation-dev-inbound" {
   }
 
   ingress {
+    from_port = 3000
+    to_port = 3000
+    protocol = "tcp"
+    cidr_blocks = [
+      "12.15.242.50/32", // US OFFICE
+      "76.102.161.105/32", // KEKO HOME
+      "76.103.237.82/32" // SANCHO HOME
+    ]
+  }
+
+  ingress {
     from_port = 8
     to_port = 0
     protocol = "icmp"
