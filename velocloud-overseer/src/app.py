@@ -40,10 +40,10 @@ class Container:
         await self.start()
 
 
-def resolve_ns():
-    container.logger.info('resolving \'%s\'' % config.NATS_CONFIG['servers'])
+def resolve_ns(host, port):
+    container.logger.info(f'resolving \'{host}:{port}\'')
     ip_list = []
-    ais = socket.getaddrinfo(config.NATS_CONFIG['servers'][0][7:-5], 0, 0, 0, 0)
+    ais = socket.getaddrinfo(host, port, 0, 0, 0)
     for result in ais:
         ip_list.append(result[-1][0])
     ip_list = list(set(ip_list))
@@ -53,7 +53,8 @@ def resolve_ns():
 if __name__ == '__main__':
     container = Container()
     container.logger.info("Velocloud overseer starting...")
-    resolve_ns()
+    resolve_ns('www.google.com', 80)
+    resolve_ns(config.NATS_CONFIG['servers'][0][7:-5], 4222)
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)
     asyncio.ensure_future(container.start_server(), loop=loop)
