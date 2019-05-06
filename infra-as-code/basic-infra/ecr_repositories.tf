@@ -5,3 +5,7 @@ resource "aws_ecr_repository" "automation-nats-server" {
 resource "aws_ecr_repository" "automation-velocloud-overseer" {
   name = "${var.environment}-velocloud-overseer"
 }
+
+resource "aws_ecr_repository" "automation-velocloud-drone" {
+  name = "${var.environment}-velocloud-drone"
+}

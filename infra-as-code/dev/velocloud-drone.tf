@@ -1,12 +1,12 @@
-data "aws_ecr_repository" "automation-velocloud-overseer" {
-  name = "${var.environment}-velocloud-overseer"
+data "aws_ecr_repository" "automation-velocloud-drone" {
+  name = "${var.environment}-velocloud-drone"
 }
 
-data "template_file" "automation-velocloud-overseer" {
-  template = "${file("${path.module}/task-definitions/velocloud_overseer.json")}"
+data "template_file" "automation-velocloud-drone" {
+  template = "${file("${path.module}/task-definitions/velocloud_drone.json")}"
 
   vars {
-    image = "${data.aws_ecr_repository.automation-velocloud-overseer.repository_url}:${var.BUILD_NUMBER}"
+    image = "${data.aws_ecr_repository.automation-velocloud-drone.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.environment}"
     log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
 
@@ -18,9 +18,9 @@ data "template_file" "automation-velocloud-overseer" {
   }
 }
 
-resource "aws_ecs_task_definition" "automation-velocloud-overseer" {
-  family = "${var.environment}-velocloud-overseer"
-  container_definitions = "${data.template_file.automation-velocloud-overseer.rendered}"
+resource "aws_ecs_task_definition" "automation-velocloud-drone" {
+  family = "${var.environment}-velocloud-drone"
+  container_definitions = "${data.template_file.automation-velocloud-drone.rendered}"
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
@@ -30,9 +30,9 @@ resource "aws_ecs_task_definition" "automation-velocloud-overseer" {
   task_role_arn = "${aws_iam_role.ecs_execution_role.arn}"
 }
 
-resource "aws_security_group" "automation-velocloud-overseer_service" {
+resource "aws_security_group" "automation-velocloud-drone_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.environment}-velocloud-overseer"
+  name = "${var.environment}-velocloud-drone"
   description = "Allow egress from container"
 
   lifecycle {
@@ -74,21 +74,21 @@ resource "aws_security_group" "automation-velocloud-overseer_service" {
   }
 
   tags {
-    Name = "${var.environment}-velocloud-overseer"
+    Name = "${var.environment}-velocloud-drone"
     Environment = "${var.environment}"
   }
 }
 
-resource "aws_ecs_service" "automation-velocloud-overseer" {
-  name = "${var.environment}-velocloud-overseer"
-  task_definition = "${aws_ecs_task_definition.automation-velocloud-overseer.family}:${aws_ecs_task_definition.automation-velocloud-overseer.revision}"
+resource "aws_ecs_service" "automation-velocloud-drone" {
+  name = "${var.environment}-velocloud-drone"
+  task_definition = "${aws_ecs_task_definition.automation-velocloud-drone.family}:${aws_ecs_task_definition.automation-velocloud-drone.revision}"
   desired_count = 1
   launch_type = "FARGATE"
   cluster = "${aws_ecs_cluster.automation.id}"
 
   network_configuration {
     security_groups = [
-      "${aws_security_group.automation-velocloud-overseer_service.id}"]
+      "${aws_security_group.automation-velocloud-drone_service.id}"]
     subnets = [
       "${aws_subnet.automation-private_subnet-1a.id}",
       "${aws_subnet.automation-private_subnet-1b.id}"]

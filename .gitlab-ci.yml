@@ -166,12 +166,12 @@ nats-streaming-build:
 #  variables:
 #    MODULE_NAME: velocloud-notificator
 #  <<: *build_app_image
-#
-#velocloud-drone-build:
-#  stage: build
-#  variables:
-#    MODULE_NAME: velocloud-drone
-#  <<: *build_app_image
+
+velocloud-drone-build:
+  stage: build
+  variables:
+    MODULE_NAME: velocloud-drone
+  <<: *build_app_image
 
 velocloud-overseer-build:
   stage: build

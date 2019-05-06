@@ -6,6 +6,10 @@
       {
         "containerPort": 5000,
         "hostPort": 5000
+      },
+      {
+        "containerPort": 9090,
+        "hostPort": 9090
       }
     ],
     "networkMode": "awsvpc",
