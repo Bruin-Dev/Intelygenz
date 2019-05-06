@@ -29,10 +29,6 @@ variable "PYTHONUNBUFFERED" {
   default = 1
 }
 
-variable "NATS_SERVER1" {
-  default = "nats://nats-streaming:4222"
-}
-
 variable "NATS_CLUSTER_NAME" {
   default = "automation-engine-nats"
 }
