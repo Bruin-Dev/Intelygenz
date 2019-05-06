@@ -10,6 +10,7 @@ import asyncio
 from igz.packages.server.api import QuartServer
 import shortuuid
 
+
 class Container:
     velocloud_repository = None
     prometheus_repository = None
