@@ -41,9 +41,9 @@ class Container:
 
 
 def resolve_ns():
-    container.logger.info('resolving \'%s\'' % config.NATS_CONFIG['servers'][7:-5])
+    container.logger.info('resolving \'%s\'' % config.NATS_CONFIG['servers'])
     ip_list = []
-    ais = socket.getaddrinfo(config.NATS_CONFIG['servers'][7:-5], 0, 0, 0, 0)
+    ais = socket.getaddrinfo(config.NATS_CONFIG['servers'][0][7:-5], 0, 0, 0, 0)
     for result in ais:
         ip_list.append(result[-1][0])
     ip_list = list(set(ip_list))
