@@ -9,3 +9,8 @@ resource "aws_ecr_repository" "automation-velocloud-overseer" {
 resource "aws_ecr_repository" "automation-velocloud-drone" {
   name = "${var.environment}-velocloud-drone"
 }
+
+
+resource "aws_ecr_repository" "automation-velocloud-notificator" {
+  name = "${var.environment}-velocloud-notificator"
+}

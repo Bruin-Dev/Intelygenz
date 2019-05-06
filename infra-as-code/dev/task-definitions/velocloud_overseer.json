@@ -1,6 +1,6 @@
 [
   {
-    "name": "velocloud_overseer",
+    "name": "velocloud-overseer",
     "image": "${image}",
     "portMappings": [
       {

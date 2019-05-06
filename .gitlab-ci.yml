@@ -160,12 +160,12 @@ nats-streaming-build:
 #  variables:
 #    MODULE_NAME: metrics-dashboard/prometheus
 #  <<: *build_app_image
-#
-#velocloud-notificator-build:
-#  stage: build
-#  variables:
-#    MODULE_NAME: velocloud-notificator
-#  <<: *build_app_image
+
+velocloud-notificator-build:
+  stage: build
+  variables:
+    MODULE_NAME: velocloud-notificator
+  <<: *build_app_image
 
 velocloud-drone-build:
   stage: build
