@@ -1,5 +1,5 @@
 FROM prom/prometheus:v2.7.2
-B
+
 COPY metrics-dashboard/prometheus/prometheus.yml /etc/prometheus/prometheus.yml
 
 EXPOSE 9090
