@@ -12,7 +12,9 @@ resource "aws_security_group" "automation-dev-inbound" {
     to_port = 8222
     protocol = "tcp"
     cidr_blocks = [
-      "12.15.242.50/32"]
+      "12.15.242.50/32", // US OFFICE
+      "76.102.161.105/32" // KEKO HOME
+    ]
   }
 
   ingress {
