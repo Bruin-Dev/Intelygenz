@@ -1,8 +1,11 @@
 from nats.aio.client import Client as NATS
-from stan.aio.client import Client as STAN
+from stan.aio.client import Client as STAN, ErrConnectReqTimeout
+from nats.aio.errors import ErrNoServers
+
 from igz.packages.eventbus.action import ActionWrapper
 import logging
-import sys
+from tenacity import retry, stop_after_attempt, retry_if_exception_type
+from asyncio.futures import TimeoutError
 
 
 class NatsStreamingClient:
@@ -28,6 +31,7 @@ class NatsStreamingClient:
             logger.addHandler(log_handler)
         self._logger = logger
 
+    @retry(stop=stop_after_attempt(5), retry=retry_if_exception_type((ErrNoServers, ErrConnectReqTimeout)))
     async def connect_to_nats(self):
         # Use borrowed connection for NATS then mount NATS Streaming
         # client on top.
@@ -38,6 +42,7 @@ class NatsStreamingClient:
         await self._sc.connect(self._config["cluster_name"], client_id=self._client_id,
                                nats=self._nc, max_pub_acks_inflight=self._config["publisher"]["max_pub_acks_inflight"])
 
+    @retry(stop=stop_after_attempt(5), retry=retry_if_exception_type(TimeoutError))
     async def publish(self, topic, message):
         await self._sc.publish(topic, message.encode())
 

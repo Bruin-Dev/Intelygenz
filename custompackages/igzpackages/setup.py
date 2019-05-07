@@ -20,7 +20,7 @@ REQUIRES = [
     "Quart==0.6.12",
     "quart-openapi==1.4.3",
     "behave == 1.2.6",
-
+    "tenacity == 5.0.4",
 ]
 setup(
     name=NAME,
