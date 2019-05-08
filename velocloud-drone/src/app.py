@@ -48,6 +48,7 @@ class Container:
 
     async def start(self):
         self.actions.start_prometheus_metrics_server()
+        self.velocloud_repository.connect_to_all_servers()
         await self.event_bus.connect()
         await self.event_bus.subscribe_consumer(consumer_name="tasks", topic="edge.status.task",
                                                 action_wrapper=self.report_edge_action, durable_name="velocloud_drones",

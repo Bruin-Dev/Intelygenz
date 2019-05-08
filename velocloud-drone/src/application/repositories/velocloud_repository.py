@@ -11,8 +11,10 @@ class VelocloudRepository:
         self._config = config.VELOCLOUD_CONFIG
         self._clients = list()
         self._velocloud_client = velocloud_client
-        self._clients = self._velocloud_client._instantiate_and_connect_clients()
         self._logger = logger
+
+    def connect_to_all_servers(self):
+        self._clients = self._velocloud_client._instantiate_and_connect_clients()
 
     def get_client_by_host(self, host):
         host_client = [client
