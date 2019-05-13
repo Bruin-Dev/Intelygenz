@@ -10,7 +10,10 @@ NATS_CONFIG = {
     'cluster_name': os.environ["NATS_CLUSTER_NAME"],
     'publisher': {
         'max_pub_acks_inflight': 1
-    }
+    },
+    'multiplier': 5,
+    'min': 5,
+    'max': 300
 }
 
 

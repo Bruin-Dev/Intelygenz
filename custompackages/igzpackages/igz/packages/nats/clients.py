@@ -1,12 +1,9 @@
 from nats.aio.client import Client as NATS
-from stan.aio.client import Client as STAN, ErrConnectReqTimeout
-from nats.aio.errors import ErrNoServers
-
+from stan.aio.client import Client as STAN
 from igz.packages.eventbus.action import ActionWrapper
 import logging
 import sys
-from tenacity import retry, stop_after_attempt, retry_if_exception_type
-from asyncio.futures import TimeoutError
+from tenacity import retry, wait_exponential
 
 
 class NatsStreamingClient:
@@ -32,20 +29,31 @@ class NatsStreamingClient:
             logger.addHandler(log_handler)
         self._logger = logger
 
-    @retry(stop=stop_after_attempt(5), retry=retry_if_exception_type((ErrNoServers, ErrConnectReqTimeout)))
     async def connect_to_nats(self):
-        # Use borrowed connection for NATS then mount NATS Streaming
-        # client on top.
-        self._nc = NATS()
-        await self._nc.connect(servers=self._config["servers"])
-        # Start session with NATS Streaming cluster.
-        self._sc = STAN()
-        await self._sc.connect(self._config["cluster_name"], client_id=self._client_id,
-                               nats=self._nc, max_pub_acks_inflight=self._config["publisher"]["max_pub_acks_inflight"])
+        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min'],
+                                     max=self._config['max']))
+        async def connect_to_nats():
+            # Use borrowed connection for NATS then mount NATS Streaming
+            # client on top.
+            self._nc = NATS()
+            await self._nc.connect(servers=self._config["servers"])
+            # Start session with NATS Streaming cluster.
+            self._sc = STAN()
 
-    @retry(stop=stop_after_attempt(5), retry=retry_if_exception_type(TimeoutError))
+            await self._sc.connect(self._config["cluster_name"], client_id=self._client_id,
+                                   nats=self._nc, max_pub_acks_inflight=self._config["publisher"]
+                                   ["max_pub_acks_inflight"])
+        print(self._config['multiplier'])
+
+        await connect_to_nats()
+
     async def publish(self, topic, message):
-        await self._sc.publish(topic, message.encode())
+        try:
+            await self._sc.publish(topic, message.encode())
+        except Exception:
+            await self.close_nats_connections()
+            await self.connect_to_nats()
+            await self._sc.publish(topic, message.encode())
 
     async def _cb_with_ack_and_action(self, msg):
         self._logger.info(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
@@ -81,18 +89,36 @@ class NatsStreamingClient:
     async def subscribe_action(self, topic, action: ActionWrapper,
                                start_at='first', time=None, sequence=None, queue=None, durable_name=None):
         self._topic_action[topic] = action
-        sub = await self._sc.subscribe(topic,
-                                       start_at=start_at,
-                                       time=time,
-                                       sequence=sequence,
-                                       queue=queue,
-                                       durable_name=durable_name,
-                                       cb=self._cb_with_ack_and_action,
-                                       manual_acks=True,
-                                       max_inflight=self._config["subscriber"][
-                                           "max_inflight"],
-                                       pending_limits=self._config["subscriber"][
-                                           "pending_limits"])
+        try:
+
+            sub = await self._sc.subscribe(topic,
+                                           start_at=start_at,
+                                           time=time,
+                                           sequence=sequence,
+                                           queue=queue,
+                                           durable_name=durable_name,
+                                           cb=self._cb_with_ack_and_action,
+                                           manual_acks=True,
+                                           max_inflight=self._config["subscriber"][
+                                               "max_inflight"],
+                                           pending_limits=self._config["subscriber"][
+                                               "pending_limits"])
+        except Exception:
+            await self.close_nats_connections()
+            await  self.connect_to_nats()
+            sub = await self._sc.subscribe(topic,
+                                           start_at=start_at,
+                                           time=time,
+                                           sequence=sequence,
+                                           queue=queue,
+                                           durable_name=durable_name,
+                                           cb=self._cb_with_ack_and_action,
+                                           manual_acks=True,
+                                           max_inflight=self._config["subscriber"][
+                                               "max_inflight"],
+                                           pending_limits=self._config["subscriber"][
+                                               "pending_limits"])
+
         self._subs.append(sub)
 
     async def subscribe(self, topic, callback,
@@ -115,6 +141,8 @@ class NatsStreamingClient:
         for sub in self._subs:
             await sub.unsubscribe()
         # Close NATS Streaming session
-        await self._sc.close()
+        if self._nc.is_connected:
+            await self._sc.close()
         # We are using a NATS borrowed connection so we need to close manually.
-        await self._nc.close()
+        if self._nc.is_closed is False:
+            await self._nc.close()
