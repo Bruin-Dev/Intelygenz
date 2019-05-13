@@ -3,6 +3,7 @@ from config import testconfig as config
 from application.repositories.velocloud_repository import VelocloudRepository
 from collections import namedtuple
 import velocloud
+from velocloud_client.client.velocloud_client import VelocloudClient
 
 
 class TestVelocloudRepository:
@@ -27,50 +28,12 @@ class TestVelocloudRepository:
         all_api_client.api_client.base_path = config.VELOCLOUD_CONFIG['servers'][0]['url']
         velocloud.AllApi = Mock(return_value=all_api_client)
 
-    def create_one_and_connect_clients_test(self):
-        mock_logger = Mock()
-        self.mock_velocloud()
-        vr = VelocloudRepository(config, mock_logger)
-        if vr._config['verify_ssl'] is 'no':
-            assert not velocloud.configuration.verify_ssl
-        else:
-            assert velocloud.configuration.verify_ssl
-        assert velocloud.ApiClient.called
-        assert velocloud.ApiClient.call_args[1] == dict(host=vr._config['servers'][0]['url'])
-        assert velocloud.ApiClient().authenticate.called
-        assert velocloud.ApiClient().authenticate.call_args[0] == (vr._config['servers'][0]['username'],
-                                                                   vr._config['servers'][0]['password'])
-
-        assert velocloud.ApiClient().authenticate.call_args[1] == dict(operator=True)
-        assert velocloud.AllApi.called
-
-    def create_and_connect_all_clients_test(self):
-        mock_logger = Mock()
-        self.mock_velocloud()
-        mock_config = Mock()
-        mock_config.VELOCLOUD_CONFIG = {
-            'verify_ssl': 'yes',
-            'servers': [
-                {
-                    'url': 'someurl',
-                    'username': 'someusername',
-                    'password': 'somepassword',
-
-                },
-                {
-                    'url': 'someurl2',
-                    'username': 'someusername2',
-                    'password': 'somepassword2',
-
-                }
-            ]}
-        vr = VelocloudRepository(mock_config, mock_logger)
-        assert len(vr._clients) is len(mock_config.VELOCLOUD_CONFIG['servers'])
-
     def get_all_enterprises_edges_with_host_test(self):
         mock_logger = Mock()
         self.mock_velocloud()
-        vr = VelocloudRepository(config, mock_logger)
+        test_velocloud_client = VelocloudClient(config)
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr.connect_to_all_servers()
         edges_by_ent = vr.get_all_enterprises_edges_with_host()
         assert edges_by_ent == [{"host": "someurl", "enterpriseId": 1, "id": 19},
                                 {"host": "someurl", "enterpriseId": 1, "id": 77}]
@@ -78,7 +41,9 @@ class TestVelocloudRepository:
     def chatching_velocloud_exception_test(self):
         mock_logger = Mock()
         self.mock_velocloud()
-        vr = VelocloudRepository(config, mock_logger)
+        test_velocloud_client = VelocloudClient(config)
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr.connect_to_all_servers()
         vr._logger.exception = Mock()
         vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
         edges_by_ent = vr.get_all_enterprises_edges_with_host()
@@ -88,7 +53,9 @@ class TestVelocloudRepository:
     def get_all_hosts_edge_count_test(self):
         mock_logger = Mock()
         self.mock_velocloud()
-        vr = VelocloudRepository(config, mock_logger)
+        test_velocloud_client = VelocloudClient(config)
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr.connect_to_all_servers()
         sum = vr.get_all_hosts_edge_count()
         print(sum)
         assert sum == 123
@@ -96,9 +63,20 @@ class TestVelocloudRepository:
     def get_all_hosts_edge_count_KO_test(self):
         mock_logger = Mock()
         self.mock_velocloud()
-        vr = VelocloudRepository(config, mock_logger)
+        test_velocloud_client = VelocloudClient(config)
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        vr.connect_to_all_servers()
         vr._logger.exception = Mock()
         vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
         sum = vr.get_all_hosts_edge_count()
         assert sum is 0
         assert vr._logger.exception.called
+
+    def connect_to_all_servers_test(self):
+        mock_logger = Mock()
+        self.mock_velocloud()
+        test_velocloud_client = VelocloudClient(config)
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        test_velocloud_client._instantiate_and_connect_clients = Mock()
+        vr.connect_to_all_servers()
+        assert test_velocloud_client._instantiate_and_connect_clients.called

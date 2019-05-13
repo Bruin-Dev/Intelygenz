@@ -7,6 +7,7 @@ import velocloud
 from collections import namedtuple
 from config import testconfig as config
 from application.repositories.velocloud_repository import VelocloudRepository
+from velocloud_client.client.velocloud_client import VelocloudClient
 
 
 class TestDroneActions:
@@ -25,7 +26,8 @@ class TestDroneActions:
         test_bus = EventBus(logger=mock_logger)
         test_prometheus = Mock()
         self.mock_velocloud()
-        velocloud_repo = VelocloudRepository(config, mock_logger)
+        test_velocloud_client = VelocloudClient(config)
+        velocloud_repo = VelocloudRepository(config, mock_logger, test_velocloud_client)
         actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
         assert actions._configs is config
         assert actions._logger is mock_logger

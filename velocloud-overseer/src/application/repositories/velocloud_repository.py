@@ -4,25 +4,17 @@ import velocloud
 class VelocloudRepository:
     _config = None
     _clients = None
+    _velocloud_client = None
     _logger = None
 
-    def __init__(self, config, logger):
+    def __init__(self, config, logger, velocloud_client):
         self._config = config.VELOCLOUD_CONFIG
         self._clients = list()
-        self._instantiate_and_connect_clients()
+        self._velocloud_client = velocloud_client
         self._logger = logger
 
-    def _instantiate_and_connect_clients(self):
-        self._clients = [
-            self._create_and_connect_client(cred_block['url'], cred_block['username'], cred_block['password']) for
-            cred_block in self._config['servers']]
-
-    def _create_and_connect_client(self, host, user, password):
-        if self._config['verify_ssl'] is 'no':
-            velocloud.configuration.verify_ssl = False
-        client = velocloud.ApiClient(host=host)
-        client.authenticate(user, password, operator=True)
-        return velocloud.AllApi(client)
+    def connect_to_all_servers(self):
+        self._clients = self._velocloud_client._instantiate_and_connect_clients()
 
     def get_all_enterprises_edges_with_host(self):
         edges_by_enterprise_and_host = list()

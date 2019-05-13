@@ -9,9 +9,11 @@ from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
 import shortuuid
+from velocloud_client.client.velocloud_client import VelocloudClient
 
 
 class Container:
+    velocloud_client = None
     velocloud_repository = None
     prometheus_repository = None
     edge_status_gauge = None
@@ -27,7 +29,8 @@ class Container:
     server = None
 
     def setup(self):
-        self.velocloud_repository = VelocloudRepository(config, self.logger)
+        self.velocloud_client = VelocloudClient(config)
+        self.velocloud_repository = VelocloudRepository(config, self.logger, self.velocloud_client)
         self.prometheus_repository = PrometheusRepository(config)
 
         uuid = shortuuid.uuid()[:8]
@@ -47,6 +50,7 @@ class Container:
 
     async def start(self):
         self.actions.start_prometheus_metrics_server()
+        self.velocloud_repository.connect_to_all_servers()
         await self.event_bus.connect()
         await self.event_bus.subscribe_consumer(consumer_name="tasks", topic="edge.status.task",
                                                 action_wrapper=self.report_edge_action, durable_name="velocloud_drones",

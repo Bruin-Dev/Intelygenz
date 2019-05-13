@@ -6,13 +6,14 @@ from application.repositories.velocloud_repository import VelocloudRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
-import socket
 from application.repositories.prometheus_repository import PrometheusRepository
 import shortuuid
+from velocloud_client.client.velocloud_client import VelocloudClient
 
 
 class Container:
     logger = None
+    velocloud_client = None
     velocloud_repository = None
     publisher = None
     event_bus = None
@@ -23,7 +24,8 @@ class Container:
     server = QuartServer(config)
 
     def setup(self):
-        self.velocloud_repository = VelocloudRepository(config, self.logger)
+        self.velocloud_client = VelocloudClient(config)
+        self.velocloud_repository = VelocloudRepository(config, self.logger, self.velocloud_client)
 
         uuid = shortuuid.uuid()[:8]
         self.publisher = NatsStreamingClient(config, f'velocloud-overseer-publisher-{uuid}', logger=self.logger)
@@ -35,6 +37,7 @@ class Container:
 
     async def start(self):
         self.actions.start_prometheus_metrics_server()
+        self.velocloud_repository.connect_to_all_servers()
         await self.event_bus.connect()
         await self.actions.send_edge_status_task_interval(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
 
@@ -46,20 +49,9 @@ class Container:
         await self.start()
 
 
-def resolve_ns(host, port):
-    container.logger.info(f'resolving \'{host}:{port}\'')
-    ip_list = []
-    ais = socket.getaddrinfo(host, port, 0, 0, 0)
-    for result in ais:
-        ip_list.append(result[-1][0])
-    ip_list = list(set(ip_list))
-    container.logger.info(ip_list)
-
-
 if __name__ == '__main__':
     container = Container()
     container.logger.info("Velocloud overseer starting...")
-    resolve_ns(config.NATS_CONFIG['servers'][0][7:-5], 4222)
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)
     asyncio.ensure_future(container.start_server(), loop=loop)

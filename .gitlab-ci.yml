@@ -1,7 +1,7 @@
 stages:
   - validation
   - unit_test
-#  - acceptance_tests
+  - acceptance_tests
   - basic_infra
   - build
   - deploy
@@ -82,6 +82,11 @@ igzpackages-linter:
     MODULE: custompackages/igzpackages/
   <<: *lint_module
 
+velocloud-linter:
+  variables:
+    MODULE: custompackages/velocloud/velocloud_client
+  <<: *lint_module
+
 velocloud-notificator-linter:
   variables:
     MODULE: velocloud-notificator
@@ -114,6 +119,19 @@ igzpackages-test:
     - apt-get update -q -y
     - cd ${MODULE}
     - python setup.py install
+  script:
+    - pytest --cov
+
+velocloud-test:
+  variables:
+    MODULE: velocloud_client
+  stage: unit_test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd custompackages/velocloud/
+    - python setup.py install
+    - cd ${MODULE}
   script:
     - pytest --cov
 
