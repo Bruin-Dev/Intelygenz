@@ -11,9 +11,11 @@ omit =
     *__init__.py**
     *_test.py
     *app.py
+    */velocloud/velocloud/*
+
 [paths]
 source =
-    packages/
+    client/
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =
