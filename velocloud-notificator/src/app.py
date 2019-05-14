@@ -10,7 +10,6 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.server.api import QuartServer
-import shortuuid
 
 
 class Container:
@@ -29,9 +28,8 @@ class Container:
     server = None
 
     def setup(self):
-        uuid = shortuuid.uuid()[:8]
-        self.subscriber = NatsStreamingClient(config, f'velocloud-notificator-subscriber-{uuid}', logger=self.logger)
-        self.publisher = NatsStreamingClient(config, f'velocloud-notificator-publisher-{uuid}', logger=self.logger)
+        self.subscriber = NatsStreamingClient(config, f'velocloud-notificator-subscriber-', logger=self.logger)
+        self.publisher = NatsStreamingClient(config, f'velocloud-notificator-publisher-', logger=self.logger)
         self.slack_client = SlackClient(config, self.logger)
         self.slack_repo = SlackRepository(config, self.slack_client, self.logger)
         self.stats_client = StatisticClient(config)

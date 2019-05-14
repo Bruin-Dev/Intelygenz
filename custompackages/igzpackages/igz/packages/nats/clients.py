@@ -4,6 +4,7 @@ from igz.packages.eventbus.action import ActionWrapper
 import logging
 import sys
 from tenacity import retry, wait_exponential
+import shortuuid
 
 
 class NatsStreamingClient:
@@ -12,12 +13,14 @@ class NatsStreamingClient:
     _subs = None
     _topic_action = None
     _config = None
+    _uuid = None
     _client_id = ""
     _logger = None
 
     def __init__(self, config, client_id, logger=None):
         self._config = config.NATS_CONFIG
-        self._client_id = client_id
+        self._uuid = shortuuid.uuid()[:8]
+        self._client_id = client_id + self._uuid
         self._subs = list()
         self._topic_action = dict()
         if logger is None:
@@ -43,7 +46,6 @@ class NatsStreamingClient:
             await self._sc.connect(self._config["cluster_name"], client_id=self._client_id,
                                    nats=self._nc, max_pub_acks_inflight=self._config["publisher"]
                                    ["max_pub_acks_inflight"])
-        print(self._config['multiplier'])
 
         await connect_to_nats()
 

@@ -15,8 +15,9 @@ class TestNatsStreamingClient:
         mock_logger = Mock()
         nats_s_client = NatsStreamingClient(config, "test-client-id")
         nats_s_client_2 = NatsStreamingClient(config, "test-client-id-2", logger=mock_logger)
+        client_id = "test-client-id" + nats_s_client._uuid
         assert nats_s_client._config == config.NATS_CONFIG
-        assert nats_s_client._client_id == "test-client-id"
+        assert nats_s_client._client_id == client_id
         assert isinstance(nats_s_client._logger, logging._loggerClass) is True
         assert nats_s_client._logger.hasHandlers() is True
         assert nats_s_client._logger.getEffectiveLevel() is 10
@@ -28,6 +29,7 @@ class TestNatsStreamingClient:
         STAN.connect = CoroutineMock()
         mock_logger = Mock()
         nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        client_id = "test-client-id" + nats_s_client._uuid
         await nats_s_client.connect_to_nats()
         assert isinstance(nats_s_client._nc, NATS)
         assert isinstance(nats_s_client._sc, STAN)
@@ -38,7 +40,7 @@ class TestNatsStreamingClient:
         max_pub_acks = config.NATS_CONFIG["publisher"]["max_pub_acks_inflight"]
         assert nats_s_client._sc.connect.await_args[1] == dict(nats=nats_s_client._nc,
                                                                max_pub_acks_inflight=max_pub_acks,
-                                                               client_id="test-client-id", )
+                                                               client_id=client_id)
 
     @pytest.mark.asyncio
     async def publish_message_test(self):
@@ -420,7 +422,44 @@ class TestNatsStreamingClient:
         nats_s_client._subs.append(sub)
         nats_s_client._sc = Mock()
         nats_s_client._nc = Mock()
+        nats_s_client._nc.is_closed = False
+        nats_s_client._nc.is_connected = True
         nats_s_client._sc.close = CoroutineMock()
         nats_s_client._nc.close = CoroutineMock()
         await nats_s_client.close_nats_connections()
         assert sub.unsubscribe.called and nats_s_client._sc.close.called and nats_s_client._nc.close.called
+
+    @pytest.mark.asyncio
+    async def close_disconnected_nats_connection_test(self):
+        mock_logger = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client._subs = list()
+        sub = Mock()
+        sub.unsubscribe = CoroutineMock()
+        nats_s_client._subs.append(sub)
+        nats_s_client._sc = Mock()
+        nats_s_client._nc = Mock()
+        nats_s_client._nc.is_closed = False
+        nats_s_client._nc.is_connected = False
+        nats_s_client._sc.close = CoroutineMock()
+        nats_s_client._nc.close = CoroutineMock()
+        await nats_s_client.close_nats_connections()
+        assert sub.unsubscribe.called and nats_s_client._sc.close.called is False and nats_s_client._nc.close.called
+
+    @pytest.mark.asyncio
+    async def close_closed_nats_connection_test(self):
+        mock_logger = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client._subs = list()
+        sub = Mock()
+        sub.unsubscribe = CoroutineMock()
+        nats_s_client._subs.append(sub)
+        nats_s_client._sc = Mock()
+        nats_s_client._nc = Mock()
+        nats_s_client._nc.is_closed = True
+        nats_s_client._nc.is_connected = False
+        nats_s_client._sc.close = CoroutineMock()
+        nats_s_client._nc.close = CoroutineMock()
+        await nats_s_client.close_nats_connections()
+        assert sub.unsubscribe.called and nats_s_client._sc.close.called is False
+        assert nats_s_client._nc.close.called is False

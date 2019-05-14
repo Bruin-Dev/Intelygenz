@@ -11,7 +11,10 @@ NATS_CONFIG = {
     },
     'publisher': {
         'max_pub_acks_inflight': 6000
-    }
+    },
+    'multiplier': 5,
+    'min': 5,
+    'max': 300
 }
 
 LOG_CONFIG = {

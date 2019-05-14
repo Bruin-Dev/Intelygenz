@@ -21,6 +21,7 @@ REQUIRES = [
     "quart-openapi==1.4.3",
     "behave == 1.2.6",
     "tenacity == 5.0.4",
+    "shortuuid==0.5.0"
 ]
 setup(
     name=NAME,

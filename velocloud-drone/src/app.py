@@ -8,7 +8,6 @@ from application.repositories.prometheus_repository import PrometheusRepository
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
-import shortuuid
 from velocloud_client.client.velocloud_client import VelocloudClient
 
 
@@ -33,9 +32,8 @@ class Container:
         self.velocloud_repository = VelocloudRepository(config, self.logger, self.velocloud_client)
         self.prometheus_repository = PrometheusRepository(config)
 
-        uuid = shortuuid.uuid()[:8]
-        self.publisher = NatsStreamingClient(config, f'velocloud-drone-publisher-{uuid}', logger=self.logger)
-        self.subscriber = NatsStreamingClient(config, f'velocloud-drone-subscriber-{uuid}', logger=self.logger)
+        self.publisher = NatsStreamingClient(config, f'velocloud-drone-publisher-', logger=self.logger)
+        self.subscriber = NatsStreamingClient(config, f'velocloud-drone-subscriber-', logger=self.logger)
 
         self.event_bus = EventBus(logger=self.logger)
         self.event_bus.add_consumer(self.subscriber, consumer_name="tasks")

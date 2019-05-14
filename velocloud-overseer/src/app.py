@@ -7,7 +7,6 @@ from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
 from application.repositories.prometheus_repository import PrometheusRepository
-import shortuuid
 from velocloud_client.client.velocloud_client import VelocloudClient
 
 
@@ -27,8 +26,7 @@ class Container:
         self.velocloud_client = VelocloudClient(config)
         self.velocloud_repository = VelocloudRepository(config, self.logger, self.velocloud_client)
 
-        uuid = shortuuid.uuid()[:8]
-        self.publisher = NatsStreamingClient(config, f'velocloud-overseer-publisher-{uuid}', logger=self.logger)
+        self.publisher = NatsStreamingClient(config, f'velocloud-overseer-publisher-', logger=self.logger)
         self.event_bus = EventBus(logger=self.logger)
         self.prometheus_repository = PrometheusRepository(config)
         self.event_bus.set_producer(self.publisher)
