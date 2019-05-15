@@ -1,4 +1,5 @@
 import velocloud
+from tenacity import retry, wait_exponential
 
 
 class VelocloudClient:
@@ -15,8 +16,13 @@ class VelocloudClient:
         return _clients
 
     def _create_and_connect_client(self, host, user, password):
-        if self._config['verify_ssl'] is 'no':
-            velocloud.configuration.verify_ssl = False
-        client = velocloud.ApiClient(host=host)
-        client.authenticate(user, password, operator=True)
-        return velocloud.AllApi(client)
+        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min'],
+                                     max=self._config['max']))
+        def _create_and_connect_client(host, user, password):
+            if self._config['verify_ssl'] is 'no':
+                velocloud.configuration.verify_ssl = False
+            client = velocloud.ApiClient(host=host)
+            client.authenticate(user, password, operator=True)
+            return velocloud.AllApi(client)
+
+        _create_and_connect_client(host, user, password)

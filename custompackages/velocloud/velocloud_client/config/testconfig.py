@@ -7,5 +7,9 @@ VELOCLOUD_CONFIG = {
             'password': 'somepassword',
 
         }
-    ]
+    ],
+    'multiplier': 5,
+    'min': 5,
+    'max': 300
+
 }

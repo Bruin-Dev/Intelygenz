@@ -35,7 +35,11 @@ def parse_velocloud_config():
 
 VELOCLOUD_CONFIG = {
     'verify_ssl': os.environ["VELOCLOUD_VERIFY_SSL"],
-    'servers': parse_velocloud_config()
+    'servers': parse_velocloud_config(),
+    'multiplier': 5,
+    'min': 5,
+    'max': 300
+
 }
 
 LOG_CONFIG = {
