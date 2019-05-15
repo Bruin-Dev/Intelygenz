@@ -261,4 +261,4 @@ deploy-dev:
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-#  when: manual
+  when: manual
