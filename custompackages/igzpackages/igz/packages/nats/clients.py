@@ -111,7 +111,7 @@ class NatsStreamingClient:
                                            pending_limits=self._config["subscriber"][
                                                "pending_limits"])
 
-        elif self._nc.is_connected is False:
+        else:
             await self.close_nats_connections()
             await self.connect_to_nats()
             sub = await self._sc.subscribe(topic,

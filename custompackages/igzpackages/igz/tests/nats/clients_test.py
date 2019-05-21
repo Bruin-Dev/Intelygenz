@@ -35,7 +35,8 @@ class TestNatsStreamingClient:
         assert isinstance(nats_s_client._sc, STAN)
         assert nats_s_client._nc.connect.called
         assert nats_s_client._sc.connect.called
-        assert nats_s_client._nc.connect.await_args[1] == dict(servers=config.NATS_CONFIG["servers"])
+        assert nats_s_client._nc.connect.await_args[1] == dict(servers=config.NATS_CONFIG["servers"],
+                                                               max_reconnect_attempts=config.NATS_CONFIG["reconnects"])
         assert nats_s_client._sc.connect.await_args[0] == (config.NATS_CONFIG["cluster_name"],)
         max_pub_acks = config.NATS_CONFIG["publisher"]["max_pub_acks_inflight"]
         assert nats_s_client._sc.connect.await_args[1] == dict(nats=nats_s_client._nc,
@@ -46,9 +47,27 @@ class TestNatsStreamingClient:
     async def publish_message_test(self):
         mock_logger = Mock()
         nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client._nc = Mock()
+        nats_s_client._nc.is_connected = True
         nats_s_client._sc = Mock()
         nats_s_client._sc.publish = CoroutineMock()
         await nats_s_client.publish("Test-topic", "Test-message")
+        assert nats_s_client._sc.publish.called
+        assert nats_s_client._sc.publish.await_args[0] == ("Test-topic", b'Test-message')
+
+    @pytest.mark.asyncio
+    async def publish_message_disconnected_test(self):
+        mock_logger = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client._nc = Mock()
+        nats_s_client._nc.is_connected = False
+        nats_s_client.close_nats_connections = CoroutineMock()
+        nats_s_client.connect_to_nats = CoroutineMock()
+        nats_s_client._sc = Mock()
+        nats_s_client._sc.publish = CoroutineMock()
+        await nats_s_client.publish("Test-topic", "Test-message")
+        assert nats_s_client.close_nats_connections.called
+        assert nats_s_client.connect_to_nats.called
         assert nats_s_client._sc.publish.called
         assert nats_s_client._sc.publish.await_args[0] == ("Test-topic", b'Test-message')
 
@@ -276,6 +295,8 @@ class TestNatsStreamingClient:
         nats_s_client._sc.ack = CoroutineMock()
         nats_s_client._logger.error = Mock()
         nats_s_client._logger.info = Mock()
+        nats_s_client._nc = Mock()
+        nats_s_client._nc.is_connected = True
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
@@ -313,6 +334,10 @@ class TestNatsStreamingClient:
         nats_s_client._sc.ack = CoroutineMock()
         nats_s_client._logger.error = Mock()
         nats_s_client._logger.info = Mock()
+        nats_s_client._nc = Mock()
+        nats_s_client._nc.is_connected = False
+        nats_s_client.close_nats_connections = CoroutineMock()
+        nats_s_client.connect_to_nats = CoroutineMock()
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
@@ -320,8 +345,8 @@ class TestNatsStreamingClient:
         message.sub.subject = "Test-topic"
         nats_s_client._sc.subscribe = CoroutineMock(return_value=nats_s_client._cb_with_ack_and_action(message))
         await nats_s_client.subscribe_action("Test-topic", action=None)
-        assert nats_s_client._logger.error.called
-        assert nats_s_client._logger.info.called
+        assert nats_s_client.close_nats_connections.called
+        assert nats_s_client.connect_to_nats.called
         assert nats_s_client._topic_action["Test-topic"] is None
         assert nats_s_client._sc.subscribe.await_args[0] == ("Test-topic",)
         assert nats_s_client._sc.subscribe.await_args[1] == dict(start_at='first',
@@ -346,6 +371,8 @@ class TestNatsStreamingClient:
         nats_s_client._sc.ack = CoroutineMock()
         nats_s_client._logger.exception = Mock()
         nats_s_client._logger.info = Mock()
+        nats_s_client._nc = Mock()
+        nats_s_client._nc.is_connected = True
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
@@ -384,6 +411,8 @@ class TestNatsStreamingClient:
         nats_s_client._sc.ack = CoroutineMock()
         nats_s_client._logger.error = Mock()
         nats_s_client._logger.info = Mock()
+        nats_s_client._nc = Mock()
+        nats_s_client._nc.is_connected = True
         message = Mock()
         message.seq = Mock()
         message.data = Mock()
