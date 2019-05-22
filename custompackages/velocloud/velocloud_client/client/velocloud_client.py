@@ -24,5 +24,5 @@ class VelocloudClient:
             client = velocloud.ApiClient(host=host)
             client.authenticate(user, password, operator=True)
             return velocloud.AllApi(client)
-
-        _create_and_connect_client(host, user, password)
+        velocloud_api = _create_and_connect_client(host, user, password)
+        return velocloud_api

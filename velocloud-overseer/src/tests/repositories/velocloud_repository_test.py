@@ -38,7 +38,7 @@ class TestVelocloudRepository:
         assert edges_by_ent == [{"host": "someurl", "enterpriseId": 1, "id": 19},
                                 {"host": "someurl", "enterpriseId": 1, "id": 77}]
 
-    def chatching_velocloud_exception_test(self):
+    def catching_velocloud_exception_test(self):
         mock_logger = Mock()
         self.mock_velocloud()
         test_velocloud_client = VelocloudClient(config)
@@ -46,9 +46,11 @@ class TestVelocloudRepository:
         vr.connect_to_all_servers()
         vr._logger.exception = Mock()
         vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
+        vr.exception_call = Mock()
         edges_by_ent = vr.get_all_enterprises_edges_with_host()
         assert len(edges_by_ent) is 0
         assert vr._logger.exception.called
+        assert vr.exception_call.called
 
     def get_all_hosts_edge_count_test(self):
         mock_logger = Mock()
@@ -68,9 +70,11 @@ class TestVelocloudRepository:
         vr.connect_to_all_servers()
         vr._logger.exception = Mock()
         vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
+        vr.exception_call = Mock()
         sum = vr.get_all_hosts_edge_count()
         assert sum is 0
         assert vr._logger.exception.called
+        assert vr.exception_call.called
 
     def connect_to_all_servers_test(self):
         mock_logger = Mock()

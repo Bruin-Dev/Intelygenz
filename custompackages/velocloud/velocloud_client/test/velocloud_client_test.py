@@ -52,7 +52,11 @@ class TestVelocloudClient:
                     'password': 'somepassword2',
 
                 }
-            ]}
+            ],
+            'multiplier': 5,
+            'min': 5,
+            'max': 300
+        }
         vc = VelocloudClient(mock_config)
         vr_clients = vc._instantiate_and_connect_clients()
         assert len(vr_clients) is len(mock_config.VELOCLOUD_CONFIG['servers'])

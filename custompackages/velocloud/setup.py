@@ -30,6 +30,7 @@ REQUIRES = ["urllib3 >= 1.15",
             "pytest==4.2.1",
             "pytest-cov==2.6.1",
             "coverage == 4.5.2",
+            "tenacity == 5.0.4"
             ]
 
 setup(
