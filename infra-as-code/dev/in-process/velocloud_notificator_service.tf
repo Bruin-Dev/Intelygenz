@@ -44,7 +44,7 @@ resource "aws_security_group" "mettel-automation-backend_service" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-backend"
     Environment = "${var.environment}"
   }

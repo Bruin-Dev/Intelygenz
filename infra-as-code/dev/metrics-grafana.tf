@@ -5,7 +5,7 @@ data "aws_ecr_repository" "automation-metrics-grafana" {
 data "template_file" "automation-metrics-grafana" {
   template = "${file("${path.module}/task-definitions/grafana.json")}"
 
-  vars {
+  vars = {
     image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.environment}"
     log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
@@ -42,7 +42,7 @@ resource "aws_alb_target_group" "automation-metrics-grafana" {
   protocol = "HTTP"
   vpc_id = "${aws_vpc.automation-vpc.id}"
   target_type = "ip"
-  stickiness = {
+  stickiness {
     type = "lb_cookie"
     enabled = false
   }
@@ -85,7 +85,7 @@ resource "aws_security_group" "automation-grafana_service" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-metrics-grafana"
     Environment = "${var.environment}"
   }

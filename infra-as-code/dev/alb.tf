@@ -45,7 +45,7 @@ resource "aws_security_group" "automation-dev-inbound" {
       "0.0.0.0/0"]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-inbound"
   }
 }
@@ -63,7 +63,7 @@ resource "aws_alb" "automation-alb" {
   security_groups = [
     "${aws_security_group.automation-dev-inbound.id}"]
 
-  tags {
+  tags = {
     Name = "${var.environment}"
     Environment = "${var.environment}"
   }

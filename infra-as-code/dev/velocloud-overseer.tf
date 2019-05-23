@@ -5,7 +5,7 @@ data "aws_ecr_repository" "automation-velocloud-overseer" {
 data "template_file" "automation-velocloud-overseer" {
   template = "${file("${path.module}/task-definitions/velocloud_overseer.json")}"
 
-  vars {
+  vars = {
     image = "${data.aws_ecr_repository.automation-velocloud-overseer.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.environment}"
     log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
@@ -73,7 +73,7 @@ resource "aws_security_group" "automation-velocloud-overseer_service" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-velocloud-overseer"
     Environment = "${var.environment}"
   }

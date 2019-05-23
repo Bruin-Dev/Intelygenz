@@ -5,7 +5,7 @@ data "aws_ecr_repository" "automation-velocloud-drone" {
 data "template_file" "automation-velocloud-drone" {
   template = "${file("${path.module}/task-definitions/velocloud_drone.json")}"
 
-  vars {
+  vars = {
     image = "${data.aws_ecr_repository.automation-velocloud-drone.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.environment}"
     log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
@@ -73,7 +73,7 @@ resource "aws_security_group" "automation-velocloud-drone_service" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-velocloud-drone"
     Environment = "${var.environment}"
   }

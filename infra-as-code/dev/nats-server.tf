@@ -5,7 +5,7 @@ data "aws_ecr_repository" "automation-nats-server" {
 data "template_file" "automation-nats-server" {
   template = "${file("${path.module}/task-definitions/nats_server.json")}"
 
-  vars {
+  vars = {
     image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.environment}"
     log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
@@ -41,7 +41,7 @@ resource "aws_alb_target_group" "automation-nats-server" {
   protocol = "HTTP"
   vpc_id = "${aws_vpc.automation-vpc.id}"
   target_type = "ip"
-  stickiness = {
+  stickiness {
     type = "lb_cookie"
     enabled = false
   }
@@ -93,7 +93,7 @@ resource "aws_security_group" "automation-nats_service" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-nats-server"
     Environment = "${var.environment}"
   }

@@ -5,7 +5,7 @@ data "aws_ecr_repository" "automation-metrics-prometheus" {
 data "template_file" "automation-metrics-prometheus" {
   template = "${file("${path.module}/task-definitions/prometheus.json")}"
 
-  vars {
+  vars = {
     image = "${data.aws_ecr_repository.automation-metrics-prometheus.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.environment}"
     log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
@@ -58,7 +58,7 @@ resource "aws_security_group" "automation-metrics-prometheus_service" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-metrics-prometheus"
     Environment = "${var.environment}"
   }

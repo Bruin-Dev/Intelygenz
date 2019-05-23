@@ -44,7 +44,7 @@ resource "aws_security_group" "automation-velocloud-drone_service" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-velocloud-drone"
     Environment = "${var.environment}"
   }

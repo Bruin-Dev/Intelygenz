@@ -44,7 +44,7 @@ resource "aws_security_group" "mettel-automation-pro-prometheus_service" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-prometheus"
     Environment = "${var.environment}"
   }

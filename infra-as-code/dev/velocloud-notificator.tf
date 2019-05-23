@@ -5,7 +5,7 @@ data "aws_ecr_repository" "automation-velocloud-notificator" {
 data "template_file" "automation-velocloud-notificator" {
   template = "${file("${path.module}/task-definitions/velocloud_notificator.json")}"
 
-  vars {
+  vars = {
     image = "${data.aws_ecr_repository.automation-velocloud-notificator.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.environment}"
     log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
@@ -63,7 +63,7 @@ resource "aws_security_group" "automation-velocloud-notificator_service" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-velocloud-notificator"
     Environment = "${var.environment}"
   }

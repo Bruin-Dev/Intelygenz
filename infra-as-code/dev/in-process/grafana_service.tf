@@ -44,7 +44,7 @@ resource "aws_security_group" "mettel-automation-pro-grafana_service" {
     ]
   }
 
-  tags {
+  tags = {
     Name = "${var.environment}-grafana"
     Environment = "${var.environment}"
   }
