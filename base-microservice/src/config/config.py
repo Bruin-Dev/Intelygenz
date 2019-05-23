@@ -17,7 +17,7 @@ NATS_CONFIG = {
     },
     'multiplier': 5,
     'min': 5,
-    'max': 300,
+    'stop_delay': 300,
     'reconnects': 150
 }
 

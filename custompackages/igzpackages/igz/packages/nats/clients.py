@@ -3,7 +3,7 @@ from stan.aio.client import Client as STAN
 from igz.packages.eventbus.action import ActionWrapper
 import logging
 import sys
-from tenacity import retry, wait_exponential
+from tenacity import retry, wait_exponential, stop_after_delay
 import shortuuid
 
 
@@ -33,8 +33,8 @@ class NatsStreamingClient:
         self._logger = logger
 
     async def connect_to_nats(self):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min'],
-                                     max=self._config['max']))
+        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
+               stop=stop_after_delay(self._config['stop_delay']))
         async def connect_to_nats():
             # Use borrowed connection for NATS then mount NATS Streaming
             # client on top.
@@ -46,11 +46,12 @@ class NatsStreamingClient:
             await self._sc.connect(self._config["cluster_name"], client_id=self._client_id,
                                    nats=self._nc, max_pub_acks_inflight=self._config["publisher"]
                                    ["max_pub_acks_inflight"])
+
         await connect_to_nats()
 
     async def publish(self, topic, message):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min'],
-                                     max=self._config['max']))
+        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
+               stop=stop_after_delay(self._config['stop_delay']))
         async def publish(topic, message):
 
             if self._nc.is_connected:

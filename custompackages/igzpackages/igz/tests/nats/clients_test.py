@@ -7,9 +7,11 @@ from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
 from igz.config import testconfig as config
 import logging
+from tenacity import RetryError
 
 
 class TestNatsStreamingClient:
+    attempts = 0
 
     def instantiation_test(self):
         mock_logger = Mock()
@@ -44,6 +46,18 @@ class TestNatsStreamingClient:
                                                                client_id=client_id)
 
     @pytest.mark.asyncio
+    async def connect_to_nats_retry_test(self):
+        NATS.connect = CoroutineMock(side_effect=Exception())
+        mock_logger = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        try:
+            await nats_s_client.connect_to_nats()
+        except Exception as e:
+            error = e
+        assert isinstance(error, RetryError)
+        assert NATS.connect.call_count > 1
+
+    @pytest.mark.asyncio
     async def publish_message_test(self):
         mock_logger = Mock()
         nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
@@ -54,6 +68,21 @@ class TestNatsStreamingClient:
         await nats_s_client.publish("Test-topic", "Test-message")
         assert nats_s_client._sc.publish.called
         assert nats_s_client._sc.publish.await_args[0] == ("Test-topic", b'Test-message')
+
+    @pytest.mark.asyncio
+    async def publish_message_retry_test(self):
+        mock_logger = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client._nc = Mock()
+        nats_s_client._nc.is_connected = True
+        nats_s_client._sc = Mock()
+        nats_s_client._sc.publish = CoroutineMock(side_effect=Exception())
+        try:
+            await nats_s_client.publish("Test-topic", "Test-message")
+        except Exception as e:
+            error = e
+        assert isinstance(error, RetryError)
+        assert nats_s_client._sc.publish.call_count > 1
 
     @pytest.mark.asyncio
     async def publish_message_disconnected_test(self):
