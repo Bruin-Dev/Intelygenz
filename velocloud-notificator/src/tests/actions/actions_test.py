@@ -3,6 +3,8 @@ from application.actions.actions import Actions
 from config import testconfig as config
 import asyncio
 import pytest
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from pytz import utc
 
 
 class TestActions:
@@ -11,7 +13,8 @@ class TestActions:
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
         mock_logger = Mock()
-        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger)
+        scheduler = Mock()
+        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger, scheduler)
         assert test_actions._config == config
         assert test_actions._slack_repository is mock_slack_repository
         assert test_actions._statistic_repository is mock_stats_repo
@@ -22,7 +25,8 @@ class TestActions:
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
         mock_logger = Mock()
-        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger)
+        scheduler = Mock()
+        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger, scheduler)
         test_actions._slack_repository.send_to_slack = Mock()
         test_actions.send_to_slack(test_msg)
         assert test_actions._slack_repository.send_to_slack.called
@@ -32,7 +36,8 @@ class TestActions:
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
         mock_logger = Mock()
-        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger)
+        scheduler = Mock()
+        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger, scheduler)
         test_actions._statistic_repository.send_to_stats_client = Mock()
         test_actions.store_stats(test_msg)
         assert test_actions._statistic_repository.send_to_stats_client.called
@@ -42,16 +47,16 @@ class TestActions:
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
         mock_logger = Mock()
-        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger)
+        scheduler = AsyncIOScheduler(timezone=utc)
+        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger, scheduler)
         test_actions._statistic_repository._statistic_client.get_statistics = Mock(return_value='OK')
         test_actions._statistic_repository._statistic_client.clear_dictionaries = Mock()
         test_actions.send_to_slack = Mock()
         test_actions._logger.info = Mock()
-        loop = asyncio.get_event_loop()
-        task = asyncio.ensure_future(test_actions.send_stats_to_slack_interval(), loop=loop)
+        test_actions.set_stats_to_slack_job()
+        scheduler.start()
         await asyncio.sleep(1.1)
-        task.cancel()
-        loop.stop()
+        scheduler.shutdown(wait=False)
         assert test_actions._statistic_repository._statistic_client.get_statistics.called
         assert test_actions._statistic_repository._statistic_client.clear_dictionaries.called
         assert test_actions.send_to_slack.called
@@ -62,16 +67,16 @@ class TestActions:
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
         mock_logger = Mock()
-        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger)
+        scheduler = AsyncIOScheduler(timezone=utc)
+        test_actions = Actions(config, mock_slack_repository, mock_stats_repo, mock_logger, scheduler)
         test_actions._statistic_repository._statistic_client.get_statistics = Mock(return_value=None)
         test_actions._statistic_repository._statistic_client.clear_dictionaries = Mock()
         test_actions.send_to_slack = Mock()
         test_actions._logger.info = Mock()
-        loop = asyncio.get_event_loop()
-        task = asyncio.ensure_future(test_actions.send_stats_to_slack_interval(), loop=loop)
+        test_actions.set_stats_to_slack_job()
+        scheduler.start()
         await asyncio.sleep(1.1)
-        task.cancel()
-        loop.stop()
+        scheduler.shutdown(wait=False)
         assert test_actions._statistic_repository._statistic_client.get_statistics.called
         assert test_actions._statistic_repository._statistic_client.clear_dictionaries.called
         assert test_actions.send_to_slack.called is False

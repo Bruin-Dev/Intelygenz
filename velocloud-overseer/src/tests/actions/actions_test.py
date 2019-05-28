@@ -67,7 +67,7 @@ class TestOverseerActions:
         actions._send_edge_status_tasks = CoroutineMock()
         actions._prometheus_repository.set_cycle_total_edges = Mock()
         actions._prometheus_repository.reset_edges_counter = Mock()
-        actions.set_edge_status_job(0.1, False)
+        actions.set_edge_status_job(0.1, True)
         scheduler.start()
         await asyncio.sleep(0.1)
         scheduler.shutdown(wait=False)
