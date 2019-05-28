@@ -153,10 +153,10 @@ velocloud-drone-test:
 #
 # Acceptance/Integration tests
 #
-event_sourcing_acceptance_test:
-  variables:
-    BLUEPRINT: ${HONESTCODE_EVENT_SOURCING_BLUEPRINT}
-  <<: *acceptance_test_module
+#event_sourcing_acceptance_test:
+#  variables:
+#    BLUEPRINT: ${HONESTCODE_EVENT_SOURCING_BLUEPRINT}
+#  <<: *acceptance_test_module
 
 #
 # Images builds
