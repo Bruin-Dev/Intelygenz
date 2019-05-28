@@ -27,7 +27,9 @@ VELOCLOUD_CONFIG = {
     ],
     'multiplier': 5,
     'min': 5,
-    'max': 300
+    'max': 300,
+    'total': 8,
+    'backoff_factor': 2
 
 }
 

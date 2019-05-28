@@ -55,7 +55,9 @@ class TestVelocloudClient:
             ],
             'multiplier': 5,
             'min': 5,
-            'max': 300
+            'max': 300,
+            'total': 8,
+            'backoff_factor': 2
         }
         vc = VelocloudClient(mock_config)
         vr_clients = vc._instantiate_and_connect_clients()

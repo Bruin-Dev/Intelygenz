@@ -29,8 +29,7 @@ REQUIRES = ["urllib3 >= 1.15",
             "python-dateutil",
             "pytest==4.2.1",
             "pytest-cov==2.6.1",
-            "coverage == 4.5.2",
-            "tenacity == 5.0.4"
+            "coverage == 4.5.2"
             ]
 
 setup(

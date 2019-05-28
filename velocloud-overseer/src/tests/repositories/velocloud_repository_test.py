@@ -45,12 +45,17 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         vr.connect_to_all_servers()
         vr._logger.exception = Mock()
-        vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
-        vr.exception_call = Mock()
+        vr._logger.error = Mock()
+        exception = velocloud.rest.ApiException()
+        exception.status = 400
+        vr._clients[0].monitoringGetAggregates = Mock(side_effect=exception)
         edges_by_ent = vr.get_all_enterprises_edges_with_host()
         assert len(edges_by_ent) is 0
         assert vr._logger.exception.called
-        assert vr.exception_call.called
+        assert vr._logger.error.called is False
+        exception.status = 0
+        edges_by_ent = vr.get_all_enterprises_edges_with_host()
+        assert vr._logger.error.called
 
     def get_all_hosts_edge_count_test(self):
         mock_logger = Mock()
@@ -59,7 +64,6 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         vr.connect_to_all_servers()
         sum = vr.get_all_hosts_edge_count()
-        print(sum)
         assert sum == 123
 
     def get_all_hosts_edge_count_KO_test(self):
@@ -69,12 +73,17 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         vr.connect_to_all_servers()
         vr._logger.exception = Mock()
-        vr._clients[0].monitoringGetAggregates = Mock(side_effect=velocloud.rest.ApiException())
-        vr.exception_call = Mock()
+        vr._logger.error = Mock()
+        exception = velocloud.rest.ApiException()
+        exception.status = 400
+        vr._clients[0].monitoringGetAggregates = Mock(side_effect=exception)
         sum = vr.get_all_hosts_edge_count()
         assert sum is 0
         assert vr._logger.exception.called
-        assert vr.exception_call.called
+        assert vr._logger.error.called is False
+        exception.status = 0
+        sum = vr.get_all_hosts_edge_count()
+        assert vr._logger.error.called
 
     def connect_to_all_servers_test(self):
         mock_logger = Mock()

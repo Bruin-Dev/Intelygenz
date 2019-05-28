@@ -1,13 +1,15 @@
 import velocloud
-from tenacity import retry, wait_exponential
+import urllib3
 
 
 class VelocloudClient:
 
-    _config = None
-
     def __init__(self, config):
         self._config = config.VELOCLOUD_CONFIG
+        self.whitelist = frozenset(['HEAD', 'GET', 'PUT', 'DELETE', 'OPTIONS', 'TRACE', 'POST'])
+        urllib3.util.retry.Retry.DEFAULT = urllib3.util.retry.Retry(total=self._config['total'],
+                                                                    backoff_factor=self._config['backoff_factor'],
+                                                                    method_whitelist=self.whitelist)
 
     def _instantiate_and_connect_clients(self):
         _clients = [
@@ -16,13 +18,8 @@ class VelocloudClient:
         return _clients
 
     def _create_and_connect_client(self, host, user, password):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min'],
-                                     max=self._config['max']))
-        def _create_and_connect_client(host, user, password):
-            if self._config['verify_ssl'] is 'no':
-                velocloud.configuration.verify_ssl = False
-            client = velocloud.ApiClient(host=host)
-            client.authenticate(user, password, operator=True)
-            return velocloud.AllApi(client)
-        velocloud_api = _create_and_connect_client(host, user, password)
-        return velocloud_api
+        if self._config['verify_ssl'] is 'no':
+            velocloud.configuration.verify_ssl = False
+        client = velocloud.ApiClient(host=host)
+        client.authenticate(user, password, operator=True)
+        return velocloud.AllApi(client)
