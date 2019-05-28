@@ -32,7 +32,7 @@ class VelocloudRepository:
         except velocloud.rest.ApiException as e:
             self._logger.exception(e)
             if e.status == 0:
-                self._logger.error('Error, bad credentials')
+                self._logger.error('Error, could not authenticate')
 
     def get_link_information(self, host, enterpriseid, edgeid):
         target_host_client = self.get_client_by_host(host)
@@ -43,7 +43,7 @@ class VelocloudRepository:
         except velocloud.rest.ApiException as e:
             self._logger.exception(e)
             if e.status == 0:
-                self._logger.error('Error, bad credentials')
+                self._logger.error('Error, could not authenticate')
 
     def get_enterprise_information(self, host, enterpriseid):
         target_host_client = self.get_client_by_host(host)
@@ -54,4 +54,4 @@ class VelocloudRepository:
         except velocloud.rest.ApiException as e:
             self._logger.exception(e)
             if e.status == 0:
-                self._logger.error('Error, bad credentials')
+                self._logger.error('Error, could not authenticate')

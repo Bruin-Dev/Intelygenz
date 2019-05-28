@@ -6,6 +6,7 @@ class VelocloudClient:
 
     def __init__(self, config):
         self._config = config.VELOCLOUD_CONFIG
+        # Have to add POST method to a urlibs method_whitelist due to velocloud's api using only POST calls
         self.whitelist = frozenset(['HEAD', 'GET', 'PUT', 'DELETE', 'OPTIONS', 'TRACE', 'POST'])
         urllib3.util.retry.Retry.DEFAULT = urllib3.util.retry.Retry(total=self._config['total'],
                                                                     backoff_factor=self._config['backoff_factor'],

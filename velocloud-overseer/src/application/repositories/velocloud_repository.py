@@ -34,7 +34,7 @@ class VelocloudRepository:
             self._logger.exception(f'Error, exception ocurred getting all velocloud '
                                    f'enterprises from all velocloud clusters: {e}')
             if e.status == 0:
-                self._logger.error('Error, bad credentials')
+                self._logger.error('Error, could not authenticate')
 
         return edges_by_enterprise_and_host
 
@@ -48,5 +48,5 @@ class VelocloudRepository:
             self._logger.exception(f'Error, exception ocurred getting all velocloud '
                                    f'enterprises from all velocloud clusters: {e}')
             if e.status == 0:
-                self._logger.error('Error, bad credentials')
+                self._logger.error('Error, could not authenticate')
         return sum
