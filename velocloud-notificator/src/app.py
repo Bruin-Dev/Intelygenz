@@ -10,10 +10,11 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.server.api import QuartServer
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from pytz import utc
 
 
 class Container:
-
     subscriber = None
     publisher = None
     slack_client = None
@@ -26,15 +27,17 @@ class Container:
     time = config.SLACK_CONFIG['time']
     logger = LoggerClient(config).get_logger()
     server = None
+    scheduler = None
 
     def setup(self):
+        self.scheduler = AsyncIOScheduler(timezone=utc)
         self.subscriber = NatsStreamingClient(config, f'velocloud-notificator-subscriber-', logger=self.logger)
         self.publisher = NatsStreamingClient(config, f'velocloud-notificator-publisher-', logger=self.logger)
         self.slack_client = SlackClient(config, self.logger)
         self.slack_repo = SlackRepository(config, self.slack_client, self.logger)
         self.stats_client = StatisticClient(config)
         self.stats_repo = StatisticRepository(config, self.stats_client, self.logger)
-        self.actions = Actions(config, self.slack_repo, self.stats_repo, self.logger)
+        self.actions = Actions(config, self.slack_repo, self.stats_repo, self.logger, scheduler=self.scheduler)
         self.store_stats_wrapper = ActionWrapper(self.actions, "store_stats", logger=self.logger)
         self.event_bus = EventBus(logger=self.logger)
         self.event_bus.add_consumer(consumer=self.subscriber, consumer_name="KO_subscription")
@@ -47,7 +50,8 @@ class Container:
                                                 action_wrapper=self.store_stats_wrapper,
                                                 durable_name="velocloud_notificator",
                                                 queue="velocloud_notificator")
-        await self.actions.send_stats_to_slack_interval()
+        self.actions.set_stats_to_slack_job()
+        self.scheduler.start()
 
     async def start_server(self):
         await self.server.run_server()
