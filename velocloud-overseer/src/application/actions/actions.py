@@ -18,7 +18,7 @@ class Actions:
             self._logger.info(f'Edge discovered with data {edge}! Sending it to NATS edge.status.task queue')
             await self._event_bus.publish_message("edge.status.task", repr(edge))
 
-    async def set_edge_status_job(self, seconds, exec_on_start=True):
+    def set_edge_status_job(self, seconds, exec_on_start=True):
         self._logger.info(f'Scheduled task: send edge status configured to run each {seconds} seconds')
         self._logger.info(f'It will be executed when start = {exec_on_start}')
         next_run_time = undefined

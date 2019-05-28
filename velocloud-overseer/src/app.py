@@ -41,7 +41,7 @@ class Container:
         self.actions.start_prometheus_metrics_server()
         self.velocloud_repository.connect_to_all_servers()
         await self.event_bus.connect()
-        await self.actions.set_edge_status_job(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
+        self.actions.set_edge_status_job(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
         self.scheduler.start()
 
     async def start_server(self):
