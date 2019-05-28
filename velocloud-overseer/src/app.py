@@ -8,10 +8,11 @@ import asyncio
 from igz.packages.server.api import QuartServer
 from application.repositories.prometheus_repository import PrometheusRepository
 from velocloud_client.client.velocloud_client import VelocloudClient
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from pytz import utc
 
 
 class Container:
-    logger = None
     velocloud_client = None
     velocloud_repository = None
     publisher = None
@@ -21,8 +22,10 @@ class Container:
     actions = None
     logger = LoggerClient(config).get_logger()
     server = QuartServer(config)
+    scheduler = None
 
     def setup(self):
+        self.scheduler = AsyncIOScheduler(timezone=utc)
         self.velocloud_client = VelocloudClient(config)
         self.velocloud_repository = VelocloudRepository(config, self.logger, self.velocloud_client)
 
@@ -31,13 +34,15 @@ class Container:
         self.prometheus_repository = PrometheusRepository(config)
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger, self.prometheus_repository)
+        self.actions = Actions(self.event_bus, self.velocloud_repository, self.logger, self.prometheus_repository,
+                               self.scheduler)
 
     async def start(self):
         self.actions.start_prometheus_metrics_server()
         self.velocloud_repository.connect_to_all_servers()
         await self.event_bus.connect()
-        await self.actions.send_edge_status_task_interval(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
+        await self.actions.set_edge_status_job(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
+        self.scheduler.start()
 
     async def start_server(self):
         await self.server.run_server()
