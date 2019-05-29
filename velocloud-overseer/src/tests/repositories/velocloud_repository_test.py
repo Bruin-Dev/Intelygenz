@@ -90,6 +90,6 @@ class TestVelocloudRepository:
         self.mock_velocloud()
         test_velocloud_client = VelocloudClient(config)
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        test_velocloud_client._instantiate_and_connect_clients = Mock()
+        test_velocloud_client.instantiate_and_connect_clients = Mock()
         vr.connect_to_all_servers()
-        assert test_velocloud_client._instantiate_and_connect_clients.called
+        assert test_velocloud_client.instantiate_and_connect_clients.called

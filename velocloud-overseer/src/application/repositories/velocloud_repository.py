@@ -14,7 +14,7 @@ class VelocloudRepository:
         self._logger = logger
 
     def connect_to_all_servers(self):
-        self._clients = self._velocloud_client._instantiate_and_connect_clients()
+        self._clients = self._velocloud_client.instantiate_and_connect_clients()
 
     def get_all_enterprises_edges_with_host(self):
         edges_by_enterprise_and_host = list()

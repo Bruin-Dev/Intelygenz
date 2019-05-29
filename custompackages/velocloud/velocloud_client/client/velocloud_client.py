@@ -12,7 +12,7 @@ class VelocloudClient:
                                                                     backoff_factor=self._config['backoff_factor'],
                                                                     method_whitelist=self.whitelist)
 
-    def _instantiate_and_connect_clients(self):
+    def instantiate_and_connect_clients(self):
         _clients = [
             self._create_and_connect_client(cred_block['url'], cred_block['username'], cred_block['password']) for
             cred_block in self._config['servers']]
@@ -32,7 +32,7 @@ class VelocloudClient:
                        client.api_client.base_path][0]
         return host_client
 
-    def _get_edge_information(self, client, logger, host, enterpriseid, edgeid):
+    def get_edge_information(self, client, logger, host, enterpriseid, edgeid):
         target_host_client = self._get_client_by_host(client, host)
         edgeids = {"enterpriseId": enterpriseid, "id": edgeid}
         try:
@@ -43,7 +43,7 @@ class VelocloudClient:
             if e.status == 0:
                 logger.error('Error, could not authenticate')
 
-    def _get_link_information(self, client, logger, host, enterpriseid, edgeid):
+    def get_link_information(self, client, logger, host, enterpriseid, edgeid):
         target_host_client = self._get_client_by_host(client, host)
         edgeids = {"enterpriseId": enterpriseid, "id": edgeid}
         try:
@@ -54,7 +54,7 @@ class VelocloudClient:
             if e.status == 0:
                 logger.error('Error, could not authenticate')
 
-    def _get_enterprise_information(self, client, logger, host, enterpriseid):
+    def get_enterprise_information(self, client, logger, host, enterpriseid):
         target_host_client = self._get_client_by_host(client, host)
         body = {"enterpriseId": enterpriseid}
         try:
