@@ -1,6 +1,3 @@
-import asyncio
-
-
 class Actions:
     _config = None
     _slack_repository = None
@@ -22,7 +19,8 @@ class Actions:
 
     def set_stats_to_slack_job(self):
         seconds = self._config.SLACK_CONFIG['time']
-        self._scheduler.add_job(self._stats_to_slack_job, 'interval', seconds=seconds)
+        self._scheduler.add_job(self._stats_to_slack_job, 'interval', seconds=seconds, replace_existing=True,
+                                id='send_stats_to_slack_job')
 
     def _stats_to_slack_job(self):
         time = self._config.SLACK_CONFIG['time']

@@ -24,7 +24,8 @@ class Actions:
         next_run_time = undefined
         if exec_on_start:
             next_run_time = datetime.now()
-        self._scheduler.add_job(self._edge_status_job, 'interval', seconds=seconds, next_run_time=next_run_time)
+        self._scheduler.add_job(self._edge_status_job, 'interval', seconds=seconds, next_run_time=next_run_time,
+                                replace_existing=True, id='edge_status_job')
 
     async def _edge_status_job(self):
         self._prometheus_repository.set_cycle_total_edges(self._sum_edges_all_hosts())
