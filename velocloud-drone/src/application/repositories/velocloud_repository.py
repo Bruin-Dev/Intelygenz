@@ -1,6 +1,3 @@
-import velocloud
-
-
 class VelocloudRepository:
     _config = None
     _clients = None

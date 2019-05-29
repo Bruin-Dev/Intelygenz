@@ -64,3 +64,38 @@ class VelocloudClient:
             logger.exception(e)
             if e.status == 0:
                 logger.error('Error, could not authenticate')
+
+    def get_all_enterprises_edges_with_host(self, clients, logger):
+        edges_by_enterprise_and_host = list()
+        try:
+            for client in clients:
+                res = client.monitoringGetAggregates(body={})
+                for enterprise in res._enterprises:
+                    edges_by_enterprise = client.enterpriseGetEnterpriseEdges({"enterpriseId": enterprise._id})
+                    for edge in edges_by_enterprise:
+                        edges_by_enterprise_and_host.append(
+                            {"host": client.api_client.base_path.replace("/portal/rest", "").replace
+                             ("https://", ""),
+                             "enterpriseId": enterprise._id,
+                             "id": edge._id})
+
+        except velocloud.rest.ApiException as e:
+            logger.exception(f'Error, exception ocurred getting all velocloud '
+                             f'enterprises from all velocloud clusters: {e}')
+            if e.status == 0:
+                logger.error('Error, could not authenticate')
+
+        return edges_by_enterprise_and_host
+
+    def get_all_hosts_edge_count(self, clients, logger):
+        sum = 0
+        try:
+            for client in clients:
+                res = client.monitoringGetAggregates(body={})
+                sum += res._edgeCount
+        except velocloud.rest.ApiException as e:
+            logger.exception(f'Error, exception ocurred getting all velocloud '
+                             f'enterprises from all velocloud clusters: {e}')
+            if e.status == 0:
+                logger.error('Error, could not authenticate')
+        return sum
