@@ -24,3 +24,43 @@ class VelocloudClient:
         client = velocloud.ApiClient(host=host)
         client.authenticate(user, password, operator=True)
         return velocloud.AllApi(client)
+
+    def _get_client_by_host(self, clients, host):
+        host_client = [client
+                       for client in clients
+                       if host in
+                       client.api_client.base_path][0]
+        return host_client
+
+    def _get_edge_information(self, client, logger, host, enterpriseid, edgeid):
+        target_host_client = self._get_client_by_host(client, host)
+        edgeids = {"enterpriseId": enterpriseid, "id": edgeid}
+        try:
+            edge_information = target_host_client.edgeGetEdge(body=edgeids)
+            return edge_information
+        except velocloud.rest.ApiException as e:
+            logger.exception(e)
+            if e.status == 0:
+                logger.error('Error, could not authenticate')
+
+    def _get_link_information(self, client, logger, host, enterpriseid, edgeid):
+        target_host_client = self._get_client_by_host(client, host)
+        edgeids = {"enterpriseId": enterpriseid, "id": edgeid}
+        try:
+            link_information = target_host_client.metricsGetEdgeLinkMetrics(body=edgeids)
+            return link_information
+        except velocloud.rest.ApiException as e:
+            logger.exception(e)
+            if e.status == 0:
+                logger.error('Error, could not authenticate')
+
+    def _get_enterprise_information(self, client, logger, host, enterpriseid):
+        target_host_client = self._get_client_by_host(client, host)
+        body = {"enterpriseId": enterpriseid}
+        try:
+            enterprise_information = target_host_client.enterpriseGetEnterprise(body=body)
+            return enterprise_information
+        except velocloud.rest.ApiException as e:
+            logger.exception(e)
+            if e.status == 0:
+                logger.error('Error, could not authenticate')
