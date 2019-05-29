@@ -42,7 +42,7 @@ VELOCLOUD_CONFIG = {
 }
 
 OVERSEER_CONFIG = {
-    'interval_time': 60
+    'interval_time': 600
 }
 
 LOG_CONFIG = {
