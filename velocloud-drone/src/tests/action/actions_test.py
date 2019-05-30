@@ -27,13 +27,12 @@ class TestDroneActions:
         test_prometheus = Mock()
         self.mock_velocloud()
         test_velocloud_client = VelocloudClient(config)
-        velocloud_repo = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        velocloud_repo = VelocloudRepository(config, test_velocloud_client)
         actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
         assert actions._configs is config
         assert actions._logger is mock_logger
         assert test_bus._logger is mock_logger
         assert actions._event_bus is test_bus
-        assert velocloud_repo._logger is mock_logger
         assert actions._velocloud_repository is velocloud_repo
         assert actions._prometheus_repository is test_prometheus
 

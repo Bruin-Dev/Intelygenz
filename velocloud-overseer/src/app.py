@@ -26,8 +26,8 @@ class Container:
 
     def setup(self):
         self.scheduler = AsyncIOScheduler(timezone=utc)
-        self.velocloud_client = VelocloudClient(config)
-        self.velocloud_repository = VelocloudRepository(config, self.logger, self.velocloud_client)
+        self.velocloud_client = VelocloudClient(config, self.logger)
+        self.velocloud_repository = VelocloudRepository(config, self.velocloud_client)
 
         self.publisher = NatsStreamingClient(config, f'velocloud-overseer-publisher-', logger=self.logger)
         self.event_bus = EventBus(logger=self.logger)
