@@ -29,7 +29,7 @@ class Container:
 
     def setup(self):
         self.velocloud_client = VelocloudClient(config, self.logger)
-        self.velocloud_repository = VelocloudRepository(config, self.velocloud_client)
+        self.velocloud_repository = VelocloudRepository(config, self.logger, self.velocloud_client)
         self.prometheus_repository = PrometheusRepository(config)
 
         self.publisher = NatsStreamingClient(config, f'velocloud-drone-publisher-', logger=self.logger)
