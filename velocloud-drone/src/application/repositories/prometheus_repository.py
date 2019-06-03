@@ -5,6 +5,7 @@ import asyncio
 class PrometheusRepository:
 
     _config = None
+    _edge_gauge = None
     _edge_status_gauge = None
     _link_status_gauge = None
     _edge_status_counter = None
@@ -12,6 +13,7 @@ class PrometheusRepository:
 
     def __init__(self, config):
         self._config = config
+        self._edge_gauge = Gauge('edges_processed', 'Edges processed')
         self._edge_status_gauge = Gauge('edge_state_gauge', 'Edge States',
                                         ['enterprise_id', 'enterprise_name', 'state'])
         self._link_status_gauge = Gauge('link_state_gauge', 'Link States',
@@ -29,6 +31,12 @@ class PrometheusRepository:
                                              enterprise_name=enterprise_name).inc()
             self._link_status_gauge.labels(state=links._link._state, enterprise_id=enterprise_id,
                                            enterprise_name=enterprise_name).inc()
+
+    def set_cycle_total_edges(self, sum):
+        self._edge_gauge.set(sum)
+
+    def reset_edges_counter(self):
+        self._edge_gauge.set(0)
 
     async def reset_counter(self):
         while True:
