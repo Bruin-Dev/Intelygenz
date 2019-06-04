@@ -120,7 +120,7 @@ To debug with PyCharm, you must put the breakpoint **in the copy in site-package
 ## Microservices
 - [Base microservice](base-microservice/README.md)
 - [Velocloud overseer](velocloud-overseer/README.md)
-- [Velocloud drone](velocloud-drone/README.md)
+- [Velocloud bridge](velocloud-bridge/README.md)
 - [Velocloud notificator](velocloud-notificator/README.md)
 
 ## Acceptance Tests
@@ -129,7 +129,7 @@ To debug with PyCharm, you must put the breakpoint **in the copy in site-package
 # Processes' overview
 
 ## Monitoring edge and link status
-Services involved: velocloud-overseer, velocloud-drone, velocloud-notificator.
+Services involved: velocloud-overseer, velocloud-bridge, velocloud-notificator.
 
 ### Process goal
 - Given an interval, process all edges and links statuses in that interval.

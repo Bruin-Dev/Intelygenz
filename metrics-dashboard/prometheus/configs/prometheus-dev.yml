@@ -16,8 +16,8 @@ scrape_configs:
     static_configs:
       - targets: ['velocloud-overseer.automation-dev.local:9090']
 
-  - job_name: 'velocloud-drone'
+  - job_name: 'velocloud-bridge'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['velocloud-drone.automation-dev.local:9090']
+      - targets: ['velocloud-bridge.automation-dev.local:9090']

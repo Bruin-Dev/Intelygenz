@@ -36,13 +36,13 @@ services:
       - 5000:5000
       - 9110:9090
 
-  velocloud-drone:
+  velocloud-bridge:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
       context: .
-      dockerfile: velocloud-drone/Dockerfile
+      dockerfile: velocloud-bridge/Dockerfile
     env_file:
-      - velocloud-drone/src/config/env
+      - velocloud-bridge/src/config/env
     depends_on:
       - "nats-streaming"
     ports:

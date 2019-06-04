@@ -97,9 +97,9 @@ velocloud-overseer-linter:
     MODULE: velocloud-overseer
   <<: *lint_module
 
-velocloud-drone-linter:
+velocloud-bridge:
   variables:
-    MODULE: velocloud-drone
+    MODULE: velocloud-bridge
   <<: *lint_module
 
 acceptance-test-linter:
@@ -145,9 +145,9 @@ velocloud-overseer-test:
     MODULE: velocloud-overseer
   <<: *unittest_module
 
-velocloud-drone-test:
+velocloud-bridge-test:
   variables:
-    MODULE: velocloud-drone
+    MODULE: velocloud-bridge
   <<: *unittest_module
 
 #
@@ -212,10 +212,10 @@ velocloud-notificator-build:
     MODULE_NAME: velocloud-notificator
   <<: *build_app_image
 
-velocloud-drone-build:
+velocloud-bridge-build:
   stage: build
   variables:
-    MODULE_NAME: velocloud-drone
+    MODULE_NAME: velocloud-bridge
   <<: *build_app_image
 
 velocloud-overseer-build:

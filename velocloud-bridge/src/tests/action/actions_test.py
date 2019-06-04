@@ -10,7 +10,7 @@ from application.repositories.velocloud_repository import VelocloudRepository
 from velocloud_client.client.velocloud_client import VelocloudClient
 
 
-class TestDroneActions:
+class TestBridgeActions:
 
     def mock_velocloud(self):
         client = Mock()

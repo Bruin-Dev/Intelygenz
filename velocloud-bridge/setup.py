@@ -3,9 +3,9 @@
 
 from setuptools import setup, find_packages
 setup(
-    name='velocloud-drone',
+    name='velocloud-bridge',
     version='1.0.0',
-    description='MetTel\'s automation drone for Velocloud',
+    description='MetTel\'s automation bridge for Velocloud',
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,
     setup_requires=[

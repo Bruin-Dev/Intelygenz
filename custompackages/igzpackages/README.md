@@ -37,6 +37,6 @@ __Microservices Address__
 
 velocloud-overseer: `http://0.0.0.0:5000/_health` or `http://localhost:5000/_health`
 
-velocloud-drone: `http://0.0.0.0:5001/_health` or `http://localhost:5001/_health`
+velocloud-bridge: `http://0.0.0.0:5001/_health` or `http://localhost:5001/_health`
 
 velocloud-notificator: `http://0.0.0.0:5002/_health` or `http://localhost:5002/_health`

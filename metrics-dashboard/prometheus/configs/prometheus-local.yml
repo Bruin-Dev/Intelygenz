@@ -22,8 +22,8 @@ scrape_configs:
     static_configs:
       - targets: ['velocloud-overseer:9090']
 
-  - job_name: 'velocloud-drone'
+  - job_name: 'velocloud-bridge'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['velocloud-drone:9090']
+      - targets: ['velocloud-bridge:9090']
