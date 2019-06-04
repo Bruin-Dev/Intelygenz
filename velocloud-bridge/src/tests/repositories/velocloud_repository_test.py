@@ -5,6 +5,22 @@ from application.repositories.velocloud_repository import VelocloudRepository
 
 class TestVelocloudRepository:
 
+    def get_all_enterprises_edges_with_host_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        test_velocloud_client.get_all_enterprises_edges_with_host = Mock()
+        edges_by_ent = vr.get_all_enterprises_edges_with_host()
+        assert test_velocloud_client.get_all_enterprises_edges_with_host.called
+
+    def get_all_hosts_edge_count_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        test_velocloud_client.get_all_hosts_edge_count = Mock()
+        sum = vr.get_all_hosts_edge_count()
+        assert test_velocloud_client.get_all_hosts_edge_count.called
+
     def get_edge_information_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()

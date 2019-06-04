@@ -8,6 +8,7 @@ from collections import namedtuple
 from config import testconfig as config
 from application.repositories.velocloud_repository import VelocloudRepository
 from velocloud_client.client.velocloud_client import VelocloudClient
+from http import HTTPStatus
 
 
 class TestBridgeActions:
@@ -36,6 +37,41 @@ class TestBridgeActions:
         assert velocloud_repo._logger is mock_logger
         assert actions._velocloud_repository is velocloud_repo
         assert actions._prometheus_repository is test_prometheus
+
+    @pytest.mark.asyncio
+    async def send_edge_status_test(self):
+        mock_logger = ()
+        test_bus = EventBus(logger=mock_logger)
+        test_prometheus = Mock()
+        test_bus.publish_message = CoroutineMock()
+        velocloud_repo = Mock()
+        edges = ["task1", "task2"]
+        velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
+        msg = {"request_id": "123"}
+        await actions._send_edge_status_tasks(msg)
+        assert velocloud_repo.get_all_enterprises_edges_with_host.called
+        assert test_bus.publish_message.called
+        assert test_bus.publish_message.call_args[0][0] == "edge.list.response"
+        assert test_bus.publish_message.call_args[0][1] == repr({"request_id": "123",
+                                                                 "edges": edges,
+                                                                 "status": HTTPStatus.OK})
+
+    @pytest.mark.asyncio
+    async def report_edge_list_test(self):
+        mock_logger = Mock()
+        test_bus = EventBus(logger=mock_logger)
+        test_prometheus = Mock()
+        velocloud_repo = Mock()
+        test_prometheus.set_cycle_total_edges = Mock()
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
+        actions._logger.info = Mock()
+        actions._send_edge_status_tasks = CoroutineMock()
+        await actions.report_edge_list(b'{"request_id": "123"}')
+        assert actions._logger.info.called
+        assert test_prometheus.set_cycle_total_edges.called
+        assert actions._send_edge_status_tasks.called
+        assert actions._send_edge_status_tasks.call_args[0][0] == {"request_id": "123"}
 
     def process_edge_ok_test(self):
         mock_logger = ()
@@ -90,36 +126,6 @@ class TestBridgeActions:
         assert velocloud_repo.get_link_information.called
 
     @pytest.mark.asyncio
-    async def report_edge_status_ko_status_test(self):
-        mock_logger = Mock()
-        test_bus = EventBus(logger=mock_logger)
-        test_bus.publish_message = CoroutineMock()
-        test_prometheus = Mock()
-        velocloud_repo = Mock()
-        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
-        actions._logger.info = Mock()
-        actions._logger.error = Mock()
-        edge_status = namedtuple("edge_status", [])
-        edge_status._edgeState = 'FAILING'
-        link_status = []
-        actions._prometheus_repository.inc = Mock()
-        actions._process_edge = Mock(return_value=edge_status)
-        actions._process_link = Mock(return_value=link_status)
-        enterprise_info = Mock()
-        enterprise_info._name = Mock()
-        velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
-        await actions.report_edge_status(b'{"enterpriseId": "ids", "host": "host"}')
-        assert test_bus.publish_message.called
-        assert actions._process_edge.called
-        assert actions._process_edge.call_args[0][0] == dict(enterpriseId="ids", host="host")
-        assert actions._process_link.called
-        assert actions._process_link.call_args[0][0] == dict(enterpriseId="ids", host="host")
-        assert test_bus.publish_message.call_args[0][0] == 'edge.status.ko'
-        assert actions._logger.info.called
-        assert actions._logger.error.called
-        assert actions._prometheus_repository.inc.called
-
-    @pytest.mark.asyncio
     async def report_edge_status_ok_status_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
@@ -128,7 +134,6 @@ class TestBridgeActions:
         velocloud_repo = Mock()
         actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
         actions._logger.info = Mock()
-        actions._logger.error = Mock()
         edge_status = namedtuple("edge_status", [])
         edge_status._edgeState = 'CONNECTED'
         link_status = 'OKAY'
@@ -138,13 +143,12 @@ class TestBridgeActions:
         actions._process_edge = Mock(return_value=edge_status)
         actions._process_link = Mock(return_value=link_status)
         velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
-        await actions.report_edge_status(b'{"enterpriseId": "ids", "host": "host"}')
+        await actions.report_edge_status(b'{"request_id":"123", "edge":{"enterpriseId": "ids", "host": "host"}}')
         assert test_bus.publish_message.called
         assert actions._process_edge.called
         assert actions._process_edge.call_args[0][0] == dict(enterpriseId="ids", host="host")
-        assert test_bus.publish_message.call_args[0][0] == 'edge.status.ok'
+        assert test_bus.publish_message.call_args[0][0] == 'edge.status.response'
         assert actions._logger.info.called
-        assert actions._logger.error.called is False
         assert actions._prometheus_repository.inc.called
 
     def start_prometheus_metrics_server_test(self):

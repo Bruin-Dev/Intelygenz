@@ -1,6 +1,5 @@
 from igz.packages.eventbus.eventbus import EventBus
 import velocloud
-import json
 from ast import literal_eval
 from http import HTTPStatus
 
@@ -57,8 +56,10 @@ class Actions:
         return link_status
 
     async def report_edge_status(self, msg):
-        request_id = json.loads(msg['request_id'].decode("utf-8").replace("\\", ' ').replace("'", '"'))
-        edgeids = json.loads(msg['edge'].decode("utf-8").replace("\\", ' ').replace("'", '"'))
+        decoded_msg = msg.decode('utf-8')
+        msg_dict = literal_eval(decoded_msg)
+        request_id = msg_dict["request_id"]
+        edgeids = msg_dict["edge"]
         self._logger.info(f'Processing edge with data {msg}')
         edge_status = self._process_edge(edgeids)
         enterprise_info = self._velocloud_repository.get_enterprise_information(edgeids['host'],

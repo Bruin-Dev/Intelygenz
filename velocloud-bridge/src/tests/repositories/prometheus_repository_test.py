@@ -12,10 +12,22 @@ class TestPrometheusRepository:
 
     def instance_test(self):
         assert self.test_pro_repo._config == config
+        assert isinstance(self.test_pro_repo._edge_gauge, Gauge) is True
         assert isinstance(self.test_pro_repo._edge_status_gauge, Gauge) is True
         assert isinstance(self.test_pro_repo._link_status_gauge, Gauge) is True
         assert isinstance(self.test_pro_repo._edge_status_counter, Counter) is True
         assert isinstance(self.test_pro_repo._link_status_counter, Counter) is True
+
+    def set_cycle_total_edges_test(self):
+        sum = 123
+        self.test_pro_repo.set_cycle_total_edges(sum)
+        assert REGISTRY.get_sample_value('edges_processed') == 123
+
+    def reset_edge_counter_test(self):
+        sum = 123
+        self.test_pro_repo.set_cycle_total_edges(sum)
+        self.test_pro_repo.reset_edges_counter()
+        assert REGISTRY.get_sample_value('edges_processed') == 0
 
     def inc_test(self):
         test_enterprise_id = 1
