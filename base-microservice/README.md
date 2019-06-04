@@ -28,6 +28,12 @@ pip install -r requirements.txt
 Now you can execute your python code related to NATS connections, using nats-streaming as host name
 
 
+## Get an instance of Redis up in local environment
+- [JUST ONCE] Go to /etc/hosts and add ``127.0.0.1  redis``
+- Go to project root
+- Type the following ``docker-compose up redis``
+
+
 ## Configuration, environment variables and configuration files
 Some of the configuration parameters can change between environments.
 That's why the config module is there: a centralized file to keep both environment and constant parameters
