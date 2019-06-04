@@ -1,3 +1,4 @@
 prometheus_client==0.6.0
+redis==3.2.1
 ../custompackages/velocloud
 ../custompackages/igzpackages
