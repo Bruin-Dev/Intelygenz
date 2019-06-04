@@ -6,6 +6,7 @@ from prometheus_client import start_http_server, Summary
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.server.api import QuartServer
 import asyncio
+import redis
 
 MESSAGES_PROCESSED = Summary('nats_processed_messages', 'Messages processed from NATS')
 REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
@@ -35,12 +36,14 @@ class Container:
     durable_action = None
     from_first_action = None
     server = None
+    redis_connection = None
 
     async def run(self):
         self.setup()
         await self.start()
 
     def setup(self):
+        self.redis_connection = redis.Redis(host="redis", port=6379)
         self.client1 = NatsStreamingClient(config, "base-microservice-client", logger=logger)
         self.client2 = NatsStreamingClient(config, "base-microservice-client2", logger=logger)
         self.client3 = NatsStreamingClient(config, "base-microservice-client3", logger=logger)
@@ -63,8 +66,8 @@ class Container:
 
     async def start(self):
         await self.event_bus.connect()
-
         # Start up the server to expose the metrics.
+
         start_http_server(9100)
         # Generate some requests.
         logger.info('starting metrics loop')
@@ -88,6 +91,10 @@ class Container:
                                                 durable_name="name",
                                                 queue="queue",
                                                 start_at='first')
+
+        self.redis_connection.set("foo", "bar")
+        redis_data = self.redis_connection.get("foo")
+        logger.info(f"Data retrieved from Redis: {redis_data}")
 
     async def start_server(self):
         await self.server.run_server()
