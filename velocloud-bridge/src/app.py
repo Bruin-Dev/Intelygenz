@@ -34,11 +34,12 @@ class Container:
         self.prometheus_repository = PrometheusRepository(config)
 
         self.publisher = NatsStreamingClient(config, f'velocloud-bridge-publisher-', logger=self.logger)
-        self.subscriber = NatsStreamingClient(config, f'velocloud-bridge-subscriber-', logger=self.logger)
+        self.subscriber_list = NatsStreamingClient(config, f'velocloud-bridge-subscriber-', logger=self.logger)
+        self.subscriber_stat = NatsStreamingClient(config, f'velocloud-bridge-subscriber-', logger=self.logger)
 
         self.event_bus = EventBus(logger=self.logger)
-        self.event_bus.add_consumer(self.subscriber, consumer_name="list")
-        self.event_bus.add_consumer(self.subscriber, consumer_name="status")
+        self.event_bus.add_consumer(self.subscriber_list, consumer_name="list")
+        self.event_bus.add_consumer(self.subscriber_stat, consumer_name="status")
         self.event_bus.set_producer(self.publisher)
 
         self.actions = Actions(config, self.event_bus, self.velocloud_repository, self.logger,
@@ -54,10 +55,12 @@ class Container:
         self.velocloud_repository.connect_to_all_servers()
         await self.event_bus.connect()
         await self.event_bus.subscribe_consumer(consumer_name="list", topic="edge.list.request",
-                                                action_wrapper=self.report_edge_list, durable_name="velocloud_bridge",
+                                                action_wrapper=self.report_edge_list,
+                                                durable_name="velocloud_bridge",
                                                 queue="velocloud_bridge")
         await self.event_bus.subscribe_consumer(consumer_name="status", topic="edge.status.request",
-                                                action_wrapper=self.report_edge_action, durable_name="velocloud_bridge",
+                                                action_wrapper=self.report_edge_action,
+                                                durable_name="velocloud_bridge",
                                                 queue="velocloud_bridge")
         await self.actions.reset_counter()
 

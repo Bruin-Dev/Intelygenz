@@ -1,7 +1,6 @@
 from igz.packages.eventbus.eventbus import EventBus
 import velocloud
 from ast import literal_eval
-from http import HTTPStatus
 
 
 class Actions:
@@ -21,7 +20,7 @@ class Actions:
 
     async def _send_edge_status_tasks(self, msg):
         edges_by_enterprise = self._velocloud_repository.get_all_enterprises_edges_with_host()
-        msg_dict = {"request_id": msg['request_id'], "edges": edges_by_enterprise, "status": HTTPStatus.OK}
+        msg_dict = {"request_id": msg['request_id'], "edges": edges_by_enterprise, "status": 200}
         await self._event_bus.publish_message("edge.list.response", repr(msg_dict))
 
     async def report_edge_list(self, msg):
@@ -70,7 +69,7 @@ class Actions:
         self._prometheus_repository.inc(edgeids['enterpriseId'], enterprise_info._name, edge_status._edgeState,
                                         link_status)
         edge_status = {"edges": edge_status, "links": link_status}
-        msg_dict = {"request_id": request_id, "edge_info": edge_status, "status": HTTPStatus.OK}
+        msg_dict = {"request_id": request_id, "edge_info": edge_status, "status": 200}
         await self._event_bus.publish_message("edge.status.response", repr(msg_dict))
 
     def start_prometheus_metrics_server(self):

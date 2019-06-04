@@ -8,7 +8,6 @@ from collections import namedtuple
 from config import testconfig as config
 from application.repositories.velocloud_repository import VelocloudRepository
 from velocloud_client.client.velocloud_client import VelocloudClient
-from http import HTTPStatus
 
 
 class TestBridgeActions:
@@ -55,7 +54,7 @@ class TestBridgeActions:
         assert test_bus.publish_message.call_args[0][0] == "edge.list.response"
         assert test_bus.publish_message.call_args[0][1] == repr({"request_id": "123",
                                                                  "edges": edges,
-                                                                 "status": HTTPStatus.OK})
+                                                                 "status": 200})
 
     @pytest.mark.asyncio
     async def report_edge_list_test(self):
