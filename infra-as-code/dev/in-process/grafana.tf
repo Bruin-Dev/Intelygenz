@@ -3,7 +3,7 @@ resource "aws_ecr_repository" "mettel-automation-pro-grafana" {
 }
 
 data "template_file" "mettel-automation-pro-grafana" {
-  template = "${file("${path.module}/task-definitions/velocloud_drone.json")}"
+  template = "${file("${path.module}/task-definitions/velocloud_bridge.json")}"
 
   vars {
     image = "${aws_ecr_repository.mettel-automation-pro-grafana.repository_url}:${var.build_number}"

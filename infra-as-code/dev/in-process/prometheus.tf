@@ -3,7 +3,7 @@ resource "aws_ecr_repository" "mettel-automation-pro-prometheus" {
 }
 
 data "template_file" "mettel-automation-pro-prometheus" {
-  template = "${file("${path.module}/task-definitions/velocloud_drone.json")}"
+  template = "${file("${path.module}/task-definitions/velocloud_bridge.json")}"
 
   vars {
     image = "${aws_ecr_repository.mettel-automation-pro-prometheus.repository_url}:${var.build_number}"

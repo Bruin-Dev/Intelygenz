@@ -1,12 +1,12 @@
-data "aws_ecr_repository" "automation-velocloud-drone" {
-  name = "${var.environment}-velocloud-drone"
+data "aws_ecr_repository" "automation-velocloud-bridge" {
+  name = "${var.environment}-velocloud-bridge"
 }
 
-data "template_file" "automation-velocloud-drone" {
-  template = "${file("${path.module}/task-definitions/velocloud_drone.json")}"
+data "template_file" "automation-velocloud-bridge" {
+  template = "${file("${path.module}/task-definitions/velocloud_bridge.json")}"
 
   vars = {
-    image = "${data.aws_ecr_repository.automation-velocloud-drone.repository_url}:${var.BUILD_NUMBER}"
+    image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.environment}"
     log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
 
@@ -18,9 +18,9 @@ data "template_file" "automation-velocloud-drone" {
   }
 }
 
-resource "aws_ecs_task_definition" "automation-velocloud-drone" {
-  family = "${var.environment}-velocloud-drone"
-  container_definitions = "${data.template_file.automation-velocloud-drone.rendered}"
+resource "aws_ecs_task_definition" "automation-velocloud-bridge" {
+  family = "${var.environment}-velocloud-bridge"
+  container_definitions = "${data.template_file.automation-velocloud-bridge.rendered}"
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
@@ -30,9 +30,9 @@ resource "aws_ecs_task_definition" "automation-velocloud-drone" {
   task_role_arn = "${aws_iam_role.ecs_execution_role.arn}"
 }
 
-resource "aws_security_group" "automation-velocloud-drone_service" {
+resource "aws_security_group" "automation-velocloud-bridge_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.environment}-velocloud-drone"
+  name = "${var.environment}-velocloud-bridge"
   description = "Allow egress from container"
 
   lifecycle {
@@ -74,12 +74,12 @@ resource "aws_security_group" "automation-velocloud-drone_service" {
   }
 
   tags = {
-    Name = "${var.environment}-velocloud-drone"
+    Name = "${var.environment}-velocloud-bridge"
     Environment = "${var.environment}"
   }
 }
-resource "aws_service_discovery_service" "velocloud-drone" {
-  name = "velocloud-drone"
+resource "aws_service_discovery_service" "velocloud-bridge" {
+  name = "velocloud-bridge"
 
   dns_config {
     namespace_id = "${aws_service_discovery_private_dns_namespace.automation-zone.id}"
@@ -97,16 +97,16 @@ resource "aws_service_discovery_service" "velocloud-drone" {
   }
 }
 
-resource "aws_ecs_service" "automation-velocloud-drone" {
-  name = "${var.environment}-velocloud-drone"
-  task_definition = "${aws_ecs_task_definition.automation-velocloud-drone.family}:${aws_ecs_task_definition.automation-velocloud-drone.revision}"
+resource "aws_ecs_service" "automation-velocloud-bridge" {
+  name = "${var.environment}-velocloud-bridge"
+  task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
   desired_count = 1
   launch_type = "FARGATE"
   cluster = "${aws_ecs_cluster.automation.id}"
 
   network_configuration {
     security_groups = [
-      "${aws_security_group.automation-velocloud-drone_service.id}"]
+      "${aws_security_group.automation-velocloud-bridge_service.id}"]
     subnets = [
       "${aws_subnet.automation-private_subnet-1a.id}",
       "${aws_subnet.automation-private_subnet-1b.id}"]
@@ -114,6 +114,6 @@ resource "aws_ecs_service" "automation-velocloud-drone" {
   }
 
   service_registries {
-    registry_arn = "${aws_service_discovery_service.velocloud-drone.arn}"
+    registry_arn = "${aws_service_discovery_service.velocloud-bridge.arn}"
   }
 }
