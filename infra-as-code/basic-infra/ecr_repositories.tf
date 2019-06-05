@@ -6,8 +6,8 @@ resource "aws_ecr_repository" "automation-velocloud-overseer" {
   name = "${var.environment}-velocloud-overseer"
 }
 
-resource "aws_ecr_repository" "automation-velocloud-drone" {
-  name = "${var.environment}-velocloud-drone"
+resource "aws_ecr_repository" "automation-velocloud-bridge" {
+  name = "${var.environment}-velocloud-bridge"
 }
 
 resource "aws_ecr_repository" "automation-velocloud-notificator" {
