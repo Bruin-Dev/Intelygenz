@@ -47,13 +47,35 @@ class TestBridgeActions:
         edges = ["task1", "task2"]
         velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
-        msg = {"request_id": "123"}
+        msg = {"request_id": "123", "filter": []}
         await actions._send_edge_status_tasks(msg)
         assert velocloud_repo.get_all_enterprises_edges_with_host.called
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == "edge.list.response"
         assert test_bus.publish_message.call_args[0][1] == repr({"request_id": "123",
                                                                  "edges": edges,
+                                                                 "status": 200})
+
+    @pytest.mark.asyncio
+    async def send_edge_status_filter_test(self):
+        mock_logger = ()
+        test_bus = EventBus(logger=mock_logger)
+        test_prometheus = Mock()
+        test_bus.publish_message = CoroutineMock()
+        velocloud_repo = Mock()
+        edges = [{"host": "some.host", "enterpriseId": 19, "edge_id": 99},
+                 {"host": "some.host", "enterpriseId": 32, "edge_id": 99},
+                 {"host": "some.host2", "enterpriseId": 42, "edge_id": 99}]
+        velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
+        actions = Actions(config, test_bus, velocloud_repo, mock_logger, test_prometheus)
+        msg = {"request_id": "123", "filter": [{"host": "some.host", "enterprise_ids": [19]},
+                                               {"host": "some.host2", "enterprise_ids": []}]}
+        await actions._send_edge_status_tasks(msg)
+        assert velocloud_repo.get_all_enterprises_edges_with_host.called
+        assert test_bus.publish_message.called
+        assert test_bus.publish_message.call_args[0][0] == "edge.list.response"
+        assert test_bus.publish_message.call_args[0][1] == repr({"request_id": "123",
+                                                                 "edges": [edges[0], edges[2]],
                                                                  "status": 200})
 
     @pytest.mark.asyncio

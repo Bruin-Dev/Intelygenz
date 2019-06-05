@@ -38,6 +38,7 @@ class PrometheusRepository:
     def reset_edges_counter(self):
         self._edge_gauge.set(0)
 
+    # TODO: put this task on the orchestrator
     async def reset_counter(self):
         while True:
             await asyncio.sleep(self._config.GRAFANA_CONFIG['time'])

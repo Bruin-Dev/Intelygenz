@@ -20,6 +20,9 @@ class Actions:
 
     async def _send_edge_status_tasks(self, msg):
         edges_by_enterprise = self._velocloud_repository.get_all_enterprises_edges_with_host()
+        if len(msg['filter']) > 0:
+            edges_by_enterprise = [x for x in edges_by_enterprise for y in msg['filter'] if x['host'] == y['host']
+                                   if (x['enterpriseId'] in y['enterprise_ids'] or len(y['enterprise_ids']) is 0)]
         msg_dict = {"request_id": msg['request_id'], "edges": edges_by_enterprise, "status": 200}
         await self._event_bus.publish_message("edge.list.response", repr(msg_dict))
 
