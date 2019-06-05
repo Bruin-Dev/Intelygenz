@@ -1,5 +1,5 @@
-resource "aws_alb_target_group" "mettel-automation-velocloud-drone" {
-  name = "${var.environment}-velocloud-drone"
+resource "aws_alb_target_group" "mettel-automation-velocloud-bridge" {
+  name = "${var.environment}-velocloud-bridge"
   port = 80
   protocol = "HTTP"
   vpc_id = "${aws_vpc.mettel-automation-vpc.id}"
@@ -14,9 +14,9 @@ resource "aws_alb_target_group" "mettel-automation-velocloud-drone" {
   }
 }
 
-resource "aws_security_group" "automation-velocloud-drone_service" {
+resource "aws_security_group" "automation-velocloud-bridge_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.environment}-velocloud-drone"
+  name = "${var.environment}-velocloud-bridge"
   description = "Allow egress from container"
 
 #  egress {
@@ -45,21 +45,21 @@ resource "aws_security_group" "automation-velocloud-drone_service" {
   }
 
   tags = {
-    Name = "${var.environment}-velocloud-drone"
+    Name = "${var.environment}-velocloud-bridge"
     Environment = "${var.environment}"
   }
 }
 
-resource "aws_ecs_service" "automation-velocloud-drone" {
-  name = "${var.environment}-velocloud-drone"
-  task_definition = "${aws_ecs_task_definition.automation-velocloud-drone.family}:${aws_ecs_task_definition.automation-velocloud-drone.revision}"
+resource "aws_ecs_service" "automation-velocloud-bridge" {
+  name = "${var.environment}-velocloud-bridge"
+  task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
   desired_count = 1
   launch_type = "FARGATE"
   cluster = "${aws_ecs_cluster.automation.id}"
 
   network_configuration {
     security_groups = [
-      "${aws_security_group.automation-velocloud-drone_service.id}"]
+      "${aws_security_group.automation-velocloud-bridge_service.id}"]
     subnets = [
       "${aws_subnet.automation-private_subnet-1a.id}",
       "${aws_subnet.automation-private_subnet-1b.id}"]
@@ -67,8 +67,8 @@ resource "aws_ecs_service" "automation-velocloud-drone" {
   }
 
   load_balancer {
-    target_group_arn = "${aws_alb_target_group.automation-velocloud-drone.arn}"
-    container_name = "velocloud-drone"
+    target_group_arn = "${aws_alb_target_group.automation-velocloud-bridge.arn}"
+    container_name = "velocloud-bridge"
     container_port = 80
   }
 }
