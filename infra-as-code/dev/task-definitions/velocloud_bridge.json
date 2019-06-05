@@ -1,6 +1,6 @@
 [
   {
-    "name": "velocloud-drone",
+    "name": "velocloud-bridge",
     "image": "${image}",
     "portMappings": [
       {
