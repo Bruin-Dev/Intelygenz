@@ -136,13 +136,13 @@ Services involved: velocloud-overseer, velocloud-bridge, velocloud-notificator.
 - Notify in a given channel. Just notify the faulty edges and a metric of it's statuses.
 
 ### Process flow
-    - Overseer ask for all edges given a list of Velocloud clusters.
+    - Orchestrator send a message to the Bridge through to ask for all edges given a list of Velocloud clusters.
     - For each edge it builds an event composed by the cluster's hostname, the edge ID and the company ID for that edge.
-    - Publish event on NATS.
-    - Drone consumes the events from Overseer.
+    - Publish events on NATS.
+    - Orchestrator consumes the events from NATS and then send each edge to the NATS to be consumed by the Bridge.
     - For each event, it fetches the edge and link data related to the given IDs
-    - Filter if the edge is faulty or not.
-    - Depending on the state of the edge, the Drone will put the result event in a different Message Queue (one Queue for faulty edges, other for ok edges)
+    - Publishes edge and link data to NATS
+    - Depending on the state of the edge, the Orchestrator will put the result event in a different Message Queue (one Queue for faulty edges, other for ok edges)
     - Notificator consumes the faulty edge queue and creates statistics. 
     - Notificator has an interval set. For each interval will send the statistics to a Slack channel and reset the statistics for the next cycle.
 
