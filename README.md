@@ -155,8 +155,8 @@ Services involved: velocloud-overseer, velocloud-bridge, velocloud-notificator.
 - [Prometheus](http://localhost:9090) 
   - Github [link](https://github.com/prometheus/client_python) to documentation of Prometheus
   
-  - Prometheus allows us to create counters/gauges in the velocloud-overseer and velocloud-drone to keep track of the metrics
-    about edges processed in the overseer, amount of certain edges states found in the drone, and amount of certain link states found in the drone.
+  - Prometheus allows us to create counters/gauges in the velocloud-bridge to keep track of the metrics
+    about edges processed in the bridge, amount of certain edges states found in the bridge, and amount of certain link states found in the bridge.
   
   - Using prometheus `start_http_server` we can host our metrics on a server. By using the file `prometheus.yml`located at
 `/metrics-dashboard/prometheus/` and using the format below, you can add your server to the prometheus app. All the servers connected
