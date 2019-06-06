@@ -44,7 +44,7 @@ variables:
     - apk add --no-cache py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
   script:
-    - docker-compose -f docker-compose-ci.yml up --build --abort-on-container-exit
+    - docker-compose -f docker-compose-ci.yml up --build --abort-on-container-exit --exit-code-from=acceptance_tests
 
   after_script:
     - docker-compose -f docker-compose-ci.yml down && docker-compose -f docker-compose-ci.yml rm -v

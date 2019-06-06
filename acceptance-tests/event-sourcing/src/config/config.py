@@ -14,11 +14,7 @@ NATS_CONFIG = {
     },
     'publisher': {
         'max_pub_acks_inflight': 1
-    },
-    'multiplier': 5,
-    'min': 5,
-    'stop_delay': 300,
-    'reconnects': 150
+    }
 }
 
 LOG_CONFIG = {
