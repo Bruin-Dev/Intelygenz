@@ -10,7 +10,7 @@ class VelocloudRepository:
         self._velocloud_client = velocloud_client
 
     def connect_to_all_servers(self):
-        self._logger.info('Instantiating and connecting clients in overseer')
+        self._logger.info('Instantiating and connecting clients in orchestrator')
         self._velocloud_client.instantiate_and_connect_clients()
 
     def get_all_enterprises_edges_with_host(self):

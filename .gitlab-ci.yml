@@ -91,9 +91,9 @@ velocloud-notificator-linter:
     MODULE: velocloud-notificator
   <<: *lint_module
 
-velocloud-overseer-linter:
+velocloud-orchestrator-linter:
   variables:
-    MODULE: velocloud-overseer
+    MODULE: velocloud-orchestrator
   <<: *lint_module
 
 velocloud-bridge:
@@ -139,9 +139,9 @@ velocloud-notificator-test:
     MODULE: velocloud-notificator
   <<: *unittest_module
 
-velocloud-overseer-test:
+velocloud-orchestrator-test:
   variables:
-    MODULE: velocloud-overseer
+    MODULE: velocloud-orchestrator
   <<: *unittest_module
 
 velocloud-bridge-test:
@@ -217,10 +217,10 @@ velocloud-bridge-build:
     MODULE_NAME: velocloud-bridge
   <<: *build_app_image
 
-velocloud-overseer-build:
+velocloud-orchestrator-build:
   stage: build
   variables:
-    MODULE_NAME: velocloud-overseer
+    MODULE_NAME: velocloud-orchestrator
   <<: *build_app_image
 
 # =========

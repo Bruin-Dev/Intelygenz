@@ -1,6 +1,6 @@
 [
   {
-    "name": "velocloud-overseer",
+    "name": "velocloud-orchestrator",
     "image": "${image}",
     "portMappings": [
       {

@@ -10,8 +10,8 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'velocloud-overseer'
+  - job_name: 'velocloud-orchestrator'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['velocloud-overseer.automation-dev.local:9090']
+      - targets: ['velocloud-orchestrator.automation-dev.local:9090']

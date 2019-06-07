@@ -2,8 +2,8 @@ resource "aws_ecr_repository" "automation-nats-server" {
   name = "${var.environment}-nats-streaming-server"
 }
 
-resource "aws_ecr_repository" "automation-velocloud-overseer" {
-  name = "${var.environment}-velocloud-overseer"
+resource "aws_ecr_repository" "automation-velocloud-orchestrator" {
+  name = "${var.environment}-velocloud-orchestrator"
 }
 
 resource "aws_ecr_repository" "automation-velocloud-bridge" {

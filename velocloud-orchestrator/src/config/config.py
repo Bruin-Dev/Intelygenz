@@ -41,19 +41,19 @@ VELOCLOUD_CONFIG = {
 
 }
 
-OVERSEER_CONFIG = {
+ORCHESTRATOR_CONFIG = {
     'interval_time': 600
 }
 
 LOG_CONFIG = {
-    'name': 'velocloud-overseer',
+    'name': 'velocloud-orchestrator',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
 QUART_CONFIG = {
-    'title': 'velocloud-overseer',
+    'title': 'velocloud-orchestrator',
     'port': 5000
 }
 

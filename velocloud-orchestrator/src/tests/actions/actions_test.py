@@ -8,7 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import utc
 
 
-class TestOverseerActions:
+class TestOrchestratorActions:
     def instance_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)

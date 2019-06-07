@@ -3,9 +3,9 @@
 
 from setuptools import setup, find_packages
 setup(
-    name='velocloud-overseer',
+    name='velocloud-orchestrator',
     version='1.0.0',
-    description='MetTel\'s automation overseer for Velocloud',
+    description='MetTel\'s automation orchestrator for Velocloud',
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,
     setup_requires=[

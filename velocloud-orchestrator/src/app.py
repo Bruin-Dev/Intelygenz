@@ -29,7 +29,7 @@ class Container:
         self.velocloud_client = VelocloudClient(config, self.logger)
         self.velocloud_repository = VelocloudRepository(config, self.logger, self.velocloud_client)
 
-        self.publisher = NatsStreamingClient(config, f'velocloud-overseer-publisher-', logger=self.logger)
+        self.publisher = NatsStreamingClient(config, f'velocloud-orchestrator-publisher-', logger=self.logger)
         self.event_bus = EventBus(logger=self.logger)
         self.prometheus_repository = PrometheusRepository(config)
         self.event_bus.set_producer(self.publisher)
@@ -41,7 +41,7 @@ class Container:
         self.actions.start_prometheus_metrics_server()
         self.velocloud_repository.connect_to_all_servers()
         await self.event_bus.connect()
-        self.actions.set_edge_status_job(config.OVERSEER_CONFIG['interval_time'], exec_on_start=True)
+        self.actions.set_edge_status_job(config.ORCHESTRATOR_CONFIG['interval_time'], exec_on_start=True)
         self.scheduler.start()
 
     async def start_server(self):
@@ -54,7 +54,7 @@ class Container:
 
 if __name__ == '__main__':
     container = Container()
-    container.logger.info("Velocloud overseer starting...")
+    container.logger.info("Velocloud orchestrator starting...")
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)
     asyncio.ensure_future(container.start_server(), loop=loop)

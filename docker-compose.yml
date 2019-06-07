@@ -23,13 +23,13 @@ services:
   #    ports:
   #      - 9100:9100
   # ============================
-  velocloud-overseer:
+  velocloud-orchestrator:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
       context: .
-      dockerfile: velocloud-overseer/Dockerfile
+      dockerfile: velocloud-orchestrator/Dockerfile
     env_file:
-      - velocloud-overseer/src/config/env
+      - velocloud-orchestrator/src/config/env
     depends_on:
       - "nats-streaming"
     ports:

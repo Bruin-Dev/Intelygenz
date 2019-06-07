@@ -16,8 +16,8 @@ scrape_configs:
     static_configs:
       - targets: ['base-microservice:9100']
 
-  - job_name: 'velocloud-overseer'
+  - job_name: 'velocloud-orchestrator'
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['velocloud-overseer:9090']
+      - targets: ['velocloud-orchestrator:9090']

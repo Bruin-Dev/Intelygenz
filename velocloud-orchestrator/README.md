@@ -37,12 +37,12 @@ The way to generate tasks is generate an event like this one
 }
 ````
 
-Then the Overseer will publish that task to the topic `edge.status.task`.
+Then the Orchestrator will publish that task to the topic `edge.status.task`.
 
 This action will be performed in cycles. The interval between them is defined in the config file, in a snippet like this:
 
 ````
-OVERSEER_CONFIG = {
+ORCHESTRATOR_CONFIG = {
     'interval_time': 600
 }
 ````
