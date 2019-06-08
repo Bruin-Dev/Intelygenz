@@ -45,12 +45,8 @@
         "value": "${NATS_CLUSTER_NAME}"
       },
       {
-        "name": "VELOCLOUD_CREDENTIALS",
-        "value": "${VELOCLOUD_CREDENTIALS}"
-      },
-      {
-        "name": "VELOCLOUD_VERIFY_SSL",
-        "value": "${VELOCLOUD_VERIFY_SSL}"
+        "name": "MONITORING_SECONDS",
+        "value": "${MONITORING_SECONDS}"
       }
     ]
   }

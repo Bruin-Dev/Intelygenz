@@ -33,6 +33,10 @@ variable "NATS_CLUSTER_NAME" {
   default = "automation-engine-nats"
 }
 
+variable "MONITORING_SECONDS" {
+  default = "600"
+}
+
 variable "VELOCLOUD_CREDENTIALS" {}
 
 variable "VELOCLOUD_VERIFY_SSL" {

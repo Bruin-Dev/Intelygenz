@@ -13,8 +13,7 @@ data "template_file" "automation-velocloud-orchestrator" {
     PYTHONUNBUFFERED = "${var.PYTHONUNBUFFERED}"
     NATS_SERVER1 = "nats://nats-server.${var.environment}.local:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
-    VELOCLOUD_CREDENTIALS = "${var.VELOCLOUD_CREDENTIALS}"
-    VELOCLOUD_VERIFY_SSL = "${var.VELOCLOUD_VERIFY_SSL}"
+    MONITORING_SECONDS = "${var.MONITORING_SECONDS}"
   }
 }
 
