@@ -5,7 +5,7 @@ class StatusRepository:
         self._logger = logger
 
     def set_status(self, status):
-        self._logger(f'Storing status = {status} in cache')
+        self._logger.info(f'Storing status = {status} in cache')
         self._redis_client.set("status", status)
 
     def get_status(self):
@@ -18,19 +18,19 @@ class StatusRepository:
         return status
 
     def set_edges_to_process(self, number_of_edges):
-        self._logger(f'Storing edges_to_process = {number_of_edges} in cache')
+        self._logger.info(f'Storing edges_to_process = {number_of_edges} in cache')
         self._redis_client.set("edges_to_process", number_of_edges)
 
     def get_edges_to_process(self):
         edges_to_process = self._redis_client.get("edges_to_process")
-        self._logger(f'Got edges_to_process = {edges_to_process} from cache')
+        self._logger.info(f'Got edges_to_process = {edges_to_process} from cache')
         return edges_to_process
 
     def set_edges_processed(self, edges_processed):
-        self._logger(f'Storing edges_processed = {edges_processed} in cache')
+        self._logger.info(f'Storing edges_processed = {edges_processed} in cache')
         self._redis_client.set("edges_processed", edges_processed)
 
     def get_edges_edges_processed(self):
         edges_processed = self._redis_client.get("edges_processed")
-        self._logger(f'Got edges_processed = {edges_processed} from cache')
+        self._logger.info(f'Got edges_processed = {edges_processed} from cache')
         return edges_processed

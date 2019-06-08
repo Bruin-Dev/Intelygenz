@@ -8,6 +8,10 @@ import sys
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
     'cluster_name': os.environ["NATS_CLUSTER_NAME"],
+    'subscriber': {
+        'max_inflight': 1,
+        'pending_limits': 1
+    },
     'publisher': {
         'max_pub_acks_inflight': 1
     },
@@ -18,7 +22,7 @@ NATS_CONFIG = {
 }
 
 ORCHESTRATOR_CONFIG = {
-    'monitoring_seconds': os.environ["MONITORING_SECONDS"]
+    'monitoring_seconds': int(os.environ["MONITORING_SECONDS"])
 }
 
 LOG_CONFIG = {
