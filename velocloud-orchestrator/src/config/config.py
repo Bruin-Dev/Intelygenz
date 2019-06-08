@@ -17,32 +17,8 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-
-def parse_velocloud_config():
-    credential_blocks = os.environ["VELOCLOUD_CREDENTIALS"].split(";")
-    credential_blocks_splitted = [credential_block.split("+") for credential_block in credential_blocks]
-    return [
-        {'url': cred_block[0],
-         'username': cred_block[1],
-         'password': cred_block[2]
-         }
-        for cred_block in credential_blocks_splitted]
-
-
-VELOCLOUD_CONFIG = {
-    'verify_ssl': os.environ["VELOCLOUD_VERIFY_SSL"],
-    'servers': parse_velocloud_config(),
-    'multiplier': 5,
-    'min': 5,
-    'max': 300,
-    'total': 8,
-    'backoff_factor': 2
-
-
-}
-
 ORCHESTRATOR_CONFIG = {
-    'interval_time': 600
+    'monitoring_seconds': os.environ["MONITORING_SECONDS"]
 }
 
 LOG_CONFIG = {
