@@ -2,7 +2,8 @@ from config import config
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
-from application.actions.actions import Actions
+from application.actions.edge_list_response import ReportEdgeList
+from application.actions.edge_status_response import ReportEdgeStatus
 from application.repositories.velocloud_repository import VelocloudRepository
 from application.repositories.prometheus_repository import PrometheusRepository
 from igz.packages.Logger.logger_client import LoggerClient
@@ -42,16 +43,17 @@ class Container:
         self.event_bus.add_consumer(self.subscriber_stat, consumer_name="status")
         self.event_bus.set_producer(self.publisher)
 
-        self.actions = Actions(config, self.event_bus, self.velocloud_repository, self.logger,
-                               self.prometheus_repository)
-        self.report_edge_list = ActionWrapper(self.actions, "report_edge_list",
+        self.actions_list = ReportEdgeList(config, self.event_bus, self.velocloud_repository, self.logger,
+                                           self.prometheus_repository)
+        self.actions_status = ReportEdgeStatus(config, self.event_bus, self.velocloud_repository, self.logger,
+                                             self.prometheus_repository)
+        self.report_edge_list = ActionWrapper(self.actions_list, "report_edge_list",
                                               is_async=True, logger=self.logger)
-        self.report_edge_action = ActionWrapper(self.actions, "report_edge_status",
+        self.report_edge_action = ActionWrapper(self.actions_status, "report_edge_status",
                                                 is_async=True, logger=self.logger)
         self.server = QuartServer(config)
 
     async def start(self):
-        self.actions.start_prometheus_metrics_server()
         self.velocloud_repository.connect_to_all_servers()
         await self.event_bus.connect()
         await self.event_bus.subscribe_consumer(consumer_name="list", topic="edge.list.request",
@@ -62,7 +64,6 @@ class Container:
                                                 action_wrapper=self.report_edge_action,
                                                 durable_name="velocloud_bridge",
                                                 queue="velocloud_bridge")
-        await self.actions.reset_counter()
 
     async def start_server(self):
         await self.server.run_server()
