@@ -33,10 +33,10 @@ taken from the configs of the microservice that defines the `QuartServer` class.
 equivalent to `flask-RESTful` we can recieve a status code of `200` or `OK` whenever a `GET` call it made to the
 `Hypercorn` server.
 
-__Microservices Address__
+__Microservices' healthcheck endpoints (for local enviroments)__
 
-velocloud-overseer: `http://0.0.0.0:5000/_health` or `http://localhost:5000/_health`
+velocloud-overseer: `http://localhost:5000/_health`
 
-velocloud-bridge: `http://0.0.0.0:5001/_health` or `http://localhost:5001/_health`
+velocloud-bridge: `http://localhost:5001/_health`
 
-velocloud-notificator: `http://0.0.0.0:5002/_health` or `http://localhost:5002/_health`
+velocloud-notificator:  `http://localhost:5002/_health`
