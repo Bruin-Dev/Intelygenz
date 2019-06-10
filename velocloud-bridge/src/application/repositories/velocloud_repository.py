@@ -21,7 +21,7 @@ class VelocloudRepository:
                                    for filter_edge in msg['filter']
                                    if edge['host'] == filter_edge['host']
                                    if edge['enterpriseId'] in filter_edge['enterprise_ids'] or len(
-                                                                                    filter_edge['enterprise_ids']) is 0]
+                                    filter_edge['enterprise_ids']) is 0]
 
         return edges_by_enterprise
 
