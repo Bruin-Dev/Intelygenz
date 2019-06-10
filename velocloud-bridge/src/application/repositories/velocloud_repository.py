@@ -13,9 +13,15 @@ class VelocloudRepository:
         self._logger.info('Instantiating and connecting clients in velocloud bridge')
         self._velocloud_client.instantiate_and_connect_clients()
 
-    def get_all_enterprises_edges_with_host(self):
+    def get_all_enterprises_edges_with_host(self, msg):
         self._logger.info('Getting all enterprises edges with host')
-        return self._velocloud_client.get_all_enterprises_edges_with_host()
+        edges_by_enterprise = self._velocloud_client.get_all_enterprises_edges_with_host()
+        if len(msg['filter']) > 0:
+            edges_by_enterprise = [edge for edge in edges_by_enterprise
+                                   for filter_edge in msg['filter']
+                                   if edge['host'] == filter_edge['host']
+                                   if (edge['enterpriseId'] in filter_edge['enterprise_ids'] or len(filter_edge['enterprise_ids']) is 0)]
+        return edges_by_enterprise
 
     def get_all_hosts_edge_count(self):
         self._logger.info('Getting edge count from host')
@@ -31,4 +37,4 @@ class VelocloudRepository:
 
     def get_enterprise_information(self, host, enterpriseid):
         self._logger.info(f'Getting enterprise information from enterprise:{enterpriseid} in host:{host}')
-        return self._velocloud_client.get_enterprise_information(host, enterpriseid)
+        return self._velocloud_client.get_enterprise_information(host, enterpriseid)._name

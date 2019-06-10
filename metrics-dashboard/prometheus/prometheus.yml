@@ -21,9 +21,3 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['velocloud-overseer:9090']
-
-  - job_name: 'velocloud-bridge'
-
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['velocloud-bridge:9090']

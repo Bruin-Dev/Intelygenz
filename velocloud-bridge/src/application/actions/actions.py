@@ -1,5 +1,4 @@
 from igz.packages.eventbus.eventbus import EventBus
-import velocloud
 from ast import literal_eval
 
 
@@ -18,44 +17,19 @@ class Actions:
         self._logger = logger
         self._prometheus_repository = prometheus_repository
 
-    async def _send_edge_status_tasks(self, msg):
-        edges_by_enterprise = self._velocloud_repository.get_all_enterprises_edges_with_host()
-        if len(msg['filter']) > 0:
-            edges_by_enterprise = [x for x in edges_by_enterprise for y in msg['filter'] if x['host'] == y['host']
-                                   if (x['enterpriseId'] in y['enterprise_ids'] or len(y['enterprise_ids']) is 0)]
-        msg_dict = {"request_id": msg['request_id'], "edges": edges_by_enterprise, "status": 200}
-        await self._event_bus.publish_message("edge.list.response", repr(msg_dict))
-
     async def report_edge_list(self, msg):
         decoded_msg = msg.decode('utf-8')
         msg_dict = literal_eval(decoded_msg)
-        self._prometheus_repository.set_cycle_total_edges(self._sum_edges_all_hosts())
-        self._logger.info("Executing scheduled task: send edge status tasks")
-        await self._send_edge_status_tasks(msg_dict)
-        self._logger.info("Executed scheduled task: send edge status tasks")
+        self._logger.info("Sending edge status tasks")
+        edges_by_enterprise = self._velocloud_repository.get_all_enterprises_edges_with_host(msg_dict)
 
-    def _sum_edges_all_hosts(self):
-        return self._velocloud_repository.get_all_hosts_edge_count()
+        status = 200
+        if edges_by_enterprise is None:
+            status = 500
 
-    def _process_edge(self, edgeids):
-        edge_status = None
-        try:
-            edge_status = self._velocloud_repository.get_edge_information(edgeids['host'],
-                                                                          edgeids['enterpriseId'],
-                                                                          edgeids['id'])
-        except velocloud.rest.ApiException as e:
-            self._logger.exception(e)
-        return edge_status
-
-    def _process_link(self, edgeids):
-        link_status = None
-        try:
-            link_status = self._velocloud_repository.get_link_information(edgeids['host'],
-                                                                          edgeids['enterpriseId'],
-                                                                          edgeids['id'])
-        except velocloud.rest.ApiException as e:
-            self._logger.exception(e)
-        return link_status
+        edge_list_response = {"request_id": msg['request_id'], "edges": edges_by_enterprise, "status": status}
+        await self._event_bus.publish_message("edge.list.response", repr(edge_list_response))
+        self._logger.info("Edge status tasks sent")
 
     async def report_edge_status(self, msg):
         decoded_msg = msg.decode('utf-8')
@@ -63,20 +37,21 @@ class Actions:
         request_id = msg_dict["request_id"]
         edgeids = msg_dict["edge"]
         self._logger.info(f'Processing edge with data {msg}')
-        edge_status = self._process_edge(edgeids)
-        enterprise_info = self._velocloud_repository.get_enterprise_information(edgeids['host'],
+
+        enterprise_name = self._velocloud_repository.get_enterprise_information(edgeids['host'],
                                                                                 edgeids['enterpriseId'])
 
-        link_status = self._process_link(edgeids)
+        edge_status = self._velocloud_repository.get_edge_information(edgeids['host'],
+                                                                      edgeids['enterpriseId'],
+                                                                      edgeids['id'])
 
-        self._prometheus_repository.inc(edgeids['enterpriseId'], enterprise_info._name, edge_status._edgeState,
-                                        link_status)
-        edge_status = {"edges": edge_status, "links": link_status}
-        msg_dict = {"request_id": request_id, "edge_info": edge_status, "status": 200}
+        link_status = self._velocloud_repository.get_link_information(edgeids['host'],
+                                                                      edgeids['enterpriseId'],
+                                                                      edgeids['id'])
+        status = 200
+        if enterprise_name is None or edge_status is None or link_status is None:
+            status = 500
+
+        edge_status = {"enterprise_name": enterprise_name, "edges": edge_status, "links": link_status}
+        msg_dict = {"request_id": request_id, "edge_info": edge_status, "status": status}
         await self._event_bus.publish_message("edge.status.response", repr(msg_dict))
-
-    def start_prometheus_metrics_server(self):
-        self._prometheus_repository.start_prometheus_metrics_server()
-
-    async def reset_counter(self):
-        await self._prometheus_repository.reset_counter()
