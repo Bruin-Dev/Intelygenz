@@ -20,7 +20,9 @@ class VelocloudRepository:
             edges_by_enterprise = [edge for edge in edges_by_enterprise
                                    for filter_edge in msg['filter']
                                    if edge['host'] == filter_edge['host']
-                                   if (edge['enterpriseId'] in filter_edge['enterprise_ids'] or len(filter_edge['enterprise_ids']) is 0)]
+                                   if edge['enterpriseId'] in filter_edge['enterprise_ids'] or len(
+                                                                                    filter_edge['enterprise_ids']) is 0]
+
         return edges_by_enterprise
 
     def get_all_hosts_edge_count(self):
