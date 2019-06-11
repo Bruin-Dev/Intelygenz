@@ -81,8 +81,8 @@ class TestVelocloudClient:
         self.mock_velocloud()
         test_velocloud_client = VelocloudClient(config, mock_logger)
         test_velocloud_client.instantiate_and_connect_clients()
-        edge_info = test_velocloud_client.get_edge_information(test_velocloud_client._config['servers'][0]['url'],
-                                                               19, 99)
+        edges = {"host": test_velocloud_client._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        edge_info = test_velocloud_client.get_edge_information(edges)
         assert edge_info == "Some Edge Information"
 
     def get_edge_information_ko_test(self):
@@ -92,17 +92,16 @@ class TestVelocloudClient:
         test_velocloud_client.instantiate_and_connect_clients()
         test_velocloud_client._logger.exception = Mock()
         test_velocloud_client._logger.error = Mock()
+        edges = {"host": test_velocloud_client._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         exception = velocloud.rest.ApiException()
         exception.status = 400
         test_velocloud_client._clients[0].edgeGetEdge = Mock(side_effect=exception)
-        edge_info = test_velocloud_client.get_edge_information(test_velocloud_client._config['servers'][0]['url'],
-                                                               19, 99)
+        edge_info = test_velocloud_client.get_edge_information(edges)
         assert edge_info is None
         assert test_velocloud_client._logger.exception.called
         assert test_velocloud_client._logger.error.called is False
         exception.status = 0
-        edge_info = test_velocloud_client.get_edge_information(test_velocloud_client._config['servers'][0]['url'],
-                                                               19, 99)
+        edge_info = test_velocloud_client.get_edge_information(edges)
         assert test_velocloud_client._logger.error.called
 
     def get_link_information_test(self):
@@ -110,8 +109,8 @@ class TestVelocloudClient:
         self.mock_velocloud()
         test_velocloud_client = VelocloudClient(config, mock_logger)
         test_velocloud_client.instantiate_and_connect_clients()
-        link_info = test_velocloud_client.get_link_information(test_velocloud_client._config['servers'][0]['url'],
-                                                               19, 99)
+        edges = {"host": test_velocloud_client._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        link_info = test_velocloud_client.get_link_information(edges)
         assert link_info == "Some Link Information"
 
     def get_link_information_ko_test(self):
@@ -123,15 +122,14 @@ class TestVelocloudClient:
         test_velocloud_client._logger.error = Mock()
         exception = velocloud.rest.ApiException()
         exception.status = 400
+        edges = {"host": test_velocloud_client._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         test_velocloud_client._clients[0].metricsGetEdgeLinkMetrics = Mock(side_effect=exception)
-        link_info = test_velocloud_client.get_link_information(test_velocloud_client._config['servers'][0]['url'],
-                                                               19, 99)
+        link_info = test_velocloud_client.get_link_information(edges)
         assert link_info is None
         assert test_velocloud_client._logger.exception.called
         assert test_velocloud_client._logger.error.called is False
         exception.status = 0
-        link_info = test_velocloud_client.get_link_information(test_velocloud_client._config['servers'][0]['url'],
-                                                               19, 99)
+        link_info = test_velocloud_client.get_link_information(edges)
         assert test_velocloud_client._logger.error.called
 
     def get_enterprise_information_test(self):
@@ -139,9 +137,8 @@ class TestVelocloudClient:
         self.mock_velocloud()
         test_velocloud_client = VelocloudClient(config, mock_logger)
         test_velocloud_client.instantiate_and_connect_clients()
-        enterprise_info = test_velocloud_client.get_enterprise_information(test_velocloud_client._config['servers'][0]
-                                                                           ['url'],
-                                                                           19)
+        edges = {"host": test_velocloud_client._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        enterprise_info = test_velocloud_client.get_enterprise_information(edges)
         assert enterprise_info == "Some Enterprise Information"
 
     def get_enterprise_information_ko_test(self):
@@ -153,17 +150,14 @@ class TestVelocloudClient:
         test_velocloud_client._logger.error = Mock()
         exception = velocloud.rest.ApiException()
         exception.status = 400
+        edges = {"host": test_velocloud_client._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         test_velocloud_client._clients[0].enterpriseGetEnterprise = Mock(side_effect=exception)
-        enterprise_info = test_velocloud_client.get_enterprise_information(test_velocloud_client._config['servers'][0]
-                                                                           ['url'],
-                                                                           19)
+        enterprise_info = test_velocloud_client.get_enterprise_information(edges)
         assert enterprise_info is None
         assert test_velocloud_client._logger.exception.called
         assert test_velocloud_client._logger.error.called is False
         exception.status = 0
-        enterprise_info = test_velocloud_client.get_enterprise_information(test_velocloud_client._config['servers'][0]
-                                                                           ['url'],
-                                                                           19)
+        enterprise_info = test_velocloud_client.get_enterprise_information(edges)
         assert test_velocloud_client._logger.error.called
 
     def get_all_enterprises_edges_with_host_test(self):
@@ -172,8 +166,8 @@ class TestVelocloudClient:
         test_velocloud_client = VelocloudClient(config, mock_logger)
         test_velocloud_client.instantiate_and_connect_clients()
         edges_by_ent = test_velocloud_client.get_all_enterprises_edges_with_host()
-        assert edges_by_ent == [{"host": "someurl", "enterpriseId": 1, "id": 19},
-                                {"host": "someurl", "enterpriseId": 1, "id": 77}]
+        assert edges_by_ent == [{"host": "someurl", "enterprise_id": 1, "edge_id": 19},
+                                {"host": "someurl", "enterprise_id": 1, "edge_id": 77}]
 
     def catching_velocloud_exception_test(self):
         mock_logger = Mock()

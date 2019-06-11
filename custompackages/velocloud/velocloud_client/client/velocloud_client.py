@@ -42,9 +42,9 @@ class VelocloudClient:
                        client.api_client.base_path][0]
         return host_client
 
-    def get_edge_information(self, host, enterpriseid, edgeid):
-        target_host_client = self._get_client_by_host(host)
-        edgeids = {"enterpriseId": enterpriseid, "id": edgeid}
+    def get_edge_information(self, edge):
+        target_host_client = self._get_client_by_host(edge["host"])
+        edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"]}
         try:
             edge_information = target_host_client.edgeGetEdge(body=edgeids)
             return edge_information
@@ -53,9 +53,9 @@ class VelocloudClient:
             if e.status == 0:
                 self._logger.error('Error, could not authenticate')
 
-    def get_link_information(self, host, enterpriseid, edgeid):
-        target_host_client = self._get_client_by_host(host)
-        edgeids = {"enterpriseId": enterpriseid, "id": edgeid}
+    def get_link_information(self, edge):
+        target_host_client = self._get_client_by_host(edge["host"])
+        edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"]}
         try:
             link_information = target_host_client.metricsGetEdgeLinkMetrics(body=edgeids)
             return link_information
@@ -64,9 +64,9 @@ class VelocloudClient:
             if e.status == 0:
                 self._logger.error('Error, could not authenticate')
 
-    def get_enterprise_information(self, host, enterpriseid):
-        target_host_client = self._get_client_by_host(host)
-        body = {"enterpriseId": enterpriseid}
+    def get_enterprise_information(self, edge):
+        target_host_client = self._get_client_by_host(edge["host"])
+        body = {"enterpriseId": edge["enterprise_id"]}
         try:
             enterprise_information = target_host_client.enterpriseGetEnterprise(body=body)
             return enterprise_information
@@ -86,8 +86,8 @@ class VelocloudClient:
                         edges_by_enterprise_and_host.append(
                             {"host": client.api_client.base_path.replace("/portal/rest", "").replace
                              ("https://", ""),
-                             "enterpriseId": enterprise._id,
-                             "id": edge._id})
+                             "enterprise_id": enterprise._id,
+                             "edge_id": edge._id})
 
         except velocloud.rest.ApiException as e:
             self._logger.exception(f'Error, exception ocurred getting all velocloud '

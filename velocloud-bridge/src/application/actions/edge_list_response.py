@@ -4,13 +4,12 @@ from ast import literal_eval
 
 class ReportEdgeList:
 
-    def __init__(self, config, event_bus: EventBus, velocloud_repository, logger, prometheus_repository):
+    def __init__(self, config, event_bus: EventBus, velocloud_repository, logger):
 
         self._configs = config
         self._event_bus = event_bus
         self._velocloud_repository = velocloud_repository
         self._logger = logger
-        self._prometheus_repository = prometheus_repository
 
     async def report_edge_list(self, msg):
         decoded_msg = msg.decode('utf-8')

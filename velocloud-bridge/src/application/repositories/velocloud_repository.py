@@ -20,23 +20,22 @@ class VelocloudRepository:
             edges_by_enterprise = [edge for edge in edges_by_enterprise
                                    for filter_edge in msg['filter']
                                    if edge['host'] == filter_edge['host']
-                                   if edge['enterpriseId'] in filter_edge['enterprise_ids'] or len(
+                                   if edge['enterprise_id'] in filter_edge['enterprise_ids'] or len(
                                     filter_edge['enterprise_ids']) is 0]
 
         return edges_by_enterprise
 
-    def get_all_hosts_edge_count(self):
-        self._logger.info('Getting edge count from host')
-        return self._velocloud_client.get_all_hosts_edge_count()
+    def get_edge_information(self, edge):
+        self._logger.info(f'Getting edge information from edge:{edge["edge_id"]} in '
+                          f'enterprise:{edge["enterprise_id"]} from host:{edge["host"]}')
+        return self._velocloud_client.get_edge_information(edge)
 
-    def get_edge_information(self, host, enterpriseid, edgeid):
-        self._logger.info(f'Getting edge information from edge:{edgeid} in enterprise:{enterpriseid} from host:{host}')
-        return self._velocloud_client.get_edge_information(host, enterpriseid, edgeid)
+    def get_link_information(self, edge):
+        self._logger.info(f'Getting link information from edge:{edge["edge_id"]} in '
+                          f'enterprise:{edge["enterprise_id"]} from host:{edge["host"]}')
+        return self._velocloud_client.get_link_information(edge)
 
-    def get_link_information(self, host, enterpriseid, edgeid):
-        self._logger.info(f'Getting link information from edge:{edgeid} in enterprise:{enterpriseid} from host:{host}')
-        return self._velocloud_client.get_link_information(host, enterpriseid, edgeid)
-
-    def get_enterprise_information(self, host, enterpriseid):
-        self._logger.info(f'Getting enterprise information from enterprise:{enterpriseid} in host:{host}')
-        return self._velocloud_client.get_enterprise_information(host, enterpriseid)._name
+    def get_enterprise_information(self, edge):
+        self._logger.info(f'Getting enterprise information from enterprise:{edge["enterprise_id"]} in'
+                          f' host:{edge["host"]}')
+        return self._velocloud_client.get_enterprise_information(edge)._name
