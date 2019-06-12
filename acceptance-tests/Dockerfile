@@ -19,4 +19,4 @@ RUN pip install --upgrade pip
 RUN (cd acceptance-tests/$acc_test && pip install -r requirements.txt)
 
 CMD (cd acceptance-tests/$ACC_TEST && behave src -f json -o results.json) ; \
-    python -u custompackages/igzpackages/igz/packages/honestcode/post_behave_result.py $JSON_FILE $BLUEPRINT
+
