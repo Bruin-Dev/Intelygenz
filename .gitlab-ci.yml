@@ -226,24 +226,24 @@ velocloud-orchestrator-build:
 # =========
 # TERRAFORM
 # =========
-#
-#terraform-validate-basic-infra:
-#  stage: validation
-#  <<: *terraform_template
-#  script:
-#    - terraform init infra-as-code/basic-infra
-#    - terraform validate infra-as-code/basic-infra
-#    - terraform plan infra-as-code/basic-infra
-#
-#terraform-validate-dev:
-#  stage: validation
-#  <<: *terraform_template
-#  script:
-#    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
-#    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
-#    - terraform init infra-as-code/dev
-#    - terraform validate infra-as-code/dev
-#    - terraform plan infra-as-code/dev
+
+terraform-validate-basic-infra:
+  stage: validation
+  <<: *terraform_template
+  script:
+    - terraform init infra-as-code/basic-infra
+    - terraform validate infra-as-code/basic-infra
+    - terraform plan infra-as-code/basic-infra
+
+terraform-validate-dev:
+  stage: validation
+  <<: *terraform_template
+  script:
+    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
+    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
+    - terraform init infra-as-code/dev
+    - terraform validate infra-as-code/dev
+    - terraform plan infra-as-code/dev
 
 basic-infra:
   stage: basic_infra

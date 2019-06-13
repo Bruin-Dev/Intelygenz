@@ -36,7 +36,7 @@ class Container:
         self._edge_repository = EdgeRepository(self._redis_client, self._logger)
         self._status_repository = StatusRepository(self._redis_client, self._logger)
         self._edge_monitoring = EdgeMonitoring(self._event_bus, self._logger, self._prometheus_repository,
-                                               self._scheduler, self._edge_repository, self._status_repository)
+                                               self._scheduler, self._edge_repository, self._status_repository, config)
         self._process_edge_list = ActionWrapper(self._edge_monitoring, "receive_edge_list", is_async=True,
                                                 logger=self._logger)
         self._process_edge = ActionWrapper(self._edge_monitoring, "receive_edge", is_async=True, logger=self._logger)
@@ -44,8 +44,7 @@ class Container:
     async def _start(self):
         self._edge_monitoring.start_prometheus_metrics_server()
         await self._event_bus.connect()
-        await self._edge_monitoring.start_edge_monitor_job(config.ORCHESTRATOR_CONFIG['monitoring_seconds'],
-                                                           exec_on_start=True)
+        await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
         await self._event_bus.subscribe_consumer(consumer_name="sub-edges-list", topic="edge.list.response",
                                                  action_wrapper=self._process_edge_list,
                                                  durable_name="velocloud_orchestrator",
