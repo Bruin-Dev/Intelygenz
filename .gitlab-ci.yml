@@ -45,7 +45,6 @@ variables:
     - pip install docker-compose
   script:
     - docker-compose -f docker-compose-ci.yml up --build --abort-on-container-exit
-    - python -u custompackages/igzpackages/igz/packages/honestcode/post_behave_result.py $JSON_FILE $BLUEPRINT
   after_script:
     - docker-compose -f docker-compose-ci.yml down && docker-compose -f docker-compose-ci.yml rm -v
 
