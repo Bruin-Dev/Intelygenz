@@ -20,6 +20,12 @@ SLACK_CONFIG = {
     'time': 1
 }
 
+EMAIL_CONFIG = {
+    'sender_email': 'fake@gmail.com',
+    'password': '456',
+    'recipient_email': 'fake@gmail.com'
+}
+
 LOG_CONFIG = {
     'name': 'test-name',
     'level': logging.DEBUG,

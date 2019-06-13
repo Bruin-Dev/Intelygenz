@@ -22,9 +22,16 @@ NATS_CONFIG = {
 }
 
 SLACK_CONFIG = {
-    'webhook': [os.environ["SLACK_URL"]],
+    'webhook': [os.environ["EMAIL_ACC_PWD"]],
     'time': 600
 }
+
+EMAIL_CONFIG = {
+    'sender_email': 'mettel.automation@intelygenz.com',
+    'password': [os.environ["SLACK_URL"]],
+    'recipient_email': 'pythonemailbot329@gmail.com'
+}
+
 
 LOG_CONFIG = {
     'name': 'velocloud-notificator',
