@@ -27,7 +27,7 @@ GRAFANA_CONFIG = {
 }
 
 ORCHESTRATOR_CONFIG = {
-    'monitoring_seconds': 10
+    'monitoring_seconds': 0.01
 }
 
 QUART_CONFIG = {
