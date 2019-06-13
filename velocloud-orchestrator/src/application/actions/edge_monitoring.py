@@ -3,6 +3,7 @@ from apscheduler.util import undefined
 from datetime import datetime
 from shortuuid import uuid
 from ast import literal_eval
+import json
 
 
 class EdgeMonitoring:
@@ -18,13 +19,18 @@ class EdgeMonitoring:
 
     async def _edge_monitoring_process(self):
         self._logger.info("Starting velocloud edge monitoring process")
-        # if "IDLE" in self._status_repository.get_status():
-        self._logger.info("IDLE status: asking edge list. Orchestrator status = REQUESTING_VELOCLOUD_EDGES...")
-        self._status_repository.set_status("REQUESTING_VELOCLOUD_EDGES")
-        await self._request_edges(uuid())
-        self._status_repository.set_edges_to_process(9000)
-        self._logger.info("Sending edge status tasks. Orchestrator status = PROCESSING_VELOCLOUD_EDGES...")
-        self._status_repository.set_status("PROCESSING_VELOCLOUD_EDGES")
+        if "PROCESSING_VELOCLOUD_EDGES" in self._status_repository.get_status():
+            edges_processed = self._status_repository.get_edges_processed()
+            edges_to_process = self._status_repository.get_edges_to_process()
+            self._logger.error(f'There\'s still edges to be processed: {edges_processed} / {edges_to_process}')
+            self._logger.error('Edge monitoring process won\'t be triggered again')
+        if "IDLE" in self._status_repository.get_status():
+            self._logger.info("IDLE status: asking edge list. Orchestrator status = REQUESTING_VELOCLOUD_EDGES...")
+            self._status_repository.set_status("REQUESTING_VELOCLOUD_EDGES")
+            self._status_repository.set_edges_processed(0)
+            await self._request_edges(uuid())
+            self._logger.info("Sending edge status tasks. Orchestrator status = PROCESSING_VELOCLOUD_EDGES...")
+            self._status_repository.set_status("PROCESSING_VELOCLOUD_EDGES")
 
     async def start_edge_monitor_job(self, seconds, exec_on_start=True):
         self._logger.info(f'Scheduled task: edge monitoring process configured to run each {seconds} seconds')
@@ -43,16 +49,24 @@ class EdgeMonitoring:
         self._logger.info(f'Edge list received from event bus')
         decoded_msg = literal_eval(msg.decode('utf-8'))
         egde_status_requests = [dict(request_id=decoded_msg["request_id"], edge=edge) for edge in decoded_msg["edges"]]
+        self._status_repository.set_edges_to_process(len(egde_status_requests))
         self._logger.info(f'{egde_status_requests}')
         self._logger.info(f'Sending them to the event bus')
         for request in egde_status_requests:
             await self._event_bus.publish_message("edge.status.request", repr(request))
         self._logger.info(f'Requests sent')
 
-    def receive_edge(self, msg):
+    async def receive_edge(self, msg):
         self._logger.info(f'Edge received from event bus')
-        decoded_msg = msg.decode('utf-8')
-        self._logger.info(f'{decoded_msg}')
+        edges_processed = self._status_repository.get_edges_processed()
+        edges_to_process = self._status_repository.get_edges_to_process()
+        edges_processed = edges_processed + 1
+        self._status_repository.set_edges_processed(edges_processed)
+        self._logger.info(f'Edges processed: {edges_processed} / {edges_to_process}')
+        if edges_processed == edges_to_process:
+            self._logger.info("All edges processed, starting the cycle again")
+            self._status_repository.set_status("IDLE")
+            await self._edge_monitoring_process()
 
     def start_prometheus_metrics_server(self):
         self._prometheus_repository.start_prometheus_metrics_server()

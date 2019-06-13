@@ -22,15 +22,19 @@ class StatusRepository:
         self._redis_client.set("edges_to_process", number_of_edges)
 
     def get_edges_to_process(self):
+        if not self._redis_client.exists("edges_to_process") or self._redis_client.get("edges_to_process") is None:
+            self.set_edges_to_process(0)
         edges_to_process = self._redis_client.get("edges_to_process")
         self._logger.info(f'Got edges_to_process = {edges_to_process} from cache')
-        return edges_to_process
+        return int(edges_to_process)
 
     def set_edges_processed(self, edges_processed):
         self._logger.info(f'Storing edges_processed = {edges_processed} in cache')
         self._redis_client.set("edges_processed", edges_processed)
 
-    def get_edges_edges_processed(self):
+    def get_edges_processed(self):
+        if not self._redis_client.exists("edges_processed") or self._redis_client.get("edges_processed") is None:
+            self.set_edges_processed(0)
         edges_processed = self._redis_client.get("edges_processed")
         self._logger.info(f'Got edges_processed = {edges_processed} from cache')
-        return edges_processed
+        return int(edges_processed)

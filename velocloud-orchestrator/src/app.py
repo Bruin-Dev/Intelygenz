@@ -39,7 +39,7 @@ class Container:
                                                self._scheduler, self._edge_repository, self._status_repository)
         self._process_edge_list = ActionWrapper(self._edge_monitoring, "receive_edge_list", is_async=True,
                                                 logger=self._logger)
-        self._process_edge = ActionWrapper(self._edge_monitoring, "receive_edge", is_async=False, logger=self._logger)
+        self._process_edge = ActionWrapper(self._edge_monitoring, "receive_edge", is_async=True, logger=self._logger)
 
     async def _start(self):
         self._edge_monitoring.start_prometheus_metrics_server()
