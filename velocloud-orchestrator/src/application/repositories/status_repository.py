@@ -15,7 +15,6 @@ class StatusRepository:
         if not self._redis_client.exists("status"):
             self._logger.info("Cache has no status' registry. Creating it. State is IDLE")
             self._redis_client.set("status", "IDLE")
-            return "IDLE"
         status = self._redis_client.get("status")
         self._logger.info(f'Current status from cache: {status}')
         return status
@@ -25,7 +24,7 @@ class StatusRepository:
         self._redis_client.set("edges_to_process", number_of_edges)
 
     def get_edges_to_process(self):
-        if not self._redis_client.exists("edges_to_process") or self._redis_client.get("edges_to_process") is None:
+        if not self._redis_client.exists("edges_to_process"):
             self.set_edges_to_process(0)
         edges_to_process = self._redis_client.get("edges_to_process")
         self._logger.info(f'Got edges_to_process = {edges_to_process} from cache')
@@ -36,7 +35,7 @@ class StatusRepository:
         self._redis_client.set("edges_processed", edges_processed)
 
     def get_edges_processed(self):
-        if not self._redis_client.exists("edges_processed") or self._redis_client.get("edges_processed") is None:
+        if not self._redis_client.exists("edges_processed"):
             self.set_edges_processed(0)
         edges_processed = self._redis_client.get("edges_processed")
         self._logger.info(f'Got edges_processed = {edges_processed} from cache')
@@ -47,9 +46,8 @@ class StatusRepository:
         self._redis_client.set("last_cycle_timestamp", last_cycle_timestamp)
 
     def get_last_cycle_timestamp(self):
-        if not self._redis_client.exists("last_cycle_timestamp") or self._redis_client.get(
-                "last_cycle_timestamp") is None:
-            self.set_edges_processed(datetime.timestamp(datetime(1970, 1, 1)))
+        if not self._redis_client.exists("last_cycle_timestamp"):
+            self.set_last_cycle_timestamp(datetime.timestamp(datetime(1970, 1, 1)))
         last_cycle_timestamp = self._redis_client.get("last_cycle_timestamp")
         self._logger.info(f'Got last_cycle_timestamp = {last_cycle_timestamp} from cache')
         return float(last_cycle_timestamp)
