@@ -1,5 +1,6 @@
 from unittest.mock import Mock
 from application.actions.actions import Actions
+from asynctest import CoroutineMock
 from config import testconfig as config
 import asyncio
 import pytest
@@ -53,37 +54,41 @@ class TestActions:
         test_actions.store_stats(test_msg)
         assert test_actions._statistic_repository.send_to_stats_client.called
 
-    def send_to_email_job_test(self):
+    @pytest.mark.asyncio
+    async def send_to_email_job_test(self):
         test_msg = b'{"request_id":"123", "message":"Failed Edges to be emailed"}'
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
         test_bus = Mock()
-        test_bus.publish_message()
+        test_bus.publish_message = CoroutineMock()
         mock_email_repository = Mock()
         mock_email_repository.send_to_email = Mock(return_value=200)
         mock_logger = Mock()
         scheduler = Mock()
         test_actions = Actions(config, test_bus, mock_slack_repository, mock_stats_repo, mock_logger,
                                mock_email_repository, scheduler)
-        test_actions.send_to_email_job(test_msg)
+        await test_actions.send_to_email_job(test_msg)
         assert test_actions._email_repository.send_to_email.called
         mock_email_repository.send_to_email.assert_called_with('Failed Edges to be emailed')
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == "notification.email.response"
         assert test_bus.publish_message.call_args[0][1] == repr({"request_id": "123", "status": 200})
 
-    def send_to_email_job_no_message_test(self):
+    @pytest.mark.asyncio
+    async def send_to_email_job_no_message_test(self):
         test_msg = b'{"request_id":"123", "message":""}'
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
         test_bus = Mock()
-        test_bus.publish_message()
+        test_bus.publish_message = CoroutineMock()
         mock_email_repository = Mock()
+        mock_email_repository.send_to_email = Mock(return_value=200)
         mock_logger = Mock()
         scheduler = Mock()
         test_actions = Actions(config, test_bus, mock_slack_repository, mock_stats_repo, mock_logger,
                                mock_email_repository, scheduler)
-        test_actions.send_to_email_job(test_msg)
+        await test_actions.send_to_email_job(test_msg)
+        assert test_actions._email_repository.send_to_email.called is False
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == "notification.email.response"
         assert test_bus.publish_message.call_args[0][1] == repr({"request_id": "123", "status": 500})
