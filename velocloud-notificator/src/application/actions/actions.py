@@ -26,14 +26,14 @@ class Actions:
     def store_stats(self, msg):
         self._statistic_repository.send_to_stats_client(msg)
 
-    def send_to_email_job(self, msg):
+    async def send_to_email_job(self, msg):
         decoded_msg = msg.decode('utf-8')
         msg_dict = literal_eval(decoded_msg)
         status = 500
         if msg_dict["message"] is not None and msg_dict["message"] != "":
             status = self._email_repository.send_to_email(msg_dict["message"])
         notification_response = {"request_id": msg_dict['request_id'], "status": status}
-        self._event_bus.publish_message("notification.email.response", repr(notification_response))
+        await self._event_bus.publish_message("notification.email.response", repr(notification_response))
 
     def set_stats_to_slack_job(self):
         seconds = self._config.SLACK_CONFIG['time']

@@ -22,14 +22,14 @@ NATS_CONFIG = {
 }
 
 SLACK_CONFIG = {
-    'webhook': [os.environ["EMAIL_ACC_PWD"]],
+    'webhook': [os.environ["SLACK_URL"]],
     'time': 600
 }
 
 EMAIL_CONFIG = {
     'sender_email': 'mettel.automation@intelygenz.com',
-    'password': [os.environ["SLACK_URL"]],
-    'recipient_email': 'pythonemailbot329@gmail.com'
+    'password': [os.environ["EMAIL_ACC_PWD"]],
+    'recipient_email': 'mettel.automation@intelygenz.com'
 }
 
 
