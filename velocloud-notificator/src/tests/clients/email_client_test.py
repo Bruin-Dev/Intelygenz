@@ -42,7 +42,7 @@ class TestEmailClient:
     def send_to_email_ok_test(self):
         test_msg = {"subject": "subject",
                     "message": "message",
-                    "attachment_name": "test",
+                    "attachment_name": "test.csv",
                     "attachment_context": "123"}
         mock_logger = Mock()
         application.clients.email_client.smtplib.SMTP.ehlo = Mock()
@@ -61,10 +61,10 @@ class TestEmailClient:
         assert isinstance(test_client._email_server.sendmail.call_args[0][2], str)
         assert test_client._logger.exception.called is False
 
-    def send_to_email_ok_csv_provided_test(self):
+    def send_to_email_ok_csv_not_provided_test(self):
         test_msg = {"subject": "subject",
                     "message": "message",
-                    "attachment_name": "test.csv",
+                    "attachment_name": "test",
                     "attachment_context": "123"}
         mock_logger = Mock()
         application.clients.email_client.smtplib.SMTP.ehlo = Mock()
@@ -81,6 +81,7 @@ class TestEmailClient:
         assert test_client._email_server.sendmail.call_args[0][0] == test_client._config.EMAIL_CONFIG['sender_email']
         assert test_client._email_server.sendmail.call_args[0][1] == test_client._config.EMAIL_CONFIG['recipient_email']
         assert isinstance(test_client._email_server.sendmail.call_args[0][2], str)
+        assert ".csv" in test_client._email_server.sendmail.call_args[0][2]
         assert test_client._logger.exception.called is False
 
     def send_to_email_ko_test(self):
