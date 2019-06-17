@@ -28,7 +28,7 @@ SLACK_CONFIG = {
 
 EMAIL_CONFIG = {
     'sender_email': 'mettel.automation@intelygenz.com',
-    'password': [os.environ["EMAIL_ACC_PWD"]],
+    'password': os.environ["EMAIL_ACC_PWD"],
     'recipient_email': 'mettel.automation@intelygenz.com'
 }
 
