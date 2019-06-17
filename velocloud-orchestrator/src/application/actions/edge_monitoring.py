@@ -2,7 +2,6 @@ from igz.packages.eventbus.eventbus import EventBus
 from apscheduler.util import undefined
 from datetime import datetime
 from shortuuid import uuid
-from ast import literal_eval
 import json
 
 

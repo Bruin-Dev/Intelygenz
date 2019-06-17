@@ -1,4 +1,4 @@
-from ast import literal_eval
+import json
 
 
 class StatisticRepository:
@@ -17,16 +17,7 @@ class StatisticRepository:
         self._logger = logger
 
     def send_to_stats_client(self, msg):
-        decoded_msg = msg.decode('utf-8')
-        decoded_msg = decoded_msg.replace('datetime.datetime', '')
-        decoded_msg = decoded_msg.replace(', tzinfo=tzlocal()', '')
-        decoded_msg = decoded_msg.replace(', tzinfo=tzutc()', '')
-        msg_dict = literal_eval(decoded_msg)
-        for links in msg_dict['links']:
-            links['link'].pop('created', None)
-            links['link'].pop('lastActive', None)
-            links['link'].pop('lastEvent', None)
-            links['link'].pop('modified', None)
+        msg_dict = json.loads(msg)
         edge_msg_dict = msg_dict["edges"]
         link_msg_dict = msg_dict["links"]
         self._activation_key = edge_msg_dict['activationKey']
