@@ -54,21 +54,23 @@ class EdgeMonitoring:
 
     async def _request_edges(self, request_id):
         msg = dict(request_id=request_id, filter=[])
-        await self._event_bus.publish_message("edge.list.request", repr(msg))
+        await self._event_bus.publish_message("edge.list.request", json.dumps(msg))
 
     async def receive_edge_list(self, msg):
         self._logger.info(f'Edge list received from event bus')
-        decoded_msg = literal_eval(msg.decode('utf-8'))
+        decoded_msg = json.loads(msg)
         egde_status_requests = [dict(request_id=decoded_msg["request_id"], edge=edge) for edge in decoded_msg["edges"]]
         self._status_repository.set_edges_to_process(len(egde_status_requests))
         self._logger.info(f'{egde_status_requests}')
         self._logger.info(f'Sending them to the event bus')
         for request in egde_status_requests:
-            await self._event_bus.publish_message("edge.status.request", repr(request))
+            await self._event_bus.publish_message("edge.status.request", json.dumps(request))
         self._logger.info(f'Requests sent')
 
     async def receive_edge(self, msg):
         self._logger.info(f'Edge received from event bus')
+        edge = json.loads(msg)
+        self._logger.info(f'Edge data: {edge}')
         edges_processed = self._status_repository.get_edges_processed()
         edges_to_process = self._status_repository.get_edges_to_process()
         edges_processed = edges_processed + 1
