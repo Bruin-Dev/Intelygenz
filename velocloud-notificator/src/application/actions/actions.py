@@ -1,5 +1,5 @@
 from igz.packages.eventbus.eventbus import EventBus
-from ast import literal_eval
+import json
 
 
 class Actions:
@@ -27,13 +27,12 @@ class Actions:
         self._statistic_repository.send_to_stats_client(msg)
 
     async def send_to_email_job(self, msg):
-        decoded_msg = msg.decode('utf-8')
-        msg_dict = literal_eval(decoded_msg)
+        msg_dict = json.loads(msg)
         status = 500
-        if msg_dict["message"] is not None and msg_dict["message"] != "":
-            status = self._email_repository.send_to_email(msg_dict["message"])
+        if msg_dict["email_data"] is not None and msg_dict["email_data"] != "":
+            status = self._email_repository.send_to_email(msg_dict["email_data"])
         notification_response = {"request_id": msg_dict['request_id'], "status": status}
-        await self._event_bus.publish_message("notification.email.response", repr(notification_response))
+        await self._event_bus.publish_message("notification.email.response", json.dumps(notification_response))
 
     def set_stats_to_slack_job(self):
         seconds = self._config.SLACK_CONFIG['time']
