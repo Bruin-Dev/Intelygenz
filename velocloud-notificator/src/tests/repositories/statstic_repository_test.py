@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 from config import testconfig as config
 from application.repositories.statistic_repository import StatisticRepository
+import json
 
 
 class TestStatisticRepository:
@@ -17,10 +18,9 @@ class TestStatisticRepository:
         mock_client = Mock()
         mock_logger = Mock()
         test_repo = StatisticRepository(config, mock_client, mock_logger)
-        test_dict_msg = b"{'edges':{'activationKey': 1234 , 'edgeState': 'CONNECTED'  },   \
-                        'links':[{'linkId': 4321, 'link':     \
-                        { 'created': datetime.datetime(2018, 1, 2, 3, 4, 5, tzinfo=tzlocal()),\
-                          'state': 'STABLE'}}]}"
+        test_dict_msg = json.dumps({'edges': {'activationKey': 1234, 'edgeState': 'CONNECTED'},
+                                   'links': [{'linkId': 4321, 'link':
+                                             {'state': 'STABLE'}}]})
         test_repo._statistic_client.store_edge = Mock()
         test_repo._statistic_client.store_link = Mock()
         test_repo.send_to_stats_client(test_dict_msg)
@@ -35,8 +35,8 @@ class TestStatisticRepository:
         mock_client = Mock()
         mock_logger = Mock()
         test_repo = StatisticRepository(config, mock_client, mock_logger)
-        test_dict_msg = b"{'edges':{'activationKey': 1234 , 'edgeState': 'CONNECTED'  },   \
-                        'links':[]}"
+        test_dict_msg = json.dumps({'edges': {'activationKey': 1234, 'edgeState': 'CONNECTED'},
+                                    'links': []})
         test_repo._statistic_client.store_edge = Mock()
         test_repo._statistic_client.store_link = Mock()
         test_repo.send_to_stats_client(test_dict_msg)

@@ -33,14 +33,10 @@ class TestEdgeStatusResponse:
         velocloud_repo = Mock()
         actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        enterprise_info = Mock()
-        enterprise_info._name = Mock()
-        edge_status = namedtuple("edge_status", [])
-        edge_status._edgeState = 'CONNECTED'
-        link_status = []
+        enterprise_info = "TEST"
         velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
-        velocloud_repo.get_edge_information = Mock(return_value=edge_status)
-        velocloud_repo.get_link_information = Mock(return_value=link_status)
+        velocloud_repo.get_edge_information().to_dict = Mock(return_value=dict(edge_status=[]))
+        velocloud_repo.get_link_information().to_dict = Mock(return_value=[dict(link_data=[])])
         edge_msg = {"request_id": "123", "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(json.dumps(edge_msg).encode('utf-8'))
         assert velocloud_repo.get_enterprise_information.called
@@ -51,11 +47,11 @@ class TestEdgeStatusResponse:
         assert velocloud_repo.get_link_information.call_args[0][0] == edge_msg["edge"]
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == 'edge.status.response'
-        assert test_bus.publish_message.call_args[0][1] == repr({"request_id": "123",
-                                                                 "edge_info": {"enterprise_name": enterprise_info,
-                                                                               "edges": edge_status,
-                                                                               "links": link_status},
-                                                                 "status": 200})
+        assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
+                                                                       "edge_info": {"enterprise_name": enterprise_info,
+                                                                                     "edges": {"edge_status": []},
+                                                                                     "links": [{"link_data": []}]},
+                                                                       "status": 200})
         assert actions._logger.info.called
 
     @pytest.mark.asyncio
@@ -66,20 +62,19 @@ class TestEdgeStatusResponse:
         velocloud_repo = Mock()
         actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        enterprise_info = Mock()
-        enterprise_info._name = Mock()
+        enterprise_info = "TEST"
         edge_status = None
-        link_status = 'OKAY'
         velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
-        velocloud_repo.get_edge_information = Mock(return_value=edge_status)
-        velocloud_repo.get_link_information = Mock(return_value=link_status)
+        velocloud_repo.get_edge_information().to_dict = Mock(return_value=edge_status)
+        velocloud_repo.get_link_information().to_dict = Mock(return_value=[dict(link_data="Some link data")])
         edge_msg = {"request_id": "123", "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(json.dumps(edge_msg).encode('utf-8'))
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == 'edge.status.response'
-        assert test_bus.publish_message.call_args[0][1] == repr({"request_id": "123",
-                                                                 "edge_info": {"enterprise_name": enterprise_info,
-                                                                               "edges": edge_status,
-                                                                               "links": link_status},
-                                                                 "status": 500})
+        assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
+                                                                       "edge_info": {"enterprise_name": enterprise_info,
+                                                                                     "edges": edge_status,
+                                                                                     "links": [{"link_data":
+                                                                                                "Some link data"}]},
+                                                                       "status": 500})
         assert actions._logger.info.called

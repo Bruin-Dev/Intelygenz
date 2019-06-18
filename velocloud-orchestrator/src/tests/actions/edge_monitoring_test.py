@@ -5,6 +5,7 @@ from config import testconfig
 from unittest.mock import Mock
 from datetime import datetime
 import asyncio
+import json
 
 
 class TestEdgeMonitoring:
@@ -97,7 +98,7 @@ class TestEdgeMonitoring:
         status_repository.set_status = Mock()
         config = Mock()
 
-        edge = b'Some edge data'
+        edge = json.dumps('Some edge data')
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, config)
