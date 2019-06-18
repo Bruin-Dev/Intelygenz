@@ -29,16 +29,17 @@ class EmailClient:
             mime_msg['Subject'] = msg["subject"]
 
             mime_msg.attach(MIMEText(msg["message"]))
-            attachment = (MIMENonMultipart('text', 'csv', charset='utf-8'))
-            attachment_name = msg["attachment_name"]
+            if msg["attachment_content"] is not None and msg["attachment_name"] is not None:
+                attachment = (MIMENonMultipart('text', 'csv', charset='utf-8'))
+                attachment_name = msg["attachment_name"]
 
-            if ".csv" not in attachment_name:
-                attachment_name += ".csv"
-            attachment.add_header('Content-Disposition', 'attachment', filename=attachment_name)
-            cs = Charset('utf-8')
-            cs.body_encoding = BASE64
-            attachment.set_payload((msg["attachment_context"]).encode('utf-8'), charset=cs)
-            mime_msg.attach(attachment)
+                if ".csv" not in attachment_name:
+                    attachment_name += ".csv"
+                attachment.add_header('Content-Disposition', 'attachment', filename=attachment_name)
+                cs = Charset('utf-8')
+                cs.body_encoding = BASE64
+                attachment.set_payload((msg["attachment_content"]).encode('utf-8'), charset=cs)
+                mime_msg.attach(attachment)
 
             self._email_server.sendmail(self._config.EMAIL_CONFIG['sender_email'],
                                         self._config.EMAIL_CONFIG['recipient_email'],

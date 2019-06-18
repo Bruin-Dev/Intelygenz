@@ -35,8 +35,8 @@ class Container:
 
     def setup(self):
         self.scheduler = AsyncIOScheduler(timezone=utc)
-        self.subscriber_email = NatsStreamingClient(config, f'velocloud-notificator-subscriber-', logger=self.logger)
-        self.subscriber = NatsStreamingClient(config, f'velocloud-notificator-subscriber-', logger=self.logger)
+        self.subscriber_email = NatsStreamingClient(config, f'velocloud-notificator-mail-subscriber-',
+                                                    logger=self.logger)
         self.publisher = NatsStreamingClient(config, f'velocloud-notificator-publisher-', logger=self.logger)
 
         self.email_client = EmailClient(config, self.logger)
@@ -50,23 +50,17 @@ class Container:
         self.event_bus = EventBus(logger=self.logger)
 
         self.event_bus.add_consumer(consumer=self.subscriber_email, consumer_name="notification_email_request")
-        self.event_bus.add_consumer(consumer=self.subscriber, consumer_name="KO_subscription")
         self.event_bus.set_producer(producer=self.publisher)
 
         self.actions = Actions(config, self.event_bus, self.slack_repo, self.stats_repo, self.logger, self.email_repo,
                                scheduler=self.scheduler)
 
         self.send_email_wrapper = ActionWrapper(self.actions, "send_to_email_job", is_async=True, logger=self.logger)
-        self.store_stats_wrapper = ActionWrapper(self.actions, "store_stats", logger=self.logger)
 
         self.server = QuartServer(config)
 
     async def start(self):
         await self.event_bus.connect()
-        await self.event_bus.subscribe_consumer(consumer_name="KO_subscription", topic="edge.status.ko",
-                                                action_wrapper=self.store_stats_wrapper,
-                                                durable_name="velocloud_notificator",
-                                                queue="velocloud_notificator")
 
         await self.event_bus.subscribe_consumer(consumer_name="notification_email_request",
                                                 topic="notification.email.request",
