@@ -36,6 +36,7 @@ class EdgeMonitoring:
             self._logger.info("IDLE status: asking edge list. Orchestrator status = REQUESTING_VELOCLOUD_EDGES...")
             self._status_repository.set_status("REQUESTING_VELOCLOUD_EDGES")
             self._status_repository.set_edges_processed(0)
+            self._prometheus_repository.reset_counter()
             self._status_repository.set_last_cycle_timestamp(datetime.timestamp(datetime.now()))
             await self._request_edges(uuid())
             self._logger.info("Sending edge status tasks. Orchestrator status = PROCESSING_VELOCLOUD_EDGES...")
@@ -58,10 +59,11 @@ class EdgeMonitoring:
     async def receive_edge_list(self, msg):
         self._logger.info(f'Edge list received from event bus')
         decoded_msg = json.loads(msg)
-        egde_status_requests = [dict(request_id=decoded_msg["request_id"], edge=edge) for edge in decoded_msg["edges"]]
-        self._status_repository.set_edges_to_process(len(egde_status_requests))
+        edge_status_requests = [dict(request_id=decoded_msg["request_id"], edge=edge) for edge in decoded_msg["edges"]]
+        self._prometheus_repository.set_cycle_total_edges(len(edge_status_requests))
+        self._status_repository.set_edges_to_process(len(edge_status_requests))
         self._logger.info(f'Splitting and sending edges to the event bus')
-        for request in egde_status_requests:
+        for request in edge_status_requests:
             await self._event_bus.publish_message("edge.status.request", json.dumps(request))
         self._logger.info(f'Requests sent')
 
@@ -69,6 +71,7 @@ class EdgeMonitoring:
         self._logger.info(f'Edge received from event bus')
         edge = json.loads(msg)
         self._logger.info(f'Edge data: {json.dumps(edge, indent=2)}')
+        self._prometheus_repository.inc()
         edges_processed = self._status_repository.get_edges_processed()
         edges_to_process = self._status_repository.get_edges_to_process()
         edges_processed = edges_processed + 1
