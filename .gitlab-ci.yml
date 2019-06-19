@@ -62,7 +62,8 @@ variables:
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
-  when: manual
+  only:
+    - master
 
 
 .job_terraform_template: &terraform_template
@@ -186,6 +187,8 @@ grafana-build:
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
+  only:
+    - master
 
 prometheus-build:
   stage: build
@@ -205,6 +208,8 @@ prometheus-build:
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
+  only:
+    - master
 
 
 velocloud-notificator-build:
@@ -253,7 +258,8 @@ basic-infra:
   script:
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
-  when: manual
+  only:
+    - master
 
 deploy-dev:
   stage: deploy
@@ -263,4 +269,5 @@ deploy-dev:
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-  when: manual
+  only:
+    - master
