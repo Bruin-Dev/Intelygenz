@@ -6,6 +6,7 @@ import asyncio
 import pytest
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import utc
+import json
 
 
 class TestActions:
@@ -56,7 +57,7 @@ class TestActions:
 
     @pytest.mark.asyncio
     async def send_to_email_job_test(self):
-        test_msg = b'{"request_id":"123", "message":"Failed Edges to be emailed"}'
+        test_msg = b'{"request_id":"123", "email_data":"Failed Edges to be emailed"}'
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
         test_bus = Mock()
@@ -72,11 +73,11 @@ class TestActions:
         mock_email_repository.send_to_email.assert_called_with('Failed Edges to be emailed')
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == "notification.email.response"
-        assert test_bus.publish_message.call_args[0][1] == repr({"request_id": "123", "status": 200})
+        assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123", "status": 200})
 
     @pytest.mark.asyncio
     async def send_to_email_job_no_message_test(self):
-        test_msg = b'{"request_id":"123", "message":""}'
+        test_msg = b'{"request_id":"123", "email_data":""}'
         mock_slack_repository = Mock()
         mock_stats_repo = Mock()
         test_bus = Mock()
@@ -91,7 +92,7 @@ class TestActions:
         assert test_actions._email_repository.send_to_email.called is False
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == "notification.email.response"
-        assert test_bus.publish_message.call_args[0][1] == repr({"request_id": "123", "status": 500})
+        assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123", "status": 500})
 
     @pytest.mark.asyncio
     async def send_stats_to_slack_interval_test(self):
