@@ -55,7 +55,7 @@ class Container:
         self.report_edge_status = ActionWrapper(self.actions_status, "report_edge_status",
                                                 is_async=True, logger=self.logger)
         self.alert_edge_list = ActionWrapper(self.edges_for_alert, "report_edge_list",
-                                                is_async=True, logger=self.logger)
+                                             is_async=True, logger=self.logger)
         self.server = QuartServer(config)
 
     async def start(self):

@@ -66,6 +66,7 @@ class Container:
                                                  queue="velocloud_orchestrator")
         await self._alert.start_alert_job()
 
+        # TODO Change exec on start to true
         await self._edge_monitoring.start_edge_monitor_job(exec_on_start=False)
         await self._alert.start_alert_job()
         self._scheduler.start()
