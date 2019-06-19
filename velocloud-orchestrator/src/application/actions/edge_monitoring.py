@@ -69,7 +69,7 @@ class EdgeMonitoring:
     async def receive_edge(self, msg):
         self._logger.info(f'Edge received from event bus')
         edge = json.loads(msg)
-        self._logger.info(f'Edge data: {edge}')
+        self._logger.info(f'Edge data: {json.dumps(edge, indent=2)}')
         edges_processed = self._status_repository.get_edges_processed()
         edges_to_process = self._status_repository.get_edges_to_process()
         edges_processed = edges_processed + 1
