@@ -29,7 +29,8 @@ class EmailClient:
             mime_msg['Subject'] = msg["subject"]
 
             mime_msg.attach(MIMEText(msg["message"]))
-            if msg["attachment_content"] is not None and msg["attachment_name"] is not None:
+            if {"attachment_content", "attachment_name"} <= set(msg) and \
+                    msg["attachment_content"] is not None and msg["attachment_name"] is not None:
                 attachment = (MIMENonMultipart('text', 'csv', charset='utf-8'))
                 attachment_name = msg["attachment_name"]
 
