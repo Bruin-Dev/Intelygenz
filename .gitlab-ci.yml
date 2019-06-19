@@ -62,6 +62,8 @@ variables:
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
+  when: manual
+
 
 .job_terraform_template: &terraform_template
   image:
@@ -251,6 +253,7 @@ basic-infra:
   script:
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
+  when: manual
 
 deploy-dev:
   stage: deploy
