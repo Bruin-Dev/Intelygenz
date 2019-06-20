@@ -15,22 +15,22 @@ class PrometheusRepository:
         self._config = config
         self._edge_gauge = Gauge('edges_processed', 'Edges processed')
         self._edge_status_gauge = Gauge('edge_state_gauge', 'Edge States',
-                                        ['enterprise_id', 'enterprise_name', 'state'])
+                                        ['enterprise_name', 'state'])
         self._link_status_gauge = Gauge('link_state_gauge', 'Link States',
-                                        ['enterprise_id', 'enterprise_name', 'state'])
-        self._edge_status_counter = Counter('edge_state', 'Edge States', ['enterprise_id', 'enterprise_name', 'state'])
-        self._link_status_counter = Counter('link_state', 'Link States', ['enterprise_id', 'enterprise_name', 'state'])
+                                        ['enterprise_name', 'state'])
+        self._edge_status_counter = Counter('edge_state', 'Edge States', ['enterprise_name', 'state'])
+        self._link_status_counter = Counter('link_state', 'Link States', ['enterprise_name', 'state'])
 
-    def inc(self, enterprise_id, enterprise_name, edge_state, link_status):
-        self._edge_status_counter.labels(state=edge_state, enterprise_id=enterprise_id,
-                                         enterprise_name=enterprise_name).inc()
-        self._edge_status_gauge.labels(state=edge_state, enterprise_id=enterprise_id,
-                                       enterprise_name=enterprise_name).inc()
-        for links in link_status:
-            self._link_status_counter.labels(state=links._link._state, enterprise_id=enterprise_id,
-                                             enterprise_name=enterprise_name).inc()
-            self._link_status_gauge.labels(state=links._link._state, enterprise_id=enterprise_id,
-                                           enterprise_name=enterprise_name).inc()
+    def inc(self, edge):
+        self._edge_status_counter.labels(state=edge["edge_info"]["edges"]["edgeState"],
+                                         enterprise_name=edge["edge_info"]["enterprise_name"]).inc()
+        self._edge_status_gauge.labels(state=edge["edge_info"]["edges"]["edgeState"],
+                                       enterprise_name=edge["edge_info"]["enterprise_name"]).inc()
+        for links in edge["edge_info"]["links"]:
+            self._link_status_counter.labels(state=links["link"]["state"],
+                                             enterprise_name=edge["edge_info"]["enterprise_name"]).inc()
+            self._link_status_gauge.labels(state=links["link"]["state"],
+                                           enterprise_name=edge["edge_info"]["enterprise_name"]).inc()
 
     def set_cycle_total_edges(self, total):
         self._edge_gauge.set(total)
