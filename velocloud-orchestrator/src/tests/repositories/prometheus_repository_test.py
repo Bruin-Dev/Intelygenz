@@ -30,41 +30,35 @@ class TestPrometheusRepository:
         assert REGISTRY.get_sample_value('edges_processed') == 0
 
     def inc_test(self):
-        test_enterprise_id = 1
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
-        test_obj = MagicMock(_link=Mock(_state='OK'))
-        test_link_status = [test_obj]
-        self.test_pro_repo.inc(test_enterprise_id, test_enterprise_name, test_edge_state, test_link_status)
-        self.test_pro_repo.inc(test_enterprise_id, test_enterprise_name, test_edge_state, test_link_status)
-        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_id': str(test_enterprise_id),
-                                                                     'enterprise_name': test_enterprise_name,
+        test_link_status = [{"link": {"state": "OK"}}]
+        test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
+                                   "links": test_link_status}}
+        self.test_pro_repo.inc(test_edge)
+        self.test_pro_repo.inc(test_edge)
+        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': test_edge_state}) == 2
-        assert REGISTRY.get_sample_value('edge_state_total', labels={'enterprise_id': str(test_enterprise_id),
-                                                                     'enterprise_name': test_enterprise_name,
+        assert REGISTRY.get_sample_value('edge_state_total', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': test_edge_state}) == 2
 
-        assert REGISTRY.get_sample_value('link_state_gauge', labels={'enterprise_id': str(test_enterprise_id),
-                                                                     'enterprise_name': test_enterprise_name,
+        assert REGISTRY.get_sample_value('link_state_gauge', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': 'OK'}) == 2
-        assert REGISTRY.get_sample_value('link_state_total', labels={'enterprise_id': str(test_enterprise_id),
-                                                                     'enterprise_name': test_enterprise_name,
+        assert REGISTRY.get_sample_value('link_state_total', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': 'OK'}) == 2
 
     def reset_counter_test(self):
-        test_enterprise_id = 1
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
-        test_obj = MagicMock(_link=Mock(_state='OK'))
-        test_link_status = [test_obj]
-        self.test_pro_repo.inc(test_enterprise_id, test_enterprise_name, test_edge_state, test_link_status)
-        self.test_pro_repo.inc(test_enterprise_id, test_enterprise_name, test_edge_state, test_link_status)
+        test_link_status = [{"link": {"state": "OK"}}]
+        test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
+                                   "links": test_link_status}}
+        self.test_pro_repo.inc(test_edge)
+        self.test_pro_repo.inc(test_edge)
         self.test_pro_repo.reset_counter()
-        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_id': str(test_enterprise_id),
-                                                                     'enterprise_name': test_enterprise_name,
+        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': test_edge_state}) is None
-        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_id': str(test_enterprise_id),
-                                                                     'enterprise_name': test_enterprise_name,
+        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': 'OK'}) is None
 
     def start_prometheus_metrics_server_test(self):
