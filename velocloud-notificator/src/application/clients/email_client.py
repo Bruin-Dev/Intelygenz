@@ -1,8 +1,10 @@
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 from email.mime.nonmultipart import MIMENonMultipart
 from email.charset import Charset, BASE64
+import base64
 
 
 class EmailClient:
@@ -23,23 +25,31 @@ class EmailClient:
 
     def send_to_email(self, msg):
         try:
-            mime_msg = MIMEMultipart()
+            mime_msg = MIMEMultipart('related')
             mime_msg['From'] = self._config.EMAIL_CONFIG['sender_email']
             mime_msg['To'] = self._config.EMAIL_CONFIG['recipient_email']
             mime_msg['Subject'] = msg["subject"]
 
-            mime_msg.attach(MIMEText(msg["message"]))
-            if {"attachment_content", "attachment_name"} <= set(msg) and \
-                    msg["attachment_content"] is not None and msg["attachment_name"] is not None:
-                attachment = (MIMENonMultipart('text', 'csv', charset='utf-8'))
-                attachment_name = msg["attachment_name"]
+            mime_msg_alternative = MIMEMultipart('alternative')
+            mime_msg_alternative.attach(MIMEText(msg["text"], 'text'))
+            mime_msg_alternative.attach(MIMEText(msg["html"], 'html'))
+            mime_msg.attach(mime_msg_alternative)
 
-                if ".csv" not in attachment_name:
-                    attachment_name += ".csv"
+            for image in msg['images']:
+                name = image['name']
+                data = base64.b64decode(image['data'].encode('utf-8'))
+                mime_img = MIMEImage(data)
+                mime_img.add_header('Content-ID', f'<{name}>')
+                mime_msg.attach(mime_img)
+
+            for att in msg['attachments']:
+                attachment = (MIMENonMultipart('text', 'csv', charset='utf-8'))
+                attachment_name = att["name"]
+
                 attachment.add_header('Content-Disposition', 'attachment', filename=attachment_name)
                 cs = Charset('utf-8')
                 cs.body_encoding = BASE64
-                attachment.set_payload((msg["attachment_content"]).encode('utf-8'), charset=cs)
+                attachment.set_payload(base64.b64decode(att["data"].encode('utf-8')), charset=cs)
                 mime_msg.attach(attachment)
 
             self._email_server.sendmail(self._config.EMAIL_CONFIG['sender_email'],
