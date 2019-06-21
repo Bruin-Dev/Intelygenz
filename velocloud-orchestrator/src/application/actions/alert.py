@@ -1,9 +1,11 @@
-from igz.packages.eventbus.eventbus import EventBus
-from shortuuid import uuid
-from datetime import datetime
-import json
 import base64
+import json
+from datetime import datetime
+
 import pandas as pd
+from shortuuid import uuid
+
+from igz.packages.eventbus.eventbus import EventBus
 
 ODD_ROW = '<tr>' \
           ' <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; white-space: nowrap">%%ENTERPRISE%%</td>' \
@@ -26,21 +28,23 @@ class Alert:
     async def start_alert_job(self):
         # TODO schedule this to be every monday instead
         self._scheduler.add_job(self._alert_process, 'interval', seconds=6000, next_run_time=datetime.now(),
+                                misfire_grace_time=6000,
                                 replace_existing=True, id='_alert_process')
 
     async def _alert_process(self):
         await self._request_all_edges()
 
     async def _request_all_edges(self):
+        self._logger.info("Requesting all edges with details for alert report")
         request = dict(request_id=uuid(), filter=[])
         await self._event_bus.publish_message("alert.request.all.edges", json.dumps(request))
 
     async def _receive_all_edges(self, msg):
+        self._logger.info("Processing all edges with details for alert report")
         all_edges = json.loads(msg)["edges"]
         edges_to_report = []
         for edge_info in all_edges:
             raw_last_contact = edge_info["edge"]["lastContact"]
-            # TODO Improve this
             if '0000-00-00 00:00:00' not in raw_last_contact:
                 last_contact = datetime.strptime(raw_last_contact, "%Y-%m-%dT%H:%M:%S.%fZ")
                 time_elapsed = datetime.now() - last_contact
