@@ -21,16 +21,16 @@ class PrometheusRepository:
         self._edge_status_counter = Counter('edge_state', 'Edge States', ['enterprise_name', 'state'])
         self._link_status_counter = Counter('link_state', 'Link States', ['enterprise_name', 'state'])
 
-    def inc(self, edge):
-        self._edge_status_counter.labels(state=edge["edge_info"]["edges"]["edgeState"],
-                                         enterprise_name=edge["edge_info"]["enterprise_name"]).inc()
-        self._edge_status_gauge.labels(state=edge["edge_info"]["edges"]["edgeState"],
-                                       enterprise_name=edge["edge_info"]["enterprise_name"]).inc()
-        for links in edge["edge_info"]["links"]:
+    def inc(self, edge_info):
+        self._edge_status_counter.labels(state=edge_info["edges"]["edgeState"],
+                                         enterprise_name=edge_info["enterprise_name"]).inc()
+        self._edge_status_gauge.labels(state=edge_info["edges"]["edgeState"],
+                                       enterprise_name=edge_info["enterprise_name"]).inc()
+        for links in edge_info["links"]:
             self._link_status_counter.labels(state=links["link"]["state"],
-                                             enterprise_name=edge["edge_info"]["enterprise_name"]).inc()
+                                             enterprise_name=edge_info["enterprise_name"]).inc()
             self._link_status_gauge.labels(state=links["link"]["state"],
-                                           enterprise_name=edge["edge_info"]["enterprise_name"]).inc()
+                                           enterprise_name=edge_info["enterprise_name"]).inc()
 
     def set_cycle_total_edges(self, total):
         self._edge_gauge.set(total)
