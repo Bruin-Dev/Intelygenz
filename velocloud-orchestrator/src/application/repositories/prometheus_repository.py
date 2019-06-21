@@ -1,15 +1,7 @@
 from prometheus_client import start_http_server, Gauge, Counter
-import asyncio
 
 
 class PrometheusRepository:
-
-    _config = None
-    _edge_gauge = None
-    _edge_status_gauge = None
-    _link_status_gauge = None
-    _edge_status_counter = None
-    _link_status_counter = None
 
     def __init__(self, config):
         self._config = config
