@@ -1,4 +1,8 @@
 import json
+from concurrent.futures import ThreadPoolExecutor
+
+import asyncio
+
 from igz.packages.eventbus.eventbus import EventBus
 
 
@@ -10,19 +14,27 @@ class EdgesForAlert:
         self._logger = logger
 
     async def report_edge_list(self, msg):
+        executor = ThreadPoolExecutor(max_workers=10)
+        loop = asyncio.get_event_loop()
+        futures = []
+
         msg_dict = json.loads(msg)
         self._logger.info("Sending edge list for alerts")
         edges_by_enterprise = self._velocloud_repository.get_all_enterprises_edges_with_host(msg_dict)
-
-        status = 200
-        if edges_by_enterprise is None:
-            status = 500
-
-        edge_list_response = dict(request_id=msg_dict['request_id'], edges=[], status=status)
-
         for edge_id in edges_by_enterprise:
-            edge = self._velocloud_repository.get_edge_information(edge_id).to_dict()
-            enterprise = self._velocloud_repository.get_enterprise_information(edge_id)
-            list_item = dict(edge=edge, enterprise=enterprise)
-            edge_list_response["edges"].append(list_item)
+            futures.append(loop.run_in_executor(executor, self._velocloud_repository.get_alert_information, edge_id))
+        asyncio.ensure_future(self._gather_and_send_edge_list(futures, msg_dict['request_id']), loop=loop)
+
+    async def _gather_and_send_edge_list(self, futures_edges, request_id):
+        data = await asyncio.wait(futures_edges)
+        edges_data = []
+        for edge_data in data[0]:
+            edges_data.append(edge_data.result())
+        status = 200
+        if len(edges_data) == 0:
+            status = 500
+        edge_list_response = {"request_id": request_id,
+                              "edges": edges_data,
+                              "status": status}
         await self._event_bus.publish_message("alert.response.all.edges", json.dumps(edge_list_response, default=str))
+        self._logger.info("Edges for alert sent")
