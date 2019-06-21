@@ -10,6 +10,8 @@ from igz.packages.server.api import QuartServer
 from application.repositories.prometheus_repository import PrometheusRepository
 from application.repositories.edge_repository import EdgeRepository
 from application.repositories.status_repository import StatusRepository
+from application.repositories.statistic_repository import StatisticRepository
+from application.repositories.statistic_client import StatisticClient
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
 from redis import Redis
@@ -36,6 +38,8 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         self._prometheus_repository = PrometheusRepository(config)
+        self._stats_client = StatisticClient(config)
+        self._stats_repo = StatisticRepository(config, self._stats_client, self._logger)
 
         self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._edge_repository = EdgeRepository(self._redis_client, self._logger)
@@ -44,7 +48,8 @@ class Container:
         self._status_repository = StatusRepository(self._redis_client, self._logger)
         self._edge_monitoring = EdgeMonitoring(self._event_bus, self._logger, self._prometheus_repository,
                                                self._scheduler, self._edge_repository, self._status_repository,
-                                               self._service_id, config)
+                                               self._stats_repo,self._service_id, config)
+
         self._process_edge_list = ActionWrapper(self._edge_monitoring, "receive_edge_list", is_async=True,
                                                 logger=self._logger)
         self._process_edge = ActionWrapper(self._edge_monitoring, "receive_edge", is_async=True, logger=self._logger)
