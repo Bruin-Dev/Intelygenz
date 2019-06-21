@@ -35,8 +35,8 @@ class TestPrometheusRepository:
         test_link_status = [{"link": {"state": "OK"}}]
         test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
                                    "links": test_link_status}}
-        self.test_pro_repo.inc(test_edge)
-        self.test_pro_repo.inc(test_edge)
+        self.test_pro_repo.inc(test_edge["edge_info"])
+        self.test_pro_repo.inc(test_edge["edge_info"])
         assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': test_edge_state}) == 2
         assert REGISTRY.get_sample_value('edge_state_total', labels={'enterprise_name': test_enterprise_name,
@@ -53,8 +53,8 @@ class TestPrometheusRepository:
         test_link_status = [{"link": {"state": "OK"}}]
         test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
                                    "links": test_link_status}}
-        self.test_pro_repo.inc(test_edge)
-        self.test_pro_repo.inc(test_edge)
+        self.test_pro_repo.inc(test_edge["edge_info"])
+        self.test_pro_repo.inc(test_edge["edge_info"])
         self.test_pro_repo.reset_counter()
         assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': test_edge_state}) is None

@@ -98,7 +98,7 @@ class TestEdgeMonitoring:
         status_repository.set_status = Mock()
         config = Mock()
 
-        edge = json.dumps('Some edge data')
+        edge = json.dumps({'edge_info': 'Some edge data'})
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, config)
