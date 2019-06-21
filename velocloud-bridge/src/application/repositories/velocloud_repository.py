@@ -26,8 +26,6 @@ class VelocloudRepository:
         return edges_by_enterprise
 
     def get_edge_information(self, edge):
-        self._logger.info(f'Getting edge information from edge:{edge["edge_id"]} in '
-                          f'enterprise:{edge["enterprise_id"]} from host:{edge["host"]}')
         return self._velocloud_client.get_edge_information(edge)
 
     def get_link_information(self, edge):
@@ -36,6 +34,10 @@ class VelocloudRepository:
         return self._velocloud_client.get_link_information(edge)
 
     def get_enterprise_information(self, edge):
-        self._logger.info(f'Getting enterprise information from enterprise:{edge["enterprise_id"]} in'
-                          f' host:{edge["host"]}')
         return self._velocloud_client.get_enterprise_information(edge)._name
+
+    def get_alert_information(self, edge):
+        return {
+            "edge": self._velocloud_client.get_edge_information(edge).to_dict(),
+            "enterprise": self._velocloud_client.get_enterprise_information(edge)._name
+        }
