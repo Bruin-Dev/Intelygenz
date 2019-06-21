@@ -110,7 +110,9 @@ class NatsStreamingClient:
                                            max_inflight=self._config["subscriber"][
                                                "max_inflight"],
                                            pending_limits=self._config["subscriber"][
-                                               "pending_limits"])
+                                               "pending_limits"],
+                                           ack_wait=99999
+                                           )
 
         else:
             await self.close_nats_connections()
@@ -126,7 +128,8 @@ class NatsStreamingClient:
                                            max_inflight=self._config["subscriber"][
                                                "max_inflight"],
                                            pending_limits=self._config["subscriber"][
-                                               "pending_limits"])
+                                               "pending_limits"],
+                                           ack_wait=99999)
         self._subs.append(sub)
 
     async def subscribe(self, topic, callback,
@@ -141,7 +144,8 @@ class NatsStreamingClient:
                                        cb=self._cb_with_ack,
                                        manual_acks=True,
                                        max_inflight=self._config["subscriber"]["max_inflight"],
-                                       pending_limits=self._config["subscriber"]["pending_limits"])
+                                       pending_limits=self._config["subscriber"]["pending_limits"],
+                                       ack_wait=99999)
         self._subs.append(sub)
 
     async def close_nats_connections(self):
