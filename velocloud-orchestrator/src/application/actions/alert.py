@@ -39,6 +39,7 @@ class Alert:
         request = dict(request_id=uuid(), filter=[])
         await self._event_bus.publish_message("alert.request.all.edges", json.dumps(request))
 
+    # TODO Split this method
     async def _receive_all_edges(self, msg):
         self._logger.info("Processing all edges with details for alert report")
         all_edges = json.loads(msg)["edges"]
@@ -55,7 +56,10 @@ class Alert:
                         'last_contact': edge_info["edge"]["lastContact"]
                     }
                     edges_to_report.append(edge_for_alert)
+        email_obj = self._compose_email_object(edges_to_report)
+        await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))
 
+    def _compose_email_object(self, edges_to_report):
         with open('src/templates/lost_contact.html') as template:
             email_html = "".join(template.readlines())
             email_html = email_html.replace('%%EDGE_COUNT%%', str(len(edges_to_report)))
@@ -78,7 +82,7 @@ class Alert:
         edges_dataframe.index.name = 'idx'
         edges_dataframe.to_csv('lost_contact.csv')
 
-        email_obj = {
+        return {
             'request_id': uuid(),
             'email_data': {
                 'subject': f'Lost contact edges ({datetime.now().strftime("%Y-%m-%d")})',
@@ -102,4 +106,3 @@ class Alert:
                 ]
             }
         }
-        await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))
