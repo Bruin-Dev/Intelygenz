@@ -58,7 +58,7 @@ class TestAlert:
         event = json.dumps({"request_id": 123, "edges": [
             {"edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z"},
              "enterprise": "Fake Corp"}]})
-        await alert._receive_all_edges(event)
+        await alert.receive_all_edges(event)
         assert event_bus.publish_message.called
         assert "notification.email.request" in event_bus.publish_message.call_args[0][0]
         assert "<div>Some email</div>" in event_bus.publish_message.call_args[0][1]
