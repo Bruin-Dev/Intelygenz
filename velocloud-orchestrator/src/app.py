@@ -64,11 +64,9 @@ class Container:
                                                  action_wrapper=self._receive_alert_edges,
                                                  durable_name="velocloud_orchestrator",
                                                  queue="velocloud_orchestrator")
-        await self._alert.start_alert_job()
 
-        # TODO Change exec on start to true
-        await self._edge_monitoring.start_edge_monitor_job(exec_on_start=False)
-        await self._alert.start_alert_job()
+        await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
+        await self._alert.start_alert_job(exec_on_start=False)
         self._scheduler.start()
 
     async def start_server(self):

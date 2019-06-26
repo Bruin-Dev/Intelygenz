@@ -28,7 +28,6 @@ ORCHESTRATOR_CONFIG = {
 ALERTS_CONFIG = {
     'lost_contact': {
         'recipient': os.environ["LOST_CONTACT_RECIPIENT"],
-        'frequency': "CRON"
     }
 }
 

@@ -41,7 +41,7 @@ class EdgeMonitoring:
             self._logger.info("Sending edge status tasks. Orchestrator status = PROCESSING_VELOCLOUD_EDGES...")
             self._status_repository.set_status("PROCESSING_VELOCLOUD_EDGES")
 
-    async def start_edge_monitor_job(self, exec_on_start=True):
+    async def start_edge_monitor_job(self, exec_on_start=False):
         seconds = self._config.ORCHESTRATOR_CONFIG['monitoring_seconds']
         self._logger.info(f'Scheduled task: edge monitoring process configured to run each {seconds} seconds')
         next_run_time = undefined

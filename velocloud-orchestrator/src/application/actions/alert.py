@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 
 import pandas as pd
+from apscheduler.util import undefined
 from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
@@ -34,11 +35,15 @@ class Alert:
         self._logger = logger
         self._config = config
 
-    async def start_alert_job(self):
-        # TODO schedule this to be every monday instead
-        self._scheduler.add_job(self._alert_process, 'interval', seconds=6000, next_run_time=datetime.now(),
-                                misfire_grace_time=6000,
-                                replace_existing=True, id='_alert_process')
+    async def start_alert_job(self, exec_on_start=False):
+        self._logger.info("Scheduled task: alert report process configured to run first day of each month")
+        next_run_time = undefined
+        if exec_on_start:
+            next_run_time = datetime.now()
+            self._logger.info(f'It will be executed now')
+        self._scheduler.add_job(self._alert_process, 'cron', day=1, misfire_grace_time=86400, replace_existing=True,
+                                next_run_time=next_run_time,
+                                id='_alert_process')
 
     async def _alert_process(self):
         await self._request_all_edges()
@@ -48,7 +53,6 @@ class Alert:
         request = dict(request_id=uuid(), filter=[])
         await self._event_bus.publish_message("alert.request.all.edges", json.dumps(request))
 
-    # TODO Split this method
     async def _receive_all_edges(self, msg):
         self._logger.info("Processing all edges with details for alert report")
         all_edges = json.loads(msg)["edges"]
