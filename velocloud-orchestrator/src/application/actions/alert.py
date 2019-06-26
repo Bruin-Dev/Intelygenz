@@ -8,13 +8,21 @@ from shortuuid import uuid
 from igz.packages.eventbus.eventbus import EventBus
 
 ODD_ROW = '<tr>' \
-          ' <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; white-space: nowrap">%%ENTERPRISE%%</td>' \
-          ' <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; white-space: nowrap">%%COUNT%%</td>' \
+          '<td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; ' \
+          'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
+          'white-space: nowrap">%%ENTERPRISE%%</td>' \
+          '<td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; ' \
+          'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
+          'white-space: nowrap">%%COUNT%%</td>' \
           ' </tr>'
 
 EVEN_ROW = ' <tr>' \
-           ' <td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; color: #596872; font-weight: normal; font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; white-space: nowrap">%%ENTERPRISE%%</td>' \
-           ' <td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; color: #596872; font-weight: normal; font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; white-space: nowrap">%%COUNT%%</td>' \
+           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; color: #596872; font-weight: normal; '\
+           'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
+           'white-space: nowrap">%%ENTERPRISE%%</td>' \
+           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; color: #596872; font-weight: normal; '\
+           'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
+           'white-space: nowrap">%%COUNT%%</td>' \
            '</tr>'
 
 
