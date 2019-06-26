@@ -133,3 +133,5 @@ dmypy.json
 *.tfstate.backup
 .terraform.tfstate.lock.info
 .terraform
+
+lost_contact.csv

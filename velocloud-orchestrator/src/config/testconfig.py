@@ -26,6 +26,13 @@ GRAFANA_CONFIG = {
     'port': 9090
 }
 
+ALERTS_CONFIG = {
+    'lost_contact': {
+        'recipient': "some.recipient@email.com",
+    }
+}
+
+
 ORCHESTRATOR_CONFIG = {
     'monitoring_seconds': 0.01
 }
