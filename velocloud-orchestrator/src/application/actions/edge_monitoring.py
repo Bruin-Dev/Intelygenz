@@ -60,8 +60,7 @@ class EdgeMonitoring:
         decoded_msg = json.loads(msg)
         egde_status_requests = [dict(request_id=decoded_msg["request_id"], edge=edge) for edge in decoded_msg["edges"]]
         self._status_repository.set_edges_to_process(len(egde_status_requests))
-        self._logger.info(f'{egde_status_requests}')
-        self._logger.info(f'Sending them to the event bus')
+        self._logger.info(f'Splitting and sending edges to the event bus')
         for request in egde_status_requests:
             await self._event_bus.publish_message("edge.status.request", json.dumps(request))
         self._logger.info(f'Requests sent')

@@ -53,7 +53,7 @@ class Alert:
         request = dict(request_id=uuid(), filter=[])
         await self._event_bus.publish_message("alert.request.all.edges", json.dumps(request))
 
-    async def _receive_all_edges(self, msg):
+    async def receive_all_edges(self, msg):
         self._logger.info("Processing all edges with details for alert report")
         all_edges = json.loads(msg)["edges"]
         edges_to_report = []
