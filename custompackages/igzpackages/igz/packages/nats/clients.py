@@ -96,57 +96,82 @@ class NatsStreamingClient:
 
     async def subscribe_action(self, topic, action: ActionWrapper,
                                start_at='first', time=None, sequence=None, queue=None, durable_name=None):
+        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
+               stop=stop_after_delay(self._config['stop_delay']))
+        async def subscribe_action(topic, action: ActionWrapper,
+                                   start_at='first', time=None, sequence=None, queue=None, durable_name=None):
+            self._topic_action[topic] = action
+            if self._nc.is_connected:
+                sub = await self._sc.subscribe(topic,
+                                               start_at=start_at,
+                                               time=time,
+                                               sequence=sequence,
+                                               queue=queue,
+                                               durable_name=durable_name,
+                                               cb=self._cb_with_ack_and_action,
+                                               manual_acks=True,
+                                               max_inflight=self._config["subscriber"][
+                                                   "max_inflight"],
+                                               pending_limits=self._config["subscriber"][
+                                                   "pending_limits"],
 
-        self._topic_action[topic] = action
-        if self._nc.is_connected:
-            sub = await self._sc.subscribe(topic,
-                                           start_at=start_at,
-                                           time=time,
-                                           sequence=sequence,
-                                           queue=queue,
-                                           durable_name=durable_name,
-                                           cb=self._cb_with_ack_and_action,
-                                           manual_acks=True,
-                                           max_inflight=self._config["subscriber"][
-                                               "max_inflight"],
-                                           pending_limits=self._config["subscriber"][
-                                               "pending_limits"],
-                                           ack_wait=99999
-                                           )
+                                               ack_wait=99999)
 
-        else:
-            await self.close_nats_connections()
-            await self.connect_to_nats()
-            sub = await self._sc.subscribe(topic,
-                                           start_at=start_at,
-                                           time=time,
-                                           sequence=sequence,
-                                           queue=queue,
-                                           durable_name=durable_name,
-                                           cb=self._cb_with_ack_and_action,
-                                           manual_acks=True,
-                                           max_inflight=self._config["subscriber"][
-                                               "max_inflight"],
-                                           pending_limits=self._config["subscriber"][
-                                               "pending_limits"],
-                                           ack_wait=99999)
-        self._subs.append(sub)
+            else:
+                await self.close_nats_connections()
+                await self.connect_to_nats()
+                sub = await self._sc.subscribe(topic,
+                                               start_at=start_at,
+                                               time=time,
+                                               sequence=sequence,
+                                               queue=queue,
+                                               durable_name=durable_name,
+                                               cb=self._cb_with_ack_and_action,
+                                               manual_acks=True,
+                                               max_inflight=self._config["subscriber"][
+                                                   "max_inflight"],
+                                               pending_limits=self._config["subscriber"][
+                                                   "pending_limits"],
+                                               ack_wait=99999)
+            self._subs.append(sub)
+
+        await subscribe_action(topic, action, start_at, time, sequence, queue, durable_name)
 
     async def subscribe(self, topic, callback,
                         start_at='first', time=None, sequence=None, queue=None, durable_name=None):
-        self._topic_action[topic] = callback
-        sub = await self._sc.subscribe(topic,
-                                       start_at=start_at,
-                                       time=time,
-                                       sequence=sequence,
-                                       queue=queue,
-                                       durable_name=durable_name,
-                                       cb=self._cb_with_ack,
-                                       manual_acks=True,
-                                       max_inflight=self._config["subscriber"]["max_inflight"],
-                                       pending_limits=self._config["subscriber"]["pending_limits"],
-                                       ack_wait=99999)
-        self._subs.append(sub)
+        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
+               stop=stop_after_delay(self._config['stop_delay']))
+        async def subscribe(topic, callback,
+                            start_at='first', time=None, sequence=None, queue=None, durable_name=None):
+            self._topic_action[topic] = callback
+            if self._nc.is_connected:
+                sub = await self._sc.subscribe(topic,
+                                               start_at=start_at,
+                                               time=time,
+                                               sequence=sequence,
+                                               queue=queue,
+                                               durable_name=durable_name,
+                                               cb=self._cb_with_ack,
+                                               manual_acks=True,
+                                               max_inflight=self._config["subscriber"]["max_inflight"],
+                                               pending_limits=self._config["subscriber"]["pending_limits"],
+                                               ack_wait=99999)
+            else:
+                await self.close_nats_connections()
+                await self.connect_to_nats()
+                sub = await self._sc.subscribe(topic,
+                                               start_at=start_at,
+                                               time=time,
+                                               sequence=sequence,
+                                               queue=queue,
+                                               durable_name=durable_name,
+                                               cb=self._cb_with_ack,
+                                               manual_acks=True,
+                                               max_inflight=self._config["subscriber"]["max_inflight"],
+                                               pending_limits=self._config["subscriber"]["pending_limits"],
+                                               ack_wait=99999)
+            self._subs.append(sub)
+        await subscribe(topic, callback, start_at, time, sequence, queue, durable_name)
 
     async def close_nats_connections(self):
         # Stop recieving messages
