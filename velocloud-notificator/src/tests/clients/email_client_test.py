@@ -42,8 +42,11 @@ class TestEmailClient:
     def send_to_email_ok_test(self):
         test_msg = {"subject": "subject",
                     "message": "message",
-                    "attachment_name": "test.csv",
-                    "attachment_content": "123"}
+                    "recipient": "fake@gmail.com",
+                    "images": [],
+                    "attachments": [],
+                    "text": "Some email test",
+                    "html": "<div>Some message html</div>"}
         mock_logger = Mock()
         application.clients.email_client.smtplib.SMTP.ehlo = Mock()
         application.clients.email_client.smtplib.SMTP.starttls = Mock()
@@ -57,15 +60,18 @@ class TestEmailClient:
         assert status == 200
         assert test_client._email_server.sendmail.called
         assert test_client._email_server.sendmail.call_args[0][0] == test_client._config.EMAIL_CONFIG['sender_email']
-        assert test_client._email_server.sendmail.call_args[0][1] == test_client._config.EMAIL_CONFIG['recipient_email']
+        assert test_client._email_server.sendmail.call_args[0][1] == test_msg["recipient"]
         assert isinstance(test_client._email_server.sendmail.call_args[0][2], str)
         assert test_client._logger.exception.called is False
 
     def send_to_email_ok_csv_not_provided_test(self):
         test_msg = {"subject": "subject",
                     "message": "message",
-                    "attachment_name": "test",
-                    "attachment_content": "123"}
+                    "recipient": "fake@gmail.com",
+                    "images": [],
+                    "attachments": [],
+                    "text": "Some email test",
+                    "html": "<div>Some message html</div>"}
         mock_logger = Mock()
         application.clients.email_client.smtplib.SMTP.ehlo = Mock()
         application.clients.email_client.smtplib.SMTP.starttls = Mock()
@@ -79,16 +85,18 @@ class TestEmailClient:
         assert status == 200
         assert test_client._email_server.sendmail.called
         assert test_client._email_server.sendmail.call_args[0][0] == test_client._config.EMAIL_CONFIG['sender_email']
-        assert test_client._email_server.sendmail.call_args[0][1] == test_client._config.EMAIL_CONFIG['recipient_email']
+        assert test_client._email_server.sendmail.call_args[0][1] == test_msg["recipient"]
         assert isinstance(test_client._email_server.sendmail.call_args[0][2], str)
-        assert ".csv" in test_client._email_server.sendmail.call_args[0][2]
         assert test_client._logger.exception.called is False
 
     def send_to_email_ok_no_attachment_provided_test(self):
         test_msg = {"subject": "subject",
                     "message": "message",
-                    "attachment_name": None,
-                    "attachment_content": None}
+                    "recipient": "fake@gmail.com",
+                    "images": [],
+                    "attachments": [],
+                    "text": "Some email test",
+                    "html": "<div>Some message html</div>"}
         mock_logger = Mock()
         application.clients.email_client.smtplib.SMTP.ehlo = Mock()
         application.clients.email_client.smtplib.SMTP.starttls = Mock()
@@ -98,13 +106,11 @@ class TestEmailClient:
         test_client._logger.info = Mock()
         test_client._logger.exception = Mock()
         status = test_client.send_to_email(test_msg)
-        assert test_client._logger.info.called
         assert status == 200
         assert test_client._email_server.sendmail.called
         assert test_client._email_server.sendmail.call_args[0][0] == test_client._config.EMAIL_CONFIG['sender_email']
-        assert test_client._email_server.sendmail.call_args[0][1] == test_client._config.EMAIL_CONFIG['recipient_email']
+        assert test_client._email_server.sendmail.call_args[0][1] == test_msg["recipient"]
         assert isinstance(test_client._email_server.sendmail.call_args[0][2], str)
-        assert 'plain' in test_client._email_server.sendmail.call_args[0][2]
         assert test_client._logger.exception.called is False
 
     def send_to_email_ko_test(self):
