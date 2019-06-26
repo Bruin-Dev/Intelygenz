@@ -125,8 +125,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
-                                                                 )
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999)
 
     @pytest.mark.asyncio
     async def register_time_consumer_test(self):
@@ -153,7 +153,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999
                                                                  )
 
     @pytest.mark.asyncio
@@ -181,7 +182,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999
                                                                  )
 
     @pytest.mark.asyncio
@@ -209,7 +211,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999
                                                                  )
 
     @pytest.mark.asyncio
@@ -243,7 +246,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999
                                                                  )
 
     @pytest.mark.asyncio
@@ -277,7 +281,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999
                                                                  )
         assert not nats_s_client._sc.ack.called
 
@@ -312,7 +317,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999
                                                                  )
 
     @pytest.mark.asyncio
@@ -350,7 +356,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999
                                                                  )
         assert caller.action.called
 
@@ -388,7 +395,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999
                                                                  )
 
     @pytest.mark.asyncio
@@ -426,7 +434,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999
                                                                  )
         assert caller.action.called
         assert not nats_s_client._sc.ack.called
@@ -466,7 +475,8 @@ class TestNatsStreamingClient:
                                                                  max_inflight=config.NATS_CONFIG["subscriber"][
                                                                      "max_inflight"],
                                                                  pending_limits=config.NATS_CONFIG["subscriber"][
-                                                                     "pending_limits"]
+                                                                     "pending_limits"],
+                                                                 ack_wait=99999
                                                                  )
         assert caller.action.called
 
