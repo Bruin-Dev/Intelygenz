@@ -71,7 +71,7 @@ class EdgeMonitoring:
         self._logger.info(f'Edge received from event bus')
         edge = json.loads(msg)
         self._logger.info(f'Edge data: {json.dumps(edge, indent=2)}')
-        self._prometheus_repository.inc()
+        self._prometheus_repository.inc(edge['edge_info'])
         edges_processed = self._status_repository.get_edges_processed()
         edges_to_process = self._status_repository.get_edges_to_process()
         edges_processed = edges_processed + 1
