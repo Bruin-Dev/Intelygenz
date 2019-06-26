@@ -25,6 +25,13 @@ ORCHESTRATOR_CONFIG = {
     'monitoring_seconds': int(os.environ["MONITORING_SECONDS"])
 }
 
+ALERTS_CONFIG = {
+    'lost_contact': {
+        'recipient': os.environ["LOST_CONTACT_RECIPIENT"],
+        'frequency': "CRON"
+    }
+}
+
 LOG_CONFIG = {
     'name': 'velocloud-orchestrator',
     'level': logging.DEBUG,

@@ -27,7 +27,7 @@ class EmailClient:
         try:
             mime_msg = MIMEMultipart('related')
             mime_msg['From'] = self._config.EMAIL_CONFIG['sender_email']
-            mime_msg['To'] = self._config.EMAIL_CONFIG['recipient_email']
+            mime_msg['To'] = msg["recipient"]
             mime_msg['Subject'] = msg["subject"]
 
             mime_msg_alternative = MIMEMultipart('alternative')
@@ -53,7 +53,7 @@ class EmailClient:
                 mime_msg.attach(attachment)
 
             self._email_server.sendmail(self._config.EMAIL_CONFIG['sender_email'],
-                                        self._config.EMAIL_CONFIG['recipient_email'],
+                                        msg["recipient"],
                                         mime_msg.as_string())
 
             self._logger.info("Success: Email sent!")

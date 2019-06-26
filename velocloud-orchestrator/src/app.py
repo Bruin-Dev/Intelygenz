@@ -38,7 +38,7 @@ class Container:
         self._redis_client = Redis(host="redis", port=6379, decode_responses=True)
         self._edge_repository = EdgeRepository(self._redis_client, self._logger)
 
-        self._alert = Alert(self._event_bus, self._scheduler, self._logger)
+        self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG)
         self._status_repository = StatusRepository(self._redis_client, self._logger)
         self._edge_monitoring = EdgeMonitoring(self._event_bus, self._logger, self._prometheus_repository,
                                                self._scheduler, self._edge_repository, self._status_repository, config)

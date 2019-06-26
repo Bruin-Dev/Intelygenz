@@ -28,10 +28,11 @@ EVEN_ROW = ' <tr>' \
 
 class Alert:
 
-    def __init__(self, event_bus: EventBus, scheduler, logger):
+    def __init__(self, event_bus: EventBus, scheduler, logger, config):
         self._event_bus = event_bus
         self._scheduler = scheduler
         self._logger = logger
+        self._config = config
 
     async def start_alert_job(self):
         # TODO schedule this to be every monday instead
@@ -94,6 +95,7 @@ class Alert:
             'request_id': uuid(),
             'email_data': {
                 'subject': f'Lost contact edges ({datetime.now().strftime("%Y-%m-%d")})',
+                'recipient': self._config["lost_contact"]["recipient"],
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
                 'images': [
