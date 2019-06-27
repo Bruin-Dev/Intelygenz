@@ -24,6 +24,8 @@ variable "subdomain" {
 
 variable "BUILD_NUMBER" {}
 
+variable "LOST_CONTACT_RECIPIENT" {}
+
 
 variable "PYTHONUNBUFFERED" {
   default = 1

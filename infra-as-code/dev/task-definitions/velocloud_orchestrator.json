@@ -47,6 +47,10 @@
       {
         "name": "MONITORING_SECONDS",
         "value": "${MONITORING_SECONDS}"
+      },
+      {
+        "name": "LOST_CONTACT_RECIPIENT",
+        "value": "${LOST_CONTACT_RECIPIENT}"
       }
     ]
   }

@@ -14,6 +14,7 @@ data "template_file" "automation-velocloud-orchestrator" {
     NATS_SERVER1 = "nats://nats-server.${var.environment}.local:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
     MONITORING_SECONDS = "${var.MONITORING_SECONDS}"
+    LOST_CONTACT_RECIPIENT = "${var.LOST_CONTACT_RECIPIENT}"
   }
 }
 
