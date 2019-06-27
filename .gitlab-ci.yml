@@ -4,7 +4,7 @@ stages:
   - acceptance_tests
   - basic_infra
   - build
-  - deploy
+  - deploy_dev
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -263,7 +263,7 @@ basic-infra:
     - master
 
 deploy-dev:
-  stage: deploy
+  stage: deploy_dev
   <<: *terraform_template
   script:
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
@@ -273,5 +273,22 @@ deploy-dev:
     - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT}
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
+  environment:
+    name: dev
+    url: http://dev.mettel-automation.net
+    on_stop: destroy-dev
+  only:
+    - master
+
+destroy-dev:
+  stage: deploy_dev
+  <<: *terraform_template
+  script:
+    - terraform init infra-as-code/dev
+    - terraform destroy -auto-approve
+  environment:
+    name: dev
+    action: stop
+  when: manual
   only:
     - master
