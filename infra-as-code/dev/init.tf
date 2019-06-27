@@ -29,6 +29,9 @@ variable "PYTHONUNBUFFERED" {
   default = 1
 }
 
+variable "EMAIL_ACC_PWD" {}
+
+
 variable "NATS_CLUSTER_NAME" {
   default = "automation-engine-nats"
 }

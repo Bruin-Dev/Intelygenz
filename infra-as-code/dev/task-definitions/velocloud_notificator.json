@@ -43,6 +43,10 @@
       {
         "name": "SLACK_URL",
         "value": "${SLACK_URL}"
+      },
+      {
+        "name": "EMAIL_ACC_PWD",
+        "value": "${EMAIL_ACC_PWD}"
       }
     ]
   }

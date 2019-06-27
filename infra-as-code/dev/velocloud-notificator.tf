@@ -14,6 +14,8 @@ data "template_file" "automation-velocloud-notificator" {
     NATS_SERVER1 = "nats://nats-server.${var.environment}.local:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
     SLACK_URL = "https://hooks.slack.com/services/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"
+    EMAIL_ACC_PWD = "${var.EMAIL_ACC_PWD}"
+
   }
 }
 

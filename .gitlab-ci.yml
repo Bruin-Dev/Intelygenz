@@ -248,6 +248,7 @@ terraform-validate-dev:
   script:
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
+    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
     - terraform plan infra-as-code/dev
@@ -267,6 +268,7 @@ deploy-dev:
   script:
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
+    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
   only:

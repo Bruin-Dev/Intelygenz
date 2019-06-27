@@ -11,6 +11,7 @@ data "template_file" "mettel-automation-velocloud-notificator" {
     NATS_SERVER1 = "${var.NATS_SERVER1}"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
     SLACK_URL = "${var.SLACK_URL}"
+    EMAIL_ACC_PWD = "${var.EMAIL_ACC_PWD}"
   }
 }
 
