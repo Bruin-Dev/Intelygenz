@@ -11,7 +11,7 @@ variables:
   NATS_CLUSTER_NAME: "automation-engine-nats"
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
-  REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation-dev
+  REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
 
 #
 # Using gitlab-ci anchors to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
@@ -240,7 +240,6 @@ terraform-validate-basic-infra:
   script:
     - terraform init infra-as-code/basic-infra
     - terraform validate infra-as-code/basic-infra
-    - terraform plan infra-as-code/basic-infra
 
 terraform-validate-dev:
   stage: validation
@@ -253,7 +252,6 @@ terraform-validate-dev:
     - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT}
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
-    - terraform plan infra-as-code/dev
 
 basic-infra:
   stage: basic_infra

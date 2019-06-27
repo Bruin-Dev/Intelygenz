@@ -1,5 +1,5 @@
 data "aws_ecr_repository" "automation-velocloud-bridge" {
-  name = "${var.environment}-velocloud-bridge"
+  name = "automation-velocloud-bridge"
 }
 
 data "template_file" "automation-velocloud-bridge" {

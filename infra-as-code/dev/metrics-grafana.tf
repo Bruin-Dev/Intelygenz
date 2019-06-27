@@ -1,5 +1,5 @@
 data "aws_ecr_repository" "automation-metrics-grafana" {
-  name = "${var.environment}-metrics-dashboard/grafana"
+  name = "automation-metrics-dashboard/grafana"
 }
 
 data "template_file" "automation-metrics-grafana" {

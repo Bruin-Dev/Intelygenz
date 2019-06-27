@@ -1,5 +1,5 @@
 data "aws_ecr_repository" "automation-velocloud-notificator" {
-  name = "${var.environment}-velocloud-notificator"
+  name = "automation-velocloud-notificator"
 }
 
 data "template_file" "automation-velocloud-notificator" {

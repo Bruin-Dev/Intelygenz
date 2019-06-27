@@ -1,5 +1,5 @@
 data "aws_ecr_repository" "automation-velocloud-orchestrator" {
-  name = "${var.environment}-velocloud-orchestrator"
+  name = "automation-velocloud-orchestrator"
 }
 
 data "template_file" "automation-velocloud-orchestrator" {

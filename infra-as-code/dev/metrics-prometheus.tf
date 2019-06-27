@@ -1,5 +1,5 @@
 data "aws_ecr_repository" "automation-metrics-prometheus" {
-  name = "${var.environment}-metrics-dashboard/prometheus"
+  name = "automation-metrics-dashboard/prometheus"
 }
 
 data "template_file" "automation-metrics-prometheus" {
