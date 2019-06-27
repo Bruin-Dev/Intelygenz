@@ -94,6 +94,7 @@ class Container:
                                                 start_at='first')
 
         self.redis_connection.hset("foo", "key", datetime.now().isoformat())
+        self.redis_connection.hmset("foo", "key", datetime.now().isoformat())
         redis_data = self.redis_connection.hgetall("foo")
         logger.info(f'Data retrieved from Redis: {redis_data["key"]}')
 

@@ -35,7 +35,7 @@ class Container:
 
         self._prometheus_repository = PrometheusRepository(config)
 
-        self._redis_client = Redis(host="redis", port=6379, decode_responses=True)
+        self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._edge_repository = EdgeRepository(self._redis_client, self._logger)
 
         self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG)
