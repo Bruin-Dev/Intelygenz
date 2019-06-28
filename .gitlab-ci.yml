@@ -285,7 +285,7 @@ destroy-dev:
   <<: *terraform_template
   script:
     - terraform init infra-as-code/dev
-    - terraform destroy -auto-approve
+    - terraform destroy -auto-approve infra-as-code/dev
   environment:
     name: dev
     action: stop
