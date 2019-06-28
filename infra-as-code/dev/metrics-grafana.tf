@@ -37,7 +37,7 @@ resource "aws_alb_listener" "automation-grafana" {
 }
 
 resource "aws_alb_target_group" "automation-metrics-grafana" {
-  name = "${var.ENVIRONMENT}-metrics-grafana"
+  name = "${var.ENVIRONMENT}-grafana"
   port = 3000
   protocol = "HTTP"
   vpc_id = "${aws_vpc.automation-vpc.id}"

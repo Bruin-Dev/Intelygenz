@@ -1,5 +1,5 @@
 resource "aws_elasticache_cluster" "automation-redis" {
-  cluster_id = "${var.ENVIRONMENT}-redis"
+  cluster_id = "${var.ENVIRONMENT}"
   engine = "redis"
   engine_version = "5.0.4"
   node_type = "cache.m4.large"
