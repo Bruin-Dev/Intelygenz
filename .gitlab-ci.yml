@@ -12,7 +12,6 @@ variables:
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
   REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-  ENVIRONMENT_SLUG: $(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
 
 #
 # Using gitlab-ci anchors to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
@@ -240,6 +239,7 @@ terraform-validate-dev:
   stage: validation
   <<: *terraform_template
   script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
@@ -263,6 +263,7 @@ deploy:
   stage: deploy
   <<: *terraform_template
   script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
@@ -284,6 +285,7 @@ destroy:
   stage: deploy
   <<: *terraform_template
   script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
