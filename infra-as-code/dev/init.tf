@@ -22,16 +22,22 @@ variable "subdomain" {
   default = "dev"
 }
 
-variable "BUILD_NUMBER" {}
+variable "BUILD_NUMBER" {
+  default = ""
+}
 
-variable "LOST_CONTACT_RECIPIENT" {}
+variable "LOST_CONTACT_RECIPIENT" {
+  default = ""
+}
 
 
 variable "PYTHONUNBUFFERED" {
   default = 1
 }
 
-variable "EMAIL_ACC_PWD" {}
+variable "EMAIL_ACC_PWD" {
+  default = ""
+}
 
 
 variable "NATS_CLUSTER_NAME" {
@@ -42,7 +48,9 @@ variable "MONITORING_SECONDS" {
   default = "600"
 }
 
-variable "VELOCLOUD_CREDENTIALS" {}
+variable "VELOCLOUD_CREDENTIALS" {
+  deafult = ""
+}
 
 variable "VELOCLOUD_VERIFY_SSL" {
   default = "yes"
