@@ -1,6 +1,3 @@
-from datetime import datetime
-
-
 class EdgeRepository:
 
     def __init__(self, redis_client, logger):

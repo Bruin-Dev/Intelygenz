@@ -50,20 +50,18 @@ class TestStatisticClient:
     def get_statistics_test(self):
         test_client = StatisticClient(config)
         test_client.clear_dictionaries()
-        time = 600
-        msg1 = test_client.get_statistics(time)
+        msg1 = test_client.get_statistics()
         assert msg1 is None
         test_edge_dict = {'someId': 'OFFLINE', 'anotherId': 'NEVER_ACTIVATED', 'testID': 'OFFLINE'}
         test_client._edge_dictionary = test_edge_dict
-        time = 600
-        msg2_results = f"Failing Edge Status Counters (last {time} minutes)\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3\n"
-        msg2 = test_client.get_statistics(time)
+        msg2_results = f"Failing Edge Status Counters \nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3\n"
+        msg2 = test_client.get_statistics()
         assert msg2 == msg2_results
         test_link_dict = {'someId': 'OFFLINE', 'anotherId': 'NEVER_ACTIVATED', 'testID': 'OFFLINE'}
         test_client._link_dictionary = test_link_dict
-        msg3_results = msg2_results + f"Failing Edges' Link Status Counters (last {time} minutes)" \
+        msg3_results = msg2_results + f"Failing Edges' Link Status Counters " \
             "\nOFFLINE: 2\nNEVER_ACTIVATED: 1\nTotal: 3"
-        msg3 = test_client.get_statistics(time)
+        msg3 = test_client.get_statistics()
         assert msg3 == msg3_results
 
     def clear_dictionaries_test(self):

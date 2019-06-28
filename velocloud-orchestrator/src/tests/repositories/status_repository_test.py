@@ -118,3 +118,40 @@ class TestStatusRepository:
         assert redis_client.get.called
         assert "last_cycle_timestamp" in redis_client.get.call_args[0][0]
         assert ret_val == 10.15
+
+    def set_last_cycle_request_id_test(self):
+        redis_client = Mock()
+        redis_client.set = Mock()
+        logger = Mock()
+        status_repo = StatusRepository(redis_client, logger)
+        last_cycle_request_id = 15
+        status_repo.set_last_cycle_request_id(last_cycle_request_id)
+        assert redis_client.set.called
+        assert "last_cycle_request_id" in redis_client.set.call_args[0][0]
+        assert redis_client.set.call_args[0][1] == last_cycle_request_id
+
+    def get_last_cycle_request_id_OK_test(self):
+        redis_client = Mock()
+        redis_client.exists = Mock(return_value=True)
+        redis_client.set = Mock()
+        redis_client.get = Mock(return_value="10")
+        logger = Mock()
+        status_repo = StatusRepository(redis_client, logger)
+        ret_val = status_repo.get_last_cycle_request_id()
+        assert redis_client.exists.called
+        assert "last_cycle_request_id" in redis_client.exists.call_args[0][0]
+        assert redis_client.get.called
+        assert "last_cycle_request_id" in redis_client.get.call_args[0][0]
+        assert ret_val == '10'
+
+    def get_last_cycle_request_id_KO_test(self):
+        redis_client = Mock()
+        redis_client.exists = Mock(return_value=False)
+        redis_client.set = Mock()
+        redis_client.get = Mock(return_value="10")
+        logger = Mock()
+        status_repo = StatusRepository(redis_client, logger)
+        ret_val = status_repo.get_last_cycle_request_id()
+        assert redis_client.exists.called
+        assert redis_client.get.called is False
+        assert ret_val is None
