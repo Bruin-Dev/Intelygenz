@@ -265,6 +265,9 @@ deploy:
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
     - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT}
+    - apk add gettext
+    - envsubst < infra-as-code/dev/init.tf > temp.tf
+    - mv temp.tf infra-as-code/dev/init.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
   environment:
@@ -277,6 +280,9 @@ destroy:
   <<: *terraform_template
   script:
     - export TF_VAR_ENVIRONMENT=automation-${CI_COMMIT_REF_NAME}
+    - apk add gettext
+    - envsubst < infra-as-code/dev/init.tf > temp.tf
+    - mv temp.tf infra-as-code/dev/init.tf
     - terraform init infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
   environment:

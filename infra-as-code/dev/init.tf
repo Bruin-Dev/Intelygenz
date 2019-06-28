@@ -1,13 +1,8 @@
 terraform {
-  backend "s3" {}
-}
-
-data "terraform_remote_state" "state" {
-  backend = "s3"
-  config {
+  backend "s3" {
     bucket = "automation-infrastructure"
     region = "us-east-1"
-    key = "terraform-${var.ENVIRONMENT}.tfstate"
+    key = "terraform-${TF_VAR_ENVIRONMENT}.tfstate"
   }
 }
 
