@@ -245,7 +245,7 @@ terraform-validate-dev:
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT}
+    - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT_DEV}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
@@ -270,7 +270,7 @@ deploy-branches:
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT}
+    - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT_DEV}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
@@ -317,7 +317,7 @@ deploy-master:
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT}
+    - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT_PRO}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
