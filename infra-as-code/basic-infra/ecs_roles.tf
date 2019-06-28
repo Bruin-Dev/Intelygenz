@@ -3,6 +3,12 @@ resource "aws_iam_role" "ecs_execution_role" {
   assume_role_policy = "${file("${path.module}/policies/ecs-task-execution-role.json")}"
 }
 
+resource "aws_iam_role_policy" "automation-ecs_execution_role_policy" {
+  name   = "ecs_execution_role_policy"
+  policy = "${file("${path.module}/policies/ecs-execution-role-policy.json")}"
+  role   = "${aws_iam_role.ecs_execution_role.id}"
+}
+
 data "aws_iam_policy_document" "ecs_service_role" {
   statement {
     effect = "Allow"
