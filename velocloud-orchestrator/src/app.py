@@ -11,7 +11,7 @@ from application.repositories.prometheus_repository import PrometheusRepository
 from application.repositories.edge_repository import EdgeRepository
 from application.repositories.status_repository import StatusRepository
 from application.repositories.statistic_repository import StatisticRepository
-from application.repositories.statistic_client import StatisticClient
+from application.clients.statistic_client import StatisticClient
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
 from redis import Redis

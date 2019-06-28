@@ -51,3 +51,14 @@ class StatusRepository:
         last_cycle_timestamp = self._redis_client.get("last_cycle_timestamp")
         self._logger.info(f'Got last_cycle_timestamp = {last_cycle_timestamp} from cache')
         return float(last_cycle_timestamp)
+
+    def set_last_cycle_request_id(self, request_id):
+        self._logger.info(f'Storing last_cycle_request_id = {request_id} in cache')
+        self._redis_client.set("last_cycle_request_id", request_id)
+
+    def get_last_cycle_request_id(self):
+        if not self._redis_client.exists("last_cycle_request_id"):
+            return None
+        last_cycle_request_id = self._redis_client.get("last_cycle_request_id")
+        self._logger.info(f'Got last_cycle_request_id = {last_cycle_request_id} from cache')
+        return last_cycle_request_id
