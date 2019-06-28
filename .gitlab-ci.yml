@@ -287,6 +287,7 @@ destroy:
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
