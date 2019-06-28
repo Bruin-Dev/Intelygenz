@@ -239,6 +239,7 @@ terraform-validate-dev:
   stage: validation
   <<: *terraform_template
   script:
+    - export TF_VAR_ENVIRONMENT=automation-${CI_PIPELINE_ID}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
@@ -261,7 +262,7 @@ deploy:
   stage: deploy
   <<: *terraform_template
   script:
-    - export TF_VAR_ENVIRONMENT=automation-${CI_COMMIT_REF_NAME}
+    - export TF_VAR_ENVIRONMENT=automation-${CI_PIPELINE_ID}
     - export TF_VAR_SUBDOMAIN=${CI_COMMIT_REF_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
@@ -282,7 +283,7 @@ destroy:
   stage: deploy
   <<: *terraform_template
   script:
-    - export TF_VAR_ENVIRONMENT=automation-${CI_COMMIT_REF_NAME}
+    - export TF_VAR_ENVIRONMENT=automation-${CI_PIPELINE_ID}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
