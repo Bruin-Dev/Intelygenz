@@ -16,7 +16,7 @@ variable "domain" {
   default = "mettel-automation.net"
 }
 
-variable "subdomain" {}
+variable "SUBDOMAIN" {}
 
 variable "BUILD_NUMBER" {
   default = ""
