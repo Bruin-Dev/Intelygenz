@@ -31,7 +31,6 @@ variable "LOST_CONTACT_RECIPIENT" {
   default = ""
 }
 
-
 variable "PYTHONUNBUFFERED" {
   default = 1
 }
@@ -39,7 +38,6 @@ variable "PYTHONUNBUFFERED" {
 variable "EMAIL_ACC_PWD" {
   default = ""
 }
-
 
 variable "NATS_CLUSTER_NAME" {
   default = "automation-engine-nats"
@@ -50,7 +48,7 @@ variable "MONITORING_SECONDS" {
 }
 
 variable "VELOCLOUD_CREDENTIALS" {
-  deafult = ""
+  default = ""
 }
 
 variable "VELOCLOUD_VERIFY_SSL" {
