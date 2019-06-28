@@ -11,7 +11,7 @@ from application.repositories.prometheus_repository import PrometheusRepository
 from application.repositories.edge_repository import EdgeRepository
 from application.repositories.status_repository import StatusRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from pytz import utc
+from pytz import timezone
 from redis import Redis
 
 
@@ -20,7 +20,7 @@ class Container:
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("Velocloud orchestrator starting...")
-        self._scheduler = AsyncIOScheduler(timezone=utc)
+        self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
 
         self._publisher = NatsStreamingClient(config, f'velocloud-orchestrator-publisher-', logger=self._logger)
