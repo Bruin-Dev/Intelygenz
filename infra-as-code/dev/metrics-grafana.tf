@@ -7,14 +7,14 @@ data "template_file" "automation-metrics-grafana" {
 
   vars = {
     image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.BUILD_NUMBER}"
-    log_group = "${var.environment}"
-    log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
+    log_group = "${var.ENVIRONMENT}"
+    log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
     GF_SECURITY_ADMIN_PASSWORD = "q1w2e3r4"
   }
 }
 
 resource "aws_ecs_task_definition" "automation-metrics-grafana" {
-  family = "${var.environment}-metrics-grafana"
+  family = "${var.ENVIRONMENT}-metrics-grafana"
   container_definitions = "${data.template_file.automation-metrics-grafana.rendered}"
   requires_compatibilities = [
     "FARGATE"]
@@ -37,7 +37,7 @@ resource "aws_alb_listener" "automation-grafana" {
 }
 
 resource "aws_alb_target_group" "automation-metrics-grafana" {
-  name = "${var.environment}-metrics-grafana"
+  name = "${var.ENVIRONMENT}-metrics-grafana"
   port = 3000
   protocol = "HTTP"
   vpc_id = "${aws_vpc.automation-vpc.id}"
@@ -57,7 +57,7 @@ resource "aws_alb_target_group" "automation-metrics-grafana" {
 
 resource "aws_security_group" "automation-grafana_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.environment}-metrics-grafana"
+  name = "${var.ENVIRONMENT}-metrics-grafana"
   description = "Allow egress from container"
 
   egress {
@@ -86,13 +86,13 @@ resource "aws_security_group" "automation-grafana_service" {
   }
 
   tags = {
-    Name = "${var.environment}-metrics-grafana"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-metrics-grafana"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
 resource "aws_ecs_service" "automation-metrics-grafana" {
-  name = "${var.environment}-metrics-grafana"
+  name = "${var.ENVIRONMENT}-metrics-grafana"
   task_definition = "${aws_ecs_task_definition.automation-metrics-grafana.family}:${aws_ecs_task_definition.automation-metrics-grafana.revision}"
   desired_count = 1
   launch_type = "FARGATE"

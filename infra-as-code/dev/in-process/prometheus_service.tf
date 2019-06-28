@@ -1,5 +1,5 @@
 resource "aws_alb_target_group" "mettel-automation-pro-prometheus" {
-  name = "${var.environment}-prometheus"
+  name = "${var.ENVIRONMENT}-prometheus"
   port = 9090
   protocol = "HTTP"
   vpc_id = "${aws_vpc.mettel-automation-pro-vpc.id}"
@@ -16,7 +16,7 @@ resource "aws_alb_target_group" "mettel-automation-pro-prometheus" {
 
 resource "aws_security_group" "mettel-automation-pro-prometheus_service" {
   vpc_id = "${aws_vpc.mettel-automation-pro-vpc.id}"
-  name = "${var.environment}-prometheus"
+  name = "${var.ENVIRONMENT}-prometheus"
   description = "Allow egress from container"
 
 #  egress {
@@ -45,13 +45,13 @@ resource "aws_security_group" "mettel-automation-pro-prometheus_service" {
   }
 
   tags = {
-    Name = "${var.environment}-prometheus"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-prometheus"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
 resource "aws_ecs_service" "mettel-automation-pro-prometheus" {
-  name = "${var.environment}-prometheus"
+  name = "${var.ENVIRONMENT}-prometheus"
   task_definition = "${aws_ecs_task_definition.mettel-automation-pro-prometheus.family}:${aws_ecs_task_definition.mettel-automation-pro-prometheus.revision}"
   desired_count = 1
   launch_type = "FARGATE"

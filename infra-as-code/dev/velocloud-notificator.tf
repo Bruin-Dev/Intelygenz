@@ -7,11 +7,11 @@ data "template_file" "automation-velocloud-notificator" {
 
   vars = {
     image = "${data.aws_ecr_repository.automation-velocloud-notificator.repository_url}:${var.BUILD_NUMBER}"
-    log_group = "${var.environment}"
-    log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
+    log_group = "${var.ENVIRONMENT}"
+    log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
 
     PYTHONUNBUFFERED = "${var.PYTHONUNBUFFERED}"
-    NATS_SERVER1 = "nats://nats-server.${var.environment}.local:4222"
+    NATS_SERVER1 = "nats://nats-server.${var.ENVIRONMENT}.local:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
     SLACK_URL = "https://hooks.slack.com/services/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"
     EMAIL_ACC_PWD = "${var.EMAIL_ACC_PWD}"
@@ -20,7 +20,7 @@ data "template_file" "automation-velocloud-notificator" {
 }
 
 resource "aws_ecs_task_definition" "automation-velocloud-notificator" {
-  family = "${var.environment}-velocloud-notificator"
+  family = "${var.ENVIRONMENT}-velocloud-notificator"
   container_definitions = "${data.template_file.automation-velocloud-notificator.rendered}"
   requires_compatibilities = [
     "FARGATE"]
@@ -33,7 +33,7 @@ resource "aws_ecs_task_definition" "automation-velocloud-notificator" {
 
 resource "aws_security_group" "automation-velocloud-notificator_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.environment}-velocloud-notificator"
+  name = "${var.ENVIRONMENT}-velocloud-notificator"
   description = "Allow egress from container"
 
   lifecycle {
@@ -66,13 +66,13 @@ resource "aws_security_group" "automation-velocloud-notificator_service" {
   }
 
   tags = {
-    Name = "${var.environment}-velocloud-notificator"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-velocloud-notificator"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
 resource "aws_ecs_service" "automation-velocloud-notificator" {
-  name = "${var.environment}-velocloud-notificator"
+  name = "${var.ENVIRONMENT}-velocloud-notificator"
   task_definition = "${aws_ecs_task_definition.automation-velocloud-notificator.family}:${aws_ecs_task_definition.automation-velocloud-notificator.revision}"
   desired_count = 1
   launch_type = "FARGATE"

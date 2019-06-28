@@ -1,8 +1,13 @@
 terraform {
-  backend "s3" {
+  backend "s3" {}
+}
+
+data "terraform_remote_state" "state" {
+  backend = "s3"
+  config {
     bucket = "automation-infrastructure"
-    key = "terraform-automation-dev.tfstate"
     region = "us-east-1"
+    key = "terraform-${var.ENVIRONMENT}.tfstate"
   }
 }
 
@@ -10,17 +15,13 @@ provider "aws" {
   region = "us-east-1"
 }
 
-variable "environment" {
-  default = "automation-dev"
-}
+variable "ENVIRONMENT" {}
 
 variable "domain" {
   default = "mettel-automation.net"
 }
 
-variable "subdomain" {
-  default = "dev"
-}
+variable "subdomain" {}
 
 variable "BUILD_NUMBER" {
   default = ""

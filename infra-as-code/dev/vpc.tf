@@ -8,8 +8,8 @@ resource "aws_vpc" "automation-vpc" {
   enable_dns_support = true
 
   tags = {
-    Name = "${var.environment}"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -21,8 +21,8 @@ resource "aws_internet_gateway" "automation-igw" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
 
   tags = {
-    Name = "${var.environment}"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -31,13 +31,13 @@ resource "aws_internet_gateway" "automation-igw" {
 resource "aws_eip" "automation-nat_eip-1a" {
   vpc = true
   tags = {
-    Name = "${var.environment}-nat-1a"
+    Name = "${var.ENVIRONMENT}-nat-1a"
   }
 }
 resource "aws_eip" "automation-nat_eip-1b" {
   vpc = true
   tags = {
-    Name = "${var.environment}-nat-1b"
+    Name = "${var.ENVIRONMENT}-nat-1b"
   }
 }
 
@@ -47,8 +47,8 @@ resource "aws_nat_gateway" "automation-nat-1a" {
   subnet_id = "${aws_subnet.automation-public_subnet-1a.id}"
 
   tags = {
-    Name = "${var.environment}-1a"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-1a"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 resource "aws_nat_gateway" "automation-nat-1b" {
@@ -56,8 +56,8 @@ resource "aws_nat_gateway" "automation-nat-1b" {
   subnet_id = "${aws_subnet.automation-public_subnet-1b.id}"
 
   tags = {
-    Name = "${var.environment}-1b"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-1b"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -69,8 +69,8 @@ resource "aws_subnet" "automation-public_subnet-1a" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.environment}-public-subnet-1a"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-public-subnet-1a"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 resource "aws_subnet" "automation-public_subnet-1b" {
@@ -80,8 +80,8 @@ resource "aws_subnet" "automation-public_subnet-1b" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.environment}-public-subnet-1b"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-public-subnet-1b"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -93,8 +93,8 @@ resource "aws_subnet" "automation-private_subnet-1a" {
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "${var.environment}-private-subnet-1a"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-private-subnet-1a"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -105,8 +105,8 @@ resource "aws_subnet" "automation-private_subnet-1b" {
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "${var.environment}-private-subnet-1b"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-private-subnet-1b"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -115,8 +115,8 @@ resource "aws_route_table" "automation-private" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
 
   tags = {
-    Name = "${var.environment}-private-route-table"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-private-route-table"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -125,8 +125,8 @@ resource "aws_route_table" "automation-public" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
 
   tags = {
-    Name = "${var.environment}-public-route-table"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-public-route-table"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -165,7 +165,7 @@ resource "aws_route_table_association" "automation-private-1b" {
 VPC's Default Security Group
 ======*/
 resource "aws_security_group" "automation-default" {
-  name = "${var.environment}-default-sg"
+  name = "${var.ENVIRONMENT}-default-sg"
   description = "Default security group to allow inbound/outbound from the VPC"
   vpc_id = "${aws_vpc.automation-vpc.id}"
 
@@ -184,6 +184,6 @@ resource "aws_security_group" "automation-default" {
   }
 
   tags = {
-    Name = "${var.environment}-default"
+    Name = "${var.ENVIRONMENT}-default"
   }
 }

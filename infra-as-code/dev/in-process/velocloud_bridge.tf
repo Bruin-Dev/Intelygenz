@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "automation-velocloud-bridge" {
-  name = "${var.environment}-velocloud-bridge"
+  name = "${var.ENVIRONMENT}-velocloud-bridge"
 }
 
 data "template_file" "automation-velocloud-bridge" {
@@ -16,7 +16,7 @@ data "template_file" "automation-velocloud-bridge" {
 }
 
 resource "aws_ecs_task_definition" "automation-velocloud-bridge" {
-  family = "${var.environment}-velocloud-bridge"
+  family = "${var.ENVIRONMENT}-velocloud-bridge"
   container_definitions = "${data.template_file.automation-velocloud-bridge.rendered}"
   requires_compatibilities = [
     "FARGATE"]

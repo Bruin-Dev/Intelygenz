@@ -4,7 +4,7 @@ stages:
   - acceptance_tests
   - basic_infra
   - build
-  - deploy_dev
+  - deploy
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -62,8 +62,6 @@ variables:
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
-  only:
-    - master
 
 
 .job_terraform_template: &terraform_template
@@ -187,8 +185,6 @@ grafana-build:
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
-  only:
-    - master
 
 prometheus-build:
   stage: build
@@ -208,8 +204,6 @@ prometheus-build:
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
-  only:
-    - master
 
 
 velocloud-notificator-build:
@@ -259,13 +253,13 @@ basic-infra:
   script:
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
-  only:
-    - master
 
-deploy-dev:
-  stage: deploy_dev
+deploy:
+  stage: deploy
   <<: *terraform_template
   script:
+    - export TF_VAR_ENVIRONMENT=automation-${CI_COMMIT_REF_NAME}
+    - export TF_VAR_SUBDOMAIN=${CI_COMMIT_REF_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
@@ -274,21 +268,18 @@ deploy-dev:
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
   environment:
-    name: dev
+    name: $CI_COMMIT_REF_NAME
     url: http://dev.mettel-automation.net
-    on_stop: destroy-dev
-  only:
-    - master
+    on_stop: destroy
 
-destroy-dev:
-  stage: deploy_dev
+destroy:
+  stage: deploy
   <<: *terraform_template
   script:
+    - export TF_VAR_ENVIRONMENT=automation-${CI_COMMIT_REF_NAME}
     - terraform init infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
   environment:
-    name: dev
+    name: $CI_COMMIT_REF_NAME
     action: stop
   when: manual
-  only:
-    - master

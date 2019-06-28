@@ -1,5 +1,5 @@
 resource "aws_elasticache_cluster" "automation-redis" {
-  cluster_id = "${var.environment}-redis"
+  cluster_id = "${var.ENVIRONMENT}-redis"
   engine = "redis"
   engine_version = "5.0.4"
   node_type = "cache.m4.large"
@@ -11,19 +11,19 @@ resource "aws_elasticache_cluster" "automation-redis" {
   security_group_ids = ["${aws_security_group.automation-redis-sg.id}"]
 
   tags = {
-    Name = "${var.environment}-redis"
+    Name = "${var.ENVIRONMENT}-redis"
   }
 }
 
 resource "aws_elasticache_subnet_group" "automation-redis-subnet" {
-  name = "${var.environment}-redis-subnet"
+  name = "${var.ENVIRONMENT}-redis-subnet"
   subnet_ids = [
     "${aws_subnet.automation-private_subnet-1a.id}",
     "${aws_subnet.automation-private_subnet-1b.id}"]
 }
 
 resource "aws_security_group" "automation-redis-sg" {
-  name = "${var.environment}-redis-sg"
+  name = "${var.ENVIRONMENT}-redis-sg"
   vpc_id = "${aws_vpc.automation-vpc.id}"
   description = "Access control to redis cache"
 
@@ -45,6 +45,6 @@ resource "aws_security_group" "automation-redis-sg" {
   }
 
   tags = {
-    Name = "${var.environment}-redis"
+    Name = "${var.ENVIRONMENT}-redis"
   }
 }

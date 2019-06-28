@@ -1,5 +1,5 @@
-resource "aws_security_group" "automation-dev-inbound" {
-  name = "${var.environment}-inbound"
+resource "aws_security_group" "automation-inbound" {
+  name = "${var.ENVIRONMENT}-inbound"
   description = "Allowed connections into ALB"
   vpc_id = "${aws_vpc.automation-vpc.id}"
 
@@ -46,7 +46,7 @@ resource "aws_security_group" "automation-dev-inbound" {
   }
 
   tags = {
-    Name = "${var.environment}-inbound"
+    Name = "${var.ENVIRONMENT}-inbound"
   }
 }
 
@@ -56,16 +56,16 @@ data "aws_acm_certificate" "automation" {
 }
 
 resource "aws_alb" "automation-alb" {
-  name = "${var.environment}"
+  name = "${var.ENVIRONMENT}"
   subnets = [
     "${aws_subnet.automation-public_subnet-1a.id}",
     "${aws_subnet.automation-public_subnet-1b.id}"]
   security_groups = [
-    "${aws_security_group.automation-dev-inbound.id}"]
+    "${aws_security_group.automation-inbound.id}"]
 
   tags = {
-    Name = "${var.environment}"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 

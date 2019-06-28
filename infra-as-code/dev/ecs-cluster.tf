@@ -1,5 +1,5 @@
 resource "aws_ecs_cluster" "automation" {
-  name = "${var.environment}"
+  name = "${var.ENVIRONMENT}"
 }
 
 /* role that the Amazon ECS container agent and the Docker daemon can assume */

@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "mettel-automation-pro-grafana" {
-  name = "${var.environment}-grafana"
+  name = "${var.ENVIRONMENT}-grafana"
 }
 
 data "template_file" "mettel-automation-pro-grafana" {
@@ -11,7 +11,7 @@ data "template_file" "mettel-automation-pro-grafana" {
 }
 
 resource "aws_ecs_task_definition" "mettel-automation-pro-grafana" {
-  family = "${var.environment}-grafana"
+  family = "${var.ENVIRONMENT}-grafana"
   container_definitions = "${data.template_file.mettel-automation-pro-grafana.rendered}"
   requires_compatibilities = [
     "FARGATE"]

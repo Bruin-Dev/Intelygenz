@@ -1,5 +1,5 @@
 resource "aws_alb_target_group" "mettel-automation-pro-grafana" {
-  name = "${var.environment}-grafana"
+  name = "${var.ENVIRONMENT}-grafana"
   port = 3000
   protocol = "HTTP"
   vpc_id = "${aws_vpc.mettel-automation-pro-vpc.id}"
@@ -16,7 +16,7 @@ resource "aws_alb_target_group" "mettel-automation-pro-grafana" {
 
 resource "aws_security_group" "mettel-automation-pro-grafana_service" {
   vpc_id = "${aws_vpc.mettel-automation-pro-vpc.id}"
-  name = "${var.environment}-grafana"
+  name = "${var.ENVIRONMENT}-grafana"
   description = "Allow egress from container"
 
 #  egress {
@@ -45,13 +45,13 @@ resource "aws_security_group" "mettel-automation-pro-grafana_service" {
   }
 
   tags = {
-    Name = "${var.environment}-grafana"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-grafana"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
 resource "aws_ecs_service" "mettel-automation-pro-grafana" {
-  name = "${var.environment}-grafana"
+  name = "${var.ENVIRONMENT}-grafana"
   task_definition = "${aws_ecs_task_definition.mettel-automation-pro-grafana.family}:${aws_ecs_task_definition.mettel-automation-pro-grafana.revision}"
   desired_count = 1
   launch_type = "FARGATE"

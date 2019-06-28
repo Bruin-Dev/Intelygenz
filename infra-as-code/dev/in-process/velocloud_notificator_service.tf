@@ -1,5 +1,5 @@
 resource "aws_alb_target_group" "mettel-automation-backend" {
-  name = "${var.environment}-backend"
+  name = "${var.ENVIRONMENT}-backend"
   port = 80
   protocol = "HTTP"
   vpc_id = "${aws_vpc.mettel-automation-vpc.id}"
@@ -16,7 +16,7 @@ resource "aws_alb_target_group" "mettel-automation-backend" {
 
 resource "aws_security_group" "mettel-automation-backend_service" {
   vpc_id = "${aws_vpc.mettel-automation-vpc.id}"
-  name = "${var.environment}-backend"
+  name = "${var.ENVIRONMENT}-backend"
   description = "Allow egress from container"
 
 #  egress {
@@ -45,13 +45,13 @@ resource "aws_security_group" "mettel-automation-backend_service" {
   }
 
   tags = {
-    Name = "${var.environment}-backend"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-backend"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
 resource "aws_ecs_service" "mettel-automation-velocloud-notificator" {
-  name = "${var.environment}-backend"
+  name = "${var.ENVIRONMENT}-backend"
   task_definition = "${aws_ecs_task_definition.mettel-automation-velocloud-notificator.family}:${aws_ecs_task_definition.mettel-automation-velocloud-notificator.revision}"
   desired_count = 1
   launch_type = "FARGATE"

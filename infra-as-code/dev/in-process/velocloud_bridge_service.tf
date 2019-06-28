@@ -1,5 +1,5 @@
 resource "aws_alb_target_group" "mettel-automation-velocloud-bridge" {
-  name = "${var.environment}-velocloud-bridge"
+  name = "${var.ENVIRONMENT}-velocloud-bridge"
   port = 80
   protocol = "HTTP"
   vpc_id = "${aws_vpc.mettel-automation-vpc.id}"
@@ -16,7 +16,7 @@ resource "aws_alb_target_group" "mettel-automation-velocloud-bridge" {
 
 resource "aws_security_group" "automation-velocloud-bridge_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.environment}-velocloud-bridge"
+  name = "${var.ENVIRONMENT}-velocloud-bridge"
   description = "Allow egress from container"
 
 #  egress {
@@ -45,13 +45,13 @@ resource "aws_security_group" "automation-velocloud-bridge_service" {
   }
 
   tags = {
-    Name = "${var.environment}-velocloud-bridge"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-velocloud-bridge"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
 resource "aws_ecs_service" "automation-velocloud-bridge" {
-  name = "${var.environment}-velocloud-bridge"
+  name = "${var.ENVIRONMENT}-velocloud-bridge"
   task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
   desired_count = 1
   launch_type = "FARGATE"

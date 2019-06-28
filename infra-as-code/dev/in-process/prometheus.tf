@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "mettel-automation-pro-prometheus" {
-  name = "${var.environment}-prometheus"
+  name = "${var.ENVIRONMENT}-prometheus"
 }
 
 data "template_file" "mettel-automation-pro-prometheus" {
@@ -11,7 +11,7 @@ data "template_file" "mettel-automation-pro-prometheus" {
 }
 
 resource "aws_ecs_task_definition" "mettel-automation-pro-prometheus" {
-  family = "${var.environment}-prometheus"
+  family = "${var.ENVIRONMENT}-prometheus"
   container_definitions = "${data.template_file.mettel-automation-pro-prometheus.rendered}"
   requires_compatibilities = [
     "FARGATE"]

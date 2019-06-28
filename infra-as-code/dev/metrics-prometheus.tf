@@ -7,13 +7,13 @@ data "template_file" "automation-metrics-prometheus" {
 
   vars = {
     image = "${data.aws_ecr_repository.automation-metrics-prometheus.repository_url}:${var.BUILD_NUMBER}"
-    log_group = "${var.environment}"
-    log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
+    log_group = "${var.ENVIRONMENT}"
+    log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   }
 }
 
 resource "aws_ecs_task_definition" "automation-metrics-prometheus" {
-  family = "${var.environment}-metrics-prometheus"
+  family = "${var.ENVIRONMENT}-metrics-prometheus"
   container_definitions = "${data.template_file.automation-metrics-prometheus.rendered}"
   requires_compatibilities = [
     "FARGATE"]
@@ -26,7 +26,7 @@ resource "aws_ecs_task_definition" "automation-metrics-prometheus" {
 
 resource "aws_security_group" "automation-metrics-prometheus_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.environment}-metrics-prometheus"
+  name = "${var.ENVIRONMENT}-metrics-prometheus"
   description = "Allow egress from container"
 
   lifecycle {
@@ -59,8 +59,8 @@ resource "aws_security_group" "automation-metrics-prometheus_service" {
   }
 
   tags = {
-    Name = "${var.environment}-metrics-prometheus"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-metrics-prometheus"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -84,7 +84,7 @@ resource "aws_service_discovery_service" "metrics-prometheus" {
 }
 
 resource "aws_ecs_service" "automation-metrics-prometheus" {
-  name = "${var.environment}-metrics-prometheus"
+  name = "${var.ENVIRONMENT}-metrics-prometheus"
   task_definition = "${aws_ecs_task_definition.automation-metrics-prometheus.family}:${aws_ecs_task_definition.automation-metrics-prometheus.revision}"
   desired_count = 1
   launch_type = "FARGATE"

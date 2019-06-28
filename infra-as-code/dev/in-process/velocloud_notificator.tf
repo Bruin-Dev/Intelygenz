@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "mettel-automation-velocloud-notificator" {
-  name = "${var.environment}-velocloud-notificator"
+  name = "${var.ENVIRONMENT}-velocloud-notificator"
 }
 
 data "template_file" "mettel-automation-velocloud-notificator" {
@@ -16,7 +16,7 @@ data "template_file" "mettel-automation-velocloud-notificator" {
 }
 
 resource "aws_ecs_task_definition" "mettel-automation-velocloud-notificator" {
-  family = "${var.environment}-velocloud-notificator"
+  family = "${var.ENVIRONMENT}-velocloud-notificator"
   container_definitions = "${data.template_file.mettel-automation-velocloud-notificator.rendered}"
   requires_compatibilities = [
     "FARGATE"]

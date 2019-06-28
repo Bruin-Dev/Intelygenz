@@ -7,13 +7,13 @@ data "template_file" "automation-nats-server" {
 
   vars = {
     image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.BUILD_NUMBER}"
-    log_group = "${var.environment}"
-    log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
+    log_group = "${var.ENVIRONMENT}"
+    log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   }
 }
 
 resource "aws_ecs_task_definition" "automation-nats-server" {
-  family = "${var.environment}-nats-server"
+  family = "${var.ENVIRONMENT}-nats-server"
   container_definitions = "${data.template_file.automation-nats-server.rendered}"
   requires_compatibilities = [
     "FARGATE"]
@@ -36,7 +36,7 @@ resource "aws_alb_listener" "automation-nats" {
 }
 
 resource "aws_alb_target_group" "automation-nats-server" {
-  name = "${var.environment}-nats-server"
+  name = "${var.ENVIRONMENT}-nats-server"
   port = 8222
   protocol = "HTTP"
   vpc_id = "${aws_vpc.automation-vpc.id}"
@@ -56,7 +56,7 @@ resource "aws_alb_target_group" "automation-nats-server" {
 
 resource "aws_security_group" "automation-nats_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.environment}-nats-server"
+  name = "${var.ENVIRONMENT}-nats-server"
   description = "Allow egress from container"
 
   egress {
@@ -94,8 +94,8 @@ resource "aws_security_group" "automation-nats_service" {
   }
 
   tags = {
-    Name = "${var.environment}-nats-server"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-nats-server"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -119,7 +119,7 @@ resource "aws_service_discovery_service" "nats-server" {
 }
 
 resource "aws_ecs_service" "automation-nats-server" {
-  name = "${var.environment}-nats-server"
+  name = "${var.ENVIRONMENT}-nats-server"
   task_definition = "${aws_ecs_task_definition.automation-nats-server.family}:${aws_ecs_task_definition.automation-nats-server.revision}"
   desired_count = 1
   launch_type = "FARGATE"

@@ -7,11 +7,11 @@ data "template_file" "automation-velocloud-bridge" {
 
   vars = {
     image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.BUILD_NUMBER}"
-    log_group = "${var.environment}"
-    log_prefix = "${var.environment}-${var.BUILD_NUMBER}"
+    log_group = "${var.ENVIRONMENT}"
+    log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
 
     PYTHONUNBUFFERED = "${var.PYTHONUNBUFFERED}"
-    NATS_SERVER1 = "nats://nats-server.${var.environment}.local:4222"
+    NATS_SERVER1 = "nats://nats-server.${var.ENVIRONMENT}.local:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
     VELOCLOUD_CREDENTIALS = "${var.VELOCLOUD_CREDENTIALS}"
     VELOCLOUD_VERIFY_SSL = "${var.VELOCLOUD_VERIFY_SSL}"
@@ -19,7 +19,7 @@ data "template_file" "automation-velocloud-bridge" {
 }
 
 resource "aws_ecs_task_definition" "automation-velocloud-bridge" {
-  family = "${var.environment}-velocloud-bridge"
+  family = "${var.ENVIRONMENT}-velocloud-bridge"
   container_definitions = "${data.template_file.automation-velocloud-bridge.rendered}"
   requires_compatibilities = [
     "FARGATE"]
@@ -32,7 +32,7 @@ resource "aws_ecs_task_definition" "automation-velocloud-bridge" {
 
 resource "aws_security_group" "automation-velocloud-bridge_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.environment}-velocloud-bridge"
+  name = "${var.ENVIRONMENT}-velocloud-bridge"
   description = "Allow egress from container"
 
   lifecycle {
@@ -74,8 +74,8 @@ resource "aws_security_group" "automation-velocloud-bridge_service" {
   }
 
   tags = {
-    Name = "${var.environment}-velocloud-bridge"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-velocloud-bridge"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 resource "aws_service_discovery_service" "velocloud-bridge" {
@@ -98,7 +98,7 @@ resource "aws_service_discovery_service" "velocloud-bridge" {
 }
 
 resource "aws_ecs_service" "automation-velocloud-bridge" {
-  name = "${var.environment}-velocloud-bridge"
+  name = "${var.ENVIRONMENT}-velocloud-bridge"
   task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
   desired_count = 1
   launch_type = "FARGATE"
