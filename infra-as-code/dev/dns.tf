@@ -4,7 +4,7 @@ data "aws_route53_zone" "automation" {
 
 resource "aws_route53_record" "automation" {
   zone_id = "${data.aws_route53_zone.automation.zone_id}"
-  name = "${var.subdomain}.${data.aws_route53_zone.automation.name}"
+  name = "${var.SUBDOMAIN}.${data.aws_route53_zone.automation.name}"
   type = "A"
 
   alias {
