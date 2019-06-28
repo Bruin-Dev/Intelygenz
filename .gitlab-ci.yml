@@ -278,7 +278,7 @@ deploy:
     - terraform apply -auto-approve infra-as-code/dev
   environment:
     name: $CI_COMMIT_REF_NAME
-    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net
+    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net:3000/
     on_stop: destroy
 
 destroy:
