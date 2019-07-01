@@ -215,3 +215,89 @@ class TestEdgeMonitoring:
         assert status_repository.get_status.called
         assert status_repository.set_status.called
         assert edge_monitoring._request_edges.called
+
+    @pytest.mark.asyncio
+    async def _send_stats_to_notifier_test(self):
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        logger = Mock()
+        logger.info = Mock()
+        logger.error = Mock()
+        prometheus_repository = Mock()
+        scheduler = Mock()
+        statistic_repository = Mock()
+        statistic_repository._statistic_client.get_statistics = Mock(return_value="Failed Edges Status")
+        statistic_repository.send_to_stats_client = Mock()
+        edge_repository = Mock()
+        edge_repository.get_keys = Mock(return_value=['host', 'fail', 'host 2'])
+        edge_repository.get_edge = Mock(return_value=json.dumps({'request_id': 123, 'redis_edge': {'edges':
+                                                                                                   {'edgeState':
+                                                                                                    'DISCONNECTED'}}}))
+        status_repository = Mock()
+        status_repository.get_last_cycle_request_id = Mock(return_value=123)
+        config = Mock()
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, config)
+        await edge_monitoring._send_stats_to_notifier()
+        assert status_repository.get_last_cycle_request_id.called
+        assert edge_repository.get_keys.called
+        assert logger.info.called is False
+        assert logger.error.called
+        assert statistic_repository.send_to_stats_client.called
+        assert statistic_repository._statistic_client.get_statistics.called
+        assert event_bus.publish_message.call_args[0][0] == "notification.slack.request"
+        assert event_bus.publish_message.call_args[0][1] == json.dumps(dict(request_id=123,
+                                                                            message="Failed Edges Status"))
+
+    @pytest.mark.asyncio
+    async def _send_stats_to_notifier_test(self):
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        logger = Mock()
+        logger.info = Mock()
+        logger.error = Mock()
+        prometheus_repository = Mock()
+        scheduler = Mock()
+        statistic_repository = Mock()
+        statistic_repository._statistic_client.get_statistics = Mock(return_value="Failed Edges Status")
+        statistic_repository.send_to_stats_client = Mock()
+        edge_repository = Mock()
+        edge_repository.get_keys = Mock(return_value=['host', 'fail', 'host 2'])
+        edge_repository.get_edge = Mock(return_value=json.dumps({'request_id': 123, 'redis_edge': {'edges':
+                                                                                                   {'edgeState':
+                                                                                                    'CONNECTED'}}}))
+        status_repository = Mock()
+        status_repository.get_last_cycle_request_id = Mock(return_value=None)
+        config = Mock()
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, config)
+        await edge_monitoring._send_stats_to_notifier()
+        assert status_repository.get_last_cycle_request_id.called
+        assert edge_repository.get_keys.called is False
+        assert logger.info.called is False
+        assert logger.error.called is False
+        assert statistic_repository.send_to_stats_client.called is False
+        assert statistic_repository._statistic_client.get_statistics.called is False
+        assert event_bus.publish_message.called is False
+
+        status_repository.get_last_cycle_request_id = Mock(return_value=124)
+        await edge_monitoring._send_stats_to_notifier()
+        assert status_repository.get_last_cycle_request_id.called
+        assert edge_repository.get_keys.called
+        assert logger.info.called is False
+        assert logger.error.called is False
+        assert statistic_repository.send_to_stats_client.called is False
+        assert statistic_repository._statistic_client.get_statistics.called
+        assert event_bus.publish_message.called
+
+        status_repository.get_last_cycle_request_id = Mock(return_value=123)
+        await edge_monitoring._send_stats_to_notifier()
+        assert status_repository.get_last_cycle_request_id.called
+        assert edge_repository.get_keys.called
+        assert logger.info.called
+        assert logger.error.called is False
+        assert statistic_repository.send_to_stats_client.called is False
+        assert statistic_repository._statistic_client.get_statistics.called
+        assert event_bus.publish_message.called
