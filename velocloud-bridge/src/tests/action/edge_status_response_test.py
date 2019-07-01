@@ -53,6 +53,8 @@ class TestEdgeStatusResponse:
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
+                                                                       "edge_id": {"host": "host", "enterprise_id": "2",
+                                                                                   "edge_id": "1"},
                                                                        "edge_info": {"enterprise_name": enterprise_info,
                                                                                      "edges": {"edge_status": []},
                                                                                      "links":
@@ -79,6 +81,8 @@ class TestEdgeStatusResponse:
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
+                                                                       "edge_id": {"host": "host", "enterprise_id": "2",
+                                                                                   "edge_id": "1"},
                                                                        "edge_info": {"enterprise_name": enterprise_info,
                                                                                      "edges": edge_status,
                                                                                      "links": None},
