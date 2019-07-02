@@ -6,7 +6,7 @@ data "template_file" "automation-nats-server" {
   template = "${file("${path.module}/task-definitions/nats_server.json")}"
 
   vars = {
-    image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.BUILD_NUMBER}"
+    image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_MODULE_VERSION}"
     log_group = "${var.ENVIRONMENT}"
     log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   }

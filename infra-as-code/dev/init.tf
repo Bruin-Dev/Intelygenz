@@ -22,6 +22,10 @@ variable "BUILD_NUMBER" {
   default = ""
 }
 
+variable "NATS_MODULE_VERSION" {
+  default = "latest"
+}
+
 variable "LOST_CONTACT_RECIPIENT" {
   default = ""
 }

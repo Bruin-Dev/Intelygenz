@@ -9,6 +9,7 @@ stages:
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
   NATS_CLUSTER_NAME: "automation-engine-nats"
+  NATS_MODULE_VERSION: 1.0.0
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
   REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
@@ -56,12 +57,12 @@ variables:
     - pip install awscli
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
-    - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
+    - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
 
 
 .job_terraform_template: &terraform_template
@@ -165,12 +166,14 @@ nats-streaming-build:
   stage: build
   variables:
     MODULE_NAME: nats-streaming-server
+    MODULE_VERSION: ${NATS_MODULE_VERSION}
   <<: *build_app_image
 
 grafana-build:
   stage: build
   variables:
     MODULE_NAME: metrics-dashboard/grafana
+    MODULE_VERSION: ${CI_PIPELINE_ID}
   services:
     - docker:dind
   before_script:
@@ -190,6 +193,7 @@ prometheus-build:
   stage: build
   variables:
     MODULE_NAME: metrics-dashboard/prometheus
+    MODULE_VERSION: ${CI_PIPELINE_ID}
   services:
     - docker:dind
   before_script:
@@ -210,18 +214,21 @@ velocloud-notificator-build:
   stage: build
   variables:
     MODULE_NAME: velocloud-notificator
+    MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
 velocloud-bridge-build:
   stage: build
   variables:
     MODULE_NAME: velocloud-bridge
+    MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
 velocloud-orchestrator-build:
   stage: build
   variables:
     MODULE_NAME: velocloud-orchestrator
+    MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
 # =========
@@ -267,6 +274,7 @@ deploy-branches:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
+    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
@@ -314,6 +322,7 @@ deploy-master:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
+    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
