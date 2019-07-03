@@ -23,9 +23,10 @@ class EdgesForAlert:
         edges_by_enterprise = self._velocloud_repository.get_all_enterprises_edges_with_host(msg_dict)
         for edge_id in edges_by_enterprise:
             futures.append(loop.run_in_executor(executor, self._velocloud_repository.get_alert_information, edge_id))
-        asyncio.ensure_future(self._gather_and_send_edge_list(futures, msg_dict['request_id']), loop=loop)
+        asyncio.ensure_future(
+            self._gather_and_send_edge_list(futures, msg_dict['request_id'], msg_dict["response_topic"]), loop=loop)
 
-    async def _gather_and_send_edge_list(self, futures_edges, request_id):
+    async def _gather_and_send_edge_list(self, futures_edges, request_id, response_topic):
         data = await asyncio.wait(futures_edges)
         edges_data = []
         for edge_data in data[0]:
@@ -36,5 +37,5 @@ class EdgesForAlert:
         edge_list_response = {"request_id": request_id,
                               "edges": edges_data,
                               "status": status}
-        await self._event_bus.publish_message("alert.response.all.edges", json.dumps(edge_list_response, default=str))
+        await self._event_bus.publish_message(response_topic, json.dumps(edge_list_response, default=str))
         self._logger.info("Edges for alert sent")
