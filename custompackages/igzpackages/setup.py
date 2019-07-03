@@ -12,7 +12,7 @@ REQUIRES = [
     "h11 == 0.8.1",
     "asynctest == 0.12.2",
     "nats-python==0.4.0",
-    "protobuf==3.6.1",
+    "protobuf==3.7.0",
     "pytest==4.2.1",
     "pytest-asyncio==0.10.0",
     "pytest-cov==2.6.1",
