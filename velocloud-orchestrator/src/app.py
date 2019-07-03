@@ -13,6 +13,7 @@ from application.repositories.status_repository import StatusRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
 from redis import Redis
+from shortuuid import uuid
 
 
 class Container:
@@ -22,6 +23,7 @@ class Container:
         self._logger.info("Velocloud orchestrator starting...")
         self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
+        self._service_id = uuid()
 
         self._publisher = NatsStreamingClient(config, f'velocloud-orchestrator-publisher-', logger=self._logger)
         self.subscriber_edges = NatsStreamingClient(config, f'velocloud-orchestrator-edges-list-', logger=self._logger)
@@ -38,7 +40,7 @@ class Container:
         self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._edge_repository = EdgeRepository(self._redis_client, self._logger)
 
-        self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG)
+        self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG, self._service_id)
         self._status_repository = StatusRepository(self._redis_client, self._logger)
         self._edge_monitoring = EdgeMonitoring(self._event_bus, self._logger, self._prometheus_repository,
                                                self._scheduler, self._edge_repository, self._status_repository, config)
@@ -50,23 +52,26 @@ class Container:
     async def _start(self):
         self._edge_monitoring.start_prometheus_metrics_server()
         await self._event_bus.connect()
-        await self._event_bus.subscribe_consumer(consumer_name="sub-edges-list", topic="edge.list.response",
+        await self._event_bus.subscribe_consumer(consumer_name="sub-edges-list",
+                                                 topic=f"edge.list.response.{self._service_id}",
                                                  action_wrapper=self._process_edge_list,
                                                  durable_name="velocloud_orchestrator",
                                                  queue="velocloud_orchestrator")
 
-        await self._event_bus.subscribe_consumer(consumer_name="sub-edge", topic="edge.status.response",
+        await self._event_bus.subscribe_consumer(consumer_name="sub-edge",
+                                                 topic=f"edge.status.response.{self._service_id}",
                                                  action_wrapper=self._process_edge,
                                                  durable_name="velocloud_orchestrator",
                                                  queue="velocloud_orchestrator")
 
-        await self._event_bus.subscribe_consumer(consumer_name="sub-alert", topic="alert.response.all.edges",
+        await self._event_bus.subscribe_consumer(consumer_name="sub-alert",
+                                                 topic=f"alert.response.all.edges.{self._service_id}",
                                                  action_wrapper=self._receive_alert_edges,
                                                  durable_name="velocloud_orchestrator",
                                                  queue="velocloud_orchestrator")
 
         # await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
-        await self._alert.start_alert_job(exec_on_start=False)
+        await self._alert.start_alert_job(exec_on_start=True)
         self._scheduler.start()
 
     async def start_server(self):

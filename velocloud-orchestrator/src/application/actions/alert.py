@@ -4,6 +4,7 @@ from datetime import datetime
 
 import pandas as pd
 from apscheduler.util import undefined
+from pytz import timezone
 from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
@@ -18,10 +19,12 @@ ODD_ROW = '<tr>' \
           ' </tr>'
 
 EVEN_ROW = ' <tr>' \
-           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; color: #596872; font-weight: normal; '\
+           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; ' \
+           'color: #596872; font-weight: normal; ' \
            'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
            'white-space: nowrap">%%ENTERPRISE%%</td>' \
-           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; color: #596872; font-weight: normal; '\
+           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; ' \
+           'color: #596872; font-weight: normal; ' \
            'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
            'white-space: nowrap">%%COUNT%%</td>' \
            '</tr>'
@@ -29,17 +32,18 @@ EVEN_ROW = ' <tr>' \
 
 class Alert:
 
-    def __init__(self, event_bus: EventBus, scheduler, logger, config):
+    def __init__(self, event_bus: EventBus, scheduler, logger, config, service_id):
         self._event_bus = event_bus
         self._scheduler = scheduler
         self._logger = logger
         self._config = config
+        self._service_id = service_id
 
     async def start_alert_job(self, exec_on_start=False):
         self._logger.info("Scheduled task: alert report process configured to run first day of each month")
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now()
+            next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._alert_process, 'cron', day=1, misfire_grace_time=86400, replace_existing=True,
                                 next_run_time=next_run_time,
@@ -50,7 +54,7 @@ class Alert:
 
     async def _request_all_edges(self):
         self._logger.info("Requesting all edges with details for alert report")
-        request = dict(request_id=uuid(), filter=[])
+        request = dict(request_id=uuid(), response_topic=f"alert.response.all.edges.{self._service_id}", filter=[])
         await self._event_bus.publish_message("alert.request.all.edges", json.dumps(request))
 
     async def receive_all_edges(self, msg):
@@ -97,6 +101,7 @@ class Alert:
 
         return {
             'request_id': uuid(),
+            'response_topic': f"notification.email.response.{self._service_id}",
             'email_data': {
                 'subject': f'Lost contact edges ({datetime.now().strftime("%Y-%m-%d")})',
                 'recipient': self._config["lost_contact"]["recipient"],
