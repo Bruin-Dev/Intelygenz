@@ -78,7 +78,7 @@ class TestEventBus:
         e.add_consumer(subscriber, "Some-name")
         await e.subscribe_consumer("Some-name", "Some-topic", action_mock)
         assert subscribe_action_mock.called
-        assert subscribe_action_mock.call_args[0] == ('Some-topic', action_mock, 'first', None, None, None, None)
+        assert subscribe_action_mock.call_args[0] == ('Some-topic', action_mock, 'first', None, None, None, None, 30)
 
     @pytest.mark.asyncio
     async def publish_message_OK_test(self):

@@ -36,10 +36,10 @@ class EventBus:
             await self._producer.connect_to_nats()
 
     async def subscribe_consumer(self, consumer_name: str, topic: str, action_wrapper: ActionWrapper, start_at='first',
-                                 time=None, sequence=None, queue=None, durable_name=None):
+                                 time=None, sequence=None, queue=None, durable_name=None, ack_wait=30):
         await self._consumers.get(consumer_name).subscribe_action(topic, action_wrapper, start_at, time, sequence,
                                                                   queue,
-                                                                  durable_name)
+                                                                  durable_name, ack_wait)
 
     async def publish_message(self, topic, msg):
         await self._producer.publish(topic, msg)

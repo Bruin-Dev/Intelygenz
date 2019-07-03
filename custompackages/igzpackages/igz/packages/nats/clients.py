@@ -95,11 +95,12 @@ class NatsStreamingClient:
             self._logger.exception(f"Error executing {self._topic_action[msg.sub.subject]} function")
 
     async def subscribe_action(self, topic, action: ActionWrapper,
-                               start_at='first', time=None, sequence=None, queue=None, durable_name=None):
+                               start_at='first', time=None, sequence=None, queue=None, durable_name=None, ack_wait=30):
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
         async def subscribe_action(topic, action: ActionWrapper,
-                                   start_at='first', time=None, sequence=None, queue=None, durable_name=None):
+                                   start_at='first', time=None, sequence=None, queue=None, durable_name=None,
+                                   ack_wait=30):
             self._topic_action[topic] = action
             if self._nc.is_connected:
                 sub = await self._sc.subscribe(topic,
@@ -115,7 +116,7 @@ class NatsStreamingClient:
                                                pending_limits=self._config["subscriber"][
                                                    "pending_limits"],
 
-                                               ack_wait=99999)
+                                               ack_wait=ack_wait)
 
             else:
                 await self.close_nats_connections()
@@ -132,17 +133,17 @@ class NatsStreamingClient:
                                                    "max_inflight"],
                                                pending_limits=self._config["subscriber"][
                                                    "pending_limits"],
-                                               ack_wait=99999)
+                                               ack_wait=ack_wait)
             self._subs.append(sub)
 
-        await subscribe_action(topic, action, start_at, time, sequence, queue, durable_name)
+        await subscribe_action(topic, action, start_at, time, sequence, queue, durable_name, ack_wait)
 
     async def subscribe(self, topic, callback,
-                        start_at='first', time=None, sequence=None, queue=None, durable_name=None):
+                        start_at='first', time=None, sequence=None, queue=None, durable_name=None, ack_wait=30):
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
         async def subscribe(topic, callback,
-                            start_at='first', time=None, sequence=None, queue=None, durable_name=None):
+                            start_at='first', time=None, sequence=None, queue=None, durable_name=None, ack_wait=30):
             self._topic_action[topic] = callback
             if self._nc.is_connected:
                 sub = await self._sc.subscribe(topic,
@@ -155,7 +156,7 @@ class NatsStreamingClient:
                                                manual_acks=True,
                                                max_inflight=self._config["subscriber"]["max_inflight"],
                                                pending_limits=self._config["subscriber"]["pending_limits"],
-                                               ack_wait=99999)
+                                               ack_wait=ack_wait)
             else:
                 await self.close_nats_connections()
                 await self.connect_to_nats()
@@ -169,9 +170,9 @@ class NatsStreamingClient:
                                                manual_acks=True,
                                                max_inflight=self._config["subscriber"]["max_inflight"],
                                                pending_limits=self._config["subscriber"]["pending_limits"],
-                                               ack_wait=99999)
+                                               ack_wait=ack_wait)
             self._subs.append(sub)
-        await subscribe(topic, callback, start_at, time, sequence, queue, durable_name)
+        await subscribe(topic, callback, start_at, time, sequence, queue, durable_name, ack_wait)
 
     async def close_nats_connections(self):
         # Stop recieving messages

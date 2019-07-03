@@ -62,7 +62,8 @@ class Container:
                                                  topic=f"edge.list.response.{self._service_id}",
                                                  action_wrapper=self._process_edge_list,
                                                  durable_name="velocloud_orchestrator",
-                                                 queue="velocloud_orchestrator")
+                                                 queue="velocloud_orchestrator",
+                                                 ack_wait=300)
 
         await self._event_bus.subscribe_consumer(consumer_name="sub-edge",
                                                  topic=f"edge.status.response.{self._service_id}",
@@ -74,7 +75,8 @@ class Container:
                                                  topic=f"alert.response.all.edges.{self._service_id}",
                                                  action_wrapper=self._receive_alert_edges,
                                                  durable_name="velocloud_orchestrator",
-                                                 queue="velocloud_orchestrator")
+                                                 queue="velocloud_orchestrator",
+                                                 ack_wait=300)
 
         # await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
         await self._alert.start_alert_job(exec_on_start=False)

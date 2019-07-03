@@ -49,7 +49,8 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="list", topic="edge.list.request",
                                                  action_wrapper=self._report_edge_list,
                                                  durable_name="velocloud_bridge",
-                                                 queue="velocloud_bridge")
+                                                 queue="velocloud_bridge",
+                                                 ack_wait=300)
         await self._event_bus.subscribe_consumer(consumer_name="status", topic="edge.status.request",
                                                  action_wrapper=self._report_edge_status,
                                                  durable_name="velocloud_bridge",
@@ -57,7 +58,8 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="alert", topic="alert.request.all.edges",
                                                  action_wrapper=self._alert_edge_list,
                                                  durable_name="velocloud_bridge",
-                                                 queue="velocloud_bridge")
+                                                 queue="velocloud_bridge",
+                                                 ack_wait=300)
 
     async def start_server(self):
         await self._server.run_server()
