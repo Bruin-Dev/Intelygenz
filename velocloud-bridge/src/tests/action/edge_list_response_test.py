@@ -9,7 +9,7 @@ from velocloud_client.client.velocloud_client import VelocloudClient
 import json
 
 
-class TestEdgeStatusResponse:
+class TestEdgeListResponse:
 
     def instance_test(self):
         mock_logger = Mock()
@@ -32,14 +32,15 @@ class TestEdgeStatusResponse:
         velocloud_repo = Mock()
         actions = ReportEdgeList(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        msg = json.dumps({"request_id": "123", "filter": []})
+        msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123", "filter": []}
+        msg = json.dumps(msg_dict)
         edges = ["task1", "task2"]
         velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         await actions.report_edge_list(msg)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprises_edges_with_host.called
-        assert velocloud_repo.get_all_enterprises_edges_with_host.call_args[0][0] == {"request_id": "123", "filter": []}
-        assert test_bus.publish_message.call_args[0][0] == "edge.list.response"
+        assert velocloud_repo.get_all_enterprises_edges_with_host.call_args[0][0] == msg_dict
+        assert test_bus.publish_message.call_args[0][0] == msg_dict["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
                                                                        "edges": edges,
                                                                        "status": 200})
@@ -52,13 +53,14 @@ class TestEdgeStatusResponse:
         velocloud_repo = Mock()
         actions = ReportEdgeList(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        msg = json.dumps({"request_id": "123", "filter": []})
+        msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123", "filter": []}
+        msg = json.dumps(msg_dict)
         velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=None)
         await actions.report_edge_list(msg)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprises_edges_with_host.called
-        assert velocloud_repo.get_all_enterprises_edges_with_host.call_args[0][0] == {"request_id": "123", "filter": []}
-        assert test_bus.publish_message.call_args[0][0] == "edge.list.response"
+        assert velocloud_repo.get_all_enterprises_edges_with_host.call_args[0][0] == msg_dict
+        assert test_bus.publish_message.call_args[0][0] == msg_dict["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
                                                                        "edges": None,
                                                                        "status": 500})

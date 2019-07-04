@@ -1,13 +1,14 @@
-import pytest
-from unittest.mock import Mock
-from asynctest import CoroutineMock
-from application.actions.edge_status_response import ReportEdgeStatus
-from igz.packages.eventbus.eventbus import EventBus
-from collections import namedtuple
-from config import testconfig as config
-from application.repositories.velocloud_repository import VelocloudRepository
-from velocloud_client.client.velocloud_client import VelocloudClient
 import json
+from unittest.mock import Mock
+
+import pytest
+from asynctest import CoroutineMock
+from velocloud_client.client.velocloud_client import VelocloudClient
+
+from application.actions.edge_status_response import ReportEdgeStatus
+from application.repositories.velocloud_repository import VelocloudRepository
+from config import testconfig as config
+from igz.packages.eventbus.eventbus import EventBus
 
 
 class TestEdgeStatusResponse:
@@ -40,7 +41,8 @@ class TestEdgeStatusResponse:
         dict_object = Mock()
         dict_object.to_dict = Mock(return_value={"link_data": "STABLE"})
         velocloud_repo.get_link_information = Mock(return_value=[dict_object])
-        edge_msg = {"request_id": "123", "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
+        edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
+                    "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(json.dumps(edge_msg).encode('utf-8'))
         assert velocloud_repo.get_enterprise_information.called
         assert velocloud_repo.get_enterprise_information.call_args[0][0] == edge_msg["edge"]
@@ -49,7 +51,7 @@ class TestEdgeStatusResponse:
         assert velocloud_repo.get_link_information.called
         assert velocloud_repo.get_link_information.call_args[0][0] == edge_msg["edge"]
         assert test_bus.publish_message.called
-        assert test_bus.publish_message.call_args[0][0] == 'edge.status.response'
+        assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
                                                                        "edge_info": {"enterprise_name": enterprise_info,
                                                                                      "edges": {"edge_status": []},
@@ -71,10 +73,11 @@ class TestEdgeStatusResponse:
         velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
         velocloud_repo.get_edge_information().to_dict = Mock(return_value=edge_status)
         velocloud_repo.get_link_information = Mock(return_value=None)
-        edge_msg = {"request_id": "123", "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
+        edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
+                    "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(json.dumps(edge_msg).encode('utf-8'))
         assert test_bus.publish_message.called
-        assert test_bus.publish_message.call_args[0][0] == 'edge.status.response'
+        assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
                                                                        "edge_info": {"enterprise_name": enterprise_info,
                                                                                      "edges": edge_status,
