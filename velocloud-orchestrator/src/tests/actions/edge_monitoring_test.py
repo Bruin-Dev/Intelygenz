@@ -1,11 +1,13 @@
-import pytest
-from asynctest import CoroutineMock
-from application.actions.edge_monitoring import EdgeMonitoring
-from config import testconfig
-from unittest.mock import Mock
-from datetime import datetime
-import asyncio
 import json
+from datetime import datetime
+from unittest.mock import Mock
+
+import asyncio
+import pytest
+from application.actions.edge_monitoring import EdgeMonitoring
+from asynctest import CoroutineMock
+
+from config import testconfig
 
 
 class TestEdgeMonitoring:
@@ -18,9 +20,10 @@ class TestEdgeMonitoring:
         edge_repository = Mock()
         status_repository = Mock()
         config = Mock()
+        service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, config)
+                                         status_repository, service_id, config)
         assert isinstance(edge_monitoring, EdgeMonitoring)
         assert edge_monitoring._event_bus is event_bus
         assert edge_monitoring._logger is logger
@@ -28,6 +31,7 @@ class TestEdgeMonitoring:
         assert edge_monitoring._scheduler is scheduler
         assert edge_monitoring._edge_repository is edge_repository
         assert edge_monitoring._status_repository is status_repository
+        assert edge_monitoring._service_id == service_id
         assert edge_monitoring._config is config
 
     def start_metrics_server_test(self):
@@ -39,9 +43,10 @@ class TestEdgeMonitoring:
         edge_repository = Mock()
         status_repository = Mock()
         config = Mock()
+        service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, config)
+                                         status_repository, service_id, config)
         edge_monitoring.start_prometheus_metrics_server()
         assert prometheus_repository.start_prometheus_metrics_server.called
 
@@ -56,9 +61,10 @@ class TestEdgeMonitoring:
         edge_repository = Mock()
         status_repository = Mock()
         config = Mock()
+        service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, config)
+                                         status_repository, service_id, config)
         await edge_monitoring._request_edges(1234)
         assert event_bus.publish_message.called
         assert "edge.list.request" in event_bus.publish_message.call_args[0][0]
@@ -74,11 +80,12 @@ class TestEdgeMonitoring:
         status_repository = Mock()
         status_repository.set_edges_to_process = Mock()
         config = Mock()
+        service_id = 123
 
         edge_list = b'{"request_id":1234, "edges":["1", "2", "3"]}'
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, config)
+                                         status_repository, service_id, config)
 
         await edge_monitoring.receive_edge_list(edge_list)
         assert status_repository.set_edges_to_process.called
@@ -97,11 +104,12 @@ class TestEdgeMonitoring:
         status_repository.get_edges_processed = Mock(return_value=2)
         status_repository.set_status = Mock()
         config = Mock()
+        service_id = 123
 
         edge = json.dumps({'edge_info': 'Some edge data'})
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, config)
+                                         status_repository, service_id, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
 
         await edge_monitoring.receive_edge(edge)
@@ -123,9 +131,10 @@ class TestEdgeMonitoring:
         edge_repository = Mock()
         status_repository = Mock()
         config = testconfig
+        service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, config)
+                                         status_repository, service_id, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
         await edge_monitoring.start_edge_monitor_job(exec_on_start=True)
         assert scheduler.add_job.called
@@ -146,11 +155,12 @@ class TestEdgeMonitoring:
         status_repository.get_status = Mock(return_value="PROCESSING_VELOCLOUD_EDGES")
         status_repository.set_status = Mock()
         status_repository.get_last_cycle_timestamp = Mock(return_value=datetime.timestamp(datetime.now()))
+        service_id = 123
         await asyncio.sleep(0.1)
         config = testconfig
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, config)
+                                         status_repository, service_id, config)
         await edge_monitoring._edge_monitoring_process()
         assert status_repository.get_edges_processed.called
         assert status_repository.get_edges_to_process.called
@@ -171,11 +181,12 @@ class TestEdgeMonitoring:
         status_repository.get_status = Mock(return_value="IDLE")
         status_repository.set_status = Mock()
         status_repository.get_last_cycle_timestamp = Mock(return_value=datetime.timestamp(datetime.now()))
+        service_id = 123
         await asyncio.sleep(0.1)
         config = testconfig
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, config)
+                                         status_repository, service_id, config)
         edge_monitoring._request_edges = CoroutineMock()
         await edge_monitoring._edge_monitoring_process()
         assert status_repository.set_edges_processed.called
