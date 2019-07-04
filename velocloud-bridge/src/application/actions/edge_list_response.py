@@ -20,5 +20,5 @@ class ReportEdgeList:
             status = 500
 
         edge_list_response = {"request_id": msg_dict['request_id'], "edges": edges_by_enterprise, "status": status}
-        await self._event_bus.publish_message("edge.list.response", json.dumps(edge_list_response))
+        await self._event_bus.publish_message(msg_dict['response_topic'], json.dumps(edge_list_response))
         self._logger.info("Edge list sent")

@@ -33,5 +33,5 @@ class ReportEdgeStatus:
             status = 500
 
         edge_status = {"enterprise_name": enterprise_name, "edges": edge_status, "links": link_status}
-        msg_dict = {"request_id": request_id, "edge_info": edge_status, "status": status}
-        await self._event_bus.publish_message("edge.status.response", json.dumps(msg_dict, default=str))
+        edge_response = {"request_id": request_id, "edge_info": edge_status, "status": status}
+        await self._event_bus.publish_message(msg_dict['response_topic'], json.dumps(edge_response, default=str))
