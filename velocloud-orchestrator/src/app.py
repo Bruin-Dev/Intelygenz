@@ -43,7 +43,8 @@ class Container:
         self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG, self._service_id)
         self._status_repository = StatusRepository(self._redis_client, self._logger)
         self._edge_monitoring = EdgeMonitoring(self._event_bus, self._logger, self._prometheus_repository,
-                                               self._scheduler, self._edge_repository, self._status_repository, config)
+                                               self._scheduler, self._edge_repository, self._status_repository,
+                                               self._service_id, config)
         self._process_edge_list = ActionWrapper(self._edge_monitoring, "receive_edge_list", is_async=True,
                                                 logger=self._logger)
         self._process_edge = ActionWrapper(self._edge_monitoring, "receive_edge", is_async=True, logger=self._logger)

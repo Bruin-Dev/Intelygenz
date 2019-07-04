@@ -1,20 +1,24 @@
-from igz.packages.eventbus.eventbus import EventBus
-from apscheduler.util import undefined
-from datetime import datetime
-from shortuuid import uuid
 import json
+from datetime import datetime
+
+from apscheduler.util import undefined
+from pytz import timezone
+from shortuuid import uuid
+
+from igz.packages.eventbus.eventbus import EventBus
 
 
 class EdgeMonitoring:
 
     def __init__(self, event_bus: EventBus, logger, prometheus_repository, scheduler, edge_repository,
-                 status_repository, config):
+                 status_repository, service_id, config):
         self._event_bus = event_bus
         self._logger = logger
         self._prometheus_repository = prometheus_repository
         self._scheduler = scheduler
         self._edge_repository = edge_repository
         self._status_repository = status_repository
+        self._service_id = service_id
         self._config = config
 
     async def _edge_monitoring_process(self):
@@ -47,19 +51,21 @@ class EdgeMonitoring:
         self._logger.info(f'Scheduled task: edge monitoring process configured to run each {seconds} seconds')
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now()
+            next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._edge_monitoring_process, 'interval', seconds=seconds, next_run_time=next_run_time,
                                 replace_existing=True, id='_edge_monitoring_process')
 
     async def _request_edges(self, request_id):
-        msg = dict(request_id=request_id, filter=[])
+        msg = dict(request_id=request_id, response_topic=f'edge.list.response.{self._service_id}', filter=[])
         await self._event_bus.publish_message("edge.list.request", json.dumps(msg))
 
     async def receive_edge_list(self, msg):
         self._logger.info(f'Edge list received from event bus')
         decoded_msg = json.loads(msg)
-        edge_status_requests = [dict(request_id=decoded_msg["request_id"], edge=edge) for edge in decoded_msg["edges"]]
+        edge_status_requests = [
+            dict(request_id=decoded_msg["request_id"], response_topic=f'edge.status.response.{self._service_id}',
+                 edge=edge) for edge in decoded_msg["edges"]]
         self._prometheus_repository.set_cycle_total_edges(len(edge_status_requests))
         self._status_repository.set_edges_to_process(len(edge_status_requests))
         self._logger.info(f'Splitting and sending edges to the event bus')
