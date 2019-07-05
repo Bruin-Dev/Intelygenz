@@ -22,7 +22,8 @@ class TestActions:
 
     @pytest.mark.asyncio
     async def send_to_slack_test(self):
-        test_msg = json.dumps({"request_id": "123", "message": "Failed Edges to be slacked"})
+        test_msg = b'{"request_id":"123", "response_topic": "some.topic","message": "Failed Edges to be slacked"}'
+        dict_msg = json.loads(test_msg.decode('utf-8'))
         mock_slack_repository = Mock()
         test_bus = Mock()
         test_bus.publish_message = CoroutineMock()
@@ -33,7 +34,7 @@ class TestActions:
         await test_actions.send_to_slack(test_msg)
         assert test_actions._slack_repository.send_to_slack.called
         assert test_bus.publish_message.called
-        assert test_bus.publish_message.call_args[0][0] == "notification.slack.response"
+        assert test_bus.publish_message.call_args[0][0] == dict_msg['response_topic']
         assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123", "status": 200})
 
     @pytest.mark.asyncio
