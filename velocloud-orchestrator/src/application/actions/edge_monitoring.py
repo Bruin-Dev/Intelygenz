@@ -78,7 +78,6 @@ class EdgeMonitoring:
 
     async def _request_edges(self, request_id):
         msg = dict(request_id=request_id, response_topic=f'edge.list.response.{self._service_id}', filter=[])
-        msg = dict(request_id=request_id, filter=[])
         self._status_repository.set_last_cycle_request_id(request_id)
         await self._event_bus.publish_message("edge.list.request", json.dumps(msg))
 
