@@ -15,7 +15,7 @@ class Actions:
         msg_dict = json.loads(msg)
         status = self._slack_repository.send_to_slack(msg_dict["message"])
         notification_response = {"request_id": msg_dict["request_id"], "status": status}
-        await self._event_bus.publish_message("notification.slack.response", json.dumps(notification_response))
+        await self._event_bus.publish_message(msg_dict["response_topic"], json.dumps(notification_response))
 
     async def send_to_email_job(self, msg):
         msg_dict = json.loads(msg)

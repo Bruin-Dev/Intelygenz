@@ -54,7 +54,7 @@ class EdgeMonitoring:
         self._logger.info(f'Scheduled task: edge monitoring process configured to run each {seconds} seconds')
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now()
+            next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._edge_monitoring_process, 'interval', seconds=seconds, next_run_time=next_run_time,
                                 replace_existing=True, id='_edge_monitoring_process')
@@ -72,9 +72,11 @@ class EdgeMonitoring:
                         self._logger.error('Edge seems KO, failure!')
                         self._statistic_repository.send_to_stats_client(redis_data["redis_edge"])
 
-            msg = self._statistic_repository._statistic_client.get_statistics()
-            slack_request_dict = {"request_id": last_cycle_request_id, "message": msg}
-            await self._event_bus.publish_message("notification.slack.request", json.dumps(slack_request_dict))
+            slack_msg = self._statistic_repository._statistic_client.get_statistics()
+            msg = dict(request_id=last_cycle_request_id,
+                       response_topic=f'notification.slack.request.{self._service_id}',
+                       message=slack_msg)
+            await self._event_bus.publish_message("notification.slack.request", json.dumps(msg))
 
     async def _request_edges(self, request_id):
         msg = dict(request_id=request_id, response_topic=f'edge.list.response.{self._service_id}', filter=[])

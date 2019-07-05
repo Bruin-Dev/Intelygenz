@@ -48,7 +48,7 @@ class Container:
         self._status_repository = StatusRepository(self._redis_client, self._logger)
         self._edge_monitoring = EdgeMonitoring(self._event_bus, self._logger, self._prometheus_repository,
                                                self._scheduler, self._edge_repository, self._status_repository,
-                                               self._stats_repo,self._service_id, config)
+                                               self._stats_repo, self._service_id, config)
 
         self._process_edge_list = ActionWrapper(self._edge_monitoring, "receive_edge_list", is_async=True,
                                                 logger=self._logger)

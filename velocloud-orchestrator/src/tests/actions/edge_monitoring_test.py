@@ -205,6 +205,7 @@ class TestEdgeMonitoring:
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
+        edge_monitoring._send_stats_to_notifier = CoroutineMock()
         edge_monitoring._request_edges = CoroutineMock()
         await edge_monitoring._edge_monitoring_process()
         assert edge_monitoring._send_stats_to_notifier.called
@@ -235,10 +236,11 @@ class TestEdgeMonitoring:
                                                                                                     'DISCONNECTED'}}}))
         status_repository = Mock()
         status_repository.get_last_cycle_request_id = Mock(return_value=123)
+        service_id = 123
         config = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, config)
+                                         status_repository, statistic_repository, service_id, config)
         await edge_monitoring._send_stats_to_notifier()
         assert status_repository.get_last_cycle_request_id.called
         assert edge_repository.get_keys.called
@@ -269,10 +271,11 @@ class TestEdgeMonitoring:
                                                                                                     'CONNECTED'}}}))
         status_repository = Mock()
         status_repository.get_last_cycle_request_id = Mock(return_value=None)
+        service_id = 123
         config = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, config)
+                                         status_repository, statistic_repository, service_id, config)
         await edge_monitoring._send_stats_to_notifier()
         assert status_repository.get_last_cycle_request_id.called
         assert edge_repository.get_keys.called is False
