@@ -63,7 +63,7 @@ class Container:
                                                  action_wrapper=self._process_edge_list,
                                                  durable_name="velocloud_orchestrator",
                                                  queue="velocloud_orchestrator",
-                                                 ack_wait=300)
+                                                 ack_wait=480)
 
         await self._event_bus.subscribe_consumer(consumer_name="sub-edge",
                                                  topic=f"edge.status.response.{self._service_id}",
