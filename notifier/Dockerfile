@@ -3,7 +3,7 @@ FROM python:3.6-alpine
 
 RUN apk --no-cache add curl
 
-COPY velocloud-notificator/ /service/app
+COPY notifier/ /service/app
 # Add custom packages to the image in order to import them
 COPY custompackages/ /service/custompackages
 

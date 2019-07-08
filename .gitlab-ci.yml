@@ -88,9 +88,9 @@ velocloud-linter:
     MODULE: custompackages/velocloud/velocloud_client
   <<: *lint_module
 
-velocloud-notificator-linter:
+notifier-linter:
   variables:
-    MODULE: velocloud-notificator
+    MODULE: notifier
   <<: *lint_module
 
 velocloud-orchestrator-linter:
@@ -136,9 +136,9 @@ velocloud-test:
   script:
     - pytest --cov
 
-velocloud-notificator-test:
+notifier-test:
   variables:
-    MODULE: velocloud-notificator
+    MODULE: notifier
   <<: *unittest_module
 
 velocloud-orchestrator-test:
@@ -210,10 +210,10 @@ prometheus-build:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
 
 
-velocloud-notificator-build:
+notifier-build:
   stage: build
   variables:
-    MODULE_NAME: velocloud-notificator
+    MODULE_NAME: notifier
     MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 

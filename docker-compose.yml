@@ -49,13 +49,13 @@ services:
       - 5001:5000
       - 9120:9090
 
-  velocloud-notificator:
+  notifier:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
       context: .
-      dockerfile: velocloud-notificator/Dockerfile
+      dockerfile: notifier/Dockerfile
     env_file:
-      - velocloud-notificator/src/config/env
+      - notifier/src/config/env
     depends_on:
       - "nats-streaming"
     ports:

@@ -121,7 +121,7 @@ To debug with PyCharm, you must put the breakpoint **in the copy in site-package
 - [Base microservice](base-microservice/README.md)
 - [Velocloud orchestrator](velocloud-orchestrator/README.md)
 - [Velocloud bridge](velocloud-bridge/README.md)
-- [Velocloud notificator](velocloud-notificator/README.md)
+- [Notifier](notifier/README.md)
 
 ## Acceptance Tests
 - [Acceptance tests](acceptance-tests/README.md)
@@ -129,7 +129,7 @@ To debug with PyCharm, you must put the breakpoint **in the copy in site-package
 # Processes' overview
 
 ## Monitoring edge and link status
-Services involved: velocloud-orchestrator, velocloud-bridge, velocloud-notificator.
+Services involved: velocloud-orchestrator, velocloud-bridge, notifier.
 
 ### Process goal
 - Given an interval, process all edges and links statuses in that interval.
@@ -143,8 +143,8 @@ Services involved: velocloud-orchestrator, velocloud-bridge, velocloud-notificat
     - For each event, it fetches the edge and link data related to the given IDs
     - Publishes edge and link data to NATS
     - Depending on the state of the edge, the Orchestrator will put the result event in a different Message Queue (one Queue for faulty edges, other for ok edges)
-    - Notificator consumes the faulty edge queue and creates statistics. 
-    - Notificator has an interval set. For each interval will send the statistics to a Slack channel and reset the statistics for the next cycle.
+    - Notifier consumes the faulty edge queue and creates statistics. 
+    - Notifier has an interval set. For each interval will send the statistics to a Slack channel and reset the statistics for the next cycle.
 
 # Good Practices
 - Documentation **must** be updated as frecuently as possible. It's recomended to annotate every action taken in the development phase, and afterwards, add to the documentation the actions or information considered relevant.

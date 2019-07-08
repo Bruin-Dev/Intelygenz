@@ -7,14 +7,14 @@
   * [statistic client](#statistic-client)
   * [slack client](#slack-client)
 
-# Velocloud-notificator summary
+# Notifier summary
 Every 10 minutes we send a message to a slack channel with the amount of times an edge status other than 
 `CONNECTED` occurs.
 # Application folder
 ##### (the specifics of each class and functions within the classes)
 ## actions
 Actions has two important functions
--  `store_stats` is the callback function everytime velocloud-notifcator subscribes to `edge.status.ko`. 
+-  `store_stats` is the callback function everytime notifier subscribes to `edge.status.ko`. 
     It also takes a message as a parameter and passes it to and calls the statistic_repository's `send_to_stats_client` 
     function.
 -  `send_to_slack` takes a message as a parameter, and then makes a call to its slack_repository's `send_to_slack` 

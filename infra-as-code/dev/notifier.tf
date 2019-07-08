@@ -1,12 +1,12 @@
-data "aws_ecr_repository" "automation-velocloud-notificator" {
-  name = "automation-velocloud-notificator"
+data "aws_ecr_repository" "automation-notifier" {
+  name = "automation-notifier"
 }
 
-data "template_file" "automation-velocloud-notificator" {
-  template = "${file("${path.module}/task-definitions/velocloud_notificator.json")}"
+data "template_file" "automation-notifier" {
+  template = "${file("${path.module}/task-definitions/notifier.json")}"
 
   vars = {
-    image = "${data.aws_ecr_repository.automation-velocloud-notificator.repository_url}:${var.BUILD_NUMBER}"
+    image = "${data.aws_ecr_repository.automation-notifier.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.ENVIRONMENT}"
     log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
 
@@ -19,9 +19,9 @@ data "template_file" "automation-velocloud-notificator" {
   }
 }
 
-resource "aws_ecs_task_definition" "automation-velocloud-notificator" {
-  family = "${var.ENVIRONMENT}-velocloud-notificator"
-  container_definitions = "${data.template_file.automation-velocloud-notificator.rendered}"
+resource "aws_ecs_task_definition" "automation-notifier" {
+  family = "${var.ENVIRONMENT}-notifier"
+  container_definitions = "${data.template_file.automation-notifier.rendered}"
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
@@ -31,9 +31,9 @@ resource "aws_ecs_task_definition" "automation-velocloud-notificator" {
   task_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
 }
 
-resource "aws_security_group" "automation-velocloud-notificator_service" {
+resource "aws_security_group" "automation-notifier_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.ENVIRONMENT}-velocloud-notificator"
+  name = "${var.ENVIRONMENT}-notifier"
   description = "Allow egress from container"
 
   lifecycle {
@@ -66,21 +66,21 @@ resource "aws_security_group" "automation-velocloud-notificator_service" {
   }
 
   tags = {
-    Name = "${var.ENVIRONMENT}-velocloud-notificator"
+    Name = "${var.ENVIRONMENT}-notifier"
     Environment = "${var.ENVIRONMENT}"
   }
 }
 
-resource "aws_ecs_service" "automation-velocloud-notificator" {
-  name = "${var.ENVIRONMENT}-velocloud-notificator"
-  task_definition = "${aws_ecs_task_definition.automation-velocloud-notificator.family}:${aws_ecs_task_definition.automation-velocloud-notificator.revision}"
+resource "aws_ecs_service" "automation-notifier" {
+  name = "${var.ENVIRONMENT}-notifier"
+  task_definition = "${aws_ecs_task_definition.automation-notifier.family}:${aws_ecs_task_definition.automation-notifier.revision}"
   desired_count = 1
   launch_type = "FARGATE"
   cluster = "${aws_ecs_cluster.automation.id}"
 
   network_configuration {
     security_groups = [
-      "${aws_security_group.automation-velocloud-notificator_service.id}"]
+      "${aws_security_group.automation-notifier_service.id}"]
     subnets = [
       "${aws_subnet.automation-private_subnet-1a.id}",
       "${aws_subnet.automation-private_subnet-1b.id}"]

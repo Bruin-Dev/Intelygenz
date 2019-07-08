@@ -1,6 +1,6 @@
 [
   {
-    "name": "velocloud-notificator",
+    "name": "notifier",
     "image": "${image}",
     "portMappings": [
       {

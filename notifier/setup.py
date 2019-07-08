@@ -3,9 +3,9 @@
 
 from setuptools import setup, find_packages
 setup(
-    name='velocloud-notificator',
+    name='notifier',
     version='1.0.0',
-    description='MetTel\'s automation notificator for Velocloud',
+    description='MetTel\'s automation notifier',
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,
     setup_requires=[

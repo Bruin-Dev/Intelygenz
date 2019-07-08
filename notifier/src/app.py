@@ -18,12 +18,12 @@ class Container:
     def __init__(self):
 
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info("Velocloud notificator starting...")
-        self._subscriber_email = NatsStreamingClient(config, f'velocloud-notificator-mail-subscriber-',
+        self._logger.info("Notifier starting...")
+        self._subscriber_email = NatsStreamingClient(config, f'notifier-mail-subscriber-',
                                                      logger=self._logger)
-        self._subscriber_slack = NatsStreamingClient(config, f'velocloud-notificator-slack-subscriber-',
+        self._subscriber_slack = NatsStreamingClient(config, f'notifier-slack-subscriber-',
                                                      logger=self._logger)
-        self._publisher = NatsStreamingClient(config, f'velocloud-notificator-publisher-', logger=self._logger)
+        self._publisher = NatsStreamingClient(config, f'notifier-publisher-', logger=self._logger)
 
         self._email_client = EmailClient(config, self._logger)
         self._email_repo = EmailRepository(config, self._email_client, self._logger)
@@ -52,14 +52,14 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="notification_email_request",
                                                  topic="notification.email.request",
                                                  action_wrapper=self._send_email_wrapper,
-                                                 durable_name="velocloud_notificator",
-                                                 queue="velocloud_notificator")
+                                                 durable_name="notifier",
+                                                 queue="notifier")
 
         await self._event_bus.subscribe_consumer(consumer_name="notification_slack_request",
                                                  topic="notification.slack.request",
                                                  action_wrapper=self._send_slack_wrapper,
-                                                 durable_name="velocloud_notificator",
-                                                 queue="velocloud_notificator")
+                                                 durable_name="notifier",
+                                                 queue="notifier")
 
     async def start_server(self):
         await self._server.run_server()

@@ -33,13 +33,13 @@ EMAIL_CONFIG = {
 
 
 LOG_CONFIG = {
-    'name': 'velocloud-notificator',
+    'name': 'notifier',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
 QUART_CONFIG = {
-    'title': 'velocloud-notificator',
+    'title': 'notifier',
     'port': 5000
 }

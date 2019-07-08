@@ -39,4 +39,4 @@ velocloud-orchestrator: `http://localhost:5000/_health`
 
 velocloud-bridge: `http://localhost:5001/_health`
 
-velocloud-notificator:  `http://localhost:5002/_health`
+notifier:  `http://localhost:5002/_health`

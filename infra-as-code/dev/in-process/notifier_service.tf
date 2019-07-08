@@ -50,9 +50,9 @@ resource "aws_security_group" "mettel-automation-backend_service" {
   }
 }
 
-resource "aws_ecs_service" "mettel-automation-velocloud-notificator" {
+resource "aws_ecs_service" "mettel-automation-notifier" {
   name = "${var.ENVIRONMENT}-backend"
-  task_definition = "${aws_ecs_task_definition.mettel-automation-velocloud-notificator.family}:${aws_ecs_task_definition.mettel-automation-velocloud-notificator.revision}"
+  task_definition = "${aws_ecs_task_definition.mettel-automation-notifier.family}:${aws_ecs_task_definition.mettel-automation-notifier.revision}"
   desired_count = 1
   launch_type = "FARGATE"
   cluster = "${aws_ecs_cluster.mettel-automation.id}"
