@@ -76,7 +76,7 @@ class Container:
                                                  action_wrapper=self._receive_alert_edges,
                                                  durable_name="velocloud_orchestrator",
                                                  queue="velocloud_orchestrator",
-                                                 ack_wait=300)
+                                                 ack_wait=480)
 
         # await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
         await self._alert.start_alert_job(exec_on_start=False)
