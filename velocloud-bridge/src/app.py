@@ -59,7 +59,7 @@ class Container:
                                                  action_wrapper=self._alert_edge_list,
                                                  durable_name="velocloud_bridge",
                                                  queue="velocloud_bridge",
-                                                 ack_wait=300)
+                                                 ack_wait=480)
 
     async def start_server(self):
         await self._server.run_server()
