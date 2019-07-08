@@ -1,5 +1,5 @@
 from unittest.mock import Mock
-from application.actions.slack_notifier import SendToSlack
+from application.actions.send_to_slack import SendToSlack
 from asynctest import CoroutineMock
 from config import testconfig as config
 import pytest

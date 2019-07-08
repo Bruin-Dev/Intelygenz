@@ -1,5 +1,5 @@
 from unittest.mock import Mock
-from application.actions.email_notifier import SendToEmail
+from application.actions.send_to_email import SendToEmail
 from asynctest import CoroutineMock
 from config import testconfig as config
 import pytest

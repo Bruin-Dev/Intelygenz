@@ -11,5 +11,4 @@ class SlackRepository:
 
     def send_to_slack(self, msg):
         slack_msg = {'text': str(msg)}
-        status = self._slack_client.send_to_slack(slack_msg)
-        return status
+        return self._slack_client.send_to_slack(slack_msg)
