@@ -30,11 +30,11 @@ class EdgeMonitoring:
             self._logger.error(f'There\'s still edges to be processed: {edges_processed} / {edges_to_process}')
 
             cycle_seconds = self._config.ORCHESTRATOR_CONFIG['monitoring_seconds']
-            last_cycle_timestamp = self._status_repository.get_last_cycle_timestamp()
+            current_cycle_timestamp = self._status_repository.get_current_cycle_timestamp()
 
-            if datetime.timestamp(datetime.now()) - last_cycle_timestamp > cycle_seconds:
+            if datetime.timestamp(datetime.now()) - current_cycle_timestamp > cycle_seconds:
                 self._status_repository.set_status("IDLE")
-                self._logger.info('Time since last cycle exceeds threshold, triggering process again')
+                self._logger.info('Time since current cycle exceeds threshold, triggering process again')
             else:
                 self._logger.error('Edge monitoring process won\'t be triggered again')
         if "IDLE" in self._status_repository.get_status():
@@ -44,7 +44,7 @@ class EdgeMonitoring:
             await self._send_stats_to_notifier()
             self._statistic_repository._statistic_client.clear_dictionaries()
             self._prometheus_repository.reset_counter()
-            self._status_repository.set_last_cycle_timestamp(datetime.timestamp(datetime.now()))
+            self._status_repository.set_current_cycle_timestamp(datetime.timestamp(datetime.now()))
             await self._request_edges(uuid())
             self._logger.info("Sending edge status tasks. Orchestrator status = PROCESSING_VELOCLOUD_EDGES...")
             self._status_repository.set_status("PROCESSING_VELOCLOUD_EDGES")
@@ -60,7 +60,7 @@ class EdgeMonitoring:
                                 replace_existing=True, id='_edge_monitoring_process')
 
     async def _send_stats_to_notifier(self):
-        current_cycle_request_id = self._status_repository.get_last_cycle_request_id()
+        current_cycle_request_id = self._status_repository.get_current_cycle_request_id()
         redis_keys = [redis_edge for redis_edge in self._edge_repository.get_keys() if 'host' in redis_edge]
         for redis_edge in redis_keys:
             redis_data = json.loads(self._edge_repository.get_edge(redis_edge))
@@ -82,7 +82,7 @@ class EdgeMonitoring:
 
     async def _request_edges(self, request_id):
         msg = dict(request_id=request_id, response_topic=f'edge.list.response.{self._service_id}', filter=[])
-        self._status_repository.set_last_cycle_request_id(request_id)
+        self._status_repository.set_current_cycle_request_id(request_id)
         await self._event_bus.publish_message("edge.list.request", json.dumps(msg))
 
     async def receive_edge_list(self, msg):

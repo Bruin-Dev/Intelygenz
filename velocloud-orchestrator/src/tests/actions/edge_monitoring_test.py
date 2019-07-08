@@ -63,7 +63,7 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         edge_repository = Mock()
         status_repository = Mock()
-        status_repository.set_last_cycle_request_id = Mock()
+        status_repository.set_current_cycle_request_id = Mock()
         statistic_repository = Mock()
         config = Mock()
         service_id = 123
@@ -71,8 +71,8 @@ class TestEdgeMonitoring:
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
         await edge_monitoring._request_edges(1234)
-        assert status_repository.set_last_cycle_request_id.called
-        assert status_repository.set_last_cycle_request_id.call_args[0][0] == 1234
+        assert status_repository.set_current_cycle_request_id.called
+        assert status_repository.set_current_cycle_request_id.call_args[0][0] == 1234
         assert event_bus.publish_message.called
         assert "edge.list.request" in event_bus.publish_message.call_args[0][0]
 
@@ -168,7 +168,7 @@ class TestEdgeMonitoring:
         status_repository.get_edges_to_process = Mock()
         status_repository.get_status = Mock(return_value="PROCESSING_VELOCLOUD_EDGES")
         status_repository.set_status = Mock()
-        status_repository.get_last_cycle_timestamp = Mock(return_value=datetime.timestamp(datetime.now()))
+        status_repository.get_current_cycle_timestamp = Mock(return_value=datetime.timestamp(datetime.now()))
         statistic_repository = Mock()
         service_id = 123
         await asyncio.sleep(0.1)
@@ -180,7 +180,7 @@ class TestEdgeMonitoring:
         assert status_repository.get_edges_processed.called
         assert status_repository.get_edges_to_process.called
         assert status_repository.get_status.called
-        assert status_repository.get_last_cycle_timestamp.called
+        assert status_repository.get_current_cycle_timestamp.called
         assert status_repository.set_status.called
 
     @pytest.mark.asyncio
@@ -193,10 +193,10 @@ class TestEdgeMonitoring:
         edge_repository = Mock()
         status_repository = Mock()
         status_repository.set_edges_processed = Mock()
-        status_repository.set_last_cycle_timestamp = Mock()
+        status_repository.set_current_cycle_timestamp = Mock()
         status_repository.get_status = Mock(return_value="IDLE")
         status_repository.set_status = Mock()
-        status_repository.get_last_cycle_timestamp = Mock(return_value=datetime.timestamp(datetime.now()))
+        status_repository.get_current_cycle_timestamp = Mock(return_value=datetime.timestamp(datetime.now()))
         statistic_repository = Mock()
         statistic_repository._statistic_client.clear_dictionaries = Mock()
         service_id = 123
@@ -212,7 +212,7 @@ class TestEdgeMonitoring:
         assert prometheus_repository.reset_counter.called
         assert statistic_repository._statistic_client.clear_dictionaries.called
         assert status_repository.set_edges_processed.called
-        assert status_repository.set_last_cycle_timestamp.called
+        assert status_repository.set_current_cycle_timestamp.called
         assert status_repository.get_status.called
         assert status_repository.set_status.called
         assert edge_monitoring._request_edges.called
@@ -235,14 +235,14 @@ class TestEdgeMonitoring:
                                                                                                    {'edgeState':
                                                                                                     'DISCONNECTED'}}}))
         status_repository = Mock()
-        status_repository.get_last_cycle_request_id = Mock(return_value=123)
+        status_repository.get_current_cycle_request_id = Mock(return_value=123)
         service_id = 123
         config = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
         await edge_monitoring._send_stats_to_notifier()
-        assert status_repository.get_last_cycle_request_id.called
+        assert status_repository.get_current_cycle_request_id.called
         assert edge_repository.get_keys.called
         assert logger.info.called is False
         assert logger.error.called
@@ -270,7 +270,7 @@ class TestEdgeMonitoring:
                                                                                                    {'edgeState':
                                                                                                     'CONNECTED'}}}))
         status_repository = Mock()
-        status_repository.get_last_cycle_request_id = Mock(return_value=123)
+        status_repository.get_current_cycle_request_id = Mock(return_value=123)
         service_id = 123
         config = Mock()
 
@@ -278,7 +278,7 @@ class TestEdgeMonitoring:
                                          status_repository, statistic_repository, service_id, config)
 
         await edge_monitoring._send_stats_to_notifier()
-        assert status_repository.get_last_cycle_request_id.called
+        assert status_repository.get_current_cycle_request_id.called
         assert edge_repository.get_keys.called
         assert logger.info.called
         assert logger.error.called
@@ -287,9 +287,9 @@ class TestEdgeMonitoring:
         assert event_bus.publish_message.called is False
 
         statistic_repository._statistic_client.get_statistics = Mock(return_value="Failed Edge Report")
-        status_repository.get_last_cycle_request_id = Mock(return_value=124)
+        status_repository.get_current_cycle_request_id = Mock(return_value=124)
         await edge_monitoring._send_stats_to_notifier()
-        assert status_repository.get_last_cycle_request_id.called
+        assert status_repository.get_current_cycle_request_id.called
         assert edge_repository.get_keys.called
         assert statistic_repository.send_to_stats_client.called is False
         assert statistic_repository._statistic_client.get_statistics.called

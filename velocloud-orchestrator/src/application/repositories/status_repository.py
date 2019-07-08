@@ -41,24 +41,24 @@ class StatusRepository:
         self._logger.info(f'Got edges_processed = {edges_processed} from cache')
         return int(edges_processed)
 
-    def set_last_cycle_timestamp(self, last_cycle_timestamp):
-        self._logger.info(f'Storing last_cycle_timestamp = {last_cycle_timestamp} in cache')
-        self._redis_client.set("last_cycle_timestamp", last_cycle_timestamp)
+    def set_current_cycle_timestamp(self, current_cycle_timestamp):
+        self._logger.info(f'Storing current_cycle_timestamp = {current_cycle_timestamp} in cache')
+        self._redis_client.set("current_cycle_timestamp", current_cycle_timestamp)
 
-    def get_last_cycle_timestamp(self):
-        if not self._redis_client.exists("last_cycle_timestamp"):
-            self.set_last_cycle_timestamp(datetime.timestamp(datetime(1970, 1, 1)))
-        last_cycle_timestamp = self._redis_client.get("last_cycle_timestamp")
-        self._logger.info(f'Got last_cycle_timestamp = {last_cycle_timestamp} from cache')
-        return float(last_cycle_timestamp)
+    def get_current_cycle_timestamp(self):
+        if not self._redis_client.exists("current_cycle_timestamp"):
+            self.set_current_cycle_timestamp(datetime.timestamp(datetime(1970, 1, 1)))
+        current_cycle_timestamp = self._redis_client.get("current_cycle_timestamp")
+        self._logger.info(f'Got current_cycle_timestamp = {current_cycle_timestamp} from cache')
+        return float(current_cycle_timestamp)
 
-    def set_last_cycle_request_id(self, request_id):
-        self._logger.info(f'Storing last_cycle_request_id = {request_id} in cache')
-        self._redis_client.set("last_cycle_request_id", request_id)
+    def set_current_cycle_request_id(self, request_id):
+        self._logger.info(f'Storing current_cycle_request_id = {request_id} in cache')
+        self._redis_client.set("current_cycle_request_id", request_id)
 
-    def get_last_cycle_request_id(self):
-        if not self._redis_client.exists("last_cycle_request_id"):
+    def get_current_cycle_request_id(self):
+        if not self._redis_client.exists("current_cycle_request_id"):
             return None
-        last_cycle_request_id = self._redis_client.get("last_cycle_request_id")
-        self._logger.info(f'Got last_cycle_request_id = {last_cycle_request_id} from cache')
-        return last_cycle_request_id
+        current_cycle_request_id = self._redis_client.get("current_cycle_request_id")
+        self._logger.info(f'Got current_cycle_request_id = {current_cycle_request_id} from cache')
+        return current_cycle_request_id
