@@ -13,7 +13,7 @@ class TestStatisticRepository:
         assert test_repo._statistic_client == mock_client
         assert test_repo._logger is mock_logger
 
-    def send_to_stats_client_test(self):
+    def store_stats_test(self):
         mock_client = Mock()
         mock_logger = Mock()
         test_repo = StatisticRepository(config, mock_client, mock_logger)
@@ -22,15 +22,15 @@ class TestStatisticRepository:
                                    {'state': 'STABLE'}}]}
         test_repo._statistic_client.store_edge = Mock()
         test_repo._statistic_client.store_link = Mock()
-        test_repo.send_to_stats_client(test_dict_msg)
-        assert test_repo._activation_key == 1234
-        assert test_repo._edge_state == 'CONNECTED'
-        assert test_repo._link_id == 4321
-        assert test_repo._link_state == 'STABLE'
-        assert test_repo._statistic_client.store_link.called
+        test_repo.store_stats(test_dict_msg)
         assert test_repo._statistic_client.store_edge.called
+        assert test_repo._statistic_client.store_link.called
+        assert test_repo._statistic_client.store_edge.call_args[0][0] == 1234
+        assert test_repo._statistic_client.store_edge.call_args[0][1] == 'CONNECTED'
+        assert test_repo._statistic_client.store_link.call_args[0][0] == 4321
+        assert test_repo._statistic_client.store_link.call_args[0][1] == 'STABLE'
 
-    def send_to_stats_client_no_links_test(self):
+    def store_stats_no_links_test(self):
         mock_client = Mock()
         mock_logger = Mock()
         test_repo = StatisticRepository(config, mock_client, mock_logger)
@@ -38,10 +38,8 @@ class TestStatisticRepository:
                          'links': []}
         test_repo._statistic_client.store_edge = Mock()
         test_repo._statistic_client.store_link = Mock()
-        test_repo.send_to_stats_client(test_dict_msg)
-        assert test_repo._activation_key == 1234
-        assert test_repo._edge_state == 'CONNECTED'
-        assert test_repo._link_id is None
-        assert test_repo._link_state is None
-        assert test_repo._statistic_client.store_link.called is False
+        test_repo.store_stats(test_dict_msg)
         assert test_repo._statistic_client.store_edge.called
+        assert test_repo._statistic_client.store_edge.call_args[0][0] == 1234
+        assert test_repo._statistic_client.store_edge.call_args[0][1] == 'CONNECTED'
+        assert test_repo._statistic_client.store_link.called is False

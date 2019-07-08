@@ -69,7 +69,7 @@ class EdgeMonitoring:
                     self._logger.info('Edge seems OK')
                 else:
                     self._logger.error('Edge seems KO, failure!')
-                    self._statistic_repository.send_to_stats_client(redis_data["redis_edge"])
+                    self._statistic_repository.store_stats(redis_data["redis_edge"])
 
         slack_msg = self._statistic_repository._statistic_client.get_statistics()
         if slack_msg is not None:
