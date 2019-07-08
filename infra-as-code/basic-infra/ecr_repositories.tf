@@ -11,7 +11,7 @@ resource "aws_ecr_repository" "automation-velocloud-bridge" {
 }
 
 resource "aws_ecr_repository" "automation-notifier" {
-  name = "automation-velocloud-notificator"
+  name = "automation-notifier"
 }
 
 resource "aws_ecr_repository" "automation-metrics-prometheus" {
