@@ -12,6 +12,7 @@ class EmailClient:
     def __init__(self, config, logger):
         self._config = config
         self._logger = logger
+        self._email_server = None
         self.email_login()
 
     def email_login(self):
