@@ -60,23 +60,25 @@ class EdgeMonitoring:
                                 replace_existing=True, id='_edge_monitoring_process')
 
     async def _send_stats_to_notifier(self):
-        last_cycle_request_id = self._status_repository.get_last_cycle_request_id()
-        if last_cycle_request_id is not None:
-            redis_keys = [redis_edge for redis_edge in self._edge_repository.get_keys() if 'host' in redis_edge]
-            for redis_edge in redis_keys:
-                redis_data = json.loads(self._edge_repository.get_edge(redis_edge))
-                if redis_data["request_id"] == last_cycle_request_id:
-                    if redis_data["redis_edge"]["edges"]["edgeState"] == 'CONNECTED':
-                        self._logger.info('Edge seems OK')
-                    else:
-                        self._logger.error('Edge seems KO, failure!')
-                        self._statistic_repository.send_to_stats_client(redis_data["redis_edge"])
+        current_cycle_request_id = self._status_repository.get_last_cycle_request_id()
+        redis_keys = [redis_edge for redis_edge in self._edge_repository.get_keys() if 'host' in redis_edge]
+        for redis_edge in redis_keys:
+            redis_data = json.loads(self._edge_repository.get_edge(redis_edge))
+            if redis_data["request_id"] == current_cycle_request_id:
+                if redis_data["redis_edge"]["edges"]["edgeState"] == 'CONNECTED':
+                    self._logger.info('Edge seems OK')
+                else:
+                    self._logger.error('Edge seems KO, failure!')
+                    self._statistic_repository.send_to_stats_client(redis_data["redis_edge"])
 
-            slack_msg = self._statistic_repository._statistic_client.get_statistics()
-            msg = dict(request_id=last_cycle_request_id,
+        slack_msg = self._statistic_repository._statistic_client.get_statistics()
+        if slack_msg is not None:
+            msg = dict(request_id=current_cycle_request_id,
                        response_topic=f'notification.slack.request.{self._service_id}',
                        message=slack_msg)
             await self._event_bus.publish_message("notification.slack.request", json.dumps(msg))
+        else:
+            self._logger.error("No statistics present")
 
     async def _request_edges(self, request_id):
         msg = dict(request_id=request_id, response_topic=f'edge.list.response.{self._service_id}', filter=[])
