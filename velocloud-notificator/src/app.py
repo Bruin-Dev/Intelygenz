@@ -5,7 +5,8 @@ from application.clients.email_client import EmailClient
 from application.clients.slack_client import SlackClient
 from application.repositories.email_repository import EmailRepository
 from application.repositories.slack_repository import SlackRepository
-from application.actions.actions import Actions
+from application.actions.email_notifier import SendToEmail
+from application.actions.slack_notifier import SendToSlack
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.Logger.logger_client import LoggerClient
@@ -36,10 +37,13 @@ class Container:
         self._event_bus.add_consumer(consumer=self._subscriber_slack, consumer_name="notification_slack_request")
         self._event_bus.set_producer(producer=self._publisher)
 
-        self._actions = Actions(config, self._event_bus, self._slack_repo, self._logger, self._email_repo)
+        self._slack_notification = SendToSlack(config, self._event_bus, self._slack_repo, self._logger)
+        self._email_notification = SendToEmail(config, self._event_bus, self._logger, self._email_repo)
 
-        self._send_email_wrapper = ActionWrapper(self._actions, "send_to_email_job", is_async=True, logger=self._logger)
-        self._send_slack_wrapper = ActionWrapper(self._actions, "send_to_slack", is_async=True, logger=self._logger)
+        self._send_slack_wrapper = ActionWrapper(self._slack_notification, "send_to_slack", is_async=True,
+                                                 logger=self._logger)
+        self._send_email_wrapper = ActionWrapper(self._email_notification, "send_to_email", is_async=True,
+                                                 logger=self._logger)
         self._server = QuartServer(config)
 
     async def start(self):
