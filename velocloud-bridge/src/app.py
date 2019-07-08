@@ -50,7 +50,7 @@ class Container:
                                                  action_wrapper=self._report_edge_list,
                                                  durable_name="velocloud_bridge",
                                                  queue="velocloud_bridge",
-                                                 ack_wait=300)
+                                                 ack_wait=480)
         await self._event_bus.subscribe_consumer(consumer_name="status", topic="edge.status.request",
                                                  action_wrapper=self._report_edge_status,
                                                  durable_name="velocloud_bridge",
