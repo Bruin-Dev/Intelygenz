@@ -286,7 +286,7 @@ deploy-branches:
     - terraform apply -auto-approve infra-as-code/dev
   environment:
     name: $CI_COMMIT_REF_NAME
-    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net:3000/
+    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
     on_stop: destroy-branches
   only:
     - branches
