@@ -6,7 +6,7 @@ import pytest
 import json
 
 
-class TestActions:
+class TestSlackNotifier:
 
     def instantiation_test(self):
         mock_slack_repository = Mock()
