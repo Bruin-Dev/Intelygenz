@@ -98,6 +98,11 @@ velocloud-orchestrator-linter:
     MODULE: velocloud-orchestrator
   <<: *lint_module
 
+edge-monitoring-report-linter:
+  variables:
+    MODULE: edge-monitoring-report
+  <<: *lint_module
+
 velocloud-bridge:
   variables:
     MODULE: velocloud-bridge
@@ -144,6 +149,11 @@ notifier-test:
 velocloud-orchestrator-test:
   variables:
     MODULE: velocloud-orchestrator
+  <<: *unittest_module
+
+edge-monitoring-report-test:
+  variables:
+    MODULE: edge-monitoring-report
   <<: *unittest_module
 
 velocloud-bridge-test:
@@ -209,6 +219,12 @@ prometheus-build:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
 
+edge-monitoring-report-build:
+  stage: build
+  variables:
+    MODULE_NAME: edge-monitoring-report
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  <<: *build_app_image
 
 notifier-build:
   stage: build
