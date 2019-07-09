@@ -22,9 +22,6 @@ LOG_CONFIG = {
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
-GRAFANA_CONFIG = {
-    'port': 9090
-}
 
 ALERTS_CONFIG = {
     'lost_contact': {
