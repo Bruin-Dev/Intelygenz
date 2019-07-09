@@ -103,6 +103,11 @@ edge-monitoring-report-linter:
     MODULE: edge-monitoring-report
   <<: *lint_module
 
+lost-contact-report-linter:
+  variables:
+    MODULE: lost-contact-report
+  <<: *lint_module
+
 velocloud-bridge:
   variables:
     MODULE: velocloud-bridge
@@ -149,6 +154,11 @@ notifier-test:
 velocloud-orchestrator-test:
   variables:
     MODULE: velocloud-orchestrator
+  <<: *unittest_module
+
+lost-contact-report-test:
+  variables:
+    MODULE: lost-contact-report
   <<: *unittest_module
 
 edge-monitoring-report-test:
