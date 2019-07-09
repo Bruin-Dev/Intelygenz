@@ -79,7 +79,7 @@ class Container:
                                                  ack_wait=480)
 
         # await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
-        await self._alert.start_alert_job(exec_on_start=True)
+        await self._alert.start_alert_job(exec_on_start=False)
         self._scheduler.start()
 
     async def start_server(self):
