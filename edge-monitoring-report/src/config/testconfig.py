@@ -23,7 +23,7 @@ LOG_CONFIG = {
 }
 
 ALERTS_CONFIG = {
-    'lost_contact': {
+    'edge_monitoring': {
         'recipient': "some.recipient@email.com",
     }
 }
