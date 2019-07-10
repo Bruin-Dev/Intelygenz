@@ -1,12 +1,11 @@
 import base64
 import json
+from collections import OrderedDict
 from datetime import datetime
 
-import pandas as pd
 from apscheduler.util import undefined
 from pytz import timezone
 from shortuuid import uuid
-from collections import OrderedDict
 
 from igz.packages.eventbus.eventbus import EventBus
 
@@ -67,39 +66,47 @@ class EdgeMonitoring:
         with open('src/templates/edge_monitoring.html') as template:
             email_html = "".join(template.readlines())
             email_html = email_html.replace('%%EDGE_COUNT%%', '1')
+            email_html = email_html.replace('%%SERIAL_NUMBER%%',
+                                            f'{edges_to_report["edge_info"]["edges"]["serialNumber"]}')
 
-        edge_info = OrderedDict()
-        edge_info["Automation Overview"] = ""
-        edge_info["Orchestrator instance"] = edges_to_report['edge_id']['host']
-        edge_info["Device URL"] = \
-            f'https://mettel.velocloud.net/#!/operator/customer/{edges_to_report["edge_id"]["enterprise_id"]}' \
+        edge_overview = OrderedDict()
+
+        edge_overview["Orchestrator instance"] = edges_to_report['edge_id']['host']
+        edge_overview["Device URL"] = \
+            f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/{edges_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/'
-        edge_info["Edge Status"] = edges_to_report["edge_info"]["edges"]["edgeState"]
+        edge_overview["Edge Status"] = edges_to_report["edge_info"]["edges"]["edgeState"]
         link_ge1 = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE1"][0]
         link_ge2 = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE2"][0]
-        edge_info["Line GE1 Status"] = link_ge1["link"]["state"]
-        edge_info["Line GE2 Status"] = link_ge2["link"]["state"]
-        edge_info[f'Events for Device {edges_to_report["edge_info"]["edges"]["serialNumber"]}'] = ""
-        edge_info["Company Events URL"] = f'https://mettel.velocloud.net/#!/operator/customer/' \
+        edge_overview["Line GE1 Status"] = link_ge1["link"]["state"]
+        edge_overview["Line GE2 Status"] = link_ge2["link"]["state"]
+
+        edge_events = OrderedDict()
+
+        edge_events["Company Events URL"] = f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_to_report["edge_id"]["enterprise_id"]}/monitor/events/'
-        edge_info["Last Edge Online"] = ""
-        edge_info["Last Edge Offline"] = ""
-        edge_info["Last GE1 Line Online"] = ""
-        edge_info["Last GE1 Line Offline"] = ""
-        edge_info["Last GE2 Line Online"] = ""
-        edge_info["Last GE2 Line Offline"] = ""
+        edge_events["Last Edge Online"] = ""
+        edge_events["Last Edge Offline"] = ""
+        edge_events["Last GE1 Line Online"] = ""
+        edge_events["Last GE1 Line Offline"] = ""
+        edge_events["Last GE2 Line Online"] = ""
+        edge_events["Last GE2 Line Offline"] = ""
 
         rows = []
-        for idx, enterprise in enumerate(edge_info.keys()):
+        for idx, key in enumerate(edge_overview.keys()):
             row = EVEN_ROW if idx % 2 == 0 else ODD_ROW
-            row = row.replace('%%KEY%%', enterprise)
-            row = row.replace('%%VALUE%%', str(edge_info[enterprise]))
+            row = row.replace('%%KEY%%', key)
+            row = row.replace('%%VALUE%%', str(edge_overview[key]))
             rows.append(row)
-        email_html = email_html.replace('%%ROWS%%', "".join(rows))
+        email_html = email_html.replace('%%OVERVIEW_ROWS%%', "".join(rows))
 
-        edges_dataframe = pd.DataFrame([edge_info])
-        edges_dataframe.index.name = 'idx'
-        edges_dataframe.to_csv('edge_monitoring.csv')
+        rows = []
+        for idx, key in enumerate(edge_events.keys()):
+            row = EVEN_ROW if idx % 2 == 0 else ODD_ROW
+            row = row.replace('%%KEY%%', key)
+            row = row.replace('%%VALUE%%', str(edge_events[key]))
+            rows.append(row)
+        email_html = email_html.replace('%%EVENT_ROWS%%', "".join(rows))
 
         return {
             'request_id': uuid(),
@@ -119,11 +126,6 @@ class EdgeMonitoring:
                         'data': base64.b64encode(open('src/templates/images/header.jpg', 'rb').read()).decode('utf-8')
                     },
                 ],
-                'attachments': [
-                    {
-                        'name': 'edge_monitoring.csv',
-                        'data': base64.b64encode(open('edge_monitoring.csv', 'rb').read()).decode('utf-8')
-                    }
-                ]
+                'attachments': []
             }
         }
