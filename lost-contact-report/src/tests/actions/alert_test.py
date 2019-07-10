@@ -25,20 +25,20 @@ class TestAlert:
         assert alert._config is config
         assert alert._service_id == service_id
 
-    @pytest.mark.asyncio
-    async def schedule_alert_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        scheduler.add_job = Mock()
-        config = Mock()
-        service_id = 123
-
-        alert = Alert(event_bus, scheduler, logger, config, service_id)
-        await alert.start_alert_job(exec_on_start=False)
-        assert 'cron' in scheduler.add_job.call_args[0][1]
-        assert scheduler.add_job.call_args[1] == {'day': 1, 'misfire_grace_time': 86400, 'replace_existing': True,
-                                                  'next_run_time': undefined, 'id': '_alert_process'}
+    # @pytest.mark.asyncio
+    # async def schedule_alert_test(self):
+    #     event_bus = Mock()
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     scheduler.add_job = Mock()
+    #     config = Mock()
+    #     service_id = 123
+    #
+    #     alert = Alert(event_bus, scheduler, logger, config, service_id)
+    #     await alert.start_alert_job(exec_on_start=False)
+    #     assert 'cron' in scheduler.add_job.call_args[0][1]
+    #     assert scheduler.add_job.call_args[1] == {'day': 1, 'misfire_grace_time': 86400, 'replace_existing': True,
+    #                                               'next_run_time': undefined, 'id': '_alert_process'}
 
     @pytest.mark.asyncio
     async def request_all_edges_test(self):

@@ -78,6 +78,7 @@ class TestEmailClient:
         application.clients.email_client.smtplib.SMTP.starttls = Mock()
         application.clients.email_client.smtplib.SMTP.login = Mock()
         test_client = EmailClient(config, mock_logger)
+        test_client._email_server = Mock()
         test_client._email_server.sendmail = Mock()
         test_client._logger.info = Mock()
         test_client._logger.exception = Mock()
