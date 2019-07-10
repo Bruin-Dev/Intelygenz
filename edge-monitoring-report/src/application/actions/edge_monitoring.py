@@ -73,7 +73,8 @@ class EdgeMonitoring:
 
         edge_overview["Orchestrator instance"] = edges_to_report['edge_id']['host']
         edge_overview["Device URL"] = \
-            f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/{edges_to_report["edge_id"]["enterprise_id"]}' \
+            f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'{edges_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/'
         edge_overview["Edge Status"] = edges_to_report["edge_info"]["edges"]["edgeState"]
         link_ge1 = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE1"][0]
