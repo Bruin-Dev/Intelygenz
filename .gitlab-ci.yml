@@ -257,6 +257,13 @@ velocloud-orchestrator-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
+lost-contact-report-build:
+  stage: build
+  variables:
+    MODULE_NAME: lost-contact-report
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  <<: *build_app_image
+
 # =========
 # TERRAFORM
 # =========
