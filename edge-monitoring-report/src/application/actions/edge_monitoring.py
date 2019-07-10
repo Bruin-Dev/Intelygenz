@@ -75,8 +75,10 @@ class EdgeMonitoring:
             f'https://mettel.velocloud.net/#!/operator/customer/{edges_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/'
         edge_info["Edge Status"] = edges_to_report["edge_info"]["edges"]["edgeState"]
-        edge_info["Line GE1 Status"] = edges_to_report["edge_info"]["links"][0]["link"]["state"]
-        edge_info["Line GE2 Status"] = edges_to_report["edge_info"]["links"][1]["link"]["state"]
+        link_ge1 = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE1"][0]
+        link_ge2 = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE2"][0]
+        edge_info["Line GE1 Status"] = link_ge1["link"]["state"]
+        edge_info["Line GE2 Status"] = link_ge2["link"]["state"]
         edge_info[f'Events for Device {edges_to_report["edge_info"]["edges"]["serialNumber"]}'] = ""
         edge_info["Company Events URL"] = f'https://mettel.velocloud.net/#!/operator/customer/' \
             f'{edges_to_report["edge_id"]["enterprise_id"]}/monitor/events/'
