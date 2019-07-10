@@ -6,6 +6,10 @@ resource "aws_ecr_repository" "automation-velocloud-orchestrator" {
   name = "automation-velocloud-orchestrator"
 }
 
+resource "aws_ecr_repository" "automation-lost-contact-report" {
+  name = "automation-lost-contact-report"
+}
+
 resource "aws_ecr_repository" "automation-edge-monitoring-report" {
   name = "automation-edge-monitoring-report"
 }
