@@ -13,19 +13,17 @@ class EmailClient:
         self._config = config
         self._logger = logger
         self._email_server = None
-        self.email_login()
 
     def email_login(self):
-        try:
-            self._email_server = smtplib.SMTP('smtp.gmail.com:587')
-            self._email_server.ehlo()
-            self._email_server.starttls()
-            self._email_server.login(self._config.EMAIL_CONFIG['sender_email'], self._config.EMAIL_CONFIG['password'])
-        except Exception:
-            self._logger.exception('Error: Could not login')
+        self._email_server = smtplib.SMTP('smtp.gmail.com:587')
+        self._email_server.ehlo()
+        self._email_server.starttls()
+        self._email_server.login(self._config.EMAIL_CONFIG['sender_email'], self._config.EMAIL_CONFIG['password'])
 
     def send_to_email(self, msg):
         try:
+            self.email_login()
+            print('here')
             mime_msg = MIMEMultipart('related')
             mime_msg['From'] = self._config.EMAIL_CONFIG['sender_email']
             mime_msg['To'] = msg["recipient"]
@@ -58,6 +56,7 @@ class EmailClient:
                                         mime_msg.as_string())
 
             self._logger.info("Success: Email sent!")
+            self._email_server.quit()
             return 200
 
         except Exception:
