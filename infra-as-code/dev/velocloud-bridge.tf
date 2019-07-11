@@ -108,8 +108,7 @@ resource "aws_ecs_service" "automation-velocloud-bridge" {
     security_groups = [
       "${aws_security_group.automation-velocloud-bridge_service.id}"]
     subnets = [
-      "${aws_subnet.automation-private_subnet-1a.id}",
-      "${aws_subnet.automation-private_subnet-1b.id}"]
+      "${aws_subnet.automation-private_subnet-1a.id}"]
     assign_public_ip = false
   }
 

@@ -58,8 +58,7 @@ data "aws_acm_certificate" "automation" {
 resource "aws_alb" "automation-alb" {
   name = "${var.ENVIRONMENT}"
   subnets = [
-    "${aws_subnet.automation-public_subnet-1a.id}",
-    "${aws_subnet.automation-public_subnet-1b.id}"]
+    "${aws_subnet.automation-public_subnet-1a.id}"]
   security_groups = [
     "${aws_security_group.automation-inbound.id}"]
 

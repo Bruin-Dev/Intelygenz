@@ -18,8 +18,7 @@ resource "aws_elasticache_cluster" "automation-redis" {
 resource "aws_elasticache_subnet_group" "automation-redis-subnet" {
   name = "${var.ENVIRONMENT}-redis-subnet"
   subnet_ids = [
-    "${aws_subnet.automation-private_subnet-1a.id}",
-    "${aws_subnet.automation-private_subnet-1b.id}"]
+    "${aws_subnet.automation-private_subnet-1a.id}"]
 }
 
 resource "aws_security_group" "automation-redis-sg" {
@@ -39,8 +38,7 @@ resource "aws_security_group" "automation-redis-sg" {
     protocol = "tcp"
     to_port = 6379
     cidr_blocks = [
-    "${aws_subnet.automation-private_subnet-1a.cidr_block}",
-    "${aws_subnet.automation-private_subnet-1b.cidr_block}"
+    "${aws_subnet.automation-private_subnet-1a.cidr_block}"
     ]
   }
 
