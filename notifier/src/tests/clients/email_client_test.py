@@ -1,9 +1,10 @@
+import smtplib
+from unittest.mock import Mock
+
 import application
 from application.clients.email_client import EmailClient
-from email.mime.multipart import MIMEMultipart
-from unittest.mock import Mock
+
 from config import testconfig as config
-import smtplib
 
 
 class TestEmailClient:
@@ -120,6 +121,7 @@ class TestEmailClient:
         application.clients.email_client.smtplib.SMTP.starttls = Mock()
         application.clients.email_client.smtplib.SMTP.login = Mock()
         test_client = EmailClient(config, mock_logger)
+        test_client._email_server = Mock()
         test_client._email_server.sendmail = Mock(side_effect=Exception)
         test_client._logger.info = Mock()
         test_client._logger.exception = Mock()
