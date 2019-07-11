@@ -9,6 +9,7 @@ resource "aws_elasticache_cluster" "automation-redis" {
   apply_immediately = true
   subnet_group_name = "${aws_elasticache_subnet_group.automation-redis-subnet.id}"
   security_group_ids = ["${aws_security_group.automation-redis-sg.id}"]
+  availability_zone = "us-east-1a"
 
   tags = {
     Name = "${var.ENVIRONMENT}-redis"
