@@ -39,7 +39,7 @@ class Container:
                                                  queue="lost-contact-report",
                                                  ack_wait=480)
 
-        await self._alert.start_alert_job(exec_on_start=True)
+        await self._alert.start_alert_job(exec_on_start=False)
         self._scheduler.start()
 
     async def start_server(self):
