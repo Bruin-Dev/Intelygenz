@@ -3,7 +3,7 @@ data "aws_ecr_repository" "automation-lost-contact-report" {
 }
 
 data "template_file" "automation-lost-contact-report" {
-  template = "${file("${path.module}/task-definitions/lost-contact-report.json")}"
+  template = "${file("${path.module}/task-definitions/lost_contact_report.json")}"
 
   vars = {
     image = "${data.aws_ecr_repository.automation-lost-contact-report.repository_url}:${var.BUILD_NUMBER}"
