@@ -29,12 +29,6 @@ REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
 }
 
-ALERTS_CONFIG = {
-    'lost_contact': {
-        'recipient': os.environ["LOST_CONTACT_RECIPIENT"],
-    }
-}
-
 LOG_CONFIG = {
     'name': 'velocloud-orchestrator',
     'level': logging.DEBUG,
