@@ -45,7 +45,7 @@ class Alert:
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._alert_process, 'interval', seconds=60, misfire_grace_time=86400,
+        self._scheduler.add_job(self._alert_process, 'interval', seconds=300, misfire_grace_time=86400,
                                 replace_existing=True, next_run_time=next_run_time, id='_alert_process')
 
     async def _alert_process(self):
