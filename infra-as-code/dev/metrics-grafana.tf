@@ -25,36 +25,6 @@ resource "aws_ecs_task_definition" "automation-metrics-grafana" {
   task_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
 }
 
-resource "aws_alb_listener" "automation-grafana" {
-  load_balancer_arn = "${aws_alb.automation-alb.arn}"
-  port = "3000"
-  protocol = "HTTP"
-
-  default_action {
-    target_group_arn = "${aws_alb_target_group.automation-metrics-grafana.arn}"
-    type = "forward"
-  }
-}
-
-resource "aws_alb_target_group" "automation-metrics-grafana" {
-  name = "${var.ENVIRONMENT}-grafana"
-  port = 3000
-  protocol = "HTTP"
-  vpc_id = "${aws_vpc.automation-vpc.id}"
-  target_type = "ip"
-  stickiness {
-    type = "lb_cookie"
-    enabled = false
-  }
-
-  depends_on = [
-    "aws_alb.automation-alb"]
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 resource "aws_security_group" "automation-grafana_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
   name = "${var.ENVIRONMENT}-metrics-grafana"
@@ -104,11 +74,5 @@ resource "aws_ecs_service" "automation-metrics-grafana" {
     subnets = [
       "${aws_subnet.automation-private_subnet-1a.id}"]
     assign_public_ip = false
-  }
-
-  load_balancer {
-    target_group_arn = "${aws_alb_target_group.automation-metrics-grafana.arn}"
-    container_name = "grafana"
-    container_port = 3000
   }
 }

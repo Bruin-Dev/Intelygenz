@@ -24,36 +24,6 @@ resource "aws_ecs_task_definition" "automation-nats-server" {
   task_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
 }
 
-resource "aws_alb_listener" "automation-nats" {
-  load_balancer_arn = "${aws_alb.automation-alb.arn}"
-  port = "8222"
-  protocol = "HTTP"
-
-  default_action {
-    target_group_arn = "${aws_alb_target_group.automation-nats-server.arn}"
-    type = "forward"
-  }
-}
-
-resource "aws_alb_target_group" "automation-nats-server" {
-  name = "${var.ENVIRONMENT}-nats-server"
-  port = 8222
-  protocol = "HTTP"
-  vpc_id = "${aws_vpc.automation-vpc.id}"
-  target_type = "ip"
-  stickiness {
-    type = "lb_cookie"
-    enabled = false
-  }
-
-  depends_on = [
-    "aws_alb.automation-alb"]
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 resource "aws_security_group" "automation-nats_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
   name = "${var.ENVIRONMENT}-nats-server"
@@ -131,12 +101,6 @@ resource "aws_ecs_service" "automation-nats-server" {
     subnets = [
       "${aws_subnet.automation-private_subnet-1a.id}"]
     assign_public_ip = false
-  }
-
-  load_balancer {
-    target_group_arn = "${aws_alb_target_group.automation-nats-server.arn}"
-    container_name = "nats-streaming"
-    container_port = 8222
   }
 
   service_registries {
