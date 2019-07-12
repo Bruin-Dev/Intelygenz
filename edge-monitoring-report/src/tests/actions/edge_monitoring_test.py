@@ -103,7 +103,7 @@ class TestEdgeMonitoring:
                         "link": {
                             "interface": "GE1",
                             "state": "DISCONNECTED",
-                        },
+                        }
                     },
                     {
                         "link": {
@@ -112,6 +112,77 @@ class TestEdgeMonitoring:
                         }
                     }
                 ]
+            }
+        }
+
+        email = edge_monitoring._compose_email_object(edges_to_report)
+
+        assert 'Edge Monitoring' in email["email_data"]["subject"]
+        assert config["edge_monitoring"]["recipient"] in email["email_data"]["recipient"]
+        assert "<!DOCTYPE html" in email["email_data"]["html"]
+
+    def compose_email_one_links_test(self):
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig.ALERTS_CONFIG
+        service_id = 123
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, scheduler, service_id, config)
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": [
+                    {
+                        "link": {
+                            "interface": "GE1",
+                            "state": "DISCONNECTED",
+                        }
+                    }
+                ]
+            }
+        }
+
+        email = edge_monitoring._compose_email_object(edges_to_report)
+
+        assert 'Edge Monitoring' in email["email_data"]["subject"]
+        assert config["edge_monitoring"]["recipient"] in email["email_data"]["recipient"]
+        assert "<!DOCTYPE html" in email["email_data"]["html"]
+
+    def compose_email_no_links_test(self):
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig.ALERTS_CONFIG
+        service_id = 123
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, scheduler, service_id, config)
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": []
             }
         }
 

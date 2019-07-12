@@ -77,10 +77,17 @@ class EdgeMonitoring:
             f'{edges_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/'
         edge_overview["Edge Status"] = edges_to_report["edge_info"]["edges"]["edgeState"]
-        link_ge1 = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE1"][0]
-        link_ge2 = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE2"][0]
-        edge_overview["Line GE1 Status"] = link_ge1["link"]["state"]
-        edge_overview["Line GE2 Status"] = link_ge2["link"]["state"]
+
+        edge_overview["Line GE1 Status"] = "Line GE1 not available"
+        edge_overview["Line GE2 Status"] = "Line GE2 not available"
+        link_data = dict()
+
+        link_data["GE1"] = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE1"]
+        link_data["GE2"] = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE2"]
+        if len(link_data["GE1"]) > 0:
+            edge_overview["Line GE1 Status"] = link_data["GE1"][0]["link"]["state"]
+        if len(link_data["GE2"]) > 0:
+            edge_overview["Line GE2 Status"] = link_data["GE2"][0]["link"]["state"]
 
         edge_events = OrderedDict()
 
