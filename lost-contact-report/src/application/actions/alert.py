@@ -60,6 +60,7 @@ class Alert:
     async def receive_all_edges(self, msg):
         self._logger.info("Processing all edges with details for alert report")
         all_edges = json.loads(msg)["edges"]
+        print(all_edges)
         edges_to_report = []
         for edge_info in all_edges:
             raw_last_contact = edge_info["edge"]["lastContact"]
@@ -70,7 +71,10 @@ class Alert:
                     edge_for_alert = {
                         'serial_number': edge_info["edge"]["serialNumber"],
                         'enterprise': edge_info["enterprise"],
-                        'last_contact': edge_info["edge"]["lastContact"]
+                        'last_contact': edge_info["edge"]["lastContact"],
+                        'url': f'https://{edge_info["host"]}/#!/operator/customer/'
+                               f'{edge_info["edge"]["enterpriseId"]}'
+                               f'/monitor/edge/{edge_info["edge"]["id"]}/'
                     }
                     edges_to_report.append(edge_for_alert)
         email_obj = self._compose_email_object(edges_to_report)

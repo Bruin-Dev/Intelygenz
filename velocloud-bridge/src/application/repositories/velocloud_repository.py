@@ -38,6 +38,7 @@ class VelocloudRepository:
 
     def get_alert_information(self, edge):
         return {
+            "host": edge['host'],
             "edge": self._velocloud_client.get_edge_information(edge).to_dict(),
             "enterprise": self._velocloud_client.get_enterprise_information(edge)._name
         }
