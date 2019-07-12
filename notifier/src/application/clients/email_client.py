@@ -23,7 +23,6 @@ class EmailClient:
     def send_to_email(self, msg):
         try:
             self.email_login()
-            print('here')
             mime_msg = MIMEMultipart('related')
             mime_msg['From'] = self._config.EMAIL_CONFIG['sender_email']
             mime_msg['To'] = msg["recipient"]
