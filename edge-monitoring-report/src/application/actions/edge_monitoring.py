@@ -82,8 +82,12 @@ class EdgeMonitoring:
         edge_overview["Line GE2 Status"] = "Line GE2 not available"
         link_data = dict()
 
-        link_data["GE1"] = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE1"]
-        link_data["GE2"] = [link for link in edges_to_report["edge_info"]["links"]if link["link"]["interface"] == "GE2"]
+        link_data["GE1"] = [link for link in edges_to_report["edge_info"]["links"]
+                            if link["link"] is not None
+                            if link["link"]["interface"] == "GE1"]
+        link_data["GE2"] = [link for link in edges_to_report["edge_info"]["links"]
+                            if link["link"] is not None
+                            if link["link"]["interface"] == "GE2"]
         if len(link_data["GE1"]) > 0:
             edge_overview["Line GE1 Status"] = link_data["GE1"][0]["link"]["state"]
         if len(link_data["GE2"]) > 0:
