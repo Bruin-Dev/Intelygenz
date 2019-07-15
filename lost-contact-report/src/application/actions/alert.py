@@ -60,7 +60,6 @@ class Alert:
     async def receive_all_edges(self, msg):
         self._logger.info("Processing all edges with details for alert report")
         all_edges = json.loads(msg)["edges"]
-        print(all_edges)
         edges_to_report = []
         for edge_info in all_edges:
             raw_last_contact = edge_info["edge"]["lastContact"]
