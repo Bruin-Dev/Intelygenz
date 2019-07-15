@@ -71,9 +71,9 @@ class Alert:
                         'serial_number': edge_info["edge"]["serialNumber"],
                         'enterprise': edge_info["enterprise"],
                         'last_contact': edge_info["edge"]["lastContact"],
-                        'url': f'https://{edge_info["host"]}/#!/operator/customer/'
-                               f'{edge_info["edge"]["enterpriseId"]}'
-                               f'/monitor/edge/{edge_info["edge"]["id"]}/'
+                        'url': f'https://{edge_info["edge_id"]["host"]}/#!/operator/customer/'
+                               f'{edge_info["edge_id"]["enterprise_id"]}'
+                               f'/monitor/edge/{edge_info["edge_id"]["edge_id"]}/'
                     }
                     edges_to_report.append(edge_for_alert)
         email_obj = self._compose_email_object(edges_to_report)
