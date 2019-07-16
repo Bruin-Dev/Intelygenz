@@ -78,11 +78,11 @@ class EdgeMonitoring:
             f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/'
         edge_overview["Edge Status"] = edges_to_report["edge_info"]["edges"]["edgeState"]
 
-        edge_overview["Interface Line1"] = "GE1"
+        edge_overview["Interface Line1"] = None
         edge_overview["GE1 Label"] = None
         edge_overview["Line GE1 Status"] = "Line GE1 not available"
 
-        edge_overview["Interface Line2"] = "GE2"
+        edge_overview["Interface Line2"] = None
         edge_overview["GE2 Label"] = None
         edge_overview["Line GE2 Status"] = "Line GE2 not available"
 
@@ -95,9 +95,11 @@ class EdgeMonitoring:
                             if link["link"] is not None
                             if link["link"]["interface"] == "GE2"]
         if len(link_data["GE1"]) > 0:
+            edge_overview["Interface Line1"] = link_data["GE1"][0]["link"]["interface"]
             edge_overview["Line GE1 Status"] = link_data["GE1"][0]["link"]["state"]
             edge_overview["GE1 Label"] = link_data["GE1"][0]["link"]['displayName']
         if len(link_data["GE2"]) > 0:
+            edge_overview["Interface Line2"] = link_data["GE2"][0]["link"]["interface"]
             edge_overview["Line GE2 Status"] = link_data["GE2"][0]["link"]["state"]
             edge_overview["GE2 Label"] = link_data["GE2"][0]["link"]['displayName']
 
