@@ -42,7 +42,7 @@ class Container:
                                                  durable_name="edge_monitoring_report",
                                                  queue="edge_monitoring_report")
 
-        await self._edge_monitoring.start_edge_monitor_job(exec_on_start=False)
+        await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
         self._scheduler.start()
 
     async def start_server(self):
