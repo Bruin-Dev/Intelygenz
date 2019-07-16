@@ -102,12 +102,14 @@ class TestEdgeMonitoring:
                     {
                         "link": {
                             "interface": "GE1",
+                            "displayName": "Test1",
                             "state": "DISCONNECTED",
                         }
                     },
                     {
                         "link": {
                             "interface": "GE2",
+                            "displayName": "Test2",
                             "state": "DISCONNECTED",
                         }
                     }
@@ -147,6 +149,7 @@ class TestEdgeMonitoring:
                     {
                         "link": {
                             "interface": "GE1",
+                            "displayName": "Test1",
                             "state": "DISCONNECTED",
                         }
                     }
