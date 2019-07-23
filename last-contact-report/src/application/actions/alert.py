@@ -1,6 +1,7 @@
 import base64
 import json
 from datetime import datetime
+from dateutil import relativedelta
 
 import pandas as pd
 from apscheduler.util import undefined
@@ -66,11 +67,14 @@ class Alert:
             if '0000-00-00 00:00:00' not in raw_last_contact:
                 last_contact = datetime.strptime(raw_last_contact, "%Y-%m-%dT%H:%M:%S.%fZ")
                 time_elapsed = datetime.now() - last_contact
+                months_elapsed = relativedelta.relativedelta(datetime.now(), last_contact).months
                 if time_elapsed.days >= 30:
                     edge_for_alert = {
                         'serial_number': edge_info["edge"]["serialNumber"],
                         'enterprise': edge_info["enterprise"],
                         'last_contact': edge_info["edge"]["lastContact"],
+                        'months in SVC': months_elapsed,
+                        'balance of the 36 months': 36 - months_elapsed,
                         'url': f'https://{edge_info["edge_id"]["host"]}/#!/operator/customer/'
                                f'{edge_info["edge_id"]["enterprise_id"]}'
                                f'/monitor/edge/{edge_info["edge_id"]["edge_id"]}/'
