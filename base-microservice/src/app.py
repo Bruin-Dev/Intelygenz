@@ -37,7 +37,7 @@ class FromFirstAction:
 class Container:
 
     def __init__(self):
-        self._my_scheduler = None
+        self._my_scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._service_id1 = uuid()
         self._service_id2 = uuid()
         self._service_id3 = uuid()
@@ -102,7 +102,6 @@ class Container:
                                                 queue="queue",
                                                 start_at='first')
 
-        self._my_scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         await self.start_publish_job(exec_on_start=True)
         self._my_scheduler.start()
 
@@ -120,7 +119,7 @@ class Container:
 if __name__ == '__main__':
     logger.info("Base microservice starting...")
     container = Container()
-    loop = asyncio.new_event_loop()
+    loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)
     asyncio.ensure_future(container.start_server(), loop=loop)
     loop.run_forever()
