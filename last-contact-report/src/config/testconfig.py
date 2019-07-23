@@ -5,7 +5,7 @@ import sys
 NATS_CONFIG = {
     'servers': 'nats://nats-streaming:4222',
     'cluster_name': 'automation-engine-nats',
-    'client_ID': 'lost-contact-report-test',
+    'client_ID': 'last-contact-report-test',
     'subscriber': {
         'max_inflight': 6000,
         'pending_limits': 6000
@@ -24,13 +24,13 @@ LOG_CONFIG = {
 
 
 ALERTS_CONFIG = {
-    'lost_contact': {
+    'last_contact': {
         'recipient': "some.recipient@email.com",
     }
 }
 
 
 QUART_CONFIG = {
-    'title': 'lost-contact-report',
+    'title': 'last-contact-report',
     'port': 5000
 }

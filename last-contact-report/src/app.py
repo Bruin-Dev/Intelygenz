@@ -15,13 +15,13 @@ class Container:
 
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info("Lost contact report starting...")
+        self._logger.info("Last contact report starting...")
         self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
         self._service_id = uuid()
 
-        self._publisher = NatsStreamingClient(config, f'lost-contact-report-publisher-', logger=self._logger)
-        self.subscriber_alert = NatsStreamingClient(config, f'lost-contact-report-alert-', logger=self._logger)
+        self._publisher = NatsStreamingClient(config, f'last-contact-report-publisher-', logger=self._logger)
+        self.subscriber_alert = NatsStreamingClient(config, f'last-contact-report-alert-', logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.add_consumer(self.subscriber_alert, consumer_name="sub-alert")
         self._event_bus.set_producer(self._publisher)
@@ -35,8 +35,8 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="sub-alert",
                                                  topic=f"alert.response.all.edges.{self._service_id}",
                                                  action_wrapper=self._receive_alert_edges,
-                                                 durable_name="lost-contact-report",
-                                                 queue="lost-contact-report",
+                                                 durable_name="last-contact-report",
+                                                 queue="last-contact-report",
                                                  ack_wait=480)
 
         await self._alert.start_alert_job(exec_on_start=False)

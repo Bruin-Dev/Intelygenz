@@ -3,9 +3,9 @@
 
 from setuptools import setup, find_packages
 setup(
-    name='lost-contact-report',
+    name='last-contact-report',
     version='1.0.0',
-    description='MetTel\'s automation lost contact report',
+    description='MetTel\'s automation last contact report',
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,
     setup_requires=[

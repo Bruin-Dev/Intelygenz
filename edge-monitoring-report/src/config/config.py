@@ -23,7 +23,7 @@ NATS_CONFIG = {
 
 ALERTS_CONFIG = {
     'edge_monitoring': {
-        'recipient': os.environ["LOST_CONTACT_RECIPIENT"],
+        'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     }
 }
 

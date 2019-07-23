@@ -103,9 +103,9 @@ edge-monitoring-report-linter:
     MODULE: edge-monitoring-report
   <<: *lint_module
 
-lost-contact-report-linter:
+last-contact-report-linter:
   variables:
-    MODULE: lost-contact-report
+    MODULE: last-contact-report
   <<: *lint_module
 
 velocloud-bridge:
@@ -156,9 +156,9 @@ velocloud-orchestrator-test:
     MODULE: velocloud-orchestrator
   <<: *unittest_module
 
-lost-contact-report-test:
+last-contact-report-test:
   variables:
-    MODULE: lost-contact-report
+    MODULE: last-contact-report
   <<: *unittest_module
 
 edge-monitoring-report-test:
@@ -257,10 +257,10 @@ velocloud-orchestrator-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
-lost-contact-report-build:
+last-contact-report-build:
   stage: build
   variables:
-    MODULE_NAME: lost-contact-report
+    MODULE_NAME: last-contact-report
     MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
@@ -285,7 +285,7 @@ terraform-validate-dev:
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT_DEV}
+    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
@@ -311,7 +311,7 @@ deploy-branches:
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT_DEV}
+    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
@@ -359,7 +359,7 @@ deploy-master:
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LOST_CONTACT_RECIPIENT=${LOST_CONTACT_RECIPIENT_PRO}
+    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf

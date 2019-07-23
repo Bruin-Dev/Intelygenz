@@ -14,7 +14,7 @@ data "template_file" "automation-velocloud-orchestrator" {
     NATS_SERVER1 = "nats://nats-server.${var.ENVIRONMENT}.local:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
     MONITORING_SECONDS = "${var.MONITORING_SECONDS}"
-    LOST_CONTACT_RECIPIENT = "${var.LOST_CONTACT_RECIPIENT}"
+    LAST_CONTACT_RECIPIENT = "${var.LAST_CONTACT_RECIPIENT}"
     REDIS_HOSTNAME = "${aws_elasticache_cluster.automation-redis.cache_nodes.0.address}"
   }
 }

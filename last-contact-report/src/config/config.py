@@ -22,19 +22,19 @@ NATS_CONFIG = {
 }
 
 ALERTS_CONFIG = {
-    'lost_contact': {
-        'recipient': os.environ["LOST_CONTACT_RECIPIENT"],
+    'last_contact': {
+        'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     }
 }
 
 LOG_CONFIG = {
-    'name': 'lost-contact-report',
+    'name': 'last-contact-report',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
 QUART_CONFIG = {
-    'title': 'lost-contact-report',
+    'title': 'last-contact-report',
     'port': 5000
 }

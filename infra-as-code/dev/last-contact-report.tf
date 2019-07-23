@@ -1,25 +1,25 @@
-data "aws_ecr_repository" "automation-lost-contact-report" {
-  name = "automation-lost-contact-report"
+data "aws_ecr_repository" "automation-last-contact-report" {
+  name = "automation-last-contact-report"
 }
 
-data "template_file" "automation-lost-contact-report" {
-  template = "${file("${path.module}/task-definitions/lost_contact_report.json")}"
+data "template_file" "automation-last-contact-report" {
+  template = "${file("${path.module}/task-definitions/last_contact_report.json")}"
 
   vars = {
-    image = "${data.aws_ecr_repository.automation-lost-contact-report.repository_url}:${var.BUILD_NUMBER}"
+    image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${var.BUILD_NUMBER}"
     log_group = "${var.ENVIRONMENT}"
     log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
 
     PYTHONUNBUFFERED = "${var.PYTHONUNBUFFERED}"
     NATS_SERVER1 = "nats://nats-server.${var.ENVIRONMENT}.local:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
-    LOST_CONTACT_RECIPIENT = "${var.LOST_CONTACT_RECIPIENT}"
+    LAST_CONTACT_RECIPIENT = "${var.LAST_CONTACT_RECIPIENT}"
   }
 }
 
-resource "aws_ecs_task_definition" "automation-lost-contact-report" {
-  family = "${var.ENVIRONMENT}-lost-contact-report"
-  container_definitions = "${data.template_file.automation-lost-contact-report.rendered}"
+resource "aws_ecs_task_definition" "automation-last-contact-report" {
+  family = "${var.ENVIRONMENT}-last-contact-report"
+  container_definitions = "${data.template_file.automation-last-contact-report.rendered}"
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
@@ -29,9 +29,9 @@ resource "aws_ecs_task_definition" "automation-lost-contact-report" {
   task_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
 }
 
-resource "aws_security_group" "automation-lost-contact-report_service" {
+resource "aws_security_group" "automation-last-contact-report_service" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
-  name = "${var.ENVIRONMENT}-lost-contact-report"
+  name = "${var.ENVIRONMENT}-last-contact-report"
   description = "Allow egress from container"
 
   lifecycle {
@@ -73,13 +73,13 @@ resource "aws_security_group" "automation-lost-contact-report_service" {
   }
 
   tags = {
-    Name = "${var.ENVIRONMENT}-lost-contact-report"
+    Name = "${var.ENVIRONMENT}-last-contact-report"
     Environment = "${var.ENVIRONMENT}"
   }
 }
 
-resource "aws_service_discovery_service" "lost-contact-report" {
-  name = "lost-contact-report"
+resource "aws_service_discovery_service" "last-contact-report" {
+  name = "last-contact-report"
 
   dns_config {
     namespace_id = "${aws_service_discovery_private_dns_namespace.automation-zone.id}"
@@ -97,22 +97,22 @@ resource "aws_service_discovery_service" "lost-contact-report" {
   }
 }
 
-resource "aws_ecs_service" "automation-lost-contact-report" {
-  name = "${var.ENVIRONMENT}-lost-contact-report"
-  task_definition = "${aws_ecs_task_definition.automation-lost-contact-report.family}:${aws_ecs_task_definition.automation-lost-contact-report.revision}"
+resource "aws_ecs_service" "automation-last-contact-report" {
+  name = "${var.ENVIRONMENT}-last-contact-report"
+  task_definition = "${aws_ecs_task_definition.automation-last-contact-report.family}:${aws_ecs_task_definition.automation-last-contact-report.revision}"
   desired_count = 1
   launch_type = "FARGATE"
   cluster = "${aws_ecs_cluster.automation.id}"
 
   network_configuration {
     security_groups = [
-      "${aws_security_group.automation-lost-contact-report_service.id}"]
+      "${aws_security_group.automation-last-contact-report_service.id}"]
     subnets = [
       "${aws_subnet.automation-private_subnet-1a.id}"]
     assign_public_ip = false
   }
 
   service_registries {
-    registry_arn = "${aws_service_discovery_service.lost-contact-report.arn}"
+    registry_arn = "${aws_service_discovery_service.last-contact-report.arn}"
   }
 }

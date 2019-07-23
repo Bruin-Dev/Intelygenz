@@ -80,7 +80,7 @@ class Alert:
         await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))
 
     def _compose_email_object(self, edges_to_report):
-        with open('src/templates/lost_contact.html') as template:
+        with open('src/templates/last_contact.html') as template:
             email_html = "".join(template.readlines())
             email_html = email_html.replace('%%EDGE_COUNT%%', str(len(edges_to_report)))
 
@@ -100,14 +100,14 @@ class Alert:
 
         edges_dataframe = pd.DataFrame(edges_to_report)
         edges_dataframe.index.name = 'idx'
-        edges_dataframe.to_csv('lost_contact.csv')
+        edges_dataframe.to_csv('last_contact.csv')
 
         return {
             'request_id': uuid(),
             'response_topic': f"notification.email.response.{self._service_id}",
             'email_data': {
-                'subject': f'Lost contact edges ({datetime.now().strftime("%Y-%m-%d")})',
-                'recipient': self._config["lost_contact"]["recipient"],
+                'subject': f'Last contact edges ({datetime.now().strftime("%Y-%m-%d")})',
+                'recipient': self._config["last_contact"]["recipient"],
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
                 'images': [
@@ -122,8 +122,8 @@ class Alert:
                 ],
                 'attachments': [
                     {
-                        'name': 'lost_contact.csv',
-                        'data': base64.b64encode(open('lost_contact.csv', 'rb').read()).decode('utf-8')
+                        'name': 'last_contact.csv',
+                        'data': base64.b64encode(open('last_contact.csv', 'rb').read()).decode('utf-8')
                     }
                 ]
             }

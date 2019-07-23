@@ -87,6 +87,6 @@ class TestAlert:
             {"edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z"},
              "enterprise": "Fake Corp"}]
         email = alert._compose_email_object(edges_to_report)
-        assert 'Lost contact edges' in email["email_data"]["subject"]
-        assert config["lost_contact"]["recipient"] in email["email_data"]["recipient"]
+        assert 'Last contact edges' in email["email_data"]["subject"]
+        assert config["last_contact"]["recipient"] in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]

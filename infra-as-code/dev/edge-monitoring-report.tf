@@ -13,7 +13,7 @@ data "template_file" "automation-edge-monitoring-report" {
     PYTHONUNBUFFERED = "${var.PYTHONUNBUFFERED}"
     NATS_SERVER1 = "nats://nats-server.${var.ENVIRONMENT}.local:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
-    LOST_CONTACT_RECIPIENT = "${var.LOST_CONTACT_RECIPIENT}"
+    LAST_CONTACT_RECIPIENT = "${var.LAST_CONTACT_RECIPIENT}"
   }
 }
 

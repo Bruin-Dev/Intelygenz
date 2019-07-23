@@ -1,6 +1,6 @@
 [
   {
-    "name": "lost-contact-report",
+    "name": "last-contact-report",
     "image": "${image}",
     "portMappings": [
       {
@@ -45,8 +45,8 @@
         "value": "${NATS_CLUSTER_NAME}"
       },
       {
-        "name": "LOST_CONTACT_RECIPIENT",
-        "value": "${LOST_CONTACT_RECIPIENT}"
+        "name": "LAST_CONTACT_RECIPIENT",
+        "value": "${LAST_CONTACT_RECIPIENT}"
       }
     ]
   }

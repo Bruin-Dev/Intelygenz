@@ -61,13 +61,13 @@ services:
     ports:
       - 5002:5000
 
-  lost-contact-report:
+  last-contact-report:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
       context: .
-      dockerfile: lost-contact-report/Dockerfile
+      dockerfile: last-contact-report/Dockerfile
     env_file:
-      - lost-contact-report/src/config/env
+      - last-contact-report/src/config/env
     depends_on:
       - "nats-streaming"
     ports:

@@ -45,8 +45,8 @@
         "value": "${NATS_CLUSTER_NAME}"
       },
       {
-        "name": "LOST_CONTACT_RECIPIENT",
-        "value": "${LOST_CONTACT_RECIPIENT}"
+        "name": "LAST_CONTACT_RECIPIENT",
+        "value": "${LAST_CONTACT_RECIPIENT}"
       }
     ]
   }
