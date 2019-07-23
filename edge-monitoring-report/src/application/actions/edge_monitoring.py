@@ -84,7 +84,7 @@ class EdgeMonitoring:
             f'{edges_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/qoe/'
 
-        edge_overview["Links URL"] = \
+        edge_overview["Transport URL"] = \
             f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/links/'
