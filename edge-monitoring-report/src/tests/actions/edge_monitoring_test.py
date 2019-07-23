@@ -95,6 +95,7 @@ class TestEdgeMonitoring:
             "edge_info": {
                 "enterprise_name": "Titan America|85940|",
                 "edges": {
+                    "name": "TEST",
                     "edgeState": "OFFLINE",
                     "serialNumber": "VC05200028729",
                 },
@@ -142,6 +143,7 @@ class TestEdgeMonitoring:
             "edge_info": {
                 "enterprise_name": "Titan America|85940|",
                 "edges": {
+                    "name": "TEST",
                     "edgeState": "OFFLINE",
                     "serialNumber": "VC05200028729",
                 },
@@ -182,6 +184,7 @@ class TestEdgeMonitoring:
             "edge_info": {
                 "enterprise_name": "Titan America|85940|",
                 "edges": {
+                    "name": "TEST",
                     "edgeState": "OFFLINE",
                     "serialNumber": "VC05200028729",
                 },
@@ -214,6 +217,7 @@ class TestEdgeMonitoring:
             "edge_info": {
                 "enterprise_name": "Titan America|85940|",
                 "edges": {
+                    "name": "TEST",
                     "edgeState": "OFFLINE",
                     "serialNumber": "VC05200028729",
                 },

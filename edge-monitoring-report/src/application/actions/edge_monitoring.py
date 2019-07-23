@@ -73,10 +73,22 @@ class EdgeMonitoring:
         edge_overview = OrderedDict()
 
         edge_overview["Orchestrator instance"] = edges_to_report['edge_id']['host']
-        edge_overview["Device URL"] = \
+        edge_overview["Edge Name"] = edges_to_report["edge_info"]["edges"]["name"]
+        edge_overview["Edge URL"] = \
             f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/'
+
+        edge_overview["QoE URL"] = \
+            f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'{edges_to_report["edge_id"]["enterprise_id"]}' \
+            f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/qoe/'
+
+        edge_overview["Links URL"] = \
+            f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'{edges_to_report["edge_id"]["enterprise_id"]}' \
+            f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/links/'
+
         edge_overview["Edge Status"] = edges_to_report["edge_info"]["edges"]["edgeState"]
 
         edge_overview["Interface LABELMARK1"] = None
