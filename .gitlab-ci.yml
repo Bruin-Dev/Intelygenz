@@ -38,9 +38,9 @@ variables:
 
 .job_acceptance_test_template: &acceptance_test_module
   stage: acceptance_tests
-  image: docker:stable
+  image: docker:18-git
   services:
-    - docker:dind
+    - docker:18-dind
   before_script:
     - apk add --no-cache py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
@@ -51,7 +51,7 @@ variables:
 
 .job_app_build_template: &build_app_image
   services:
-    - docker:dind
+    - docker:18-dind
   before_script:
     - apk add --no-cache curl jq python py-pip
     - pip install awscli
@@ -195,7 +195,7 @@ grafana-build:
     MODULE_NAME: metrics-dashboard/grafana
     MODULE_VERSION: ${CI_PIPELINE_ID}
   services:
-    - docker:dind
+    - docker:18-dind
   before_script:
     - apk add --no-cache curl jq python py-pip
     - pip install awscli
@@ -215,7 +215,7 @@ prometheus-build:
     MODULE_NAME: metrics-dashboard/prometheus
     MODULE_VERSION: ${CI_PIPELINE_ID}
   services:
-    - docker:dind
+    - docker:18-dind
   before_script:
     - apk add --no-cache curl jq python py-pip
     - pip install awscli
