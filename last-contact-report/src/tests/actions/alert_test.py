@@ -67,7 +67,8 @@ class TestAlert:
         alert._compose_email_object = Mock(return_value="<div>Some email</div>")
         event = json.dumps({"request_id": 123, "edges": [
             {"edge_id": {"host": "some.host", "enterprise_id": "123", "edge_id": "123"},
-             "edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z"},
+             "edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z",
+                      'modelNumber': 'edge123'},
              "enterprise": "Fake Corp"}]})
         await alert.receive_all_edges(event)
         assert event_bus.publish_message.called

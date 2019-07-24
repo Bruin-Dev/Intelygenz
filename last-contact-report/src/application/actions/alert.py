@@ -72,9 +72,9 @@ class Alert:
                 total_months_elapsed = relative_time_elapsed.years * 12 + relative_time_elapsed.months
                 if time_elapsed.days >= 30:
                     edge_for_alert = OrderedDict()
-
-                    edge_for_alert['serial_number'] = edge_info["edge"]["serialNumber"]
                     edge_for_alert['enterprise'] = edge_info["enterprise"]
+                    edge_for_alert['serial_number'] = edge_info["edge"]["serialNumber"]
+                    edge_for_alert['model number'] = edge_info["edge"]['modelNumber']
                     edge_for_alert['last_contact'] = edge_info["edge"]["lastContact"]
                     edge_for_alert['months in SVC'] = total_months_elapsed
                     edge_for_alert['balance of the 36 months'] = 36 - total_months_elapsed
