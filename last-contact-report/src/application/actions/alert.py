@@ -1,10 +1,11 @@
 import base64
 import json
+from collections import OrderedDict
 from datetime import datetime
-from dateutil import relativedelta
 
 import pandas as pd
 from apscheduler.util import undefined
+from dateutil import relativedelta
 from pytz import timezone
 from shortuuid import uuid
 
@@ -70,16 +71,17 @@ class Alert:
                 relative_time_elapsed = relativedelta.relativedelta(datetime.now(), last_contact)
                 total_months_elapsed = relative_time_elapsed.years * 12 + relative_time_elapsed.months
                 if time_elapsed.days >= 30:
-                    edge_for_alert = {
-                        'serial_number': edge_info["edge"]["serialNumber"],
-                        'enterprise': edge_info["enterprise"],
-                        'last_contact': edge_info["edge"]["lastContact"],
-                        'months in SVC': total_months_elapsed,
-                        'balance of the 36 months': 36 - total_months_elapsed,
-                        'url': f'https://{edge_info["edge_id"]["host"]}/#!/operator/customer/'
-                               f'{edge_info["edge_id"]["enterprise_id"]}'
-                               f'/monitor/edge/{edge_info["edge_id"]["edge_id"]}/'
-                    }
+                    edge_for_alert = OrderedDict()
+
+                    edge_for_alert['serial_number'] = edge_info["edge"]["serialNumber"]
+                    edge_for_alert['enterprise'] = edge_info["enterprise"]
+                    edge_for_alert['last_contact'] = edge_info["edge"]["lastContact"]
+                    edge_for_alert['months in SVC'] = total_months_elapsed
+                    edge_for_alert['balance of the 36 months'] = 36 - total_months_elapsed
+                    edge_for_alert['url'] = f'https://{edge_info["edge_id"]["host"]}/#!/operator/customer/'\
+                                            f'{edge_info["edge_id"]["enterprise_id"]}' \
+                                            f'/monitor/edge/{edge_info["edge_id"]["edge_id"]}/'
+
                     edges_to_report.append(edge_for_alert)
         email_obj = self._compose_email_object(edges_to_report)
         await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))
