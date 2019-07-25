@@ -36,10 +36,6 @@ resource "aws_security_group" "automation-velocloud-orchestrator_service" {
   name = "${var.ENVIRONMENT}-velocloud-orchestrator"
   description = "Allow egress from container"
 
-  lifecycle {
-    create_before_destroy = true
-  }
-
   egress {
     from_port = 0
     to_port = 0

@@ -34,10 +34,6 @@ resource "aws_security_group" "automation-edge-monitoring-report_service" {
   name = "${var.ENVIRONMENT}-edge-monitoring-report"
   description = "Allow egress from container"
 
-  lifecycle {
-    create_before_destroy = true
-  }
-
   egress {
     from_port = 0
     to_port = 0

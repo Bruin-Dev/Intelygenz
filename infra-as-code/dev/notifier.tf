@@ -36,10 +36,6 @@ resource "aws_security_group" "automation-notifier_service" {
   name = "${var.ENVIRONMENT}-notifier"
   description = "Allow egress from container"
 
-  lifecycle {
-    create_before_destroy = true
-  }
-
   egress {
     from_port = 0
     to_port = 0
