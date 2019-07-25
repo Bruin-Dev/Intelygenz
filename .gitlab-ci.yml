@@ -337,6 +337,7 @@ destroy-branches:
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - terraform init infra-as-code/dev
+    - terraform refresh infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
   environment:
     name: $CI_COMMIT_REF_NAME
