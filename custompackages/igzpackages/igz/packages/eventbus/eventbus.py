@@ -20,6 +20,9 @@ class EventBus:
             logger.addHandler(log_handler)
         self._logger = logger
 
+    async def rpc_request(self, topic, message, timeout=10):
+        return await self._producer.rpc_request(topic, message, timeout)
+
     def add_consumer(self, consumer: NatsStreamingClient, consumer_name: str):
         if self._consumers.get(consumer_name) is not None:
             self._logger.error(f'Consumer name {consumer_name} already registered. Skipping...')

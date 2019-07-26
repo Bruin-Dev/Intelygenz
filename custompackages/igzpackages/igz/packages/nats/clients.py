@@ -1,21 +1,18 @@
-from nats.aio.client import Client as NATS
-from stan.aio.client import Client as STAN
-from igz.packages.eventbus.action import ActionWrapper
+import json
 import logging
 import sys
-from tenacity import retry, wait_exponential, stop_after_delay
+from datetime import datetime, timedelta
+
+import asyncio
 import shortuuid
+from nats.aio.client import Client as NATS
+from stan.aio.client import Client as STAN
+from tenacity import retry, wait_exponential, stop_after_delay
+
+from igz.packages.eventbus.action import ActionWrapper
 
 
 class NatsStreamingClient:
-    _nc = None
-    _sc = None
-    _subs = None
-    _topic_action = None
-    _config = None
-    _uuid = None
-    _client_id = ""
-    _logger = None
 
     def __init__(self, config, client_id, logger=None):
         self._config = config.NATS_CONFIG
@@ -23,6 +20,7 @@ class NatsStreamingClient:
         self._client_id = client_id + self._uuid
         self._subs = list()
         self._topic_action = dict()
+        self._rpc_inbox = dict()
         if logger is None:
             logger = logging.getLogger('nats')
             logger.setLevel(logging.DEBUG)
@@ -45,7 +43,7 @@ class NatsStreamingClient:
 
             await self._sc.connect(self._config["cluster_name"], client_id=self._client_id,
                                    nats=self._nc, max_pub_acks_inflight=self._config["publisher"]
-                                   ["max_pub_acks_inflight"])
+                ["max_pub_acks_inflight"])
 
         await connect_to_nats()
 
@@ -62,6 +60,50 @@ class NatsStreamingClient:
                 await self._sc.publish(topic, message.encode())
 
         await publish(topic, message)
+
+    def _rpc_callback(self, msg):
+        try:
+            json_msg = json.loads(msg)
+        except Exception as e:
+            self._logger.error(f'Error in RPC response: message is not JSON serializable')
+            self._logger.error(f'{e}')
+        if 'request_id' not in json_msg:
+            self._logger.error(f'Error processing RPC response: message does not contain "request_id" field')
+            return
+        self._rpc_inbox[json_msg["request_id"]] = json_msg
+
+    async def _subscribe_rpc(self, topic, timeout=10):
+        return await self.subscribe(topic, self._rpc_callback, start_at='last_received', ack_wait=timeout)
+
+    async def rpc_request(self, topic, message, timeout=10):
+        try:
+            data = json.loads(message)
+        except Exception as e:
+            self._logger.error(f'Error publishing RPC request: message is not JSON serializable')
+            self._logger.error(f'{e}')
+            return None
+        if 'request_id' not in data:
+            self._logger.error(f'Error publishing RPC request: message does not contain "request_id" field')
+            return None
+        if 'response_topic' not in data:
+            self._logger.error(f'Error publishing RPC request: message does not contain "response_topic" field')
+            return None
+
+        temp_sub = await self._subscribe_rpc(data["response_topic"], timeout)
+
+        await self.publish(topic, message)
+
+        timeout_stamp = datetime.now() + timedelta(seconds=timeout)
+
+        ret_msg = None
+        while datetime.now() < timeout_stamp:
+            if data["request_id"] in self._rpc_inbox:
+                await temp_sub.unsubscribe()
+                ret_msg = self._rpc_inbox.pop(data["request_id"], None)
+                break
+            await asyncio.sleep(0.1)
+
+        return ret_msg
 
     async def _cb_with_ack_and_action(self, msg):
         self._logger.info(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
@@ -146,33 +188,33 @@ class NatsStreamingClient:
                             start_at='first', time=None, sequence=None, queue=None, durable_name=None, ack_wait=30):
             self._topic_action[topic] = callback
             if self._nc.is_connected:
-                sub = await self._sc.subscribe(topic,
-                                               start_at=start_at,
-                                               time=time,
-                                               sequence=sequence,
-                                               queue=queue,
-                                               durable_name=durable_name,
-                                               cb=self._cb_with_ack,
-                                               manual_acks=True,
-                                               max_inflight=self._config["subscriber"]["max_inflight"],
-                                               pending_limits=self._config["subscriber"]["pending_limits"],
-                                               ack_wait=ack_wait)
+                return await self._sc.subscribe(topic,
+                                                start_at=start_at,
+                                                time=time,
+                                                sequence=sequence,
+                                                queue=queue,
+                                                durable_name=durable_name,
+                                                cb=self._cb_with_ack,
+                                                manual_acks=True,
+                                                max_inflight=self._config["subscriber"]["max_inflight"],
+                                                pending_limits=self._config["subscriber"]["pending_limits"],
+                                                ack_wait=ack_wait)
             else:
                 await self.close_nats_connections()
                 await self.connect_to_nats()
-                sub = await self._sc.subscribe(topic,
-                                               start_at=start_at,
-                                               time=time,
-                                               sequence=sequence,
-                                               queue=queue,
-                                               durable_name=durable_name,
-                                               cb=self._cb_with_ack,
-                                               manual_acks=True,
-                                               max_inflight=self._config["subscriber"]["max_inflight"],
-                                               pending_limits=self._config["subscriber"]["pending_limits"],
-                                               ack_wait=ack_wait)
-            self._subs.append(sub)
-        await subscribe(topic, callback, start_at, time, sequence, queue, durable_name, ack_wait)
+                return await self._sc.subscribe(topic,
+                                                start_at=start_at,
+                                                time=time,
+                                                sequence=sequence,
+                                                queue=queue,
+                                                durable_name=durable_name,
+                                                cb=self._cb_with_ack,
+                                                manual_acks=True,
+                                                max_inflight=self._config["subscriber"]["max_inflight"],
+                                                pending_limits=self._config["subscriber"]["pending_limits"],
+                                                ack_wait=ack_wait)
+
+        return await subscribe(topic, callback, start_at, time, sequence, queue, durable_name, ack_wait)
 
     async def close_nats_connections(self):
         # Stop recieving messages
