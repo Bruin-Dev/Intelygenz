@@ -2,6 +2,7 @@ from unittest.mock import Mock
 from config import testconfig as config
 from application.repositories.velocloud_repository import VelocloudRepository
 import pytest
+from datetime import datetime, timedelta
 
 
 class TestVelocloudRepository:
@@ -57,6 +58,18 @@ class TestVelocloudRepository:
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         enterprise_info = vr.get_enterprise_information(edge)
         assert test_velocloud_client.get_enterprise_information.called
+
+    def get_all_edge_events_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        test_velocloud_client.get_all_edge_events = Mock()
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        start = datetime.now() - timedelta(hours=24)
+        end = datetime.now()
+        limit = None
+        edge_events = vr.get_all_edge_events(edge, start, end, limit)
+        assert test_velocloud_client.get_all_edge_events.called
 
     def connect_to_all_servers_test(self):
         mock_logger = Mock()
