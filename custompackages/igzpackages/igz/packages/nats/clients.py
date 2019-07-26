@@ -42,8 +42,8 @@ class NatsStreamingClient:
             self._sc = STAN()
 
             await self._sc.connect(self._config["cluster_name"], client_id=self._client_id,
-                                   nats=self._nc, max_pub_acks_inflight=self._config["publisher"]
-                ["max_pub_acks_inflight"])
+                                   nats=self._nc,
+                                   max_pub_acks_inflight=self._config["publisher"]["max_pub_acks_inflight"])
 
         await connect_to_nats()
 
