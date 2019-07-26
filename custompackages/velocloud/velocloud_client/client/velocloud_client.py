@@ -75,6 +75,20 @@ class VelocloudClient:
             if e.status == 0:
                 self._logger.error('Error, could not authenticate')
 
+    def get_all_edge_events(self, edge, start, end, limit):
+        target_host_client = self._get_client_by_host(edge["host"])
+        body = {"enterpriseId": edge["enterprise_id"],
+                "interval": {"start": start, "end": end},
+                "filter": {"limit": limit},
+                "edgeId": [edge["edge_id"]]}
+        try:
+            edge_events = target_host_client.eventGetEnterpriseEvents(body=body)
+            return edge_events
+        except velocloud.rest.ApiException as e:
+            self._logger.exception(e)
+            if e.status == 0:
+                self._logger.error('Error, could not authenticate')
+
     def get_all_enterprises_edges_with_host(self):
         edges_by_enterprise_and_host = list()
         try:
