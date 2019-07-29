@@ -52,6 +52,7 @@ class VelocloudClient:
             self._logger.exception(e)
             if e.status == 0:
                 self._logger.error('Error, could not authenticate')
+            return e
 
     def get_link_information(self, edge):
         target_host_client = self._get_client_by_host(edge["host"])
@@ -63,6 +64,7 @@ class VelocloudClient:
             self._logger.exception(e)
             if e.status == 0:
                 self._logger.error('Error, could not authenticate')
+            return e
 
     def get_enterprise_information(self, edge):
         target_host_client = self._get_client_by_host(edge["host"])
@@ -74,6 +76,7 @@ class VelocloudClient:
             self._logger.exception(e)
             if e.status == 0:
                 self._logger.error('Error, could not authenticate')
+            return e
 
     def get_all_edge_events(self, edge, start, end, limit):
         target_host_client = self._get_client_by_host(edge["host"])
@@ -88,6 +91,7 @@ class VelocloudClient:
             self._logger.exception(e)
             if e.status == 0:
                 self._logger.error('Error, could not authenticate')
+            return e
 
     def get_all_enterprises_edges_with_host(self):
         edges_by_enterprise_and_host = list()
@@ -108,7 +112,7 @@ class VelocloudClient:
                                    f'enterprises from all velocloud clusters: {e}')
             if e.status == 0:
                 self._logger.error('Error, could not authenticate')
-
+            return e
         return edges_by_enterprise_and_host
 
     def get_all_hosts_edge_count(self):

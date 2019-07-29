@@ -99,7 +99,7 @@ class TestVelocloudClient:
         exception.status = 400
         test_velocloud_client._clients[0].edgeGetEdge = Mock(side_effect=exception)
         edge_info = test_velocloud_client.get_edge_information(edges)
-        assert edge_info is None
+        assert isinstance(edge_info, Exception) is True
         assert test_velocloud_client._logger.exception.called
         assert test_velocloud_client._logger.error.called is False
         exception.status = 0
@@ -127,7 +127,7 @@ class TestVelocloudClient:
         edges = {"host": test_velocloud_client._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         test_velocloud_client._clients[0].metricsGetEdgeLinkMetrics = Mock(side_effect=exception)
         link_info = test_velocloud_client.get_link_information(edges)
-        assert link_info is None
+        assert isinstance(link_info, Exception) is True
         assert test_velocloud_client._logger.exception.called
         assert test_velocloud_client._logger.error.called is False
         exception.status = 0
@@ -155,7 +155,7 @@ class TestVelocloudClient:
         edges = {"host": test_velocloud_client._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         test_velocloud_client._clients[0].enterpriseGetEnterprise = Mock(side_effect=exception)
         enterprise_info = test_velocloud_client.get_enterprise_information(edges)
-        assert enterprise_info is None
+        assert isinstance(enterprise_info, Exception) is True
         assert test_velocloud_client._logger.exception.called
         assert test_velocloud_client._logger.error.called is False
         exception.status = 0
@@ -189,7 +189,7 @@ class TestVelocloudClient:
         limit = None
         test_velocloud_client._clients[0].eventGetEnterpriseEvents = Mock(side_effect=exception)
         event_info = test_velocloud_client.get_all_edge_events(edges, start, end, limit)
-        assert event_info is None
+        assert isinstance(event_info, Exception) is True
         assert test_velocloud_client._logger.exception.called
         assert test_velocloud_client._logger.error.called is False
         exception.status = 0
@@ -216,7 +216,7 @@ class TestVelocloudClient:
         exception.status = 400
         test_velocloud_client._clients[0].monitoringGetAggregates = Mock(side_effect=exception)
         edges_by_ent = test_velocloud_client.get_all_enterprises_edges_with_host()
-        assert len(edges_by_ent) is 0
+        assert isinstance(edges_by_ent, Exception) is True
         assert test_velocloud_client._logger.exception.called
         assert test_velocloud_client._logger.error.called is False
         exception.status = 0
