@@ -23,6 +23,8 @@ class EventEdgesForAlert:
 
         status = 200
         if events_by_edge is None:
+            status = 204
+        if isinstance(events_by_edge, Exception):
             status = 500
 
         edge_event_response = {"request_id": msg_dict['request_id'], "events": events_by_edge, "status": status}

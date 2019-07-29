@@ -22,14 +22,19 @@ class ReportEdgeStatus:
 
         link_status = []
         links = self._velocloud_repository.get_link_information(edgeids)
-        if links is not None:
+        if links is not None and isinstance(links, Exception) is False:
             for link in links:
                 link_status.append(link.to_dict())
-        else:
+        elif links is None:
             link_status = None
+        elif isinstance(links, Exception):
+            link_status = links
 
         status = 200
         if enterprise_name is None or edge_status is None or link_status is None:
+            status = 204
+        if isinstance(enterprise_name, Exception) or isinstance(edge_status, Exception) or isinstance(link_status,
+                                                                                                      Exception):
             status = 500
 
         edge_status = {"enterprise_name": enterprise_name, "edges": edge_status, "links": link_status}

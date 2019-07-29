@@ -63,7 +63,7 @@ class TestEdgeStatusResponse:
         assert actions._logger.info.called
 
     @pytest.mark.asyncio
-    async def report_edge_status_ko_status_test(self):
+    async def report_edge_status_ko_empty_status_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
@@ -86,5 +86,32 @@ class TestEdgeStatusResponse:
                                                                        "edge_info": {"enterprise_name": enterprise_info,
                                                                                      "edges": edge_status,
                                                                                      "links": None},
+                                                                       "status": 204})
+        assert actions._logger.info.called
+
+    @pytest.mark.asyncio
+    async def report_edge_status_ko_exception_status_test(self):
+        mock_logger = Mock()
+        test_bus = EventBus(logger=mock_logger)
+        test_bus.publish_message = CoroutineMock()
+        velocloud_repo = Mock()
+        actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
+        actions._logger.info = Mock()
+        enterprise_info = "TEST"
+        edge_status = dict(edge_status=[])
+        velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
+        velocloud_repo.get_edge_information().to_dict = Mock(return_value=edge_status)
+        velocloud_repo.get_link_information = Mock(return_value=Exception())
+        edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
+                    "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
+        await actions.report_edge_status(json.dumps(edge_msg).encode('utf-8'))
+        assert test_bus.publish_message.called
+        assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
+        assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
+                                                                       "edge_id": {"host": "host", "enterprise_id": "2",
+                                                                                   "edge_id": "1"},
+                                                                       "edge_info": {"enterprise_name": enterprise_info,
+                                                                                     "edges": edge_status,
+                                                                                     "links": ""},
                                                                        "status": 500})
         assert actions._logger.info.called

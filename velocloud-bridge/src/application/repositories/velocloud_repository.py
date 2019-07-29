@@ -34,7 +34,11 @@ class VelocloudRepository:
         return self._velocloud_client.get_link_information(edge)
 
     def get_enterprise_information(self, edge):
-        return self._velocloud_client.get_enterprise_information(edge)._name
+        enterprise_info = self._velocloud_client.get_enterprise_information(edge)
+        if isinstance(enterprise_info, Exception) is False:
+            return self._velocloud_client.get_enterprise_information(edge)._name
+        else:
+            return enterprise_info
 
     def get_all_edge_events(self, edge, start, end, limit):
         self._logger.info(f'Getting events from edge:{edge["edge_id"]} from time:{start} to time:{end}')

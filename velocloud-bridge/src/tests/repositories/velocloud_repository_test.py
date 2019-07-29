@@ -59,6 +59,16 @@ class TestVelocloudRepository:
         enterprise_info = vr.get_enterprise_information(edge)
         assert test_velocloud_client.get_enterprise_information.called
 
+    def get_enterprise_information_ko_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        test_velocloud_client.get_enterprise_information = Mock(return_value=Exception())
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        enterprise_info = vr.get_enterprise_information(edge)
+        assert test_velocloud_client.get_enterprise_information.called
+        assert isinstance(enterprise_info, Exception)
+
     def get_all_edge_events_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()

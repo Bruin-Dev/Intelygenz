@@ -73,7 +73,7 @@ class TestEventEdgesForAlert:
         assert edges_for_alert._logger.info.called
 
     @pytest.mark.asyncio
-    async def report_edge_event_ko_test(self):
+    async def report_edge_event_empty_ko_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
@@ -90,5 +90,26 @@ class TestEventEdgesForAlert:
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
                                                                        "events": None,
+                                                                       "status": 204})
+        assert edges_for_alert._logger.info.called
+
+    @pytest.mark.asyncio
+    async def report_edge_event_exception_ko_test(self):
+        mock_logger = Mock()
+        test_bus = EventBus(logger=mock_logger)
+        test_bus.publish_message = CoroutineMock()
+        velocloud_repo = Mock()
+        edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
+        edges_for_alert._logger.info = Mock()
+        velocloud_repo.get_all_edge_events = Mock(return_value=Exception())
+        edge_msg = {"request_id": "123", "response_topic": "alert.request.event.edge.response.123",
+                    "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
+                    "start_date": "2019-07-26 14:19:45.334427",
+                    "end_date": "now"}
+        await edges_for_alert.report_edge_event(json.dumps(edge_msg, default=str))
+        assert test_bus.publish_message.called
+        assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
+        assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
+                                                                       "events": "",
                                                                        "status": 500})
         assert edges_for_alert._logger.info.called

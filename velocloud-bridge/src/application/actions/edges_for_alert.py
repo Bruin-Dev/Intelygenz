@@ -33,7 +33,7 @@ class EdgesForAlert:
             edges_data.append(edge_data.result())
         status = 200
         if len(edges_data) == 0:
-            status = 500
+            status = 204
         edge_list_response = {"request_id": request_id,
                               "edges": edges_data,
                               "status": status}
