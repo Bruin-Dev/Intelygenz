@@ -36,13 +36,15 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
 
-        await self._event_bus.subscribe_consumer(consumer_name="sub-edge",
-                                                 topic=f"edge.status.response.{self._service_id}",
-                                                 action_wrapper=self._process_edge,
-                                                 durable_name="edge_monitoring_report",
-                                                 queue="edge_monitoring_report")
+        # await self._event_bus.subscribe_consumer(consumer_name="sub-edge",
+        #                                          topic=f"edge.status.response.{self._service_id}",
+        #                                          action_wrapper=self._process_edge,
+        #                                          durable_name="edge_monitoring_report",
+        #                                          queue="edge_monitoring_report")
 
-        await self._edge_monitoring.start_edge_monitor_job(exec_on_start=False)
+        # await self._edge_monitoring.start_edge_monitor_job(exec_on_start=False)
+        await self._edge_monitoring.request_edge_events_and_status()
+
         self._scheduler.start()
 
     async def start_server(self):

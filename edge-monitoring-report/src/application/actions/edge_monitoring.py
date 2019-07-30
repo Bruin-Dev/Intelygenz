@@ -2,10 +2,10 @@ import base64
 import re
 import json
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from apscheduler.util import undefined
-from pytz import timezone
+from pytz import timezone, utc
 from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
@@ -63,33 +63,59 @@ class EdgeMonitoring:
         email_obj = self._compose_email_object(edge)
         await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))
 
-    def _compose_email_object(self, edges_to_report):
+    async def request_edge_events_and_status(self):
+        request_id = uuid()
+        self._logger.info("Requesting edges and events for edge monitoring report")
+        edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
+        status_msg = dict(request_id=request_id, response_topic=f'edge.status.response.{self._service_id}',
+                          edge=edge_id)
+        events_msg = dict(request_id=request_id, response_topic=f'alert.response.event.edge.{self._service_id}',
+                          edge=edge_id, start_date=(datetime.now(utc) - timedelta(hours=168)),
+                          end_date=datetime.now(utc))
+        edge_status = await self._event_bus.rpc_request("edge.status.request",
+                                                        json.dumps(status_msg, default=str), timeout=10)
+        edge_events = await self._event_bus.rpc_request("alert.request.event.edge",
+                                                        json.dumps(events_msg, default=str), timeout=10)
+        email_obj = self._compose_email_object(edge_status, edge_events)
+        await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))
+
+    def _find_recent_occurence_of_event(self, event_list, event, message=None):
+        for event_obj in event_list:
+            if event_obj['event'] == event:
+                if message is not None:
+                    if event_obj['message'] == message:
+                        return event_obj['eventTime']
+                else:
+                    return event_obj['eventTime']
+        return None
+
+    def _compose_email_object(self, edges_status_to_report, edges_events_to_report):
         with open('src/templates/edge_monitoring.html') as template:
             email_html = "".join(template.readlines())
             email_html = email_html.replace('%%EDGE_COUNT%%', '1')
             email_html = email_html.replace('%%SERIAL_NUMBER%%',
-                                            f'{edges_to_report["edge_info"]["edges"]["serialNumber"]}')
+                                            f'{edges_status_to_report["edge_info"]["edges"]["serialNumber"]}')
 
         edge_overview = OrderedDict()
 
-        edge_overview["Orchestrator instance"] = edges_to_report['edge_id']['host']
-        edge_overview["Edge Name"] = edges_to_report["edge_info"]["edges"]["name"]
+        edge_overview["Orchestrator instance"] = edges_status_to_report['edge_id']['host']
+        edge_overview["Edge Name"] = edges_status_to_report["edge_info"]["edges"]["name"]
         edge_overview["Edge URL"] = \
-            f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/' \
-            f'{edges_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/'
+            f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/'
 
         edge_overview["QoE URL"] = \
-            f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/' \
-            f'{edges_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/qoe/'
+            f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/'
 
         edge_overview["Transport URL"] = \
-            f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/' \
-            f'{edges_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_to_report["edge_id"]["edge_id"]}/links/'
+            f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/'
 
-        edge_overview["Edge Status"] = edges_to_report["edge_info"]["edges"]["edgeState"]
+        edge_overview["Edge Status"] = edges_status_to_report["edge_info"]["edges"]["edgeState"]
 
         edge_overview["Interface LABELMARK1"] = None
         edge_overview["Label LABELMARK2"] = None
@@ -101,10 +127,10 @@ class EdgeMonitoring:
 
         link_data = dict()
 
-        link_data["GE1"] = [link for link in edges_to_report["edge_info"]["links"]
+        link_data["GE1"] = [link for link in edges_status_to_report["edge_info"]["links"]
                             if link["link"] is not None
                             if link["link"]["interface"] == "GE1"]
-        link_data["GE2"] = [link for link in edges_to_report["edge_info"]["links"]
+        link_data["GE2"] = [link for link in edges_status_to_report["edge_info"]["links"]
                             if link["link"] is not None
                             if link["link"]["interface"] == "GE2"]
         if len(link_data["GE1"]) > 0:
@@ -118,14 +144,24 @@ class EdgeMonitoring:
 
         edge_events = OrderedDict()
 
-        edge_events["Company Events URL"] = f'https://{edges_to_report["edge_id"]["host"]}/#!/operator/customer/' \
-            f'{edges_to_report["edge_id"]["enterprise_id"]}/monitor/events/'
-        edge_events["Last Edge Online"] = ""
-        edge_events["Last Edge Offline"] = ""
-        edge_events["Last GE1 Line Online"] = ""
-        edge_events["Last GE1 Line Offline"] = ""
-        edge_events["Last GE2 Line Online"] = ""
-        edge_events["Last GE2 Line Offline"] = ""
+        edge_events["Company Events URL"] = f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'{edges_status_to_report["edge_id"]["enterprise_id"]}/monitor/events/'
+        edge_events["Last Edge Online"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]["data"],
+                                                                               'EDGE_UP')
+        edge_events["Last Edge Offline"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
+                                                                                ["data"], 'EDGE_DOWN')
+        edge_events["Last GE1 Line Online"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
+                                                                                   ["data"], 'LINK_ALIVE',
+                                                                                   'Link GE1 is no longer DEAD')
+        edge_events["Last GE1 Line Offline"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
+                                                                                    ["data"], 'LINK_DEAD',
+                                                                                    'Link GE1 is now DEAD')
+        edge_events["Last GE2 Line Online"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
+                                                                                   ["data"], 'LINK_ALIVE',
+                                                                                   'Link GE2 is no longer DEAD')
+        edge_events["Last GE2 Line Offline"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
+                                                                                    ["data"], 'LINK_DEAD',
+                                                                                    'Link GE2 is now DEAD')
 
         rows = []
         for idx, key in enumerate(edge_overview.keys()):

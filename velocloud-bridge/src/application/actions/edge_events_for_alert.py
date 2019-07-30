@@ -19,7 +19,7 @@ class EventEdgesForAlert:
             limit = msg_dict["limit"]
 
         self._logger.info(f'Sending events for edge with data {edgeids} for alerts')
-        events_by_edge = self._velocloud_repository.get_all_edge_events(edgeids, start, end, limit)
+        events_by_edge = self._velocloud_repository.get_all_edge_events(edgeids, start, end, limit).to_dict()
 
         status = 200
         if events_by_edge is None:
