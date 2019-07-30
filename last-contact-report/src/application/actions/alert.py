@@ -107,7 +107,7 @@ class Alert:
 
         edges_dataframe = pd.DataFrame(edges_to_report)
         edges_dataframe.index.name = 'idx'
-        edges_dataframe.to_csv('last_contact.csv')
+        edges_dataframe.to_csv('last_contact.csv', index=False)
 
         return {
             'request_id': uuid(),
