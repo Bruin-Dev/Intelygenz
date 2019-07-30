@@ -144,8 +144,9 @@ class EdgeMonitoring:
 
         edge_events = OrderedDict()
 
-        edge_events["Company Events URL"] = f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
-            f'{edges_status_to_report["edge_id"]["enterprise_id"]}/monitor/events/'
+        edge_events["Company Events URL"] = f'https://{edges_status_to_report["edge_id"]["host"]}/#!/' \
+                                            f'operator/customer/{edges_status_to_report["edge_id"]["enterprise_id"]}' \
+                                            f'/monitor/events/'
         edge_events["Last Edge Online"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]["data"],
                                                                                'EDGE_UP')
         edge_events["Last Edge Offline"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
