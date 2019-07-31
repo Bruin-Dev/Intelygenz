@@ -1,13 +1,16 @@
-from igz.packages.nats.clients import NatsStreamingClient
-from igz.packages.eventbus.action import ActionWrapper
-import pytest
+import json
+import logging
 from unittest.mock import Mock
+
+import pytest
 from asynctest import CoroutineMock
 from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
-from igz.config import testconfig as config
-import logging
 from tenacity import RetryError
+
+from igz.config import testconfig as config
+from igz.packages.eventbus.action import ActionWrapper
+from igz.packages.nats.clients import NatsStreamingClient
 
 
 class TestNatsStreamingClient:
@@ -99,6 +102,127 @@ class TestNatsStreamingClient:
         assert nats_s_client.connect_to_nats.called
         assert nats_s_client._sc.publish.called
         assert nats_s_client._sc.publish.await_args[0] == ("Test-topic", b'Test-message')
+
+    @pytest.mark.asyncio
+    async def rpc_callback_ok_test(self):
+        mock_logger = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        msg = {"request_id": 123, "rpc_info": "some info"}
+        nats_s_client._rpc_callback(json.dumps(msg))
+        assert nats_s_client._rpc_inbox[msg['request_id']] == msg
+
+    @pytest.mark.asyncio
+    async def rpc_callback_ko_no_request_id_test(self):
+        mock_logger = Mock()
+        mock_logger.error = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        msg = {"rpc_info": "some info"}
+        nats_s_client._rpc_callback(json.dumps(msg))
+        assert mock_logger.error.called
+        assert len(nats_s_client._rpc_inbox) == 0
+
+    @pytest.mark.asyncio
+    async def rpc_callback_ko_exception_test(self):
+        mock_logger = Mock()
+        mock_logger.error = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        msg = {"request_id": 123, "rpc_info": "some info"}
+
+        nats_s_client._rpc_callback(msg)
+        assert mock_logger.error.called
+        assert len(nats_s_client._rpc_inbox) == 0
+
+    @pytest.mark.asyncio
+    async def subscribe_rpc_test(self):
+        mock_logger = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client.subscribe = CoroutineMock()
+        callback = nats_s_client._rpc_callback = CoroutineMock()
+        temp_sub = await nats_s_client._subscribe_rpc("some_topic", 10)
+        assert nats_s_client.subscribe.called
+        assert nats_s_client.subscribe.call_args[0][0] == "some_topic"
+        assert nats_s_client.subscribe.call_args[0][1] == callback
+
+    @pytest.mark.asyncio
+    async def rpc_request_ok_test(self):
+        mock_logger = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client._subscribe_rpc = CoroutineMock(return_value=nats_s_client)
+        nats_s_client.unsubscribe = CoroutineMock()
+        nats_s_client.publish = CoroutineMock()
+        nats_s_client._rpc_inbox = {123: "some_data"}
+        msg = {"request_id": 123, "response_topic": "test_topic", "rpc_info": "some info"}
+        rpc_msg = await nats_s_client.rpc_request("some_topic", json.dumps(msg), 1)
+        assert nats_s_client._subscribe_rpc.called
+        assert nats_s_client.unsubscribe.called
+        assert nats_s_client.publish.called
+        assert rpc_msg == "some_data"
+
+    @pytest.mark.asyncio
+    async def rpc_request_ko_exception_test(self):
+        mock_logger = Mock()
+        mock_logger.error = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client._subscribe_rpc = CoroutineMock(return_value=nats_s_client)
+        nats_s_client.unsubscribe = CoroutineMock()
+        nats_s_client.publish = CoroutineMock()
+        nats_s_client._rpc_inbox = {123: "some_data"}
+        msg = Exception()
+        rpc_msg = await nats_s_client.rpc_request("some_topic", msg, 1)
+        assert mock_logger.error.called
+        assert nats_s_client._subscribe_rpc.called is False
+        assert nats_s_client.unsubscribe.called is False
+        assert nats_s_client.publish.called is False
+        assert rpc_msg is None
+
+    @pytest.mark.asyncio
+    async def rpc_request_ko_no_request_id_test(self):
+        mock_logger = Mock()
+        mock_logger.error = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client._subscribe_rpc = CoroutineMock(return_value=nats_s_client)
+        nats_s_client.unsubscribe = CoroutineMock()
+        nats_s_client.publish = CoroutineMock()
+        nats_s_client._rpc_inbox = {123: "some_data"}
+        msg = {"response_topic": "test_topic", "rpc_info": "some info"}
+        rpc_msg = await nats_s_client.rpc_request("some_topic", json.dumps(msg), 1)
+        assert mock_logger.error.called
+        assert nats_s_client._subscribe_rpc.called is False
+        assert nats_s_client.unsubscribe.called is False
+        assert nats_s_client.publish.called is False
+        assert rpc_msg is None
+
+    @pytest.mark.asyncio
+    async def rpc_request_ko_no_response_test(self):
+        mock_logger = Mock()
+        mock_logger.error = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client._subscribe_rpc = CoroutineMock(return_value=nats_s_client)
+        nats_s_client.unsubscribe = CoroutineMock()
+        nats_s_client.publish = CoroutineMock()
+        nats_s_client._rpc_inbox = {123: "some_data"}
+        msg = {"request_id": 123, "rpc_info": "some info"}
+        rpc_msg = await nats_s_client.rpc_request("some_topic", json.dumps(msg), 1)
+        assert mock_logger.error.called
+        assert nats_s_client._subscribe_rpc.called is False
+        assert nats_s_client.unsubscribe.called is False
+        assert nats_s_client.publish.called is False
+        assert rpc_msg is None
+
+    @pytest.mark.asyncio
+    async def rpc_request_ko_empty_inbox_test(self):
+        mock_logger = Mock()
+        mock_logger.error = Mock()
+        nats_s_client = NatsStreamingClient(config, "test-client-id", logger=mock_logger)
+        nats_s_client._subscribe_rpc = CoroutineMock(return_value=nats_s_client)
+        nats_s_client.unsubscribe = CoroutineMock()
+        nats_s_client.publish = CoroutineMock()
+        msg = {"request_id": 123, "response_topic": "test_topic", "rpc_info": "some info"}
+        rpc_msg = await nats_s_client.rpc_request("some_topic", json.dumps(msg), 1)
+        assert nats_s_client._subscribe_rpc.called
+        assert nats_s_client.unsubscribe.called is False
+        assert nats_s_client.publish.called
+        assert rpc_msg is None
 
     @pytest.mark.asyncio
     async def register_sequence_consumer_test(self):

@@ -40,6 +40,19 @@ class TestEventBus:
         assert sub_connect_mock.called
         assert pub_connect_mock.called
 
+    @pytest.mark.asyncio
+    async def rpc_request_test(self):
+        mock_logger = Mock()
+        e = EventBus(logger=mock_logger)
+        publisher = NatsStreamingClient(config, "Some-pub-ID", logger=mock_logger)
+        publisher.rpc_request = CoroutineMock()
+        e.set_producer(publisher)
+        rpc_response = await e.rpc_request("some_topic", "some_message", 10)
+        assert publisher.rpc_request.called
+        assert publisher.rpc_request.call_args[0][0] == "some_topic"
+        assert publisher.rpc_request.call_args[0][1] == "some_message"
+        assert publisher.rpc_request.call_args[0][2] == 10
+
     def add_consumer_OK_test(self):
         mock_logger = Mock()
         e = EventBus(logger=mock_logger)

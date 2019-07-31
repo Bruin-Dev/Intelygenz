@@ -67,6 +67,7 @@ class NatsStreamingClient:
         except Exception as e:
             self._logger.error(f'Error in RPC response: message is not JSON serializable')
             self._logger.error(f'{e}')
+            return
         if 'request_id' not in json_msg:
             self._logger.error(f'Error processing RPC response: message does not contain "request_id" field')
             return
