@@ -67,11 +67,15 @@ class EdgeMonitoring:
         request_id = uuid()
         self._logger.info("Requesting edges and events for edge monitoring report")
         edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
-        status_msg = dict(request_id=request_id, response_topic=f'edge.status.response.{self._service_id}',
-                          edge=edge_id)
-        events_msg = dict(request_id=request_id, response_topic=f'alert.response.event.edge.{self._service_id}',
-                          edge=edge_id, start_date=(datetime.now(utc) - timedelta(hours=168)),
-                          end_date=datetime.now(utc))
+        status_msg = {'request_id': request_id,
+                      'response_topic': f'edge.status.response.{self._service_id}',
+                      'edge': edge_id}
+
+        events_msg = {'request_id': request_id,
+                      'response_topic': f'alert.response.event.edge.{self._service_id}',
+                      'edge': edge_id,
+                      'start_date': (datetime.now(utc) - timedelta(days=7)),
+                      'end_date': datetime.now(utc)}
         edge_status = await self._event_bus.rpc_request("edge.status.request",
                                                         json.dumps(status_msg, default=str), timeout=10)
         edge_events = await self._event_bus.rpc_request("alert.request.event.edge",
@@ -79,9 +83,9 @@ class EdgeMonitoring:
         email_obj = self._compose_email_object(edge_status, edge_events)
         await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))
 
-    def _find_recent_occurence_of_event(self, event_list, event, message=None):
+    def _find_recent_occurence_of_event(self, event_list, event_type, message=None):
         for event_obj in event_list:
-            if event_obj['event'] == event:
+            if event_obj['event'] == event_type:
                 if message is not None:
                     if event_obj['message'] == message:
                         return event_obj['eventTime']

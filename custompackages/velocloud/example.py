@@ -84,9 +84,8 @@ except ApiException as e:
 
 
 # print("### GETTING ALL EVENTS BY ENTERPRISE ID: SIGNET ###")
-# # Accepts filters and pagination
+# Accepts filters and pagination
 #
-# # {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
 # body = {"enterpriseId": 137, "edgeId": 1602,  "interval": {
 #     "end": datetime.now(utc),
 #     "start": (datetime.now(utc)-timedelta(hours=168))}}
