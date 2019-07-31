@@ -102,8 +102,8 @@ class TestEdgeMonitoring:
         link_online_time = edge_monitoring._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
                                                                            'Link GE2 is no longer DEAD')
         assert link_online_time == '2019-07-30 4:26:00+00:00'
-        link_dead_time = edge_monitoring._find_recent_occurence_of_event(event_list, 'LINK_DEAD',
-                                                                         'Link GE2 is DEAD')
+        link_dead_time = edge_monitoring._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
+                                                                         'Link GE1 is no longer DEAD')
         assert link_dead_time is None
 
     @pytest.mark.asyncio
