@@ -46,32 +46,17 @@ class EdgeMonitoring:
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._request_edges, 'cron', hour=0, next_run_time=next_run_time,
+        self._scheduler.add_job(self._request_edge_events_and_status, 'cron', hour=0, next_run_time=next_run_time,
                                 replace_existing=True, id='_edge_monitoring_process')
 
-    async def _request_edges(self):
-        request_id = uuid()
-        self._logger.info("Requesting edges for edge monitoring report")
-        edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
-        msg = dict(request_id=request_id, response_topic=f'edge.status.response.{self._service_id}', edge=edge_id)
-        await self._event_bus.publish_message("edge.status.request", json.dumps(msg))
-
-    async def receive_edge(self, msg):
-        self._logger.info(f'Edge received from event bus')
-        edge = json.loads(msg)
-        self._logger.info(f'Edge data: {json.dumps(edge, indent=2)}')
-        email_obj = self._compose_email_object(edge)
-        await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))
-
-    async def request_edge_events_and_status(self):
-        request_id = uuid()
+    async def _request_edge_events_and_status(self):
         self._logger.info("Requesting edges and events for edge monitoring report")
         edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
-        status_msg = {'request_id': request_id,
+        status_msg = {'request_id': uuid(),
                       'response_topic': f'edge.status.response.{self._service_id}',
                       'edge': edge_id}
 
-        events_msg = {'request_id': request_id,
+        events_msg = {'request_id': uuid(),
                       'response_topic': f'alert.response.event.edge.{self._service_id}',
                       'edge': edge_id,
                       'start_date': (datetime.now(utc) - timedelta(days=7)),

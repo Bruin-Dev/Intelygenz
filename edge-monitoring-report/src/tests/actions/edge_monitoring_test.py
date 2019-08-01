@@ -26,40 +26,6 @@ class TestEdgeMonitoring:
         assert edge_monitoring._config is config
 
     @pytest.mark.asyncio
-    async def request_edges_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
-        scheduler = Mock()
-        config = Mock()
-        service_id = 123
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, scheduler, service_id, config)
-
-        await edge_monitoring._request_edges()
-        assert event_bus.publish_message.called
-        assert "edge.status.request" in event_bus.publish_message.call_args[0][0]
-
-    @pytest.mark.asyncio
-    async def receive_edge_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
-        scheduler = Mock()
-        config = Mock()
-        service_id = 123
-
-        edge = {"request_id": 1234, 'edge_id': {'host': 'some_host'}, 'edge_info': 'Some edge data'}
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, scheduler, service_id, config)
-        edge_monitoring._compose_email_object = Mock(return_value=edge)
-
-        await edge_monitoring.receive_edge(json.dumps(edge))
-        assert event_bus.publish_message.called
-        assert edge_monitoring._compose_email_object.called
-        assert event_bus.publish_message.call_args[0][1] == json.dumps(edge)
-
-    @pytest.mark.asyncio
     async def request_edge_events_and_status_test(self):
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -72,7 +38,7 @@ class TestEdgeMonitoring:
         edge_monitoring = EdgeMonitoring(event_bus, logger, scheduler, service_id, config)
         edge_monitoring._compose_email_object = Mock(return_value="Email Object")
 
-        await edge_monitoring.request_edge_events_and_status()
+        await edge_monitoring._request_edge_events_and_status()
         assert event_bus.rpc_request.called
         assert edge_monitoring._compose_email_object.called
         assert event_bus.publish_message.called
@@ -116,10 +82,10 @@ class TestEdgeMonitoring:
         service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, scheduler, service_id, config)
-        edge_monitoring._request_edges = Mock()
+        edge_monitoring._request_edge_events_and_status = Mock()
         await edge_monitoring.start_edge_monitor_job(exec_on_start=True)
         assert scheduler.add_job.called
-        assert scheduler.add_job.call_args[0][0] is edge_monitoring._request_edges
+        assert scheduler.add_job.call_args[0][0] is edge_monitoring._request_edge_events_and_status
         assert "cron" in scheduler.add_job.call_args[0][1]
         assert scheduler.add_job.call_args[1]['hour'] == 0
 
