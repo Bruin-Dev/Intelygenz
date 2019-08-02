@@ -176,10 +176,10 @@ velocloud-bridge-test:
     MODULE: velocloud-bridge
   <<: *unittest_module
 
-#bruin-bridge-test:
-#  variables:
-#    MODULE: bruin-bridge
-#  <<: *unittest_module
+bruin-bridge-test:
+  variables:
+    MODULE: bruin-bridge
+  <<: *unittest_module
 
 #
 # Acceptance/Integration tests
