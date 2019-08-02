@@ -113,6 +113,11 @@ velocloud-bridge:
     MODULE: velocloud-bridge
   <<: *lint_module
 
+bruin-bridge:
+  variables:
+    MODULE: bruin-bridge
+  <<: *lint_module
+
 acceptance-test-linter:
   variables:
     MODULE: acceptance-tests
@@ -170,6 +175,11 @@ velocloud-bridge-test:
   variables:
     MODULE: velocloud-bridge
   <<: *unittest_module
+
+#bruin-bridge-test:
+#  variables:
+#    MODULE: bruin-bridge
+#  <<: *unittest_module
 
 #
 # Acceptance/Integration tests
@@ -250,6 +260,13 @@ velocloud-bridge-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
+bruin-bridge-build:
+  stage: build
+  variables:
+    MODULE_NAME: bruin-bridge
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  <<: *build_app_image
+
 velocloud-orchestrator-build:
   stage: build
   variables:
@@ -286,6 +303,10 @@ terraform-validate-dev:
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
     - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
+    - export TF_VAR_BRUIN_CLIENT_ID_PRO=${BRUIN_CLIENT_ID_PRO}
+    - export TF_VAR_BRUIN_CLIENT_SECRET_PRO=${BRUIN_CLIENT_SECRET_PRO}
+    - export TF_VAR_BRUIN_LOGIN_URL_PRO=${BRUIN_LOGIN_URL_PRO}
+    - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
@@ -312,6 +333,10 @@ deploy-branches:
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
     - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
+    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
+    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
+    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
+    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
@@ -361,6 +386,10 @@ deploy-master:
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
     - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
+    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
+    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
+    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
+    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf

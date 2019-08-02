@@ -18,6 +18,10 @@ resource "aws_ecr_repository" "automation-velocloud-bridge" {
   name = "automation-velocloud-bridge"
 }
 
+resource "aws_ecr_repository" "automation-bruin-bridge" {
+  name = "automation-bruin-bridge"
+}
+
 resource "aws_ecr_repository" "automation-notifier" {
   name = "automation-notifier"
 }

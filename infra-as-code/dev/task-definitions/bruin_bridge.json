@@ -1,0 +1,65 @@
+[
+  {
+    "name": "bruin-bridge",
+    "image": "${image}",
+    "portMappings": [
+      {
+        "containerPort": 5000,
+        "hostPort": 5000
+      },
+      {
+        "containerPort": 9090,
+        "hostPort": 9090
+      }
+    ],
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:5000/_health || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
+    "environment": [
+      {
+        "name": "PYTHONUNBUFFERED",
+        "value": "${PYTHONUNBUFFERED}"
+      },
+      {
+        "name": "NATS_SERVER1",
+        "value": "${NATS_SERVER1}"
+      },
+      {
+        "name": "NATS_CLUSTER_NAME",
+        "value": "${NATS_CLUSTER_NAME}"
+      },
+      {
+        "name": "BRUIN_CLIENT_ID",
+        "value": "${BRUIN_CLIENT_ID}"
+      },
+      {
+        "name": "BRUIN_CLIENT_SECRET",
+        "value": "${BRUIN_CLIENT_SECRET}"
+      },
+      {
+        "name": "BRUIN_LOGIN_URL",
+        "value": "${BRUIN_LOGIN_URL}"
+      },
+      {
+        "name": "BRUIN_BASE_URL",
+        "value": "${BRUIN_BASE_URL}"
+      }
+    ]
+  }
+]

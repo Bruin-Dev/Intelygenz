@@ -54,6 +54,22 @@ variable "VELOCLOUD_VERIFY_SSL" {
   default = "yes"
 }
 
+variable "BRUIN_CLIENT_ID" {
+  default = ""
+}
+
+variable "BRUIN_CLIENT_SECRET" {
+  default = ""
+}
+
+variable "BRUIN_LOGIN_URL" {
+  default = ""
+}
+
+variable "BRUIN_BASE_URL" {
+  default = ""
+}
+
 variable "cdir_base" {
   default = "10.1.0.0"
 }
