@@ -49,18 +49,6 @@ services:
       - 5001:5000
       - 9120:9090
 
-  bruin-bridge:
-    build:
-      # Context must be the root of the monorepo since we need to copy custompackages
-      context: .
-      dockerfile: bruin-bridge/Dockerfile
-    env_file:
-      - bruin-bridge/src/config/env
-    depends_on:
-      - "nats-streaming"
-    ports:
-      - 5001:5000
-
   notifier:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
@@ -96,6 +84,18 @@ services:
       - "nats-streaming"
     ports:
       - 5004:5000
+
+  bruin-bridge:
+    build:
+      # Context must be the root of the monorepo since we need to copy custompackages
+      context: .
+      dockerfile: bruin-bridge/Dockerfile
+    env_file:
+      - bruin-bridge/src/config/env
+    depends_on:
+      - "nats-streaming"
+    ports:
+      - 5006:5000
 
   redis:
     image: redis:5.0.4
