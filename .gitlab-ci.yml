@@ -108,7 +108,12 @@ last-contact-report-linter:
     MODULE: last-contact-report
   <<: *lint_module
 
-velocloud-bridge:
+service-outage-triage-linter:
+  variables:
+    MODULE: service-outage-triage
+  <<: *lint_module
+
+velocloud-bridge-linter:
   variables:
     MODULE: velocloud-bridge
   <<: *lint_module
@@ -169,6 +174,11 @@ last-contact-report-test:
 edge-monitoring-report-test:
   variables:
     MODULE: edge-monitoring-report
+  <<: *unittest_module
+
+service-outage-triage-test:
+  variables:
+    MODULE: service-outage-triage
   <<: *unittest_module
 
 velocloud-bridge-test:
@@ -278,6 +288,13 @@ last-contact-report-build:
   stage: build
   variables:
     MODULE_NAME: last-contact-report
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  <<: *build_app_image
+
+service-outage-triage-build:
+  stage: build
+  variables:
+    MODULE_NAME: service-outage-triage
     MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
