@@ -1,5 +1,4 @@
 import asyncio
-
 from application.actions.service_outage_triage import ServiceOutageTriage
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
@@ -7,7 +6,6 @@ from shortuuid import uuid
 
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
-from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.server.api import QuartServer
@@ -23,9 +21,7 @@ class Container:
         self._service_id = uuid()
 
         self._publisher = NatsStreamingClient(config, f'service-outage-triage-publisher-', logger=self._logger)
-        self.subscriber_tickets = NatsStreamingClient(config, f'service-outage-triage-ticket-', logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
-        self._event_bus.add_consumer(self.subscriber_tickets, consumer_name="sub-ticket")
         self._event_bus.set_producer(self._publisher)
 
         self._service_outage_triage = ServiceOutageTriage(self._event_bus, self._logger, self._scheduler,
