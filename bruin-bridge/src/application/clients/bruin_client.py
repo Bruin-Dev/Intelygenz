@@ -31,3 +31,13 @@ class BruinClient:
         except Exception as err:
             self._logger.error("An error occurred while trying to login to Bruin")
             self._logger.error(f"{err}")
+
+    def get_request_headers(self):
+        if not self._bearer_token:
+            raise Exception("Missing BEARER token")
+
+        headers = {
+            "authorization": f"Bearer {self._bearer_token}",
+            "Content-Type": "application/json-patch+json"
+        }
+        return headers
