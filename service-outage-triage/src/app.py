@@ -25,7 +25,7 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         self._service_outage_triage = ServiceOutageTriage(self._event_bus, self._logger, self._scheduler,
-                                                          self._service_id, config.ALERTS_CONFIG)
+                                                          self._service_id, config)
 
     async def _start(self):
         await self._event_bus.connect()

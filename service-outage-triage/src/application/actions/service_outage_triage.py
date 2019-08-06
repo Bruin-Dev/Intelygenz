@@ -19,12 +19,12 @@ class ServiceOutageTriage:
         self._config = config
 
     async def start_service_outage_triage_job(self, exec_on_start=False):
-        self._logger.info(f'Scheduled task: edge monitoring process configured to run each first hour each day')
+        self._logger.info(f'Scheduled task: service outage triage configured to run every minute')
         next_run_time = undefined
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._poll_tickets, 'interval', minute=1, next_run_time=next_run_time,
+        self._scheduler.add_job(self._poll_tickets, 'interval', seconds=60, next_run_time=next_run_time,
                                 replace_existing=True, id='_service_outage_triage_process')
 
     async def _poll_tickets(self):
@@ -62,7 +62,7 @@ class ServiceOutageTriage:
 
     async def _filtered_ticket_details(self, ticket_list):
         filtered_ticket_ids = []
-        for ticket in ticket_list['tickets']['responses']:
+        for ticket in ticket_list['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'response_topic': f'bruin.ticket.details.response.{self._service_id}',
                                  'ticket_id': ticket['ticketID']}
