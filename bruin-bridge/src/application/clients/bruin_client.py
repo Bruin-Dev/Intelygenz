@@ -47,8 +47,11 @@ class BruinClient:
         response = requests.get(f'{self._config["base_url"]}/api/Ticket/{ticket_id}/details',
                                 headers=self._get_request_headers(),
                                 verify=False)
-        # Put the parse of response object in repository
-        return response.json()["ticketDetails"]
+        # TODO Put the parse of response object in repository
+        if response.status_code in range(200, 299):
+            return response.json()["ticketDetails"]
+        else:
+            return None
 
     def post_ticket_note(self, ticket_id, ticket_note):
         self._logger.info(f'Getting posting notes for ticket id: {ticket_id}')
@@ -59,4 +62,7 @@ class BruinClient:
                                  headers=self._get_request_headers(),
                                  json=payload,
                                  verify=False)
-        return response.json()
+        if response.status_code in range(200, 299):
+            return response.json()
+        else:
+            return None
