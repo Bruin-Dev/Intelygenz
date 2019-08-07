@@ -43,13 +43,14 @@ class BruinClient:
         return headers
 
     def get_ticket_detail(self, ticket_id):
+        self._logger.info(f'Getting ticket details for ticket id: {ticket_id}')
         response = requests.get(f'{self._config["base_url"]}/api/Ticket/{ticket_id}/details',
                                 headers=self._get_request_headers(),
                                 verify=False)
-        print(f"Response code: {response.status_code}")
         return response.json()
 
     def post_ticket_note(self, ticket_id, ticket_note):
+        self._logger.info(f'Getting posting notes for ticket id: {ticket_id}')
         payload = {
             "note": ticket_note
         }
@@ -57,5 +58,4 @@ class BruinClient:
                                  headers=self._get_request_headers(),
                                  json=payload,
                                  verify=False)
-        print(f"Response code: {response.status_code}")
         return response.json()
