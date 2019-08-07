@@ -32,7 +32,7 @@ class BruinClient:
             self._logger.error("An error occurred while trying to login to Bruin")
             self._logger.error(f"{err}")
 
-    def get_request_headers(self):
+    def _get_request_headers(self):
         if not self._bearer_token:
             raise Exception("Missing BEARER token")
 
@@ -42,7 +42,7 @@ class BruinClient:
         }
         return headers
 
-    def get_ticket_detail(self, ticket_id):
+    def get_ticket_details(self, ticket_id):
         self._logger.info(f'Getting ticket details for ticket id: {ticket_id}')
         response = requests.get(f'{self._config["base_url"]}/api/Ticket/{ticket_id}/details',
                                 headers=self._get_request_headers(),

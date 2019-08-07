@@ -1,7 +1,7 @@
 from config import config
 from application.clients.bruin_client import BruinClient
 from application.actions.bruin_ticket_response import BruinTicketResponse
-from application.actions.get_ticket_detail import GetTicketDetail
+from application.actions.get_ticket_details import GetTicketDetails
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
@@ -27,16 +27,17 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         self._get_tickets = BruinTicketResponse(self._logger, config.BRUIN_CONFIG, self._event_bus, self._bruin_client)
-        self._get_ticket_details = GetTicketDetail(self._logger, self._event_bus, self._bruin_client)
+        self._get_ticket_details = GetTicketDetails(self._logger, self._event_bus, self._bruin_client)
 
         self._report_bruin_ticket = ActionWrapper(self._get_tickets, "report_all_bruin_tickets",
                                                   is_async=True, logger=self._logger)
-        self._action_get_ticket_detail = ActionWrapper(self._get_ticket_details, "send_ticket_detail",
+        self._action_get_ticket_detail = ActionWrapper(self._get_ticket_details, "send_ticket_details",
                                                        is_async=True, logger=self._logger)
         self._server = QuartServer(config)
 
     async def start(self):
         await self._event_bus.connect()
+        self._bruin_client.login()
         await self._event_bus.subscribe_consumer(consumer_name="tickets", topic="bruin.ticket.request",
                                                  action_wrapper=self._report_bruin_ticket,
                                                  durable_name="bruin_bridge",
@@ -48,7 +49,6 @@ class Container:
                                                  durable_name="bruin_bridge",
                                                  queue="bruin_bridge",
                                                  ack_wait=480)
-        self._bruin_client.login()
 
     async def start_server(self):
         await self._server.run_server()
