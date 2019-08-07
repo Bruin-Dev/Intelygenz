@@ -42,6 +42,21 @@ class BruinClient:
         }
         return headers
 
+    def get_all_filtered_tickets(self, client_id, ticket_id):
+        self._logger.info(f'Getting all tickets for client id: {client_id}')
+        params = {
+            "ClientId": client_id,
+            "TicketId": ticket_id
+        }
+        response = requests.get(f"{self._config['base_url']}/api/Ticket",
+                                headers=self._get_request_headers(),
+                                verify=False, params=params)
+        filtered_tickets = [ticket for ticket in response.json()["responses"]
+                            if "Closed" not in ticket["ticketStatus"]
+                            if "Resolved" not in ticket["ticketStatus"]
+                            if "SD-WAN" in ticket["category"]]
+        return filtered_tickets
+
     def get_ticket_details(self, ticket_id):
         self._logger.info(f'Getting ticket details for ticket id: {ticket_id}')
         response = requests.get(f'{self._config["base_url"]}/api/Ticket/{ticket_id}/details',
