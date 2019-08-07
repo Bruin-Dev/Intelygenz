@@ -47,7 +47,8 @@ class BruinClient:
         response = requests.get(f'{self._config["base_url"]}/api/Ticket/{ticket_id}/details',
                                 headers=self._get_request_headers(),
                                 verify=False)
-        return response.json()
+        # Put the parse of response object in repository
+        return response.json()["ticketDetails"]
 
     def post_ticket_note(self, ticket_id, ticket_note):
         self._logger.info(f'Getting posting notes for ticket id: {ticket_id}')
