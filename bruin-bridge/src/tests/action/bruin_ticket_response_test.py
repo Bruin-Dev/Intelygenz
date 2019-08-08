@@ -2,7 +2,6 @@ import json
 from unittest.mock import Mock
 
 import pytest
-import requests
 from application.actions.bruin_ticket_response import BruinTicketResponse
 from asynctest import CoroutineMock
 
@@ -14,26 +13,29 @@ class TestBruinTicketResponse:
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
-        bruin_client = Mock()
-        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_client)
+        bruin_repository = Mock()
+        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         assert bruin_ticket_response._logger is logger
         assert bruin_ticket_response._config is config.BRUIN_CONFIG
         assert bruin_ticket_response._event_bus is event_bus
-        assert bruin_ticket_response._bruin_client is bruin_client
+        assert bruin_ticket_response._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
     async def report_all_bruin_tickets_no_ticket_id_test(self):
         logger = Mock()
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
-        bruin_client = Mock()
-        bruin_client.get_all_filtered_tickets = Mock(return_value=['Some ticket list'])
+        bruin_repository = Mock()
+        bruin_repository.get_all_filtered_tickets = Mock(return_value=['Some ticket list'])
         msg = {'request_id': "123", 'response_topic': 'bruin.ticket.response',
-               'client_id': 123}
-        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_client)
+               'client_id': 123, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN'}
+        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.report_all_bruin_tickets(json.dumps(msg))
-        assert bruin_client.get_all_filtered_tickets.call_args[0][0] == msg['client_id']
-        assert bruin_client.get_all_filtered_tickets.call_args[0][1] == ''
+        assert bruin_repository.get_all_filtered_tickets.called
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][0] == msg['client_id']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][1] == ''
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][2] == msg['ticket_status']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][3] == msg['category']
         assert event_bus.publish_message.called
         assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
         assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
@@ -45,14 +47,17 @@ class TestBruinTicketResponse:
         logger = Mock()
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
-        bruin_client = Mock()
-        bruin_client.get_all_filtered_tickets = Mock(return_value=['Some ticket list'])
+        bruin_repository = Mock()
+        bruin_repository.get_all_filtered_tickets = Mock(return_value=['Some ticket list'])
         msg = {'request_id': "123", 'response_topic': 'bruin.ticket.response',
-               'client_id': 123, 'ticket_id': 321}
-        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_client)
+               'client_id': 123, 'ticket_id': 321, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN'}
+        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.report_all_bruin_tickets(json.dumps(msg))
-        assert bruin_client.get_all_filtered_tickets.call_args[0][0] == msg['client_id']
-        assert bruin_client.get_all_filtered_tickets.call_args[0][1] == msg['ticket_id']
+        assert bruin_repository.get_all_filtered_tickets.called
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][0] == msg['client_id']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][1] == msg['ticket_id']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][2] == msg['ticket_status']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][3] == msg['category']
         assert event_bus.publish_message.called
         assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
         assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
@@ -64,14 +69,17 @@ class TestBruinTicketResponse:
         logger = Mock()
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
-        bruin_client = Mock()
-        bruin_client.get_all_filtered_tickets = Mock(return_value=None)
+        bruin_repository = Mock()
+        bruin_repository.get_all_filtered_tickets = Mock(return_value=None)
         msg = {'request_id': "123", 'response_topic': 'bruin.ticket.response',
-               'client_id': 123, 'ticket_id': 321}
-        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_client)
+               'client_id': 123, 'ticket_id': 321, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN'}
+        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.report_all_bruin_tickets(json.dumps(msg))
-        assert bruin_client.get_all_filtered_tickets.call_args[0][0] == msg['client_id']
-        assert bruin_client.get_all_filtered_tickets.call_args[0][1] == msg['ticket_id']
+        assert bruin_repository.get_all_filtered_tickets.called
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][0] == msg['client_id']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][1] == msg['ticket_id']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][2] == msg['ticket_status']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][3] == msg['category']
         assert event_bus.publish_message.called
         assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
         assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],

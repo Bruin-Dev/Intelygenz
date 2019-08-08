@@ -3,10 +3,10 @@ import json
 
 class PostNote:
 
-    def __init__(self, logger, event_bus, bruin_client):
+    def __init__(self, logger, event_bus, bruin_repository):
         self._logger = logger
         self._event_bus = event_bus
-        self._bruin_client = bruin_client
+        self._bruin_repository = bruin_repository
 
     async def post_note(self, msg):
         msg_dict = json.loads(msg)
@@ -14,7 +14,7 @@ class PostNote:
         note = msg_dict["note"]
         self._logger.info(f'Putting note in: {ticket_id}...')
         status = 500
-        result = self._bruin_client.post_ticket_note(ticket_id, note)
+        result = self._bruin_repository.post_ticket_note(ticket_id, note)
         if result is not None:
             status = 200
         response = {

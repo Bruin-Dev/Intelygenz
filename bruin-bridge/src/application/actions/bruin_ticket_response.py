@@ -4,11 +4,11 @@ import json
 
 class BruinTicketResponse:
 
-    def __init__(self, logger, config, event_bus, bruin_client):
+    def __init__(self, logger, config, event_bus, bruin_repository):
         self._config = config
         self._logger = logger
         self._event_bus = event_bus
-        self._bruin_client = bruin_client
+        self._bruin_repository = bruin_repository
 
     async def report_all_bruin_tickets(self, msg):
         msg_dict = json.loads(msg)
@@ -17,8 +17,13 @@ class BruinTicketResponse:
         if 'ticket_id' in msg_dict.keys():
             ticket_id = msg_dict['ticket_id']
         client_id = msg_dict['client_id']
+        ticket_status = msg_dict['ticket_status']
+        category = msg_dict['category']
         status = 500
-        filtered_tickets = self._bruin_client.get_all_filtered_tickets(client_id, ticket_id)
+        filtered_tickets = self._bruin_repository.get_all_filtered_tickets(client_id,
+                                                                           ticket_id,
+                                                                           ticket_status,
+                                                                           category)
         if filtered_tickets is not None:
             status = 200
 
