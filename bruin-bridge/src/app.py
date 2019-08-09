@@ -52,15 +52,11 @@ class Container:
                                                  durable_name="bruin_bridge",
                                                  queue="bruin_bridge",
                                                  ack_wait=480)
-        await asyncio.sleep(3)
-
         await self._event_bus.subscribe_consumer(consumer_name="ticket_details", topic="bruin.ticket.details.request",
                                                  action_wrapper=self._action_get_ticket_detail,
                                                  durable_name="bruin_bridge",
                                                  queue="bruin_bridge",
                                                  ack_wait=480)
-        await asyncio.sleep(3)
-
         await self._event_bus.subscribe_consumer(consumer_name="post_note", topic="bruin.ticket.note.append.request",
                                                  action_wrapper=self._action_post_note,
                                                  durable_name="bruin_bridge",

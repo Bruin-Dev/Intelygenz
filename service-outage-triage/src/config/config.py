@@ -20,7 +20,9 @@ NATS_CONFIG = {
     'stop_delay': 300,
     'reconnects': 150
 }
-
+TRIAGE_CONFIG = {
+    'environment': os.environ["CURRENT_ENVIRONMENT"]
+}
 LOG_CONFIG = {
     'name': 'service-outage-triage',
     'level': logging.DEBUG,

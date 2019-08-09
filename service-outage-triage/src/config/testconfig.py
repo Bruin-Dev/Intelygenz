@@ -14,7 +14,9 @@ NATS_CONFIG = {
         'max_pub_acks_inflight': 6000
     }
 }
-
+TRIAGE_CONFIG = {
+    'environment': "dev"
+}
 LOG_CONFIG = {
     'name': 'test-name',
     'level': logging.DEBUG,
