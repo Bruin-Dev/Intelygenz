@@ -30,10 +30,11 @@ class ServiceOutageTriage:
     async def _poll_tickets(self):
         self._logger.info("Requesting tickets from Bruin")
         ticket_request_msg = {'request_id': uuid(), 'response_topic': f'bruin.ticket.response.{self._service_id}',
-                              'client_id': 85940}
+                              'client_id': 85940, 'ticket_status': ['In-Progress'], 'category': 'SD-WAN'}
         all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
                                                         json.dumps(ticket_request_msg, default=str),
-                                                        timeout=10)
+                                                        timeout=30)
+        # print(json.dumps(all_tickets, indent=2))
         filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
 
         for ticket_id in filtered_ticket_ids:
@@ -52,13 +53,16 @@ class ServiceOutageTriage:
             edge_events = await self._event_bus.rpc_request("alert.request.event.edge",
                                                             json.dumps(events_msg, default=str), timeout=10)
             ticket_note = self._compose_ticket_note_object(edge_status, edge_events)
-            ticket_append_note_msg = {'request_id': uuid(),
-                                      'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
-                                      'ticket_id': ticket_id,
-                                      'ticket_note': json.dumps(ticket_note, default=str)}
-            ticket_append_note = await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                                   json.dumps(ticket_append_note_msg),
-                                                                   timeout=10)
+            # # ticket_append_note_msg = {'request_id': uuid(),
+            # #                           'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
+            # #                           'ticket_id': ticket_id,
+            # #                           'note': json.dumps(ticket_note, default=str)}
+            # ticket_append_note_msg = {'request_id': uuid(),
+            #                           'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
+            #                           'message': json.dumps(ticket_note, default=str)}
+            # ticket_append_note = await self._event_bus.rpc_request("notification.slack.request",
+            #                                                        json.dumps(ticket_append_note_msg),
+            #                                                        timeout=10)
 
     async def _filtered_ticket_details(self, ticket_list):
         filtered_ticket_ids = []
@@ -66,13 +70,15 @@ class ServiceOutageTriage:
             ticket_detail_msg = {'request_id': uuid(),
                                  'response_topic': f'bruin.ticket.details.response.{self._service_id}',
                                  'ticket_id': ticket['ticketID']}
+
             ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
                                                                json.dumps(ticket_detail_msg, default=str),
                                                                timeout=10)
+
             for ticket_detail in ticket_details['ticket_details']['ticketDetails']:
                 triage_exists = False
                 if 'detailValue' in ticket_detail.keys():
-                    if ticket_detail['detailValue'] == 'VC05200028729':
+                    if ticket_detail['detailValue'] == "VC05200033420":
                         for ticket_note in ticket_details['ticket_details']['ticketNotes']:
                             if ticket_note['noteValue'] is not None:
                                 if '#*Automaton Engine*#' in ticket_note['noteValue']:
@@ -80,6 +86,8 @@ class ServiceOutageTriage:
                         if triage_exists is not True:
                             filtered_ticket_ids.append(ticket['ticketID'])
                             break
+        # print('Filtered Ticket Ids')
+        # print(filtered_ticket_ids)
         return filtered_ticket_ids
 
     def _find_recent_occurence_of_event(self, event_list, event_type, message=None):
