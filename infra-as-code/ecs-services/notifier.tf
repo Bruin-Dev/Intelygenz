@@ -27,12 +27,12 @@ resource "aws_ecs_task_definition" "automation-notifier" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
-  task_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
+  execution_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.ecs_execution_role}"
+  task_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.ecs_execution_role}"
 }
 
 resource "aws_security_group" "automation-notifier_service" {
-  vpc_id = "${aws_vpc.automation-vpc.id}"
+  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.vpc_automation_id}"
   name = "${var.ENVIRONMENT}-notifier"
   description = "Allow egress from container"
 
@@ -72,13 +72,13 @@ resource "aws_ecs_service" "automation-notifier" {
   task_definition = "${aws_ecs_task_definition.automation-notifier.family}:${aws_ecs_task_definition.automation-notifier.revision}"
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = "${aws_ecs_cluster.automation.id}"
+  cluster = "${data.terraform_remote_state.tfstate-dev-resources.automation_cluster_id}"
 
   network_configuration {
     security_groups = [
       "${aws_security_group.automation-notifier_service.id}"]
     subnets = [
-      "${aws_subnet.automation-private_subnet-1a.id}"]
+      "${data.terraform_remote_state.tfstate-dev-resources.subnet_automation-private-1a}"]
     assign_public_ip = false
   }
 }

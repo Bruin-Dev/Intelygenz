@@ -27,12 +27,12 @@ resource "aws_ecs_task_definition" "automation-velocloud-orchestrator" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
-  task_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
+  execution_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.ecs_execution_role}"
+  task_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.ecs_execution_role}"
 }
 
 resource "aws_security_group" "automation-velocloud-orchestrator_service" {
-  vpc_id = "${aws_vpc.automation-vpc.id}"
+  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.vpc_automation_id}"
   name = "${var.ENVIRONMENT}-velocloud-orchestrator"
   description = "Allow egress from container"
 
@@ -80,7 +80,7 @@ resource "aws_service_discovery_service" "velocloud-orchestrator" {
   name = "velocloud-orchestrator"
 
   dns_config {
-    namespace_id = "${aws_service_discovery_private_dns_namespace.automation-zone.id}"
+    namespace_id = "${data.terraform_remote_state.tfstate-dev-resources.aws_service_discovery_automation-zone_id}"
 
     dns_records {
       ttl = 10
@@ -100,13 +100,13 @@ resource "aws_ecs_service" "automation-velocloud-orchestrator" {
   task_definition = "${aws_ecs_task_definition.automation-velocloud-orchestrator.family}:${aws_ecs_task_definition.automation-velocloud-orchestrator.revision}"
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = "${aws_ecs_cluster.automation.id}"
+  cluster = "${data.terraform_remote_state.tfstate-dev-resources.automation_cluster_id}"
 
   network_configuration {
     security_groups = [
       "${aws_security_group.automation-velocloud-orchestrator_service.id}"]
     subnets = [
-      "${aws_subnet.automation-private_subnet-1a.id}"]
+      "${data.terraform_remote_state.tfstate-dev-resources.subnet_automation-private-1a}"]
     assign_public_ip = false
   }
 

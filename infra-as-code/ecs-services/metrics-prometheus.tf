@@ -20,12 +20,12 @@ resource "aws_ecs_task_definition" "automation-metrics-prometheus" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
-  task_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
+  execution_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.ecs_execution_role}"
+  task_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.ecs_execution_role}"
 }
 
 resource "aws_security_group" "automation-metrics-prometheus_service" {
-  vpc_id = "${aws_vpc.automation-vpc.id}"
+  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.vpc_automation_id}"
   name = "${var.ENVIRONMENT}-metrics-prometheus"
   description = "Allow egress from container"
 
@@ -64,7 +64,7 @@ resource "aws_service_discovery_service" "metrics-prometheus" {
   name = "prometheus"
 
   dns_config {
-    namespace_id = "${aws_service_discovery_private_dns_namespace.automation-zone.id}"
+    namespace_id = "${data.terraform_remote_state.tfstate-dev-resources.aws_service_discovery_automation-zone_id}"
 
     dns_records {
       ttl = 10
@@ -84,13 +84,13 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
   task_definition = "${aws_ecs_task_definition.automation-metrics-prometheus.family}:${aws_ecs_task_definition.automation-metrics-prometheus.revision}"
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = "${aws_ecs_cluster.automation.id}"
+  cluster = "${data.terraform_remote_state.tfstate-dev-resources.automation_cluster_id}"
 
   network_configuration {
     security_groups = [
       "${aws_security_group.automation-metrics-prometheus_service.id}"]
     subnets = [
-      "${aws_subnet.automation-private_subnet-1a.id}"]
+      "${data.terraform_remote_state.tfstate-dev-resources.subnet_automation-private-1a}"]
     assign_public_ip = false
   }
 
