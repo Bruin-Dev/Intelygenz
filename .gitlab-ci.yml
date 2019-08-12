@@ -6,6 +6,8 @@ stages:
   - build
   - deploy
   - deploy_ecs_services
+  - remove_dev
+  - remove_ecs_services
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -68,7 +70,7 @@ variables:
 
 .job_terraform_template: &terraform_template
   image:
-    name: hashicorp/terraform:light
+    name: hashicorp/terraform:0.12.6
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -449,7 +451,7 @@ deploy-branches-ecs-services:
     - master
 
 destroy-branches:
-  stage: deploy
+  stage: remove_dev
   <<: *terraform_template
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
@@ -473,7 +475,7 @@ destroy-branches:
     - master
 
 destroy-branches-ecs-services:
-  stage: deploy_ecs_services
+  stage: remove_ecs_services
   <<: *terraform_template
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
@@ -552,7 +554,7 @@ deploy-master-ecs-services:
     - master
 
 destroy-master:
-  stage: deploy
+  stage: remove_dev
   <<: *terraform_template
   script:
     - export ENVIRONMENT_SLUG=master
@@ -573,7 +575,7 @@ destroy-master:
     - master
 
 destroy-master-ecs-services:
-  stage: deploy_ecs_services
+  stage: remove_ecs_services
   <<: *terraform_template
   script:
     - export ENVIRONMENT_SLUG=master
