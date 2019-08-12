@@ -15,7 +15,7 @@ data "template_file" "automation-velocloud-orchestrator" {
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
     MONITORING_SECONDS = "${var.MONITORING_SECONDS}"
     LAST_CONTACT_RECIPIENT = "${var.LAST_CONTACT_RECIPIENT}"
-    REDIS_HOSTNAME = "${aws_elasticache_cluster.automation-redis.cache_nodes.0.address}"
+    REDIS_HOSTNAME = "${data.terraform_remote_state.tfstate-dev-resources.redis_hostname}"
   }
 }
 

@@ -17,3 +17,7 @@ output "aws_service_discovery_automation-zone_id" {
 output "subnet_automation-private-1a" {
   value = "${aws_subnet.automation-private_subnet-1a.id}"
 }
+
+output "redis_hostname" {
+  value = "${aws_elasticache_cluster.automation-redis.cache_nodes.0.address}"
+}

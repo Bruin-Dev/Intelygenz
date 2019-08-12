@@ -33,7 +33,7 @@ resource "aws_ecs_task_definition" "automation-bruin-bridge" {
 }
 
 resource "aws_security_group" "automation-bruin-bridge_service" {
-  vpc_id = "${aws_vpc.automation-vpc.id}"
+  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.vpc_automation_id}"
   name = "${var.ENVIRONMENT}-bruin-bridge"
   description = "Allow egress from container"
 
