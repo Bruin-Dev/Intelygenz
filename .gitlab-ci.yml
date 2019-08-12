@@ -352,7 +352,7 @@ terraform-validate-dev:
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables > temp_vars.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
@@ -376,7 +376,7 @@ terraform-validate-ecs-services:
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
     - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables > temp_vars.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/ecs-services/init.tf
     - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
@@ -400,7 +400,7 @@ deploy-branches:
     - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables > temp_vars.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
@@ -434,7 +434,7 @@ deploy-branches-ecs-services:
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
     - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables > temp_vars.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/ecs-services/init.tf
     - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
@@ -457,7 +457,7 @@ destroy-branches:
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables > temp_vars.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
@@ -481,7 +481,7 @@ destroy-branches-ecs-services:
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - apk add gettext
     - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables > temp_vars.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/ecs-services/init.tf
     - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
@@ -507,7 +507,7 @@ deploy-master:
     - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables > temp_vars.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
@@ -539,7 +539,7 @@ deploy-master-ecs-services:
     - export TF_VAR_CURRENT_ENVIRONMENT=production
     - apk add gettext
     - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables > temp_vars.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/ecs-services/init.tf
     - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
@@ -560,7 +560,7 @@ destroy-master:
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables > temp_vars.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
@@ -581,7 +581,7 @@ destroy-master-ecs-services:
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - apk add gettext
     - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables > temp_vars.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/ecs-services/init.tf
     - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
