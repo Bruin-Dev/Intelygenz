@@ -86,7 +86,7 @@ class ServiceOutageTriage:
                     if 'VC05200028729' in ticket_detail['detailValue']:
                         for ticket_note in ticket_details['ticket_details']['ticketNotes']:
                             if ticket_note['noteValue'] is not None:
-                                if '#*Automaton Engine*#' in ticket_note['noteValue']:
+                                if '#*Automation Engine*#' in ticket_note['noteValue']:
                                     triage_exists = True
                         if triage_exists is not True:
                             filtered_ticket_ids.append(ticket['ticketID'])
@@ -176,8 +176,8 @@ class ServiceOutageTriage:
         return edge_triage_dict
 
     def _ticket_object_to_string(self, ticket_dict):
-        edge_triage_str = "#*Automaton Engine*#| "
+        edge_triage_str = "#*Automation Engine*# \n"
         for key in ticket_dict.keys():
             parsed_key = re.sub(r" LABELMARK(.)*", "", key)
-            edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]} |'
+            edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]} \n'
         return edge_triage_str

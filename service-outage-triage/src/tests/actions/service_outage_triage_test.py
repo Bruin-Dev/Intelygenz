@@ -230,7 +230,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         tickets = {'tickets': [{"ticketID": 3521039}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200028729'}],
-                          "ticketNotes": [{"noteValue": '#*Automaton Engine*#'}]}}
+                          "ticketNotes": [{"noteValue": '#*Automation Engine*#'}]}}
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
         logger = Mock()
         scheduler = Mock()
@@ -504,4 +504,4 @@ class TestServiceOutageTriage:
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         ticket_note = service_outage_triage._ticket_object_to_string(test_dict)
-        assert ticket_note == '#*Automaton Engine*#| EdgeName: Test |Edge Status: ok |'
+        assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'
