@@ -59,16 +59,16 @@ class ServiceOutageTriage:
                                           'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
                                           'ticket_id': ticket_id,
                                           'note': ticket_note}
-                ticket_append_note = await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                                       json.dumps(ticket_append_note_msg),
-                                                                       timeout=10)
+                await self._event_bus.rpc_request("bruin.ticket.note.append.request",
+                                                  json.dumps(ticket_append_note_msg),
+                                                  timeout=10)
             elif self._config.TRIAGE_CONFIG['environment'] == 'dev':
                 ticket_append_note_msg = {'request_id': uuid(),
                                           'response_topic': f'notification.slack.response.{self._service_id}',
                                           'message': ticket_note}
-                ticket_send_to_slack = await self._event_bus.rpc_request("notification.slack.request",
-                                                                         json.dumps(ticket_append_note_msg),
-                                                                         timeout=10)
+                await self._event_bus.rpc_request("notification.slack.request",
+                                                  json.dumps(ticket_append_note_msg),
+                                                  timeout=10)
         self._logger.info("End of ticket polling job")
 
     async def _filtered_ticket_details(self, ticket_list):

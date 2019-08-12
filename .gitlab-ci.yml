@@ -324,6 +324,7 @@ terraform-validate-dev:
     - export TF_VAR_BRUIN_CLIENT_SECRET_PRO=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL_PRO=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
@@ -354,6 +355,7 @@ deploy-branches:
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf
@@ -407,6 +409,7 @@ deploy-master:
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_CURRENT_ENVIRONMENT=production
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - mv temp.tf infra-as-code/dev/init.tf

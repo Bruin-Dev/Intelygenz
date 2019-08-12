@@ -43,6 +43,10 @@
       {
         "name": "NATS_CLUSTER_NAME",
         "value": "${NATS_CLUSTER_NAME}"
+      },
+      {
+        "name": "CURRENT_ENVIRONMENT",
+        "value": "${CURRENT_ENVIRONMENT}"
       }
     ]
   }

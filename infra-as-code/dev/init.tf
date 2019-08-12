@@ -69,7 +69,9 @@ variable "BRUIN_LOGIN_URL" {
 variable "BRUIN_BASE_URL" {
   default = ""
 }
-
+variable "CURRENT_ENVIRONMENT" {
+  default = "dev"
+}
 variable "cdir_base" {
   default = "10.1.0.0"
 }
