@@ -15,7 +15,8 @@ NATS_CONFIG = {
     }
 }
 TRIAGE_CONFIG = {
-    'environment': "dev"
+    'environment': "dev",
+    'recipient': "some.recipient@email.com"
 }
 LOG_CONFIG = {
     'name': 'test-name',

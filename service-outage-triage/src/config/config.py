@@ -21,7 +21,8 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 TRIAGE_CONFIG = {
-    'environment': os.environ["CURRENT_ENVIRONMENT"]
+    'environment': os.environ["CURRENT_ENVIRONMENT"],
+    'recipient': os.environ["LAST_CONTACT_RECIPIENT"]
 }
 LOG_CONFIG = {
     'name': 'service-outage-triage',

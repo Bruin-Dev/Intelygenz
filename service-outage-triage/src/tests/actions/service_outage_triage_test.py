@@ -1,10 +1,11 @@
 from collections import OrderedDict
 from unittest.mock import Mock
-
+import json
 import pytest
 from application.actions.service_outage_triage import ServiceOutageTriage
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
+from collections import OrderedDict
 
 from config import testconfig
 
@@ -78,7 +79,7 @@ class TestServiceOutageTriage:
         service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=[
                                                                        tickets['tickets'][0]['ticketID']])
         service_outage_triage._compose_ticket_note_object = Mock(return_value={"Ticket return object": "Ticket Note"})
-        service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
+        service_outage_triage._ticket_object_to_email_obj = Mock(return_value="Ticket Note Object")
 
         await service_outage_triage._poll_tickets()
         assert event_bus.rpc_request.called
@@ -87,9 +88,9 @@ class TestServiceOutageTriage:
         assert service_outage_triage._compose_ticket_note_object.called
         assert service_outage_triage._compose_ticket_note_object.call_args[0][0] == edge_status
         assert service_outage_triage._compose_ticket_note_object.call_args[0][1] == edge_event
-        assert service_outage_triage._ticket_object_to_string.called
-        assert event_bus.rpc_request.call_args[0][0] == "notification.slack.request"
-        assert 'message' in event_bus.rpc_request.call_args[0][1]
+        assert service_outage_triage._ticket_object_to_email_obj.called
+        assert event_bus.rpc_request.call_args[0][0] == "notification.email.request"
+        assert event_bus.rpc_request.call_args[0][1] == json.dumps("Ticket Note Object")
 
     @pytest.mark.asyncio
     async def poll_tickets_production_test(self):
@@ -141,6 +142,7 @@ class TestServiceOutageTriage:
             tickets['tickets'][0]['ticketID']])
         service_outage_triage._compose_ticket_note_object = Mock(return_value={"Ticket return object": "Ticket Note"})
         service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
+        service_outage_triage._ticket_object_to_email_obj = Mock(return_value="Ticket Note Object")
 
         await service_outage_triage._poll_tickets()
         assert event_bus.rpc_request.called
@@ -149,7 +151,8 @@ class TestServiceOutageTriage:
         assert service_outage_triage._compose_ticket_note_object.called
         assert service_outage_triage._compose_ticket_note_object.call_args[0][0] == edge_status
         assert service_outage_triage._compose_ticket_note_object.call_args[0][1] == edge_event
-        assert service_outage_triage._ticket_object_to_string.called
+        assert service_outage_triage._ticket_object_to_string.called is False
+        assert service_outage_triage._ticket_object_to_email_obj.called is False
         assert event_bus.rpc_request.call_args[0][0] != "bruin.ticket.note.append.request"
         assert event_bus.rpc_request.call_args[0][0] != "notification.slack.request"
 
@@ -494,6 +497,24 @@ class TestServiceOutageTriage:
         assert ticket_object['Label LABELMARK2'] is None
         assert ticket_object['Label LABELMARK4'] is None
         assert service_outage_triage._find_recent_occurence_of_event.called
+
+    def ticket_object_to_email_obj_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        service_id = 123
+        ticket_dict = OrderedDict()
+        ticket_dict['EdgeName'] = 'Test'
+        ticket_dict['Edge Status'] = 'ok'
+        ticket_dict["Company Events URL"] = 'test.com',
+        ticket_dict['Events URL'] = 'event.com'
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        email = service_outage_triage._ticket_object_to_email_obj(ticket_dict)
+
+        assert 'Edge Monitoring' in email["email_data"]["subject"]
+        assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
+        assert "<!DOCTYPE html" in email["email_data"]["html"]
 
     def ticket_object_to_string_test(self):
         event_bus = Mock()

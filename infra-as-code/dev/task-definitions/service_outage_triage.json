@@ -47,6 +47,10 @@
       {
         "name": "CURRENT_ENVIRONMENT",
         "value": "${CURRENT_ENVIRONMENT}"
+      },
+      {
+        "name": "LAST_CONTACT_RECIPIENT",
+        "value": "${LAST_CONTACT_RECIPIENT}"
       }
     ]
   }

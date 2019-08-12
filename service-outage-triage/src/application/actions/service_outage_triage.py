@@ -1,3 +1,5 @@
+import base64
+
 import json
 import re
 from collections import OrderedDict
@@ -8,6 +10,26 @@ from pytz import timezone, utc
 from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
+
+ODD_ROW = '<tr>' \
+          '<td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; ' \
+          'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
+          'white-space: nowrap">%%KEY%%</td>' \
+          '<td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; ' \
+          'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
+          'white-space: nowrap">%%VALUE%%</td>' \
+          ' </tr>'
+
+EVEN_ROW = ' <tr>' \
+           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; ' \
+           'color: #596872; font-weight: normal; ' \
+           'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
+           'white-space: nowrap">%%KEY%%</td>' \
+           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; ' \
+           'color: #596872; font-weight: normal; ' \
+           'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
+           'white-space: nowrap">%%VALUE%%</td>' \
+           '</tr>'
 
 
 class ServiceOutageTriage:
@@ -53,8 +75,8 @@ class ServiceOutageTriage:
             edge_events = await self._event_bus.rpc_request("alert.request.event.edge",
                                                             json.dumps(events_msg, default=str), timeout=10)
             ticket_dict = self._compose_ticket_note_object(edge_status, edge_events)
-            ticket_note = self._ticket_object_to_string(ticket_dict)
             if self._config.TRIAGE_CONFIG['environment'] == 'production':
+                ticket_note = self._ticket_object_to_string(ticket_dict)
                 ticket_append_note_msg = {'request_id': uuid(),
                                           'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
                                           'ticket_id': ticket_id,
@@ -63,11 +85,9 @@ class ServiceOutageTriage:
                                                   json.dumps(ticket_append_note_msg),
                                                   timeout=10)
             elif self._config.TRIAGE_CONFIG['environment'] == 'dev':
-                ticket_append_note_msg = {'request_id': uuid(),
-                                          'response_topic': f'notification.slack.response.{self._service_id}',
-                                          'message': ticket_note}
-                await self._event_bus.rpc_request("notification.slack.request",
-                                                  json.dumps(ticket_append_note_msg),
+                ticket_note = self._ticket_object_to_email_obj(ticket_dict)
+                await self._event_bus.rpc_request("notification.email.request",
+                                                  json.dumps(ticket_note),
                                                   timeout=10)
         self._logger.info("End of ticket polling job")
 
@@ -122,7 +142,7 @@ class ServiceOutageTriage:
         edge_triage_dict["Transport URL"] = \
             f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/'
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/ \n'
 
         edge_triage_dict["Edge Status"] = edges_status_to_report["edge_info"]["edges"]["edgeState"]
 
@@ -132,7 +152,7 @@ class ServiceOutageTriage:
 
         edge_triage_dict["Interface LABELMARK3"] = None
         edge_triage_dict["Label LABELMARK4"] = None
-        edge_triage_dict["Line GE2 Status"] = "Line GE2 not available"
+        edge_triage_dict["Line GE2 Status"] = "Line GE2 not available\n"
 
         link_data = dict()
 
@@ -148,7 +168,7 @@ class ServiceOutageTriage:
             edge_triage_dict["Label LABELMARK2"] = link_data["GE1"][0]["link"]['displayName']
         if len(link_data["GE2"]) > 0:
             edge_triage_dict["Interface LABELMARK3"] = link_data["GE2"][0]["link"]["interface"]
-            edge_triage_dict["Line GE2 Status"] = link_data["GE2"][0]["link"]["state"]
+            edge_triage_dict["Line GE2 Status"] = f'{link_data["GE2"][0]["link"]["state"]}\n'
             edge_triage_dict["Label LABELMARK4"] = link_data["GE2"][0]["link"]['displayName']
 
         edge_triage_dict["Company Events URL"] = f'https://{edges_status_to_report["edge_id"]["host"]}/#!/' \
@@ -174,6 +194,62 @@ class ServiceOutageTriage:
                                                                                          'LINK_DEAD',
                                                                                          'Link GE2 is now DEAD')
         return edge_triage_dict
+
+    def _ticket_object_to_email_obj(self, ticket_dict):
+        with open('src/templates/service_outage_triage.html') as template:
+            email_html = "".join(template.readlines())
+            email_html = email_html.replace('%%EDGE_COUNT%%', '1')
+            email_html = email_html.replace('%%SERIAL_NUMBER%%', 'VC05200028729')
+
+        copy_ticket_dict = ticket_dict
+        edge_overview = OrderedDict()
+        for key in copy_ticket_dict.copy().keys():
+            if key == "Company Events URL":
+                break
+            edge_overview[key] = copy_ticket_dict.pop(key)
+
+        edge_events = OrderedDict()
+        for key in copy_ticket_dict.copy().keys():
+            edge_events[key] = copy_ticket_dict.pop(key)
+
+        rows = []
+        for idx, key in enumerate(edge_overview.keys()):
+            row = EVEN_ROW if idx % 2 == 0 else ODD_ROW
+            parsed_key = re.sub(r" LABELMARK(.)*", "", key)
+            row = row.replace('%%KEY%%', parsed_key)
+            row = row.replace('%%VALUE%%', str(edge_overview[key]))
+            rows.append(row)
+        email_html = email_html.replace('%%OVERVIEW_ROWS%%', "".join(rows))
+
+        rows = []
+        for idx, key in enumerate(edge_events.keys()):
+            row = EVEN_ROW if idx % 2 == 0 else ODD_ROW
+            row = row.replace('%%KEY%%', key)
+            row = row.replace('%%VALUE%%', str(edge_events[key]))
+            rows.append(row)
+        email_html = email_html.replace('%%EVENT_ROWS%%', "".join(rows))
+
+        return {
+            'request_id': uuid(),
+            'response_topic': f"notification.email.response.{self._service_id}",
+            'email_data': {
+                'subject': f'Edge Monitoring ({datetime.now().strftime("%Y-%m-%d")})',
+                'recipient': self._config.TRIAGE_CONFIG["recipient"],
+                'text': 'this is the accessible text for the email',
+                'html': email_html,
+                'images': [
+                    {
+                        'name': 'logo',
+                        'data': base64.b64encode(open('src/templates/images/logo.png', 'rb').read()).decode('utf-8')
+                    },
+                    {
+                        'name': 'header',
+                        'data': base64.b64encode(open('src/templates/images/header.jpg', 'rb').read()).decode('utf-8')
+                    },
+                ],
+                'attachments': []
+            }
+        }
 
     def _ticket_object_to_string(self, ticket_dict):
         edge_triage_str = "#*Automation Engine*# \n"

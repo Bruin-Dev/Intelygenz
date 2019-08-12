@@ -14,6 +14,8 @@ data "template_file" "automation-service-outage-triage" {
     NATS_SERVER1 = "nats://nats-server.${var.ENVIRONMENT}.local:4222"
     NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
     CURRENT_ENVIRONMENT = "${var.CURRENT_ENVIRONMENT}"
+    LAST_CONTACT_RECIPIENT = "${var.LAST_CONTACT_RECIPIENT}"
+
   }
 }
 
