@@ -1,4 +1,5 @@
 import json
+import re
 from collections import OrderedDict
 from datetime import datetime, timedelta
 
@@ -177,5 +178,6 @@ class ServiceOutageTriage:
     def _ticket_object_to_string(self, ticket_dict):
         edge_triage_str = "#*Automaton Engine*#| "
         for key in ticket_dict.keys():
-            edge_triage_str = edge_triage_str + f'{key}: {ticket_dict[key]} |'
+            parsed_key = re.sub(r" LABELMARK(.)*", "", key)
+            edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]} |'
         return edge_triage_str
