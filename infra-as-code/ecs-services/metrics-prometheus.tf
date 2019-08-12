@@ -20,12 +20,12 @@ resource "aws_ecs_task_definition" "automation-metrics-prometheus" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.ecs_execution_role}"
-  task_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.ecs_execution_role}"
+  execution_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
+  task_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
 }
 
 resource "aws_security_group" "automation-metrics-prometheus_service" {
-  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.vpc_automation_id}"
+  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id}"
   name = "${var.ENVIRONMENT}-metrics-prometheus"
   description = "Allow egress from container"
 
@@ -64,7 +64,7 @@ resource "aws_service_discovery_service" "metrics-prometheus" {
   name = "prometheus"
 
   dns_config {
-    namespace_id = "${data.terraform_remote_state.tfstate-dev-resources.aws_service_discovery_automation-zone_id}"
+    namespace_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id}"
 
     dns_records {
       ttl = 10
@@ -84,13 +84,13 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
   task_definition = "${aws_ecs_task_definition.automation-metrics-prometheus.family}:${aws_ecs_task_definition.automation-metrics-prometheus.revision}"
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = "${data.terraform_remote_state.tfstate-dev-resources.automation_cluster_id}"
+  cluster = "${data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id}"
 
   network_configuration {
     security_groups = [
       "${aws_security_group.automation-metrics-prometheus_service.id}"]
     subnets = [
-      "${data.terraform_remote_state.tfstate-dev-resources.subnet_automation-private-1a}"]
+      "${data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a}"]
     assign_public_ip = false
   }
 
