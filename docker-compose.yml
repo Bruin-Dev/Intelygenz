@@ -94,6 +94,9 @@ services:
       - service-outage-triage/src/config/env
     depends_on:
       - "nats-streaming"
+      - "velocloud-bridge"
+      - "bruin-bridge"
+      - "notifier"
     ports:
       - 5005:5000
 
