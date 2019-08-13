@@ -516,6 +516,22 @@ class TestServiceOutageTriage:
         assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 
+    def ticket_object_to_email_obj_no_events_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        service_id = 123
+        ticket_dict = OrderedDict()
+        ticket_dict['EdgeName'] = 'Test'
+        ticket_dict['Edge Status'] = 'ok'
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        email = service_outage_triage._ticket_object_to_email_obj(ticket_dict)
+
+        assert 'Edge Monitoring' in email["email_data"]["subject"]
+        assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
+        assert "<!DOCTYPE html" in email["email_data"]["html"]
+
     def ticket_object_to_string_test(self):
         event_bus = Mock()
         logger = Mock()
