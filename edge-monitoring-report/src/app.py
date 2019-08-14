@@ -11,7 +11,7 @@ from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.server.api import QuartServer
-
+import os
 
 class Container:
 
@@ -45,7 +45,6 @@ class Container:
 
     async def run(self):
         await self._start()
-
 
 
 if __name__ == '__main__':
