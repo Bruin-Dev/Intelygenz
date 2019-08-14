@@ -407,6 +407,7 @@ deploy-branches:
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
+    - sleep 300
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
@@ -441,7 +442,6 @@ deploy-branches-ecs-services:
     - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
     - terraform apply -auto-approve infra-as-code/ecs-services
-    - sleep 300
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
@@ -490,13 +490,6 @@ destroy-branches:
     - terraform init infra-as-code/dev
     - terraform refresh infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
-      - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/ecs-services/init.tf
-    - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
-    - terraform init infra-as-code/ecs-services
-    - terraform refresh infra-as-code/ecs-services
-    - terraform destroy -auto-approve infra-as-code/ecs-services
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
