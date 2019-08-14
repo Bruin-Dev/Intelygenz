@@ -2,19 +2,19 @@ import json
 from unittest.mock import Mock
 
 import pytest
-from application.actions.bruin_ticket_response import BruinTicketResponse
+from application.actions.get_tickets import GetTicket
 from asynctest import CoroutineMock
 
 from config import testconfig as config
 
 
-class TestBruinTicketResponse:
+class TestGetTicket:
 
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
         bruin_repository = Mock()
-        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
+        bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         assert bruin_ticket_response._logger is logger
         assert bruin_ticket_response._config is config.BRUIN_CONFIG
         assert bruin_ticket_response._event_bus is event_bus
@@ -29,8 +29,8 @@ class TestBruinTicketResponse:
         bruin_repository.get_all_filtered_tickets = Mock(return_value=['Some ticket list'])
         msg = {'request_id': "123", 'response_topic': 'bruin.ticket.response',
                'client_id': 123, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN'}
-        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
-        await bruin_ticket_response.report_all_bruin_tickets(json.dumps(msg))
+        bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
+        await bruin_ticket_response.get_all_tickets(json.dumps(msg))
         assert bruin_repository.get_all_filtered_tickets.called
         assert bruin_repository.get_all_filtered_tickets.call_args[0][0] == msg['client_id']
         assert bruin_repository.get_all_filtered_tickets.call_args[0][1] == ''
@@ -51,8 +51,8 @@ class TestBruinTicketResponse:
         bruin_repository.get_all_filtered_tickets = Mock(return_value=['Some ticket list'])
         msg = {'request_id': "123", 'response_topic': 'bruin.ticket.response',
                'client_id': 123, 'ticket_id': 321, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN'}
-        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
-        await bruin_ticket_response.report_all_bruin_tickets(json.dumps(msg))
+        bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
+        await bruin_ticket_response.get_all_tickets(json.dumps(msg))
         assert bruin_repository.get_all_filtered_tickets.called
         assert bruin_repository.get_all_filtered_tickets.call_args[0][0] == msg['client_id']
         assert bruin_repository.get_all_filtered_tickets.call_args[0][1] == msg['ticket_id']
@@ -73,8 +73,8 @@ class TestBruinTicketResponse:
         bruin_repository.get_all_filtered_tickets = Mock(return_value=None)
         msg = {'request_id': "123", 'response_topic': 'bruin.ticket.response',
                'client_id': 123, 'ticket_id': 321, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN'}
-        bruin_ticket_response = BruinTicketResponse(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
-        await bruin_ticket_response.report_all_bruin_tickets(json.dumps(msg))
+        bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
+        await bruin_ticket_response.get_all_tickets(json.dumps(msg))
         assert bruin_repository.get_all_filtered_tickets.called
         assert bruin_repository.get_all_filtered_tickets.call_args[0][0] == msg['client_id']
         assert bruin_repository.get_all_filtered_tickets.call_args[0][1] == msg['ticket_id']

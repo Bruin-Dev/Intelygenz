@@ -1,7 +1,7 @@
 from config import config
 from application.clients.bruin_client import BruinClient
 from application.repositories.bruin_repository import BruinRepository
-from application.actions.bruin_ticket_response import BruinTicketResponse
+from application.actions.get_tickets import GetTicket
 from application.actions.get_ticket_details import GetTicketDetails
 from application.actions.post_note import PostNote
 from igz.packages.nats.clients import NatsStreamingClient
@@ -31,12 +31,12 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_post_note, consumer_name="post_note")
         self._event_bus.set_producer(self._publisher)
 
-        self._get_tickets = BruinTicketResponse(self._logger, config.BRUIN_CONFIG, self._event_bus,
-                                                self._bruin_repository)
+        self._get_tickets = GetTicket(self._logger, config.BRUIN_CONFIG, self._event_bus,
+                                      self._bruin_repository)
         self._get_ticket_details = GetTicketDetails(self._logger, self._event_bus, self._bruin_repository)
         self._post_note = PostNote(self._logger, self._event_bus, self._bruin_repository)
 
-        self._report_bruin_ticket = ActionWrapper(self._get_tickets, "report_all_bruin_tickets",
+        self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
                                                   is_async=True, logger=self._logger)
         self._action_get_ticket_detail = ActionWrapper(self._get_ticket_details, "send_ticket_details",
                                                        is_async=True, logger=self._logger)

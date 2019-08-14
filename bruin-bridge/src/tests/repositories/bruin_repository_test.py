@@ -12,18 +12,44 @@ class TestBruinRepository:
         assert bruin_repository._logger is logger
         assert bruin_repository._bruin_client is bruin_client
 
-    def get_filtered_tickets_test(self):
+    def get_filtered_tickets_ok_test(self):
         logger = Mock()
         bruin_client = Mock()
-        bruin_client.get_all_tickets = Mock(return_value='All Tickets')
+        bruin_client.get_all_tickets = Mock(side_effect=[['All New Tickets'], ['All In-Progress Tickets']])
         bruin_repository = BruinRepository(logger, bruin_client)
         filtered_tickets = bruin_repository.get_all_filtered_tickets(123, 321, ["New", "In-Progress"], "SD-WAN")
         assert bruin_client.get_all_tickets.called
         assert bruin_client.get_all_tickets.call_args[0][0] == 123
         assert bruin_client.get_all_tickets.call_args[0][1] == 321
-        assert bruin_client.get_all_tickets.call_args[0][2] == ["New", "In-Progress"]
+        assert bruin_client.get_all_tickets.call_args[0][2] == "In-Progress"
         assert bruin_client.get_all_tickets.call_args[0][3] == "SD-WAN"
-        assert filtered_tickets == 'All Tickets'
+        assert filtered_tickets == ['All New Tickets', 'All In-Progress Tickets']
+
+    def get_filtered_tickets_ko_one_none_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+        bruin_client.get_all_tickets = Mock(side_effect=[['All New Tickets'], None])
+        bruin_repository = BruinRepository(logger, bruin_client)
+        filtered_tickets = bruin_repository.get_all_filtered_tickets(123, 321, ["New", "In-Progress"], "SD-WAN")
+        assert bruin_client.get_all_tickets.called
+        assert bruin_client.get_all_tickets.call_args[0][0] == 123
+        assert bruin_client.get_all_tickets.call_args[0][1] == 321
+        assert bruin_client.get_all_tickets.call_args[0][2] == "In-Progress"
+        assert bruin_client.get_all_tickets.call_args[0][3] == "SD-WAN"
+        assert filtered_tickets == ['All New Tickets']
+
+    def get_filtered_tickets_ko_all_none_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+        bruin_client.get_all_tickets = Mock(side_effect=[None, None])
+        bruin_repository = BruinRepository(logger, bruin_client)
+        filtered_tickets = bruin_repository.get_all_filtered_tickets(123, 321, ["New", "In-Progress"], "SD-WAN")
+        assert bruin_client.get_all_tickets.called
+        assert bruin_client.get_all_tickets.call_args[0][0] == 123
+        assert bruin_client.get_all_tickets.call_args[0][1] == 321
+        assert bruin_client.get_all_tickets.call_args[0][2] == "In-Progress"
+        assert bruin_client.get_all_tickets.call_args[0][3] == "SD-WAN"
+        assert filtered_tickets is None
 
     def get_ticket_details_test(self):
         logger = Mock()

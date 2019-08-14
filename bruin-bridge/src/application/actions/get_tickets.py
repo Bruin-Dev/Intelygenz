@@ -2,7 +2,7 @@ import requests
 import json
 
 
-class BruinTicketResponse:
+class GetTicket:
 
     def __init__(self, logger, config, event_bus, bruin_repository):
         self._config = config
@@ -10,7 +10,7 @@ class BruinTicketResponse:
         self._event_bus = event_bus
         self._bruin_repository = bruin_repository
 
-    async def report_all_bruin_tickets(self, msg):
+    async def get_all_tickets(self, msg):
         msg_dict = json.loads(msg)
         self._logger.info(f'Collecting all tickets for client id: { msg_dict["client_id"]}...')
         ticket_id = ''

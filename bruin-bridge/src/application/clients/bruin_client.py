@@ -44,23 +44,21 @@ class BruinClient:
 
     def get_all_tickets(self, client_id, ticket_id, ticket_status, category):
         self._logger.info(f'Getting all tickets for client id: {client_id}')
-        ticket_list = []
-        for status in ticket_status:
-            params = {
-                "ClientId": client_id,
-                "TicketId": ticket_id,
-                "TicketStatus": status,
-                "Category": category
-            }
-            response = requests.get(f"{self._config['base_url']}/api/Ticket",
-                                    headers=self._get_request_headers(),
-                                    verify=False, params=params)
 
-            if response.status_code in range(200, 299):
-                ticket_list = ticket_list + response.json()['responses']
-        if len(ticket_list) > 0:
-            return ticket_list
-        return None
+        params = {
+            "ClientId": client_id,
+            "TicketId": ticket_id,
+            "TicketStatus": ticket_status,
+            "Category": category
+        }
+        response = requests.get(f"{self._config['base_url']}/api/Ticket",
+                                headers=self._get_request_headers(),
+                                verify=False, params=params)
+
+        if response.status_code in range(200, 299):
+            return response.json()['responses']
+        else:
+            return None
 
     def get_ticket_details(self, ticket_id):
         self._logger.info(f'Getting ticket details for ticket id: {ticket_id}')
