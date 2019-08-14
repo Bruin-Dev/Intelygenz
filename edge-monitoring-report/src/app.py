@@ -47,6 +47,7 @@ class Container:
         await self._start()
 
 
+
 if __name__ == '__main__':
     container = Container()
     loop = asyncio.get_event_loop()
