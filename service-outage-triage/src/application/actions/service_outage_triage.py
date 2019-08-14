@@ -57,8 +57,11 @@ class ServiceOutageTriage:
         all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
                                                         json.dumps(ticket_request_msg, default=str),
                                                         timeout=10)
-        filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
-
+        filtered_ticket_ids = []
+        if all_tickets is not None:
+            filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
+        else:
+            self._logger.error('Tickets returned None')
         for ticket_id in filtered_ticket_ids:
             edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
             status_msg = {'request_id': uuid(),
@@ -109,7 +112,8 @@ class ServiceOutageTriage:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
                                     triage_exists = True
                         if triage_exists is not True:
-                            filtered_ticket_ids.append(ticket['ticketID'])
+                            if ticket['ticketID'] not in filtered_ticket_ids:
+                                filtered_ticket_ids.append(ticket['ticketID'])
                             break
         return filtered_ticket_ids
 
@@ -162,6 +166,7 @@ class ServiceOutageTriage:
         link_data["GE2"] = [link for link in edges_status_to_report["edge_info"]["links"]
                             if link["link"] is not None
                             if link["link"]["interface"] == "GE2"]
+        # Check if linkdata return an empty list due to None links
         if len(link_data["GE1"]) > 0:
             edge_triage_dict["Interface LABELMARK1"] = link_data["GE1"][0]["link"]["interface"]
             edge_triage_dict["Line GE1 Status"] = link_data["GE1"][0]["link"]["state"]
@@ -201,16 +206,19 @@ class ServiceOutageTriage:
             email_html = email_html.replace('%%EDGE_COUNT%%', '1')
             email_html = email_html.replace('%%SERIAL_NUMBER%%', 'VC05200028729')
 
-        copy_ticket_dict = ticket_dict
+        overview_keys = ["Orchestrator instance", "Edge Name", "Edge URL", "QoE URL", "Transport URL", "Edge Status",
+                         "Interface LABELMARK1", "Label LABELMARK2", "Line GE1 Status", "Interface LABELMARK3",
+                         "Line GE2 Status", "Label LABELMARK4"]
+        events_keys = ["Company Events URL", "Last Edge Online", "Last Edge Offline", "Last GE1 Line Online",
+                       "Last GE1 Line Offline", "Last GE2 Line Online", "Last GE2 Line Offline"]
         edge_overview = OrderedDict()
-        for key in copy_ticket_dict.copy().keys():
-            if key == "Company Events URL":
-                break
-            edge_overview[key] = copy_ticket_dict.pop(key)
-
         edge_events = OrderedDict()
-        for key in copy_ticket_dict.copy().keys():
-            edge_events[key] = copy_ticket_dict.pop(key)
+
+        for key, value in ticket_dict.items():
+            if key in overview_keys:
+                edge_overview[key] = value
+            if key in events_keys:
+                edge_events[key] = value
 
         rows = []
         for idx, key in enumerate(edge_overview.keys()):

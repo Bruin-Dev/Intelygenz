@@ -157,6 +157,25 @@ class TestServiceOutageTriage:
         assert event_bus.rpc_request.call_args[0][0] != "notification.slack.request"
 
     @pytest.mark.asyncio
+    async def poll_tickets_none_bruin_ticket_response_test(self):
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=None)
+        logger = Mock()
+        logger.error = Mock()
+        scheduler = Mock()
+        config = testconfig
+        config.TRIAGE_CONFIG['environment'] = None
+        service_id = 123
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage._filtered_ticket_details = Mock()
+
+        await service_outage_triage._poll_tickets()
+        assert event_bus.rpc_request.called
+        assert service_outage_triage._filtered_ticket_details.called is False
+        assert logger.error.called is True
+
+    @pytest.mark.asyncio
     async def filter_tickets_ok_test(self):
         event_bus = Mock()
         tickets = {'tickets': [{"ticketID": 3521039}]}
@@ -170,9 +189,27 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
 
-        filtered_ticekts = await service_outage_triage._filtered_ticket_details(tickets)
+        filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
         assert event_bus.rpc_request.called
-        assert filtered_ticekts == [3521039]
+        assert filtered_tickets == [3521039]
+
+    @pytest.mark.asyncio
+    async def filter_tickets_ko_duplicate_ticket_test(self):
+        event_bus = Mock()
+        tickets = {'tickets': [{"ticketID": 3521039}, {"ticketID": 3521039}]}
+        ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200028729'}],
+                                             "ticketNotes": [{"noteValue": 'test info'}]}}
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_details, ticket_details])
+        logger = Mock()
+        scheduler = Mock()
+        config = Mock()
+        service_id = 123
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+
+        filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+        assert event_bus.rpc_request.called
+        assert filtered_tickets == [3521039]
 
     @pytest.mark.asyncio
     async def filter_tickets_ok_no_note_test(self):
@@ -188,9 +225,9 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
 
-        filtered_ticekts = await service_outage_triage._filtered_ticket_details(tickets)
+        filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
         assert event_bus.rpc_request.called
-        assert filtered_ticekts == [3521039]
+        assert filtered_tickets == [3521039]
 
     @pytest.mark.asyncio
     async def filter_tickets_ko_no_detail_value_test(self):
@@ -206,9 +243,9 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
 
-        filtered_ticekts = await service_outage_triage._filtered_ticket_details(tickets)
+        filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
         assert event_bus.rpc_request.called
-        assert len(filtered_ticekts) == 0
+        assert len(filtered_tickets) == 0
 
     @pytest.mark.asyncio
     async def filter_tickets_ko_wrong_detail_value_test(self):
@@ -224,9 +261,9 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
 
-        filtered_ticekts = await service_outage_triage._filtered_ticket_details(tickets)
+        filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
         assert event_bus.rpc_request.called
-        assert len(filtered_ticekts) == 0
+        assert len(filtered_tickets) == 0
 
     @pytest.mark.asyncio
     async def filter_tickets_ko_triage_exists_test(self):
@@ -242,9 +279,9 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
 
-        filtered_ticekts = await service_outage_triage._filtered_ticket_details(tickets)
+        filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
         assert event_bus.rpc_request.called
-        assert len(filtered_ticekts) == 0
+        assert len(filtered_tickets) == 0
 
     def find_recent_occurence_of_event_test(self):
         event_bus = Mock()
