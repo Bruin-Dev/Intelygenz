@@ -241,7 +241,7 @@ class ServiceOutageTriage:
             'request_id': uuid(),
             'response_topic': f"notification.email.response.{self._service_id}",
             'email_data': {
-                'subject': f'Edge Monitoring ({datetime.now().strftime("%Y-%m-%d")})',
+                'subject': f'Service outage triage ({datetime.now().strftime("%Y-%m-%d")})',
                 'recipient': self._config.TRIAGE_CONFIG["recipient"],
                 'text': 'this is the accessible text for the email',
                 'html': email_html,

@@ -549,7 +549,7 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         email = service_outage_triage._ticket_object_to_email_obj(ticket_dict)
 
-        assert 'Edge Monitoring' in email["email_data"]["subject"]
+        assert 'Service outage triage' in email["email_data"]["subject"]
         assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 
@@ -565,7 +565,7 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         email = service_outage_triage._ticket_object_to_email_obj(ticket_dict)
 
-        assert 'Edge Monitoring' in email["email_data"]["subject"]
+        assert 'Service outage triage' in email["email_data"]["subject"]
         assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 
