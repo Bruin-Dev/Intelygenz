@@ -112,8 +112,7 @@ class ServiceOutageTriage:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
                                     triage_exists = True
                         if triage_exists is not True:
-                            if ticket['ticketID'] not in filtered_ticket_ids:
-                                filtered_ticket_ids.append(ticket['ticketID'])
+                            filtered_ticket_ids.append(ticket['ticketID'])
                             break
         return filtered_ticket_ids
 

@@ -72,6 +72,22 @@ class TestBruinClient:
         assert requests.get.call_args[1]['params']['Category'] == 'SD-WAN'
         assert tickets == [{'category': 'SD-WAN', 'ticketStatus': 'New'}]
 
+    def get_all_bruin_tickets_ok_empty_test(self):
+        logger = Mock()
+        response = Mock()
+        response.json = Mock(return_value={"responses": [{"category": "SD-WAN", "ticketStatus": "New"}]})
+        response.status_code = 400
+        requests.get = Mock(return_value=response)
+        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        tickets = bruin_client.get_all_tickets(123, '', 'New', 'SD-WAN')
+        assert requests.get.called
+        assert requests.get.call_args[1]['params']['ClientId'] == 123
+        assert requests.get.call_args[1]['params']['TicketId'] == ''
+        assert requests.get.call_args[1]['params']['TicketStatus'] == "New"
+        assert requests.get.call_args[1]['params']['Category'] == 'SD-WAN'
+        assert tickets == []
+
     def get_all_bruin_tickets_ko_test(self):
         logger = Mock()
         response = Mock()

@@ -54,11 +54,13 @@ class BruinClient:
         response = requests.get(f"{self._config['base_url']}/api/Ticket",
                                 headers=self._get_request_headers(),
                                 verify=False, params=params)
-
         if response.status_code in range(200, 299):
             return response.json()['responses']
-        else:
-            return None
+        # 400 is the return code when no data matches filter in the form of:
+        # {'ticketStatus': ["The value ''TicketStatus'' is not valid for TicketStatus."]}
+        elif response.status_code == 400:
+            return []
+        return None
 
     def get_ticket_details(self, ticket_id):
         self._logger.info(f'Getting ticket details for ticket id: {ticket_id}')
