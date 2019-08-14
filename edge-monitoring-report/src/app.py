@@ -37,7 +37,7 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
 
-        # await self._edge_monitoring.start_edge_monitor_job(exec_on_start=False)
+        await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
 
         self._scheduler.start()
 

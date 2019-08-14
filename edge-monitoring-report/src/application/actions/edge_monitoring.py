@@ -46,7 +46,8 @@ class EdgeMonitoring:
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._request_edge_events_and_status, 'cron', hour=0, next_run_time=next_run_time,
+        self._scheduler.add_job(self._request_edge_events_and_status, 'interval', seconds=60,
+                                next_run_time=next_run_time,
                                 replace_existing=True, id='_edge_monitoring_process')
 
     async def _request_edge_events_and_status(self):
