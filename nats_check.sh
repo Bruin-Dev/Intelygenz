@@ -3,7 +3,7 @@
 i=1
 while [ $i -le 30 ]
 do
-    sleep 5
+    sleep 10
     nats_task=`ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep "nats"`
     echo "nats_task is $nats_task"
     nats_status=`ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep "nats" | awk '{ print $6 }'`
