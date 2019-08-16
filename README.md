@@ -42,12 +42,13 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
  - [Virtualenv](https://virtualenv.pypa.io/en/latest/)
  - [Hypercorn to deploy Quart server](https://pgjones.gitlab.io/hypercorn/)
  - [Requests for python HTTP requests](http://docs.python-requests.org/en/master/)
- - [NATS(in streaming mode, as event bus)](https://nats.io/)
+ - [NATS(in streaming mode, as event bus)](https://github.com/nats-io/nats-streaming-server)
  - [Docker](https://www.docker.com/)
  - [Docker-compose](https://docs.docker.com/compose/)
- - [Kubernetes](https://kubernetes.io/)
  - [markdown-toc (for Table of Contents generation in READMEs)](https://github.com/jonschlinkert/markdown-toc)
  - [PEP8 pre-commit hook](https://github.com/cbrueffer/pep8-git-hook) **MANDATORY**
+ - [AWS Fargate](https://aws.amazon.com/fargate/)
+ 
 # Developing flow
 - Create a branch from development
 	- "feature" branches starts with feature/feature-name
@@ -55,7 +56,9 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 - When taking a fix or a feature, create a new branch. After first push to the remote repository, start a Merge Request with the title like the following: "WIP: your title goes here". That way, Maintainer and Approvers can read your changes while you develop them.
 - **Remember that all code must have automated tests(unit and integration and must be part of an acceptance test) in it's pipeline.** 
 - Assign that merge request to a any developer of the repository. Also add any affected developer as Approver. I.E: if you are developing a microservice wich is part of a process, you should add as Approvers both the developers of the first microservice ahead and the first behind in the process chain. Those microservices will be the more affected by your changes. 
-- When deploying to production, a certain revision of the dev branch will be tagged. That will trigger all the pipelines needed to deploy.
+- When a branch is merged into master, it will be deployed in production environment.
+- When a new branch is created, it will be deployed in a new Fargate cluster. When a branch is deleted that cluster is deleted. **So every merge request should have "delete branch after merge"**
+- You can also check in gitlab's project view, inside Operations>Environments, to see current running environments
 
 ## DOD(Definition of Done)
 If any of the next requirements is not fulfilled in a merge request, merge request can't be merged. 
@@ -63,8 +66,8 @@ If any of the next requirements is not fulfilled in a merge request, merge reque
 - Each service must have unit tests with a coverage percent of the 80% or more.
 - Each service must have it's dockerfile and must be referenced in the docker-compose.
 - Each service must have a linter job and a unit tests job in the gitlab.ci pipeline.
-- Each service that interacts in a process should be part of an acceptance test.
-- Developers should take care of notify the devops of putting in the pipeline env any environment variable needed in the pipeline's execution.
+- If it is a new service, all the terraform code to deploy it should be present.
+- Developers should take care of notify the devops/tech lead of putting in the pipeline env any environment variable needed in the pipeline's execution.
 
 ## Custom packages
 Custom packages are developed using the same branching name and workflow that is used in other pieces of the project.
@@ -77,6 +80,8 @@ Since they are going to be used among various microservices it is important not 
 For the IDE to detect changes in custompackages, you need to uninstall & reinstall them via pip in your virtualenvs.
 
 If changes are going to be persistent, remember to test them and change the version depending on the changes made. [Check semver](https://semver.org/) for that.
+
+
 
 ### Creation and testing
 For a wrapper of other package (I.E: httpclient parametrized for some provider) test are **mandatory**.
