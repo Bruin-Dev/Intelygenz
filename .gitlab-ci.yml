@@ -5,9 +5,6 @@ stages:
   - basic_infra
   - build
   - deploy
-  - deploy_ecs_services
-  - remove_ecs_services
-  - remove_dev
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -352,6 +349,14 @@ terraform-validate-dev:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
+    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
+    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
+    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
+    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
+    - export TF_VAR_BRUIN_CLIENT_ID_PRO=${BRUIN_CLIENT_ID_PRO}
+    - export TF_VAR_BRUIN_CLIENT_SECRET_PRO=${BRUIN_CLIENT_SECRET_PRO}
+    - export TF_VAR_BRUIN_LOGIN_URL_PRO=${BRUIN_LOGIN_URL_PRO}
+    - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
@@ -359,6 +364,12 @@ terraform-validate-dev:
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
+    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
+    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
+    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
+    - terraform init infra-as-code/ecs-services
+    - terraform validate infra-as-code/ecs-services
 
 terraform-validate-ecs-services:
   stage: validation
@@ -377,10 +388,10 @@ terraform-validate-ecs-services:
     - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
-    - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/ecs-services/init.tf
-    - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
+    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
+    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
+    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
 
@@ -400,31 +411,6 @@ deploy-branches:
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
-    - apk add gettext
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - terraform init infra-as-code/dev
-    - terraform apply -auto-approve infra-as-code/dev
-    - sleep 300
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
-    on_stop: destroy-branches
-  only:
-    - branches
-  except:
-    - master
-
-deploy-branches-ecs-services:
-  stage: deploy_ecs_services
-  <<: *terraform_template
-  script:
-    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
-    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
@@ -436,47 +422,30 @@ deploy-branches-ecs-services:
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
-    - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/ecs-services/init.tf
-    - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
+    - envsubst < infra-as-code/dev/init.tf > temp.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
+    - mv temp.tf infra-as-code/dev/init.tf
+    - mv temp_vars.tf infra-as-code/dev/variables.tf
+    - terraform init infra-as-code/dev
+    - terraform apply -auto-approve infra-as-code/dev
+    - sleep 300
+    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
+    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
+    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
     - terraform apply -auto-approve infra-as-code/ecs-services
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
-    on_stop: destroy-branches-ecs-services
-  only:
-    - branches
-  except:
-    - master
-
-destroy-branches-ecs-services:
-  stage: remove_ecs_services
-  <<: *terraform_template
-  script:
-    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
-    - apk add gettext
-    - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/ecs-services/init.tf
-    - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
-    - terraform init infra-as-code/ecs-services
-    - terraform refresh infra-as-code/ecs-services
-    - terraform destroy -auto-approve infra-as-code/ecs-services
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    action: stop
-  when: manual
+    on_stop: destroy-branches
   only:
     - branches
   except:
     - master
 
 destroy-branches:
-  stage: remove_dev
+  stage: deploy
   <<: *terraform_template
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
@@ -490,6 +459,13 @@ destroy-branches:
     - terraform init infra-as-code/dev
     - terraform refresh infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
+    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
+    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
+    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
+    - terraform init infra-as-code/ecs-services
+    - terraform refresh infra-as-code/ecs-services
+    - terraform destroy -auto-approve infra-as-code/ecs-services
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
@@ -508,29 +484,6 @@ deploy-master:
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
-    - apk add gettext
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - terraform init infra-as-code/dev
-    - terraform apply -auto-approve infra-as-code/dev
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net:3000/
-    on_stop: destroy-master
-  only:
-    - master
-
-deploy-master-ecs-services:
-  stage: deploy_ecs_services
-  <<: *terraform_template
-  script:
-    - export ENVIRONMENT_SLUG=master
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
-    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
-    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
@@ -541,42 +494,28 @@ deploy-master-ecs-services:
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=production
     - apk add gettext
-    - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/ecs-services/init.tf
-    - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
+    - envsubst < infra-as-code/dev/init.tf > temp.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
+    - mv temp.tf infra-as-code/dev/init.tf
+    - mv temp_vars.tf infra-as-code/dev/variables.tf
+    - terraform init infra-as-code/dev
+    - terraform apply -auto-approve infra-as-code/dev
+    - sleep 300
+    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
+    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
+    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
     - terraform apply -auto-approve infra-as-code/ecs-services
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net:3000/
-    on_stop: destroy-master-ecs-services
-  only:
-    - master
-
-destroy-master-ecs-services:
-  stage: remove_ecs_services
-  <<: *terraform_template
-  script:
-    - export ENVIRONMENT_SLUG=master
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
-    - apk add gettext
-    - envsubst < infra-as-code/ecs-services/init.tf > temp.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/ecs-services/init.tf
-    - mv temp_vars.tf infra-as-code/ecs-services/variables.tf
-    - terraform init infra-as-code/ecs-services
-    - terraform destroy -auto-approve infra-as-code/ecs-services
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    action: stop
-  when: manual
+    on_stop: destroy-master
   only:
     - master
 
 destroy-master:
-  stage: remove_dev
+  stage: deploy
   <<: *terraform_template
   script:
     - export ENVIRONMENT_SLUG=master
@@ -589,6 +528,12 @@ destroy-master:
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
+    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
+    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
+    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
+    - terraform init infra-as-code/ecs-services
+    - terraform destroy -auto-approve infra-as-code/ecs-services
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
