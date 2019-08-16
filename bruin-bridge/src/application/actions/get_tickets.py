@@ -36,4 +36,7 @@ class GetTicket:
         await self._event_bus.publish_message(msg_dict['response_topic'],
                                               json.dumps(filtered_tickets_response, default=str))
 
+        if filtered_tickets is not None:
+            self._logger.info(f'Tickets that are going to be sent {len(filtered_tickets)}')
+
         self._logger.info(f'All tickets for client id: {client_id} sent')

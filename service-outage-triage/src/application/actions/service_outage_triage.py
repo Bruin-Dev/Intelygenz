@@ -102,6 +102,8 @@ class ServiceOutageTriage:
 
     async def _filtered_ticket_details(self, ticket_list):
         filtered_ticket_ids = []
+        if ticket_list["tickets"] is not None:
+            self._logger.info(f'List of tickets lenght: {len(ticket_list["tickets"])}')
         for ticket in ticket_list['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'response_topic': f'bruin.ticket.details.response.{self._service_id}',
