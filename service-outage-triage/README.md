@@ -2,7 +2,7 @@
   * [Description](#description)
   * [Work Flow](#work-flow)
   * [Behaviour in dev and in pro](#behaviour-in-development-and-in-production)
-  * [Capabilities used](#service-logic) 
+  * [Capabilities used](#capabilities-used) 
   * [Running in docker-compose](#running-in-docker-compose)
 
 # Description
