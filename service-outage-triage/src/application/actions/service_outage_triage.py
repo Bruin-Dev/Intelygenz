@@ -92,6 +92,12 @@ class ServiceOutageTriage:
                 await self._event_bus.rpc_request("notification.email.request",
                                                   json.dumps(ticket_note),
                                                   timeout=10)
+            slack_message = {'request_id': uuid(),
+                             'message': f'Triage appeneded to ticket:'
+                                        f'https://app.bruin.com/helpdesk?clientId=88089&ticketId={ticket_id} , in '
+                                        f'{self._config.TRIAGE_CONFIG["environment"]}',
+                             'response_topic': f'notification.slack.request.{self._service_id}'}
+            await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
         self._logger.info("End of ticket polling job")
 
     async def _filtered_ticket_details(self, ticket_list):
@@ -110,6 +116,7 @@ class ServiceOutageTriage:
                         for ticket_note in ticket_details['ticket_details']['ticketNotes']:
                             if ticket_note['noteValue'] is not None:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
+                                    self._logger.info(f'Triage already exists for ticket id of {ticket["ticketID"]}')
                                     triage_exists = True
                         if triage_exists is not True:
                             filtered_ticket_ids.append(ticket['ticketID'])

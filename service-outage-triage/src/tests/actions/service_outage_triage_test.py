@@ -69,7 +69,9 @@ class TestServiceOutageTriage:
         edge_status = {'edge_status': 'Some status info'}
         edge_event = {'edge_events': 'Some event info'}
         append_ticket = {'ticket_appeneded': 'Success'}
-        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, edge_status, edge_event, append_ticket])
+        send_to_slack = {'slack_sent': 'Success'}
+        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, edge_status, edge_event, append_ticket,
+                                                           send_to_slack])
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -89,8 +91,8 @@ class TestServiceOutageTriage:
         assert service_outage_triage._compose_ticket_note_object.call_args[0][0] == edge_status
         assert service_outage_triage._compose_ticket_note_object.call_args[0][1] == edge_event
         assert service_outage_triage._ticket_object_to_email_obj.called
-        assert event_bus.rpc_request.call_args[0][0] == "notification.email.request"
-        assert event_bus.rpc_request.call_args[0][1] == json.dumps("Ticket Note Object")
+        assert event_bus.rpc_request.mock_calls[3][1][0] == "notification.email.request"
+        assert event_bus.rpc_request.mock_calls[3][1][1] == json.dumps("Ticket Note Object")
 
     @pytest.mark.asyncio
     async def poll_tickets_production_test(self):
@@ -99,7 +101,9 @@ class TestServiceOutageTriage:
         edge_status = {'edge_status': 'Some status info'}
         edge_event = {'edge_events': 'Some event info'}
         append_ticket = {'ticket_appeneded': 'Success'}
-        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, edge_status, edge_event, append_ticket])
+        send_to_slack = {'slack_sent': 'Success'}
+        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, edge_status, edge_event, append_ticket,
+                                                           send_to_slack])
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -120,8 +124,8 @@ class TestServiceOutageTriage:
         assert service_outage_triage._compose_ticket_note_object.call_args[0][0] == edge_status
         assert service_outage_triage._compose_ticket_note_object.call_args[0][1] == edge_event
         assert service_outage_triage._ticket_object_to_string.called
-        assert event_bus.rpc_request.call_args[0][0] == "bruin.ticket.note.append.request"
-        assert 'note' in event_bus.rpc_request.call_args[0][1]
+        assert event_bus.rpc_request.mock_calls[3][1][0] == "bruin.ticket.note.append.request"
+        assert 'note' in event_bus.rpc_request.mock_calls[3][1][1]
 
     @pytest.mark.asyncio
     async def poll_tickets_none_test(self):
@@ -130,7 +134,9 @@ class TestServiceOutageTriage:
         edge_status = {'edge_status': 'Some status info'}
         edge_event = {'edge_events': 'Some event info'}
         append_ticket = {'ticket_appeneded': 'Success'}
-        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, edge_status, edge_event, append_ticket])
+        send_to_slack = {'slack_sent': 'Success'}
+        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, edge_status, edge_event, append_ticket,
+                                                           send_to_slack])
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -153,8 +159,8 @@ class TestServiceOutageTriage:
         assert service_outage_triage._compose_ticket_note_object.call_args[0][1] == edge_event
         assert service_outage_triage._ticket_object_to_string.called is False
         assert service_outage_triage._ticket_object_to_email_obj.called is False
-        assert event_bus.rpc_request.call_args[0][0] != "bruin.ticket.note.append.request"
-        assert event_bus.rpc_request.call_args[0][0] != "notification.slack.request"
+        assert event_bus.rpc_request.mock_calls[2][1][0] != "bruin.ticket.note.append.request"
+        assert event_bus.rpc_request.mock_calls[2][1][0] != "notification.email.request"
 
     @pytest.mark.asyncio
     async def poll_tickets_none_bruin_ticket_response_test(self):
