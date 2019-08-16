@@ -27,7 +27,7 @@ and edge events of the edge we're currently monitoring ,
 That ordered dict is now our triage. And then based on our current environment, development or production, 
 we send an email of the triage or append the triage as a note. It is then followed by a slack message confirming triage
 has been appended or sent with a url to the ticket and the environment in which the action took place.
-`` ``
+
 
 # Behaviour in development and in production
 In our development environment we are taking the ordered dict created for the triage and converting it into an email 
