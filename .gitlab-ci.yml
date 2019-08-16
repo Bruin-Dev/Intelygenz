@@ -67,7 +67,7 @@ variables:
 
 .job_terraform_template: &terraform_template
   image:
-    name: hashicorp/terraform:0.12.6
+    name: hashicorp/terraform:0.12.7
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -137,6 +137,7 @@ acceptance-test-linter:
   variables:
     MODULE: acceptance-tests
   <<: *lint_module
+
 
 #
 # Modules unit tests
@@ -210,6 +211,7 @@ bruin-bridge-test:
   variables:
     MODULE: bruin-bridge
   <<: *unittest_module
+
 
 #
 # Acceptance/Integration tests
@@ -318,13 +320,6 @@ service-outage-triage-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
-service-outage-monitor-build:
-  stage: build
-  variables:
-    MODULE_NAME: service-outage-monitor
-    MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
-
 service-affecting-monitor-build:
   stage: build
   variables:
@@ -371,30 +366,6 @@ terraform-validate-dev:
     - terraform init infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
 
-terraform-validate-ecs-services:
-  stage: validation
-  <<: *terraform_template
-  script:
-    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
-    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
-    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
-    - export TF_VAR_BRUIN_CLIENT_ID_PRO=${BRUIN_CLIENT_ID_PRO}
-    - export TF_VAR_BRUIN_CLIENT_SECRET_PRO=${BRUIN_CLIENT_SECRET_PRO}
-    - export TF_VAR_BRUIN_LOGIN_URL_PRO=${BRUIN_LOGIN_URL_PRO}
-    - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
-    - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - apk add gettext
-    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
-    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
-    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
-    - terraform init infra-as-code/ecs-services
-    - terraform validate infra-as-code/ecs-services
-
 basic-infra:
   stage: basic_infra
   <<: *terraform_template
@@ -405,12 +376,15 @@ basic-infra:
 deploy-branches:
   stage: deploy
   <<: *terraform_template
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
-    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
     - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
@@ -420,7 +394,6 @@ deploy-branches:
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
-    - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
@@ -428,7 +401,11 @@ deploy-branches:
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - sleep 300
+    - apk add curl
+    - apk add bash
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - chmod +x /usr/local/bin/ecs-cli
+    - /bin/bash ci-utils/nats_healthcheck.sh
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
     - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
@@ -452,20 +429,18 @@ destroy-branches:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - apk add gettext
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - terraform init infra-as-code/dev
-    - terraform refresh infra-as-code/dev
-    - terraform destroy -auto-approve infra-as-code/dev
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
     - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
     - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
-    - terraform refresh infra-as-code/ecs-services
     - terraform destroy -auto-approve infra-as-code/ecs-services
+    - envsubst < infra-as-code/dev/init.tf > temp.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
+    - mv temp.tf infra-as-code/dev/init.tf
+    - mv temp_vars.tf infra-as-code/dev/variables.tf
+    - terraform init infra-as-code/dev
+    - terraform destroy -auto-approve infra-as-code/dev
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
@@ -478,6 +453,10 @@ destroy-branches:
 deploy-master:
   stage: deploy
   <<: *terraform_template
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
     - export ENVIRONMENT_SLUG=master
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
@@ -492,7 +471,6 @@ deploy-master:
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
-    - export TF_VAR_CURRENT_ENVIRONMENT=production
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
@@ -500,7 +478,11 @@ deploy-master:
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - sleep 300
+    - apk add curl
+    - apk add bash
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - chmod +x /usr/local/bin/ecs-cli
+    - /bin/bash ci-utils/nats_healthcheck.sh
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
     - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
@@ -522,18 +504,18 @@ destroy-master:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - apk add gettext
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - terraform init infra-as-code/dev
-    - terraform destroy -auto-approve infra-as-code/dev
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
     - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
     - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
     - terraform destroy -auto-approve infra-as-code/ecs-services
+    - envsubst < infra-as-code/dev/init.tf > temp.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
+    - mv temp.tf infra-as-code/dev/init.tf
+    - mv temp_vars.tf infra-as-code/dev/variables.tf
+    - terraform init infra-as-code/dev
+    - terraform destroy -auto-approve infra-as-code/dev
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
