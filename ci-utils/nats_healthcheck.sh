@@ -10,7 +10,7 @@ nats_server_healthcheck () {
     i=1
     while [ $i -le 30 ]
     do
-        #sleep 15
+        sleep 15
         get_nats_tasks_numbers
         nats_task=`ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep "nats" | grep $nats_task_major`
         echo "$i: nats_task is $nats_task"
