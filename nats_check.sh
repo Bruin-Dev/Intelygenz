@@ -7,7 +7,7 @@ do
     nats_task=`ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep "nats"`
     echo "nats_task is $nats_task"
     nats_status=`ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep "nats" | awk '{ print $6 }'`
-    if [ -z "$nats_status" ] && [ $nats_status = "HEALTHY" ]; then
+    if [ ! -z "$nats_status" ] && [ $nats_status = "HEALTHY" ]; then
         echo "$i: NATS server is ready"
         break
     else
