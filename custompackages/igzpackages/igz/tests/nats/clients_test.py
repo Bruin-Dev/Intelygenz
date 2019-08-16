@@ -220,7 +220,6 @@ class TestNatsStreamingClient:
         msg = {"request_id": 123, "response_topic": "test_topic", "rpc_info": "some info"}
         rpc_msg = await nats_s_client.rpc_request("some_topic", json.dumps(msg), 1)
         assert nats_s_client._subscribe_rpc.called
-        assert nats_s_client.unsubscribe.called is False
         assert nats_s_client.publish.called
         assert rpc_msg is None
 

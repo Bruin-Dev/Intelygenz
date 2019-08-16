@@ -74,7 +74,8 @@ class NatsStreamingClient:
         self._rpc_inbox[json_msg["request_id"]] = json_msg
 
     async def _subscribe_rpc(self, topic, timeout=10):
-        return await self.subscribe(topic, self._rpc_callback, start_at='last_received', ack_wait=timeout)
+        return await self.subscribe(topic, self._rpc_callback, start_at='time', ack_wait=timeout,
+                                    time=datetime.timestamp(datetime.now()))
 
     async def rpc_request(self, topic, message, timeout=10):
         try:
@@ -99,11 +100,10 @@ class NatsStreamingClient:
         ret_msg = None
         while datetime.now() < timeout_stamp:
             if data["request_id"] in self._rpc_inbox:
-                await temp_sub.unsubscribe()
                 ret_msg = self._rpc_inbox.pop(data["request_id"], None)
                 break
             await asyncio.sleep(0.1)
-
+        await temp_sub.unsubscribe()
         return ret_msg
 
     async def _cb_with_ack_and_action(self, msg):

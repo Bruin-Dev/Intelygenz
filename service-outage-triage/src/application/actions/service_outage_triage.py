@@ -47,7 +47,7 @@ class ServiceOutageTriage:
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._poll_tickets, 'interval', seconds=60, next_run_time=next_run_time,
+        self._scheduler.add_job(self._poll_tickets, 'interval', seconds=15, next_run_time=next_run_time,
                                 replace_existing=True, id='_service_outage_triage_process')
 
     async def _poll_tickets(self):
@@ -103,7 +103,7 @@ class ServiceOutageTriage:
     async def _filtered_ticket_details(self, ticket_list):
         filtered_ticket_ids = []
         if ticket_list["tickets"] is not None:
-            self._logger.info(f'List of tickets lenght: {len(ticket_list["tickets"])}')
+            self._logger.info(f'List of tickets length: {len(ticket_list["tickets"])}')
         for ticket in ticket_list['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'response_topic': f'bruin.ticket.details.response.{self._service_id}',
