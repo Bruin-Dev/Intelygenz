@@ -63,7 +63,9 @@ class ServiceOutageTriage:
         else:
             self._logger.error(f'Tickets returned {json.dumps(all_tickets)}')
             slack_message = {'request_id': uuid(),
-                             'message': f'{json.dumps(all_tickets)}',
+                             'message': f'Service outage triage: Error in ticket list. '
+                                        f'Ticket list: {json.dumps(all_tickets)}.'
+                                        f'Environment: {self._config.TRIAGE_CONFIG["environment"]}',
                              'response_topic': f'notification.slack.request.{self._service_id}'}
             await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
         for ticket_id in filtered_ticket_ids:
