@@ -42,7 +42,7 @@ class TestServiceOutageTriage:
         assert scheduler.add_job.called
         assert scheduler.add_job.call_args[0][0] is service_outage_triage._poll_tickets
         assert 'interval' in scheduler.add_job.call_args[0][1]
-        assert scheduler.add_job.call_args[1]['seconds'] == 15
+        assert scheduler.add_job.call_args[1]['seconds'] == 120
 
     @pytest.mark.asyncio
     async def start_service_outage_triage_job_false_exec_test(self):
@@ -59,7 +59,7 @@ class TestServiceOutageTriage:
         assert scheduler.add_job.called
         assert scheduler.add_job.call_args[0][0] is service_outage_triage._poll_tickets
         assert 'interval' in scheduler.add_job.call_args[0][1]
-        assert scheduler.add_job.call_args[1]['seconds'] == 15
+        assert scheduler.add_job.call_args[1]['seconds'] == 120
         assert scheduler.add_job.call_args[1]['next_run_time'] == undefined
 
     @pytest.mark.asyncio

@@ -47,7 +47,7 @@ class ServiceOutageTriage:
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._poll_tickets, 'interval', seconds=15, next_run_time=next_run_time,
+        self._scheduler.add_job(self._poll_tickets, 'interval', seconds=120, next_run_time=next_run_time,
                                 replace_existing=True, id='_service_outage_triage_process')
 
     async def _poll_tickets(self):
