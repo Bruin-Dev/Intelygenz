@@ -23,9 +23,6 @@ class GetTicketDetails:
             'status': status
         }
 
-        if ticket_details is not None:
-            self._logger.info(f'Tickets details that are going to be sent {len(ticket_details)}')
-
         await self._event_bus.publish_message(msg_dict['response_topic'],
                                               json.dumps(response, default=str))
         self._logger.info(f'Ticket details for ticket id: {ticket_id} sent!')
