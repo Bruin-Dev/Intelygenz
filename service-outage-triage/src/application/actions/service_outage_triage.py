@@ -58,10 +58,14 @@ class ServiceOutageTriage:
                                                         json.dumps(ticket_request_msg, default=str),
                                                         timeout=10)
         filtered_ticket_ids = []
-        if all_tickets is not None:
+        if all_tickets is not None and "tickets" in all_tickets.keys() and all_tickets["tickets"] is not None:
             filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
         else:
-            self._logger.error('Tickets returned None')
+            self._logger.error(f'Tickets returned {json.dumps(all_tickets)}')
+            slack_message = {'request_id': uuid(),
+                             'message': f'{json.dumps(all_tickets)}',
+                             'response_topic': f'notification.slack.request.{self._service_id}'}
+            await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
         for ticket_id in filtered_ticket_ids:
             edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
             status_msg = {'request_id': uuid(),

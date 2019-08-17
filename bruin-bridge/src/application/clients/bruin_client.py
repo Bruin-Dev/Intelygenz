@@ -54,6 +54,7 @@ class BruinClient:
         response = requests.get(f"{self._config['base_url']}/api/Ticket",
                                 headers=self._get_request_headers(),
                                 verify=False, params=params)
+        self._logger.info(f'Ticket info: {response.json()}')
         if response.status_code in range(200, 299):
             return response.json()['responses']
         # 400 is the return code when no data matches filter in the form of:
@@ -67,7 +68,7 @@ class BruinClient:
         response = requests.get(f'{self._config["base_url"]}/api/Ticket/{ticket_id}/details',
                                 headers=self._get_request_headers(),
                                 verify=False)
-
+        self._logger.info(f'Ticket details: {response.json()}')
         if response.status_code in range(200, 299):
             return response.json()
         else:
