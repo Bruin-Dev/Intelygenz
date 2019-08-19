@@ -14,6 +14,10 @@ resource "aws_ecr_repository" "automation-edge-monitoring-report" {
   name = "automation-edge-monitoring-report"
 }
 
+resource "aws_ecr_repository" "automation-service-outage-monitor" {
+  name = "automation-service-outage-monitor"
+}
+
 resource "aws_ecr_repository" "automation-service-outage-triage" {
   name = "automation-service-outage-triage"
 }
