@@ -22,10 +22,10 @@ wait_nats_server_healthy () {
         if [ $i -eq 1 ]; then
             get_nats_tasks_major_number
         fi
-        nats_task=`ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep "nats" | grep $nats_task_major`
-        s_info "Try $i. Waiting for task $nats_task"
+        nats_task=`ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep $nats_task_major`
+        s_info "Try $i. Waiting for the task $nats_task to be in HEALTHY state"
         nats_status=`echo $nats_task | awk '{ print $6 }'`
-        s_info "Try $i. Status of NATS task is $nats_status"
+        s_info "Try $i. Health Status of NATS task is $nats_status"
         if [ ! -z "$nats_status" ] && [ $nats_status = "HEALTHY" ]; then
             s_info "Try $i. NATS Server task is ready"
             break
