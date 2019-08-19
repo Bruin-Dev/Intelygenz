@@ -11,7 +11,6 @@ from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.server.api import QuartServer
-import os
 
 
 class Container:
@@ -37,7 +36,7 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
 
-        await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
+        # await self._edge_monitoring.start_edge_monitor_job(exec_on_start=False)
 
         self._scheduler.start()
 

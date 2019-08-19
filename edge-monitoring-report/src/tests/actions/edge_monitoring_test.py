@@ -72,22 +72,22 @@ class TestEdgeMonitoring:
                                                                          'Link GE1 is no longer DEAD')
         assert link_dead_time is None
 
-    # @pytest.mark.asyncio
-    # async def start_edge_monitor_job_test(self):
-    #     event_bus = Mock()
-    #     logger = Mock()
-    #     scheduler = Mock()
-    #     scheduler.add_job = Mock()
-    #     config = testconfig
-    #     service_id = 123
-    #
-    #     edge_monitoring = EdgeMonitoring(event_bus, logger, scheduler, service_id, config)
-    #     edge_monitoring._request_edge_events_and_status = Mock()
-    #     await edge_monitoring.start_edge_monitor_job(exec_on_start=True)
-    #     assert scheduler.add_job.called
-    #     assert scheduler.add_job.call_args[0][0] is edge_monitoring._request_edge_events_and_status
-    #     assert "cron" in scheduler.add_job.call_args[0][1]
-    #     assert scheduler.add_job.call_args[1]['hour'] == 0
+    @pytest.mark.asyncio
+    async def start_edge_monitor_job_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        scheduler.add_job = Mock()
+        config = testconfig
+        service_id = 123
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, scheduler, service_id, config)
+        edge_monitoring._request_edge_events_and_status = Mock()
+        await edge_monitoring.start_edge_monitor_job(exec_on_start=True)
+        assert scheduler.add_job.called
+        assert scheduler.add_job.call_args[0][0] is edge_monitoring._request_edge_events_and_status
+        assert "cron" in scheduler.add_job.call_args[0][1]
+        assert scheduler.add_job.call_args[1]['hour'] == 0
 
     def compose_email_test(self):
         event_bus = Mock()

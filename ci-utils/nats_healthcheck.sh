@@ -1,10 +1,17 @@
 #!/bin/bash
 
+source $(dirname "$0")/common_functions.sh
+
 get_nats_tasks_major_number () {
     nats_server_running_tasks=`ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep "nats" | awk '{ print $5 }'`
-    echo "nats_server_running_tasks are $nats_server_running_tasks"
+    if [ -z "$nats_server_running_tasks" ]; then
+        s_err "No NATS cluster task exists"
+        exit 1
+    else
+        s_info "NATS Server Running tasks are $nats_server_running_tasks"
+    fi
     nats_task_major=`echo "${nats_server_running_tasks[*]}" | sort -nr | head -n1`
-    echo "nats_task_major is $nats_task_major"
+    s_info "NATS Server Running task with major identifier is $nats_task_major"
 }
 
 nats_server_healthcheck () {
@@ -16,17 +23,19 @@ nats_server_healthcheck () {
             get_nats_tasks_major_number
         fi
         nats_task=`ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep "nats" | grep $nats_task_major`
-        echo "$i: nats_task is $nats_task"
+        s_info "Try $i. Waiting for task $nats_task"
         nats_status=`echo $nats_task | awk '{ print $6 }'`
-        echo "$i: nats_status is $nats_status"
+        s_info "Try $i. Status of NATS task is $nats_status"
         if [ ! -z "$nats_status" ] && [ $nats_status = "HEALTHY" ]; then
-            echo "$i: NATS server is ready"
+            s_info "Try $i. NATS Server task is ready"
             break
         else
-            echo "$i: NATS server is not ready yet"
+            s_info "Try $i. NATS Server task is not ready yet"
         fi
         i=$(( $i + 1 ))
     done
+    s_err "NATS server hasn't reached HEALTHY state in 5 minutes. Aborting job"
+    exit 1
 }
 
 nats_server_healthcheck
