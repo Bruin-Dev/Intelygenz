@@ -14,7 +14,7 @@ get_nats_tasks_major_number () {
     s_info "NATS Server Running task with major identifier is $nats_task_major"
 }
 
-nats_server_healthcheck () {
+wait_nats_server_healthy () {
     i=1
     while [ $i -le 10 ]
     do
@@ -34,8 +34,13 @@ nats_server_healthcheck () {
         fi
         i=$(( $i + 1 ))
     done
-    s_err "NATS server hasn't reached HEALTHY state in 5 minutes. Aborting job"
-    exit 1
+}
+
+nats_server_healthcheck () {
+    if [ $i -le 10 ]; then
+        s_err "NATS Server task $nats_task_major hasn't reached HEALTHY state in 5 minutes. Aborting job"
+        exit 1
+    fi
 }
 
 nats_server_healthcheck
