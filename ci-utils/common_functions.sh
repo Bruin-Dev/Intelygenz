@@ -7,3 +7,9 @@ function s_info() {
 function s_err() {
     echo -e "ERROR: $1"
 }
+
+function iterate_over_lines() {
+    while read -r line; do
+        s_info "\t $line"
+    done <<< "$1"
+}

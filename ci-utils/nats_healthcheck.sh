@@ -9,7 +9,7 @@ get_nats_tasks_major_number () {
         exit 1
     else
         s_info "NATS Server Running tasks are the following"
-        s_info "\t $nats_server_running_tasks"
+        iterate_over_lines $nats_server_running_tasks
     fi
     nats_task_major=`echo "${nats_server_running_tasks[*]}" | sort -nr | head -n1`
     s_info "NATS Server Running task with major identifier is $nats_task_major"
