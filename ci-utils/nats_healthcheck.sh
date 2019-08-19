@@ -38,7 +38,7 @@ wait_nats_server_healthy () {
 
 nats_server_healthcheck () {
     wait_nats_server_healthy
-    if [ $i -le 10 ]; then
+    if [ $i -ge 10 ]; then
         s_err "NATS Server task $nats_task_major hasn't reached HEALTHY state in 5 minutes. Aborting job"
         exit 1
     fi
