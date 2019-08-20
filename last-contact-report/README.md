@@ -7,7 +7,8 @@
 # Description
 The last contact service's job is to report on edges that have were last contacted more than 30 days ago.
 This report is sent in an email with contents of the name of the enterprise and the amount of edges that were last
-contacted more than 30 days ago along with a csv file attached with more specific edge information.
+contacted more than 30 days ago along with a csv file attached. The CSV contains each edge detailed, with the time elapsed since activation, and the months that are left before 36 months of service has passed. Also there's an URL to visit the edge overview in Velocloud.
+
 
 # Work Flow
 Last contact's function `_alert_process` is called by apscheduler the first day of every month. 
