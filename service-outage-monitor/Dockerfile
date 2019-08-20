@@ -2,7 +2,6 @@
 FROM python:3.6
 
 RUN pip install --upgrade pip
-RUN pip install pandas==0.24.2
 
 ENV PYTHONUNBUFFERED 1
 
