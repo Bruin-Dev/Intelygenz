@@ -13,7 +13,7 @@ contacted more than 30 days ago along with a csv file attached. The CSV contains
 # Work Flow
 Last contact's function `_alert_process` is called by apscheduler the first day of every month. 
 Last contact makes a call to the velocloud bridge to return a dictionary with list of edge status, edge_id(host id, edge id, enterprise id),
-and enterprise name. With this information we can go through each edge and determine whether or not they were last contacted
+With this information we can go through each edge and determine whether or not they were last contacted
 more than 30 days through the last contact field in the edge status.
  
 Once we've determined its been more than 30 days we create an ordered dict for the csv file. The fields we grab are
