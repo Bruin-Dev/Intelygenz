@@ -102,7 +102,7 @@ class NatsStreamingClient:
             if data["request_id"] in self._rpc_inbox:
                 ret_msg = self._rpc_inbox.pop(data["request_id"], None)
                 break
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.01)
         await temp_sub.unsubscribe()
         return ret_msg
 
