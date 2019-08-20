@@ -46,7 +46,7 @@ class ServiceOutageMonitor:
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._service_outage_monitor_process, 'interval', seconds=60,
+        self._scheduler.add_job(self._service_outage_monitor_process, 'interval', seconds=900,
                                 next_run_time=next_run_time, replace_existing=True,
                                 id='_service_outage_monitor_process')
 
@@ -67,6 +67,7 @@ class ServiceOutageMonitor:
                 self._logger.info('Edge seems OK')
             elif edge_status["edge_info"]["edges"]["edgeState"] == 'OFFLINE':
                 self._logger.error('Edge seems KO, failure!')
+                # TODO remove production check here when production part gets implemented
                 if self._config.MONITOR_CONFIG['environment'] == 'dev' or self._config.MONITOR_CONFIG['environment'] \
                                                               == 'production':
                     events_msg = {'request_id': uuid(),
@@ -79,7 +80,7 @@ class ServiceOutageMonitor:
                     email_obj = self._compose_email_object(edge_status, edge_events)
                     await self._event_bus.rpc_request("notification.email.request", json.dumps(email_obj), timeout=10)
                 # elif self._config.MONITOR_CONFIG['environment'] == 'production':
-                #     # TODO create repair tickets
+                #     TODO create repair tickets
                 #     pass
         # Start up the next job
         self._logger.info("End of service outage monitor job")
