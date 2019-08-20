@@ -39,7 +39,7 @@ class TestServiceOutageMonitor:
         assert scheduler.add_job.called
         assert scheduler.add_job.call_args[0][0] is service_outage_monitor._service_outage_monitor_process
         assert "interval" in scheduler.add_job.call_args[0][1]
-        assert scheduler.add_job.call_args[1]['seconds'] == 60
+        assert scheduler.add_job.call_args[1]['seconds'] == 900
 
     @pytest.mark.asyncio
     async def start_service_outage_monitor_job_false_exec_test(self):
@@ -55,7 +55,7 @@ class TestServiceOutageMonitor:
         assert scheduler.add_job.called
         assert scheduler.add_job.call_args[0][0] is service_outage_monitor._service_outage_monitor_process
         assert "interval" in scheduler.add_job.call_args[0][1]
-        assert scheduler.add_job.call_args[1]['seconds'] == 60
+        assert scheduler.add_job.call_args[1]['seconds'] == 900
         assert scheduler.add_job.call_args[1]['next_run_time'] == undefined
 
     @pytest.mark.asyncio
