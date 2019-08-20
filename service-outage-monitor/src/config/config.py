@@ -33,6 +33,6 @@ LOG_CONFIG = {
 }
 
 QUART_CONFIG = {
-    'title': 'velocloud-orchestrator',
+    'title': 'service-outage-monitor',
     'port': 5000
 }
