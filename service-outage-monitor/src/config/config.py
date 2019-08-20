@@ -26,7 +26,7 @@ MONITOR_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"]
 }
 LOG_CONFIG = {
-    'name': 'velocloud-orchestrator',
+    'name': 'service-outage-monitor',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
