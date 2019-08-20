@@ -43,7 +43,9 @@ class TestBruinClient:
         bruin_client.login()
         header = bruin_client._get_request_headers()
         assert header == {"authorization": f"Bearer Someverysecretaccesstoken",
-                          "Content-Type": "application/json-patch+json"}
+                          "Content-Type": "application/json-patch+json",
+                          "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
+                          }
 
     def get_request_header_ko_test(self):
         logger = Mock()
