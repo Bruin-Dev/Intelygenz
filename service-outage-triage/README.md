@@ -38,7 +38,7 @@ string. That string will be appended as a note using the bruin bridge for the ti
  we're dealing with .
 
 The check for whether you're in development or production is needed so when we're making changes to the service outage
-triage and we're testing it we are not appending anything to real tickets. We only append the triage when we deploy or in
+triage and we're testing it we are not appending anything to real tickets. We only append the triage when we deploy in
 production. 
 
 # Capabilities used
