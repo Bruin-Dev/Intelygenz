@@ -28,10 +28,10 @@ class VelocloudRepository:
     def get_edge_information(self, edge):
         return self._velocloud_client.get_edge_information(edge)
 
-    def get_link_information(self, edge):
+    def get_link_information(self, edge, interval=None):
         self._logger.info(f'Getting link information from edge:{edge["edge_id"]} in '
                           f'enterprise:{edge["enterprise_id"]} from host:{edge["host"]}')
-        return self._velocloud_client.get_link_information(edge)
+        return self._velocloud_client.get_link_information(edge, interval)
 
     def get_enterprise_information(self, edge):
         enterprise_info = self._velocloud_client.get_enterprise_information(edge)

@@ -54,9 +54,9 @@ class VelocloudClient:
                 self._logger.error('Error, could not authenticate')
             return e
 
-    def get_link_information(self, edge):
+    def get_link_information(self, edge, interval=None):
         target_host_client = self._get_client_by_host(edge["host"])
-        edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"]}
+        edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"], "interval": interval}
         try:
             link_information = target_host_client.metricsGetEdgeLinkMetrics(body=edgeids)
             return link_information
