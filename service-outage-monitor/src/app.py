@@ -15,7 +15,7 @@ class Container:
 
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info(f'Service Outage Monitor starting in {config.TRIAGE_CONFIG["environment"]}...')
+        self._logger.info(f'Service Outage Monitor starting in {config.MONITOR_CONFIG["environment"]}...')
         self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
         self._service_id = uuid()

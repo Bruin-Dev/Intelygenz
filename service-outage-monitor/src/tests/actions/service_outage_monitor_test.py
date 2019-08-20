@@ -1,10 +1,8 @@
-import json
-from datetime import datetime
 from unittest.mock import Mock
 
-import asyncio
 import pytest
 from application.actions.service_outage_monitor import ServiceOutageMonitor
+from apscheduler.util import undefined
 from asynctest import CoroutineMock
 
 from config import testconfig
@@ -19,269 +17,305 @@ class TestServiceOutageMonitor:
         config = Mock()
         service_id = 123
 
-        edge_monitoring = ServiceOutageMonitor(event_bus, logger, service_id, config)
-        assert isinstance(edge_monitoring, ServiceOutageMonitor)
-        assert edge_monitoring._event_bus is event_bus
-        assert edge_monitoring._logger is logger
-        assert edge_monitoring._scheduler is scheduler
-        assert edge_monitoring._service_id == service_id
-        assert edge_monitoring._config is config
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        assert isinstance(service_outage_monitor, ServiceOutageMonitor)
+        assert service_outage_monitor._event_bus is event_bus
+        assert service_outage_monitor._logger is logger
+        assert service_outage_monitor._scheduler is scheduler
+        assert service_outage_monitor._service_id == service_id
+        assert service_outage_monitor._config is config
 
-    def start_metrics_server_test(self):
+    @pytest.mark.asyncio
+    async def start_service_outage_monitor_job_true_exec_test(self):
         event_bus = Mock()
         logger = Mock()
-        prometheus_repository = Mock()
-        prometheus_repository.start_prometheus_metrics_server = Mock()
         scheduler = Mock()
-        edge_repository = Mock()
-        status_repository = Mock()
-        statistic_repository = Mock()
         config = Mock()
         service_id = 123
 
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-        edge_monitoring.start_prometheus_metrics_server()
-        assert prometheus_repository.start_prometheus_metrics_server.called
-
-    @pytest.mark.asyncio
-    async def request_edges_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
-        prometheus_repository = Mock()
-        prometheus_repository.start_prometheus_metrics_server = Mock()
-        scheduler = Mock()
-        edge_repository = Mock()
-        status_repository = Mock()
-        status_repository.set_current_cycle_request_id = Mock()
-        statistic_repository = Mock()
-        config = Mock()
-        service_id = 123
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-        await edge_monitoring._request_edges(1234)
-        assert status_repository.set_current_cycle_request_id.called
-        assert status_repository.set_current_cycle_request_id.call_args[0][0] == 1234
-        assert event_bus.publish_message.called
-        assert "edge.list.request" in event_bus.publish_message.call_args[0][0]
-
-    @pytest.mark.asyncio
-    async def receive_edge_list_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
-        prometheus_repository = Mock()
-        scheduler = Mock()
-        edge_repository = Mock()
-        status_repository = Mock()
-        status_repository.set_edges_to_process = Mock()
-        statistic_repository = Mock()
-        config = Mock()
-        service_id = 123
-
-        edge_list = b'{"request_id":1234, "edges":["1", "2", "3"]}'
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-
-        await edge_monitoring.receive_edge_list(edge_list)
-        assert status_repository.set_edges_to_process.called
-        assert event_bus.publish_message.called
-
-    @pytest.mark.asyncio
-    async def receive_edge_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        prometheus_repository = Mock()
-        prometheus_repository.inc = Mock()
-        scheduler = Mock()
-        edge_repository = Mock()
-        edge_repository.set_edge = Mock()
-        status_repository = Mock()
-        status_repository.set_edges_processed = Mock()
-        status_repository.get_edges_to_process = Mock(return_value=3)
-        status_repository.get_edges_processed = Mock(return_value=2)
-        status_repository.set_status = Mock()
-        statistic_repository = Mock()
-        config = Mock()
-        service_id = 123
-
-        edge = {"request_id": 1234, 'edge_id': {'host': 'some_host'}, 'edge_info': 'Some edge data'}
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-        edge_monitoring._edge_monitoring_process = CoroutineMock()
-
-        await edge_monitoring.receive_edge(json.dumps(edge))
-        assert prometheus_repository.inc.called
-        assert status_repository.get_edges_processed.called
-        assert status_repository.set_edges_processed.called
-        assert status_repository.set_edges_processed.call_args[0][0] == 3
-        assert status_repository.get_edges_to_process.called
-        assert status_repository.set_status.called
-        assert "IDLE" in status_repository.set_status.call_args[0][0]
-        assert edge_repository.set_edge.call_args[0][0] == edge['edge_id']
-        assert edge_monitoring._edge_monitoring_process.called
-
-    @pytest.mark.asyncio
-    async def start_edge_monitor_job_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        prometheus_repository = Mock()
-        scheduler = Mock()
-        scheduler.add_job = Mock()
-        edge_repository = Mock()
-        status_repository = Mock()
-        statistic_repository = Mock()
-        config = testconfig
-        service_id = 123
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-        edge_monitoring._edge_monitoring_process = CoroutineMock()
-        await edge_monitoring.start_edge_monitor_job(exec_on_start=True)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor._service_outage_monitor_process = CoroutineMock()
+        await service_outage_monitor.start_service_outage_monitor_job(exec_on_start=True)
         assert scheduler.add_job.called
-        assert scheduler.add_job.call_args[0][0] is edge_monitoring._edge_monitoring_process
+        assert scheduler.add_job.call_args[0][0] is service_outage_monitor._service_outage_monitor_process
         assert "interval" in scheduler.add_job.call_args[0][1]
-        assert scheduler.add_job.call_args[1]['seconds'] == testconfig.ORCHESTRATOR_CONFIG['monitoring_seconds']
+        assert scheduler.add_job.call_args[1]['seconds'] == 60
 
     @pytest.mark.asyncio
-    async def _edge_monitoring_process_processing_test(self):
+    async def start_service_outage_monitor_job_false_exec_test(self):
         event_bus = Mock()
         logger = Mock()
-        prometheus_repository = Mock()
         scheduler = Mock()
-        edge_repository = Mock()
-        status_repository = Mock()
-        status_repository.get_edges_processed = Mock()
-        status_repository.get_edges_to_process = Mock()
-        status_repository.get_status = Mock(return_value="PROCESSING_VELOCLOUD_EDGES")
-        status_repository.set_status = Mock()
-        status_repository.get_current_cycle_timestamp = Mock(return_value=datetime.timestamp(datetime.now()))
-        statistic_repository = Mock()
-        service_id = 123
-        await asyncio.sleep(0.1)
-        config = testconfig
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-        await edge_monitoring._edge_monitoring_process()
-        assert status_repository.get_edges_processed.called
-        assert status_repository.get_edges_to_process.called
-        assert status_repository.get_status.called
-        assert status_repository.get_current_cycle_timestamp.called
-        assert status_repository.set_status.called
-
-    @pytest.mark.asyncio
-    async def _edge_monitoring_process_idle_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        prometheus_repository = Mock()
-        prometheus_repository.reset_counter = Mock()
-        scheduler = Mock()
-        edge_repository = Mock()
-        status_repository = Mock()
-        status_repository.set_edges_processed = Mock()
-        status_repository.set_current_cycle_timestamp = Mock()
-        status_repository.get_status = Mock(return_value="IDLE")
-        status_repository.set_status = Mock()
-        status_repository.get_current_cycle_timestamp = Mock(return_value=datetime.timestamp(datetime.now()))
-        statistic_repository = Mock()
-        statistic_repository._statistic_client.clear_dictionaries = Mock()
-        service_id = 123
-        await asyncio.sleep(0.1)
-        config = testconfig
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-        edge_monitoring._send_stats_to_notifier = CoroutineMock()
-        edge_monitoring._request_edges = CoroutineMock()
-        await edge_monitoring._edge_monitoring_process()
-        assert edge_monitoring._send_stats_to_notifier.called
-        assert prometheus_repository.reset_counter.called
-        assert statistic_repository._statistic_client.clear_dictionaries.called
-        assert status_repository.set_edges_processed.called
-        assert status_repository.set_current_cycle_timestamp.called
-        assert status_repository.get_status.called
-        assert status_repository.set_status.called
-        assert edge_monitoring._request_edges.called
-
-    @pytest.mark.asyncio
-    async def _send_stats_to_notifier_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
-        logger.info = Mock()
-        logger.error = Mock()
-        prometheus_repository = Mock()
-        scheduler = Mock()
-        statistic_repository = Mock()
-        statistic_repository._statistic_client.get_statistics = Mock(return_value="Failed Edges Status")
-        statistic_repository.send_to_stats_client = Mock()
-        edge_repository = Mock()
-        edge_repository.get_keys = Mock(return_value=['host', 'fail', 'host 2'])
-        edge_repository.get_edge = Mock(return_value=json.dumps({'request_id': 123, 'redis_edge': {'edges':
-                                                                                                   {'edgeState':
-                                                                                                    'DISCONNECTED'}}}))
-        status_repository = Mock()
-        status_repository.get_current_cycle_request_id = Mock(return_value=123)
-        service_id = 123
         config = Mock()
+        service_id = 123
 
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-        await edge_monitoring._send_stats_to_notifier()
-        assert status_repository.get_current_cycle_request_id.called
-        assert edge_repository.get_keys.called
-        assert logger.info.called is False
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor._service_outage_monitor_process = CoroutineMock()
+        await service_outage_monitor.start_service_outage_monitor_job(exec_on_start=False)
+        assert scheduler.add_job.called
+        assert scheduler.add_job.call_args[0][0] is service_outage_monitor._service_outage_monitor_process
+        assert "interval" in scheduler.add_job.call_args[0][1]
+        assert scheduler.add_job.call_args[1]['seconds'] == 60
+        assert scheduler.add_job.call_args[1]['next_run_time'] == undefined
+
+    @pytest.mark.asyncio
+    async def service_outage_monitor_process_offline_dev_test(self):
+        event_bus = Mock()
+        edge_list = {'edges': {'edge': 'Some edge id'}}
+        edge_status = {'edge_id': 'Some edge id', 'edge_info': {'edges': {'edgeState': 'OFFLINE'}}}
+        edge_event = {'edge_events': 'Some event info'}
+        email_sent = {'email_sent': 'Success'}
+        event_bus.rpc_request = CoroutineMock(side_effect=[edge_list, edge_status, edge_event, email_sent])
+        logger = Mock()
+        logger.error = Mock()
+        scheduler = Mock()
+        config = testconfig
+        service_id = 123
+
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor._compose_email_object = Mock(return_value='Some email object')
+        await service_outage_monitor._service_outage_monitor_process()
+
         assert logger.error.called
-        assert statistic_repository.send_to_stats_client.called
-        assert statistic_repository._statistic_client.get_statistics.called
-        assert event_bus.publish_message.call_args[0][0] == "notification.slack.request"
-        assert event_bus.publish_message.call_args[0][1] == json.dumps(dict(request_id=123,
-                                                                            message="Failed Edges Status"))
+        assert event_bus.rpc_request.called
+        assert service_outage_monitor._compose_email_object.called
+        assert event_bus.rpc_request.mock_calls[2][1][0] == "alert.request.event.edge"
+        assert event_bus.rpc_request.mock_calls[3][1][0] == "notification.email.request"
 
     @pytest.mark.asyncio
-    async def _send_stats_to_notifier_test(self):
+    async def service_outage_monitor_process_connected_test(self):
         event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        edge_list = {'edges': {'edge': 'Some edge id'}}
+        edge_status = {'edge_id': 'Some edge id', 'edge_info': {'edges': {'edgeState': 'CONNECTED'}}}
+        edge_event = {'edge_events': 'Some event info'}
+        event_bus.rpc_request = CoroutineMock(side_effect=[edge_list, edge_status, edge_event])
         logger = Mock()
         logger.info = Mock()
-        logger.error = Mock()
-        prometheus_repository = Mock()
         scheduler = Mock()
-        statistic_repository = Mock()
-        statistic_repository._statistic_client.get_statistics = Mock(return_value=None)
-        statistic_repository.send_to_stats_client = Mock()
-        edge_repository = Mock()
-        edge_repository.get_keys = Mock(return_value=['host', 'fail', 'host 2'])
-        edge_repository.get_edge = Mock(return_value=json.dumps({'request_id': 123, 'redis_edge': {'edges':
-                                                                                                   {'edgeState':
-                                                                                                    'CONNECTED'}}}))
-        status_repository = Mock()
-        status_repository.get_current_cycle_request_id = Mock(return_value=123)
+        config = testconfig
         service_id = 123
-        config = Mock()
 
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor._compose_email_object = Mock(return_value='Some email object')
 
-        await edge_monitoring._send_stats_to_notifier()
-        assert status_repository.get_current_cycle_request_id.called
-        assert edge_repository.get_keys.called
+        await service_outage_monitor._service_outage_monitor_process()
+
         assert logger.info.called
-        assert logger.error.called
-        assert statistic_repository.send_to_stats_client.called is False
-        assert statistic_repository._statistic_client.get_statistics.called
-        assert event_bus.publish_message.called is False
+        assert event_bus.rpc_request.called
+        assert service_outage_monitor._compose_email_object.called is False
+        assert event_bus.rpc_request.call_args[0][0] == "edge.status.request"
 
-        statistic_repository._statistic_client.get_statistics = Mock(return_value="Failed Edge Report")
-        status_repository.get_current_cycle_request_id = Mock(return_value=124)
-        await edge_monitoring._send_stats_to_notifier()
-        assert status_repository.get_current_cycle_request_id.called
-        assert edge_repository.get_keys.called
-        assert statistic_repository.send_to_stats_client.called is False
-        assert statistic_repository._statistic_client.get_statistics.called
-        assert event_bus.publish_message.called
+    @pytest.mark.asyncio
+    async def service_outage_monitor_process_other_test(self):
+        event_bus = Mock()
+        edge_list = {'edges': {'edge': 'Some edge id'}}
+        edge_status = {'edge_id': 'Some edge id', 'edge_info': {'edges': {'edgeState': 'DISCONNECTED'}}}
+        edge_event = {'edge_events': 'Some event info'}
+        event_bus.rpc_request = CoroutineMock(side_effect=[edge_list, edge_status, edge_event])
+        logger = Mock()
+        logger.info = Mock()
+        scheduler = Mock()
+        config = testconfig
+        service_id = 123
+
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor._compose_email_object = Mock(return_value='Some email object')
+
+        await service_outage_monitor._service_outage_monitor_process()
+
+        assert event_bus.rpc_request.called
+        assert service_outage_monitor._compose_email_object.called is False
+        assert event_bus.rpc_request.call_args[0][0] == "edge.status.request"
+
+    def find_recent_occurence_of_event_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = Mock()
+        service_id = 123
+
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        event_list = [{'event': 'EDGE_ALIVE',
+                       'eventTime': '2019-07-30 06:38:00+00:00',
+                       'message': 'Edge is back up'},
+                      {'event': 'LINK_ALIVE',
+                       'eventTime': '2019-07-30 4:26:00+00:00',
+                       'message': 'Link GE2 is no longer DEAD'},
+                      {'event': 'EDGE_ALIVE',
+                       'eventTime': '2019-07-29 06:38:00+00:00',
+                       'message': 'Edge is back up'}
+                      ]
+        edge_online_time = service_outage_monitor._find_recent_occurence_of_event(event_list, 'EDGE_ALIVE')
+        assert edge_online_time == '2019-07-30 06:38:00+00:00'
+        link_online_time = service_outage_monitor._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
+                                                                                  'Link GE2 is no longer DEAD')
+        assert link_online_time == '2019-07-30 4:26:00+00:00'
+        link_dead_time = service_outage_monitor._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
+                                                                                'Link GE1 is no longer DEAD')
+        assert link_dead_time is None
+
+    def compose_email_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        service_id = 123
+
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor._find_recent_occurence_of_event = Mock()
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": [
+                    {
+                        "link": {
+                            "interface": "GE1",
+                            "displayName": "Test1",
+                            "state": "DISCONNECTED",
+                        }
+                    },
+                    {
+                        "link": {
+                            "interface": "GE2",
+                            "displayName": "Test2",
+                            "state": "DISCONNECTED",
+                        }
+                    }
+                ]
+            }
+        }
+        events_to_report = {'events': {'data': 'Some Event Info'}}
+
+        email = service_outage_monitor._compose_email_object(edges_to_report, events_to_report)
+
+        assert 'Service outage monitor' in email["email_data"]["subject"]
+        assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
+        assert service_outage_monitor._find_recent_occurence_of_event.called
+        assert "<!DOCTYPE html" in email["email_data"]["html"]
+
+    def compose_email_one_links_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        service_id = 123
+
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor._find_recent_occurence_of_event = Mock()
+
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": [
+                    {
+                        "link": {
+                            "interface": "GE1",
+                            "displayName": "Test1",
+                            "state": "DISCONNECTED",
+                        }
+                    }
+                ]
+            }
+        }
+        events_to_report = {'events': {'data': 'Some Event Info'}}
+
+        email = service_outage_monitor._compose_email_object(edges_to_report, events_to_report)
+
+        assert 'Service outage monitor' in email["email_data"]["subject"]
+        assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
+        assert service_outage_monitor._find_recent_occurence_of_event.called
+        assert "<!DOCTYPE html" in email["email_data"]["html"]
+
+    def compose_email_no_links_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        service_id = 123
+
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor._find_recent_occurence_of_event = Mock()
+
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": []
+            }
+        }
+        events_to_report = {'events': {'data': 'Some Event Info'}}
+
+        email = service_outage_monitor._compose_email_object(edges_to_report, events_to_report)
+
+        assert 'Service outage monitor' in email["email_data"]["subject"]
+        assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
+        assert service_outage_monitor._find_recent_occurence_of_event.called
+        assert "<!DOCTYPE html" in email["email_data"]["html"]
+
+    def compose_email_null_links_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        service_id = 123
+
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor._find_recent_occurence_of_event = Mock()
+
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": [{"link": None}]
+            }
+        }
+        events_to_report = {'events': {'data': 'Some Event Info'}}
+
+        email = service_outage_monitor._compose_email_object(edges_to_report, events_to_report)
+
+        assert 'Service outage monitor' in email["email_data"]["subject"]
+        assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
+        assert service_outage_monitor._find_recent_occurence_of_event.called
+        assert "<!DOCTYPE html" in email["email_data"]["html"]

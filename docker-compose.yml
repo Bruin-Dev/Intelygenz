@@ -120,7 +120,7 @@ services:
       - "nats-streaming"
     ports:
       - 5007:5000
-      -
+
   redis:
     image: redis:5.0.4
     ports:

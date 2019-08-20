@@ -46,7 +46,7 @@ class ServiceOutageMonitor:
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._service_outage_monitor_process, 'interval', seconds=600,
+        self._scheduler.add_job(self._service_outage_monitor_process, 'interval', seconds=60,
                                 next_run_time=next_run_time, replace_existing=True,
                                 id='_service_outage_monitor_process')
 
@@ -54,7 +54,7 @@ class ServiceOutageMonitor:
         edge_list_request = {'request_id': uuid(),
                              'response_topic': f'edge.list.response.{self._service_id}',
                              'filter': []}
-        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(edge_list_request), timeout=10)
+        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(edge_list_request), timeout=30)
         self._logger.info(f'Edge list received from event bus')
         self._logger.info(f'Splitting and sending edges to the event bus')
         for edge in edge_list['edges']:
@@ -67,7 +67,8 @@ class ServiceOutageMonitor:
                 self._logger.info('Edge seems OK')
             elif edge_status["edge_info"]["edges"]["edgeState"] == 'OFFLINE':
                 self._logger.error('Edge seems KO, failure!')
-                if self._config.TRIAGE_CONFIG['environment'] == 'dev':
+                if self._config.MONITOR_CONFIG['environment'] == 'dev' or self._config.MONITOR_CONFIG['environment'] \
+                                                              == 'production':
                     events_msg = {'request_id': uuid(),
                                   'response_topic': f'alert.response.event.edge.{self._service_id}',
                                   'edge': edge_status['edge_id'],
@@ -77,9 +78,9 @@ class ServiceOutageMonitor:
                                                                     json.dumps(events_msg, default=str), timeout=10)
                     email_obj = self._compose_email_object(edge_status, edge_events)
                     await self._event_bus.rpc_request("notification.email.request", json.dumps(email_obj), timeout=10)
-                elif self._config.TRIAGE_CONFIG['environment'] == 'production':
-                    # TODO create repair tickets
-                    pass
+                # elif self._config.MONITOR_CONFIG['environment'] == 'production':
+                #     # TODO create repair tickets
+                #     pass
         # Start up the next job
         self._logger.info("End of service outage monitor job")
 
