@@ -38,7 +38,8 @@ class BruinClient:
 
         headers = {
             "authorization": f"Bearer {self._bearer_token}",
-            "Content-Type": "application/json-patch+json"
+            "Content-Type": "application/json-patch+json",
+            "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
         }
         return headers
 
