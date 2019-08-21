@@ -25,7 +25,7 @@ and edge events of the edge we're currently monitoring ,
 `{"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}`, obtained through rpc calls.
 
 That ordered dict is now our triage. And then based on our current environment, development or production, 
-we send an email of the triage or append the triage as a note. It is then followed by a slack message confirming triage
+we send an email of the triage(dev) or append the triage as a note(production). It is then followed by a slack message confirming triage
 has been appended or sent with a url to the ticket and the environment in which the action took place.
 
 
