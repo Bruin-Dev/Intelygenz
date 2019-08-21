@@ -16,7 +16,7 @@ Last contact makes a call to the velocloud bridge to return a list of edge statu
 With this information we can go through each edge and determine whether or not they were last contacted
 more than 30 days through the last contact field in the edge status.
  
-Once we've determined its been more than 30 days we create an ordered dict for the csv file. The fields we grab are
+Once we've determined its been more than 30 days we append this edge information to a list of edges that will be reported in a .csv file. The fields we grab are
 enterprise name, serial number, model number, last contact date, amount of month its been since last contact, how much
 more months are left until its been 3 years, and the url to the edge.
  
