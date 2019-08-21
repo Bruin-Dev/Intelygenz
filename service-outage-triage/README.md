@@ -17,7 +17,7 @@ that we provide to the bridge.
 Once all tickets are received we run that through another filter with the function `_filtered_ticket_details`.
 Which makes another rpc request to the bruin bridge to receive the ticket details for each ticket. With
 the details we can see if the ticket matches the serial number of the edge we're currently looking to append 
-tickets to. Then once we find a ticket that matches that we check if the triage has already been appended.
+tickets to. Then once we find a ticket that matches that we check if the triage has already been appended and will do nothing in the case the ticket has a triage already.
 
 `_Filtered_ticket_details` function should return a list of ticket ids that needs the triage appended.
 So now we create an ordered dict using the function ` _compose_ticket_note_object` with parameters of the edge status
@@ -25,7 +25,7 @@ and edge events of the edge we're currently monitoring ,
 `{"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}`, obtained through rpc calls.
 
 That ordered dict is now our triage. And then based on our current environment, development or production, 
-we send an email of the triage or append the triage as a note. It is then followed by a slack message confirming triage
+we send an email of the triage(dev) or append the triage as a note(production). It is then followed by a slack message confirming triage
 has been appended or sent with a url to the ticket and the environment in which the action took place.
 
 
@@ -38,7 +38,7 @@ string. That string will be appended as a note using the bruin bridge for the ti
  we're dealing with .
 
 The check for whether you're in development or production is needed so when we're making changes to the service outage
-triage and we're testing it we are not appending anything to real tickets. We only append the triage when we deploy or in
+triage and we're testing it we are not appending anything to real tickets. We only append the triage when we deploy in
 production. 
 
 # Capabilities used
