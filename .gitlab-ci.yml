@@ -118,6 +118,11 @@ service-outage-monitor-linter:
     MODULE: service-outage-monitor
   <<: *lint_module
 
+service-affecting-monitor-linter:
+  variables:
+    MODULE: service-affecting-monitor
+  <<: *lint_module
+
 velocloud-bridge-linter:
   variables:
     MODULE: velocloud-bridge
@@ -189,6 +194,11 @@ service-outage-triage-test:
 service-outage-monitor-test:
   variables:
     MODULE: service-outage-monitor
+  <<: *unittest_module
+
+service-affecting-monitor-test:
+  variables:
+    MODULE: service-affecting-monitor
   <<: *unittest_module
 
 velocloud-bridge-test:
@@ -315,6 +325,12 @@ service-outage-monitor-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
+service-affecting-monitor-build:
+  stage: build
+  variables:
+    MODULE_NAME: service-affecting-monitor
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  <<: *build_app_image
 # =========
 # TERRAFORM
 # =========

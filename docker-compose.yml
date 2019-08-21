@@ -121,6 +121,18 @@ services:
     ports:
       - 5007:5000
 
+  service-affecting-monitor:
+    build:
+      # Context must be the root of the monorepo since we need to copy custompackages
+      context: .
+      dockerfile: service-affecting-monitor/Dockerfile
+    env_file:
+      - service-affecting-monitor/src/config/env
+    depends_on:
+      - "nats-streaming"
+    ports:
+      - 5008:5000
+
   redis:
     image: redis:5.0.4
     ports:
