@@ -17,7 +17,7 @@ that we provide to the bridge.
 Once all tickets are received we run that through another filter with the function `_filtered_ticket_details`.
 Which makes another rpc request to the bruin bridge to receive the ticket details for each ticket. With
 the details we can see if the ticket matches the serial number of the edge we're currently looking to append 
-tickets to. Then once we find a ticket that matches that we check if the triage has already been appended.
+tickets to. Then once we find a ticket that matches that we check if the triage has already been appended and will do nothing in the case the ticket has a triage already.
 
 `_Filtered_ticket_details` function should return a list of ticket ids that needs the triage appended.
 So now we create an ordered dict using the function ` _compose_ticket_note_object` with parameters of the edge status
