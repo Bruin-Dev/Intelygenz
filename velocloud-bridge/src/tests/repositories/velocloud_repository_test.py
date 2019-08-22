@@ -50,6 +50,15 @@ class TestVelocloudRepository:
         link_info = vr.get_link_information(edge)
         assert test_velocloud_client.get_link_information.called
 
+    def get_link_service_group_information_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        test_velocloud_client.get_link_service_group_information = Mock()
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        link_info = vr.get_link_service_groups_information(edge)
+        assert test_velocloud_client.get_link_service_groups_information.called
+
     def get_enterprise_information_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()

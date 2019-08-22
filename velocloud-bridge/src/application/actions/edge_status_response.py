@@ -25,9 +25,16 @@ class ReportEdgeStatus:
         if "interval" in msg_dict.keys():
             interval = msg_dict["interval"]
         links = self._velocloud_repository.get_link_information(edgeids, interval)
+        link_service_group = self._velocloud_repository.get_link_service_groups_information(edgeids, interval)
         if links is not None and isinstance(links, Exception) is False:
             for link in links:
-                link_status.append(link.to_dict())
+                link_dict = link.to_dict()
+                for link_service in link_service_group:
+                    link_service_dict = link_service.to_dict()
+                    if link_dict['linkId'] == link_service_dict['linkId']:
+                        link_dict['serviceGroups'] = link_service_dict['serviceGroups']
+                        break
+                link_status.append(link_dict)
         elif links is None:
             link_status = None
         elif isinstance(links, Exception):
@@ -39,7 +46,6 @@ class ReportEdgeStatus:
         if isinstance(enterprise_name, Exception) or isinstance(edge_status, Exception) or isinstance(link_status,
                                                                                                       Exception):
             status = 500
-
         edge_status = {"enterprise_name": enterprise_name, "edges": edge_status, "links": link_status}
         edge_response = {"request_id": request_id, "edge_id": edgeids, "edge_info": edge_status, "status": status}
         await self._event_bus.publish_message(msg_dict['response_topic'], json.dumps(edge_response, default=str))
