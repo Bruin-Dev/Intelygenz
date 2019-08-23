@@ -67,7 +67,7 @@ class ServiceAffectingMonitor:
                     await self._dev_or_production_event(edge_status, link, 'Latency', 120)
             elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
                 if link['bestLatencyMsRx'] > 50 or link['bestLatencyMsTx'] > 50:
-                    await self._dev_or_production_event(edge_status, link, 'LATENCY', 50)
+                    await self._dev_or_production_event(edge_status, link, 'Latency', 50)
 
         self._logger.info("End of service affecting monitor job")
 
