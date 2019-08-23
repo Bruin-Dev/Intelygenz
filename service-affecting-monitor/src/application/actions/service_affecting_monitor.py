@@ -64,7 +64,7 @@ class ServiceAffectingMonitor:
 
             if 'PUBLIC_WIRELESS' in link['serviceGroups']:
                 if link['bestLatencyMsRx'] > 120 or link['bestLatencyMsTx'] > 120:
-                    await self._dev_or_production_event(edge_status, link, 'LATENCY', 120)
+                    await self._dev_or_production_event(edge_status, link, 'Latency', 120)
             elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
                 if link['bestLatencyMsRx'] > 50 or link['bestLatencyMsTx'] > 50:
                     await self._dev_or_production_event(edge_status, link, 'LATENCY', 50)
