@@ -1,9 +1,7 @@
 import base64
 import json
-import re
 from collections import OrderedDict
 from datetime import datetime, timedelta
-
 from apscheduler.util import undefined
 from pytz import timezone, utc
 from shortuuid import uuid
@@ -94,6 +92,8 @@ class ServiceAffectingMonitor:
 
         edge_overview["Trouble"] = trouble
         edge_overview["Threshold"] = threshold
+        edge_overview['Interval for Scan'] = '15 Minutes'
+        edge_overview['Scan Time'] = datetime.now(timezone('US/Eastern'))
         edge_overview["Input"] = link['bestLatencyMsRx']
         edge_overview["Output"] = link['bestLatencyMsTx']
         edge_overview["Edge URL"] = \
