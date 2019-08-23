@@ -120,7 +120,7 @@ class ServiceAffectingMonitor:
             'request_id': uuid(),
             'response_topic': f"notification.email.response.{self._service_id}",
             'email_data': {
-                'subject': f'Service affecting: ({trouble})',
+                'subject': f'Service affecting trouble detected: {trouble}',
                 'recipient': self._config.MONITOR_CONFIG["recipient"],
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
