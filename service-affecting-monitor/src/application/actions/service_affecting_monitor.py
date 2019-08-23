@@ -61,17 +61,19 @@ class ServiceAffectingMonitor:
                                                                                           default=str), timeout=30)
         self._logger.info(f'Edge received from event bus')
         for link in edge_status['edge_info']['links']:
-
-            if 'PUBLIC_WIRELESS' in link['serviceGroups']:
-                if link['bestLatencyMsRx'] > 120 or link['bestLatencyMsTx'] > 120:
-                    await self._dev_or_production_event(edge_status, link, 'Latency', 120)
-            elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
-                if link['bestLatencyMsRx'] > 50 or link['bestLatencyMsTx'] > 50:
-                    await self._dev_or_production_event(edge_status, link, 'Latency', 50)
+            await self._latency_check(edge_status, link)
 
         self._logger.info("End of service affecting monitor job")
 
-    async def _dev_or_production_event(self, edge_status, link, trouble, threshold):
+    async def _latency_check(self, edge_status, link):
+        if 'PUBLIC_WIRELESS' in link['serviceGroups']:
+            if link['bestLatencyMsRx'] > 120 or link['bestLatencyMsTx'] > 120:
+                await self._notify_trouble(edge_status, link, 'Latency', 120)
+        elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
+            if link['bestLatencyMsRx'] > 50 or link['bestLatencyMsTx'] > 50:
+                await self._notify_trouble(edge_status, link, 'Latency', 50)
+
+    async def _notify_trouble(self, edge_status, link, trouble, threshold):
         # TODO remove production check here when production part gets implemented
         if self._config.MONITOR_CONFIG['environment'] == 'dev' or self._config.MONITOR_CONFIG['environment'] \
                 == 'production':
@@ -110,8 +112,7 @@ class ServiceAffectingMonitor:
         rows = []
         for idx, key in enumerate(edge_overview.keys()):
             row = EVEN_ROW if idx % 2 == 0 else ODD_ROW
-            parsed_key = re.sub(r" LABELMARK(.)*", "", key)
-            row = row.replace('%%KEY%%', parsed_key)
+            row = row.replace('%%KEY%%', key)
             row = row.replace('%%VALUE%%', str(edge_overview[key]))
             rows.append(row)
         email_html = email_html.replace('%%OVERVIEW_ROWS%%', "".join(rows))

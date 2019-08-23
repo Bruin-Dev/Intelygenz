@@ -59,7 +59,7 @@ class TestServiceAffectingMonitor:
         assert scheduler.add_job.call_args[1]['next_run_time'] == undefined
 
     @pytest.mark.asyncio
-    async def service_affecting_monitor_process_wireless_and_wired_ko_test(self):
+    async def _service_affecting_monitor_process_test(self):
         event_bus = Mock()
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
@@ -97,25 +97,68 @@ class TestServiceAffectingMonitor:
         service_id = 123
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
-        service_affecting_monitor._dev_or_production_event = CoroutineMock()
+        service_affecting_monitor._latency_check = CoroutineMock()
 
         await service_affecting_monitor._service_affecting_monitor_process()
 
         assert event_bus.rpc_request.called
-        assert service_affecting_monitor._dev_or_production_event.called
-        assert service_affecting_monitor._dev_or_production_event.mock_calls[0][1][0] == edges_to_report
-        assert service_affecting_monitor._dev_or_production_event.mock_calls[0][1][1] == edges_to_report[
-                                                                                         "edge_info"]['links'][0]
-        assert service_affecting_monitor._dev_or_production_event.mock_calls[0][1][2] == 'LATENCY'
-        assert service_affecting_monitor._dev_or_production_event.mock_calls[0][1][3] == 120
-        assert service_affecting_monitor._dev_or_production_event.mock_calls[1][1][0] == edges_to_report
-        assert service_affecting_monitor._dev_or_production_event.mock_calls[1][1][1] == edges_to_report[
-                                                                                         "edge_info"]['links'][1]
-        assert service_affecting_monitor._dev_or_production_event.mock_calls[1][1][2] == 'LATENCY'
-        assert service_affecting_monitor._dev_or_production_event.mock_calls[1][1][3] == 50
+        assert service_affecting_monitor._latency_check.called
 
     @pytest.mark.asyncio
-    async def service_affecting_monitor_process_wireless_and_wired_ok_test(self):
+    async def latency_check_wireless_and_wired_ko_test(self):
+        event_bus = Mock()
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": [
+                    {
+                        'bestLatencyMsRx': 14,
+                        'bestLatencyMsTx': 121,
+                        'serviceGroups': ['PUBLIC_WIRELESS']
+                    },
+                    {
+                        'bestLatencyMsRx': 60,
+                        'bestLatencyMsTx': 20,
+                        'serviceGroups': ['PUBLIC_WIRED']
+                    },
+
+                ]
+            }
+        }
+        logger = Mock()
+        scheduler = Mock()
+        config = Mock()
+        service_id = 123
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor._notify_trouble = CoroutineMock()
+
+        await service_affecting_monitor._latency_check(edges_to_report, edges_to_report["edge_info"]['links'][0])
+
+        assert service_affecting_monitor._notify_trouble.called
+        assert service_affecting_monitor._notify_trouble.mock_calls[0][1][0] == edges_to_report
+        assert service_affecting_monitor._notify_trouble.mock_calls[0][1][2] == 'Latency'
+        assert service_affecting_monitor._notify_trouble.mock_calls[0][1][3] == 120
+
+        await service_affecting_monitor._latency_check(edges_to_report, edges_to_report["edge_info"]['links'][1])
+
+        assert service_affecting_monitor._notify_trouble.mock_calls[1][1][0] == edges_to_report
+        assert service_affecting_monitor._notify_trouble.mock_calls[1][1][2] == 'Latency'
+        assert service_affecting_monitor._notify_trouble.mock_calls[1][1][3] == 50
+
+    @pytest.mark.asyncio
+    async def latency_check_wireless_and_wired_ok_test(self):
         event_bus = Mock()
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
@@ -146,22 +189,22 @@ class TestServiceAffectingMonitor:
                 ]
             }
         }
-        event_bus.rpc_request = CoroutineMock(return_value=edges_to_report)
         logger = Mock()
         scheduler = Mock()
         config = Mock()
         service_id = 123
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
-        service_affecting_monitor._dev_or_production_event = CoroutineMock()
+        service_affecting_monitor._notify_trouble = CoroutineMock()
 
-        await service_affecting_monitor._service_affecting_monitor_process()
+        await service_affecting_monitor._latency_check(edges_to_report, edges_to_report["edge_info"]['links'][0])
+        assert service_affecting_monitor._notify_trouble.called is False
 
-        assert event_bus.rpc_request.called
-        assert service_affecting_monitor._dev_or_production_event.called is False
+        await service_affecting_monitor._latency_check(edges_to_report, edges_to_report["edge_info"]['links'][1])
+        assert service_affecting_monitor._notify_trouble.called is False
 
     @pytest.mark.asyncio
-    async def service_affecting_monitor_process_wireless_and_wired_none_test(self):
+    async def latency_check_wireless_and_wired_none_test(self):
         event_bus = Mock()
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
@@ -192,22 +235,22 @@ class TestServiceAffectingMonitor:
                 ]
             }
         }
-        event_bus.rpc_request = CoroutineMock(return_value=edges_to_report)
         logger = Mock()
         scheduler = Mock()
         config = Mock()
         service_id = 123
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
-        service_affecting_monitor._dev_or_production_event = CoroutineMock()
+        service_affecting_monitor._notify_trouble = CoroutineMock()
 
-        await service_affecting_monitor._service_affecting_monitor_process()
+        await service_affecting_monitor._latency_check(edges_to_report, edges_to_report["edge_info"]['links'][0])
+        assert service_affecting_monitor._notify_trouble.called is False
 
-        assert event_bus.rpc_request.called
-        assert service_affecting_monitor._dev_or_production_event.called is False
+        await service_affecting_monitor._latency_check(edges_to_report, edges_to_report["edge_info"]['links'][1])
+        assert service_affecting_monitor._notify_trouble.called is False
 
     @pytest.mark.asyncio
-    async def _dev_or_production_event_test(self):
+    async def _notify_trouble_test(self):
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value="Email Sent")
         logger = Mock()
@@ -218,13 +261,13 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
         service_affecting_monitor._compose_email_object = Mock(return_value='Some email object')
 
-        await service_affecting_monitor._dev_or_production_event('Some Edge Status', 'Some Link Info', 'LATENCY', 120)
+        await service_affecting_monitor._notify_trouble('Some Edge Status', 'Some Link Info', 'LATENCY', 120)
 
         assert service_affecting_monitor._compose_email_object.called
         assert event_bus.rpc_request.called
 
     @pytest.mark.asyncio
-    async def _dev_or_production_event_none_test(self):
+    async def _notify_trouble_none_test(self):
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value="Email Sent")
         logger = Mock()
@@ -236,7 +279,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
         service_affecting_monitor._compose_email_object = Mock(return_value='Some email object')
 
-        await service_affecting_monitor._dev_or_production_event('Some Edge Status', 'Some Link Info', 'LATENCY', 120)
+        await service_affecting_monitor._notify_trouble('Some Edge Status', 'Some Link Info', 'LATENCY', 120)
 
         assert service_affecting_monitor._compose_email_object.called is False
         assert event_bus.rpc_request.called is False
@@ -290,6 +333,6 @@ class TestServiceAffectingMonitor:
                                                                 edges_to_report['edge_info']['links'][0],
                                                                 'LATENCY', 120)
 
-        assert 'Service affecting: ' in email["email_data"]["subject"]
+        assert 'Service affecting trouble detected: ' in email["email_data"]["subject"]
         assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]
