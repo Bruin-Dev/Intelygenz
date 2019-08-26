@@ -91,6 +91,8 @@ class ServiceAffectingMonitor:
         edge_overview = OrderedDict()
 
         edge_overview["Trouble"] = trouble
+        edge_overview["Interface"] = link['link']['interface']
+        edge_overview["Name"] = link['link']['displayName']
         edge_overview["Threshold"] = threshold
         edge_overview['Interval for Scan'] = '15 Minutes'
         edge_overview['Scan Time'] = datetime.now(timezone('US/Eastern'))
