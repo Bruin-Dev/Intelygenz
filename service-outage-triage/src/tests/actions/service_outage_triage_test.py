@@ -290,10 +290,11 @@ class TestServiceOutageTriage:
                        'message': 'Edge is back up'}
                       ]
         edge_online_time = service_outage_triage._find_recent_occurence_of_event(event_list, 'EDGE_ALIVE')
-        assert edge_online_time == '2019-07-30 06:38:00+00:00'
+        assert json.dumps(edge_online_time, default=str) == json.dumps('2019-07-30 02:38:00-04:00')
+
         link_online_time = service_outage_triage._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
                                                                                  'Link GE2 is no longer DEAD')
-        assert link_online_time == '2019-07-30 4:26:00+00:00'
+        assert json.dumps(link_online_time, default=str) == json.dumps('2019-07-30 00:26:00-04:00')
         link_dead_time = service_outage_triage._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
                                                                                'Link GE1 is no longer DEAD')
         assert link_dead_time is None

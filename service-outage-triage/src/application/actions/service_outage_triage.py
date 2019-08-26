@@ -166,13 +166,13 @@ class ServiceOutageTriage:
 
         edge_triage_dict["Edge Status"] = edges_status_to_report["edge_info"]["edges"]["edgeState"]
 
-        edge_triage_dict["Line LABELMARK1"] = None
+        edge_triage_dict["Interface LABELMARK1"] = None
         edge_triage_dict["Label LABELMARK2"] = None
-        edge_triage_dict["Line GE1 Status"] = "Line GE1 not available"
+        edge_triage_dict["Interface GE1 Status"] = "Interface GE1 not available"
 
-        edge_triage_dict["Line LABELMARK3"] = None
+        edge_triage_dict["Interface LABELMARK3"] = None
         edge_triage_dict["Label LABELMARK4"] = None
-        edge_triage_dict["Line GE2 Status"] = "Line GE2 not available\n"
+        edge_triage_dict["Interface GE2 Status"] = "Interface GE2 not available\n"
 
         link_data = dict()
 
@@ -185,11 +185,11 @@ class ServiceOutageTriage:
         # Check if linkdata return an empty list due to None links
         if len(link_data["GE1"]) > 0:
             edge_triage_dict["Interface LABELMARK1"] = link_data["GE1"][0]["link"]["interface"]
-            edge_triage_dict["Line GE1 Status"] = link_data["GE1"][0]["link"]["state"]
+            edge_triage_dict["Interface GE1 Status"] = link_data["GE1"][0]["link"]["state"]
             edge_triage_dict["Label LABELMARK2"] = link_data["GE1"][0]["link"]['displayName']
         if len(link_data["GE2"]) > 0:
             edge_triage_dict["Interface LABELMARK3"] = link_data["GE2"][0]["link"]["interface"]
-            edge_triage_dict["Line GE2 Status"] = f'{link_data["GE2"][0]["link"]["state"]}\n'
+            edge_triage_dict["Interface GE2 Status"] = f'{link_data["GE2"][0]["link"]["state"]}\n'
             edge_triage_dict["Label LABELMARK4"] = link_data["GE2"][0]["link"]['displayName']
 
         edge_triage_dict["Company Events URL"] = f'https://{edges_status_to_report["edge_id"]["host"]}/#!/' \
@@ -200,20 +200,24 @@ class ServiceOutageTriage:
                                                                                     ["data"], 'EDGE_UP')
         edge_triage_dict["Last Edge Offline"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
                                                                                      ["data"], 'EDGE_DOWN')
-        edge_triage_dict["Last GE1 Line Online"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
-                                                                                        ["data"], 'LINK_ALIVE',
-                                                                                        'Link GE1 is no longer DEAD')
-        edge_triage_dict["Last GE1 Line Offline"] = self._find_recent_occurence_of_event(edges_events_to_report
-                                                                                         ["events"]["data"],
-                                                                                         'LINK_DEAD',
-                                                                                         'Link GE1 is now DEAD')
-        edge_triage_dict["Last GE2 Line Online"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
-                                                                                        ["data"], 'LINK_ALIVE',
-                                                                                        'Link GE2 is no longer DEAD')
-        edge_triage_dict["Last GE2 Line Offline"] = self._find_recent_occurence_of_event(edges_events_to_report
-                                                                                         ["events"]["data"],
-                                                                                         'LINK_DEAD',
-                                                                                         'Link GE2 is now DEAD')
+        edge_triage_dict["Last GE1 Interface Online"] = self._find_recent_occurence_of_event(edges_events_to_report
+                                                                                             ["events"]["data"],
+                                                                                             'LINK_ALIVE',
+                                                                                             'Link GE1 is no'
+                                                                                             ' longer DEAD')
+        edge_triage_dict["Last GE1 Interface Offline"] = self._find_recent_occurence_of_event(edges_events_to_report
+                                                                                              ["events"]["data"],
+                                                                                              'LINK_DEAD',
+                                                                                              'Link GE1 is now DEAD')
+        edge_triage_dict["Last GE2 Interface Online"] = self._find_recent_occurence_of_event(edges_events_to_report
+                                                                                             ["events"]["data"],
+                                                                                             'LINK_ALIVE',
+                                                                                             'Link GE2 is no'
+                                                                                             ' longer DEAD')
+        edge_triage_dict["Last GE2 Interface Offline"] = self._find_recent_occurence_of_event(edges_events_to_report
+                                                                                              ["events"]["data"],
+                                                                                              'LINK_DEAD',
+                                                                                              'Link GE2 is now DEAD')
         return edge_triage_dict
 
     def _ticket_object_to_email_obj(self, ticket_dict):
@@ -223,10 +227,10 @@ class ServiceOutageTriage:
             email_html = email_html.replace('%%SERIAL_NUMBER%%', 'VC05200028729')
 
         overview_keys = ["Orchestrator instance", "Edge Name", "Edge URL", "QoE URL", "Transport URL", "Edge Status",
-                         "Interface LABELMARK1", "Label LABELMARK2", "Line GE1 Status", "Interface LABELMARK3",
-                         "Line GE2 Status", "Label LABELMARK4"]
-        events_keys = ["Company Events URL", "Last Edge Online", "Last Edge Offline", "Last GE1 Line Online",
-                       "Last GE1 Line Offline", "Last GE2 Line Online", "Last GE2 Line Offline"]
+                         "Interface LABELMARK1", "Label LABELMARK2", "Interface GE1 Status", "Interface LABELMARK3",
+                         "Interface GE2 Status", "Label LABELMARK4"]
+        events_keys = ["Company Events URL", "Last Edge Online", "Last Edge Offline", "Last GE1 Interface Online",
+                       "Last GE1 Interface Offline", "Last GE2 Interface Online", "Last GE2 Interface Offline"]
         edge_overview = OrderedDict()
         edge_events = OrderedDict()
 
