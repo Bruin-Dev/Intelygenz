@@ -4,7 +4,7 @@ import json
 import re
 from collections import OrderedDict
 from datetime import datetime, timedelta
-
+from dateutil.parser import parse
 from apscheduler.util import undefined
 from pytz import timezone, utc
 from shortuuid import uuid
@@ -53,7 +53,7 @@ class ServiceOutageTriage:
     async def _poll_tickets(self):
         self._logger.info("Requesting tickets from Bruin")
         ticket_request_msg = {'request_id': uuid(), 'response_topic': f'bruin.ticket.response.{self._service_id}',
-                              'client_id': 85940, 'ticket_status': ['New', 'InProgress'], 'category': 'SD-WAN'}
+                              'client_id': 85940, 'ticket_status': ['New', 'InProgress', 'Draft'], 'category': 'SD-WAN'}
         all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
                                                         json.dumps(ticket_request_msg, default=str),
                                                         timeout=10)
@@ -100,7 +100,7 @@ class ServiceOutageTriage:
                                                   timeout=10)
             slack_message = {'request_id': uuid(),
                              'message': f'Triage appeneded to ticket:'
-                                        f'https://app.bruin.com/helpdesk?clientId=88089&ticketId={ticket_id} , in '
+                                        f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id} , in '
                                         f'{self._config.TRIAGE_CONFIG["environment"]}',
                              'response_topic': f'notification.slack.request.{self._service_id}'}
             await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
@@ -136,9 +136,11 @@ class ServiceOutageTriage:
             if event_obj['event'] == event_type:
                 if message is not None:
                     if event_obj['message'] == message:
-                        return event_obj['eventTime']
+                        time = parse(event_obj['eventTime'])
+                        return time.astimezone(timezone('US/Eastern'))
                 else:
-                    return event_obj['eventTime']
+                    time = parse(event_obj['eventTime'])
+                    return time.astimezone(timezone('US/Eastern'))
         return None
 
     def _compose_ticket_note_object(self, edges_status_to_report, edges_events_to_report):
@@ -164,11 +166,11 @@ class ServiceOutageTriage:
 
         edge_triage_dict["Edge Status"] = edges_status_to_report["edge_info"]["edges"]["edgeState"]
 
-        edge_triage_dict["Interface LABELMARK1"] = None
+        edge_triage_dict["Line LABELMARK1"] = None
         edge_triage_dict["Label LABELMARK2"] = None
         edge_triage_dict["Line GE1 Status"] = "Line GE1 not available"
 
-        edge_triage_dict["Interface LABELMARK3"] = None
+        edge_triage_dict["Line LABELMARK3"] = None
         edge_triage_dict["Label LABELMARK4"] = None
         edge_triage_dict["Line GE2 Status"] = "Line GE2 not available\n"
 
