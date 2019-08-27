@@ -56,7 +56,7 @@ class ServiceOutageTriage:
                               'client_id': 85940, 'ticket_status': ['New', 'InProgress', 'Draft'], 'category': 'SD-WAN'}
         all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
                                                         json.dumps(ticket_request_msg, default=str),
-                                                        timeout=10)
+                                                        timeout=15)
         filtered_ticket_ids = []
         if all_tickets is not None and "tickets" in all_tickets.keys() and all_tickets["tickets"] is not None:
             filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
@@ -64,7 +64,7 @@ class ServiceOutageTriage:
             self._logger.error(f'Tickets returned {json.dumps(all_tickets)}')
             slack_message = {'request_id': uuid(),
                              'message': f'Service outage triage: Error in ticket list. '
-                                        f'Ticket list: {json.dumps(all_tickets)}.'
+                                        f'Ticket list: {json.dumps(all_tickets)}. '
                                         f'Environment: {self._config.TRIAGE_CONFIG["environment"]}',
                              'response_topic': f'notification.slack.request.{self._service_id}'}
             await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
@@ -92,7 +92,7 @@ class ServiceOutageTriage:
                                           'note': ticket_note}
                 await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                   json.dumps(ticket_append_note_msg),
-                                                  timeout=10)
+                                                  timeout=15)
             elif self._config.TRIAGE_CONFIG['environment'] == 'dev':
                 ticket_note = self._ticket_object_to_email_obj(ticket_dict)
                 await self._event_bus.rpc_request("notification.email.request",
@@ -116,7 +116,7 @@ class ServiceOutageTriage:
                                  'ticket_id': ticket['ticketID']}
             ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
                                                                json.dumps(ticket_detail_msg, default=str),
-                                                               timeout=10)
+                                                               timeout=15)
             for ticket_detail in ticket_details['ticket_details']['ticketDetails']:
                 triage_exists = False
                 if 'detailValue' in ticket_detail.keys():
