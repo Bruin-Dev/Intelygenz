@@ -89,7 +89,7 @@ class ServiceAffectingMonitor:
                                             f'{edges_status_to_report["edge_info"]["edges"]["serialNumber"]}')
 
         edge_overview = OrderedDict()
-
+        edge_overview["Edge Name"] = edges_status_to_report["edge_info"]["edges"]["name"]
         edge_overview["Trouble"] = trouble
         edge_overview["Interface"] = link['link']['interface']
         edge_overview["Name"] = link['link']['displayName']
