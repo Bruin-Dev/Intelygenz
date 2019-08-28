@@ -4,22 +4,23 @@ import requests
 from application.clients.bruin_client import BruinClient
 from config import testconfig as config
 from pytest import raises
+from tenacity import RetryError
 
 
 class TestBruinClient:
 
     def instance_test(self):
         logger = Mock()
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
         assert bruin_client._logger is logger
-        assert bruin_client._config is config.BRUIN_CONFIG
+        assert bruin_client._config is config
 
     def login_ok_test(self):
         logger = Mock()
         response = Mock()
         response.json = Mock(return_value={"access_token": "Someverysecretaccesstoken"})
         requests.post = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
         bruin_client.login()
         assert "Someverysecretaccesstoken" in bruin_client._bearer_token
         assert requests.post.called
@@ -29,7 +30,7 @@ class TestBruinClient:
         response = Mock()
         response.json = Mock()
         requests.post = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
         bruin_client.login()
         assert bruin_client._bearer_token == ""
         assert requests.post.called
@@ -39,7 +40,7 @@ class TestBruinClient:
         response = Mock()
         response.json = Mock(return_value={"access_token": "Someverysecretaccesstoken"})
         requests.post = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
         bruin_client.login()
         header = bruin_client._get_request_headers()
         assert header == {"authorization": f"Bearer Someverysecretaccesstoken",
@@ -52,7 +53,7 @@ class TestBruinClient:
         response = Mock()
         response.json = Mock()
         requests.post = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
         bruin_client.login()
         with raises(Exception) as error_info:
             header = bruin_client._get_request_headers()
@@ -64,7 +65,7 @@ class TestBruinClient:
         response.json = Mock(return_value={"responses": [{"category": "SD-WAN", "ticketStatus": "New"}]})
         response.status_code = 200
         requests.get = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
         tickets = bruin_client.get_all_tickets(123, '', 'New', 'SD-WAN')
         assert requests.get.called
@@ -74,31 +75,22 @@ class TestBruinClient:
         assert requests.get.call_args[1]['params']['Category'] == 'SD-WAN'
         assert tickets == [{'category': 'SD-WAN', 'ticketStatus': 'New'}]
 
-    def get_all_bruin_tickets_ok_empty_test(self):
-        logger = Mock()
-        response = Mock()
-        response.json = Mock(return_value={"responses": [{"category": "SD-WAN", "ticketStatus": "New"}]})
-        response.status_code = 400
-        requests.get = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
-        bruin_client._bearer_token = "Someverysecretaccesstoken"
-        tickets = bruin_client.get_all_tickets(123, '', 'New', 'SD-WAN')
-        assert requests.get.called
-        assert requests.get.call_args[1]['params']['ClientId'] == 123
-        assert requests.get.call_args[1]['params']['TicketId'] == ''
-        assert requests.get.call_args[1]['params']['TicketStatus'] == "New"
-        assert requests.get.call_args[1]['params']['Category'] == 'SD-WAN'
-        assert tickets == []
-
     def get_all_bruin_tickets_ko_test(self):
         logger = Mock()
         response = Mock()
         response.json = Mock(return_value={"responses": [{"category": "SD-WAN", "ticketStatus": "New"}]})
         response.status_code = 500
         requests.get = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = Mock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        tickets = bruin_client.get_all_tickets(123, '', "New", 'SD-WAN')
+        tickets = None
+        try:
+            tickets = bruin_client.get_all_tickets(123, '', "New", 'SD-WAN')
+        except Exception as e:
+            error = e
+        assert isinstance(error, RetryError)
+        assert bruin_client.login.called
         assert requests.get.called
         assert requests.get.call_args[1]['params']['ClientId'] == 123
         assert requests.get.call_args[1]['params']['TicketId'] == ''
@@ -112,7 +104,7 @@ class TestBruinClient:
         response.json = Mock(return_value='Some Ticket Details')
         response.status_code = 200
         requests.get = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
         ticket_details = bruin_client.get_ticket_details(123)
         assert requests.get.called
@@ -124,9 +116,16 @@ class TestBruinClient:
         response.json = Mock(return_value='Some Ticket Details')
         response.status_code = 500
         requests.get = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = Mock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        ticket_details = bruin_client.get_ticket_details(123)
+        ticket_details = None
+        try:
+            ticket_details = bruin_client.get_ticket_details(123)
+        except Exception as e:
+            error = e
+        assert isinstance(error, RetryError)
+        assert bruin_client.login.called
         assert requests.get.called
         assert ticket_details is None
 
@@ -136,12 +135,12 @@ class TestBruinClient:
         response.json = Mock(return_value='Note appended')
         response.status_code = 200
         requests.post = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        ticket_details = bruin_client.post_ticket_note(123, 'Ticket Notes')
+        post_ticket = bruin_client.post_ticket_note(123, 'Ticket Notes')
         assert requests.post.called
         assert requests.post.call_args[1]['json']['note'] == 'Ticket Notes'
-        assert ticket_details == 'Note appended'
+        assert post_ticket == 'Note appended'
 
     def post_ticket_note_ko_test(self):
         logger = Mock()
@@ -149,9 +148,15 @@ class TestBruinClient:
         response.json = Mock(return_value='Note appended')
         response.status_code = 500
         requests.post = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config.BRUIN_CONFIG)
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = Mock()
         bruin_client._bearer_token = "Someverysecretaccesstoken"
-        ticket_details = bruin_client.post_ticket_note(123, 'Ticket Notes')
+        post_ticket = None
+        try:
+            post_ticket = bruin_client.post_ticket_note(123, 'Ticket Notes')
+        except Exception as e:
+            error = e
+        assert isinstance(error, RetryError)
         assert requests.post.called
         assert requests.post.call_args[1]['json']['note'] == 'Ticket Notes'
-        assert ticket_details is None
+        assert post_ticket is None

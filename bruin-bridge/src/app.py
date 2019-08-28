@@ -18,7 +18,7 @@ class Container:
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("Bruin bridge starting...")
-        self._bruin_client = BruinClient(self._logger, config.BRUIN_CONFIG)
+        self._bruin_client = BruinClient(self._logger, config)
         self._bruin_repository = BruinRepository(self._logger, self._bruin_client)
         self._publisher = NatsStreamingClient(config, f'bruin-bridge-publisher-', logger=self._logger)
         self._subscriber_tickets = NatsStreamingClient(config, f'bruin-bridge-subscriber-', logger=self._logger)
