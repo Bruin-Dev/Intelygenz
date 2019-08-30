@@ -2,19 +2,20 @@
   * [Bruin API](#bruin-api)
     * [Description](#description)
     * [Links](#links)
-  * [Work queues]()
-    * [Get All Tickets](#get-all-tickets)
-        * [Description](#description-1)
-        * [Request message](#request-message)
-        * [Response message](#response-message)
-    * [Get Tickets Details](#get-tickets-details)
-        * [Description](#description-2)
-        * [Request message](#request-message-1)
-        * [Response message](#response-message-1)
-    * [Post notes to Ticket](#post-notes-to-ticket)
-        * [Description](#description-3)
-        * [Request message](#request-message-2)
-        * [Response message](#response-message-2)
+  * [Get All Tickets](#get-all-tickets)
+    * [Description](#description-1)
+    * [Request message](#request-message)
+    * [Response message](#response-message)
+  * [Get Tickets Details](#get-tickets-details)
+    * [Description](#description-2)
+    * [Request message](#request-message-1)
+    * [Response message](#response-message-1)
+  * [Post notes to Ticket](#post-notes-to-ticket)
+    * [Description](#description-3)
+    * [Request message](#request-message-2)
+    * [Response message](#response-message-2)
+- [Running in docker-compose](#running-in-docker-compose)
+
 # Bruin API
 ### Description
 
@@ -117,4 +118,5 @@ And then a response message is publish to the response topic provided by the req
     'status': 200
 }
 ```
-    
+# Running in docker-compose 
+`docker-compose up --build nats-streaming bruin-bridge `

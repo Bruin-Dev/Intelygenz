@@ -1,65 +1,90 @@
 # Table of contents
-- [actions](#actions)
-- [repositories](#repositories)
-  * [statistic repository](#statistic-repository)
-  * [slack repository](#slack-repository)
-- [clients](#clients)
-  * [statistic client](#statistic-client)
-  * [slack client](#slack-client)
+- [Notifier](#notifier)
+  * [Desciption](#description)
+- [Send to Email](#send-to-email)
+  * [Description](#description-1)
+  * [Request message](#request-message)
+  * [Response message](#response-message)
+- [Send to Slack](#send-to-slack)
+  * [Description](#description-2)
+  * [Request message](#request-message-1)
+  * [Response message](#response-message-1)
+- [Running in docker-compose](#running-in-docker-compose)
 
-# Notifier summary
-Every 10 minutes we send a message to a slack channel with the amount of times an edge status other than 
-`CONNECTED` occurs.
-# Application folder
-##### (the specifics of each class and functions within the classes)
-## actions
-Actions has two important functions
--  `store_stats` is the callback function everytime notifier subscribes to `edge.status.ko`. 
-    It also takes a message as a parameter and passes it to and calls the statistic_repository's `send_to_stats_client` 
-    function.
--  `send_to_slack` takes a message as a parameter, and then makes a call to its slack_repository's `send_to_slack` 
-    function and passes the message to slack_repository's `send_to_slack` message parameter. This action is 
-    called every 10 minutes.
-## repositories
-### statistic repository
-   Statistic repository usually receives a message in a byte format. So first it must
-   decode the message from a byte to a string. Then using this line, `from ast import literal_eval`, 
-   we can convert the newly made string into a dictionary. Having this dictionary allows us to
-   grab both values from keys `activation id` and `edge state` located in that dictionary. Then
-   we pass both of those values down to the statistic clients' `store_edge` function.
-   
-### slack repository
-   Converts the message passed from action's `send_to_slack` to a json format, inorder for the slack
-   client can to it to a slack channel. After message has been formatted it calls slack client's
-   `send_to_slack`and passes the newly formatted message as the parameter for this function.
-## clients
-### statistic client
-  - `store_edge` stores the data(`activation id` and `edge state`) gained from the statistic repository in 
-     `edge_dictionary` with the `activation id` acting as the key and the `edge state` as the associated value.
-     Once that has been established it makes a call to `store_statistics_dictionary` and passes the edge state
-     as a parameter.
-  - `store_statistics_dictionary` is called to store the amount of occurrences of an edge state to the 
-    `stats_dictionary`. It makes a check first to see if the edge state passed to it is already a key in 
-    `stats_dictionary`. If it is a new occurrence then add it to the dictionary with a value of 1. Else if it
-    already exists then increment that value of that edge_state by 1.
-  - `get_statistics` is usually called after 10 minutes has passed and returns a message that will be passed down
-    by actions in `app.py` to be formatted and sent to slack. The message format should look something like:
-    ````
-       Edge Status Counters (last 10 minutes)
-       SOME_EDGE_STATUS: XXX
-       ANOTHER_EDGE_STATUS: XXX
-       Total: (sum of all edge statuses' values)
-    ````
-    *note: This is only how it looks like on slack however it is actually one long string with `\n` as the newline
-           breaker *
-  - `clear_dictionaries` is called once the message has been sent to slack, and it clears both the `edge_dictionary`
-     and the `stats_dictionary`. Which allows us to record new data to be sent to slack again after another 10 minutes.
-### slack client
-   Slack Client receives the message passed down from the slack repository. And prepares to make a `POST` call to 
-   to a webhook url, which is provided in the config file located in the config folder of this 
-   microservice. Any `POST` calls made to that url will post to a slack channel. It however
-   first must check that the webhook url is a valid url by checking to see if the string 
-   `https://` is within the url.  Once that is cleared, it then makes the request call. A message will be 
-   printed to the console and returned to determine if the message was successfully sent or not based on the status
-   code of the request call. 200 is a success and anything else is a failure.
+# Notifier 
+###Description
+The notifier receives requests messages, and based on the topic that it received the message from, it can either send an email
+or send a message to our slack channel.
 
+## Send to Email
+### Description
+The notifier receives a request message from topic `notification_email_request`, and then makes a callback to the 
+`send_to_email` function. It then extracts the `email_data` dictionary from the request message if it exists and is not empty.
+Then it sends the email data to the email repository which sends it to the email client.
+
+The email client will attempt to send the email in a try/catch. The email client will first need to login using 
+the library `smtplib` and the fields `sender_email` and `password` from the configs file. From there it will use
+`MIMEMultipart` to format the data from the `email_data` dictionary into a format that can be sent as an email. Then
+it uses the `sender_email` from configs, the `recipient` field from the `email_data` dictionary, and the newly formatted
+`MIMEMultipart` message to send the email. If its sent successfully then a status code of 200 will be returned. And 
+the send_to_email function will put this in a dictionary and publish it to the topic identified by the `response_topic` field of
+the request message. If any error occurs during the process then an error message is printed out and a status code of 
+500 is returned and published instead. 
+
+### Request message
+ ```
+{
+    'request_id': 123,
+    'response_topic': f"notification.email.response.{self._service_id}",
+    'email_data': {
+        'subject': 'Some Subject',
+        'recipient': self._config.TRIAGE_CONFIG["recipient"],
+        'text': 'this is the accessible text for the email',
+        'html': email_html,
+        'images': [],
+        'attachments': []
+    }
+}
+```
+### Response message
+```
+{
+   'request_id': msg_dict['request_id'], 
+   'status': 200
+}
+```
+##Send to Slack
+### Description
+The notifier receives a request message from topic `notification_slack_request`, and then makes a callback to the 
+`send_to_slack` function. Which extracts the `message` field from the request message and sends it to slack_repository. 
+
+In the slack repository, a dictionary is created with the key `text` and the value is the `message` field passed by 
+`send_to_slack` converted into string format. This new dictionary is then passed down to the slack client. 
+
+The slack client receives the message passed down from the slack repository. And prepares to make a `POST` call to 
+to a webhook url, which is provided in the config file located in the config folder of this 
+microservice. Any `POST` calls made to that url will post to a slack channel. It however
+first must check that the webhook url is a valid url by checking to see if the string 
+`https://` is within the url.  Once that is cleared, it then makes the request call. A message will be 
+printed to the console and returned to determine if the message was successfully sent or not based on the status
+code of the request call. 200 is a success and anything else is a failure.
+
+This returned message goes back to the `send_to_slack` function to publish it to the topic identified by the   
+request message's `response_topic` field.
+### Request message
+```
+{
+    'request_id': 123,
+    'message':'Some message',
+    'response_topic': f'notification.slack.request.{service_id}'
+}
+```
+### Response message
+```
+{
+   'request_id': msg_dict['request_id'], 
+   'status': 200
+}
+```
+# Running in docker-compose 
+`docker-compose up --build nats-streaming notifier `
