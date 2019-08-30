@@ -60,28 +60,40 @@ class ServiceAffectingMonitor:
         self._logger.info(f'Edge received from event bus')
         for link in edge_status['edge_info']['links']:
             await self._latency_check(edge_status, link)
-
+            await self._packet_loss_check(edge_status, link)
         self._logger.info("End of service affecting monitor job")
 
     async def _latency_check(self, edge_status, link):
         if 'PUBLIC_WIRELESS' in link['serviceGroups']:
             if link['bestLatencyMsRx'] > 120 or link['bestLatencyMsTx'] > 120:
-                await self._notify_trouble(edge_status, link, 'Latency', 120)
+                await self._notify_trouble(edge_status, link, link['bestLatencyMsRx'], link['bestLatencyMsTx'],
+                                           'Latency', 120)
         elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
             if link['bestLatencyMsRx'] > 50 or link['bestLatencyMsTx'] > 50:
-                await self._notify_trouble(edge_status, link, 'Latency', 50)
+                await self._notify_trouble(edge_status, link, link['bestLatencyMsRx'], link['bestLatencyMsTx'],
+                                           'Latency', 50)
 
-    async def _notify_trouble(self, edge_status, link, trouble, threshold):
+    async def _packet_loss_check(self, edge_status, link):
+        if 'PUBLIC_WIRELESS' in link['serviceGroups']:
+            if link['bestLossPctRx'] > 8 or link['bestLossPctTx'] > 8:
+                await self._notify_trouble(edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
+                                           'Packet Loss', 8)
+        elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
+            if link['bestLossPctRx'] > 5 or link['bestLossPctTx'] > 5:
+                await self._notify_trouble(edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
+                                           'Packet Loss', 5)
+
+    async def _notify_trouble(self, edge_status, link, input, output, trouble, threshold):
         # TODO remove production check here when production part gets implemented
         if self._config.MONITOR_CONFIG['environment'] == 'dev' or self._config.MONITOR_CONFIG['environment'] \
                 == 'production':
-            email_obj = self._compose_email_object(edge_status, link, trouble, threshold)
+            email_obj = self._compose_email_object(edge_status, link, input, output, trouble, threshold)
             await self._event_bus.rpc_request("notification.email.request", json.dumps(email_obj), timeout=10)
         # elif self._config.MONITOR_CONFIG['environment'] == 'production':
         #     TODO create repair tickets
         #     pass
 
-    def _compose_email_object(self, edges_status_to_report, link, trouble, threshold):
+    def _compose_email_object(self, edges_status_to_report, link, input, output, trouble, threshold):
         with open('src/templates/service_affecting_monitor.html') as template:
             email_html = "".join(template.readlines())
             email_html = email_html.replace('%%TROUBLE%%', trouble)
@@ -96,8 +108,8 @@ class ServiceAffectingMonitor:
         edge_overview["Threshold"] = threshold
         edge_overview['Interval for Scan'] = '15 Minutes'
         edge_overview['Scan Time'] = datetime.now(timezone('US/Eastern'))
-        edge_overview["Input"] = link['bestLatencyMsRx']
-        edge_overview["Output"] = link['bestLatencyMsTx']
+        edge_overview["Input"] = input
+        edge_overview["Output"] = output
         edge_overview["Edge URL"] = \
             f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
