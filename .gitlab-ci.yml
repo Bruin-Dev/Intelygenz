@@ -440,8 +440,9 @@ deploy_template_master: &deploy_template_master
 
 deploy-branches:
   stage: deploy
-  <<: *deploy_template_branches
-  <<: *deploy_template
+  <<: 
+    - *deploy_template_branches
+    - *deploy_template
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
