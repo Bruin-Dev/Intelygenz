@@ -373,27 +373,13 @@ basic-infra:
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
 
-deploy-branches:
-  stage: deploy
+.deploy_template: &deploy_template
   <<: *terraform_template
   variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
-    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
-    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
-    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
-    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
-    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
-    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
-    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
-    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
-    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
@@ -412,6 +398,25 @@ deploy-branches:
     - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
     - terraform apply -auto-approve infra-as-code/ecs-services
+
+
+deploy-branches:
+  stage: deploy
+  <<: *deploy_template
+  variables:
+    ENVIRONMENT_SLUG: $(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    TF_VAR_ENVIRONMENT: automation-${ENVIRONMENT_SLUG}
+    TF_VAR_SUBDOMAIN: ${ENVIRONMENT_SLUG}
+    TF_VAR_BUILD_NUMBER: ${CI_PIPELINE_ID}
+    TF_VAR_NATS_MODULE_VERSION: ${NATS_MODULE_VERSION}
+    TF_VAR_VELOCLOUD_CREDENTIALS: ${VELOCLOUD_CREDENTIALS_PRO}
+    TF_VAR_EMAIL_ACC_PWD: ${EMAIL_ACC_PWD}
+    TF_VAR_MONITORING_SECONDS: ${MONITORING_SECONDS}
+    TF_VAR_LAST_CONTACT_RECIPIENT: ${LAST_CONTACT_RECIPIENT_DEV}
+    TF_VAR_BRUIN_CLIENT_ID: ${BRUIN_CLIENT_ID_PRO}
+    TF_VAR_BRUIN_CLIENT_SECRET: ${BRUIN_CLIENT_SECRET_PRO}
+    TF_VAR_BRUIN_LOGIN_URL: ${BRUIN_LOGIN_URL_PRO}
+    TF_VAR_BRUIN_BASE_URL: ${BRUIN_BASE_URL_PRO}
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
@@ -452,43 +457,21 @@ destroy-branches:
 
 deploy-master:
   stage: deploy
-  <<: *terraform_template
+  <<: *deploy_template
   variables:
-    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
-  script:
-    - export ENVIRONMENT_SLUG=master
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
-    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
-    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
-    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
-    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
-    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
-    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
-    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
-    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
-    - apk add gettext
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - terraform init infra-as-code/dev
-    - terraform apply -auto-approve infra-as-code/dev
-    - apk add curl
-    - apk add bash
-    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
-    - chmod +x /usr/local/bin/ecs-cli
-    - /bin/bash ci-utils/nats_healthcheck.sh
-    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
-    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
-    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
-    - terraform init infra-as-code/ecs-services
-    - terraform apply -auto-approve infra-as-code/ecs-services
+    ENVIRONMENT_SLUG: master
+    TF_VAR_ENVIRONMENT: automation-${ENVIRONMENT_SLUG}
+    TF_VAR_SUBDOMAIN: ${ENVIRONMENT_SLUG}
+    TF_VAR_BUILD_NUMBER: ${CI_PIPELINE_ID}
+    TF_VAR_NATS_MODULE_VERSION: ${NATS_MODULE_VERSION}
+    TF_VAR_VELOCLOUD_CREDENTIALS: ${VELOCLOUD_CREDENTIALS_PRO}
+    TF_VAR_EMAIL_ACC_PWD: ${EMAIL_ACC_PWD}
+    TF_VAR_MONITORING_SECONDS: ${MONITORING_SECONDS}
+    TF_VAR_LAST_CONTACT_RECIPIENT: ${LAST_CONTACT_RECIPIENT_PRO}
+    TF_VAR_BRUIN_CLIENT_ID: ${BRUIN_CLIENT_ID_PRO}
+    TF_VAR_BRUIN_CLIENT_SECRET: ${BRUIN_CLIENT_SECRET_PRO}
+    TF_VAR_BRUIN_LOGIN_URL: ${BRUIN_LOGIN_URL_PRO}
+    TF_VAR_BRUIN_BASE_URL: ${BRUIN_BASE_URL_PRO}
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net:3000/
