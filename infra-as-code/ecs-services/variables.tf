@@ -60,7 +60,6 @@ variable "cdir_base" {
   default = "10.1.0.0"
 }
 
-
-
-
-
+variable "CURRENT_ENVIRONMENT" {
+  default = "dev"
+}
