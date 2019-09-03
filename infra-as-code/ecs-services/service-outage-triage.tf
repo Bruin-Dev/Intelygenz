@@ -27,12 +27,12 @@ resource "aws_ecs_task_definition" "automation-service-outage-triage" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
-  task_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
+  execution_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
+  task_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
 }
 
 resource "aws_security_group" "automation-service-outage-triage_service" {
-  vpc_id = "${aws_vpc.automation-vpc.id}"
+  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id}"
   name = "${var.ENVIRONMENT}-service-outage-triage"
   description = "Allow egress from container"
 
@@ -100,13 +100,13 @@ resource "aws_ecs_service" "automation-service-outage-triage" {
   task_definition = "${aws_ecs_task_definition.automation-service-outage-triage.family}:${aws_ecs_task_definition.automation-service-outage-triage.revision}"
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = "${aws_ecs_cluster.automation.id}"
+  cluster = "${data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id}"
 
   network_configuration {
     security_groups = [
       "${aws_security_group.automation-service-outage-triage_service.id}"]
     subnets = [
-      "${aws_subnet.automation-private_subnet-1a.id}"]
+      "${data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a}"]
     assign_public_ip = false
   }
 
