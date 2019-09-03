@@ -27,8 +27,8 @@ resource "aws_ecs_task_definition" "automation-service-affecting-monitor" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
-  task_role_arn = "${data.aws_iam_role.ecs_execution_role.arn}"
+  execution_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
+  task_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
 }
 
 resource "aws_security_group" "automation-service-affecting-monitor_service" {
