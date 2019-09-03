@@ -80,7 +80,7 @@ resource "aws_service_discovery_service" "service-outage-triage" {
   name = "service-outage-triage"
 
   dns_config {
-    namespace_id = "${aws_service_discovery_private_dns_namespace.automation-zone.id}"
+    namespace_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id}"
 
     dns_records {
       ttl = 10

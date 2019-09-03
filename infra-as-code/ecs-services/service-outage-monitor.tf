@@ -32,7 +32,7 @@ resource "aws_ecs_task_definition" "automation-service-outage-monitor" {
 }
 
 resource "aws_security_group" "automation-service-outage-monitor_service" {
-  vpc_id = "${aws_vpc.automation-vpc.id}"
+  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id}"
   name = "${var.ENVIRONMENT}-service-outage-monitor"
   description = "Allow egress from container"
 
