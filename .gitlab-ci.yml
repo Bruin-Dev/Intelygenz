@@ -138,7 +138,6 @@ acceptance-test-linter:
     MODULE: acceptance-tests
   <<: *lint_module
 
-
 #
 # Modules unit tests
 #
@@ -211,7 +210,6 @@ bruin-bridge-test:
   variables:
     MODULE: bruin-bridge
   <<: *unittest_module
-
 
 #
 # Acceptance/Integration tests
@@ -320,12 +318,20 @@ service-outage-triage-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
 
+service-outage-monitor-build:
+  stage: build
+  variables:
+    MODULE_NAME: service-outage-monitor
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  <<: *build_app_image
+
 service-affecting-monitor-build:
   stage: build
   variables:
     MODULE_NAME: service-affecting-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   <<: *build_app_image
+
 # =========
 # TERRAFORM
 # =========
@@ -352,6 +358,7 @@ terraform-validate-dev:
     - export TF_VAR_BRUIN_CLIENT_SECRET_PRO=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL_PRO=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
@@ -394,6 +401,7 @@ deploy-branches:
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
@@ -434,12 +442,14 @@ destroy-branches:
     - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
     - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
     - terraform init infra-as-code/ecs-services
+    - terraform refresh infra-as-code/ecs-services
     - terraform destroy -auto-approve infra-as-code/ecs-services
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
+    - terraform refresh infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
   environment:
     name: $CI_COMMIT_REF_NAME
@@ -471,6 +481,7 @@ deploy-master:
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_CURRENT_ENVIRONMENT=production
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
