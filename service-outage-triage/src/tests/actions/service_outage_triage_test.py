@@ -266,10 +266,14 @@ class TestServiceOutageTriage:
         service_id = 123
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage._check_events = CoroutineMock()
 
         filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
         assert event_bus.rpc_request.called
         assert len(filtered_tickets) == 0
+        assert service_outage_triage._check_events.called
+        assert service_outage_triage._check_events.call_args[0][1] == ticket_details['ticket_details']['ticketNotes'][
+                                                                      0]['noteValue']
 
     def find_recent_occurence_of_event_test(self):
         event_bus = Mock()
@@ -298,6 +302,19 @@ class TestServiceOutageTriage:
         link_dead_time = service_outage_triage._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
                                                                                'Link GE1 is no longer DEAD')
         assert link_dead_time is None
+
+    def extract_field_from_string_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = Mock()
+        service_id = 123
+        dict_as_string = 'Edge Name: Test \nTimeStamp1: 2019-08-29 14:36:19-04:00 \nTimeStamp2 : Now \n'
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+
+        timestamp = service_outage_triage._extract_field_from_string(dict_as_string, 'TimeStamp1: ', '\nTimeStamp2')
+
+        assert timestamp == '2019-08-29 14:36:19-04:00 '
 
     def compose_ticket_note_object(self):
         event_bus = Mock()

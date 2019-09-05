@@ -108,8 +108,7 @@ class ServiceOutageTriage:
 
     async def _filtered_ticket_details(self, ticket_list):
         filtered_ticket_ids = []
-        if ticket_list["tickets"] is not None:
-            self._logger.info(f'List of tickets length: {len(ticket_list["tickets"])}')
+        self._logger.info(f'List of tickets length: {len(ticket_list["tickets"])}')
         for ticket in ticket_list['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'response_topic': f'bruin.ticket.details.response.{self._service_id}',
@@ -125,6 +124,7 @@ class ServiceOutageTriage:
                             if ticket_note['noteValue'] is not None:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
                                     self._logger.info(f'Triage already exists for ticket id of {ticket["ticketID"]}')
+                                    await self._check_events(ticket['ticketID'], ticket_note['noteValue'])
                                     triage_exists = True
                         if triage_exists is not True:
                             filtered_ticket_ids.append(ticket['ticketID'])
@@ -142,6 +142,44 @@ class ServiceOutageTriage:
                     time = parse(event_obj['eventTime'])
                     return time.astimezone(timezone('US/Eastern'))
         return None
+
+    def _extract_field_from_string(self, dict_as_string, key1, key2='#DEFAULT_END#'):
+        return dict_as_string[dict_as_string.find(key1) + len(key1): dict_as_string.find(key2)]
+
+    async def _check_events(self, ticket_id, ticket_note):
+        last_timestamp = self._extract_field_from_string(ticket_note, "TimeStamp: ")
+        edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
+        events_msg = {'request_id': uuid(),
+                      'response_topic': f'alert.response.event.edge.{self._service_id}',
+                      'edge': edge_id,
+                      'start_date': last_timestamp,
+                      'end_date': datetime.now(timezone('US/Eastern'))}
+        edge_events = await self._event_bus.rpc_request("alert.request.event.edge", json.dumps(
+                                                                                events_msg, default=str), timeout=10)
+        events_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+        for event in reversed(edge_events["events"]["data"]):
+            if event['event'] in events_list:
+                event_dict = OrderedDict()
+                event_dict['NewEvent'] = event['event']
+                if event['category'] is 'EDGE':
+                    event_dict['Device'] = 'Edge'
+                else:
+                    if 'GE1' in event['message']:
+                        event_dict['Device'] = 'GE1'
+                    if 'GE2' in event['message']:
+                        event_dict['Device'] = 'GE2'
+                event_dict["TimeStamp"] = event['eventTime'].astimezone(timezone('US/Eastern')) + timedelta(seconds=1)
+                event_note = self._ticket_object_to_string(event_dict)
+                if self._config.TRIAGE_CONFIG['environment'] == 'production':
+                    ticket_append_note_msg = {'request_id': uuid(),
+                                              'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
+                                              'ticket_id': ticket_id,
+                                              'note': event_note}
+                    await self._event_bus.rpc_request("bruin.ticket.note.append.request",
+                                                      json.dumps(ticket_append_note_msg),
+                                                      timeout=15)
+                if self._config.TRIAGE_CONFIG['environment'] == 'dev':
+                    self._logger.info(event_note)
 
     def _compose_ticket_note_object(self, edges_status_to_report, edges_events_to_report):
 
@@ -218,6 +256,7 @@ class ServiceOutageTriage:
                                                                                               ["events"]["data"],
                                                                                               'LINK_DEAD',
                                                                                               'Link GE2 is now DEAD')
+        edge_triage_dict["TimeStamp"] = datetime.now(timezone('US/Eastern'))
         return edge_triage_dict
 
     def _ticket_object_to_email_obj(self, ticket_dict):
