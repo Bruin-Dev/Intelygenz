@@ -28,6 +28,7 @@ TRIAGE_CONFIG = {
     #   "VC05400001548", "VC05200033081", "VC05200037161", "VC05200059766",
     #   "VC05200033383", "VC05200029594", "VC05200039471", "VC05200038423",
     #   "VC05200043210"]
+    # The ones not appearing are ['VCE20000000895', 'VC05400001548']
     'id_by_serial': {
         "VC05200026138": {
             "host": "mettel.velocloud.net",
@@ -85,6 +86,8 @@ TRIAGE_CONFIG = {
             "edge_id": 2969
         }
     }
+
+
 }
 LOG_CONFIG = {
     'name': 'service-outage-triage',

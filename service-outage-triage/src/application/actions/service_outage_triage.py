@@ -69,7 +69,8 @@ class ServiceOutageTriage:
                              'response_topic': f'notification.slack.request.{self._service_id}'}
             await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
         for ticket_id in filtered_ticket_ids:
-            edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
+            id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
+            edge_id = id_by_serial[ticket_id["serial"]]
             status_msg = {'request_id': uuid(),
                           'response_topic': f'edge.status.response.{self._service_id}',
                           'edge': edge_id}
@@ -88,7 +89,7 @@ class ServiceOutageTriage:
                 ticket_note = self._ticket_object_to_string(ticket_dict)
                 ticket_append_note_msg = {'request_id': uuid(),
                                           'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
-                                          'ticket_id': ticket_id,
+                                          'ticket_id': ticket_id["ticketID"],
                                           'note': ticket_note}
                 await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                   json.dumps(ticket_append_note_msg),
@@ -100,7 +101,8 @@ class ServiceOutageTriage:
                                                   timeout=10)
             slack_message = {'request_id': uuid(),
                              'message': f'Triage appeneded to ticket:'
-                                        f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id} , in '
+                                        f'https://app.bruin.com/helpdesk?clientId=85940&ticketId='
+                                        f'{ticket_id["ticketID"]} , in '
                                         f'{self._config.TRIAGE_CONFIG["environment"]}',
                              'response_topic': f'notification.slack.request.{self._service_id}'}
             await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
@@ -108,7 +110,9 @@ class ServiceOutageTriage:
 
     async def _filtered_ticket_details(self, ticket_list):
         filtered_ticket_ids = []
-        self._logger.info(f'List of tickets length: {len(ticket_list["tickets"])}')
+        valid_serials = list(self._config.TRIAGE_CONFIG["id_by_serial"].keys())
+        if ticket_list["tickets"] is not None:
+            self._logger.info(f'List of tickets length: {len(ticket_list["tickets"])}')
         for ticket in ticket_list['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'response_topic': f'bruin.ticket.details.response.{self._service_id}',
@@ -119,7 +123,10 @@ class ServiceOutageTriage:
             for ticket_detail in ticket_details['ticket_details']['ticketDetails']:
                 triage_exists = False
                 if 'detailValue' in ticket_detail.keys():
-                    if 'VC05200028729' in ticket_detail['detailValue']:
+                    if ticket_detail['detailValue'] in valid_serials:
+                        ticket_item = dict()
+                        ticket_item["ticketID"] = ticket['ticketID']
+                        ticket_item["serial"] = ticket_detail['detailValue']
                         for ticket_note in ticket_details['ticket_details']['ticketNotes']:
                             if ticket_note['noteValue'] is not None:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
@@ -127,7 +134,7 @@ class ServiceOutageTriage:
                                     await self._check_events(ticket['ticketID'], ticket_note['noteValue'])
                                     triage_exists = True
                         if triage_exists is not True:
-                            filtered_ticket_ids.append(ticket['ticketID'])
+                            filtered_ticket_ids.append(ticket_item)
                             break
         return filtered_ticket_ids
 
