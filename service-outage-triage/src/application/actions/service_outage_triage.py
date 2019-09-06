@@ -182,8 +182,7 @@ class ServiceOutageTriage:
                     await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                       json.dumps(ticket_append_note_msg),
                                                       timeout=15)
-                if self._config.TRIAGE_CONFIG['environment'] == 'dev':
-                    self._logger.info(event_note)
+                self._logger.info(event_note)
 
                 slack_message = {'request_id': uuid(),
                                  'message': f'Events appeneded to ticket:'
