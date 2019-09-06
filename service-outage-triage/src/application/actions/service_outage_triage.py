@@ -111,8 +111,6 @@ class ServiceOutageTriage:
     async def _filtered_ticket_details(self, ticket_list):
         filtered_ticket_ids = []
         valid_serials = list(self._config.TRIAGE_CONFIG["id_by_serial"].keys())
-        if ticket_list["tickets"] is not None:
-            self._logger.info(f'List of tickets length: {len(ticket_list["tickets"])}')
         for ticket in ticket_list['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'response_topic': f'bruin.ticket.details.response.{self._service_id}',
@@ -131,7 +129,7 @@ class ServiceOutageTriage:
                             if ticket_note['noteValue'] is not None:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
                                     self._logger.info(f'Triage already exists for ticket id of {ticket["ticketID"]}')
-                                    await self._check_events(ticket['ticketID'], ticket_note['noteValue'])
+                                    await self._check_events(ticket, ticket_note['noteValue'])
                                     triage_exists = True
                         if triage_exists is not True:
                             filtered_ticket_ids.append(ticket_item)
@@ -158,7 +156,8 @@ class ServiceOutageTriage:
             last_timestamp = self._extract_field_from_string(ticket_note, "TimeStamp: ")
         else:
             return
-        edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
+        id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
+        edge_id = id_by_serial[ticket_id["serial"]]
         events_msg = {'request_id': uuid(),
                       'response_topic': f'alert.response.event.edge.{self._service_id}',
                       'edge': edge_id,
@@ -184,7 +183,7 @@ class ServiceOutageTriage:
                 if self._config.TRIAGE_CONFIG['environment'] == 'production':
                     ticket_append_note_msg = {'request_id': uuid(),
                                               'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
-                                              'ticket_id': ticket_id,
+                                              'ticket_id': ticket_id["ticketID"],
                                               'note': event_note}
                     await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                       json.dumps(ticket_append_note_msg),
@@ -193,7 +192,7 @@ class ServiceOutageTriage:
 
                 slack_message = {'request_id': uuid(),
                                  'message': f'Events appeneded to ticket:'
-                                 f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id} , in '
+                                 f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id["ticketID"]} , in '
                                  f'{self._config.TRIAGE_CONFIG["environment"]}',
                                  'response_topic': f'notification.slack.request.{self._service_id}'}
                 await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)

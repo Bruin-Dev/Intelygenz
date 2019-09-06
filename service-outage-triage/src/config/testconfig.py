@@ -16,7 +16,19 @@ NATS_CONFIG = {
 }
 TRIAGE_CONFIG = {
     'environment': "dev",
-    'recipient': "some.recipient@email.com"
+    'recipient': "some.recipient@email.com",
+    'id_by_serial': {
+        "VC05200026138": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        },
+        "VC05400001485": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1502
+        }
+    }
 }
 LOG_CONFIG = {
     'name': 'test-name',
