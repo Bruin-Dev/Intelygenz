@@ -22,7 +22,69 @@ NATS_CONFIG = {
 }
 TRIAGE_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"],
-    'recipient': os.environ["LAST_CONTACT_RECIPIENT"]
+    'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
+    # TODO Research why there are only 11 of 13 of the serials given after automated process searching for them:
+    #   ["VCE20000000940", "VCE20000000895", "VC05200026138", "VC05400001485",
+    #   "VC05400001548", "VC05200033081", "VC05200037161", "VC05200059766",
+    #   "VC05200033383", "VC05200029594", "VC05200039471", "VC05200038423",
+    #   "VC05200043210"]
+    'id_by_serial': {
+        "VC05200026138": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        },
+        "VC05400001485": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1502
+        },
+        "VC05200033081": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1515
+        },
+        "VC05200029594": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1573
+        },
+        "VC05200033383": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1651
+        },
+        "VC05200038423": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1997
+        },
+        "VC05200037161": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 2135
+        },
+        "VC05200039471": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 2151
+        },
+        "VCE20000000940": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 2419
+        },
+        "VC05200059766": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 2839
+        },
+        "VC05200043210": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 2969
+        }
+    }
 }
 LOG_CONFIG = {
     'name': 'service-outage-triage',
