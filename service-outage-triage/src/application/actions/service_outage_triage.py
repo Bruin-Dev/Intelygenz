@@ -147,7 +147,10 @@ class ServiceOutageTriage:
         return dict_as_string[dict_as_string.find(key1) + len(key1): dict_as_string.find(key2)]
 
     async def _check_events(self, ticket_id, ticket_note):
-        last_timestamp = self._extract_field_from_string(ticket_note, "TimeStamp: ")
+        if 'TimeStamp: ' in ticket_note:
+            last_timestamp = self._extract_field_from_string(ticket_note, "TimeStamp: ")
+        else:
+            return
         edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
         events_msg = {'request_id': uuid(),
                       'response_topic': f'alert.response.event.edge.{self._service_id}',
@@ -165,9 +168,9 @@ class ServiceOutageTriage:
                     event_dict['Device'] = 'Edge'
                 else:
                     if 'GE1' in event['message']:
-                        event_dict['Device'] = 'GE1'
+                        event_dict['Device'] = 'Interface GE1'
                     if 'GE2' in event['message']:
-                        event_dict['Device'] = 'GE2'
+                        event_dict['Device'] = 'Interface GE2'
                 event_dict["TimeStamp"] = parse(event['eventTime']).astimezone(timezone('US/Eastern')) + timedelta(
                                                                                                          seconds=1)
                 event_note = self._ticket_object_to_string(event_dict)
@@ -181,6 +184,13 @@ class ServiceOutageTriage:
                                                       timeout=15)
                 if self._config.TRIAGE_CONFIG['environment'] == 'dev':
                     self._logger.info(event_note)
+
+                slack_message = {'request_id': uuid(),
+                                 'message': f'Events appeneded to ticket:'
+                                 f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id} , in '
+                                 f'{self._config.TRIAGE_CONFIG["environment"]}',
+                                 'response_topic': f'notification.slack.request.{self._service_id}'}
+                await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
 
     def _compose_ticket_note_object(self, edges_status_to_report, edges_events_to_report):
 
