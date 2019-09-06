@@ -257,7 +257,7 @@ class TestServiceOutageTriage:
     async def filter_tickets_ko_triage_exists_test(self):
         event_bus = Mock()
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200028729'}],
+        ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*#'}]}}
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
         logger = Mock()
@@ -273,7 +273,7 @@ class TestServiceOutageTriage:
         assert len(filtered_tickets) == 0
         assert service_outage_triage._check_events.called
         assert service_outage_triage._check_events.call_args[0][1] == ticket_details['ticket_details']['ticketNotes'][
-                                                                      0]['noteValue']
+            0]['noteValue']
 
     def find_recent_occurence_of_event_test(self):
         event_bus = Mock()
@@ -333,11 +333,12 @@ class TestServiceOutageTriage:
         config = testconfig
         config.TRIAGE_CONFIG['environment'] = 'dev'
         service_id = 123
+        ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
 
-        await service_outage_triage._check_events(123, ticket_note)
+        await service_outage_triage._check_events(ticket, ticket_note)
 
         assert event_bus.rpc_request.called
         assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
@@ -364,11 +365,12 @@ class TestServiceOutageTriage:
         config = testconfig
         config.TRIAGE_CONFIG['environment'] = 'dev'
         service_id = 123
+        ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
 
-        await service_outage_triage._check_events(123, ticket_note)
+        await service_outage_triage._check_events(ticket, ticket_note)
 
         assert event_bus.rpc_request.called
         assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
@@ -419,11 +421,12 @@ class TestServiceOutageTriage:
         config = testconfig
         config.TRIAGE_CONFIG['environment'] = 'production'
         service_id = 123
+        ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
 
-        await service_outage_triage._check_events(123, ticket_note)
+        await service_outage_triage._check_events(ticket, ticket_note)
 
         assert event_bus.rpc_request.called
         assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
@@ -449,11 +452,12 @@ class TestServiceOutageTriage:
         config = testconfig
         config.TRIAGE_CONFIG['environment'] = 'production'
         service_id = 123
+        ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
 
-        await service_outage_triage._check_events(123, ticket_note)
+        await service_outage_triage._check_events(ticket, ticket_note)
 
         assert event_bus.rpc_request.called
         assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
@@ -511,11 +515,12 @@ class TestServiceOutageTriage:
         config = testconfig
         config.TRIAGE_CONFIG['environment'] = 'production'
         service_id = 123
+        ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
 
-        await service_outage_triage._check_events(123, ticket_note)
+        await service_outage_triage._check_events(ticket, ticket_note)
 
         assert event_bus.rpc_request.called
         assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
