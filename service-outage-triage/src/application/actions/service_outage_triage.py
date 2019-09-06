@@ -161,14 +161,15 @@ class ServiceOutageTriage:
             if event['event'] in events_list:
                 event_dict = OrderedDict()
                 event_dict['NewEvent'] = event['event']
-                if event['category'] is 'EDGE':
+                if event['category'] == 'EDGE':
                     event_dict['Device'] = 'Edge'
                 else:
                     if 'GE1' in event['message']:
                         event_dict['Device'] = 'GE1'
                     if 'GE2' in event['message']:
                         event_dict['Device'] = 'GE2'
-                event_dict["TimeStamp"] = event['eventTime'].astimezone(timezone('US/Eastern')) + timedelta(seconds=1)
+                event_dict["TimeStamp"] = parse(event['eventTime']).astimezone(timezone('US/Eastern')) + timedelta(
+                                                                                                         seconds=1)
                 event_note = self._ticket_object_to_string(event_dict)
                 if self._config.TRIAGE_CONFIG['environment'] == 'production':
                     ticket_append_note_msg = {'request_id': uuid(),
