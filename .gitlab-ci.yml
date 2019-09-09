@@ -403,14 +403,14 @@ deploy-branches:
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
+    - apk add curl
+    - apk add bash
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - apk add curl
-    - apk add bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/nats_healthcheck.sh
@@ -483,14 +483,14 @@ deploy-master:
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=production
     - apk add gettext
+    - apk add curl
+    - apk add bash
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - apk add curl
-    - apk add bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/nats_healthcheck.sh
