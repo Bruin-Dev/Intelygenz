@@ -45,7 +45,7 @@ resource "aws_security_group" "automation-dev-inbound" {
       "0.0.0.0/0"]
   }
 
-  tags {
+  tags = {
     Name = "${var.ENVIRONMENT}-inbound"
   }
 }
@@ -68,6 +68,13 @@ resource "aws_lb" "automation-alb" {
     Name = "${var.ENVIRONMENT}"
     ENVIRONMENT = "${var.ENVIRONMENT}"
   }
+}
+
+resource "aws_lb_target_group" "automation-alb-tg" {
+  name     = "alb-tg-${var.ENVIRONMENT}"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = "${aws_vpc.main.id}"
 }
 
 resource "aws_lb_listener" "front_end" {

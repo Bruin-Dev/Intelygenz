@@ -21,3 +21,10 @@ output "subnet_automation-private-1a" {
 output "redis_hostname" {
   value = "${aws_elasticache_cluster.automation-redis.cache_nodes.0.address}"
 }
+
+output "automation_alb" {
+  value = "${aws_lb.automation-alb}"
+}
+output "automation_alb_arn" {
+  value = "${aws_lb.automation-alb.arn}"
+}
