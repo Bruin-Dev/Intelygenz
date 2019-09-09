@@ -48,7 +48,7 @@ resource "aws_lb_target_group" "automation-metrics-grafana" {
   }
 
   depends_on = [
-    "${data.terraform_remote_state.tfstate-dev-resources.outputs.automation_alb}"]
+    "data.terraform_remote_state.tfstate-dev-resources.outputs.automation_alb"]
 
   lifecycle {
     create_before_destroy = true
