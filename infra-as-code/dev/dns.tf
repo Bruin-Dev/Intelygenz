@@ -8,8 +8,8 @@ resource "aws_route53_record" "automation" {
   type = "A"
 
   alias {
-    name = "${aws_alb.automation-alb.dns_name}"
-    zone_id = "${aws_alb.automation-alb.zone_id}"
+    name = "${aws_lb.automation-alb.dns_name}"
+    zone_id = "${aws_lb.automation-alb.zone_id}"
     evaluate_target_health = true
   }
 }
