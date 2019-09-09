@@ -129,7 +129,7 @@ class ServiceOutageTriage:
                             if ticket_note['noteValue'] is not None:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
                                     self._logger.info(f'Triage already exists for ticket id of {ticket["ticketID"]}')
-                                    await self._check_events(ticket, ticket_note['noteValue'])
+                                    await self._check_events(ticket_item, ticket_note['noteValue'])
                                     triage_exists = True
                         if triage_exists is not True:
                             filtered_ticket_ids.append(ticket_item)
