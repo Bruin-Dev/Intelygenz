@@ -31,7 +31,7 @@ resource "aws_lb_listener" "automation-grafana" {
   protocol = "HTTP"
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.automation-metrics-grafana.arn}"
+    target_group_arn = "${aws_lb_target_group.automation-metrics-grafana.arn}"
     type = "forward"
   }
 }
@@ -42,13 +42,10 @@ resource "aws_lb_target_group" "automation-metrics-grafana" {
   protocol = "HTTP"
   vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id}"
   target_type = "ip"
-  stickiness = {
+  stickiness {
     type = "lb_cookie"
     enabled = false
   }
-
-  depends_on = [
-    "data.terraform_remote_state.tfstate-dev-resources.outputs.automation_alb"]
 
   lifecycle {
     create_before_destroy = true
@@ -107,7 +104,7 @@ resource "aws_ecs_service" "automation-metrics-grafana" {
   }
 
   load_balancer {
-    target_group_arn = "${aws_alb_target_group.automation-metrics-grafana.arn}"
+    target_group_arn = "${aws_lb_target_group.automation-metrics-grafana.arn}"
     container_name = "grafana"
     container_port = 3000
   }
