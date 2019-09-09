@@ -38,7 +38,7 @@ resource "aws_eip" "automation-nat_eip-1a" {
 resource "aws_eip" "automation-nat_eip-1b" {
   vpc = true
   tags = {
-    Name = "${var.environment}-nat-1b"
+    Name = "${var.ENVIRONMENT}-nat-1b"
   }
 }
 
@@ -83,8 +83,8 @@ resource "aws_subnet" "automation-public_subnet-1b" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.environment}-public-subnet-1b"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-public-subnet-1b"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
@@ -107,9 +107,9 @@ resource "aws_subnet" "automation-private_subnet-1b" {
   availability_zone = "us-east-1b"
   map_public_ip_on_launch = false
 
-  tags = {
-    Name = "${var.environment}-private-subnet-1b"
-    Environment = "${var.environment}"
+  tags ={
+    Name = "${var.ENVIRONMENT}-private-subnet-1b"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 
