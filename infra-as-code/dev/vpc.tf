@@ -58,8 +58,8 @@ resource "aws_nat_gateway" "automation-nat-1b" {
   subnet_id = "${aws_subnet.automation-public_subnet-1b.id}"
 
   tags = {
-    Name = "${var.environment}-1b"
-    Environment = "${var.environment}"
+    Name = "${var.ENVIRONMENT}-1b"
+    Environment = "${var.ENVIRONMENT}"
   }
 }
 

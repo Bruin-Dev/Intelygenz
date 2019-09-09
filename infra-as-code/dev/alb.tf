@@ -64,17 +64,10 @@ resource "aws_lb" "automation-alb" {
   security_groups = [
     "${aws_security_group.automation-dev-inbound.id}"]
 
-  tags {
+  tags = {
     Name = "${var.ENVIRONMENT}"
-    ENVIRONMENT = "${var.ENVIRONMENT}"
+    Environment = "${var.ENVIRONMENT}"
   }
-}
-
-resource "aws_lb_target_group" "automation-alb-tg" {
-  name     = "alb-tg-${var.ENVIRONMENT}"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = "${aws_vpc.main.id}"
 }
 
 resource "aws_lb_listener" "front_end" {
@@ -91,5 +84,24 @@ resource "aws_lb_listener" "front_end" {
       status_code = "HTTP_301"
     }
 
+  }
+}
+
+resource "aws_lb_target_group" "automation-front_end" {
+  name = "${var.ENVIRONMENT}-front_end"
+  port = 80
+  protocol = "HTTP"
+  vpc_id = "${aws_vpc.automation-vpc.id}"
+  target_type = "ip"
+  stickiness = {
+    type = "lb_cookie"
+    enabled = false
+  }
+
+  depends_on = [
+    "${aws_lb.automation-alb}"]
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
