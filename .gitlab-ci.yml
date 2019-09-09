@@ -405,14 +405,14 @@ deploy-branches:
     - apk add gettext
     - apk add curl
     - apk add bash
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - chmod +x /usr/local/bin/ecs-cli
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
-    - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/nats_healthcheck.sh
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
@@ -485,14 +485,14 @@ deploy-master:
     - apk add gettext
     - apk add curl
     - apk add bash
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - chmod +x /usr/local/bin/ecs-cli
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
-    - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/nats_healthcheck.sh
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
