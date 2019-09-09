@@ -35,6 +35,13 @@ resource "aws_eip" "automation-nat_eip-1a" {
   }
 }
 
+resource "aws_eip" "automation-nat_eip-1b" {
+  vpc = true
+  tags {
+    Name = "${var.environment}-nat-1b"
+  }
+}
+
 /* NAT */
 resource "aws_nat_gateway" "automation-nat-1a" {
   allocation_id = "${aws_eip.automation-nat_eip-1a.id}"
@@ -43,6 +50,16 @@ resource "aws_nat_gateway" "automation-nat-1a" {
   tags = {
     Name = "${var.ENVIRONMENT}-1a"
     Environment = "${var.ENVIRONMENT}"
+  }
+}
+
+resource "aws_nat_gateway" "automation-nat-1b" {
+  allocation_id = "${aws_eip.automation-nat_eip-1b.id}"
+  subnet_id = "${aws_subnet.automation-public_subnet-1b.id}"
+
+  tags {
+    Name = "${var.environment}-1b"
+    Environment = "${var.environment}"
   }
 }
 
@@ -59,6 +76,18 @@ resource "aws_subnet" "automation-public_subnet-1a" {
   }
 }
 
+resource "aws_subnet" "automation-public_subnet-1b" {
+  vpc_id = "${aws_vpc.automation-vpc.id}"
+  cidr_block = "${var.cdir_public_2}/24"
+  availability_zone = "us-east-1b"
+  map_public_ip_on_launch = true
+
+  tags {
+    Name = "${var.environment}-public-subnet-1b"
+    Environment = "${var.environment}"
+  }
+}
+
 /* Private subnet */
 resource "aws_subnet" "automation-private_subnet-1a" {
   vpc_id = "${aws_vpc.automation-vpc.id}"
@@ -69,6 +98,18 @@ resource "aws_subnet" "automation-private_subnet-1a" {
   tags = {
     Name = "${var.ENVIRONMENT}-private-subnet-1a"
     Environment = "${var.ENVIRONMENT}"
+  }
+}
+
+resource "aws_subnet" "automation-private_subnet-1b" {
+  vpc_id = "${aws_vpc.automation-vpc.id}"
+  cidr_block = "${var.cdir_private_2}/24"
+  availability_zone = "us-east-1b"
+  map_public_ip_on_launch = false
+
+  tags {
+    Name = "${var.environment}-private-subnet-1b"
+    Environment = "${var.environment}"
   }
 }
 
@@ -110,8 +151,18 @@ resource "aws_route_table_association" "automation-public-1a" {
   route_table_id = "${aws_route_table.automation-public.id}"
 }
 
+resource "aws_route_table_association" "automation-public-1b" {
+  subnet_id = "${aws_subnet.automation-public_subnet-1b.id}"
+  route_table_id = "${aws_route_table.automation-public.id}"
+}
+
 resource "aws_route_table_association" "automation-private-1a" {
   subnet_id = "${aws_subnet.automation-private_subnet-1a.id}"
+  route_table_id = "${aws_route_table.automation-private.id}"
+}
+
+resource "aws_route_table_association" "automation-private-1b" {
+  subnet_id = "${aws_subnet.automation-private_subnet-1b.id}"
   route_table_id = "${aws_route_table.automation-private.id}"
 }
 
