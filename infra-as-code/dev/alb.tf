@@ -93,10 +93,10 @@ resource "aws_lb_target_group" "automation-front_end" {
   protocol = "HTTP"
   vpc_id = "${aws_vpc.automation-vpc.id}"
   target_type = "ip"
-  stickiness = {
+  stickiness = [{
     type = "lb_cookie"
     enabled = false
-  }
+  }]
 
   depends_on = [
     "aws_lb.automation-alb"]
