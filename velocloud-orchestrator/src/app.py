@@ -67,7 +67,7 @@ class Container:
                                                  durable_name="velocloud_orchestrator",
                                                  queue="velocloud_orchestrator")
 
-        # await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
+        await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
         self._scheduler.start()
 
     async def start_server(self):
