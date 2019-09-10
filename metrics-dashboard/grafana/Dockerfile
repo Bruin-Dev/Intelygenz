@@ -8,3 +8,5 @@ COPY metrics-dashboard/grafana/dashboards /etc/grafana/provisioning/dashboards
 COPY metrics-dashboard/grafana/dashboards-definitions /var/lib/grafana/dashboards
 
 EXPOSE 3000
+
+CMD ["sh","-c","/run.sh  && sleep 300 && curl -v http://prometheus.automation-d64c6a4d.local:9090"]
