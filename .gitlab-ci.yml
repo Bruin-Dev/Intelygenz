@@ -241,6 +241,8 @@ grafana-build:
     - pip install awscli
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - sed -i "s/$ENVIRONMENT_SLUG/ENVIRONMENT/g" metrics-dashboard/grafana/configs/prometheus-dev.yml
     - cp metrics-dashboard/grafana/configs/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
@@ -261,6 +263,8 @@ prometheus-build:
     - pip install awscli
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - sed -i "s/$ENVIRONMENT_SLUG/ENVIRONMENT/g" metrics-dashboard/grafana/configs/prometheus-dev.yml
     - cp metrics-dashboard/prometheus/configs/prometheus-dev.yml metrics-dashboard/prometheus/prometheus.yml
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
