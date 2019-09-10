@@ -99,25 +99,6 @@ resource "aws_security_group" "automation-grafana_service" {
   }
 }
 
-resource "aws_service_discovery_service" "metrics-grafana" {
-  name = "grafana"
-
-  dns_config {
-    namespace_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id}"
-
-    dns_records {
-      ttl = 10
-      type = "A"
-    }
-
-    routing_policy = "MULTIVALUE"
-  }
-
-  health_check_custom_config {
-    failure_threshold = 1
-  }
-}
-
 resource "aws_ecs_service" "automation-metrics-grafana" {
   name = "${var.ENVIRONMENT}-metrics-grafana"
   task_definition = "${aws_ecs_task_definition.automation-metrics-grafana.family}:${aws_ecs_task_definition.automation-metrics-grafana.revision}"
@@ -137,9 +118,5 @@ resource "aws_ecs_service" "automation-metrics-grafana" {
     target_group_arn = "${aws_lb_target_group.automation-metrics-grafana.arn}"
     container_name = "grafana"
     container_port = 3000
-  }
-
-  service_registries {
-    registry_arn = "${aws_service_discovery_service.metrics-grafana.arn}"
   }
 }
