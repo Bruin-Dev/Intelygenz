@@ -24,6 +24,17 @@ class PrometheusRepository:
             self._link_status_gauge.labels(state=links["link"]["state"],
                                            enterprise_name=edge_info["enterprise_name"]).inc()
 
+    def dec(self, edge_info):
+        self._edge_status_counter.labels(state=edge_info["edges"]["edgeState"],
+                                         enterprise_name=edge_info["enterprise_name"]).dec()
+        self._edge_status_gauge.labels(state=edge_info["edges"]["edgeState"],
+                                       enterprise_name=edge_info["enterprise_name"]).dec()
+        for links in edge_info["links"]:
+            self._link_status_counter.labels(state=links["link"]["state"],
+                                             enterprise_name=edge_info["enterprise_name"]).dec()
+            self._link_status_gauge.labels(state=links["link"]["state"],
+                                           enterprise_name=edge_info["enterprise_name"]).dec()
+
     def set_cycle_total_edges(self, total):
         self._edge_gauge.set(total)
 

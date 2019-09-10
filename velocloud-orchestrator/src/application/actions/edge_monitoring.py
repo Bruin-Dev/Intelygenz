@@ -43,7 +43,6 @@ class EdgeMonitoring:
             self._status_repository.set_edges_processed(0)
             await self._send_stats_to_notifier()
             self._statistic_repository._statistic_client.clear_dictionaries()
-            self._prometheus_repository.reset_counter()
             self._status_repository.set_current_cycle_timestamp(datetime.timestamp(datetime.now()))
             await self._request_edges(uuid())
             self._logger.info("Sending edge status tasks. Orchestrator status = PROCESSING_VELOCLOUD_EDGES...")
@@ -102,13 +101,19 @@ class EdgeMonitoring:
         self._logger.info(f'Edge received from event bus')
         edge = json.loads(msg)
         self._logger.info(f'Edge data: {json.dumps(edge, indent=2)}')
-        self._prometheus_repository.inc(edge['edge_info'])
         edges_processed = self._status_repository.get_edges_processed()
         edges_to_process = self._status_repository.get_edges_to_process()
         edges_processed = edges_processed + 1
         self._status_repository.set_edges_processed(edges_processed)
-        redis_data = {"request_id": edge["request_id"], "redis_edge": edge['edge_info']}
-        self._edge_repository.set_edge(edge['edge_id'], json.dumps(redis_data))
+        redis_edge = self._edge_repository.get_edge(edge['edge_id'])
+        if redis_edge is None or redis_edge["redis_edge"
+                                            ]["edges"]["edgeState"] != edge['edge_info']["edges"]["edgeState"]:
+            if redis_edge is not None:
+                self._prometheus_repository.dec(redis_edge["redis_edge"])
+            self._prometheus_repository.inc(edge['edge_info'])
+            redis_data = {"request_id": edge["request_id"], "redis_edge": edge['edge_info']}
+            self._edge_repository.set_edge(edge['edge_id'], json.dumps(redis_data))
+
         self._logger.info(f'Edges processed: {edges_processed} / {edges_to_process}')
         if edges_processed == edges_to_process:
             self._logger.info("All edges processed, starting the cycle again")
