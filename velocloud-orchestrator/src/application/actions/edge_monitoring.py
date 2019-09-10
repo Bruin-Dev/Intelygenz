@@ -105,9 +105,11 @@ class EdgeMonitoring:
         edges_to_process = self._status_repository.get_edges_to_process()
         edges_processed = edges_processed + 1
         self._status_repository.set_edges_processed(edges_processed)
-        redis_edge = self._edge_repository.get_edge(edge['edge_id'])
-        if redis_edge is None or redis_edge["redis_edge"
-                                            ]["edges"]["edgeState"] != edge['edge_info']["edges"]["edgeState"]:
+        try:
+            redis_edge = json.loads(self._edge_repository.get_edge(str(edge['edge_id'])))
+        except Exception:
+            redis_edge = None
+        if redis_edge is None or redis_edge["redis_edge"]["edges"]["edgeState"] != edge['edge_info']["edges"]["edgeState"]:
             if redis_edge is not None:
                 self._prometheus_repository.dec(redis_edge["redis_edge"])
             self._prometheus_repository.inc(edge['edge_info'])

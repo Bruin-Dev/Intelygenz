@@ -9,12 +9,11 @@ class EdgeRepository:
         self._redis_client.set(str(edge_id), edge_status)
 
     def get_edge(self, edge_id):
-        if not self._redis_client.exists(str(edge_id)):
-            return None
-        self._logger.info(f'Getting data for edge_id = {edge_id}...')
-        edge_data = self._redis_client.get(edge_id)
-        self._logger.info(f'edge_data = {edge_data}')
-        return edge_data
+        if self._redis_client.exists(edge_id):
+            self._logger.info(f'Getting data for edge_id = {edge_id}...')
+            edge_data = self._redis_client.get(edge_id)
+            self._logger.info(f'edge_data = {edge_data}')
+            return edge_data
 
     def get_keys(self):
         self._logger.info(f'Getting keys from redis')
