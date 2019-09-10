@@ -186,7 +186,8 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
-                                             "ticketNotes": [{"noteValue": 'test info'}]}}
+                                             "ticketNotes": [{"noteValue": 'test info',
+                                                              'createdDate': '2019-09-10 10:34:00-04:00'}]}}
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
         logger = Mock()
         scheduler = Mock()
@@ -204,7 +205,8 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
-                                             "ticketNotes": [{"noteValue": None}]}}
+                                             "ticketNotes": [{"noteValue": None,
+                                                              'createdDate': '2019-09-10 10:34:00-04:00'}]}}
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
         logger = Mock()
         scheduler = Mock()
@@ -258,7 +260,8 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
-                                             "ticketNotes": [{"noteValue": '#*Automation Engine*#'}]}}
+                                             "ticketNotes": [{"noteValue": '#*Automation Engine*#',
+                                                              'createdDate': '2019-09-10 10:34:00-04:00'}]}}
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
         logger = Mock()
         scheduler = Mock()

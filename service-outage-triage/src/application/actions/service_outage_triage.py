@@ -125,12 +125,15 @@ class ServiceOutageTriage:
                         ticket_item = dict()
                         ticket_item["ticketID"] = ticket['ticketID']
                         ticket_item["serial"] = ticket_detail['detailValue']
-                        for ticket_note in ticket_details['ticket_details']['ticketNotes']:
+                        sorted_ticket_notes = sorted(ticket_details['ticket_details']['ticketNotes'],
+                                                     key=lambda note: note['createdDate'], reverse=True)
+                        for ticket_note in sorted_ticket_notes:
                             if ticket_note['noteValue'] is not None:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
                                     self._logger.info(f'Triage already exists for ticket id of {ticket["ticketID"]}')
                                     await self._check_events(ticket_item, ticket_note['noteValue'])
                                     triage_exists = True
+                                    break
                         if triage_exists is not True:
                             filtered_ticket_ids.append(ticket_item)
                             break
