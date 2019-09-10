@@ -131,7 +131,10 @@ class ServiceOutageTriage:
                             if ticket_note['noteValue'] is not None:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
                                     self._logger.info(f'Triage already exists for ticket id of {ticket["ticketID"]}')
-                                    await self._check_events(ticket_item, ticket_note['noteValue'])
+                                    if 'TimeStamp: ' in ticket_note['noteValue']:
+                                        last_timestamp = self._extract_field_from_string(ticket_note['noteValue'],
+                                                                                         "TimeStamp: ")
+                                        await self._check_for_new_events(last_timestamp, ticket_item)
                                     triage_exists = True
                                     break
                         if not triage_exists:
@@ -154,35 +157,21 @@ class ServiceOutageTriage:
     def _extract_field_from_string(self, dict_as_string, key1, key2='#DEFAULT_END#'):
         return dict_as_string[dict_as_string.find(key1) + len(key1): dict_as_string.find(key2)]
 
-    async def _check_events(self, ticket_id, ticket_note):
-        if 'TimeStamp: ' in ticket_note:
-            last_timestamp = self._extract_field_from_string(ticket_note, "TimeStamp: ")
-        else:
-            return
+    async def _check_for_new_events(self, timestamp, ticket_id):
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
         edge_id = id_by_serial[ticket_id["serial"]]
         events_msg = {'request_id': uuid(),
                       'response_topic': f'alert.response.event.edge.{self._service_id}',
                       'edge': edge_id,
-                      'start_date': last_timestamp,
+                      'start_date': timestamp,
                       'end_date': datetime.now(timezone('US/Eastern'))}
         edge_events = await self._event_bus.rpc_request("alert.request.event.edge", json.dumps(
                                                                                 events_msg, default=str), timeout=10)
         events_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
         for event in reversed(edge_events["events"]["data"]):
             if event['event'] in events_list:
-                event_dict = OrderedDict()
-                event_dict['NewEvent'] = event['event']
-                if event['category'] == 'EDGE':
-                    event_dict['Device'] = 'Edge'
-                else:
-                    if 'GE1' in event['message']:
-                        event_dict['Device'] = 'Interface GE1'
-                    if 'GE2' in event['message']:
-                        event_dict['Device'] = 'Interface GE2'
-                event_dict["TimeStamp"] = parse(event['eventTime']).astimezone(timezone('US/Eastern')) + timedelta(
-                                                                                                         seconds=1)
-                event_note = self._ticket_object_to_string(event_dict)
+                event_obj = self._compose_event_note_object(event)
+                event_note = self._ticket_object_to_string(event_obj)
                 if self._config.TRIAGE_CONFIG['environment'] == 'production':
                     ticket_append_note_msg = {'request_id': uuid(),
                                               'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
@@ -199,6 +188,20 @@ class ServiceOutageTriage:
                                  f'{self._config.TRIAGE_CONFIG["environment"]}',
                                  'response_topic': f'notification.slack.request.{self._service_id}'}
                 await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
+
+    def _compose_event_note_object(self, event):
+        event_dict = OrderedDict()
+        event_dict['NewEvent'] = event['event']
+        if event['category'] == 'EDGE':
+            event_dict['Device'] = 'Edge'
+        else:
+            if 'GE1' in event['message']:
+                event_dict['Device'] = 'Interface GE1'
+            if 'GE2' in event['message']:
+                event_dict['Device'] = 'Interface GE2'
+        event_dict["TimeStamp"] = parse(event['eventTime']).astimezone(timezone('US/Eastern')) + timedelta(
+            seconds=1)
+        return event_dict
 
     def _compose_ticket_note_object(self, edges_status_to_report, edges_events_to_report):
 

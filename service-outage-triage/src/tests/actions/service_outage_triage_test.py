@@ -256,7 +256,30 @@ class TestServiceOutageTriage:
         assert len(filtered_tickets) == 0
 
     @pytest.mark.asyncio
-    async def filter_tickets_ko_triage_exists_test(self):
+    async def filter_tickets_ko_triage_exists_timestamp_test(self):
+        event_bus = Mock()
+        tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
+        ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
+                                             "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
+                                                                           'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                                                              'createdDate': '2019-09-10 10:34:00-04:00'}]}}
+        event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        service_id = 123
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage._check_for_new_events = CoroutineMock()
+
+        filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+        assert event_bus.rpc_request.called
+        assert len(filtered_tickets) == 0
+        assert service_outage_triage._check_for_new_events.called
+        assert service_outage_triage._check_for_new_events.call_args[0][1] == tickets['tickets'][0]
+
+    @pytest.mark.asyncio
+    async def filter_tickets_ko_triage_exists_no_timestamp_test(self):
         event_bus = Mock()
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
@@ -269,14 +292,12 @@ class TestServiceOutageTriage:
         service_id = 123
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
-        service_outage_triage._check_events = CoroutineMock()
+        service_outage_triage._check_for_new_events = CoroutineMock()
 
         filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
         assert event_bus.rpc_request.called
         assert len(filtered_tickets) == 0
-        assert service_outage_triage._check_events.called
-        assert service_outage_triage._check_events.call_args[0][1] == ticket_details['ticket_details']['ticketNotes'][
-            0]['noteValue']
+        assert service_outage_triage._check_for_new_events.called is False
 
     def find_recent_occurence_of_event_test(self):
         event_bus = Mock()
@@ -320,7 +341,7 @@ class TestServiceOutageTriage:
         assert timestamp == '2019-08-29 14:36:19-04:00 '
 
     @pytest.mark.asyncio
-    async def check_events_dev_test(self):
+    async def check_for_new_events_dev_test(self):
         event_bus = Mock()
 
         events_to_report = {'events': {'data': [{'event': 'LINK_ALIVE', 'category': 'NETWORK',
@@ -329,7 +350,6 @@ class TestServiceOutageTriage:
         append_ticket = {'ticket_appeneded': 'Success'}
         send_to_slack = {'slack_sent': 'Success'}
 
-        ticket_note = 'TimeStamp: 5 mins Ago \n'
         event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack])
         logger = Mock()
         scheduler = Mock()
@@ -340,19 +360,19 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
+        service_outage_triage._compose_event_note_object = Mock(return_value="Ticket Dict object")
 
-        await service_outage_triage._check_events(ticket, ticket_note)
+        await service_outage_triage._check_for_new_events('2019-07-30 00:26:00-04:00', ticket)
 
         assert event_bus.rpc_request.called
-        assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
+        assert '2019-07-30 00:26:00-04:00' in event_bus.rpc_request.mock_calls[0][1][1]
         assert logger.info.called
         assert 'Ticket Note Object' in logger.info.call_args[0][0]
         assert service_outage_triage._ticket_object_to_string.called
-        assert service_outage_triage._ticket_object_to_string.call_args[0][0]['NewEvent'] == 'LINK_ALIVE'
-        assert service_outage_triage._ticket_object_to_string.call_args[0][0]['Device'] == 'Interface GE2'
+        assert service_outage_triage._compose_event_note_object.called
 
     @pytest.mark.asyncio
-    async def check_events_irrelevant_events_test(self):
+    async def check_for_new_events_irrelevant_events_test(self):
         event_bus = Mock()
 
         events_to_report = {'events': {'data': [{'event': 'INTERFACE_UP', 'category': 'NETWORK',
@@ -361,7 +381,6 @@ class TestServiceOutageTriage:
         append_ticket = {'ticket_appeneded': 'Success'}
         send_to_slack = {'slack_sent': 'Success'}
 
-        ticket_note = 'TimeStamp: 5 mins Ago \n'
         event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack])
         logger = Mock()
         scheduler = Mock()
@@ -372,43 +391,19 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
+        service_outage_triage._compose_event_note_object = Mock(return_value="Ticket Dict object")
 
-        await service_outage_triage._check_events(ticket, ticket_note)
+        await service_outage_triage._check_for_new_events('2019-07-30 00:26:00-04:00', ticket)
 
         assert event_bus.rpc_request.called
-        assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
+        assert '2019-07-30 00:26:00-04:00' in event_bus.rpc_request.mock_calls[0][1][1]
+
         assert logger.info.called is False
         assert service_outage_triage._ticket_object_to_string.called is False
+        assert service_outage_triage._compose_event_note_object.called is False
 
     @pytest.mark.asyncio
-    async def check_events_no_timestamp_test(self):
-        event_bus = Mock()
-
-        events_to_report = {'events': {'data': [{'event': 'INTERFACE_UP', 'category': 'NETWORK',
-                                                 'eventTime': '2019-07-30 06:38:00+00:00',
-                                                 'message': 'GE2 alive'}]}}
-        append_ticket = {'ticket_appeneded': 'Success'}
-        send_to_slack = {'slack_sent': 'Success'}
-
-        ticket_note = ''
-        event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack])
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        config.TRIAGE_CONFIG['environment'] = 'dev'
-        service_id = 123
-
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
-        service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
-
-        await service_outage_triage._check_events(123, ticket_note)
-
-        assert event_bus.rpc_request.called is False
-        assert logger.info.called is False
-        assert service_outage_triage._ticket_object_to_string.called is False
-
-    @pytest.mark.asyncio
-    async def check_events_pro_edge_test(self):
+    async def check_for_new_events_pro_edge_test(self):
         event_bus = Mock()
 
         events_to_report = {'events': {'data': [{'event': 'EDGE_UP', 'category': 'EDGE',
@@ -417,7 +412,6 @@ class TestServiceOutageTriage:
         append_ticket = {'ticket_appeneded': 'Success'}
         send_to_slack = {'slack_sent': 'Success'}
 
-        ticket_note = 'TimeStamp: 5 mins Ago \n'
         event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack])
         logger = Mock()
         scheduler = Mock()
@@ -428,109 +422,72 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
         service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
+        service_outage_triage._compose_event_note_object = Mock(return_value="Ticket Dict object")
 
-        await service_outage_triage._check_events(ticket, ticket_note)
+        await service_outage_triage._check_for_new_events('2019-07-30 00:26:00-04:00', ticket)
 
         assert event_bus.rpc_request.called
-        assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
+        assert '2019-07-30 00:26:00-04:00' in event_bus.rpc_request.mock_calls[0][1][1]
         assert 'Ticket Note Object' in event_bus.rpc_request.mock_calls[1][1][1]
         assert service_outage_triage._ticket_object_to_string.called
-        assert service_outage_triage._ticket_object_to_string.call_args[0][0]['NewEvent'] == 'EDGE_UP'
-        assert service_outage_triage._ticket_object_to_string.call_args[0][0]['Device'] == 'Edge'
+        assert service_outage_triage._compose_event_note_object.called
 
     @pytest.mark.asyncio
-    async def check_events_pro_interface_GE1_test(self):
+    async def compose_event_note_object_edge_test(self):
         event_bus = Mock()
 
-        events_to_report = {'events': {'data': [{'event': 'LINK_DEAD', 'category': 'NETWORK',
-                                                 'eventTime': '2019-07-30 06:38:00+00:00',
-                                                 'message': 'GE1 dead'}]}}
-        append_ticket = {'ticket_appeneded': 'Success'}
-        send_to_slack = {'slack_sent': 'Success'}
-
-        ticket_note = 'TimeStamp: 5 mins Ago \n'
-        event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack])
+        events_to_report = {'event': 'EDGE_UP', 'category': 'EDGE',
+                            'eventTime': '2019-07-30 06:38:00+00:00',
+                            'message': 'An Edge'}
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        config.TRIAGE_CONFIG['environment'] = 'production'
         service_id = 123
-        ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
-        service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
 
-        await service_outage_triage._check_events(ticket, ticket_note)
+        event_dict = service_outage_triage._compose_event_note_object(events_to_report)
 
-        assert event_bus.rpc_request.called
-        assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
-        assert 'Ticket Note Object' in event_bus.rpc_request.mock_calls[1][1][1]
-        assert service_outage_triage._ticket_object_to_string.called
-        assert service_outage_triage._ticket_object_to_string.call_args[0][0]['NewEvent'] == 'LINK_DEAD'
-        assert service_outage_triage._ticket_object_to_string.call_args[0][0]['Device'] == 'Interface GE1'
+        assert isinstance(event_dict, OrderedDict)
+        assert event_dict['Device'] == 'Edge'
 
     @pytest.mark.asyncio
-    async def check_events_pro_interface_GE2_test(self):
+    async def compose_event_note_object_GE1_test(self):
         event_bus = Mock()
 
-        events_to_report = {'events': {'data': [{'event': 'LINK_ALIVE', 'category': 'NETWORK',
-                                                 'eventTime': '2019-07-30 06:38:00+00:00',
-                                                 'message': 'GE2 alive'}]}}
-        append_ticket = {'ticket_appeneded': 'Success'}
-        send_to_slack = {'slack_sent': 'Success'}
-
-        ticket_note = 'TimeStamp: 5 mins Ago \n'
-        event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack])
+        events_to_report = {'event': 'LINK_ALIVE', 'category': 'NETWORK',
+                            'eventTime': '2019-07-30 06:38:00+00:00',
+                            'message': 'GE1 alive'}
         logger = Mock()
-        logger.info = Mock()
         scheduler = Mock()
         config = testconfig
-        config.TRIAGE_CONFIG['environment'] = 'production'
         service_id = 123
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
-        service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
 
-        await service_outage_triage._check_events(123, ticket_note)
+        event_dict = service_outage_triage._compose_event_note_object(events_to_report)
 
-        assert event_bus.rpc_request.called
-        assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
-        assert 'Ticket Note Object' in event_bus.rpc_request.mock_calls[1][1][1]
-        assert service_outage_triage._ticket_object_to_string.called
-        assert service_outage_triage._ticket_object_to_string.call_args[0][0]['NewEvent'] == 'LINK_ALIVE'
-        assert service_outage_triage._ticket_object_to_string.call_args[0][0]['Device'] == 'Interface GE2'
+        assert isinstance(event_dict, OrderedDict)
+        assert event_dict['Device'] == 'Interface GE1'
 
     @pytest.mark.asyncio
-    async def check_events_pro_interface_GE2_test(self):
+    async def compose_event_note_object_GE2_test(self):
         event_bus = Mock()
 
-        events_to_report = {'events': {'data': [{'event': 'LINK_ALIVE', 'category': 'NETWORK',
-                                                 'eventTime': '2019-07-30 06:38:00+00:00',
-                                                 'message': 'GE2 alive'}]}}
-        append_ticket = {'ticket_appeneded': 'Success'}
-        send_to_slack = {'slack_sent': 'Success'}
-
-        ticket_note = 'TimeStamp: 5 mins Ago \n'
-        event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack])
+        events_to_report = {'event': 'LINK_ALIVE', 'category': 'NETWORK',
+                            'eventTime': '2019-07-30 06:38:00+00:00',
+                            'message': 'GE2 alive'}
         logger = Mock()
-        logger.info = Mock()
         scheduler = Mock()
         config = testconfig
-        config.TRIAGE_CONFIG['environment'] = 'production'
         service_id = 123
-        ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
-        service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
 
-        await service_outage_triage._check_events(ticket, ticket_note)
+        event_dict = service_outage_triage._compose_event_note_object(events_to_report)
 
-        assert event_bus.rpc_request.called
-        assert '5 mins Ago' in event_bus.rpc_request.mock_calls[0][1][1]
-        assert 'Ticket Note Object' in event_bus.rpc_request.mock_calls[1][1][1]
-        assert service_outage_triage._ticket_object_to_string.called
-        assert service_outage_triage._ticket_object_to_string.call_args[0][0]['NewEvent'] == 'LINK_ALIVE'
-        assert service_outage_triage._ticket_object_to_string.call_args[0][0]['Device'] == 'Interface GE2'
+        assert isinstance(event_dict, OrderedDict)
+        assert event_dict['Device'] == 'Interface GE2'
 
     def compose_ticket_note_object(self):
         event_bus = Mock()
