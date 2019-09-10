@@ -9,4 +9,6 @@ COPY metrics-dashboard/grafana/dashboards-definitions /var/lib/grafana/dashboard
 
 EXPOSE 3000
 
+ENTRYPOINT ["/usr/bin/env"]
+
 CMD ["sh","-c","/run.sh  && sleep 300 && curl -v http://prometheus.automation-d64c6a4d.local:9090"]
