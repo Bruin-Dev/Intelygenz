@@ -59,6 +59,7 @@ resource "aws_lb_target_group" "automation-metrics-grafana" {
     port                = 3000
     matcher             = 200
     protocol            = "HTTP"
+    path                = "/api/health"
   }
 }
 
