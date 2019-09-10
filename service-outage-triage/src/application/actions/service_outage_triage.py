@@ -134,7 +134,7 @@ class ServiceOutageTriage:
                                     await self._check_events(ticket_item, ticket_note['noteValue'])
                                     triage_exists = True
                                     break
-                        if triage_exists is not True:
+                        if not triage_exists:
                             filtered_ticket_ids.append(ticket_item)
                             break
         return filtered_ticket_ids
