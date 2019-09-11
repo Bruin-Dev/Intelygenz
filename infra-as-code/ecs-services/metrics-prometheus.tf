@@ -134,7 +134,7 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
   # }
   load_balancer {
     target_group_arn = "${aws_lb_target_group.mettel-automation-prometheus.arn}"
-    container_name = "prometheus"
+    container_name = "metrics-prometheus"
     container_port = 9090
   }
 }
