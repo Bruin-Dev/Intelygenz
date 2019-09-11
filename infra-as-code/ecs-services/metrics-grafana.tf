@@ -116,7 +116,7 @@ resource "aws_ecs_service" "automation-metrics-grafana" {
 
   load_balancer {
     target_group_arn = "${aws_lb_target_group.automation-metrics-grafana.arn}"
-    container_name = "metrics-grafana"
+    container_name = "grafana"
     container_port = 3000
   }
 }
