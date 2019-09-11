@@ -79,16 +79,16 @@ resource "aws_service_discovery_service" "metrics-prometheus" {
   }
 }
 
-# resource "aws_lb_listener" "automation-prometheus" {
-#   load_balancer_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.automation_alb_arn}"
-#   port = "9000"
-#   protocol = "HTTP"
+resource "aws_lb_listener" "automation-prometheus" {
+  load_balancer_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.automation_alb_arn}"
+  port = "9000"
+  protocol = "HTTP"
 
-#   default_action {
-#     target_group_arn = "${aws_lb_target_group.mettel-automation-prometheus.arn}"
-#     type = "forward"
-#   }
-# }
+  default_action {
+    target_group_arn = "${aws_lb_target_group.mettel-automation-prometheus.arn}"
+    type = "forward"
+  }
+}
 
 resource "aws_lb_target_group" "mettel-automation-prometheus" {
   name = "${var.ENVIRONMENT}-prometheus"
