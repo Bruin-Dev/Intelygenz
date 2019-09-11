@@ -79,6 +79,29 @@ resource "aws_service_discovery_service" "metrics-prometheus" {
   }
 }
 
+resource "aws_alb_target_group" "mettel-automation-prometheus" {
+  name = "${var.ENVIRONMENT}-prometheus"
+  port = 9090
+  protocol = "HTTP"
+  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id}"
+  target_type = "ip"
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    interval            = 30
+    port                = 3000
+    matcher             = 200
+    protocol            = "HTTP"
+    path                = "/-/healthy"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "aws_ecs_service" "automation-metrics-prometheus" {
   name = "${var.ENVIRONMENT}-metrics-prometheus"
   task_definition = "${aws_ecs_task_definition.automation-metrics-prometheus.family}:${aws_ecs_task_definition.automation-metrics-prometheus.revision}"
@@ -90,11 +113,17 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
     security_groups = [
       "${aws_security_group.automation-metrics-prometheus_service.id}"]
     subnets = [
-      "${data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a}"]
+      "${data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a}",
+      "${data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1b}"]
     assign_public_ip = false
   }
 
-  service_registries {
-    registry_arn = "${aws_service_discovery_service.metrics-prometheus.arn}"
+  # service_registries {
+  #   registry_arn = "${aws_service_discovery_service.metrics-prometheus.arn}"
+  # }
+  load_balancer {
+    target_group_arn = "${aws_alb_target_group.mettel-automation-prometheus}"
+    container_name = "prometheus"
+    container_port = 9090
   }
 }
