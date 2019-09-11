@@ -25,6 +25,7 @@ class EdgeMonitoring:
     async def _edge_monitoring_process(self):
         self._logger.info("Starting velocloud edge monitoring process")
         if "PROCESSING_VELOCLOUD_EDGES" in self._status_repository.get_status():
+            self._logger.info("Starting velocloud edge monitoring process for PROCESSING VELOCLOUD EDGES")
             edges_processed = self._status_repository.get_edges_processed()
             edges_to_process = self._status_repository.get_edges_to_process()
             self._logger.error(f'There\'s still edges to be processed: {edges_processed} / {edges_to_process}')
@@ -38,6 +39,7 @@ class EdgeMonitoring:
             else:
                 self._logger.error('Edge monitoring process won\'t be triggered again')
         if "IDLE" in self._status_repository.get_status():
+            self._logger.info("Starting velocloud edge monitoring process for IDLE")
             self._logger.info("IDLE status: asking edge list. Orchestrator status = REQUESTING_VELOCLOUD_EDGES...")
             self._status_repository.set_status("REQUESTING_VELOCLOUD_EDGES")
             self._status_repository.set_edges_processed(0)
