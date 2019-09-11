@@ -1,6 +1,6 @@
 [
   {
-    "name": "metrics-grafana",
+    "name": "grafana",
     "image": "${image}",
     "portMappings": [
       {
