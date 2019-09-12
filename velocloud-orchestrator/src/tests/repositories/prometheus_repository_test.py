@@ -15,8 +15,6 @@ class TestPrometheusRepository:
         assert isinstance(self.test_pro_repo._edge_gauge, Gauge) is True
         assert isinstance(self.test_pro_repo._edge_status_gauge, Gauge) is True
         assert isinstance(self.test_pro_repo._link_status_gauge, Gauge) is True
-        assert isinstance(self.test_pro_repo._edge_status_counter, Counter) is True
-        assert isinstance(self.test_pro_repo._link_status_counter, Counter) is True
 
     def set_cycle_total_edges_test(self):
         sum = 123
@@ -39,12 +37,8 @@ class TestPrometheusRepository:
         self.test_pro_repo.inc(test_edge["edge_info"])
         assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': test_edge_state}) == 2
-        assert REGISTRY.get_sample_value('edge_state_total', labels={'enterprise_name': test_enterprise_name,
-                                                                     'state': test_edge_state}) == 2
 
         assert REGISTRY.get_sample_value('link_state_gauge', labels={'enterprise_name': test_enterprise_name,
-                                                                     'state': 'OK'}) == 2
-        assert REGISTRY.get_sample_value('link_state_total', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': 'OK'}) == 2
 
     def reset_counter_test(self):

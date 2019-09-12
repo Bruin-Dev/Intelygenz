@@ -100,13 +100,14 @@ class TestEdgeMonitoring:
         assert event_bus.publish_message.called
 
     @pytest.mark.asyncio
-    async def receive_edge_test(self):
+    async def receive_edge_no_redis_test(self):
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
         prometheus_repository.inc = Mock()
         scheduler = Mock()
         edge_repository = Mock()
+        edge_repository.get_edge = Mock(return_value=None)
         edge_repository.set_edge = Mock()
         status_repository = Mock()
         status_repository.set_edges_processed = Mock()
@@ -188,7 +189,6 @@ class TestEdgeMonitoring:
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
-        prometheus_repository.reset_counter = Mock()
         scheduler = Mock()
         edge_repository = Mock()
         status_repository = Mock()
@@ -209,7 +209,6 @@ class TestEdgeMonitoring:
         edge_monitoring._request_edges = CoroutineMock()
         await edge_monitoring._edge_monitoring_process()
         assert edge_monitoring._send_stats_to_notifier.called
-        assert prometheus_repository.reset_counter.called
         assert statistic_repository._statistic_client.clear_dictionaries.called
         assert status_repository.set_edges_processed.called
         assert status_repository.set_current_cycle_timestamp.called
