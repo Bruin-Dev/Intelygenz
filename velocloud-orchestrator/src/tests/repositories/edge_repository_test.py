@@ -20,13 +20,25 @@ class TestEdgeRepository:
         edge_repo.set_edge("some.edge.id", "some.edge.data")
         assert redis_client.set.called
 
-    def get_edge_test(self):
+    def get_edge_ok_test(self):
         redis_client = Mock()
-        redis_client.get = Mock()
+        redis_client.get = Mock(return_value='Some Edge Data')
+        redis_client.exists = Mock(return_value=True)
         logger = Mock()
         edge_repo = EdgeRepository(redis_client, logger)
-        edge_repo.get_edge("some.edge.id")
+        redis_data = edge_repo.get_edge("some.edge.id")
         assert redis_client.get.called
+        assert redis_data == 'Some Edge Data'
+
+    def get_edge_ko_test(self):
+        redis_client = Mock()
+        redis_client.get = Mock(return_value='Some Edge Data')
+        redis_client.exists = Mock(return_value=False)
+        logger = Mock()
+        edge_repo = EdgeRepository(redis_client, logger)
+        redis_data = edge_repo.get_edge("some.edge.id")
+        assert redis_client.get.called is False
+        assert redis_data is None
 
     def get_keys_test(self):
         redis_client = Mock()
