@@ -34,5 +34,5 @@ output "automation_alb_arn" {
 }
 
 output "cert_mettel" {
-  value = "${aws_acm_certificate.automation.arn}"
+  value = "${data.aws_acm_certificate.automation.arn}"
 }
