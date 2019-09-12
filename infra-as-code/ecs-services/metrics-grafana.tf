@@ -27,8 +27,9 @@ resource "aws_ecs_task_definition" "automation-metrics-grafana" {
 
 resource "aws_lb_listener" "automation-grafana" {
   load_balancer_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.automation_alb_arn}"
-  port = "3000"
-  protocol = "HTTP"
+  port = "443"
+  protocol = "HTTPS"
+  certificate_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.cert_mettel}"
 
   default_action {
     target_group_arn = "${aws_lb_target_group.automation-metrics-grafana.arn}"

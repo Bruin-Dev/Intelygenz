@@ -22,8 +22,23 @@ resource "aws_security_group" "automation-dev-inbound" {
   }
 
   ingress {
-    from_port = 3000
-    to_port = 3000
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+    cidr_blocks = [
+      "12.15.242.50/32", // US OFFICE
+      "76.102.161.105/32", // KEKO HOME
+      "76.103.237.82/32", // SANCHO HOME
+      "83.61.20.90/32", // IGZ CALLAO OFFICE 1
+      "83.61.8.95/32",  // IGZ CALLAO OFFICE 2
+      "83.56.7.26/32",  // IGZ CALLAO OFFICE 3
+      "83.40.63.125/32" // XOAN HOME
+    ]
+  }
+
+    ingress {
+    from_port = 80
+    to_port = 80
     protocol = "tcp"
     cidr_blocks = [
       "12.15.242.50/32", // US OFFICE
