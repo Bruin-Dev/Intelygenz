@@ -105,17 +105,22 @@ class EdgeMonitoring:
         edges_to_process = self._status_repository.get_edges_to_process()
         edges_processed = edges_processed + 1
         self._status_repository.set_edges_processed(edges_processed)
-        try:
-            redis_edge = json.loads(self._edge_repository.get_edge(str(edge['edge_id'])))
-        except Exception:
-            redis_edge = None
-        if redis_edge is None or redis_edge["redis_edge"]["edges"]["edgeState"] != edge['edge_info']["edges"]["edgeState"]:
-            if redis_edge is not None:
-                self._prometheus_repository.dec(redis_edge["redis_edge"])
-            self._prometheus_repository.inc(edge['edge_info'])
-            redis_data = {"request_id": edge["request_id"], "redis_edge": edge['edge_info']}
-            self._edge_repository.set_edge(edge['edge_id'], json.dumps(redis_data))
 
+        redis_edge = self._edge_repository.get_edge(str(edge['edge_id']))
+        if redis_edge is None:
+            self._prometheus_repository.inc(edge['edge_info'])
+        else:
+            redis_edge_data = json.loads(redis_edge)
+            if redis_edge_data['redis_edge']['edges']['edgeState'] != edge['edge_info']['edges']['edgeState']:
+                self._prometheus_repository.update_edge(edge['edge_info'], redis_edge_data['redis_edge'])
+
+            for link, redis_link in zip(edge['edge_info']['links'], redis_edge_data['redis_edge']['links']):
+                if link['link']['state'] != redis_link['link']:
+                    self._prometheus_repository.update_link(edge['edge_info'], link,
+                                                            redis_edge_data['redis_edge'], redis_link)
+
+        redis_data = {"request_id": edge["request_id"], "redis_edge": edge['edge_info']}
+        self._edge_repository.set_edge(edge['edge_id'], json.dumps(redis_data))
         self._logger.info(f'Edges processed: {edges_processed} / {edges_to_process}')
         if edges_processed == edges_to_process:
             self._logger.info("All edges processed, starting the cycle again")
