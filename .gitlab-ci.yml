@@ -5,6 +5,7 @@ stages:
   - basic_infra
   - build
   - deploy
+  - grafana_user_creation
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
@@ -535,5 +536,45 @@ destroy-master:
     name: $CI_COMMIT_REF_NAME
     action: stop
   when: manual
+  only:
+    - master
+
+grafana_user_creation_branches:
+  stage: grafana_user_creation
+  tags:
+    - docker
+    - dind
+  script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - apk add curl
+    - sleep 60
+    - >
+      curl -XPOST --user $GRAFANA_ADMIN_USER:$GRAFANA_ADMIN_PASSWORD -H "Content-Type: application/json" -d '{
+      "name": "'"$GRAFANA_USER_NAME"'",
+        "email": "'"$GRAFANA_USER_EMAIL"'",
+        "login": "'"$GRAFANA_USER_LOGIN"'",
+        "password":"'"$GRAFANA_USER_PASSWORD"'"
+      }' https://admin:admin@$ENVIRONMENT_SLUG.mettel-automation.net/api/admin/users
+  only:
+    - branches
+  except:
+    - master
+
+grafana_user_creation_master:
+  stage: grafana_user_creation
+  tags:
+    - docker
+    - dind
+  script:
+    - export ENVIRONMENT_SLUG="master"
+    - apk add curl
+    - sleep 60
+    - >
+      curl -XPOST --user $GRAFANA_ADMIN_USER:$GRAFANA_ADMIN_PASSWORD -H "Content-Type: application/json" -d '{
+      "name": "'"$GRAFANA_USER_NAME"'",
+        "email": "'"$GRAFANA_USER_EMAIL"'",
+        "login": "'"$GRAFANA_USER_LOGIN"'",
+        "password":"'"$GRAFANA_USER_PASSWORD"'"
+      }' https://admin:admin@$ENVIRONMENT_SLUG.mettel-automation.net/api/admin/users
   only:
     - master
