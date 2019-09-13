@@ -136,6 +136,153 @@ class TestEdgeMonitoring:
         assert edge_monitoring._edge_monitoring_process.called
 
     @pytest.mark.asyncio
+    async def receive_edge_redis_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        prometheus_repository = Mock()
+        prometheus_repository.update_edge = Mock()
+        prometheus_repository.update_link = Mock()
+        scheduler = Mock()
+        edge_repository = Mock()
+        redis_test_enterprise_name = 'Test'
+        redis_edge_state = 'Edge_KO'
+        redis_link_status = [{"link": {"state": "KO"}}]
+        redis_edge = {"redis_edge": {"edges": {"edgeState": redis_edge_state},
+                                     "enterprise_name": redis_test_enterprise_name,
+                                     "links": redis_link_status}}
+        edge_repository.get_edge = Mock(return_value=json.dumps(redis_edge))
+        edge_repository.set_edge = Mock()
+        status_repository = Mock()
+        status_repository.set_edges_processed = Mock()
+        status_repository.get_edges_to_process = Mock(return_value=3)
+        status_repository.get_edges_processed = Mock(return_value=2)
+        status_repository.set_status = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        service_id = 123
+
+        test_enterprise_name = 'Test'
+        test_edge_state = 'Edge_OK'
+        test_link_status = [{"link": {"state": "OK"}}]
+        test_edge = {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
+                     "links": test_link_status}
+        edge = {"request_id": 1234, 'edge_id': {'host': 'some_host'}, 'edge_info': test_edge}
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+        edge_monitoring._edge_monitoring_process = CoroutineMock()
+
+        await edge_monitoring.receive_edge(json.dumps(edge))
+        assert prometheus_repository.update_edge.called
+        assert prometheus_repository.update_link.called
+        assert status_repository.get_edges_processed.called
+        assert status_repository.set_edges_processed.called
+        assert status_repository.set_edges_processed.call_args[0][0] == 3
+        assert status_repository.get_edges_to_process.called
+        assert status_repository.set_status.called
+        assert "IDLE" in status_repository.set_status.call_args[0][0]
+        assert edge_repository.set_edge.call_args[0][0] == edge['edge_id']
+        assert edge_monitoring._edge_monitoring_process.called
+
+    @pytest.mark.asyncio
+    async def receive_edge_redis_same_edge_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        prometheus_repository = Mock()
+        prometheus_repository.update_edge = Mock()
+        prometheus_repository.update_link = Mock()
+        scheduler = Mock()
+        edge_repository = Mock()
+        redis_test_enterprise_name = 'Test'
+        redis_edge_state = 'Edge_OK'
+        redis_link_status = [{"link": {"state": "KO"}}]
+        redis_edge = {"redis_edge": {"edges": {"edgeState": redis_edge_state},
+                                     "enterprise_name": redis_test_enterprise_name,
+                                     "links": redis_link_status}}
+        edge_repository.get_edge = Mock(return_value=json.dumps(redis_edge))
+        edge_repository.set_edge = Mock()
+        status_repository = Mock()
+        status_repository.set_edges_processed = Mock()
+        status_repository.get_edges_to_process = Mock(return_value=3)
+        status_repository.get_edges_processed = Mock(return_value=2)
+        status_repository.set_status = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        service_id = 123
+
+        test_enterprise_name = 'Test'
+        test_edge_state = 'Edge_OK'
+        test_link_status = [{"link": {"state": "OK"}}]
+        test_edge = {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
+                     "links": test_link_status}
+        edge = {"request_id": 1234, 'edge_id': {'host': 'some_host'}, 'edge_info': test_edge}
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+        edge_monitoring._edge_monitoring_process = CoroutineMock()
+
+        await edge_monitoring.receive_edge(json.dumps(edge))
+        assert prometheus_repository.update_edge.called is False
+        assert prometheus_repository.update_link.called
+        assert status_repository.get_edges_processed.called
+        assert status_repository.set_edges_processed.called
+        assert status_repository.set_edges_processed.call_args[0][0] == 3
+        assert status_repository.get_edges_to_process.called
+        assert status_repository.set_status.called
+        assert "IDLE" in status_repository.set_status.call_args[0][0]
+        assert edge_repository.set_edge.call_args[0][0] == edge['edge_id']
+        assert edge_monitoring._edge_monitoring_process.called
+
+    @pytest.mark.asyncio
+    async def receive_edge_redis_same_link_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        prometheus_repository = Mock()
+        prometheus_repository.update_edge = Mock()
+        prometheus_repository.update_link = Mock()
+        scheduler = Mock()
+        edge_repository = Mock()
+        redis_test_enterprise_name = 'Test'
+        redis_edge_state = 'Edge_OK'
+        redis_link_status = [{"link": {"state": "OK"}}]
+        redis_edge = {"redis_edge": {"edges": {"edgeState": redis_edge_state},
+                                     "enterprise_name": redis_test_enterprise_name,
+                                     "links": redis_link_status}}
+        edge_repository.get_edge = Mock(return_value=json.dumps(redis_edge))
+        edge_repository.set_edge = Mock()
+        status_repository = Mock()
+        status_repository.set_edges_processed = Mock()
+        status_repository.get_edges_to_process = Mock(return_value=3)
+        status_repository.get_edges_processed = Mock(return_value=2)
+        status_repository.set_status = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        service_id = 123
+
+        test_enterprise_name = 'Test'
+        test_edge_state = 'Edge_KO'
+        test_link_status = [{"link": {"state": "OK"}}]
+        test_edge = {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
+                     "links": test_link_status}
+        edge = {"request_id": 1234, 'edge_id': {'host': 'some_host'}, 'edge_info': test_edge}
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+        edge_monitoring._edge_monitoring_process = CoroutineMock()
+
+        await edge_monitoring.receive_edge(json.dumps(edge))
+        assert prometheus_repository.update_edge.called
+        assert prometheus_repository.update_link.called is False
+        assert status_repository.get_edges_processed.called
+        assert status_repository.set_edges_processed.called
+        assert status_repository.set_edges_processed.call_args[0][0] == 3
+        assert status_repository.get_edges_to_process.called
+        assert status_repository.set_status.called
+        assert "IDLE" in status_repository.set_status.call_args[0][0]
+        assert edge_repository.set_edge.call_args[0][0] == edge['edge_id']
+        assert edge_monitoring._edge_monitoring_process.called
+
+    @pytest.mark.asyncio
     async def start_edge_monitor_job_test(self):
         event_bus = Mock()
         logger = Mock()
@@ -217,7 +364,7 @@ class TestEdgeMonitoring:
         assert edge_monitoring._request_edges.called
 
     @pytest.mark.asyncio
-    async def _send_stats_to_notifier_test(self):
+    async def _send_stats_to_notifier_ko_test(self):
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
         logger = Mock()
@@ -227,7 +374,7 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         statistic_repository = Mock()
         statistic_repository._statistic_client.get_statistics = Mock(return_value="Failed Edges Status")
-        statistic_repository.send_to_stats_client = Mock()
+        statistic_repository.store_stats = Mock()
         edge_repository = Mock()
         edge_repository.get_keys = Mock(return_value=['host', 'fail', 'host 2'])
         edge_repository.get_edge = Mock(return_value=json.dumps({'request_id': 123, 'redis_edge': {'edges':
@@ -245,10 +392,12 @@ class TestEdgeMonitoring:
         assert edge_repository.get_keys.called
         assert logger.info.called is False
         assert logger.error.called
-        assert statistic_repository.send_to_stats_client.called
+        assert statistic_repository.store_stats.called
         assert statistic_repository._statistic_client.get_statistics.called
         assert event_bus.publish_message.call_args[0][0] == "notification.slack.request"
         assert event_bus.publish_message.call_args[0][1] == json.dumps(dict(request_id=123,
+                                                                            response_topic=f'notification.'
+                                                                            f'slack.request.{service_id}',
                                                                             message="Failed Edges Status"))
 
     @pytest.mark.asyncio
@@ -262,7 +411,6 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         statistic_repository = Mock()
         statistic_repository._statistic_client.get_statistics = Mock(return_value=None)
-        statistic_repository.send_to_stats_client = Mock()
         edge_repository = Mock()
         edge_repository.get_keys = Mock(return_value=['host', 'fail', 'host 2'])
         edge_repository.get_edge = Mock(return_value=json.dumps({'request_id': 123, 'redis_edge': {'edges':
@@ -281,10 +429,9 @@ class TestEdgeMonitoring:
         assert edge_repository.get_keys.called
         assert logger.info.called
         assert logger.error.called
-        assert statistic_repository.send_to_stats_client.called is False
+        assert statistic_repository.store.called is False
         assert statistic_repository._statistic_client.get_statistics.called
         assert event_bus.publish_message.called is False
-
         statistic_repository._statistic_client.get_statistics = Mock(return_value="Failed Edge Report")
         status_repository.get_current_cycle_request_id = Mock(return_value=124)
         await edge_monitoring._send_stats_to_notifier()

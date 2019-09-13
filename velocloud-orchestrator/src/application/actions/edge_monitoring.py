@@ -115,7 +115,7 @@ class EdgeMonitoring:
                 self._prometheus_repository.update_edge(edge['edge_info'], redis_edge_data['redis_edge'])
 
             for link, redis_link in zip(edge['edge_info']['links'], redis_edge_data['redis_edge']['links']):
-                if link['link']['state'] != redis_link['link']:
+                if link['link']['state'] != redis_link['link']['state']:
                     self._prometheus_repository.update_link(edge['edge_info'], link,
                                                             redis_edge_data['redis_edge'], redis_link)
 
