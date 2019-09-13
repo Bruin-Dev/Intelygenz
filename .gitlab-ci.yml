@@ -550,6 +550,7 @@ grafana_user_creation_branches:
     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - apk add curl
     - apk add bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
@@ -578,6 +579,7 @@ grafana_user_creation_master:
     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
     - export ENVIRONMENT_SLUG="master"
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - apk add curl
     - apk add bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
