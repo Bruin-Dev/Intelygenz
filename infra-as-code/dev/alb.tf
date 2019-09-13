@@ -36,7 +36,8 @@ resource "aws_security_group" "automation-dev-inbound" {
       "83.56.7.26/32",  // IGZ CALLAO OFFICE 3
       "83.40.63.125/32", // XOAN HOME MADRID
       "87.219.160.222/32", // XOAN HOME GALICIA
-      "54.73.0.183/32" // IGZ GITLAB RUNNERS
+      "54.73.0.183/32", // IGZ GITLAB RUNNERS
+      "216.194.50.82/32" // METTEL OFFICE
     ]
   }
 
@@ -53,7 +54,8 @@ resource "aws_security_group" "automation-dev-inbound" {
       "83.56.7.26/32",  // IGZ CALLAO OFFICE 3
       "83.40.63.125/32", // XOAN HOME MADRID
       "87.219.160.222/32", // XOAN HOME GALICIA
-      "54.73.0.183/32" // IGZ GITLAB RUNNERS
+      "54.73.0.183/32", // IGZ GITLAB RUNNERS
+      "216.194.50.82/32" // METTEL OFFICE
     ]
   }
 

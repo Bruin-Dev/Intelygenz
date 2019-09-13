@@ -418,7 +418,7 @@ deploy-branches:
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - /bin/bash ci-utils/nats_healthcheck.sh
+    - /bin/bash ci-utils/nats_healthcheck.sh -t nats
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
     - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
@@ -498,7 +498,7 @@ deploy-master:
     - mv temp_vars.tf infra-as-code/dev/variables.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - /bin/bash ci-utils/nats_healthcheck.sh
+    - /bin/bash ci-utils/nats_healthcheck.sh -t nats
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
     - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
@@ -551,6 +551,7 @@ grafana_user_creation_branches:
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - apk add curl
+    - apk add bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/nats_healthcheck.sh -t grafana
@@ -578,6 +579,7 @@ grafana_user_creation_master:
   script:
     - export ENVIRONMENT_SLUG="master"
     - apk add curl
+    - apk add bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/nats_healthcheck.sh -t grafana
