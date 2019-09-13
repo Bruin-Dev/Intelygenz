@@ -544,10 +544,16 @@ grafana_user_creation_branches:
   tags:
     - docker
     - dind
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - apk add curl
-    - sleep 60
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - chmod +x /usr/local/bin/ecs-cli
+    - /bin/bash ci-utils/nats_healthcheck.sh -t grafana
     - >
       curl -XPOST --user $GRAFANA_ADMIN_USER:$GRAFANA_ADMIN_PASSWORD -H "Content-Type: application/json" -d '{
       "name": "'"$GRAFANA_USER_NAME"'",
@@ -565,10 +571,16 @@ grafana_user_creation_master:
   tags:
     - docker
     - dind
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
     - export ENVIRONMENT_SLUG="master"
     - apk add curl
-    - sleep 60
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - chmod +x /usr/local/bin/ecs-cli
+    - /bin/bash ci-utils/nats_healthcheck.sh -t grafana
     - >
       curl -XPOST --user $GRAFANA_ADMIN_USER:$GRAFANA_ADMIN_PASSWORD -H "Content-Type: application/json" -d '{
       "name": "'"$GRAFANA_USER_NAME"'",
