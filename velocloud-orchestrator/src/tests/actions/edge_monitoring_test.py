@@ -77,13 +77,16 @@ class TestEdgeMonitoring:
         assert "edge.list.request" in event_bus.publish_message.call_args[0][0]
 
     @pytest.mark.asyncio
-    async def receive_edge_list_test(self):
+    async def receive_edge_list_no_redis_test(self):
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
         logger = Mock()
         prometheus_repository = Mock()
+        prometheus_repository.dec = Mock()
         scheduler = Mock()
         edge_repository = Mock()
+        edge_repository.get_last_edge_list = Mock(return_value=None)
+        edge_repository.get_edge = Mock()
         status_repository = Mock()
         status_repository.set_edges_to_process = Mock()
         statistic_repository = Mock()
@@ -96,6 +99,90 @@ class TestEdgeMonitoring:
                                          status_repository, statistic_repository, service_id, config)
 
         await edge_monitoring.receive_edge_list(edge_list)
+        assert edge_repository.get_last_edge_list.called
+        assert edge_repository.get_edge.called is False
+        assert prometheus_repository.dec.called is False
+        assert status_repository.set_edges_to_process.called
+        assert event_bus.publish_message.called
+
+    @pytest.mark.asyncio
+    async def receive_edge_list_redis_data_test(self):
+
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        logger = Mock()
+        prometheus_repository = Mock()
+        prometheus_repository.dec = Mock()
+        scheduler = Mock()
+        edge_repository = Mock()
+        redis_test_enterprise_name = 'Test'
+        redis_edge_state = 'Edge_KO'
+        redis_link_status = [{"link": {"state": "KO"}}]
+        redis_edge = {"redis_edge": {"edges": {"edgeState": redis_edge_state},
+                                     "enterprise_name": redis_test_enterprise_name,
+                                     "links": redis_link_status}}
+        edge_repository.get_edge = Mock(return_value=json.dumps(redis_edge))
+        redis_list = b'[{"host": "some.host", "enterprise_id": 19, "edge_id": 99},' \
+                     b'{"host": "some.host", "enterprise_id": 20, "edge_id": 100},' \
+                     b'{"host": "some.host", "enterprise_id": 21, "edge_id": 101}]'
+        edge_repository.get_last_edge_list = Mock(return_value=redis_list)
+        status_repository = Mock()
+        status_repository.set_edges_to_process = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        service_id = 123
+
+        edge_list = b'{"request_id":1234, "edges":[{"host": "some.host", "enterprise_id":19, "edge_id":99},' \
+                    b'{"host": "some.host", "enterprise_id":20, "edge_id":100}]}'
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+
+        await edge_monitoring.receive_edge_list(edge_list)
+
+        assert prometheus_repository.dec.called
+        assert edge_repository.get_last_edge_list.called
+        assert edge_repository.get_edge.called
+        assert status_repository.set_edges_to_process.called
+        assert event_bus.publish_message.called
+
+    @pytest.mark.asyncio
+    async def receive_edge_list_redis_data_same_len_test(self):
+
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        logger = Mock()
+        prometheus_repository = Mock()
+        prometheus_repository.dec = Mock()
+        scheduler = Mock()
+        edge_repository = Mock()
+        redis_test_enterprise_name = 'Test'
+        redis_edge_state = 'Edge_KO'
+        redis_link_status = [{"link": {"state": "KO"}}]
+        redis_edge = {"redis_edge": {"edges": {"edgeState": redis_edge_state},
+                                     "enterprise_name": redis_test_enterprise_name,
+                                     "links": redis_link_status}}
+        edge_repository.get_edge = Mock(return_value=json.dumps(redis_edge))
+        redis_list = b'[{"host": "some.host", "enterprise_id": 19, "edge_id": 99},' \
+                     b'{"host": "some.host", "enterprise_id": 20, "edge_id": 100}]'
+        edge_repository.get_last_edge_list = Mock(return_value=redis_list)
+        status_repository = Mock()
+        status_repository.set_edges_to_process = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        service_id = 123
+
+        edge_list = b'{"request_id":1234, "edges":[{"host": "some.host", "enterprise_id":19, "edge_id":99},' \
+                    b'{"host": "some.host", "enterprise_id":20, "edge_id":100}]}'
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+
+        await edge_monitoring.receive_edge_list(edge_list)
+
+        assert prometheus_repository.dec.called is False
+        assert edge_repository.get_last_edge_list.called
+        assert edge_repository.get_edge.called is False
         assert status_repository.set_edges_to_process.called
         assert event_bus.publish_message.called
 

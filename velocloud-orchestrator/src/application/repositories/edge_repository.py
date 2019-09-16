@@ -15,6 +15,17 @@ class EdgeRepository:
             self._logger.info(f'edge_data = {edge_data}')
             return edge_data
 
+    def set_current_edge_list(self, edge_list):
+        self._logger.info(f'Saving edge list with data:  {edge_list}')
+        self._redis_client.set("edge_list", edge_list)
+
+    def get_last_edge_list(self):
+        if self._redis_client.exists("edge_list"):
+            self._logger.info(f'Getting edge list from redis')
+            edge_list = self._redis_client.get("edge_list")
+            self._logger.info(f'edge_list = {edge_list}')
+            return edge_list
+
     def get_keys(self):
         self._logger.info(f'Getting keys from redis')
         redis_keys = self._redis_client.keys()

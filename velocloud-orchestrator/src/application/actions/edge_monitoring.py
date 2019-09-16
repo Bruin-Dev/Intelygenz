@@ -92,6 +92,18 @@ class EdgeMonitoring:
                  edge=edge) for edge in decoded_msg["edges"]]
         self._prometheus_repository.set_cycle_total_edges(len(edge_status_requests))
         self._status_repository.set_edges_to_process(len(edge_status_requests))
+
+        redis_edge_list = self._edge_repository.get_last_edge_list()
+        if redis_edge_list is not None:
+            decoded_redis_edge_list = json.loads(redis_edge_list)
+            if len(decoded_redis_edge_list) != len(decoded_msg["edges"]):
+                for redis_edge in decoded_redis_edge_list:
+                    if redis_edge not in decoded_msg['edges']:
+                        redis_edge_info = json.loads(self._edge_repository.get_edge(str(redis_edge)))
+                        self._prometheus_repository.dec(redis_edge_info["redis_edge"])
+
+        self._edge_repository.set_current_edge_list(json.dumps(decoded_msg["edges"]))
+
         self._logger.info(f'Splitting and sending edges to the event bus')
         for request in edge_status_requests:
             await self._event_bus.publish_message("edge.status.request", json.dumps(request))
