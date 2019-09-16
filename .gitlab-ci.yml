@@ -83,11 +83,14 @@ variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
-  before_script:
+  script:
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - apk add curl
     - apk add bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
+    - /bin/bash ci-utils/task_healthcheck.sh -t grafana
+    - /bin/bash ci-utils/create_grafana_user.sh
 
 # ===============
 # Modules linters
@@ -556,11 +559,8 @@ destroy-master:
 grafana_user_creation_branches:
   stage: grafana_user_creation
   <<: *grafana_user_creation_template
-  script:
+  before_script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - /bin/bash ci-utils/task_healthcheck.sh -t grafana
-    - /bin/bash ci-utils/create_grafana_user.sh
   only:
     - branches
   except:
@@ -569,10 +569,7 @@ grafana_user_creation_branches:
 grafana_user_creation_master:
   stage: grafana_user_creation
   <<: *grafana_user_creation_template
-  script:
-    - export ENVIRONMENT_SLUG="master"
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - /bin/bash ci-utils/task_healthcheck.sh -t grafana
-    - /bin/bash ci-utils/create_grafana_user.sh
+  before_script:
+    - export ENVIRONMENT_SLUG=master
   only:
     - master
