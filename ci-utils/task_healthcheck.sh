@@ -3,7 +3,7 @@
 source $(dirname "$0")/common_functions.sh
 
 task_major_number () {
-    if [ "$TASK" == *"prometheus"* ] || [ "$TASK" == *"grafana"* ] || [ "$TASK" == *"notifier"* ]; then
+    if [[ $TASK == *prometheus* ]] || [[ $TASK == *grafana* ]] || [[ $TASK == *notifier* ]]; then
         tasks_running=$(ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep $TASK | awk '{ print $4 }')
     else
         tasks_running=$(ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep $TASK | awk '{ print $5 }')
@@ -27,15 +27,15 @@ wait_task_healthy () {
         if [ $i -eq 1 ]; then
             task_major_number
         fi
-        nats_task=$(ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep $task_running_major)
+        selected_task=$(ecs-cli ps --cluster $TF_VAR_ENVIRONMENT --desired-status RUNNING | grep $task_running_major)
         s_info "Try $i. Waiting for the task with task definition $task_running_major to be in HEALTHY state"
-        if [ "$TASK" == *"prometheus"* ] || [ "$TASK" == *"grafana"* ] || [ "$TASK" == *"notifier"* ]; then
-            nats_status=$(echo $nats_task | awk '{ print $5 }')
+        if [[ $TASK == *prometheus* ]] || [[ $TASK == *grafana* ]] || [[ $TASK == *notifier* ]]; then
+            task_status=$(echo $selected_task | awk '{ print $5 }')
         else 
-            nats_status=$(echo $nats_task | awk '{ print $6 }')
+            task_status=$(echo $selected_task | awk '{ print $6 }')
         fi
-        s_info "Try $i. Health Status of $TASK task is $nats_status"
-        if [ ! -z "$nats_status" ] && [ $nats_status = "HEALTHY" ]; then
+        s_info "Try $i. Health Status of $TASK task is $task_status"
+        if [ ! -z "$task_status" ] && [ $task_status = "HEALTHY" ]; then
             s_info "Try $i. $TASK task is ready"
             break
         else
