@@ -556,13 +556,7 @@ grafana_user_creation_branches:
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/task_healthcheck.sh -t grafana
-    - >
-      curl -XPOST --user $GRAFANA_ADMIN_USER:$GRAFANA_ADMIN_PASSWORD -H "Content-Type: application/json" -d '{
-      "name": "'"$GRAFANA_USER_NAME"'",
-        "email": "'"$GRAFANA_USER_EMAIL"'",
-        "login": "'"$GRAFANA_USER_LOGIN"'",
-        "password":"'"$GRAFANA_USER_PASSWORD"'"
-      }' https://admin:admin@$ENVIRONMENT_SLUG.mettel-automation.net/api/admin/users
+    - /bin/bash ci-utils/create_grafana_user.sh
   only:
     - branches
   except:
@@ -585,12 +579,6 @@ grafana_user_creation_master:
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/task_healthcheck.sh -t grafana
-    - >
-      curl -XPOST --user $GRAFANA_ADMIN_USER:$GRAFANA_ADMIN_PASSWORD -H "Content-Type: application/json" -d '{
-      "name": "'"$GRAFANA_USER_NAME"'",
-        "email": "'"$GRAFANA_USER_EMAIL"'",
-        "login": "'"$GRAFANA_USER_LOGIN"'",
-        "password":"'"$GRAFANA_USER_PASSWORD"'"
-      }' https://admin:admin@$ENVIRONMENT_SLUG.mettel-automation.net/api/admin/users
+    - /bin/bash ci-utils/create_grafana_user.sh
   only:
     - master
