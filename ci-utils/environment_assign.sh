@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 if [[ ${CI_COMMIT_REF_SLUG} == "master" ]]; then
     export ENVIRONMENT_SLUG=master
 elif
