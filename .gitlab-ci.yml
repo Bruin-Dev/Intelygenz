@@ -255,11 +255,10 @@ grafana-build:
   services:
     - docker:18-dind
   before_script:
-    - apk add --no-cache curl jq python py-pip
+    - apk add --no-cache curl jq python py-pip bash
     - pip install awscli
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
-    - apk add bash
     - /bin/bash ci-utils/environment_assign.sh
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_SLUG}/g" metrics-dashboard/grafana/configs/prometheus-dev.yml
     - cp metrics-dashboard/grafana/configs/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
@@ -278,11 +277,10 @@ prometheus-build:
   services:
     - docker:18-dind
   before_script:
-    - apk add --no-cache curl jq python py-pip
+    - apk add --no-cache curl jq python py-pip bash
     - pip install awscli
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
-    - apk add bash
     - /bin/bash ci-utils/environment_assign.sh
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_SLUG}/g" metrics-dashboard/prometheus/configs/prometheus-dev.yml
     - cp metrics-dashboard/prometheus/configs/prometheus-dev.yml metrics-dashboard/prometheus/prometheus.yml
