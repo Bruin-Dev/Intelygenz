@@ -33,7 +33,7 @@ resource "aws_ecs_task_definition" "automation-service-outage-triage" {
 
 resource "aws_security_group" "automation-service-outage-triage_service" {
   vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
-  name = local.automation-service-outage-monitor-service-security_group-name
+  name = local.automation-service-outage-triage-service-security_group-name
   description = "Allow egress from container"
 
   egress {
