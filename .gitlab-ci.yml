@@ -85,7 +85,7 @@ variables:
     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - apk add curl
+    - apk --upgrade --no-cache add curl
     - apk add bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
@@ -425,7 +425,7 @@ deploy-branches:
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
-    - apk add curl
+    - apk --upgrade --no-cache add curl
     - apk add bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
@@ -505,7 +505,7 @@ deploy-master:
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=production
     - apk add gettext
-    - apk add curl
+    - apk --upgrade --no-cache add curl
     - apk add bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli

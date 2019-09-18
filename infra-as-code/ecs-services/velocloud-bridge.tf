@@ -3,35 +3,35 @@ data "aws_ecr_repository" "automation-velocloud-bridge" {
 }
 
 data "template_file" "automation-velocloud-bridge" {
-  template = "${file("${path.module}/task-definitions/velocloud_bridge.json")}"
+  template = file("${path.module}/task-definitions/velocloud_bridge.json")
 
   vars = {
-    image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.BUILD_NUMBER}"
-    log_group = "${var.ENVIRONMENT}"
-    log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+    image = local.automation-velocloud-bridge-image
+    log_group = var.ENVIRONMENT
+    log_prefix = local.automation-velocloud-bridge-log_prefix
 
-    PYTHONUNBUFFERED = "${var.PYTHONUNBUFFERED}"
-    NATS_SERVER1 = "nats://nats-server.${var.ENVIRONMENT}.local:4222"
-    NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
-    VELOCLOUD_CREDENTIALS = "${var.VELOCLOUD_CREDENTIALS}"
-    VELOCLOUD_VERIFY_SSL = "${var.VELOCLOUD_VERIFY_SSL}"
+    PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
+    NATS_SERVER1 = local.nats_server1
+    NATS_CLUSTER_NAME = var.NATS_CLUSTER_NAME
+    VELOCLOUD_CREDENTIALS = var.VELOCLOUD_CREDENTIALS
+    VELOCLOUD_VERIFY_SSL = var.VELOCLOUD_VERIFY_SSL
   }
 }
 
 resource "aws_ecs_task_definition" "automation-velocloud-bridge" {
-  family = "${var.ENVIRONMENT}-velocloud-bridge"
-  container_definitions = "${data.template_file.automation-velocloud-bridge.rendered}"
+  family = local.automation-velocloud-bridge-ecs_task_definition-family
+  container_definitions = data.template_file.automation-velocloud-bridge.rendered
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
-  task_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
+  execution_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
+  task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
 }
 
 resource "aws_security_group" "automation-velocloud-bridge_service" {
-  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id}"
+  vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
   name = "${var.ENVIRONMENT}-velocloud-bridge"
   description = "Allow egress from container"
 
@@ -70,15 +70,15 @@ resource "aws_security_group" "automation-velocloud-bridge_service" {
   }
 
   tags = {
-    Name = "${var.ENVIRONMENT}-velocloud-bridge"
-    Environment = "${var.ENVIRONMENT}"
+    Name = local.automation-velocloud-bridge-service-security_group-tag-Name
+    Environment = var.ENVIRONMENT
   }
 }
 resource "aws_service_discovery_service" "velocloud-bridge" {
   name = "velocloud-bridge"
 
   dns_config {
-    namespace_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id}"
+    namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
 
     dns_records {
       ttl = 10
@@ -94,21 +94,21 @@ resource "aws_service_discovery_service" "velocloud-bridge" {
 }
 
 resource "aws_ecs_service" "automation-velocloud-bridge" {
-  name = "${var.ENVIRONMENT}-velocloud-bridge"
-  task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
+  name = local.automation-velocloud-bridge-ecs_service-name
+  task_definition = local.automation-velocloud-bridge-ecs_service-task_definition
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = "${data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id}"
+  cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
 
   network_configuration {
     security_groups = [
-      "${aws_security_group.automation-velocloud-bridge_service.id}"]
+      aws_security_group.automation-velocloud-bridge_service.id]
     subnets = [
-      "${data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a}"]
+      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a]
     assign_public_ip = false
   }
 
   service_registries {
-    registry_arn = "${aws_service_discovery_service.velocloud-bridge.arn}"
+    registry_arn = aws_service_discovery_service.velocloud-bridge.arn
   }
 }

@@ -3,35 +3,35 @@ data "aws_ecr_repository" "automation-last-contact-report" {
 }
 
 data "template_file" "automation-last-contact-report" {
-  template = "${file("${path.module}/task-definitions/last_contact_report.json")}"
+  template = file("${path.module}/task-definitions/last_contact_report.json")
 
   vars = {
-    image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${var.BUILD_NUMBER}"
-    log_group = "${var.ENVIRONMENT}"
-    log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+    image = local.automation-last-contact-report-image
+    log_group = var.ENVIRONMENT
+    log_prefix = local.log_prefix
 
-    PYTHONUNBUFFERED = "${var.PYTHONUNBUFFERED}"
-    NATS_SERVER1 = "nats://nats-server.${var.ENVIRONMENT}.local:4222"
-    NATS_CLUSTER_NAME = "${var.NATS_CLUSTER_NAME}"
-    LAST_CONTACT_RECIPIENT = "${var.LAST_CONTACT_RECIPIENT}"
+    PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
+    NATS_SERVER1 = local.nats_server1
+    NATS_CLUSTER_NAME = var.NATS_CLUSTER_NAME
+    LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
   }
 }
 
 resource "aws_ecs_task_definition" "automation-last-contact-report" {
-  family = "${var.ENVIRONMENT}-last-contact-report"
-  container_definitions = "${data.template_file.automation-last-contact-report.rendered}"
+  family = local.automation-last-contact-report-ecs_task_definition-family
+  container_definitions = data.template_file.automation-last-contact-report.rendered
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
-  task_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
+  execution_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
+  task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
 }
 
 resource "aws_security_group" "automation-last-contact-report_service" {
-  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id}"
-  name = "${var.ENVIRONMENT}-last-contact-report"
+  vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
+  name = local.automation-last-contact-report-service-security_group-name
   description = "Allow egress from container"
 
   egress {
@@ -69,8 +69,8 @@ resource "aws_security_group" "automation-last-contact-report_service" {
   }
 
   tags = {
-    Name = "${var.ENVIRONMENT}-last-contact-report"
-    Environment = "${var.ENVIRONMENT}"
+    Name = local.automation-last-contact-report-service-security_group-tag-Name
+    Environment = var.ENVIRONMENT
   }
 }
 
@@ -78,7 +78,7 @@ resource "aws_service_discovery_service" "last-contact-report" {
   name = "last-contact-report"
 
   dns_config {
-    namespace_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id}"
+    namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
 
     dns_records {
       ttl = 10
@@ -94,21 +94,21 @@ resource "aws_service_discovery_service" "last-contact-report" {
 }
 
 resource "aws_ecs_service" "automation-last-contact-report" {
-  name = "${var.ENVIRONMENT}-last-contact-report"
-  task_definition = "${aws_ecs_task_definition.automation-last-contact-report.family}:${aws_ecs_task_definition.automation-last-contact-report.revision}"
+  name = local.automation-last-contact-report-resource-name
+  task_definition = local.automation-last-contact-report-task_definition
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = "${data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id}"
+  cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
 
   network_configuration {
     security_groups = [
-      "${aws_security_group.automation-last-contact-report_service.id}"]
+      aws_security_group.automation-last-contact-report_service.id]
     subnets = [
-      "${data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a}"]
+      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a]
     assign_public_ip = false
   }
 
   service_registries {
-    registry_arn = "${aws_service_discovery_service.last-contact-report.arn}"
+    registry_arn = aws_service_discovery_service.last-contact-report.arn
   }
 }

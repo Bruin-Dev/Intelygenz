@@ -3,36 +3,36 @@ data "aws_ecr_repository" "automation-metrics-grafana" {
 }
 
 data "template_file" "automation-metrics-grafana" {
-  template = "${file("${path.module}/task-definitions/grafana.json")}"
+  template = file("${path.module}/task-definitions/grafana.json")
 
   vars = {
-    image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.BUILD_NUMBER}"
-    log_group = "${var.ENVIRONMENT}"
-    log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+    image = local.automation-metrics-grafana-image
+    log_group = var.ENVIRONMENT
+    log_prefix = local.log_prefix
     GF_SECURITY_ADMIN_PASSWORD = "q1w2e3r4"
   }
 }
 
 resource "aws_ecs_task_definition" "automation-metrics-grafana" {
-  family = "${var.ENVIRONMENT}-metrics-grafana"
-  container_definitions = "${data.template_file.automation-metrics-grafana.rendered}"
+  family = local.automation-metrics-grafana-ecs_task_definition-family
+  container_definitions = data.template_file.automation-metrics-grafana.rendered
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
   cpu = "512"
   memory = "1024"
-  execution_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
-  task_role_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role}"
+  execution_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
+  task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
 }
 
 resource "aws_lb_listener" "automation-grafana" {
-  load_balancer_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.automation_alb_arn}"
+  load_balancer_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_alb_arn
   port = "443"
   protocol = "HTTPS"
-  certificate_arn = "${data.terraform_remote_state.tfstate-dev-resources.outputs.cert_mettel}"
+  certificate_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.cert_mettel
 
   default_action {
-    target_group_arn = "${aws_lb_target_group.automation-metrics-grafana.arn}"
+    target_group_arn = aws_lb_target_group.automation-metrics-grafana.arn
     type = "forward"
   }
 }
@@ -41,7 +41,7 @@ resource "aws_lb_target_group" "automation-metrics-grafana" {
   name = "${var.ENVIRONMENT}-mts-grafana"
   port = 3000
   protocol = "HTTP"
-  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id}"
+  vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
   target_type = "ip"
   stickiness {
     type = "lb_cookie"
@@ -65,8 +65,8 @@ resource "aws_lb_target_group" "automation-metrics-grafana" {
 }
 
 resource "aws_security_group" "automation-grafana_service" {
-  vpc_id = "${data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id}"
-  name = "${var.ENVIRONMENT}-metrics-grafana"
+  vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
+  name = local.automation-metrics-grafana-service-security_group-name
   description = "Allow egress from container"
 
   egress {
@@ -95,28 +95,28 @@ resource "aws_security_group" "automation-grafana_service" {
   }
 
   tags = {
-    Name = "${var.ENVIRONMENT}-metrics-grafana"
-    Environment = "${var.ENVIRONMENT}"
+    Name = local.automation-metrics-grafana-service-security_group-tag-Name
+    Environment = var.ENVIRONMENT
   }
 }
 
 resource "aws_ecs_service" "automation-metrics-grafana" {
-  name = "${var.ENVIRONMENT}-metrics-grafana"
-  task_definition = "${aws_ecs_task_definition.automation-metrics-grafana.family}:${aws_ecs_task_definition.automation-metrics-grafana.revision}"
+  name = local.automation-metrics-grafana-ecs_service-name
+  task_definition = local.automation-metrics-grafana-ecs_task_definition
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = "${data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id}"
+  cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
 
   network_configuration {
     security_groups = [
-      "${aws_security_group.automation-grafana_service.id}"]
+      aws_security_group.automation-grafana_service.id]
     subnets = [
-      "${data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a}"]
+      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a]
     assign_public_ip = false
   }
 
   load_balancer {
-    target_group_arn = "${aws_lb_target_group.automation-metrics-grafana.arn}"
+    target_group_arn = aws_lb_target_group.automation-metrics-grafana.arn
     container_name = "grafana"
     container_port = 3000
   }
