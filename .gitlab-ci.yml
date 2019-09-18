@@ -260,7 +260,6 @@ grafana-build:
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
     - source ci-utils/environment_assign.sh
-    - echo "ENVIRONMENT_VAR is $ENVIRONMENT_VAR"
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/grafana/configs/prometheus-dev.yml
     - cp metrics-dashboard/grafana/configs/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
@@ -283,9 +282,7 @@ prometheus-build:
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
     - source ci-utils/environment_assign.sh
-    - echo "ENVIRONMENT_SLUG is $ENVIRONMENT_VAR"
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/prometheus/configs/prometheus-dev.yml
-    - cat metrics-dashboard/prometheus/configs/prometheus-dev.yml
     - cp metrics-dashboard/prometheus/configs/prometheus-dev.yml metrics-dashboard/prometheus/prometheus.yml
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
