@@ -23,7 +23,6 @@ locals {
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${var.BUILD_NUMBER}"
-  automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-service-security_group-name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-service-security_group-tag-Name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-resource-name = "${var.ENVIRONMENT}-last-contact-report"
