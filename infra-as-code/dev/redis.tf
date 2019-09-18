@@ -1,5 +1,5 @@
 resource "aws_elasticache_cluster" "automation-redis" {
-  cluster_id = "${var.ENVIRONMENT}"
+  cluster_id = var.ENVIRONMENT
   engine = "redis"
   engine_version = "5.0.4"
   node_type = "cache.m4.large"
@@ -7,24 +7,25 @@ resource "aws_elasticache_cluster" "automation-redis" {
   parameter_group_name = "default.redis5.0"
   port = 6379
   apply_immediately = true
-  subnet_group_name = "${aws_elasticache_subnet_group.automation-redis-subnet.id}"
-  security_group_ids = ["${aws_security_group.automation-redis-sg.id}"]
+  subnet_group_name = aws_elasticache_subnet_group.automation-redis-subnet.id
+  security_group_ids = [
+    aws_security_group.automation-redis-sg.id]
   availability_zone = "us-east-1a"
 
   tags = {
-    Name = "${var.ENVIRONMENT}-redis"
+    Name = local.automation-redis-elasticache_cluster-tag-Name
   }
 }
 
 resource "aws_elasticache_subnet_group" "automation-redis-subnet" {
   name = "${var.ENVIRONMENT}-redis-subnet"
   subnet_ids = [
-    "${aws_subnet.automation-private_subnet-1a.id}"]
+    aws_subnet.automation-private_subnet-1a.id]
 }
 
 resource "aws_security_group" "automation-redis-sg" {
-  name = "${var.ENVIRONMENT}-redis-sg"
-  vpc_id = "${aws_vpc.automation-vpc.id}"
+  name = local.automation-redis-security_group-name
+  vpc_id = aws_vpc.automation-vpc.id
   description = "Access control to redis cache"
 
   egress {
@@ -39,11 +40,11 @@ resource "aws_security_group" "automation-redis-sg" {
     protocol = "tcp"
     to_port = 6379
     cidr_blocks = [
-    "${aws_subnet.automation-private_subnet-1a.cidr_block}"
+    aws_subnet.automation-private_subnet-1a.cidr_block
     ]
   }
 
   tags = {
-    Name = "${var.ENVIRONMENT}-redis"
+    Name = local.automation-redis-security_group-tag-Name
   }
 }
