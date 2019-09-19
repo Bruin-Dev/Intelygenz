@@ -134,6 +134,7 @@ class EdgeMonitoring:
         redis_data = {"request_id": edge["request_id"], "redis_edge": edge['edge_info']}
         self._edge_repository.set_edge(edge['edge_id'], json.dumps(redis_data))
         self._logger.info(f'Edges processed: {edges_processed} / {edges_to_process}')
+
         if edges_processed == edges_to_process:
             self._logger.info("All edges processed, starting the cycle again")
             self._status_repository.set_status("IDLE")
