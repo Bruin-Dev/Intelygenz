@@ -89,7 +89,7 @@ variables:
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/task_healthcheck.sh -t grafana
-    - python3 ci-utils/create_grafana_user.sh
+    - python3 ci-utils/grafana_users_creation.py
 
 # ===============
 # Modules linters

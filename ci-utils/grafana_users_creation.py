@@ -68,11 +68,14 @@ def UserCreationInGrafana(user):
             "login": "GRAFANA_USER_LOGIN",
             "password": "GRAFANA_USER_PASSWORD"}
     data = {k: user.get(v) for k, v in mapping.items()}
+    print("Creating user {} in Grafana".format(user.get("GRAFANA_USER_LOGIN")))
     try:
         response = requests.post(url_api_create_user.format(environment_slug=user.get("ENVIRONMENT_SLUG")), data=data, 
             auth=HTTPBasicAuth(user.get("GRAFANA_ADMIN_USER"), user.get("GRAFANA_ADMIN_PASSWORD")))
         if response.status_code == 200:
             print("User {} successfully created in Grafana".format(user.get("GRAFANA_USER_LOGIN")))
+        else:
+            print("User {} not created in Grafana".format(user.get("GRAFANA_USER_LOGIN")))
     except ConnectionError as e:
         print(e)
         exit(1)
