@@ -86,7 +86,7 @@ variables:
   script:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - apk --upgrade --no-cache add curl python3 bash py-pip
-    - pip install requests
+    - pip3 install requests
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/task_healthcheck.sh -t grafana
