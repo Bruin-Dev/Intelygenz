@@ -41,7 +41,7 @@ class EdgeMonitoring:
             self._logger.info("IDLE status: asking edge list. Orchestrator status = REQUESTING_VELOCLOUD_EDGES...")
             self._status_repository.set_status("REQUESTING_VELOCLOUD_EDGES")
             self._status_repository.set_edges_processed(0)
-            await self._send_stats_to_notifier()
+            # await self._send_stats_to_notifier()
             self._statistic_repository._statistic_client.clear_dictionaries()
             self._status_repository.set_current_cycle_timestamp(datetime.timestamp(datetime.now()))
             await self._request_edges(uuid())
