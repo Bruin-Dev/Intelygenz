@@ -35,12 +35,13 @@ resource "aws_eip" "automation-nat_eip-1a" {
   }
 }
 
-resource "aws_eip" "automation-nat_eip-1b" {
+// TODO: Decomment creation when the number of EIPs per region has been increased
+/*resource "aws_eip" "automation-nat_eip-1b" {
   vpc = true
   tags = {
     Name = local.automation-nat_eip-1b-tag-Name
   }
-}
+}*/
 
 /* NAT */
 resource "aws_nat_gateway" "automation-nat-1a" {
@@ -53,7 +54,7 @@ resource "aws_nat_gateway" "automation-nat-1a" {
   }
 }
 // TODO: Decomment creation when the number of EIPs per region has been increased
-resource "aws_nat_gateway" "automation-nat-1b" {
+/*resource "aws_nat_gateway" "automation-nat-1b" {
   allocation_id = aws_eip.automation-nat_eip-1b.id
   subnet_id = aws_subnet.automation-public_subnet-1b.id
 
@@ -61,7 +62,7 @@ resource "aws_nat_gateway" "automation-nat-1b" {
     Name = local.automation-nat_gateway-1b-tag-Name
     Environment = var.ENVIRONMENT
   }
-}
+}*/
 
 /* Public subnet */
 resource "aws_subnet" "automation-public_subnet-1a" {
