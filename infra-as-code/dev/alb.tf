@@ -101,7 +101,7 @@ resource "aws_lb" "automation-alb" {
 }
 
 resource "aws_lb_listener" "front_end" {
-  load_balancer_arn = "${aws_lb.automation-alb.arn}"
+  load_balancer_arn = aws_lb.automation-alb.arn
   port              = "80"
   protocol          = "HTTP"
 
