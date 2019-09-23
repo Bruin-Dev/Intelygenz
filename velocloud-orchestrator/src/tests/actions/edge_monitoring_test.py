@@ -439,10 +439,8 @@ class TestEdgeMonitoring:
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
-        edge_monitoring._send_stats_to_notifier = CoroutineMock()
         edge_monitoring._request_edges = CoroutineMock()
         await edge_monitoring._edge_monitoring_process()
-        assert edge_monitoring._send_stats_to_notifier.called
         assert statistic_repository._statistic_client.clear_dictionaries.called
         assert status_repository.set_edges_processed.called
         assert status_repository.set_current_cycle_timestamp.called
