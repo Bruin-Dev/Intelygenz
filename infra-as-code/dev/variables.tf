@@ -24,14 +24,16 @@ variable "cdir_public_1" {
   default = "10.1.1.0"
 }
 
-variable "cdir_public_2" {
+// TODO: Decomment creation when the number of EIPs per region has been increased
+/*variable "cdir_public_2" {
   default = "10.1.2.0"
-}
+}*/
 
 variable "cdir_private_1" {
   default = "10.1.11.0"
 }
 
-variable "cdir_private_2" {
+// TODO: Decomment creation when the number of EIPs per region has been increased
+/*variable "cdir_private_2" {
   default = "10.1.12.0"
-}
+}*/

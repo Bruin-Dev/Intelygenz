@@ -47,7 +47,7 @@ def CheckIfUserExistsInGrafana(_list):
                 response = requests.get(url_api_check_user.format(environment_slug=environment_slug, grafana_user_login=i), 
                 auth=HTTPBasicAuth(grafana_admin_user, grafana_admin_password))
                 if (response.json().get("totalCount") == 0):
-                    print("User {} doesn't exists in Grafana".format(i))
+                    print("User {} doesn't exists yet in Grafana".format(i))
                     pos = users.get("GRAFANA_USER_LOGIN").index(i)
                     user = { k: v[pos] for k, v in users.items() }
                     user.update(result.get("credentials"))

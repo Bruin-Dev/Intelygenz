@@ -90,12 +90,13 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
     security_groups = [
       aws_security_group.automation-metrics-prometheus_service.id]
     subnets = [
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a,
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1b]
+      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a]
+      // TODO: Decomment creation when the number of EIPs per region has been increased
+      /*data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1b]*/
     assign_public_ip = false
   }
 
   service_registries {
-    registry_arn = "${aws_service_discovery_service.metrics-prometheus.arn}"
+    registry_arn = aws_service_discovery_service.metrics-prometheus.arn
   }
 }
