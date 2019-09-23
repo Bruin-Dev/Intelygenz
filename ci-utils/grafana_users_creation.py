@@ -40,10 +40,11 @@ def check_users_length(users):
 
 def check_if_user_exists_in_grafana(_list):
     result = get_necessary_vars(_list)
-    url_api_check_user = "https://admin:admin@{environment_slug}.mettel-automation.net/api/users/search?query={grafana_user_login}"
+    url_api_check_user = "https://admin:admin@{environment_slug}.mettel-automation.net/api/users/search?query={" \
+                         "grafana_user_login} "
     environment_slug, grafana_admin_user, grafana_admin_password = result.get("credentials").values()
     users = result.get("users")
-    if check_users_length(users) == True:
+    if check_users_length(users):
         for i in users.get("GRAFANA_USER_LOGIN"):
             try:
                 response = requests.get(
