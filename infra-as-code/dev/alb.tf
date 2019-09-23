@@ -89,9 +89,8 @@ resource "aws_lb" "automation-alb" {
   name = var.ENVIRONMENT
   load_balancer_type = "application"
   subnets = [
-    aws_subnet.automation-public_subnet-1a.id]
-    // TODO: Decomment creation when the number of EIPs per region has been increased
-    //aws_subnet.automation-public_subnet-1b.id]
+    aws_subnet.automation-public_subnet-1a.id,
+    aws_subnet.automation-public_subnet-1b.id]
   security_groups = [
     aws_security_group.automation-dev-inbound.id]
 
@@ -102,7 +101,7 @@ resource "aws_lb" "automation-alb" {
 }
 
 resource "aws_lb_listener" "front_end" {
-  load_balancer_arn = aws_lb.automation-alb.arn
+  load_balancer_arn = "${aws_lb.automation-alb.arn}"
   port              = "80"
   protocol          = "HTTP"
 

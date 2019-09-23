@@ -75,7 +75,7 @@ variables:
   before_script:
     - terraform init -backend=true -get=true -input=false
 
-.grafana_user_creation_template: &grafana_user_creation_template
+.job_grafana_user_creation: &grafana_user_creation_template
   tags:
     - docker
     - dind

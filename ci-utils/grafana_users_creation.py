@@ -24,6 +24,7 @@ def GetNecessaryVars(args):
             result["users"][i] = [i.strip() for i in result["users"][i]]
     return result
 
+
 def CheckUsersLength(users):
     n = []
     for k, v in users.items():
@@ -35,6 +36,7 @@ def CheckUsersLength(users):
         if check_in == False:
             break
     return check_in
+
 
 def CheckIfUserExistsInGrafana(_list):
     result = GetNecessaryVars(_list)
@@ -79,6 +81,7 @@ def UserCreationInGrafana(user):
     except ConnectionError as e:
         print(e)
         exit(1)
+
 
 if __name__ == "__main__":
     CheckIfUserExistsInGrafana(_list)

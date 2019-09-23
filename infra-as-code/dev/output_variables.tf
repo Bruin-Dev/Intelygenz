@@ -18,10 +18,9 @@ output "subnet_automation-private-1a" {
   value = aws_subnet.automation-private_subnet-1a.id
 }
 
-// TODO: Decomment creation when the number of EIPs per region has been increased
-/*output "subnet_automation-private-1b" {
+output "subnet_automation-private-1b" {
   value = "${aws_subnet.automation-private_subnet-1b.id}"
-}*/
+}
 
 output "redis_hostname" {
   value = aws_elasticache_cluster.automation-redis.cache_nodes[0].address

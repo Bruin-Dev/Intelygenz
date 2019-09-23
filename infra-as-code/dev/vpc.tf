@@ -35,13 +35,12 @@ resource "aws_eip" "automation-nat_eip-1a" {
   }
 }
 
-// TODO: Decomment creation when the number of EIPs per region has been increased
-/*resource "aws_eip" "automation-nat_eip-1b" {
+resource "aws_eip" "automation-nat_eip-1b" {
   vpc = true
   tags = {
     Name = local.automation-nat_eip-1b-tag-Name
   }
-}*/
+}
 
 /* NAT */
 resource "aws_nat_gateway" "automation-nat-1a" {
@@ -53,8 +52,8 @@ resource "aws_nat_gateway" "automation-nat-1a" {
     Environment = var.ENVIRONMENT
   }
 }
-// TODO: Decomment creation when the number of EIPs per region has been increased
-/*resource "aws_nat_gateway" "automation-nat-1b" {
+
+resource "aws_nat_gateway" "automation-nat-1b" {
   allocation_id = aws_eip.automation-nat_eip-1b.id
   subnet_id = aws_subnet.automation-public_subnet-1b.id
 
@@ -62,7 +61,7 @@ resource "aws_nat_gateway" "automation-nat-1a" {
     Name = local.automation-nat_gateway-1b-tag-Name
     Environment = var.ENVIRONMENT
   }
-}*/
+}
 
 /* Public subnet */
 resource "aws_subnet" "automation-public_subnet-1a" {
@@ -77,8 +76,7 @@ resource "aws_subnet" "automation-public_subnet-1a" {
   }
 }
 
-// TODO: Decomment creation when the number of EIPs per region has been increased
-/*resource "aws_subnet" "automation-public_subnet-1b" {
+resource "aws_subnet" "automation-public_subnet-1b" {
   vpc_id = aws_vpc.automation-vpc.id
   cidr_block = "${var.cdir_public_2}/24"
   availability_zone = "us-east-1b"
@@ -88,7 +86,7 @@ resource "aws_subnet" "automation-public_subnet-1a" {
     Name = local.automation-public_subnet-1b-tag-Name
     Environment = var.ENVIRONMENT
   }
-}*/
+}
 
 /* Private subnet */
 resource "aws_subnet" "automation-private_subnet-1a" {
@@ -103,8 +101,7 @@ resource "aws_subnet" "automation-private_subnet-1a" {
   }
 }
 
-// TODO: Decomment creation when the number of EIPs per region has been increased
-/*resource "aws_subnet" "automation-private_subnet-1b" {
+resource "aws_subnet" "automation-private_subnet-1b" {
   vpc_id = aws_vpc.automation-vpc.id
   cidr_block = "${var.cdir_private_2}/24"
   availability_zone = "us-east-1b"
@@ -114,7 +111,7 @@ resource "aws_subnet" "automation-private_subnet-1a" {
     Name = local.automation-private_subnet-1b-tag-Name
     Environment = var.ENVIRONMENT
   }
-}*/
+}
 
 /* Routing table for private subnet */
 resource "aws_route_table" "automation-private" {
@@ -154,28 +151,26 @@ resource "aws_route_table_association" "automation-public-1a" {
   route_table_id = aws_route_table.automation-public.id
 }
 
-// TODO: Decomment creation when the number of EIPs per region has been increased
-/*resource "aws_route_table_association" "automation-public-1b" {
+resource "aws_route_table_association" "automation-public-1b" {
   subnet_id = aws_subnet.automation-public_subnet-1b.id
   route_table_id = aws_route_table.automation-public.id
-}*/
+}
 
 resource "aws_route_table_association" "automation-private-1a" {
   subnet_id = aws_subnet.automation-private_subnet-1a.id
   route_table_id = aws_route_table.automation-private.id
 }
 
-// TODO: Decomment creation when the number of EIPs per region has been increased
-/*resource "aws_route_table_association" "automation-private-1b" {
+resource "aws_route_table_association" "automation-private-1b" {
   subnet_id = aws_subnet.automation-private_subnet-1b.id
   route_table_id = aws_route_table.automation-private.id
-}*/
+}
 
 /*====
 VPC's Default Security Group
 ======*/
 resource "aws_security_group" "automation-default" {
-  name = "${var.ENVIRONMENT}-default-sg"
+  name = local.automation-default-security-group-name
   description = "Default security group to allow inbound/outbound from the VPC"
   vpc_id = aws_vpc.automation-vpc.id
 
