@@ -1,4 +1,4 @@
-foutput "ecs_execution_role" {
+output "ecs_execution_role" {
   value = data.aws_iam_role.ecs_execution_role.arn
 }
 
