@@ -4,5 +4,5 @@ class T7Repository:
         self._logger = logger
         self._t7_client = t7_client
 
-    def get_predication(self, ticket_id):
-        return self._t7_client.get_predication(ticket_id)
+    def get_prediction(self, ticket_id):
+        return self._t7_client.get_prediction(ticket_id)

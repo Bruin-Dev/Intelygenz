@@ -1,7 +1,7 @@
 from config import config
 from application.clients.t7_client import T7Client
 from application.repositories.t7_repository import T7Repository
-from application.actions.get_predication import GetPredication
+from application.actions.get_prediction import GetPrediction
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
@@ -19,24 +19,24 @@ class Container:
         self._t7_client = T7Client(self._logger, config)
         self._t7_repository = T7Repository(self._logger, self._t7_client)
         self._publisher = NatsStreamingClient(config, f't7-bridge-publisher-', logger=self._logger)
-        self._subscriber_predication = NatsStreamingClient(config, f't7-bridge-subscriber-', logger=self._logger)
+        self._subscriber_prediction = NatsStreamingClient(config, f't7-bridge-subscriber-', logger=self._logger)
 
         self._event_bus = EventBus(logger=self._logger)
-        self._event_bus.add_consumer(self._subscriber_predication, consumer_name="predication")
+        self._event_bus.add_consumer(self._subscriber_prediction, consumer_name="prediction")
         self._event_bus.set_producer(self._publisher)
 
-        self._get_predication = GetPredication(self._logger, config, self._event_bus,
-                                               self._t7_repository)
+        self._get_prediction = GetPrediction(self._logger, config, self._event_bus,
+                                             self._t7_repository)
 
-        self._action_get_predication = ActionWrapper(self._get_predication, "get_predication",
-                                                     is_async=True, logger=self._logger)
+        self._action_get_prediction = ActionWrapper(self._get_prediction, "get_prediction",
+                                                    is_async=True, logger=self._logger)
 
         self._server = QuartServer(config)
 
     async def start(self):
         await self._event_bus.connect()
-        await self._event_bus.subscribe_consumer(consumer_name="predication", topic="t7.predication.request",
-                                                 action_wrapper=self._action_get_predication,
+        await self._event_bus.subscribe_consumer(consumer_name="prediction", topic="t7.prediction.request",
+                                                 action_wrapper=self._action_get_prediction,
                                                  durable_name="t7_bridge",
                                                  queue="t7_bridge",
                                                  ack_wait=480)
