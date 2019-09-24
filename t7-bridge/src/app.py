@@ -15,7 +15,7 @@ class Container:
 
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info("Bruin bridge starting...")
+        self._logger.info("T7 bridge starting...")
         self._t7_client = T7Client(self._logger, config)
         self._t7_repository = T7Repository(self._logger, self._t7_client)
         self._publisher = NatsStreamingClient(config, f't7-bridge-publisher-', logger=self._logger)
@@ -25,7 +25,7 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_predication, consumer_name="predication")
         self._event_bus.set_producer(self._publisher)
 
-        self._get_predication = GetPredication(self._logger, config.BRUIN_CONFIG, self._event_bus,
+        self._get_predication = GetPredication(self._logger, config, self._event_bus,
                                                self._t7_repository)
 
         self._action_get_predication = ActionWrapper(self._get_predication, "get_predication",
@@ -36,7 +36,7 @@ class Container:
     async def start(self):
         await self._event_bus.connect()
         await self._event_bus.subscribe_consumer(consumer_name="predication", topic="t7.predication.request",
-                                                 action_wrapper=self._get_predication,
+                                                 action_wrapper=self._action_get_predication,
                                                  durable_name="t7_bridge",
                                                  queue="t7_bridge",
                                                  ack_wait=480)

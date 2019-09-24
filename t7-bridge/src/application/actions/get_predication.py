@@ -13,7 +13,7 @@ class GetPredication:
         msg_dict = json.loads(msg)
         ticket_id = msg_dict["ticket_id"]
         status = 500
-        predication = self._t7_repository.post_ticket_note(ticket_id)
+        predication = self._t7_repository.get_predication(ticket_id)
         if predication is not None:
             status = 200
         response = {
