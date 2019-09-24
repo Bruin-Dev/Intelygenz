@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 setup(
     name='t7-bridge',
     version='1.0.0',
-    description='MetTel\'s automation t7 bridge',
+    description='MetTel\'s automation bridge for t7 bridge',
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,
     setup_requires=[
