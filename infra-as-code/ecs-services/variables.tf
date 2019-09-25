@@ -56,6 +56,13 @@ variable "BRUIN_BASE_URL" {
   default = ""
 }
 
+variable "T7_BASE_URL"{
+  default = ""
+}
+
+variable "T7_TOKEN"{
+  default = ""
+}
 variable "cdir_base" {
   default = "10.1.0.0"
 }

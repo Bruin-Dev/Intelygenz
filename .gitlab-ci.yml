@@ -440,6 +440,8 @@ deploy-branches:
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
+    - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
     - apk --upgrade --no-cache add curl
@@ -520,6 +522,8 @@ deploy-master:
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_PRO}
+    - export TF_VAR_T7_TOKEN=${T7_TOKEN_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=production
     - apk add gettext
     - apk --upgrade --no-cache add curl

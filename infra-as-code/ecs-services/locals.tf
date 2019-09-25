@@ -12,6 +12,14 @@ locals {
   automation-bruin-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-bruin-bridge"
   automation-bruin-bridge-task_definition = "${aws_ecs_task_definition.automation-bruin-bridge.family}:${aws_ecs_task_definition.automation-bruin-bridge.revision}"
 
+  // t7-brige local vars
+  automation-t7-bridge-image = "${data.aws_ecr_repository.automation-t7-bridge.repository_url}:${var.BUILD_NUMBER}"
+  automation-t7-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge_service-security_group-name = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge-resource-name = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge-task_definition = "${aws_ecs_task_definition.automation-t7-bridge.family}:${aws_ecs_task_definition.automation-t7-bridge.revision}"
+
   // automation-edge-monitoring-report local vars
   automation-edge-monitoring-report-image = "${data.aws_ecr_repository.automation-edge-monitoring-report.repository_url}:${var.BUILD_NUMBER}"
   automation-edge-monitoring-report-ecs_task_definition-family = "${var.ENVIRONMENT}-edge-monitoring-report"
