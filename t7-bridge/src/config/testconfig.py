@@ -13,7 +13,11 @@ NATS_CONFIG = {
     },
     'publisher': {
         'max_pub_acks_inflight': 6000
-    }
+    },
+    'multiplier': 0.1,
+    'min': 0,
+    'stop_delay': 0.4,
+    'reconnects': 0
 }
 
 LOG_CONFIG = {
@@ -25,6 +29,7 @@ LOG_CONFIG = {
 
 
 T7CONFIG = {
+    'base_url': 'http//:test-url.com/',
     'client_name': 'test-name',
     'version': '1.0.0',
     'auth-token': 'test-token'

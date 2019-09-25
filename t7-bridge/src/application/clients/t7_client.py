@@ -24,12 +24,12 @@ class T7Client:
         def get_prediction(ticket_id):
             self._logger.info(f'Getting prediction for ticket id: {ticket_id}')
 
-            response = requests.get(f"http://api.mettel.t7.ai/api/v1/suggestions?ticketId={ticket_id}",
+            response = requests.get(f"{self._config.T7CONFIG['base_url']}api/v1/suggestions?ticketId={ticket_id}",
                                     headers=self._get_request_headers(),
                                     verify=False)
 
             if response.status_code in range(200, 299):
-                return response.json()
+                return response.json()['assets']
             else:
                 raise Exception
 
