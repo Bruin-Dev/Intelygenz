@@ -29,10 +29,10 @@ LOG_CONFIG = {
 }
 
 T7CONFIG = {
-    'base_url': os.environ['BASE_URL'],
+    'base_url': os.environ['T7_BASE_URL'],
     'client_name': 'mettel-automation',
     'version': '1.0.0',
-    'auth-token': os.environ['TOKEN']
+    'auth-token': os.environ['T7_TOKEN']
 }
 
 QUART_CONFIG = {
