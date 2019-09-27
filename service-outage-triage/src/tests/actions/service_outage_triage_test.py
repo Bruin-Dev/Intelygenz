@@ -1,11 +1,13 @@
-from collections import OrderedDict
-from unittest.mock import Mock
 import json
+from collections import OrderedDict
+from datetime import datetime, timedelta
+from unittest.mock import Mock
+
 import pytest
 from application.actions.service_outage_triage import ServiceOutageTriage
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
-from collections import OrderedDict
+from pytz import timezone
 
 from config import testconfig
 
@@ -279,6 +281,29 @@ class TestServiceOutageTriage:
         assert service_outage_triage._check_for_new_events.call_args[0][1] == tickets['tickets'][0]
 
     @pytest.mark.asyncio
+    async def filter_tickets_ko_triage_exists_timestamp_less_than_30_mins_test(self):
+        event_bus = Mock()
+        time_stamp = datetime.now(timezone('US/Eastern')) + timedelta(seconds=1)
+        tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
+        ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
+                                             "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
+                                                                           f'TimeStamp: {time_stamp} ',
+                                                              'createdDate': '2019-09-10 10:34:00-04:00'}]}}
+        event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        service_id = 123
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage._check_for_new_events = CoroutineMock()
+
+        filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+        assert event_bus.rpc_request.called
+        assert len(filtered_tickets) == 0
+        assert service_outage_triage._check_for_new_events.called is False
+
+    @pytest.mark.asyncio
     async def filter_tickets_ko_triage_exists_no_timestamp_test(self):
         event_bus = Mock()
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
@@ -359,8 +384,7 @@ class TestServiceOutageTriage:
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
-        service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
-        service_outage_triage._compose_event_note_object = Mock(return_value="Ticket Dict object")
+        service_outage_triage._compose_event_note_object = Mock(return_value=" Ticket Note Object \n")
 
         await service_outage_triage._check_for_new_events('2019-07-30 00:26:00-04:00', ticket)
 
@@ -368,7 +392,6 @@ class TestServiceOutageTriage:
         assert '2019-07-30 00:26:00-04:00' in event_bus.rpc_request.mock_calls[0][1][1]
         assert logger.info.called
         assert 'Ticket Note Object' in logger.info.call_args[0][0]
-        assert service_outage_triage._ticket_object_to_string.called
         assert service_outage_triage._compose_event_note_object.called
 
     @pytest.mark.asyncio
@@ -390,8 +413,7 @@ class TestServiceOutageTriage:
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
-        service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
-        service_outage_triage._compose_event_note_object = Mock(return_value="Ticket Dict object")
+        service_outage_triage._compose_event_note_object = Mock(return_value=" Ticket Note Object \n")
 
         await service_outage_triage._check_for_new_events('2019-07-30 00:26:00-04:00', ticket)
 
@@ -399,7 +421,6 @@ class TestServiceOutageTriage:
         assert '2019-07-30 00:26:00-04:00' in event_bus.rpc_request.mock_calls[0][1][1]
 
         assert logger.info.called is False
-        assert service_outage_triage._ticket_object_to_string.called is False
         assert service_outage_triage._compose_event_note_object.called is False
 
     @pytest.mark.asyncio
@@ -421,15 +442,13 @@ class TestServiceOutageTriage:
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
-        service_outage_triage._ticket_object_to_string = Mock(return_value="Ticket Note Object")
-        service_outage_triage._compose_event_note_object = Mock(return_value="Ticket Dict object")
+        service_outage_triage._compose_event_note_object = Mock(return_value=" Ticket Note Object \n")
 
         await service_outage_triage._check_for_new_events('2019-07-30 00:26:00-04:00', ticket)
 
         assert event_bus.rpc_request.called
         assert '2019-07-30 00:26:00-04:00' in event_bus.rpc_request.mock_calls[0][1][1]
         assert 'Ticket Note Object' in event_bus.rpc_request.mock_calls[1][1][1]
-        assert service_outage_triage._ticket_object_to_string.called
         assert service_outage_triage._compose_event_note_object.called
 
     @pytest.mark.asyncio
@@ -446,10 +465,9 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
 
-        event_dict = service_outage_triage._compose_event_note_object(events_to_report)
+        event_str = service_outage_triage._compose_event_note_object(events_to_report)
 
-        assert isinstance(event_dict, OrderedDict)
-        assert event_dict['Device'] == 'Edge'
+        assert 'Edge' in event_str
 
     @pytest.mark.asyncio
     async def compose_event_note_object_GE1_test(self):
@@ -465,10 +483,9 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
 
-        event_dict = service_outage_triage._compose_event_note_object(events_to_report)
+        event_str = service_outage_triage._compose_event_note_object(events_to_report)
 
-        assert isinstance(event_dict, OrderedDict)
-        assert event_dict['Device'] == 'Interface GE1'
+        assert 'Interface GE1' in event_str
 
     @pytest.mark.asyncio
     async def compose_event_note_object_GE2_test(self):
@@ -484,10 +501,9 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
 
-        event_dict = service_outage_triage._compose_event_note_object(events_to_report)
+        event_str = service_outage_triage._compose_event_note_object(events_to_report)
 
-        assert isinstance(event_dict, OrderedDict)
-        assert event_dict['Device'] == 'Interface GE2'
+        assert 'Interface GE2' in event_str
 
     def compose_ticket_note_object(self):
         event_bus = Mock()
@@ -535,7 +551,6 @@ class TestServiceOutageTriage:
 
         ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
 
-        assert isinstance(ticket_object, OrderedDict)
         assert ticket_object['Interface LABELMARK1'] == "GE1"
         assert ticket_object['Interface LABELMARK3'] == "GE2"
         assert ticket_object['Label LABELMARK2'] == "Test1"

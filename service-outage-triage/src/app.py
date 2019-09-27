@@ -30,7 +30,7 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
 
-        # await self._service_outage_triage.start_service_outage_triage_job(exec_on_start=True)
+        await self._service_outage_triage.start_service_outage_triage_job(exec_on_start=True)
 
         self._scheduler.start()
 
