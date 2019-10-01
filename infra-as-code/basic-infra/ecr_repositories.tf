@@ -10,10 +10,6 @@ resource "aws_ecr_repository" "automation-last-contact-report" {
   name = "automation-last-contact-report"
 }
 
-resource "aws_ecr_repository" "automation-edge-monitoring-report" {
-  name = "automation-edge-monitoring-report"
-}
-
 resource "aws_ecr_repository" "automation-service-affecting-monitor" {
   name = "automation-service-affecting-monitor"
 }

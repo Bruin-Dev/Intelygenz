@@ -116,11 +116,6 @@ velocloud-orchestrator-linter:
     MODULE: velocloud-orchestrator
   <<: *lint_module
 
-edge-monitoring-report-linter:
-  variables:
-    MODULE: edge-monitoring-report
-  <<: *lint_module
-
 last-contact-report-linter:
   variables:
     MODULE: last-contact-report
@@ -204,10 +199,6 @@ last-contact-report-test:
     MODULE: last-contact-report
   <<: *unittest_module
 
-edge-monitoring-report-test:
-  variables:
-    MODULE: edge-monitoring-report
-  <<: *unittest_module
 
 service-outage-triage-test:
   variables:
@@ -301,12 +292,7 @@ prometheus-build:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
 
-edge-monitoring-report-build:
-  stage: build
-  variables:
-    MODULE_NAME: edge-monitoring-report
-    MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+
 
 notifier-build:
   stage: build

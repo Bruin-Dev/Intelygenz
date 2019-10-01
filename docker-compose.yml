@@ -73,17 +73,6 @@ services:
     ports:
       - 5003:5000
 
-  edge-monitoring-report:
-    build:
-      # Context must be the root of the monorepo since we need to copy custompackages
-      context: .
-      dockerfile: edge-monitoring-report/Dockerfile
-    env_file:
-      - edge-monitoring-report/src/config/env
-    depends_on:
-      - "nats-streaming"
-    ports:
-      - 5004:5000
 
   service-outage-triage:
     build:
