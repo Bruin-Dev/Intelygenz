@@ -20,13 +20,7 @@ locals {
   automation-t7-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-t7-bridge"
   automation-t7-bridge-task_definition = "${aws_ecs_task_definition.automation-t7-bridge.family}:${aws_ecs_task_definition.automation-t7-bridge.revision}"
 
-  // automation-edge-monitoring-report local vars
-  automation-edge-monitoring-report-image = "${data.aws_ecr_repository.automation-edge-monitoring-report.repository_url}:${var.BUILD_NUMBER}"
-  automation-edge-monitoring-report-ecs_task_definition-family = "${var.ENVIRONMENT}-edge-monitoring-report"
-  automation-edge-monitoring-report-service-security_group-name = "${var.ENVIRONMENT}-edge-monitoring-report"
-  automation-edge-monitoring-report_service-resource-name = "${var.ENVIRONMENT}-edge-monitoring-report"
-  automation-edge-monitoring-report-service-security_group-tag-Name = "${var.ENVIRONMENT}-edge-monitoring-report"
-  automation-edge-monitoring-report-task_definition = "${aws_ecs_task_definition.automation-edge-monitoring-report.family}:${aws_ecs_task_definition.automation-edge-monitoring-report.revision}"
+
 
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
