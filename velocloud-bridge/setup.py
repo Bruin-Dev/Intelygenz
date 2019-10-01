@@ -9,7 +9,7 @@ setup(
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,
     setup_requires=[
-        'pytest-runner',
+        'pytest-runner == 5.1',
     ],
     test_suite='test.unittest'
 )

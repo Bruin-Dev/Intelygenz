@@ -172,7 +172,7 @@ igzpackages-test:
   before_script:
     - apt-get update -q -y
     - cd ${MODULE}
-    - pip install . 
+    - python setup.py install
   script:
     - pytest --cov
 
@@ -184,7 +184,7 @@ velocloud-test:
   before_script:
     - apt-get update -q -y
     - cd custompackages/velocloud/
-    - pip install . 
+    - python setup.py install
     - cd ${MODULE}
   script:
     - pytest --cov
