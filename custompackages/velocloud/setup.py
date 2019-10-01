@@ -27,9 +27,9 @@ REQUIRES = ["urllib3 >= 1.15",
             "six >= 1.10",
             "certifi",
             "python-dateutil",
-            "pytest==4.2.1",
-            "pytest-cov==2.6.1",
-            "coverage == 4.5.2"
+            "pytest==5.2.0",
+            "pytest-cov==2.7.1",
+            "coverage == 4.5.4",
             ]
 
 setup(
