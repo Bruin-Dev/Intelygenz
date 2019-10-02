@@ -21,7 +21,7 @@ task_major_number () {
 
 wait_task_healthy () {
     i=1
-    while [[ $i -le 10 ]]
+    while [[ ${i} -le 10 ]]
     do
         sleep 30
         if [[ ${i} -eq 1 ]]; then
