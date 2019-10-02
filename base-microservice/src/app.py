@@ -57,11 +57,11 @@ class Container:
         self._service_id2 = uuid()
         self._service_id3 = uuid()
         self.redis_connection = redis.Redis(host="redis", port=6379, decode_responses=True)
-        self.client1 = NatsStreamingClient(config, "base-microservice-client", logger=logger)
-        self.client2 = NatsStreamingClient(config, "base-microservice-client2", logger=logger)
-        self.client3 = NatsStreamingClient(config, "base-microservice-client3", logger=logger)
-        self.client4 = NatsStreamingClient(config, "base-microservice-client4", logger=logger)
-        self.client5 = NatsStreamingClient(config, "base-microservice-client4", logger=logger)
+        self.client1 = NatsStreamingClient(config, logger=logger)
+        self.client2 = NatsStreamingClient(config, logger=logger)
+        self.client3 = NatsStreamingClient(config, logger=logger)
+        self.client4 = NatsStreamingClient(config, logger=logger)
+        self.client5 = NatsStreamingClient(config, logger=logger)
 
         base_durable_action = DurableAction()
         base_from_first_action = FromFirstAction()
@@ -116,26 +116,19 @@ class Container:
         logger.info('starting metrics loop')
 
         await self.event_bus.subscribe_consumer(consumer_name="consumer4", topic=f'topic1.{self._service_id1}',
-                                                action_wrapper=self.from_first_action,
-                                                start_at='first')
+                                                action_wrapper=self.from_first_action)
 
         await self.event_bus.subscribe_consumer(consumer_name="consumer3", topic=f'topic1.{self._service_id2}',
                                                 action_wrapper=self.durable_action,
-                                                durable_name="name",
-                                                queue="queue",
-                                                start_at='first')
+                                                queue="queue")
 
         await self.event_bus.subscribe_consumer(consumer_name="consumer2", topic=f'topic1.{self._service_id3}',
                                                 action_wrapper=self.durable_action,
-                                                durable_name="name",
-                                                queue="queue",
-                                                start_at='first')
+                                                queue="queue")
 
         await self.event_bus.subscribe_consumer(consumer_name="consumer5", topic=f'rpc.request',
                                                 action_wrapper=self.rpc_action,
-                                                durable_name="name",
-                                                queue="queue",
-                                                start_at='first')
+                                                queue="queue")
 
         await self.start_publish_job(exec_on_start=True)
         self._my_scheduler.start()

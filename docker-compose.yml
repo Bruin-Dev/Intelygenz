@@ -1,27 +1,28 @@
 version: '3.1'
 services:
-  nats-streaming:
-    restart: on-failure
-    build:
-      context: .
-      dockerfile: nats-streaming-server/Dockerfile
+  nats-server:
+    image: 'nats:2.0.4'
+    expose:
+      - "4222"
+      - "6222"
     ports:
-      - 4222:4222
-      - 8222:8222
+      - "8222:8222"
+      - "6222:6222"
+    hostname: nats-server
 
   # EXAMPLE OF BASE-MICROSERVICE
   # ============================
-  #  base-microservice:
-  #    build:
-  #      # Context must be the root of the monorepo since we need to copy custompackages
-  #      context: .
-  #      dockerfile: base-microservice/Dockerfile
-  #    env_file:
-  #      - base-microservice/src/config/env
-  #    depends_on:
-  #      - "nats-streaming"
-  #    ports:
-  #      - 9100:9100
+  base-microservice:
+    build:
+      # Context must be the root of the monorepo since we need to copy custompackages
+      context: .
+      dockerfile: base-microservice/Dockerfile
+    env_file:
+      - base-microservice/src/config/env
+    depends_on:
+      - "nats-server"
+    ports:
+      - 9100:9100
   # ============================
   velocloud-orchestrator:
     build:
@@ -31,7 +32,7 @@ services:
     env_file:
       - velocloud-orchestrator/src/config/env
     depends_on:
-      - "nats-streaming"
+      - "nats-server"
     ports:
       - 5000:5000
       - 9110:9090
@@ -44,7 +45,7 @@ services:
     env_file:
       - velocloud-bridge/src/config/env
     depends_on:
-      - "nats-streaming"
+      - "nats-server"
     ports:
       - 5001:5000
       - 9120:9090
@@ -57,7 +58,7 @@ services:
     env_file:
       - notifier/src/config/env
     depends_on:
-      - "nats-streaming"
+      - "nats-server"
     ports:
       - 5002:5000
 
@@ -69,7 +70,7 @@ services:
     env_file:
       - last-contact-report/src/config/env
     depends_on:
-      - "nats-streaming"
+      - "nats-server"
     ports:
       - 5003:5000
 
@@ -82,7 +83,7 @@ services:
     env_file:
       - service-outage-triage/src/config/env
     depends_on:
-      - "nats-streaming"
+      - "nats-server"
     ports:
       - 5005:5000
 
@@ -94,7 +95,7 @@ services:
     env_file:
       - bruin-bridge/src/config/env
     depends_on:
-      - "nats-streaming"
+      - "nats-server"
     ports:
       - 5006:5000
 
@@ -106,7 +107,7 @@ services:
     env_file:
       - service-outage-monitor/src/config/env
     depends_on:
-      - "nats-streaming"
+      - "nats-server"
     ports:
       - 5007:5000
 
@@ -118,7 +119,7 @@ services:
     env_file:
       - service-affecting-monitor/src/config/env
     depends_on:
-      - "nats-streaming"
+      - "nats-server"
     ports:
       - 5008:5000
 
@@ -130,7 +131,7 @@ services:
     env_file:
       - t7-bridge/src/config/env
     depends_on:
-      - "nats-streaming"
+      - "nats-server"
     ports:
       - 5009:5000
 
