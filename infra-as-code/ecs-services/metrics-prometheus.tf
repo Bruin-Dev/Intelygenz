@@ -61,7 +61,7 @@ resource "aws_security_group" "automation-metrics-prometheus_service" {
 }
 
 resource "aws_service_discovery_service" "metrics-prometheus" {
-  name = local.automation-metrics-prometheus-service_discovery_service-name
+  name = "prometheus"
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id

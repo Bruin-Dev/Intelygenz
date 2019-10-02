@@ -76,7 +76,7 @@ resource "aws_security_group" "automation-t7-bridge_service" {
   }
 }
 resource "aws_service_discovery_service" "t7-bridge" {
-  name = local.automation-t7-bridge-service_discovery_service-name
+  name = "t7-bridge"
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id

@@ -77,7 +77,7 @@ resource "aws_security_group" "automation-service-affecting-monitor_service" {
 }
 
 resource "aws_service_discovery_service" "service-affecting-monitor" {
-  name = local.automation-service-affecting-service_discovery_service-name
+  name = "service-affecting-monitor"
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id

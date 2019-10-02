@@ -11,7 +11,6 @@ locals {
   automation-bruin-bridge-resource-name = "${var.ENVIRONMENT}-bruin-bridge"
   automation-bruin-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-bruin-bridge"
   automation-bruin-bridge-task_definition = "${aws_ecs_task_definition.automation-bruin-bridge.family}:${aws_ecs_task_definition.automation-bruin-bridge.revision}"
-  automation-bruin-bridge-service_discovery_service-name = "${var.ENVIRONMENT}-bruin-bridge"
 
   // t7-brige local vars
   automation-t7-bridge-image = "${data.aws_ecr_repository.automation-t7-bridge.repository_url}:${var.BUILD_NUMBER}"
@@ -20,7 +19,6 @@ locals {
   automation-t7-bridge-resource-name = "${var.ENVIRONMENT}-t7-bridge"
   automation-t7-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-t7-bridge"
   automation-t7-bridge-task_definition = "${aws_ecs_task_definition.automation-t7-bridge.family}:${aws_ecs_task_definition.automation-t7-bridge.revision}"
-  automation-t7-bridge-service_discovery_service-name = "${var.ENVIRONMENT}-t7-bridge"
 
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
@@ -29,7 +27,6 @@ locals {
   automation-last-contact-report-service-security_group-tag-Name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-resource-name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-task_definition = "${aws_ecs_task_definition.automation-last-contact-report.family}:${aws_ecs_task_definition.automation-last-contact-report.revision}"
-  automation-last-contact-report-service_discovery_service-name = "${var.ENVIRONMENT}-last-contact-report"
 
   // automation-metrics-grafana local vars
   automation-metrics-grafana-image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.BUILD_NUMBER}"
@@ -47,7 +44,6 @@ locals {
   automation-metrics-prometheus-service-security_group-tag-Name = "${var.ENVIRONMENT}-metrics-prometheus"
   automation-metrics-prometheus-ecs_service-name = "${var.ENVIRONMENT}-metrics-prometheus"
   automation-metrics-prometheus-ecs_service-task_definition = "${aws_ecs_task_definition.automation-metrics-prometheus.family}:${aws_ecs_task_definition.automation-metrics-prometheus.revision}"
-  automation-metrics-prometheus-service_discovery_service-name = "${var.ENVIRONMENT}-metrics-prometheus"
 
   // automation-notifier local vars
   automation-notifier-image = "${data.aws_ecr_repository.automation-notifier.repository_url}:${var.BUILD_NUMBER}"
@@ -64,8 +60,6 @@ locals {
   automation-service-affecting-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-affecting-monitor"
   automation-service-affecting-monitor-ecs_service-name = "${var.ENVIRONMENT}-service-affecting-monitor"
   automation-service-affecting-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-affecting-monitor.family}:${aws_ecs_task_definition.automation-service-affecting-monitor.revision}"
-  automation-service-affecting-service_discovery_service-name = "${var.ENVIRONMENT}-service-affecting-monitor"
-
   // automation-service-outage-monitor local vars
   automation-service-outage-monitor-image = "${data.aws_ecr_repository.automation-service-outage-monitor.repository_url}:${var.BUILD_NUMBER}"
   automation-service-outage-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor"
@@ -73,7 +67,6 @@ locals {
   automation-service-outage-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-monitor"
   automation-service-outage-monitor-ecs_service-name = "${var.ENVIRONMENT}-service-outage-monitor"
   automation-service-outage-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-monitor.family}:${aws_ecs_task_definition.automation-service-outage-monitor.revision}"
-  automation-service-outage-monitor-service_discovery_service-name = "${var.ENVIRONMENT}-service-outage-monitor"
 
   // automation-service-outage-triage local vars
   automation-service-outage-triage-image = "${data.aws_ecr_repository.automation-service-outage-triage.repository_url}:${var.BUILD_NUMBER}"
@@ -83,7 +76,6 @@ locals {
   automation-service-outage-triage-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-triage"
   automation-service-outage-triage-ecs_service-name = "${var.ENVIRONMENT}-service-outage-triage"
   automation-service-outage-triage-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-triage.family}:${aws_ecs_task_definition.automation-service-outage-triage.revision}"
-  automation-service-outage-triage-service_discovery_service-name = "${var.ENVIRONMENT}-service-outage-triage"
 
   // automation-velocloud-bridge local vars
   automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.BUILD_NUMBER}"
@@ -92,7 +84,6 @@ locals {
   automation-velocloud-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-velocloud-bridge"
   automation-velocloud-bridge-ecs_service-name = "${var.ENVIRONMENT}-velocloud-bridge"
   automation-velocloud-bridge-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
-  automation-velocloud-bridge-service_discovery_service-name = "${var.ENVIRONMENT}-velocloud-bridge"
 
   // automation-velocloud-orchestrator local vars
   automation-velocloud-orchestrator-image = "${data.aws_ecr_repository.automation-velocloud-orchestrator.repository_url}:${var.BUILD_NUMBER}"
@@ -102,6 +93,5 @@ locals {
   automation-velocloud-orchestrator-service-security_group-tag-Name = "${var.ENVIRONMENT}-velocloud-orchestrator"
   automation-velocloud-orchestrator-ecs_service-name = "${var.ENVIRONMENT}-velocloud-orchestrator"
   automation-velocloud-orchestrator-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-orchestrator.family}:${aws_ecs_task_definition.automation-velocloud-orchestrator.revision}"
-  automation-velocloud-orchestrator-service_discovery_service-name = "${var.ENVIRONMENT}-velocloud-orchestrator"
 
 }

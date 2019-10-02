@@ -17,7 +17,6 @@ locals {
   automation-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-ecs_service-name = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server.family}:${aws_ecs_task_definition.automation-nats-server.revision}"
-  automation-nats-server-service_discovery_service-name = "${var.ENVIRONMENT}-nats-server"
 
   // automation-redis local vars
   automation-redis-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-redis"
