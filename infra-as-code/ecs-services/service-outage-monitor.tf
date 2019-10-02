@@ -77,7 +77,7 @@ resource "aws_security_group" "automation-service-outage-monitor_service" {
 }
 
 resource "aws_service_discovery_service" "service-outage-monitor" {
-  name = "service-outage-monitor"
+  name = local.automation-service-outage-monitor-service_discovery_service-name
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id

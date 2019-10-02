@@ -77,7 +77,7 @@ resource "aws_security_group" "automation-velocloud-orchestrator_service" {
 }
 
 resource "aws_service_discovery_service" "velocloud-orchestrator" {
-  name = "velocloud-orchestrator"
+  name = local.automation-velocloud-orchestrator-service_discovery_service-name
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
