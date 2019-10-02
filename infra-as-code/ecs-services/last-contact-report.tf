@@ -75,7 +75,7 @@ resource "aws_security_group" "automation-last-contact-report_service" {
 }
 
 resource "aws_service_discovery_service" "last-contact-report" {
-  name = "last-contact-report"
+  name = "last-contact-report-${var.ENVIRONMENT}"
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id

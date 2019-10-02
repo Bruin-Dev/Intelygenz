@@ -77,7 +77,7 @@ resource "aws_security_group" "automation-bruin-bridge_service" {
   }
 }
 resource "aws_service_discovery_service" "bruin-bridge" {
-  name = "bruin-bridge"
+  name = "bruin-bridge-${var.ENVIRONMENT}"
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
