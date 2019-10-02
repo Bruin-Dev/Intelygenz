@@ -37,6 +37,7 @@ locals {
   automation-metrics-grafana-service-security_group-tag-Name = "${var.ENVIRONMENT}-metrics-grafana"
   automation-metrics-grafana-ecs_service-name = "${var.ENVIRONMENT}-metrics-grafana"
   automation-metrics-grafana-ecs_task_definition = "${aws_ecs_task_definition.automation-metrics-grafana.family}:${aws_ecs_task_definition.automation-metrics-grafana.revision}"
+  automation-metrics-grafana-target_group-name = "${var.ENVIRONMENT}-mts-grafana"
 
   // automation-metrics-prometheus local vars
   automation-metrics-prometheus-image = "${data.aws_ecr_repository.automation-metrics-prometheus.repository_url}:${var.BUILD_NUMBER}"

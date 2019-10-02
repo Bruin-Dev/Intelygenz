@@ -21,7 +21,7 @@ data "template_file" "automation-bruin-bridge" {
 }
 
 resource "aws_ecs_task_definition" "automation-bruin-bridge" {
-  family = "${var.ENVIRONMENT}-bruin-bridge"
+  family = local.automation-bruin-bridge-ecs_task_definition-family
   container_definitions = data.template_file.automation-bruin-bridge.rendered
   requires_compatibilities = [
     "FARGATE"]
@@ -106,7 +106,8 @@ resource "aws_ecs_service" "automation-bruin-bridge" {
     security_groups = [
       aws_security_group.automation-bruin-bridge_service.id]
     subnets = [
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a]
+      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a,
+      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1b]
     assign_public_ip = false
   }
 

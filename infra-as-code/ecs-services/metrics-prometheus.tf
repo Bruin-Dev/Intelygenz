@@ -96,6 +96,6 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
   }
 
   service_registries {
-    registry_arn = "${aws_service_discovery_service.metrics-prometheus.arn}"
+    registry_arn = aws_service_discovery_service.metrics-prometheus.arn
   }
 }
