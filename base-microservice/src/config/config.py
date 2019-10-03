@@ -15,10 +15,10 @@ NATS_CONFIG = {
     'publisher': {
         'max_pub_acks_inflight': 1
     },
-    'multiplier': 5,
-    'min': 5,
-    'stop_delay': 300,
-    'reconnects': 150
+    'multiplier': 1,
+    'min': 1,
+    'stop_delay': 1,
+    'reconnects': 1
 }
 
 LOG_CONFIG = {
