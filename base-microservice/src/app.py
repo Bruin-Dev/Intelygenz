@@ -83,9 +83,12 @@ class Container:
 
     async def _publish_msgs(self):
         logger.info(f'Publishing messages')
-        await self.event_bus.publish_message(f'topic1.{self._service_id1}', "Message 1")
-        await self.event_bus.publish_message(f'topic1.{self._service_id2}', "Message 2")
-        await self.event_bus.publish_message(f'topic1.{self._service_id3}', "Message 3")
+        msg = {
+            "data": "Some message"
+        }
+        await self.event_bus.publish_message(f'topic1.{self._service_id1}', json.dumps(msg))
+        await self.event_bus.publish_message(f'topic1.{self._service_id2}', json.dumps(msg))
+        await self.event_bus.publish_message(f'topic1.{self._service_id3}', json.dumps(msg))
 
     async def start_publish_job(self, exec_on_start=False):
         logger.info(f'Starting publish job')
@@ -126,9 +129,9 @@ class Container:
                                                 action_wrapper=self.durable_action,
                                                 queue="queue")
 
-        await self.event_bus.subscribe_consumer(consumer_name="consumer5", topic=f'rpc.request',
-                                                action_wrapper=self.rpc_action,
-                                                queue="queue")
+        # await self.event_bus.subscribe_consumer(consumer_name="consumer5", topic=f'rpc.request',
+        #                                         action_wrapper=self.rpc_action,
+        #                                         queue="queue")
 
         await self.start_publish_job(exec_on_start=True)
         self._my_scheduler.start()
@@ -137,7 +140,7 @@ class Container:
         redis_data = self.redis_connection.hgetall("foo")
         logger.info(f'Data retrieved from Redis: {redis_data["key"]}')
 
-        await self._make_rpc_request()
+        # await self._make_rpc_request()
 
     async def run(self):
         await self.start()

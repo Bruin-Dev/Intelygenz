@@ -7,7 +7,6 @@ import sys
 
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
-    'cluster_name': os.environ["NATS_CLUSTER_NAME"],
     'subscriber': {
         'max_inflight': 1,
         'pending_limits': 1
@@ -15,10 +14,11 @@ NATS_CONFIG = {
     'publisher': {
         'max_pub_acks_inflight': 1
     },
-    'multiplier': 1,
-    'min': 1,
-    'stop_delay': 1,
-    'reconnects': 1
+    'multiplier': 5,
+    'min': 5,
+    'stop_delay': 300,
+    'reconnects': 150
+
 }
 
 LOG_CONFIG = {

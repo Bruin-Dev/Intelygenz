@@ -1,3 +1,4 @@
+import json
 import logging
 import sys
 
@@ -13,6 +14,7 @@ class NatsStreamingClient:
     def __init__(self, config, logger=None):
         self._config = config.NATS_CONFIG
         self._topic_action = dict()
+        self._subs = list()
         if logger is None:
             logger = logging.getLogger('nats')
             logger.setLevel(logging.DEBUG)
@@ -60,34 +62,33 @@ class NatsStreamingClient:
         return await rpc_request(topic, message, timeout)
 
     async def _cb_with_ack_and_action(self, msg):
-        self._logger.info(f'Message received from topic {msg.sub.subject} with sequence {msg.sequence}')
-        event = msg.data
+        self._logger.info(f'Message received from topic {msg.subject}')
+        event = json.loads(msg.data)
         event["response_topic"] = msg.reply
-        if self._topic_action[msg.sub.subject] is None or type(
-                self._topic_action[msg.sub.subject]) is not ActionWrapper:
-            self._logger.error(f'No ActionWrapper defined for topic {msg.sub.subject}. Message not marked with ACK')
+        if self._topic_action[msg.subject] is None or type(
+                self._topic_action[msg.subject]) is not ActionWrapper:
+            self._logger.error(f'No ActionWrapper defined for topic {msg.subject}. Message not marked with ACK')
             return
         try:
-            if self._topic_action[msg.sub.subject].is_async:
-                await self._topic_action[msg.sub.subject].execute_stateful_action(event)
+            if self._topic_action[msg.subject].is_async:
+                await self._topic_action[msg.subject].execute_stateful_action(event)
             else:
-                self._topic_action[msg.sub.subject].execute_stateful_action(event)
-            await self._nc.ack(msg)
+                self._topic_action[msg.subject].execute_stateful_action(event)
         except Exception:
             self._logger.exception(f"NATS Client Exception in client happened")
-            self._logger.exception(f"Error executing {self._topic_action[msg.sub.subject].execute_stateful_action} "f"")
+            self._logger.exception(f"Error executing {self._topic_action[msg.subject].execute_stateful_action} "f"")
             self._logger.exception("Won't ACK message")
 
-    async def subscribe_action(self, topic, action: ActionWrapper, queue=None):
+    async def subscribe_action(self, topic, action: ActionWrapper, queue=""):
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
-        async def subscribe_action(topic, action: ActionWrapper, queue=None):
+        async def subscribe_action(topic, action: ActionWrapper, queue=""):
             self._topic_action[topic] = action
             if self._nc.is_connected:
                 sub = await self._nc.subscribe(topic,
                                                queue=queue,
+                                               is_async=True,
                                                cb=self._cb_with_ack_and_action,
-                                               manual_acks=True,
                                                pending_msgs_limit=self._config["subscriber"][
                                                    "pending_limits"])
 
@@ -96,8 +97,8 @@ class NatsStreamingClient:
                 await self.connect_to_nats()
                 sub = await self._nc.subscribe(topic,
                                                queue=queue,
+                                               is_async=True,
                                                cb=self._cb_with_ack_and_action,
-                                               manual_acks=True,
                                                pending_msgs_limit=self._config["subscriber"][
                                                    "pending_limits"])
             self._subs.append(sub)
