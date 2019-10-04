@@ -66,7 +66,7 @@ resource "aws_security_group" "automation-t7-bridge_service" {
     to_port = 9090
     protocol = "TCP"
     cidr_blocks = [
-      "${var.cdir_base}/16"
+      var.cdir_base
     ]
   }
 
