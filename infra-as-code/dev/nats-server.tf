@@ -59,7 +59,7 @@ resource "aws_security_group" "automation-nats_service" {
     to_port = 4222
     protocol = "TCP"
     cidr_blocks = [
-      "${var.cdir_base}/16"
+      var.cdir_base
     ]
   }
 

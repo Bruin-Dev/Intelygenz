@@ -15,3 +15,7 @@ variable "BUILD_NUMBER" {
 variable "NATS_MODULE_VERSION" {
   default = "latest"
 }
+
+variable "cdir_base" {
+  default = "10.1.0.0/16"
+}
