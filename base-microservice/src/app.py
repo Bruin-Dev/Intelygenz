@@ -103,11 +103,10 @@ class Container:
     async def _make_rpc_request(self):
         rpc_request_msg = {
             "request_id": uuid(),
-            "response_topic": f'rpc.response.{self._service_id1}',
             "some_field_1": "Sending data related to request here",
             "some_field_2": "Sending data related to request here"
         }
-        response = await self.event_bus.rpc_request("rpc.request", json.dumps(rpc_request_msg), timeout=10)
+        response = await self.event_bus.rpc_request("rpc.request", json.dumps(rpc_request_msg), timeout=1)
         print(f'Got RPC response with value: {json.dumps(response, indent=2)}')
 
     async def start(self):
@@ -129,9 +128,9 @@ class Container:
                                                 action_wrapper=self.durable_action,
                                                 queue="queue")
 
-        # await self.event_bus.subscribe_consumer(consumer_name="consumer5", topic=f'rpc.request',
-        #                                         action_wrapper=self.rpc_action,
-        #                                         queue="queue")
+        await self.event_bus.subscribe_consumer(consumer_name="consumer5", topic=f'rpc.request',
+                                                action_wrapper=self.rpc_action,
+                                                queue="queue")
 
         await self.start_publish_job(exec_on_start=True)
         self._my_scheduler.start()
@@ -140,7 +139,7 @@ class Container:
         redis_data = self.redis_connection.hgetall("foo")
         logger.info(f'Data retrieved from Redis: {redis_data["key"]}')
 
-        # await self._make_rpc_request()
+        await self._make_rpc_request()
 
     async def run(self):
         await self.start()

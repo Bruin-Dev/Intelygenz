@@ -51,13 +51,14 @@ class NatsStreamingClient:
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
         async def rpc_request(topic, message, timeout):
-
             if self._nc.is_connected:
-                return await self._nc.timed_request(topic, message.encode(), timeout)
+                rpc_request = await self._nc.timed_request(topic, message.encode(), timeout)
+                return json.loads(rpc_request.data)
             else:
                 await self.close_nats_connections()
                 await self.connect_to_nats()
-                return await self._nc.timed_request(topic, message.encode(), timeout)
+                rpc_request = await self._nc.timed_request(topic, message.encode(), timeout)
+                return json.loads(rpc_request.data)
 
         return await rpc_request(topic, message, timeout)
 
@@ -71,9 +72,9 @@ class NatsStreamingClient:
             return
         try:
             if self._topic_action[msg.subject].is_async:
-                await self._topic_action[msg.subject].execute_stateful_action(event)
+                await self._topic_action[msg.subject].execute_stateful_action(json.dumps(event))
             else:
-                self._topic_action[msg.subject].execute_stateful_action(event)
+                self._topic_action[msg.subject].execute_stateful_action(json.dumps(event))
         except Exception:
             self._logger.exception(f"NATS Client Exception in client happened")
             self._logger.exception(f"Error executing {self._topic_action[msg.subject].execute_stateful_action} "f"")
