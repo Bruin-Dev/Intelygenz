@@ -92,7 +92,7 @@ resource "aws_lb" "automation-alb" {
   load_balancer_type = "application"
   subnets = [
     data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
-    data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id]
+    data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
   security_groups = [
     aws_security_group.automation-dev-inbound.id]
 
