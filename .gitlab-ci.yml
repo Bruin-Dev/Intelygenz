@@ -579,6 +579,15 @@ destroy-master:
   only:
     - master
 
+destroy-network-resources:
+  stage: deploy
+  <<: *terraform_template
+  script:
+    - terraform init infra-as-code/network-resources
+    - terraform refresh infra-as-code/network-resources
+    - terraform destroy -auto-approve infra-as-code/network-resources
+  when: manual
+
 grafana_user_creation_branches:
   stage: grafana_user_creation
   <<: *grafana_user_creation_template
