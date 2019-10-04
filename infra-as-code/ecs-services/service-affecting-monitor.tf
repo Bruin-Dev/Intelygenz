@@ -106,7 +106,7 @@ resource "aws_ecs_service" "automation-service-affecting-monitor" {
     security_groups = [
       aws_security_group.automation-service-affecting-monitor_service.id]
     subnets = [
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a,
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b]
     assign_public_ip = false
   }

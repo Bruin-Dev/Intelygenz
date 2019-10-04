@@ -105,8 +105,8 @@ resource "aws_ecs_service" "automation-t7-bridge" {
     security_groups = [
       aws_security_group.automation-t7-bridge_service.id]
     subnets = [
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a,
-      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b]
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
     assign_public_ip = false
   }
 

@@ -3,9 +3,9 @@ output "vpc_automation_id" {
 }
 
 output "subnet_automation-private-1a" {
-  value = aws_subnet.automation-private_subnet-1a.id
+  value = aws_subnet.automation-private_subnet-1a
 }
 
 output "subnet_automation-private-1b" {
-  value = aws_subnet.automation-private_subnet-1b.id
+  value = aws_subnet.automation-private_subnet-1b
 }

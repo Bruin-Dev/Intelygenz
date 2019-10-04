@@ -368,7 +368,7 @@ terraform-validate-basic-infra:
     - terraform init infra-as-code/basic-infra
     - terraform validate infra-as-code/basic-infra
 
-terraform-validate-network-resourcs:
+terraform-validate-network-resources:
   stage: validation
   <<: *terraform_template
   script:
