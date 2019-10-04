@@ -405,6 +405,13 @@ terraform-validate-dev:
     - terraform init infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
 
+basic-infra:
+  stage: basic_infra
+  <<: *terraform_template
+  script:
+    - terraform init infra-as-code/basic-infra
+    - terraform apply -auto-approve infra-as-code/basic-infra
+
 network-resources-infra:
   stage: basic_infra
   <<: *terraform_template
