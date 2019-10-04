@@ -57,19 +57,12 @@ class Container:
         self._service_id2 = uuid()
         self._service_id3 = uuid()
         self.redis_connection = redis.Redis(host="redis", port=6379, decode_responses=True)
-<<<<<<< HEAD
+        
         self.client1 = NATSClient(config, logger=logger)
         self.client2 = NATSClient(config, logger=logger)
         self.client3 = NATSClient(config, logger=logger)
         self.client4 = NATSClient(config, logger=logger)
         self.client5 = NATSClient(config, logger=logger)
-=======
-        self.client1 = NatsStreamingClient(config, logger=logger)
-        self.client2 = NatsStreamingClient(config, logger=logger)
-        self.client3 = NatsStreamingClient(config, logger=logger)
-        self.client4 = NatsStreamingClient(config, logger=logger)
-        self.client5 = NatsStreamingClient(config, logger=logger)
->>>>>>> Refactor NATS Streaming client to NATSClient. Modify event bus to fulfill new function signature
 
         base_durable_action = DurableAction()
         base_from_first_action = FromFirstAction()
