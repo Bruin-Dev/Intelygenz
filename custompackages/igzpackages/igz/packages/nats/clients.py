@@ -8,8 +8,7 @@ from tenacity import retry, wait_exponential, stop_after_delay
 from igz.packages.eventbus.action import ActionWrapper
 
 
-# TODO Change name to NATSClient
-class NatsStreamingClient:
+class NATSClient:
 
     def __init__(self, config, logger=None):
         self._config = config.NATS_CONFIG

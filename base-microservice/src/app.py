@@ -13,7 +13,7 @@ from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.nats.clients import NatsStreamingClient
+from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 
 MESSAGES_PROCESSED = Summary('nats_processed_messages', 'Messages processed from NATS')
@@ -57,11 +57,11 @@ class Container:
         self._service_id2 = uuid()
         self._service_id3 = uuid()
         self.redis_connection = redis.Redis(host="redis", port=6379, decode_responses=True)
-        self.client1 = NatsStreamingClient(config, logger=logger)
-        self.client2 = NatsStreamingClient(config, logger=logger)
-        self.client3 = NatsStreamingClient(config, logger=logger)
-        self.client4 = NatsStreamingClient(config, logger=logger)
-        self.client5 = NatsStreamingClient(config, logger=logger)
+        self.client1 = NATSClient(config, logger=logger)
+        self.client2 = NATSClient(config, logger=logger)
+        self.client3 = NATSClient(config, logger=logger)
+        self.client4 = NATSClient(config, logger=logger)
+        self.client5 = NATSClient(config, logger=logger)
 
         base_durable_action = DurableAction()
         base_from_first_action = FromFirstAction()

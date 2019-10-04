@@ -1,4 +1,4 @@
-from igz.packages.nats.clients import NatsStreamingClient
+from igz.packages.nats.clients import NATSClient
 from igz.packages.eventbus.action import ActionWrapper
 import logging
 import sys
@@ -23,13 +23,13 @@ class EventBus:
     async def rpc_request(self, topic, message, timeout=10):
         return await self._producer.rpc_request(topic, message, timeout)
 
-    def add_consumer(self, consumer: NatsStreamingClient, consumer_name: str):
+    def add_consumer(self, consumer: NATSClient, consumer_name: str):
         if self._consumers.get(consumer_name) is not None:
             self._logger.error(f'Consumer name {consumer_name} already registered. Skipping...')
             return
         self._consumers[consumer_name] = consumer
 
-    def set_producer(self, producer: NatsStreamingClient):
+    def set_producer(self, producer: NATSClient):
         self._producer = producer
 
     async def connect(self):
