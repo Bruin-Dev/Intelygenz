@@ -99,8 +99,8 @@ resource "aws_ecs_service" "automation-nats-server" {
     security_groups = [
       aws_security_group.automation-nats_service.id]
     subnets = [
-      aws_subnet.automation-private_subnet-1a.id,
-      aws_subnet.automation-private_subnet-1b.id]
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
     assign_public_ip = false
   }
 

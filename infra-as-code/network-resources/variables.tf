@@ -1,3 +1,7 @@
+variable "cdir_base" {
+  default = "10.1.0.0/16"
+}
+
 //TODO: Restore to 10.1.1.0/24 before deploy in master
 variable "cdir_public_1" {
   default = "10.1.8.0/24"
