@@ -3,13 +3,12 @@ The VPC
 ======*/
 
 resource "aws_vpc" "automation-vpc" {
-  cidr_block = "${var.cdir_base}/16"
+  cidr_block = var.cdir_base
   enable_dns_hostnames = true
   enable_dns_support = true
 
   tags = {
-    Name = var.ENVIRONMENT
-    Environment = var.ENVIRONMENT
+    Name = local.automation-vpc-tag-Name
   }
 }
 
@@ -21,8 +20,7 @@ resource "aws_internet_gateway" "automation-igw" {
   vpc_id = aws_vpc.automation-vpc.id
 
   tags = {
-    Name = var.ENVIRONMENT
-    Environment = var.ENVIRONMENT
+    Name = local.automation-internet_gateway-tag-Name
   }
 }
 
@@ -49,7 +47,6 @@ resource "aws_nat_gateway" "automation-nat-1a" {
 
   tags = {
     Name = local.automation-nat_gateway-1a-tag-Name
-    Environment = var.ENVIRONMENT
   }
 }
 
@@ -59,57 +56,52 @@ resource "aws_nat_gateway" "automation-nat-1b" {
 
   tags = {
     Name = local.automation-nat_gateway-1b-tag-Name
-    Environment = var.ENVIRONMENT
   }
 }
 
 /* Public subnet */
 resource "aws_subnet" "automation-public_subnet-1a" {
   vpc_id = aws_vpc.automation-vpc.id
-  cidr_block = "${var.cdir_public_1}/24"
+  cidr_block = var.cdir_public_1
   availability_zone = "us-east-1a"
   map_public_ip_on_launch = true
 
   tags = {
     Name = local.automation-public_subnet-1a-tag-Name
-    Environment = var.ENVIRONMENT
   }
 }
 
 resource "aws_subnet" "automation-public_subnet-1b" {
   vpc_id = aws_vpc.automation-vpc.id
-  cidr_block = "${var.cdir_public_2}/24"
+  cidr_block = var.cdir_public_2
   availability_zone = "us-east-1b"
   map_public_ip_on_launch = true
 
   tags = {
     Name = local.automation-public_subnet-1b-tag-Name
-    Environment = var.ENVIRONMENT
   }
 }
 
 /* Private subnet */
 resource "aws_subnet" "automation-private_subnet-1a" {
   vpc_id = aws_vpc.automation-vpc.id
-  cidr_block = local.automation-private_subnet-1a-subnet-cidr_block
+  cidr_block = var.cdir_private_1
   availability_zone = "us-east-1a"
   map_public_ip_on_launch = false
 
   tags = {
     Name = local.automation-private_subnet-1a-tag-Name
-    Environment = var.ENVIRONMENT
   }
 }
 
 resource "aws_subnet" "automation-private_subnet-1b" {
   vpc_id = aws_vpc.automation-vpc.id
-  cidr_block = "${var.cdir_private_2}/24"
+  cidr_block = var.cdir_private_2
   availability_zone = "us-east-1b"
   map_public_ip_on_launch = false
 
   tags ={
     Name = local.automation-private_subnet-1b-tag-Name
-    Environment = var.ENVIRONMENT
   }
 }
 
@@ -119,7 +111,6 @@ resource "aws_route_table" "automation-private" {
 
   tags = {
     Name = local.automation-private-route_table-tag-Name
-    Environment = var.ENVIRONMENT
   }
 }
 
@@ -129,7 +120,6 @@ resource "aws_route_table" "automation-public" {
 
   tags = {
     Name = local.automation-public-route_table-tag-Name
-    Environment = var.ENVIRONMENT
   }
 }
 

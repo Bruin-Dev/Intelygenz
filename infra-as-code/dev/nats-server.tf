@@ -25,7 +25,7 @@ resource "aws_ecs_task_definition" "automation-nats-server" {
 }
 
 resource "aws_security_group" "automation-nats_service" {
-  vpc_id = aws_vpc.automation-vpc.id
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
   name = local.automation-nats_service-security_group-name
   description = "Allow egress from container"
 

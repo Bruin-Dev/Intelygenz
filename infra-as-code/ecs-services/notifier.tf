@@ -32,7 +32,7 @@ resource "aws_ecs_task_definition" "automation-notifier" {
 }
 
 resource "aws_security_group" "automation-notifier_service" {
-  vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
   name = local.automation-notifier-service-security_group-name
   description = "Allow egress from container"
 
@@ -78,8 +78,8 @@ resource "aws_ecs_service" "automation-notifier" {
     security_groups = [
       aws_security_group.automation-notifier_service.id]
     subnets = [
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a,
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1b]
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a,
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b]
     assign_public_ip = false
   }
 }

@@ -33,7 +33,7 @@ resource "aws_ecs_task_definition" "automation-bruin-bridge" {
 }
 
 resource "aws_security_group" "automation-bruin-bridge_service" {
-  vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
   name = local.automation-bruin-bridge_service-security_group-name
   description = "Allow egress from container"
 
@@ -67,7 +67,7 @@ resource "aws_security_group" "automation-bruin-bridge_service" {
     to_port = 9090
     protocol = "TCP"
     cidr_blocks = [
-      "${var.cdir_base}/16"
+      var.cdir_base
     ]
   }
 
@@ -77,7 +77,7 @@ resource "aws_security_group" "automation-bruin-bridge_service" {
   }
 }
 resource "aws_service_discovery_service" "bruin-bridge" {
-  name = "bruin-bridge-${var.ENVIRONMENT}"
+  name = local.automation-bruin-bridge-service_discovery_service-name
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
@@ -106,8 +106,8 @@ resource "aws_ecs_service" "automation-bruin-bridge" {
     security_groups = [
       aws_security_group.automation-bruin-bridge_service.id]
     subnets = [
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a,
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1b]
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a,
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b]
     assign_public_ip = false
   }
 

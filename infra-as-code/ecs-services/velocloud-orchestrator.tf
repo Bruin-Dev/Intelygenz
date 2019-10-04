@@ -32,7 +32,7 @@ resource "aws_ecs_task_definition" "automation-velocloud-orchestrator" {
 }
 
 resource "aws_security_group" "automation-velocloud-orchestrator_service" {
-  vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
   name = local.automation-velocloud-orchestrator-service-security_group-name
   description = "Allow egress from container"
 
@@ -66,7 +66,7 @@ resource "aws_security_group" "automation-velocloud-orchestrator_service" {
     to_port = 9090
     protocol = "TCP"
     cidr_blocks = [
-      "${var.cdir_base}/16"
+      var.cdir_base
     ]
   }
 
@@ -77,7 +77,7 @@ resource "aws_security_group" "automation-velocloud-orchestrator_service" {
 }
 
 resource "aws_service_discovery_service" "velocloud-orchestrator" {
-  name = "velocloud-orchestrator-${var.ENVIRONMENT}"
+  name = local.automation-velocloud-orchestrator-service_discovery_service-name
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
@@ -106,8 +106,8 @@ resource "aws_ecs_service" "automation-velocloud-orchestrator" {
     security_groups = [
       aws_security_group.automation-velocloud-orchestrator_service.id]
     subnets = [
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a,
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1b]
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a,
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b]
     assign_public_ip = false
   }
 

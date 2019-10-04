@@ -32,7 +32,7 @@ resource "aws_ecs_task_definition" "automation-t7-bridge" {
 }
 
 resource "aws_security_group" "automation-t7-bridge_service" {
-  vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
   name = local.automation-t7-bridge_service-security_group-name
   description = "Allow egress from container"
 
@@ -76,7 +76,7 @@ resource "aws_security_group" "automation-t7-bridge_service" {
   }
 }
 resource "aws_service_discovery_service" "t7-bridge" {
-  name = "t7-bridge-${var.ENVIRONMENT}"
+  name = local.automation-t7-bridge-service_discovery_service-name
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
@@ -105,8 +105,8 @@ resource "aws_ecs_service" "automation-t7-bridge" {
     security_groups = [
       aws_security_group.automation-t7-bridge_service.id]
     subnets = [
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a,
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1b]
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a,
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b]
     assign_public_ip = false
   }
 

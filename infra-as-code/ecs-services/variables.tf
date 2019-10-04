@@ -64,7 +64,7 @@ variable "T7_TOKEN"{
   default = ""
 }
 variable "cdir_base" {
-  default = "10.1.0.0"
+  default = "10.1.0.0/16"
 }
 
 variable "CURRENT_ENVIRONMENT" {

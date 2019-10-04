@@ -22,19 +22,4 @@ locals {
   automation-redis-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-redis"
   automation-redis-security_group-name = "${var.ENVIRONMENT}-redis-sg"
   automation-redis-security_group-tag-Name = "${var.ENVIRONMENT}-redis"
-
-  // automation-vpc local vars
-  automation-nat_eip-1a-tag-Name = "${var.ENVIRONMENT}-nat-1a"
-  automation-nat_eip-1b-tag-Name = "${var.ENVIRONMENT}-nat-1b"
-  automation-nat_gateway-1a-tag-Name = "${var.ENVIRONMENT}-1a"
-  automation-nat_gateway-1b-tag-Name = "${var.ENVIRONMENT}-1b"
-  automation-public_subnet-1a-tag-Name = "${var.ENVIRONMENT}-public-subnet-1a"
-  automation-public_subnet-1b-tag-Name = "${var.ENVIRONMENT}-public-subnet-1b"
-  automation-private_subnet-1a-subnet-cidr_block = "${var.cdir_private_1}/24"
-  automation-private_subnet-1a-tag-Name = "${var.ENVIRONMENT}-private-subnet-1a"
-  automation-private_subnet-1b-tag-Name = "${var.ENVIRONMENT}-private-subnet-1b"
-  automation-private-route_table-tag-Name = "${var.ENVIRONMENT}-private-route-table"
-  automation-public-route_table-tag-Name = "${var.ENVIRONMENT}-public-route-table"
-  automation-default-security-group-name = "${var.ENVIRONMENT}-default-sg"
-  automation-default-security_group-tag-Name = "${var.ENVIRONMENT}-default"
 }

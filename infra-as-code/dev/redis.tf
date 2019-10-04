@@ -26,7 +26,7 @@ resource "aws_elasticache_subnet_group" "automation-redis-subnet" {
 
 resource "aws_security_group" "automation-redis-sg" {
   name = local.automation-redis-security_group-name
-  vpc_id = aws_vpc.automation-vpc.id
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
   description = "Access control to redis cache"
 
   egress {

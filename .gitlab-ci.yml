@@ -368,6 +368,13 @@ terraform-validate-basic-infra:
     - terraform init infra-as-code/basic-infra
     - terraform validate infra-as-code/basic-infra
 
+terraform-validate-network-resourcs:
+  stage: validation
+  <<: *terraform_template
+  script:
+    - terraform init infra-as-code/network-resources
+    - terraform validate infra-as-code/network-resources
+
 terraform-validate-dev:
   stage: validation
   <<: *terraform_template
@@ -398,12 +405,14 @@ terraform-validate-dev:
     - terraform init infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
 
-basic-infra:
+network-resources-infra:
   stage: basic_infra
   <<: *terraform_template
   script:
-    - terraform init infra-as-code/basic-infra
-    - terraform apply -auto-approve infra-as-code/basic-infra
+    - terraform init infra-as-code/network-resources
+    - terraform validate infra-as-code/network-resources
+    - terraform apply -auto-approve infra-as-code/network-resources
+  when: manual
 
 deploy-branches:
   stage: deploy

@@ -1,7 +1,7 @@
 resource "aws_security_group" "automation-dev-inbound" {
   name = local.automation-dev-inbound-security_group-name
   description = "Allowed connections into ALB"
-  vpc_id = aws_vpc.automation-vpc.id
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
 
   lifecycle {
     create_before_destroy = true
@@ -91,8 +91,8 @@ resource "aws_lb" "automation-alb" {
   name = var.ENVIRONMENT
   load_balancer_type = "application"
   subnets = [
-    aws_subnet.automation-public_subnet-1a.id,
-    aws_subnet.automation-public_subnet-1b.id]
+    data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a,
+    data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a]
   security_groups = [
     aws_security_group.automation-dev-inbound.id]
 
@@ -123,7 +123,7 @@ resource "aws_lb_target_group" "automation-front_end" {
   name = "${var.ENVIRONMENT}-frontend"
   port = 80
   protocol = "HTTP"
-  vpc_id = aws_vpc.automation-vpc.id
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
   target_type = "ip"
   stickiness {
     type = "lb_cookie"

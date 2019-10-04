@@ -41,7 +41,7 @@ resource "aws_lb_target_group" "automation-metrics-grafana" {
   name = local.automation-metrics-grafana-target_group-name
   port = 3000
   protocol = "HTTP"
-  vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
   target_type = "ip"
   stickiness {
     type = "lb_cookie"
@@ -65,7 +65,7 @@ resource "aws_lb_target_group" "automation-metrics-grafana" {
 }
 
 resource "aws_security_group" "automation-grafana_service" {
-  vpc_id = data.terraform_remote_state.tfstate-dev-resources.outputs.vpc_automation_id
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
   name = local.automation-metrics-grafana-service-security_group-name
   description = "Allow egress from container"
 
@@ -111,8 +111,8 @@ resource "aws_ecs_service" "automation-metrics-grafana" {
     security_groups = [
       aws_security_group.automation-grafana_service.id]
     subnets = [
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1a,
-      data.terraform_remote_state.tfstate-dev-resources.outputs.subnet_automation-private-1b]
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a,
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b]
     assign_public_ip = false
   }
 
