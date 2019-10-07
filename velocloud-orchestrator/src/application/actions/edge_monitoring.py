@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-
 from apscheduler.util import undefined
 from pytz import timezone
 from shortuuid import uuid
@@ -43,7 +42,7 @@ class EdgeMonitoring:
             self._status_repository.set_edges_processed(0)
             self._statistic_repository._statistic_client.clear_dictionaries()
             self._status_repository.set_current_cycle_timestamp(datetime.timestamp(datetime.now()))
-            await self._request_edges(uuid())
+            await self._process_all_edges(uuid())
             self._logger.info("Sending edge status tasks. Orchestrator status = PROCESSING_VELOCLOUD_EDGES...")
             self._status_repository.set_status("PROCESSING_VELOCLOUD_EDGES")
 
@@ -71,50 +70,49 @@ class EdgeMonitoring:
 
         slack_msg = self._statistic_repository._statistic_client.get_statistics()
         if slack_msg is not None:
-            msg = dict(request_id=current_cycle_request_id,
-                       response_topic=f'notification.slack.request.{self._service_id}',
-                       message=slack_msg)
-            await self._event_bus.publish_message("notification.slack.request", json.dumps(msg))
+            msg = {'request_id': current_cycle_request_id, 'message': slack_msg}
+            await self._event_bus.rpc_request("notification.slack.request", json.dumps(msg), timeout=5)
         else:
             self._logger.error("No statistics present")
 
-    async def _request_edges(self, request_id):
-        msg = dict(request_id=request_id, response_topic=f'edge.list.response.{self._service_id}',
-                   filter=[{'host': 'mettel.velocloud.net', 'enterprise_ids': []},
-                           {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
-                           {'host': 'metvco04.mettel.net', 'enterprise_ids': []}])
+    async def _process_all_edges(self, request_id):
+        msg = {
+            'request_id': request_id,
+            'filter': [
+                {'host': 'mettel.velocloud.net', 'enterprise_ids': []},
+                {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
+                {'host': 'metvco04.mettel.net', 'enterprise_ids': []},
+            ]
+        }
         self._status_repository.set_current_cycle_request_id(request_id)
-        await self._event_bus.publish_message("edge.list.request", json.dumps(msg))
 
-    async def receive_edge_list(self, msg):
+        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(msg), timeout=900)
         self._logger.info(f'Edge list received from event bus')
-        decoded_msg = json.loads(msg)
         edge_status_requests = [
-            dict(request_id=decoded_msg["request_id"], response_topic=f'edge.status.response.{self._service_id}',
-                 edge=edge) for edge in decoded_msg["edges"]]
+            {'request_id': edge_list["request_id"], 'edge': edge} for edge in edge_list["edges"]]
         self._prometheus_repository.set_cycle_total_edges(len(edge_status_requests))
         self._status_repository.set_edges_to_process(len(edge_status_requests))
 
         redis_edge_list = self._edge_repository.get_last_edge_list()
         if redis_edge_list is not None:
             decoded_redis_edge_list = json.loads(redis_edge_list)
-            if len(decoded_redis_edge_list) != len(decoded_msg["edges"]):
+            if len(decoded_redis_edge_list) != len(edge_list["edges"]):
                 for redis_edge in decoded_redis_edge_list:
-                    if redis_edge not in decoded_msg['edges']:
+                    if redis_edge not in edge_list['edges']:
                         redis_edge_info = json.loads(self._edge_repository.get_edge(str(redis_edge)))
                         self._prometheus_repository.dec(redis_edge_info["redis_edge"])
 
-        self._edge_repository.set_current_edge_list(json.dumps(decoded_msg["edges"]))
+        self._edge_repository.set_current_edge_list(json.dumps(edge_list["edges"]))
 
         self._logger.info(f'Splitting and sending edges to the event bus')
+
         for request in edge_status_requests:
-            await self._event_bus.publish_message("edge.status.request", json.dumps(request))
+            edge = await self._event_bus.rpc_request("edge.status.request", json.dumps(request), timeout=10)
+            await self._process_edge(edge)
         self._logger.info(f'Requests sent')
 
-    async def receive_edge(self, msg):
+    async def _process_edge(self, edge):
         self._logger.info(f'Edge received from event bus')
-        edge = json.loads(msg)
-        self._logger.info(f'Edge data: {json.dumps(edge, indent=2)}')
         edges_processed = self._status_repository.get_edges_processed()
         edges_to_process = self._status_repository.get_edges_to_process()
         edges_processed = edges_processed + 1

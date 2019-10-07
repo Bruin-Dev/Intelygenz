@@ -211,7 +211,7 @@ class TestEdgeMonitoring:
                                          status_repository, statistic_repository, service_id, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
 
-        await edge_monitoring.receive_edge(json.dumps(edge))
+        await edge_monitoring._process_edge(json.dumps(edge))
         assert prometheus_repository.inc.called
         assert status_repository.get_edges_processed.called
         assert status_repository.set_edges_processed.called
@@ -259,7 +259,7 @@ class TestEdgeMonitoring:
                                          status_repository, statistic_repository, service_id, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
 
-        await edge_monitoring.receive_edge(json.dumps(edge))
+        await edge_monitoring._process_edge(json.dumps(edge))
         assert prometheus_repository.update_edge.called
         assert prometheus_repository.update_link.called
         assert status_repository.get_edges_processed.called
@@ -308,7 +308,7 @@ class TestEdgeMonitoring:
                                          status_repository, statistic_repository, service_id, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
 
-        await edge_monitoring.receive_edge(json.dumps(edge))
+        await edge_monitoring._process_edge(json.dumps(edge))
         assert prometheus_repository.update_edge.called is False
         assert prometheus_repository.update_link.called
         assert status_repository.get_edges_processed.called
@@ -357,7 +357,7 @@ class TestEdgeMonitoring:
                                          status_repository, statistic_repository, service_id, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
 
-        await edge_monitoring.receive_edge(json.dumps(edge))
+        await edge_monitoring._process_edge(json.dumps(edge))
         assert prometheus_repository.update_edge.called
         assert prometheus_repository.update_link.called is False
         assert status_repository.get_edges_processed.called

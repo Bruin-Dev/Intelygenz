@@ -2,6 +2,7 @@
 - [Velocloud SDK integration](#velocloud-sdk-integration)
   * [Connecting to several clusters](#connecting-to-several-clusters)
   * [Service logic](#service-logic) 
+  * [How to run it](#how-to-run-it) 
 
 # Velocloud SDK integration
 
@@ -46,3 +47,11 @@ ORCHESTRATOR_CONFIG = {
     'interval_time': 600
 }
 ````
+## How to run it
+````$
+docker-compose up --build nats-server velocloud-bridge prometheus grafana redis
+# Wait until everything is up and running
+docker-compose up --build velocloud-orchestrator
+````
+
+You can access to the metrics dashboards in localhost:3000 using the credentials in [here](../metrics-dashboard/grafana/Dockerfile)
