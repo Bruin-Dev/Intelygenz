@@ -25,6 +25,7 @@ class TestEdgeMonitoring:
         edge_repository = Mock()
         status_repository = Mock()
         config = Mock()
+        service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, config)
