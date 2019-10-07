@@ -1,5 +1,5 @@
 from config import config
-from igz.packages.nats.clients import NatsStreamingClient
+from igz.packages.nats.clients import NATSClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from application.actions.edge_list_response import ReportEdgeList
@@ -22,11 +22,11 @@ class Container:
         self._velocloud_client = VelocloudClient(config, self._logger)
         self._velocloud_repository = VelocloudRepository(config, self._logger, self._velocloud_client)
 
-        self._publisher = NatsStreamingClient(config, f'velocloud-bridge-publisher-', logger=self._logger)
-        self._subscriber_list = NatsStreamingClient(config, f'velocloud-bridge-subscriber-', logger=self._logger)
-        self._subscriber_stat = NatsStreamingClient(config, f'velocloud-bridge-subscriber-', logger=self._logger)
-        self._subscriber_alert = NatsStreamingClient(config, f'velocloud-bridge-subscriber-', logger=self._logger)
-        self._subscriber_event_alert = NatsStreamingClient(config, f'velocloud-bridge-subscriber-', logger=self._logger)
+        self._publisher = NATSClient(config, logger=self._logger)
+        self._subscriber_list = NATSClient(config, logger=self._logger)
+        self._subscriber_stat = NATSClient(config, logger=self._logger)
+        self._subscriber_alert = NATSClient(config, logger=self._logger)
+        self._subscriber_event_alert = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_list, consumer_name="list")
@@ -56,23 +56,16 @@ class Container:
         await self._event_bus.connect()
         await self._event_bus.subscribe_consumer(consumer_name="list", topic="edge.list.request",
                                                  action_wrapper=self._report_edge_list,
-                                                 durable_name="velocloud_bridge",
-                                                 queue="velocloud_bridge",
-                                                 ack_wait=480)
+                                                 queue="velocloud_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="status", topic="edge.status.request",
                                                  action_wrapper=self._report_edge_status,
-                                                 durable_name="velocloud_bridge",
                                                  queue="velocloud_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="alert", topic="alert.request.all.edges",
                                                  action_wrapper=self._alert_edge_list,
-                                                 durable_name="velocloud_bridge",
-                                                 queue="velocloud_bridge",
-                                                 ack_wait=480)
+                                                 queue="velocloud_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="event_alert", topic="alert.request.event.edge",
                                                  action_wrapper=self._alert_edge_event,
-                                                 durable_name="velocloud_bridge",
-                                                 queue="velocloud_bridge",
-                                                 ack_wait=480)
+                                                 queue="velocloud_bridge")
 
     async def start_server(self):
         await self._server.run_server()

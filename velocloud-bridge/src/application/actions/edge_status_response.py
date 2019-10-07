@@ -11,10 +11,10 @@ class ReportEdgeStatus:
         self._logger = logger
 
     async def report_edge_status(self, msg):
-        msg_dict = json.loads(msg)
-        request_id = msg_dict["request_id"]
-        edgeids = msg_dict["edge"]
-        self._logger.info(f'Processing edge with data {msg_dict}')
+        msg = json.loads(msg)
+        request_id = msg["request_id"]
+        edgeids = msg["edge"]
+        self._logger.info(f'Processing edge with data {msg}')
 
         enterprise_name = self._velocloud_repository.get_enterprise_information(edgeids)
 
@@ -22,8 +22,8 @@ class ReportEdgeStatus:
 
         link_status = []
         interval = None
-        if "interval" in msg_dict.keys():
-            interval = msg_dict["interval"]
+        if "interval" in msg.keys():
+            interval = msg["interval"]
         links = self._velocloud_repository.get_link_information(edgeids, interval)
         link_service_group = self._velocloud_repository.get_link_service_groups_information(edgeids, interval)
         if links is not None and isinstance(links, Exception) is False:
@@ -48,4 +48,4 @@ class ReportEdgeStatus:
             status = 500
         edge_status = {"enterprise_name": enterprise_name, "edges": edge_status, "links": link_status}
         edge_response = {"request_id": request_id, "edge_id": edgeids, "edge_info": edge_status, "status": status}
-        await self._event_bus.publish_message(msg_dict['response_topic'], json.dumps(edge_response, default=str))
+        await self._event_bus.publish_message(msg['response_topic'], json.dumps(edge_response, default=str))
