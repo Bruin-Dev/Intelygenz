@@ -105,12 +105,20 @@ resource "aws_subnet" "automation-private_subnet-1b" {
   }
 }
 
-/* Routing table for private subnet */
-resource "aws_route_table" "automation-private" {
+/* Routing table for private subnets */
+resource "aws_route_table" "automation-private-1a" {
   vpc_id = aws_vpc.automation-vpc.id
 
   tags = {
-    Name = local.automation-private-route_table-tag-Name
+    Name = local.automation-private-route_table-1a-tag-Name
+  }
+}
+
+resource "aws_route_table" "automation-private-1b" {
+  vpc_id = aws_vpc.automation-vpc.id
+
+  tags = {
+    Name = local.automation-private-route_table-1b-tag-Name
   }
 }
 
@@ -129,10 +137,16 @@ resource "aws_route" "automation-igw-public" {
   gateway_id = aws_internet_gateway.automation-igw.id
 }
 
-resource "aws_route" "automation-nat-private" {
-  route_table_id = aws_route_table.automation-private.id
+resource "aws_route" "automation-nat-private-1a" {
+  route_table_id = aws_route_table.automation-private-1a.id
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id = aws_nat_gateway.automation-nat-1a.id
+}
+
+resource "aws_route" "automation-nat-private-1b" {
+  route_table_id = aws_route_table.automation-private-1b.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.automation-nat-1b.id
 }
 
 /* Route table associations */
@@ -148,12 +162,12 @@ resource "aws_route_table_association" "automation-public-1b" {
 
 resource "aws_route_table_association" "automation-private-1a" {
   subnet_id = aws_subnet.automation-private_subnet-1a.id
-  route_table_id = aws_route_table.automation-private.id
+  route_table_id = aws_route_table.automation-private-1a.id
 }
 
 resource "aws_route_table_association" "automation-private-1b" {
   subnet_id = aws_subnet.automation-private_subnet-1b.id
-  route_table_id = aws_route_table.automation-private.id
+  route_table_id = aws_route_table.automation-private-1b .id
 }
 
 /*====
