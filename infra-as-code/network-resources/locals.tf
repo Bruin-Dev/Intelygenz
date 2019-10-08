@@ -12,7 +12,8 @@ locals {
   automation-private_subnet-1b-tag-Name = "mettel-automation-private-subnet-1b"
   automation-private-route_table-1a-tag-Name = "mettel-automation-private-route-table-1a"
   automation-private-route_table-1b-tag-Name = "mettel-automation-private-route-table-1b"
-  automation-public-route_table-tag-Name = "mettel-automation-public-route-table"
+  automation-public-route_table-1a-tag-Name = "mettel-automation-public-route-table-1a"
+  automation-public-route_table-1b-tag-Name = "mettel-automation-public-route-table-1b"
   automation-default-security-group-name = "mettel-automation-default-sg"
   automation-default-security_group-tag-Name = "mettel-automation-default"
 }
