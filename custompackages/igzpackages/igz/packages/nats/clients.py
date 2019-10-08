@@ -71,8 +71,10 @@ class NATSClient:
             return
         try:
             if self._topic_action[msg.subject].is_async:
+                # TODO: Don't do json.dump, just pass msg.data to the function
                 await self._topic_action[msg.subject].execute_stateful_action(json.dumps(event))
             else:
+                # TODO: Don't do json.dump, just pass msg.data to the function
                 self._topic_action[msg.subject].execute_stateful_action(json.dumps(event))
         except Exception:
             self._logger.exception(f"NATS Client Exception in client happened")
