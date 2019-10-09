@@ -394,8 +394,10 @@ terraform-validate-dev:
     - apk add gettext
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
+    - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
+    - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
