@@ -373,6 +373,7 @@ terraform-validate-network-resources:
   <<: *terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - apk add gettext
     - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
     - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
@@ -424,6 +425,7 @@ network-resources-infra-branches:
   <<: *terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - apk add gettext
     - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
     - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
@@ -439,6 +441,7 @@ network-resources-infra-master:
   <<: *terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - apk add gettext
     - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
     - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
@@ -612,6 +615,7 @@ destroy-network-resources-branches:
   <<: *terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - apk add gettext
     - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
     - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
@@ -628,6 +632,7 @@ destroy-network-resources-master:
   <<: *terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - apk add gettext
     - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
     - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
