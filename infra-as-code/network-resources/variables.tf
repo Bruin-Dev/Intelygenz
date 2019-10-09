@@ -17,3 +17,8 @@ variable "cdir_private_1" {
 variable "cdir_private_2" {
   default = "10.1.12.0/24"
 }
+
+variable "NETWORK_ENVIRONMENT" {
+  description = "Name of the environment to identify the network resources to be used"
+  type = "string"
+}

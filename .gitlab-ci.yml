@@ -412,14 +412,29 @@ basic-infra:
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
 
-network-resources-infra:
+network-resources-infra-branches:
   stage: basic_infra
   <<: *terraform_template
   script:
+    - export TF_VAR_NETWORK_ENVIRONMENT="dev"
     - terraform init infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
     - terraform apply -auto-approve infra-as-code/network-resources
-  when: manual
+  only:
+    - branches
+  except:
+    - master
+
+network-resources-infra-master:
+  stage: basic_infra
+  <<: *terraform_template
+  script:
+    - export TF_VAR_NETWORK_ENVIRONMENT="master"
+    - terraform init infra-as-code/network-resources
+    - terraform validate infra-as-code/network-resources
+    - terraform apply -auto-approve infra-as-code/network-resources
+  only:
+    - master
 
 deploy-branches:
   stage: deploy
