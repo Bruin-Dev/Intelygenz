@@ -416,7 +416,7 @@ network-resources-infra-branches:
   stage: basic_infra
   <<: *terraform_template
   script:
-    - export TF_VAR_NETWORK_ENVIRONMENT="dev"
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
     - terraform init infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
     - terraform apply -auto-approve infra-as-code/network-resources
@@ -429,7 +429,7 @@ network-resources-infra-master:
   stage: basic_infra
   <<: *terraform_template
   script:
-    - export TF_VAR_NETWORK_ENVIRONMENT="master"
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
     - terraform init infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
     - terraform apply -auto-approve infra-as-code/network-resources
@@ -596,14 +596,31 @@ destroy-master:
   only:
     - master
 
-destroy-network-resources:
+destroy-network-resources-branches:
   stage: deploy
   <<: *terraform_template
   script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
     - terraform init infra-as-code/network-resources
     - terraform refresh infra-as-code/network-resources
     - terraform destroy -auto-approve infra-as-code/network-resources
   when: manual
+  only:
+    - branches
+  except:
+    - master
+
+destroy-network-resources-master:
+  stage: deploy
+  <<: *terraform_template
+  script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+    - terraform init infra-as-code/network-resources
+    - terraform refresh infra-as-code/network-resources
+    - terraform destroy -auto-approve infra-as-code/network-resources
+  when: manual
+  only:
+    - master
 
 grafana_user_creation_branches:
   stage: grafana_user_creation

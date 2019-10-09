@@ -19,3 +19,9 @@ variable "NATS_MODULE_VERSION" {
 variable "cdir_base" {
   default = "10.1.0.0/16"
 }
+
+variable "CURRENT_ENVIRONMENT" {
+  default = "dev"
+  description = "Name of the environment to identify the network resources to be used"
+  type = "string"
+}

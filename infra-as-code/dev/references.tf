@@ -3,6 +3,6 @@ data "terraform_remote_state" "tfstate-network-resources" {
   config = {
     bucket = "automation-infrastructure"
     region = "us-east-1"
-    key = "terraform-tests-network-resources.tfstate"
+    key = "terraform-tests-${TF_VAR_CURRENT_ENVIRONMENT}-network-resources.tfstate"
   }
 }
