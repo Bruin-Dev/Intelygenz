@@ -3,7 +3,7 @@ The VPC
 ======*/
 
 resource "aws_vpc" "automation-vpc" {
-  cidr_block = var.cdir_base
+  cidr_block = var.cidr_vars[var.CURRENT_ENVIRONMENT]["cidr_base"]
   enable_dns_hostnames = true
   enable_dns_support = true
 
