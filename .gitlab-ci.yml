@@ -629,7 +629,7 @@ destroy-master:
     - master
 
 destroy-network-resources-branches:
-  stage: deploy
+  stage: basic_infra
   <<: *terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
@@ -646,7 +646,7 @@ destroy-network-resources-branches:
     - master
 
 destroy-network-resources-master:
-  stage: deploy
+  stage: basic_infra
   <<: *terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
