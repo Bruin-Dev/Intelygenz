@@ -455,9 +455,9 @@ class TestServiceOutageTriage:
     async def compose_event_note_object_edge_test(self):
         event_bus = Mock()
 
-        events_to_report = {'event': 'EDGE_UP', 'category': 'EDGE',
-                            'eventTime': '2019-07-30 06:38:00+00:00',
-                            'message': 'An Edge'}
+        events_to_report = [{'event': 'EDGE_UP', 'category': 'EDGE',
+                             'eventTime': '2019-07-30 06:38:00+00:00',
+                             'message': 'An Edge'}]
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -473,9 +473,9 @@ class TestServiceOutageTriage:
     async def compose_event_note_object_GE1_test(self):
         event_bus = Mock()
 
-        events_to_report = {'event': 'LINK_ALIVE', 'category': 'NETWORK',
-                            'eventTime': '2019-07-30 06:38:00+00:00',
-                            'message': 'GE1 alive'}
+        events_to_report = [{'event': 'LINK_ALIVE', 'category': 'NETWORK',
+                             'eventTime': '2019-07-30 06:38:00+00:00',
+                             'message': 'GE1 alive'}]
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -491,9 +491,9 @@ class TestServiceOutageTriage:
     async def compose_event_note_object_GE2_test(self):
         event_bus = Mock()
 
-        events_to_report = {'event': 'LINK_ALIVE', 'category': 'NETWORK',
-                            'eventTime': '2019-07-30 06:38:00+00:00',
-                            'message': 'GE2 alive'}
+        events_to_report = [{'event': 'LINK_ALIVE', 'category': 'NETWORK',
+                             'eventTime': '2019-07-30 06:38:00+00:00',
+                             'message': 'GE2 alive'}]
         logger = Mock()
         scheduler = Mock()
         config = testconfig

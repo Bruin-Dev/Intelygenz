@@ -170,45 +170,66 @@ class ServiceOutageTriage:
                       'end_date': datetime.now(timezone('US/Eastern'))}
         edge_events = await self._event_bus.rpc_request("alert.request.event.edge", json.dumps(
                                                                                 events_msg, default=str), timeout=10)
-        events_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-        events_str = "#*Automation Engine*# \n"
-        current_timestamp = None
-        for event in reversed(edge_events["events"]["data"]):
-            if event['event'] in events_list:
-                event_obj = self._compose_event_note_object(event)
-                events_str = events_str + event_obj
-                current_timestamp = parse(event['eventTime']).astimezone(timezone('US/Eastern'))
+        filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
 
-        if events_str != "#*Automation Engine*# \n":
-            events_str = events_str + 'TimeStamp: ' + str(current_timestamp + timedelta(seconds=1))
-            if self._config.TRIAGE_CONFIG['environment'] == 'production':
-                ticket_append_note_msg = {'request_id': uuid(),
-                                          'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
-                                          'ticket_id': ticket_id["ticketID"],
-                                          'note': events_str}
-                await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                  json.dumps(ticket_append_note_msg),
-                                                  timeout=15)
-                slack_message = {'request_id': uuid(),
-                                 'message': f'Events appeneded to ticket:'
-                                            f'https://app.bruin.com/helpdesk?clientId=85940&'
-                                            f'ticketId={ticket_id["ticketID"]} , in '
-                                            f'{self._config.TRIAGE_CONFIG["environment"]}',
-                                 'response_topic': f'notification.slack.request.{self._service_id}'}
-                await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
-            self._logger.info(events_str)
+        event_list = [event for event in edge_events["events"]["data"] if event['event'] in filter_events_status_list]
 
-    def _compose_event_note_object(self, event):
-        event_str = f'NewEvent: {event["event"]}\n'
-        if event['category'] == 'EDGE':
-            event_str = event_str + 'Device: Edge\n'
-        else:
-            if 'GE1' in event['message']:
-                event_str = event_str + f'Device: Interface GE1\n'
-            if 'GE2' in event['message']:
-                event_str = event_str + f'Device: Interface GE2\n'
-        event_str = event_str + f'eventTime: {parse(event["eventTime"]).astimezone(timezone("US/Eastern"))}\n\n'
-        return event_str
+        if len(event_list) > 0:
+            sorted_event_list = sorted(event_list, key=lambda event: event['eventTime'])
+
+            event_str = self._compose_event_note_object(sorted_event_list)
+
+            quotient = len(event_str) // 1000
+
+            split_amount = 0
+            step_amount = len(sorted_event_list)
+            if quotient > 0:
+                if len(event_str) % 1000 == 0:
+                    split_amount = quotient - 1
+                elif len(event_str) % 1000 > 0:
+                    split_amount = quotient
+                step_amount = (len(sorted_event_list) // split_amount)
+
+            split_event_lists = [sorted_event_list[i:i + step_amount] for i in range(0, len(sorted_event_list),
+                                                                                     step_amount)]
+
+            for events in split_event_lists:
+                event_obj = self._compose_event_note_object(events)
+                event_timestamp = parse(events[len(events) - 1]["eventTime"]).astimezone(timezone("US/Eastern"))
+                event_ticket_note = "#*Automation Engine*#" + event_obj + 'TimeStamp: ' + str(
+                                                                                 event_timestamp + timedelta(seconds=1))
+                if self._config.TRIAGE_CONFIG['environment'] == 'production':
+                    ticket_append_note_msg = {'request_id': uuid(),
+                                              'response_topic': f'bruin.ticket.note.append.response.{self._service_id}',
+                                              'ticket_id': ticket_id["ticketID"],
+                                              'note': event_ticket_note}
+                    await self._event_bus.rpc_request("bruin.ticket.note.append.request",
+                                                      json.dumps(ticket_append_note_msg),
+                                                      timeout=15)
+                    slack_message = {'request_id': uuid(),
+                                     'message': f'Events appeneded to ticket:'
+                                                f'https://app.bruin.com/helpdesk?clientId=85940&'
+                                                f'ticketId={ticket_id["ticketID"]} , in '
+                                                f'{self._config.TRIAGE_CONFIG["environment"]}',
+                                     'response_topic': f'notification.slack.request.{self._service_id}'}
+                    await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
+                                                      timeout=10)
+                self._logger.info(event_ticket_note)
+
+    def _compose_event_note_object(self, event_list):
+        full_event_str = ""
+        for event in event_list:
+            event_str = f'NewEvent: {event["event"]}\n'
+            if event['category'] == 'EDGE':
+                event_str = event_str + 'Device: Edge\n'
+            else:
+                if 'GE1' in event['message']:
+                    event_str = event_str + f'Device: Interface GE1\n'
+                if 'GE2' in event['message']:
+                    event_str = event_str + f'Device: Interface GE2\n'
+            event_str = event_str + f'eventTime: {parse(event["eventTime"]).astimezone(timezone("US/Eastern"))}\n'
+            full_event_str = full_event_str + '\n' + event_str
+        return full_event_str
 
     def _compose_ticket_note_object(self, edges_status_to_report, edges_events_to_report):
 

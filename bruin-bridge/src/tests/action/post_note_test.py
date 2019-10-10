@@ -41,6 +41,41 @@ class TestPostNote:
                                                                         'status': 200})
 
     @pytest.mark.asyncio
+    async def post_note_long_message_test(self):
+        logger = Mock()
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        bruin_repository = Mock()
+        bruin_repository.post_ticket_note = Mock(return_value='Note appeneded')
+        long_note = "This note is supposed to be 1500 characters long!!This note is supposed to be 1500 characters " \
+                    "long!!This note is supposed to be 1500 characters long!!This note is supposed to be 1500 " \
+                    "characters long!!This note is supposed to be 1500 characters long!!This note is supposed to be " \
+                    "1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed to "\
+                    "be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed "\
+                    "to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is " \
+                    "supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note "\
+                    "is supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This " \
+                    "note is supposed to be 1500 characters long!!This note is supposed to be 1500 characters " \
+                    "long!!This note is supposed to be 1500 characters long!!This note is supposed to be 1500 " \
+                    "characters long!!This note is supposed to be 1500 characters long!!This note is supposed to be " \
+                    "1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed to "\
+                    "be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed "\
+                    "to be 1500 characters long!!This note is supposed to be 1500 characters long!!!!This note is " \
+                    "supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note "\
+                    "is supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!! "
+        msg = {'request_id': 123,
+               'response_topic': f'bruin.ticket.note.append.response',
+               'ticket_id': 321,
+               'note': long_note}
+        post_note = PostNote(logger, event_bus, bruin_repository)
+        await post_note.post_note(json.dumps(msg))
+        assert bruin_repository.post_ticket_note.called is False
+        assert event_bus.publish_message.called
+        assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
+        assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
+                                                                        'status': 400})
+
+    @pytest.mark.asyncio
     async def post_note_none_return_test(self):
         logger = Mock()
         event_bus = Mock()

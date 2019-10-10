@@ -14,7 +14,14 @@ class PostNote:
         note = msg_dict["note"]
         self._logger.info(f'Putting note in: {ticket_id}...')
         status = 500
-        result = self._bruin_repository.post_ticket_note(ticket_id, note)
+        result = None
+
+        if len(note) < 1500:
+            result = self._bruin_repository.post_ticket_note(ticket_id, note)
+        else:
+            self._logger.info(f'Message is of length:{len(note)} and exceeds 1500 character limit')
+            status = 400
+
         if result is not None:
             status = 200
         response = {
