@@ -1,6 +1,6 @@
 locals {
   // common vars for ecs-services project
-  nats_server1 = "nats://nats-server.${var.ENVIRONMENT}.local:4222"
+  nats_server1 = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:4222"
   log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   slack_url = "https://hooks.slack.com/services/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"
 

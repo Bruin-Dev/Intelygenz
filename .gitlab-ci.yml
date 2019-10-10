@@ -514,18 +514,23 @@ destroy-branches:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
+    - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
     - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
     - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
+    - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
     - terraform init infra-as-code/ecs-services
     - terraform refresh infra-as-code/ecs-services
     - terraform destroy -auto-approve infra-as-code/ecs-services
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
+    - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
+    - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform refresh infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
@@ -598,17 +603,22 @@ destroy-master:
     - export ENVIRONMENT_SLUG=master
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
+    - export TF_VAR_CURRENT_ENVIRONMENT=production
     - apk add gettext
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
+    - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
     - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
     - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
+    - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
     - terraform init infra-as-code/ecs-services
     - terraform destroy -auto-approve infra-as-code/ecs-services
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
+    - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
     - mv temp.tf infra-as-code/dev/init.tf
     - mv temp_vars.tf infra-as-code/dev/variables.tf
+    - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
   environment:
