@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
     bucket = "automation-infrastructure"
     region = "us-east-1"
-    key = "terraform-tests-${var.CURRENT_ENVIRONMENT}-network-resources.tfstate"
+    key = "terraform-tests-${TF_VAR_CURRENT_ENVIRONMENT}-network-resources.tfstate"
   }
 }
 
