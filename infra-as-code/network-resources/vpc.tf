@@ -62,7 +62,7 @@ resource "aws_nat_gateway" "automation-nat-1b" {
 /* Public subnet */
 resource "aws_subnet" "automation-public_subnet-1a" {
   vpc_id = aws_vpc.automation-vpc.id
-  cidr_block = var.cdir_public_1
+  cidr_block = var.cdir_public_1[var.CURRENT_ENVIRONMENT]
   availability_zone = "us-east-1a"
   map_public_ip_on_launch = true
 
@@ -73,7 +73,7 @@ resource "aws_subnet" "automation-public_subnet-1a" {
 
 resource "aws_subnet" "automation-public_subnet-1b" {
   vpc_id = aws_vpc.automation-vpc.id
-  cidr_block = var.cdir_public_2
+  cidr_block = var.cdir_public_2[var.CURRENT_ENVIRONMENT]
   availability_zone = "us-east-1b"
   map_public_ip_on_launch = true
 
@@ -85,7 +85,7 @@ resource "aws_subnet" "automation-public_subnet-1b" {
 /* Private subnet */
 resource "aws_subnet" "automation-private_subnet-1a" {
   vpc_id = aws_vpc.automation-vpc.id
-  cidr_block = var.cdir_private_1
+  cidr_block = var.cdir_private_1[var.CURRENT_ENVIRONMENT]
   availability_zone = "us-east-1a"
   map_public_ip_on_launch = false
 
@@ -96,7 +96,7 @@ resource "aws_subnet" "automation-private_subnet-1a" {
 
 resource "aws_subnet" "automation-private_subnet-1b" {
   vpc_id = aws_vpc.automation-vpc.id
-  cidr_block = var.cdir_private_2
+  cidr_block = var.cdir_private_2[var.CURRENT_ENVIRONMENT]
   availability_zone = "us-east-1b"
   map_public_ip_on_launch = false
 
