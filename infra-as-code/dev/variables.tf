@@ -16,8 +16,12 @@ variable "NATS_MODULE_VERSION" {
   default = "latest"
 }
 
-variable "cdir_base" {
-  default = "10.1.0.0/16"
+variable "cidr_base" {
+  type = "map"
+  default = {
+    "production"  = "10.1.0.0/16"
+    "dev"         = "10.2.0.0/16"
+  }
 }
 
 variable "CURRENT_ENVIRONMENT" {

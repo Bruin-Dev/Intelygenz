@@ -65,7 +65,7 @@ resource "aws_security_group" "automation-velocloud-bridge_service" {
     to_port = 9090
     protocol = "TCP"
     cidr_blocks = [
-      var.cdir_base
+      var.cidr_base[var.CURRENT_ENVIRONMENT]
     ]
   }
 
