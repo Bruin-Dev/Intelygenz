@@ -1,5 +1,9 @@
 resource "aws_ecs_cluster" "automation" {
   name = var.ENVIRONMENT
+  setting {
+    name = "containerInsights"
+    value = "enabled"
+  }
 }
 
 /* role that the Amazon ECS container agent and the Docker daemon can assume */
