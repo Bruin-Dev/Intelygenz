@@ -1,9 +1,13 @@
 import json
 from datetime import datetime
+from unittest.mock import call
+from unittest.mock import patch
 from unittest.mock import Mock
 
 import asyncio
 import pytest
+from apscheduler.util import undefined as apscheduler_undefined
+from application.actions import edge_monitoring as edge_monitoring_module
 from application.actions.edge_monitoring import EdgeMonitoring
 from asynctest import CoroutineMock
 
@@ -13,6 +17,10 @@ from config import testconfig
 class TestEdgeMonitoring:
 
     def instance_test(self):
+        """
+        Test that the EdgeMonitoring instance contains the expected
+        attributes.
+        """
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
@@ -37,340 +45,662 @@ class TestEdgeMonitoring:
         assert edge_monitoring._config is config
 
     def start_metrics_server_test(self):
+        """ Test that starting the metrics server works as expected. """
         event_bus = Mock()
         logger = Mock()
-        prometheus_repository = Mock()
-        prometheus_repository.start_prometheus_metrics_server = Mock()
         scheduler = Mock()
         edge_repository = Mock()
         status_repository = Mock()
         statistic_repository = Mock()
         config = Mock()
         service_id = 123
+
+        prometheus_repository = Mock()
+        prometheus_repository.start_prometheus_metrics_server = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
         edge_monitoring.start_prometheus_metrics_server()
-        assert prometheus_repository.start_prometheus_metrics_server.called
+        prometheus_repository.start_prometheus_metrics_server.assert_called_once()
 
     @pytest.mark.asyncio
-    async def request_edges_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+    async def process_all_edges_test(self):
+        """
+        Test that the edges are requested and later processed.
+        This test doesn't watch out for the behavior of Redis.
+        """
         logger = Mock()
+        scheduler = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        service_id = 123
+        request_id = 'random-uuid'
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            {'request_id': request_id, 'edges': ["test_host1", "test_host2"]},
+            {
+                'request_id': request_id,
+                'edge_id': {'host': 'test_host1'},
+                'edge_info': {
+                    'enterprise_name': 'evil-corp',
+                    'edges': {'edgeState': 'DISCONNECTED'},
+                    'links': [
+                        {'link': {'state': 'DISCONNECTED'}},
+                        {'link': {'state': 'DISCONNECTED'}},
+                    ],
+                },
+            },
+            {
+                'request_id': request_id,
+                'edge_id': {'host': 'test_host2'},
+                'edge_info': {
+                    'enterprise_name': 'evil-corp',
+                    'edges': {'edgeState': 'CONNECTED'},
+                    'links': [
+                        {'link': {'state': 'DISCONNECTED'}},
+                        {'link': {'state': 'CONNECTED'}},
+                    ],
+                },
+            },
+        ])
+
+        edge_repository = Mock()
+        edge_repository.get_last_edge_list = Mock(
+            return_value=json.dumps(["test_host1", "test_host2"])
+        )
+        edge_repository.set_current_edge_list = Mock()
+
         prometheus_repository = Mock()
         prometheus_repository.start_prometheus_metrics_server = Mock()
-        scheduler = Mock()
-        edge_repository = Mock()
+        prometheus_repository.set_cycle_total_edges = Mock()
+        prometheus_repository.dec = Mock()
+
         status_repository = Mock()
+        status_repository.set_edges_to_process = Mock()
         status_repository.set_current_cycle_request_id = Mock()
-        statistic_repository = Mock()
-        config = Mock()
-        service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
-        await edge_monitoring._request_edges(1234)
-        assert status_repository.set_current_cycle_request_id.called
-        assert status_repository.set_current_cycle_request_id.call_args[0][0] == 1234
-        assert event_bus.publish_message.called
-        assert "edge.list.request" in event_bus.publish_message.call_args[0][0]
+        edge_monitoring._process_edge = CoroutineMock()
+
+        await edge_monitoring._process_all_edges(request_id=request_id)
+
+        status_repository.set_current_cycle_request_id.assert_called_once_with(request_id)
+        prometheus_repository.set_cycle_total_edges.assert_called_once()
+        status_repository.set_edges_to_process.assert_called_once()
+        edge_repository.get_edge.assert_not_called()
+        prometheus_repository.dec.assert_not_called()
+        edge_repository.set_current_edge_list.assert_called_once()
+
+        event_bus.rpc_request.assert_has_awaits([
+            call("edge.list.request", json.dumps({'request_id': request_id, 'filter': [
+                {'host': 'mettel.velocloud.net', 'enterprise_ids': []},
+                {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
+                {'host': 'metvco04.mettel.net', 'enterprise_ids': []},
+            ]}), timeout=900),
+            call("edge.status.request", json.dumps({'request_id': request_id, 'edge': "test_host1"}), timeout=10),
+            call("edge.status.request", json.dumps({'request_id': request_id, 'edge': "test_host2"}), timeout=10),
+        ], any_order=False)
+        assert edge_monitoring._process_edge.await_count == 2
 
     @pytest.mark.asyncio
-    async def receive_edge_list_no_redis_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+    async def process_all_edges_without_redis_data_test(self):
+        """
+        Test that the edges are requested and later processed.
+        This test takes into account that Redis doesn't have any edge data
+        stored at all.
+        """
         logger = Mock()
-        prometheus_repository = Mock()
-        prometheus_repository.dec = Mock()
         scheduler = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        service_id = 123
+        request_id = 'random-uuid'
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            {'request_id': request_id, 'edges': ["test_host1", "test_host2"]},
+            {
+                'request_id': request_id,
+                'edge_id': {'host': 'test_host1'},
+                'edge_info': {
+                    'enterprise_name': 'evil-corp',
+                    'edges': {'edgeState': 'DISCONNECTED'},
+                    'links': [
+                        {'link': {'state': 'DISCONNECTED'}},
+                        {'link': {'state': 'CONNECTED'}},
+                    ],
+                },
+            },
+            {
+                'request_id': request_id,
+                'edge_id': {'host': 'test_host2'},
+                'edge_info': {
+                    'enterprise_name': 'evil-corp',
+                    'edges': {'edgeState': 'CONNECTED'},
+                    'links': [
+                        {'link': {'state': 'DISCONNECTED'}},
+                        {'link': {'state': 'DISCONNECTED'}},
+                    ],
+                },
+            },
+        ])
+
         edge_repository = Mock()
         edge_repository.get_last_edge_list = Mock(return_value=None)
-        edge_repository.get_edge = Mock()
-        status_repository = Mock()
-        status_repository.set_edges_to_process = Mock()
-        statistic_repository = Mock()
-        config = Mock()
-        service_id = 123
+        edge_repository.set_current_edge_list = Mock()
 
-        edge_list = b'{"request_id":1234, "edges":["1", "2", "3"]}'
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-
-        await edge_monitoring.receive_edge_list(edge_list)
-        assert edge_repository.get_last_edge_list.called
-        assert edge_repository.get_edge.called is False
-        assert prometheus_repository.dec.called is False
-        assert status_repository.set_edges_to_process.called
-        assert event_bus.publish_message.called
-
-    @pytest.mark.asyncio
-    async def receive_edge_list_redis_data_test(self):
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
         prometheus_repository = Mock()
+        prometheus_repository.start_prometheus_metrics_server = Mock()
+        prometheus_repository.set_cycle_total_edges = Mock()
         prometheus_repository.dec = Mock()
-        scheduler = Mock()
-        edge_repository = Mock()
-        redis_test_enterprise_name = 'Test'
-        redis_edge_state = 'Edge_KO'
-        redis_link_status = [{"link": {"state": "KO"}}]
-        redis_edge = {"redis_edge": {"edges": {"edgeState": redis_edge_state},
-                                     "enterprise_name": redis_test_enterprise_name,
-                                     "links": redis_link_status}}
-        edge_repository.get_edge = Mock(return_value=json.dumps(redis_edge))
-        redis_list = b'[{"host": "some.host", "enterprise_id": 19, "edge_id": 99},' \
-                     b'{"host": "some.host", "enterprise_id": 20, "edge_id": 100},' \
-                     b'{"host": "some.host", "enterprise_id": 21, "edge_id": 101}]'
-        edge_repository.get_last_edge_list = Mock(return_value=redis_list)
+
         status_repository = Mock()
         status_repository.set_edges_to_process = Mock()
-        statistic_repository = Mock()
-        config = Mock()
-        service_id = 123
-
-        edge_list = b'{"request_id":1234, "edges":[{"host": "some.host", "enterprise_id":19, "edge_id":99},' \
-                    b'{"host": "some.host", "enterprise_id":20, "edge_id":100}]}'
+        status_repository.set_current_cycle_request_id = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
+        edge_monitoring._process_edge = CoroutineMock()
 
-        await edge_monitoring.receive_edge_list(edge_list)
+        await edge_monitoring._process_all_edges(request_id=request_id)
 
-        assert prometheus_repository.dec.called
-        assert edge_repository.get_last_edge_list.called
-        assert edge_repository.get_edge.called
-        assert status_repository.set_edges_to_process.called
-        assert event_bus.publish_message.called
+        edge_repository.get_edge.assert_not_called()
+        prometheus_repository.dec.assert_not_called()
 
     @pytest.mark.asyncio
-    async def receive_edge_list_redis_data_same_len_test(self):
+    async def process_all_edges_with_redis_data_test(self):
+        """
+        Test that the edges are requested and later processed.
+        This test takes into account that Redis has data from edges stored
+        that should be loaded into the monitoring server.
+        """
+        logger = Mock()
+        scheduler = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        service_id = 123
+        request_id = 'random-uuid'
+
+        redis_edge_3_info = {
+            'enterprise_name': 'evil-corp',
+            'edges': {'edgeState': 'DISCONNECTED'},
+            'links': [
+                {'link': {'state': 'DISCONNECTED'}},
+                {'link': {'state': 'DISCONNECTED'}},
+            ],
+        }
+
+        redis_edge_4_info = {
+            'enterprise_name': 'evil-corp',
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'link': {'state': 'DISCONNECTED'}},
+                {'link': {'state': 'CONNECTED'}},
+            ],
+        }
+
+        redis_edge_5_info = {
+            'enterprise_name': 'evil-corp',
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'link': {'state': 'CONNECTED'}},
+                {'link': {'state': 'CONNECTED'}},
+            ],
+        }
 
         event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            {'request_id': request_id, 'edges': ["test_host1", "test_host2"]},
+            {
+                'request_id': request_id,
+                'edge_id': {'host': 'test_host1'},
+                'edge_info': {
+                    'enterprise_name': 'evil-corp',
+                    'edges': {'edgeState': 'DISCONNECTED'},
+                    'links': [
+                        {'link': {'state': 'DISCONNECTED'}},
+                        {'link': {'state': 'CONNECTED'}},
+                    ],
+                },
+            },
+            {
+                'request_id': request_id,
+                'edge_id': {'host': 'test_host2'},
+                'edge_info': {
+                    'enterprise_name': 'evil-corp',
+                    'edges': {'edgeState': 'CONNECTED'},
+                    'links': [
+                        {'link': {'state': 'DISCONNECTED'}},
+                        {'link': {'state': 'DISCONNECTED'}},
+                    ],
+                },
+            },
+        ])
+
+        edge_repository = Mock()
+        # Let's simulate that Redis has data that was not included within the
+        # response to the RPC request targeting at edge.list.request topic
+        edge_repository.get_last_edge_list = Mock(
+            return_value=json.dumps(["edge-id-3", "edge-id-4", "edge-id-5"])
+        )
+        edge_repository.get_edge = Mock(side_effect=[
+            json.dumps({'request_id': request_id, 'redis_edge': redis_edge_3_info}),
+            json.dumps({'request_id': request_id, 'redis_edge': redis_edge_4_info}),
+            json.dumps({'request_id': request_id, 'redis_edge': redis_edge_5_info}),
+        ])
+        edge_repository.set_current_edge_list = Mock()
+
         prometheus_repository = Mock()
+        prometheus_repository.start_prometheus_metrics_server = Mock()
+        prometheus_repository.set_cycle_total_edges = Mock()
         prometheus_repository.dec = Mock()
-        scheduler = Mock()
-        edge_repository = Mock()
-        redis_test_enterprise_name = 'Test'
-        redis_edge_state = 'Edge_KO'
-        redis_link_status = [{"link": {"state": "KO"}}]
-        redis_edge = {"redis_edge": {"edges": {"edgeState": redis_edge_state},
-                                     "enterprise_name": redis_test_enterprise_name,
-                                     "links": redis_link_status}}
-        edge_repository.get_edge = Mock(return_value=json.dumps(redis_edge))
-        redis_list = b'[{"host": "some.host", "enterprise_id": 19, "edge_id": 99},' \
-                     b'{"host": "some.host", "enterprise_id": 20, "edge_id": 100}]'
-        edge_repository.get_last_edge_list = Mock(return_value=redis_list)
+
         status_repository = Mock()
         status_repository.set_edges_to_process = Mock()
-        statistic_repository = Mock()
-        config = Mock()
-        service_id = 123
-
-        edge_list = b'{"request_id":1234, "edges":[{"host": "some.host", "enterprise_id":19, "edge_id":99},' \
-                    b'{"host": "some.host", "enterprise_id":20, "edge_id":100}]}'
+        status_repository.set_current_cycle_request_id = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
+        edge_monitoring._process_edge = CoroutineMock()
 
-        await edge_monitoring.receive_edge_list(edge_list)
+        await edge_monitoring._process_all_edges(request_id=request_id)
 
-        assert prometheus_repository.dec.called is False
-        assert edge_repository.get_last_edge_list.called
-        assert edge_repository.get_edge.called is False
-        assert status_repository.set_edges_to_process.called
-        assert event_bus.publish_message.called
+        edge_repository.get_edge.assert_has_calls([
+            call('edge-id-3'), call('edge-id-4'), call('edge-id-5')
+        ], any_order=True)
+        prometheus_repository.dec.assert_has_calls([
+            call(redis_edge_3_info),
+            call(redis_edge_4_info),
+            call(redis_edge_5_info),
+        ], any_order=True)
 
     @pytest.mark.asyncio
-    async def receive_edge_no_redis_test(self):
-        event_bus = Mock()
+    async def process_all_edges_with_redis_data_equal_to_velocloud_data_test(self):
+        """
+        Test that the edges are requested and later processed.
+        This test takes into account that Redis has data from edges stored
+        and also that the data is the same returned by the Velocloud API.
+
+        TODO: Remove this ugly warning by the time the comparison process is
+              improved
+        A WORD OF WARNING: Here, "the data stored in Redis is the same
+        returned by the Velocloud API" means that both datasets have the
+        same length. However, this comparison is VERY fragile as data could
+        be different if we are talking about contents. Take this into
+        account when reading the test.
+        """
         logger = Mock()
-        prometheus_repository = Mock()
-        prometheus_repository.inc = Mock()
         scheduler = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        service_id = 123
+        request_id = 'random-uuid'
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            {'request_id': request_id, 'edges': ["test_host1", "test_host2"]},
+            {
+                'request_id': request_id,
+                'edge_id': {'host': 'test_host1'},
+                'edge_info': {
+                    'enterprise_name': 'evil-corp',
+                    'edges': {'edgeState': 'CONNECTED'},
+                    'links': [
+                        {'link': {'state': 'DISCONNECTED'}},
+                        {'link': {'state': 'CONNECTED'}},
+                    ],
+                },
+            },
+            {
+                'request_id': request_id,
+                'edge_id': {'host': 'test_host2'},
+                'edge_info': {
+                    'enterprise_name': 'evil-corp',
+                    'edges': {'edgeState': 'DISCONNECTED'},
+                    'links': [
+                        {'link': {'state': 'DISCONNECTED'}},
+                        {'link': {'state': 'DISCONNECTED'}},
+                    ],
+                },
+            },
+        ])
+
+        edge_repository = Mock()
+        edge_repository.get_last_edge_list = Mock(
+            return_value=json.dumps(["test_host1", "test_host2"])
+        )
+        edge_repository.set_current_edge_list = Mock()
+
+        prometheus_repository = Mock()
+        prometheus_repository.start_prometheus_metrics_server = Mock()
+        prometheus_repository.set_cycle_total_edges = Mock()
+        prometheus_repository.dec = Mock()
+
+        status_repository = Mock()
+        status_repository.set_edges_to_process = Mock()
+        status_repository.set_current_cycle_request_id = Mock()
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+        edge_monitoring._process_edge = CoroutineMock()
+
+        await edge_monitoring._process_all_edges(request_id=request_id)
+
+        edge_repository.get_edge.assert_not_called()
+        prometheus_repository.dec.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def process_edge_test(self):
+        """
+        Test that the edge is processed as expected.
+        This test doesn't watch out for the behavior of Redis.
+        """
+        logger = Mock()
+        scheduler = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        event_bus = Mock()
+        service_id = 123
+
+        edge_id = {'host': 'test_host1'}
+        edge_info = {
+            'enterprise_name': 'evil-corp',
+            'edges': {'edgeState': 'DISCONNECTED'},
+            'links': [
+                {'link': {'state': 'DISCONNECTED'}},
+                {'link': {'state': 'DISCONNECTED'}},
+            ],
+        }
+        velocloud_edge = {
+            'request_id': 1234,
+            'edge_id': edge_id,
+            'edge_info': edge_info,
+        }
+        redis_edge = {
+            'request_id': 1234,
+            'redis_edge': edge_info,
+        }
+
         edge_repository = Mock()
         edge_repository.get_edge = Mock(return_value=None)
+        edge_repository.set_current_edge_list = Mock()
         edge_repository.set_edge = Mock()
-        status_repository = Mock()
-        status_repository.set_edges_processed = Mock()
-        status_repository.get_edges_to_process = Mock(return_value=3)
-        status_repository.get_edges_processed = Mock(return_value=2)
-        status_repository.set_status = Mock()
-        statistic_repository = Mock()
-        config = Mock()
-        service_id = 123
 
-        edge = {"request_id": 1234, 'edge_id': {'host': 'some_host'}, 'edge_info': 'Some edge data'}
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-        edge_monitoring._edge_monitoring_process = CoroutineMock()
-
-        await edge_monitoring._process_edge(json.dumps(edge))
-        assert prometheus_repository.inc.called
-        assert status_repository.get_edges_processed.called
-        assert status_repository.set_edges_processed.called
-        assert status_repository.set_edges_processed.call_args[0][0] == 3
-        assert status_repository.get_edges_to_process.called
-        assert status_repository.set_status.called
-        assert "IDLE" in status_repository.set_status.call_args[0][0]
-        assert edge_repository.set_edge.call_args[0][0] == edge['edge_id']
-        assert edge_monitoring._edge_monitoring_process.called
-
-    @pytest.mark.asyncio
-    async def receive_edge_redis_test(self):
-        event_bus = Mock()
-        logger = Mock()
         prometheus_repository = Mock()
-        prometheus_repository.update_edge = Mock()
-        prometheus_repository.update_link = Mock()
-        scheduler = Mock()
-        edge_repository = Mock()
-        redis_test_enterprise_name = 'Test'
-        redis_edge_state = 'Edge_KO'
-        redis_link_status = [{"link": {"state": "KO"}}]
-        redis_edge = {"redis_edge": {"edges": {"edgeState": redis_edge_state},
-                                     "enterprise_name": redis_test_enterprise_name,
-                                     "links": redis_link_status}}
-        edge_repository.get_edge = Mock(return_value=json.dumps(redis_edge))
-        edge_repository.set_edge = Mock()
-        status_repository = Mock()
-        status_repository.set_edges_processed = Mock()
-        status_repository.get_edges_to_process = Mock(return_value=3)
-        status_repository.get_edges_processed = Mock(return_value=2)
-        status_repository.set_status = Mock()
-        statistic_repository = Mock()
-        config = Mock()
-        service_id = 123
+        prometheus_repository.inc = Mock()
 
-        test_enterprise_name = 'Test'
-        test_edge_state = 'Edge_OK'
-        test_link_status = [{"link": {"state": "OK"}}]
-        test_edge = {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
-                     "links": test_link_status}
-        edge = {"request_id": 1234, 'edge_id': {'host': 'some_host'}, 'edge_info': test_edge}
+        status_repository = Mock()
+        status_repository.get_edges_to_process = Mock(return_value=10)
+        status_repository.get_edges_processed = Mock(return_value=5)
+        status_repository.set_edges_processed = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
-        edge_monitoring._edge_monitoring_process = CoroutineMock()
 
-        await edge_monitoring._process_edge(json.dumps(edge))
-        assert prometheus_repository.update_edge.called
-        assert prometheus_repository.update_link.called
-        assert status_repository.get_edges_processed.called
-        assert status_repository.set_edges_processed.called
-        assert status_repository.set_edges_processed.call_args[0][0] == 3
-        assert status_repository.get_edges_to_process.called
-        assert status_repository.set_status.called
-        assert "IDLE" in status_repository.set_status.call_args[0][0]
-        assert edge_repository.set_edge.call_args[0][0] == edge['edge_id']
-        assert edge_monitoring._edge_monitoring_process.called
+        await edge_monitoring._process_edge(velocloud_edge)
+
+        status_repository.get_edges_to_process.assert_called_once()
+        status_repository.get_edges_processed.assert_called_once()
+        status_repository.set_edges_processed.assert_called_once_with(
+            status_repository.get_edges_processed.return_value + 1
+        )
+        edge_repository.set_edge.assert_called_once_with(
+            edge_id, json.dumps(redis_edge)
+        )
 
     @pytest.mark.asyncio
-    async def receive_edge_redis_same_edge_test(self):
-        event_bus = Mock()
+    async def process_edge_without_redis_data_test(self):
+        """
+        Test that the edge is processed as expected.
+        This test takes into account that Redis doesn't have any data stored
+        for this edge.
+        """
         logger = Mock()
-        prometheus_repository = Mock()
-        prometheus_repository.update_edge = Mock()
-        prometheus_repository.update_link = Mock()
         scheduler = Mock()
-        edge_repository = Mock()
-        redis_test_enterprise_name = 'Test'
-        redis_edge_state = 'Edge_OK'
-        redis_link_status = [{"link": {"state": "KO"}}]
-        redis_edge = {"redis_edge": {"edges": {"edgeState": redis_edge_state},
-                                     "enterprise_name": redis_test_enterprise_name,
-                                     "links": redis_link_status}}
-        edge_repository.get_edge = Mock(return_value=json.dumps(redis_edge))
-        edge_repository.set_edge = Mock()
-        status_repository = Mock()
-        status_repository.set_edges_processed = Mock()
-        status_repository.get_edges_to_process = Mock(return_value=3)
-        status_repository.get_edges_processed = Mock(return_value=2)
-        status_repository.set_status = Mock()
         statistic_repository = Mock()
         config = Mock()
-        service_id = 123
-
-        test_enterprise_name = 'Test'
-        test_edge_state = 'Edge_OK'
-        test_link_status = [{"link": {"state": "OK"}}]
-        test_edge = {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
-                     "links": test_link_status}
-        edge = {"request_id": 1234, 'edge_id': {'host': 'some_host'}, 'edge_info': test_edge}
-
-        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
-        edge_monitoring._edge_monitoring_process = CoroutineMock()
-
-        await edge_monitoring._process_edge(json.dumps(edge))
-        assert prometheus_repository.update_edge.called is False
-        assert prometheus_repository.update_link.called
-        assert status_repository.get_edges_processed.called
-        assert status_repository.set_edges_processed.called
-        assert status_repository.set_edges_processed.call_args[0][0] == 3
-        assert status_repository.get_edges_to_process.called
-        assert status_repository.set_status.called
-        assert "IDLE" in status_repository.set_status.call_args[0][0]
-        assert edge_repository.set_edge.call_args[0][0] == edge['edge_id']
-        assert edge_monitoring._edge_monitoring_process.called
-
-    @pytest.mark.asyncio
-    async def receive_edge_redis_same_link_test(self):
         event_bus = Mock()
-        logger = Mock()
-        prometheus_repository = Mock()
-        prometheus_repository.update_edge = Mock()
-        prometheus_repository.update_link = Mock()
-        scheduler = Mock()
-        edge_repository = Mock()
-        redis_test_enterprise_name = 'Test'
-        redis_edge_state = 'Edge_OK'
-        redis_link_status = [{"link": {"state": "OK"}}]
-        redis_edge = {"redis_edge": {"edges": {"edgeState": redis_edge_state},
-                                     "enterprise_name": redis_test_enterprise_name,
-                                     "links": redis_link_status}}
-        edge_repository.get_edge = Mock(return_value=json.dumps(redis_edge))
-        edge_repository.set_edge = Mock()
-        status_repository = Mock()
-        status_repository.set_edges_processed = Mock()
-        status_repository.get_edges_to_process = Mock(return_value=3)
-        status_repository.get_edges_processed = Mock(return_value=2)
-        status_repository.set_status = Mock()
-        statistic_repository = Mock()
-        config = Mock()
         service_id = 123
 
-        test_enterprise_name = 'Test'
-        test_edge_state = 'Edge_KO'
-        test_link_status = [{"link": {"state": "OK"}}]
-        test_edge = {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
-                     "links": test_link_status}
-        edge = {"request_id": 1234, 'edge_id': {'host': 'some_host'}, 'edge_info': test_edge}
+        edge_info = {
+            'enterprise_name': 'evil-corp',
+            'edges': {'edgeState': 'DISCONNECTED'},
+            'links': [
+                {'link': {'state': 'DISCONNECTED'}},
+                {'link': {'state': 'DISCONNECTED'}},
+            ],
+        }
+        edge = {
+            'request_id': 1234,
+            'edge_id': {'host': 'test_host1'},
+            'edge_info': edge_info,
+        }
+
+        edge_repository = Mock()
+        edge_repository.get_edge = Mock(return_value=None)
+        edge_repository.set_current_edge_list = Mock()
+        edge_repository.set_edge = Mock()
+
+        prometheus_repository = Mock()
+        prometheus_repository.inc = Mock()
+
+        status_repository = Mock()
+        status_repository.get_edges_to_process = Mock(return_value=10)
+        status_repository.get_edges_processed = Mock(return_value=5)
+        status_repository.set_edges_processed = Mock()
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+
+        await edge_monitoring._process_edge(edge)
+
+        prometheus_repository.inc.assert_called_once_with(edge_info)
+
+    @pytest.mark.asyncio
+    async def process_edge_with_redis_data_and_edge_state_changed_test(self):
+        """
+        Test that the edge is processed as expected.
+        This test takes into account that Redis has data stored for this edge
+        and observes how Prometheus updates its info about edges when the edge
+        state in Redis is different from the one returned by the Velocloud API.
+        """
+        logger = Mock()
+        scheduler = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        event_bus = Mock()
+        service_id = 123
+
+        velocloud_edge_state = 'CONNECTED'
+        redis_edge_state = 'DISCONNECTED'
+
+        velocloud_edge = {
+            'request_id': 1234,
+            'edge_id': {'host': 'test_host1'},
+            'edge_info': {
+                'enterprise_name': 'evil-corp',
+                'edges': {'edgeState': velocloud_edge_state},
+                'links': [
+                    {'link': {'state': 'DISCONNECTED'}},
+                    {'link': {'state': 'DISCONNECTED'}},
+                ],
+            },
+        }
+
+        redis_edge_info = {
+            'enterprise_name': 'evil-corp',
+            'edges': {'edgeState': redis_edge_state},
+            'links': [
+                {'link': {'state': 'DISCONNECTED'}},
+                {'link': {'state': 'DISCONNECTED'}},
+            ],
+        }
+        redis_edge = {
+            'request_id': 1234,
+            'redis_edge': redis_edge_info,
+        }
+
+        edge_repository = Mock()
+        edge_repository.get_edge = Mock(return_value=json.dumps({
+            'redis_edge': redis_edge_info,
+        }))
+        edge_repository.set_current_edge_list = Mock()
+        edge_repository.set_edge = Mock()
+
+        prometheus_repository = Mock()
+        prometheus_repository.inc = Mock()
+
+        status_repository = Mock()
+        status_repository.get_edges_to_process = Mock(return_value=10)
+        status_repository.get_edges_processed = Mock(return_value=5)
+        status_repository.set_edges_processed = Mock()
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+
+        await edge_monitoring._process_edge(velocloud_edge)
+
+        prometheus_repository.update_edge.assert_called_once_with(
+            velocloud_edge['edge_info'], redis_edge['redis_edge']
+        )
+
+    @pytest.mark.asyncio
+    async def process_edge_with_redis_data_and_link_state_changed_test(self):
+        """
+        Test that the edge is processed as expected.
+        This test takes into account that Redis has data stored for this edge
+        and observes how Prometheus updates its info about links when the link
+        state in Redis is different from the one returned by the Velocloud API.
+        """
+        logger = Mock()
+        scheduler = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        event_bus = Mock()
+        service_id = 123
+
+        velocloud_link_1_state = 'DISCONNECTED'
+        velocloud_link_2_state = 'CONNECTED'
+        redis_link_1_state = 'CONNECTED'
+        redis_link_2_state = 'DISCONNECTED'
+
+        velocloud_link_1 = {'link': {'state': velocloud_link_1_state}}
+        velocloud_link_2 = {'link': {'state': velocloud_link_2_state}}
+        redis_link_1 = {'link': {'state': redis_link_1_state}}
+        redis_link_2 = {'link': {'state': redis_link_2_state}}
+
+        velocloud_edge = {
+            'request_id': 1234,
+            'edge_id': {'host': 'test_host1'},
+            'edge_info': {
+                'enterprise_name': 'evil-corp',
+                'edges': {'edgeState': 'CONNECTED'},
+                'links': [velocloud_link_1, velocloud_link_2],
+            },
+        }
+
+        redis_edge_info = {
+            'enterprise_name': 'evil-corp',
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [redis_link_1, redis_link_2],
+        }
+        redis_edge = {
+            'request_id': 1234,
+            'redis_edge': redis_edge_info,
+        }
+
+        edge_repository = Mock()
+        edge_repository.get_edge = Mock(return_value=json.dumps({
+            'redis_edge': redis_edge_info,
+        }))
+        edge_repository.set_current_edge_list = Mock()
+        edge_repository.set_edge = Mock()
+
+        prometheus_repository = Mock()
+        prometheus_repository.update_link = Mock()
+
+        status_repository = Mock()
+        status_repository.get_edges_to_process = Mock(return_value=10)
+        status_repository.get_edges_processed = Mock(return_value=5)
+        status_repository.set_edges_processed = Mock()
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+
+        await edge_monitoring._process_edge(velocloud_edge)
+
+        prometheus_repository.update_link.assert_has_calls([
+            call(
+                velocloud_edge['edge_info'], velocloud_link_1,
+                redis_edge['redis_edge'], redis_link_1,
+            ),
+            call(
+                velocloud_edge['edge_info'], velocloud_link_2,
+                redis_edge['redis_edge'], redis_link_2,
+            ),
+        ])
+
+    @pytest.mark.asyncio
+    async def process_edge_with_no_remaining_edges_test(self):
+        """
+        Test that the edge is processed as expected.
+        This test observes the behavior of this process when there are no more
+        edges that need to be processed.
+        """
+        logger = Mock()
+        scheduler = Mock()
+        statistic_repository = Mock()
+        config = Mock()
+        event_bus = Mock()
+        service_id = 123
+
+        edge = {
+            'request_id': 1234,
+            'edge_id': {'host': 'test_host1'},
+            'edge_info': {
+                'enterprise_name': 'evil-corp',
+                'edges': {'edgeState': 'DISCONNECTED'},
+                'links': [
+                    {'link': {'state': 'DISCONNECTED'}},
+                    {'link': {'state': 'DISCONNECTED'}},
+                ],
+            },
+        }
+
+        edges_processed = 9  # We are processing the last remaining edge
+        edges_to_process = 10
+
+        edge_repository = Mock()
+        edge_repository.get_edge = Mock(return_value=None)
+        edge_repository.set_current_edge_list = Mock()
+        edge_repository.set_edge = Mock()
+
+        prometheus_repository = Mock()
+        prometheus_repository.inc = Mock()
+
+        status_repository = Mock()
+        status_repository.get_edges_to_process = Mock(return_value=edges_to_process)
+        status_repository.get_edges_processed = Mock(return_value=edges_processed)
+        status_repository.set_edges_processed = Mock()
+        status_repository.set_status = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
 
-        await edge_monitoring._process_edge(json.dumps(edge))
-        assert prometheus_repository.update_edge.called
-        assert prometheus_repository.update_link.called is False
-        assert status_repository.get_edges_processed.called
-        assert status_repository.set_edges_processed.called
-        assert status_repository.set_edges_processed.call_args[0][0] == 3
-        assert status_repository.get_edges_to_process.called
-        assert status_repository.set_status.called
-        assert "IDLE" in status_repository.set_status.call_args[0][0]
-        assert edge_repository.set_edge.call_args[0][0] == edge['edge_id']
-        assert edge_monitoring._edge_monitoring_process.called
+        await edge_monitoring._process_edge(edge)
+
+        status_repository.set_status.assert_called_once_with("IDLE")
+        edge_monitoring._edge_monitoring_process.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def start_edge_monitor_job_test(self):
+    async def start_edge_monitor_job_with_exec_on_start_test(self):
+        """
+        Test that the edge monitor job gets scheduled at the expected time
+        when the execution is set to start immediately.
+        """
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
@@ -385,143 +715,366 @@ class TestEdgeMonitoring:
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
-        await edge_monitoring.start_edge_monitor_job(exec_on_start=True)
-        assert scheduler.add_job.called
-        assert scheduler.add_job.call_args[0][0] is edge_monitoring._edge_monitoring_process
-        assert "interval" in scheduler.add_job.call_args[0][1]
-        assert scheduler.add_job.call_args[1]['seconds'] == testconfig.ORCHESTRATOR_CONFIG['monitoring_seconds']
+
+        next_run_time = datetime.now()
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=next_run_time)
+        with patch.object(edge_monitoring_module, 'datetime', new=datetime_mock) as _:
+            with patch.object(edge_monitoring_module, 'timezone', new=Mock()) as _:
+                await edge_monitoring.start_edge_monitor_job(exec_on_start=True)
+
+        scheduler.add_job.assert_called_once_with(
+            edge_monitoring._edge_monitoring_process, 'interval',
+            seconds=testconfig.ORCHESTRATOR_CONFIG['monitoring_seconds'],
+            next_run_time=next_run_time,
+            replace_existing=True,
+            id='_edge_monitoring_process',
+        )
 
     @pytest.mark.asyncio
-    async def _edge_monitoring_process_processing_test(self):
+    async def start_edge_monitor_job_with_no_exec_on_start_test(self):
+        """
+        Test that the edge monitor job gets scheduled at the expected time
+        when its execution is not scheduled for a particular moment.
+        """
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
         scheduler = Mock()
+        scheduler.add_job = Mock()
         edge_repository = Mock()
         status_repository = Mock()
-        status_repository.get_edges_processed = Mock()
-        status_repository.get_edges_to_process = Mock()
-        status_repository.get_status = Mock(return_value="PROCESSING_VELOCLOUD_EDGES")
-        status_repository.set_status = Mock()
-        status_repository.get_current_cycle_timestamp = Mock(return_value=datetime.timestamp(datetime.now()))
         statistic_repository = Mock()
-        service_id = 123
-        await asyncio.sleep(0.1)
         config = testconfig
+        service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
-        await edge_monitoring._edge_monitoring_process()
-        assert status_repository.get_edges_processed.called
-        assert status_repository.get_edges_to_process.called
-        assert status_repository.get_status.called
-        assert status_repository.get_current_cycle_timestamp.called
-        assert status_repository.set_status.called
+        edge_monitoring._edge_monitoring_process = CoroutineMock()
+
+        await edge_monitoring.start_edge_monitor_job(exec_on_start=False)
+
+        scheduler.add_job.assert_called_once_with(
+            edge_monitoring._edge_monitoring_process, 'interval',
+            seconds=testconfig.ORCHESTRATOR_CONFIG['monitoring_seconds'],
+            next_run_time=apscheduler_undefined,
+            replace_existing=True,
+            id='_edge_monitoring_process',
+        )
 
     @pytest.mark.asyncio
-    async def _edge_monitoring_process_idle_test(self):
+    async def edge_monitoring_process_in_idle_status_test(self):
+        """
+        Test how the monitoring process behave when it's set to stay idle.
+        """
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
         scheduler = Mock()
         edge_repository = Mock()
+        config = testconfig
+        service_id = 123
+
+        edge_monitoring_status = "IDLE"
+
         status_repository = Mock()
+        status_repository.get_status = Mock(return_value=edge_monitoring_status)
+        status_repository.set_status = Mock()
         status_repository.set_edges_processed = Mock()
         status_repository.set_current_cycle_timestamp = Mock()
-        status_repository.get_status = Mock(return_value="IDLE")
-        status_repository.set_status = Mock()
-        status_repository.get_current_cycle_timestamp = Mock(return_value=datetime.timestamp(datetime.now()))
+
         statistic_repository = Mock()
+        statistic_repository._statistic_client = Mock()
         statistic_repository._statistic_client.clear_dictionaries = Mock()
-        service_id = 123
-        await asyncio.sleep(0.1)
-        config = testconfig
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
-        edge_monitoring._request_edges = CoroutineMock()
-        await edge_monitoring._edge_monitoring_process()
-        assert statistic_repository._statistic_client.clear_dictionaries.called
-        assert status_repository.set_edges_processed.called
-        assert status_repository.set_current_cycle_timestamp.called
-        assert status_repository.get_status.called
-        assert status_repository.set_status.called
-        assert edge_monitoring._request_edges.called
+        edge_monitoring._process_all_edges = CoroutineMock()
+
+        current_cycle_timestamp = 1000000
+        datetime_mock = Mock()
+        datetime_mock.timestamp = Mock(return_value=current_cycle_timestamp)
+        with patch.object(edge_monitoring_module, 'datetime', new=datetime_mock) as _:
+            with patch.object(edge_monitoring_module, 'timezone', new=Mock()) as _:
+                await edge_monitoring._edge_monitoring_process()
+
+        status_repository.get_status.assert_called()
+        status_repository.set_edges_processed.assert_called_once_with(0)
+        status_repository.set_current_cycle_timestamp.assert_called_once_with(
+            current_cycle_timestamp
+        )
+        edge_monitoring._process_all_edges.assert_awaited_once()
+        status_repository.set_status.assert_has_calls([
+            call("REQUESTING_VELOCLOUD_EDGES"),
+            call("PROCESSING_VELOCLOUD_EDGES"),
+        ], any_order=False)
 
     @pytest.mark.asyncio
-    async def _send_stats_to_notifier_ko_test(self):
+    async def edge_monitoring_process_in_processing_status_with_retriggering_test(self):
+        """
+        Test how the monitoring process behave when it's set to start
+        processing Velocloud edges.
+        In this particular case, the process is triggered again because the
+        execution cycle defined in the configuration expires by the time the
+        process has finished.
+        """
         event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+        logger = Mock()
+        prometheus_repository = Mock()
+        scheduler = Mock()
+        edge_repository = Mock()
+        config = testconfig
+        service_id = 123
+
+        current_timestamp = 100000
+        current_cycle_timestamp = 50000
+
+        status_repository = Mock()
+        status_repository.get_status = Mock(side_effect=[
+            "PROCESSING_VELOCLOUD_EDGES", "IDLE"
+        ])
+        status_repository.set_status = Mock()
+        status_repository.get_edges_processed = Mock()
+        status_repository.set_edges_processed = Mock()
+        status_repository.get_edges_to_process = Mock()
+        status_repository.get_current_cycle_timestamp = Mock(return_value=current_cycle_timestamp)
+        status_repository.set_current_cycle_timestamp = Mock()
+
+        statistic_repository = Mock()
+        statistic_repository._statistic_client = Mock()
+        statistic_repository._statistic_client.clear_dictionaries = Mock()
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+        edge_monitoring._process_all_edges = CoroutineMock()
+
+        datetime_mock = Mock()
+        datetime_mock.timestamp = Mock(return_value=current_timestamp)
+        with patch.object(edge_monitoring_module, 'datetime', new=datetime_mock) as _:
+            with patch.object(edge_monitoring_module, 'timezone', new=Mock()) as _:
+                await edge_monitoring._edge_monitoring_process()
+
+        status_repository.get_status.assert_called()
+        status_repository.get_edges_processed.assert_called_once()
+        status_repository.get_edges_to_process.assert_called_once()
+        status_repository.get_current_cycle_timestamp.assert_called_once()
+        edge_monitoring._process_all_edges.assert_awaited_once()
+        status_repository.set_status.assert_has_calls([
+            call("IDLE"),
+            call("REQUESTING_VELOCLOUD_EDGES"),
+            call("PROCESSING_VELOCLOUD_EDGES"),
+        ], any_order=False)
+
+    @pytest.mark.asyncio
+    async def edge_monitoring_process_in_processing_status_with_no_retriggering_test(self):
+        """
+        Test how the monitoring process behave when it's set to start
+        processing Velocloud edges.
+        In this particular case, the process is NOT triggered again because the
+        execution cycle defined in the configuration has not expired by the
+        time the process has finished.
+        """
+        event_bus = Mock()
+        logger = Mock()
+        prometheus_repository = Mock()
+        scheduler = Mock()
+        edge_repository = Mock()
+        statistic_repository = Mock()
+        config = testconfig
+        service_id = 123
+
+        # We make these two values equal so the status is not set to IDLE
+        current_timestamp = 50000
+        current_cycle_timestamp = current_timestamp
+
+        status_repository = Mock()
+        status_repository.get_status = Mock(return_value="PROCESSING_VELOCLOUD_EDGES")
+        status_repository.set_status = Mock()
+        status_repository.get_edges_processed = Mock()
+        status_repository.get_edges_to_process = Mock()
+        status_repository.get_current_cycle_timestamp = Mock(return_value=current_cycle_timestamp)
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+        edge_monitoring._process_all_edges = CoroutineMock()
+
+        datetime_mock = Mock()
+        datetime_mock.timestamp = Mock(return_value=current_timestamp)
+        with patch.object(edge_monitoring_module, 'datetime', new=datetime_mock) as _:
+            with patch.object(edge_monitoring_module, 'timezone', new=Mock()) as _:
+                await edge_monitoring._edge_monitoring_process()
+
+        status_repository.get_status.assert_called()
+        status_repository.get_edges_processed.assert_called_once()
+        status_repository.get_edges_to_process.assert_called_once()
+        status_repository.get_current_cycle_timestamp.assert_called_once()
+        edge_monitoring._process_all_edges.assert_not_awaited()
+        status_repository.set_status.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def send_stats_to_notifier_with_statistics_test(self):
+        """
+        Test that statistics are sent to the topic for Slack notifications.
+        This test doesn't watch out for the behavior of Redis.
+        """
+        scheduler = Mock()
+        prometheus_repository = Mock()
+        config = Mock()
+        service_id = 123
+
         logger = Mock()
         logger.info = Mock()
         logger.error = Mock()
-        prometheus_repository = Mock()
-        scheduler = Mock()
+
         statistic_repository = Mock()
         statistic_repository._statistic_client.get_statistics = Mock(return_value="Failed Edges Status")
         statistic_repository.store_stats = Mock()
+
         edge_repository = Mock()
-        edge_repository.get_keys = Mock(return_value=['host', 'fail', 'host 2'])
-        edge_repository.get_edge = Mock(return_value=json.dumps({'request_id': 123, 'redis_edge': {'edges':
-                                                                                                   {'edgeState':
-                                                                                                    'DISCONNECTED'}}}))
+        edge_repository.get_keys = Mock(return_value=[])
+
         status_repository = Mock()
         status_repository.get_current_cycle_request_id = Mock(return_value=123)
-        service_id = 123
-        config = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
+
         await edge_monitoring._send_stats_to_notifier()
-        assert status_repository.get_current_cycle_request_id.called
-        assert edge_repository.get_keys.called
-        assert logger.info.called is False
-        assert logger.error.called
-        assert statistic_repository.store_stats.called
-        assert statistic_repository._statistic_client.get_statistics.called
-        assert event_bus.publish_message.call_args[0][0] == "notification.slack.request"
-        assert event_bus.publish_message.call_args[0][1] == json.dumps(dict(request_id=123,
-                                                                            response_topic=f'notification.'
-                                                                            f'slack.request.{service_id}',
-                                                                            message="Failed Edges Status"))
+
+        statistic_repository._statistic_client.get_statistics.assert_called_once()
+        event_bus.rpc_request.assert_awaited_once_with(
+            'notification.slack.request',
+            json.dumps({
+                'request_id': 123,
+                'message': "Failed Edges Status"
+            }),
+            timeout=5,
+        )
 
     @pytest.mark.asyncio
-    async def _send_stats_to_notifier_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+    async def send_stats_to_notifier_with_no_statistics_test(self):
+        """
+        Test that statistics are NOT sent to the topic for Slack notifications
+        if there are no statistics registered.
+        This test doesn't watch out for the behavior of Redis.
+        """
+        scheduler = Mock()
+        prometheus_repository = Mock()
+        config = Mock()
+        service_id = 123
+
         logger = Mock()
         logger.info = Mock()
         logger.error = Mock()
-        prometheus_repository = Mock()
-        scheduler = Mock()
+
         statistic_repository = Mock()
         statistic_repository._statistic_client.get_statistics = Mock(return_value=None)
+        statistic_repository.store_stats = Mock()
+
         edge_repository = Mock()
-        edge_repository.get_keys = Mock(return_value=['host', 'fail', 'host 2'])
-        edge_repository.get_edge = Mock(return_value=json.dumps({'request_id': 123, 'redis_edge': {'edges':
-                                                                                                   {'edgeState':
-                                                                                                    'CONNECTED'}}}))
+        edge_repository.get_keys = Mock(return_value=[])
+
         status_repository = Mock()
         status_repository.get_current_cycle_request_id = Mock(return_value=123)
-        service_id = 123
-        config = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
                                          status_repository, statistic_repository, service_id, config)
 
         await edge_monitoring._send_stats_to_notifier()
-        assert status_repository.get_current_cycle_request_id.called
-        assert edge_repository.get_keys.called
-        assert logger.info.called
-        assert logger.error.called
-        assert statistic_repository.store.called is False
-        assert statistic_repository._statistic_client.get_statistics.called
-        assert event_bus.publish_message.called is False
-        statistic_repository._statistic_client.get_statistics = Mock(return_value="Failed Edge Report")
-        status_repository.get_current_cycle_request_id = Mock(return_value=124)
+
+        statistic_repository._statistic_client.get_statistics.assert_called_once()
+        event_bus.rpc_request.assert_not_awaited()
+        logger.error.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def send_stats_to_notifier_with_redis_data_test(self):
+        """
+        Test how stats are updated within the statistics client by using edges
+        info, which is stored in Redis.
+        """
+        scheduler = Mock()
+        prometheus_repository = Mock()
+        config = Mock()
+        service_id = 123
+        current_cycle_request_id = 567
+
+        redis_edge_info_1 = {
+            'enterprise_name': 'evil-corp',
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'link': {'state': 'CONNECTED'}},
+                {'link': {'state': 'DISCONNECTED'}},
+            ],
+        }
+
+        redis_edge_info_2 = {
+            'enterprise_name': 'evil-corp',
+            'edges': {'edgeState': 'DISCONNECTED'},
+            'links': [
+                {'link': {'state': 'CONNECTED'}},
+                {'link': {'state': 'DISCONNECTED'}},
+            ],
+        }
+
+        redis_edge_info_3 = {
+            'enterprise_name': 'evil-corp',
+            'edges': {'edgeState': 'DISCONNECTED'},
+            'links': [
+                {'link': {'state': 'DISCONNECTED'}},
+                {'link': {'state': 'DISCONNECTED'}},
+            ],
+        }
+
+        logger = Mock()
+        logger.info = Mock()
+        logger.error = Mock()
+
+        statistic_repository = Mock()
+        statistic_repository._statistic_client.get_statistics = Mock(return_value="Failed Edges Status")
+        statistic_repository.store_stats = Mock()
+
+        edge_repository = Mock()
+        edge_repository.get_keys = Mock(return_value=['host-1', 'fail', 'host-2', 'host 3'])
+        edge_repository.get_edge = Mock(side_effect=[
+            json.dumps({
+                'request_id': current_cycle_request_id,
+                'redis_edge': redis_edge_info_1,
+            }),
+            json.dumps({
+                'request_id': 789,
+                'redis_edge': redis_edge_info_2,
+            }),
+            json.dumps({
+                'request_id': current_cycle_request_id,
+                'redis_edge': redis_edge_info_3,
+            }),
+        ])
+
+        status_repository = Mock()
+        status_repository.get_current_cycle_request_id = Mock(return_value=current_cycle_request_id)
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
+                                         status_repository, statistic_repository, service_id, config)
+
         await edge_monitoring._send_stats_to_notifier()
-        assert status_repository.get_current_cycle_request_id.called
-        assert edge_repository.get_keys.called
-        assert statistic_repository.send_to_stats_client.called is False
-        assert statistic_repository._statistic_client.get_statistics.called
-        assert event_bus.publish_message.called
+
+        edge_repository.get_keys.assert_called_once()
+        edge_repository.get_edge.assert_has_calls([
+            call('host-1'), call('host-2'), call('host 3')
+        ])
+
+        # Two edges are CONNECTED, but only one has current_cycle_request_id as its request_id
+        logger.info.assert_called_once()
+
+        # One edge is DISCONNECTED with current_cycle_request_id as its request_id
+        logger.error.assert_called_once()  # One edge is DISCONNECTED
+        statistic_repository.store_stats.assert_called_once_with(redis_edge_info_3)
