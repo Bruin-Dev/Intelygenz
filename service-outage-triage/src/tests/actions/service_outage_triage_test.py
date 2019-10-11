@@ -387,7 +387,6 @@ class TestServiceOutageTriage:
         service_outage_triage._compose_event_note_object = Mock(return_value=" Ticket Note Object \n")
 
         await service_outage_triage._check_for_new_events('2019-07-30 00:26:00-04:00', ticket)
-
         assert event_bus.rpc_request.called
         assert '2019-07-30 00:26:00-04:00' in event_bus.rpc_request.mock_calls[0][1][1]
         assert logger.info.called
@@ -424,16 +423,36 @@ class TestServiceOutageTriage:
         assert service_outage_triage._compose_event_note_object.called is False
 
     @pytest.mark.asyncio
-    async def check_for_new_events_pro_edge_test(self):
+    async def check_for_new_events_long_note_less_than_2_pro_test(self):
         event_bus = Mock()
 
         events_to_report = {'events': {'data': [{'event': 'EDGE_UP', 'category': 'EDGE',
                                                  'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'},
+                                                {'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
                                                  'message': 'An Edge'}]}}
         append_ticket = {'ticket_appeneded': 'Success'}
         send_to_slack = {'slack_sent': 'Success'}
+        long_note = "This note is supposed to be 1500 characters long!!This note is supposed to be 1500 characters " \
+                    "long!!This note is supposed to be 1500 characters long!!This note is supposed to be 1500 " \
+                    "characters long!!This note is supposed to be 1500 characters long!!This note is supposed to be " \
+                    "1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed to "\
+                    "be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed "\
+                    "to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is " \
+                    "supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note "\
+                    "is supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This " \
+                    "note is supposed to be 1500 characters long!!This note is supposed to be 1500 characters " \
+                    "long!!This note is supposed to be 1500 characters long!!This note is supposed to be 1500 " \
+                    "characters long!!This note is supposed to be 1500 characters long!!This note is supposed to be " \
+                    "1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed to "\
+                    "be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed "\
+                    "to be 1500 characters long!!This note is supposed to be 1500 characters long!!!!This note is " \
+                    "supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note "\
+                    "is supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!! "
 
-        event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack])
+        event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack,
+                                                           append_ticket, send_to_slack])
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -442,13 +461,131 @@ class TestServiceOutageTriage:
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
-        service_outage_triage._compose_event_note_object = Mock(return_value=" Ticket Note Object \n")
+        service_outage_triage._compose_event_note_object = Mock(return_value=long_note)
 
         await service_outage_triage._check_for_new_events('2019-07-30 00:26:00-04:00', ticket)
 
         assert event_bus.rpc_request.called
-        assert '2019-07-30 00:26:00-04:00' in event_bus.rpc_request.mock_calls[0][1][1]
-        assert 'Ticket Note Object' in event_bus.rpc_request.mock_calls[1][1][1]
+        assert len(event_bus.rpc_request.mock_calls) == 5
+        assert service_outage_triage._compose_event_note_object.called
+
+    @pytest.mark.asyncio
+    async def check_for_new_events_long_note_greater_2_pro_test(self):
+        event_bus = Mock()
+
+        events_to_report = {'events': {'data': [{'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'},
+                                                {'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'},
+                                                {'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'},
+                                                {'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'},
+                                                {'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'}
+                                                ]}}
+        append_ticket = {'ticket_appeneded': 'Success'}
+        send_to_slack = {'slack_sent': 'Success'}
+        long_note = "This note is supposed to be 1500 characters long!!This note is supposed to be 1500 characters " \
+                    "long!!This note is supposed to be 1500 characters long!!This note is supposed to be 1500 " \
+                    "characters long!!This note is supposed to be 1500 characters long!!This note is supposed to be " \
+                    "1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed to "\
+                    "be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed "\
+                    "to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is " \
+                    "supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note "\
+                    "is supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This " \
+                    "note is supposed to be 1500 characters long!!This note is supposed to be 1500 characters " \
+                    "long!!This note is supposed to be 1500 characters long!!This note is supposed to be 1500 " \
+                    "characters long!!This note is supposed to be 1500 characters long!!This note is supposed to be " \
+                    "1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed to "\
+                    "be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed "\
+                    "to be 1500 characters long!!This note is supposed to be 1500 characters long!!!!This note is " \
+                    "supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note "\
+                    "is supposed to be 1500 characters long!!This note is supposed to be 1500 characters long"
+        super_long_note = 2 * (long_note + long_note)
+        event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack,
+                                                           append_ticket, send_to_slack,
+                                                           append_ticket, send_to_slack,
+                                                           append_ticket, send_to_slack,
+                                                           append_ticket, send_to_slack])
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        config.TRIAGE_CONFIG['environment'] = 'production'
+        service_id = 123
+        ticket = {"ticketID": 123, "serial": "VC05200026138"}
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage._compose_event_note_object = Mock(return_value=super_long_note)
+
+        await service_outage_triage._check_for_new_events('2019-07-30 00:26:00-04:00', ticket)
+
+        assert event_bus.rpc_request.called
+        assert len(event_bus.rpc_request.mock_calls) == 11
+        assert service_outage_triage._compose_event_note_object.called
+
+    @pytest.mark.asyncio
+    async def check_for_new_events_long_note_greater_2_remainder_greater_0_pro_test(self):
+        event_bus = Mock()
+
+        events_to_report = {'events': {'data': [{'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'},
+                                                {'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'},
+                                                {'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'},
+                                                {'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'},
+                                                {'event': 'EDGE_UP', 'category': 'EDGE',
+                                                 'eventTime': '2019-07-30 06:38:00+00:00',
+                                                 'message': 'An Edge'}
+                                                ]}}
+        append_ticket = {'ticket_appeneded': 'Success'}
+        send_to_slack = {'slack_sent': 'Success'}
+        long_note = "This note is supposed to be 1500 characters long!!This note is supposed to be 1500 characters " \
+                    "long!!This note is supposed to be 1500 characters long!!This note is supposed to be 1500 " \
+                    "characters long!!This note is supposed to be 1500 characters long!!This note is supposed to be " \
+                    "1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed to "\
+                    "be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed "\
+                    "to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is " \
+                    "supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note "\
+                    "is supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This " \
+                    "note is supposed to be 1500 characters long!!This note is supposed to be 1500 characters " \
+                    "long!!This note is supposed to be 1500 characters long!!This note is supposed to be 1500 " \
+                    "characters long!!This note is supposed to be 1500 characters long!!This note is supposed to be " \
+                    "1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed to "\
+                    "be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed "\
+                    "to be 1500 characters long!!This note is supposed to be 1500 characters long!!!!This note is " \
+                    "supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note "
+        super_long_note = 2 * (long_note + long_note)
+        event_bus.rpc_request = CoroutineMock(side_effect=[events_to_report, append_ticket, send_to_slack,
+                                                           append_ticket, send_to_slack,
+                                                           append_ticket, send_to_slack,
+                                                           append_ticket, send_to_slack,
+                                                           append_ticket, send_to_slack])
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        config.TRIAGE_CONFIG['environment'] = 'production'
+        service_id = 123
+        ticket = {"ticketID": 123, "serial": "VC05200026138"}
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage._compose_event_note_object = Mock(return_value=super_long_note)
+
+        await service_outage_triage._check_for_new_events('2019-07-30 00:26:00-04:00', ticket)
+
+        assert event_bus.rpc_request.called
+        assert len(event_bus.rpc_request.mock_calls) == 11
         assert service_outage_triage._compose_event_note_object.called
 
     @pytest.mark.asyncio

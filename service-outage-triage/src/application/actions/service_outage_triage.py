@@ -180,19 +180,19 @@ class ServiceOutageTriage:
             event_str = self._compose_event_note_object(sorted_event_list)
 
             quotient = len(event_str) // 1000
-
-            split_amount = 0
             step_amount = len(sorted_event_list)
-            if quotient > 0:
+
+            if quotient == 2 or quotient == 1:
+                step_amount = (len(sorted_event_list)) // 2
+            if quotient > 2:
                 if len(event_str) % 1000 == 0:
                     split_amount = quotient - 1
-                elif len(event_str) % 1000 > 0:
+                else:
                     split_amount = quotient
                 step_amount = (len(sorted_event_list) // split_amount)
 
             split_event_lists = [sorted_event_list[i:i + step_amount] for i in range(0, len(sorted_event_list),
                                                                                      step_amount)]
-
             for events in split_event_lists:
                 event_obj = self._compose_event_note_object(events)
                 event_timestamp = parse(events[len(events) - 1]["eventTime"]).astimezone(timezone("US/Eastern"))
