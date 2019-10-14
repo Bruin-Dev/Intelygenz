@@ -23,6 +23,7 @@ class PostNote:
             status = 400
 
         if result is not None:
+            self._logger.info(f'Note put in: {ticket_id}!')
             status = 200
         response = {
             'request_id': msg_dict['request_id'],
@@ -30,4 +31,3 @@ class PostNote:
         }
         await self._event_bus.publish_message(msg_dict['response_topic'],
                                               json.dumps(response, default=str))
-        self._logger.info(f'Note put in: {ticket_id}!')
