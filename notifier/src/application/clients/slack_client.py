@@ -22,8 +22,10 @@ class SlackClient:
             return response
 
         if response.status_code != 200:
-            self._logger.error('HTTP error ' + str(response.status_code))
-            return 'HTTP error ' + str(response.status_code)
+            error_msg = f'ERROR - Request returned HTTP {response.status_code}'
+            self._logger.error(error_msg)
+            return error_msg
         else:
-            self._logger.info(str(msg) + ' sent with a status code of ' + str(response.status_code))
-            return str(msg) + 'sent with status code of ' + str(response.status_code)
+            info_msg = f'Request with message {str(msg)} returned a response with status code {response.status_code}'
+            self._logger.info(info_msg)
+            return info_msg

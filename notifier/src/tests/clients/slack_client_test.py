@@ -1,51 +1,91 @@
+from application.clients import slack_client
 from application.clients.slack_client import SlackClient
 from unittest.mock import Mock, patch
 from config import testconfig as config
 import requests
+import json
 
 
 class TestSlackClient:
 
     def instantiation_test(self):
+        """
+        Test that the SlackClient instance contains the expected
+        attributes.
+        """
         mock_logger = Mock()
+
         test_client = SlackClient(config, mock_logger)
-        assert test_client._config == config.SLACK_CONFIG
+
+        assert test_client._config is config.SLACK_CONFIG
         assert test_client._url == config.SLACK_CONFIG['webhook'][0]
         assert test_client._logger is mock_logger
 
-    def ok_send_to_slack_test(self):
-        test_msg = {'text': str(Mock())}
+    def send_to_slack_test(self):
+        """
+        Test that the notification is sent to the Slack channel as expected.
+        """
         mock_logger = Mock()
+        test_msg = {'text': 'This is a dummy message'}
+        msg_delivery_status = 200
+        test_response = (
+            f'Request with message {str(test_msg)} '
+            f'returned a response with status code {msg_delivery_status}'
+        )
+
         test_client = SlackClient(config, mock_logger)
         test_client._logger.info = Mock()
-        with patch.object(requests, 'post') as post_mock:
-            post_mock.return_value = mock_response = Mock()
-            mock_response.status_code = 200
-            response = test_client.send_to_slack(test_msg)
-            test_response = str(test_msg) + 'sent with status code of ' + str(200)
-            assert post_mock.called
-            assert response == test_response
-            assert test_client._logger.info.called
 
-    def ko_send_to_slack_bad_status_code_test(self):
-        test_msg = {'text': str(Mock())}
+        with patch.object(slack_client.requests, 'post') as post_mock:
+            post_mock.return_value.status_code = msg_delivery_status
+
+            response = test_client.send_to_slack(test_msg)
+
+            post_mock.assert_called_once_with(
+                test_client._url,
+                data=json.dumps(test_msg)
+            )
+            test_client._logger.info.assert_called_once()
+            assert response == test_response
+
+    def send_to_slack_with_bad_status_code_test(self):
+        """
+        Test the behaviour of the Slack client when the status code of the
+        response is different from 200.
+        """
         mock_logger = Mock()
+        test_msg = {'text': 'This is a dummy message'}
+        msg_delivery_status = 404
+        test_response = f'ERROR - Request returned HTTP {msg_delivery_status}'
+
         test_client = SlackClient(config, mock_logger)
         test_client._logger.error = Mock()
-        with patch.object(requests, 'post') as post_mock:
-            post_mock.return_value = mock_response = Mock()
-            mock_response.status_code = 404
-            response = test_client.send_to_slack(test_msg)
-            test_response = 'HTTP error ' + str(mock_response.status_code)
-            assert response == test_response
-            assert test_client._logger.error.called
 
-    def ko_send_to_slack_invalid_url_test(self):
-        test_msg = {'text': str(Mock())}
+        with patch.object(slack_client.requests, 'post') as post_mock:
+            post_mock.return_value.status_code = msg_delivery_status
+
+            response = test_client.send_to_slack(test_msg)
+
+            post_mock.assert_called_once_with(
+                test_client._url,
+                data=json.dumps(test_msg)
+            )
+            test_client._logger.error.assert_called_once()
+            assert response == test_response
+
+    def send_to_slack_with_insecure_url_test(self):
+        """
+        Test the behaviour of the Slack client when the URL the message is
+        sent to is not secure (i.e., it doesn't use HTTPS protocol).
+        """
         mock_logger = Mock()
+        test_msg = {'text': 'This is a dummy message'}
+
         test_client = SlackClient(config, mock_logger)
+        test_client._url = 'http://slack.com'
         test_client._logger.error = Mock()
-        test_client._url = 'test_url.com'
+
         response = test_client.send_to_slack(test_msg)
+
+        test_client._logger.error.assert_called_once()
         assert response is None
-        assert test_client._logger.error.called

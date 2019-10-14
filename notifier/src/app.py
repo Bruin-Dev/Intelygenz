@@ -1,6 +1,6 @@
 import asyncio
 from config import config
-from igz.packages.nats.clients import NatsStreamingClient
+from igz.packages.nats.clients import NATSClient
 from application.clients.email_client import EmailClient
 from application.clients.slack_client import SlackClient
 from application.repositories.email_repository import EmailRepository
@@ -19,11 +19,9 @@ class Container:
 
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("Notifier starting...")
-        self._subscriber_email = NatsStreamingClient(config, f'notifier-mail-subscriber-',
-                                                     logger=self._logger)
-        self._subscriber_slack = NatsStreamingClient(config, f'notifier-slack-subscriber-',
-                                                     logger=self._logger)
-        self._publisher = NatsStreamingClient(config, f'notifier-publisher-', logger=self._logger)
+        self._subscriber_email = NATSClient(config, logger=self._logger)
+        self._subscriber_slack = NATSClient(config, logger=self._logger)
+        self._publisher = NATSClient(config, logger=self._logger)
 
         self._email_client = EmailClient(config, self._logger)
         self._email_repo = EmailRepository(config, self._email_client, self._logger)
@@ -52,13 +50,11 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="notification_email_request",
                                                  topic="notification.email.request",
                                                  action_wrapper=self._send_email_wrapper,
-                                                 durable_name="notifier",
                                                  queue="notifier")
 
         await self._event_bus.subscribe_consumer(consumer_name="notification_slack_request",
                                                  topic="notification.slack.request",
                                                  action_wrapper=self._send_slack_wrapper,
-                                                 durable_name="notifier",
                                                  queue="notifier")
 
     async def start_server(self):
