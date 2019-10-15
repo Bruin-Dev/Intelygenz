@@ -160,3 +160,43 @@ class TestBruinClient:
         assert requests.post.called
         assert requests.post.call_args[1]['json']['note'] == 'Ticket Notes'
         assert post_ticket is None
+
+    def post_ticket_ok_test(self):
+        logger = Mock()
+        response = Mock()
+        response.json = Mock(return_value='Ticket Created')
+        response.status_code = 200
+        requests.post = Mock(return_value=response)
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        post_ticket = bruin_client.post_ticket(123, 'Some Category', ['Services'], ['Notes'], ['Contacts'])
+        assert requests.post.called
+        assert requests.post.call_args[1]['json']['clientId'] == 123
+        assert requests.post.call_args[1]['json']['category'] == 'Some Category'
+        assert requests.post.call_args[1]['json']['services'] == ['Services']
+        assert requests.post.call_args[1]['json']['notes'] == ['Notes']
+        assert requests.post.call_args[1]['json']['contacts'] == ['Contacts']
+        assert post_ticket == 'Ticket Created'
+
+    def post_ticket_ko_test(self):
+        logger = Mock()
+        response = Mock()
+        response.json = Mock(return_value='Ticket Created')
+        response.status_code = 500
+        requests.post = Mock(return_value=response)
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = Mock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        post_ticket = None
+        try:
+            post_ticket = bruin_client.post_ticket(123, 'Some Category', ['Services'], ['Notes'], ['Contacts'])
+        except Exception as e:
+            error = e
+        assert isinstance(error, RetryError)
+        assert requests.post.called
+        assert requests.post.call_args[1]['json']['clientId'] == 123
+        assert requests.post.call_args[1]['json']['category'] == 'Some Category'
+        assert requests.post.call_args[1]['json']['services'] == ['Services']
+        assert requests.post.call_args[1]['json']['notes'] == ['Notes']
+        assert requests.post.call_args[1]['json']['contacts'] == ['Contacts']
+        assert post_ticket is None

@@ -71,3 +71,17 @@ class TestBruinRepository:
         assert bruin_client.post_ticket_note.call_args[0][0] == 123
         assert bruin_client.post_ticket_note.call_args[0][1] == 'TicketNote'
         assert appened_ticket == 'Ticket Appended'
+
+    def post_ticket_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+        bruin_client.post_ticket = Mock(return_value='Ticket Created')
+        bruin_repository = BruinRepository(logger, bruin_client)
+        create_ticket = bruin_repository.post_ticket(123, 'Some Category', ['Services'], ['Notes'], ['Contacts'])
+        assert bruin_client.post_ticket.called
+        assert bruin_client.post_ticket.call_args[0][0] == 123
+        assert bruin_client.post_ticket.call_args[0][1] == 'Some Category'
+        assert bruin_client.post_ticket.call_args[0][2] == ['Services']
+        assert bruin_client.post_ticket.call_args[0][3] == ['Notes']
+        assert bruin_client.post_ticket.call_args[0][4] == ['Contacts']
+        assert create_ticket == 'Ticket Created'

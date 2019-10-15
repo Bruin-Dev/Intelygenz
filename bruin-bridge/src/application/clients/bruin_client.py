@@ -112,3 +112,28 @@ class BruinClient:
                 self.login()
                 raise Exception
         return post_ticket_note(ticket_id, ticket_note)
+
+    def post_ticket(self, client_id, category, services, notes, contacts):
+        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
+                                     min=self._config.NATS_CONFIG['min']),
+               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        def post_ticket(client_id, category, services, notes, contacts):
+            self._logger.info(f'Posting note for client id:{client_id}')
+            payload = {
+              "clientId": client_id,
+              "category": category,
+              "services": services,
+              "notes": notes,
+              "contacts": contacts
+            }
+            response = requests.post(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/',
+                                     headers=self._get_request_headers(),
+                                     json=payload,
+                                     verify=False)
+
+            if response.status_code in range(200, 299):
+                return response.json()
+            else:
+                self.login()
+                raise Exception
+        return post_ticket(client_id, category, services, notes, contacts)

@@ -4,6 +4,7 @@ from application.repositories.bruin_repository import BruinRepository
 from application.actions.get_tickets import GetTicket
 from application.actions.get_ticket_details import GetTicketDetails
 from application.actions.post_note import PostNote
+from application.actions.post_note import PostTicket
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
@@ -24,17 +25,21 @@ class Container:
         self._subscriber_tickets = NatsStreamingClient(config, f'bruin-bridge-subscriber-', logger=self._logger)
         self._subscriber_details = NatsStreamingClient(config, f'bruin-bridge-subscriber-', logger=self._logger)
         self._subscriber_post_note = NatsStreamingClient(config, f'bruin-bridge-subscriber-', logger=self._logger)
+        self._subscriber_post_ticket = NatsStreamingClient(config, f'bruin-bridge-subscriber-', logger=self._logger)
 
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
         self._event_bus.add_consumer(self._subscriber_details, consumer_name="ticket_details")
         self._event_bus.add_consumer(self._subscriber_post_note, consumer_name="post_note")
+        self._event_bus.add_consumer(self._subscriber_post_ticket, consumer_name="post_ticket")
+
         self._event_bus.set_producer(self._publisher)
 
         self._get_tickets = GetTicket(self._logger, config.BRUIN_CONFIG, self._event_bus,
                                       self._bruin_repository)
         self._get_ticket_details = GetTicketDetails(self._logger, self._event_bus, self._bruin_repository)
         self._post_note = PostNote(self._logger, self._event_bus, self._bruin_repository)
+        self._post_ticket = PostTicket(self._logger, self._event_bus, self._bruin_repository)
 
         self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
                                                   is_async=True, logger=self._logger)
@@ -42,6 +47,8 @@ class Container:
                                                        is_async=True, logger=self._logger)
         self._action_post_note = ActionWrapper(self._post_note, "post_note",
                                                is_async=True, logger=self._logger)
+        self._action_post_ticket = ActionWrapper(self._post_ticket, "post_ticket",
+                                                 is_async=True, logger=self._logger)
         self._server = QuartServer(config)
 
     async def start(self):
@@ -59,6 +66,11 @@ class Container:
                                                  ack_wait=480)
         await self._event_bus.subscribe_consumer(consumer_name="post_note", topic="bruin.ticket.note.append.request",
                                                  action_wrapper=self._action_post_note,
+                                                 durable_name="bruin_bridge",
+                                                 queue="bruin_bridge",
+                                                 ack_wait=480)
+        await self._event_bus.subscribe_consumer(consumer_name="post_ticket", topic="bruin.ticket.creation.request",
+                                                 action_wrapper=self._action_post_ticket,
                                                  durable_name="bruin_bridge",
                                                  queue="bruin_bridge",
                                                  ack_wait=480)

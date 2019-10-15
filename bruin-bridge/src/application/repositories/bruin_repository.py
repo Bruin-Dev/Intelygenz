@@ -21,3 +21,6 @@ class BruinRepository:
 
     def post_ticket_note(self, ticket_id, note):
         return self._bruin_client.post_ticket_note(ticket_id, note)
+
+    def post_ticket(self, client_id, category, services, notes, contacts):
+        return self._bruin_client.post_ticket(client_id, category, services, notes, contacts)
