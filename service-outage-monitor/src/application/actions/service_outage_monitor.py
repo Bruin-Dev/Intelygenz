@@ -53,15 +53,18 @@ class ServiceOutageMonitor:
     async def _service_outage_monitor_process(self):
         edge_list_request = {'request_id': uuid(),
                              'response_topic': f'edge.list.response.{self._service_id}',
-                             'filter': []}
-        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(edge_list_request), timeout=30)
+                             'filter': [{'host': 'mettel.velocloud.net', 'enterprise_ids': []},
+                                        {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
+                                        {'host': 'metvco04.mettel.net', 'enterprise_ids': []}]}
+        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(edge_list_request), timeout=60)
         self._logger.info(f'Edge list received from event bus')
         self._logger.info(f'Splitting and sending edges to the event bus')
         for edge in edge_list['edges']:
             edge_status_request = {'request_id': uuid(),
                                    'response_topic': f'edge.status.response.{self._service_id}',
                                    'edge': edge}
-            edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(edge_status_request))
+            edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(edge_status_request),
+                                                            timeout=45)
             self._logger.info(f'Edge received from event bus')
             if edge_status["edge_info"]["edges"]["edgeState"] == 'CONNECTED':
                 self._logger.info('Edge seems OK')
