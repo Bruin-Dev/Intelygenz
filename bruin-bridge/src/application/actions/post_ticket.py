@@ -10,7 +10,7 @@ class PostTicket:
 
     async def post_ticket(self, msg):
         msg_dict = json.loads(msg)
-        client_id = msg_dict["client_id"]
+        client_id = msg_dict["clientId"]
         category = msg_dict["category"]
         services = msg_dict["services"]
         notes = []
@@ -25,8 +25,9 @@ class PostTicket:
             status = 200
         response = {
             'request_id': msg_dict['request_id'],
+            'ticketIds': result,
             'status': status
         }
         await self._event_bus.publish_message(msg_dict['response_topic'],
                                               json.dumps(response, default=str))
-        self._logger.info(f'Ticket created for client id: {client_id}...')
+        self._logger.info(f'Ticket created for client id: {client_id} with ticket id: {result["ticketIds"][0]}')

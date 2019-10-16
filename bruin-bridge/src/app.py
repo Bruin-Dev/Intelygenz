@@ -4,7 +4,7 @@ from application.repositories.bruin_repository import BruinRepository
 from application.actions.get_tickets import GetTicket
 from application.actions.get_ticket_details import GetTicketDetails
 from application.actions.post_note import PostNote
-from application.actions.post_note import PostTicket
+from application.actions.post_ticket import PostTicket
 from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
