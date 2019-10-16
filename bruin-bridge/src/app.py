@@ -4,8 +4,8 @@ from application.repositories.bruin_repository import BruinRepository
 from application.actions.get_tickets import GetTicket
 from application.actions.get_ticket_details import GetTicketDetails
 from application.actions.post_note import PostNote
+from igz.packages.nats.clients import NATSClient
 from application.actions.post_ticket import PostTicket
-from igz.packages.nats.clients import NatsStreamingClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 
@@ -21,11 +21,11 @@ class Container:
         self._logger.info("Bruin bridge starting...")
         self._bruin_client = BruinClient(self._logger, config)
         self._bruin_repository = BruinRepository(self._logger, self._bruin_client)
-        self._publisher = NatsStreamingClient(config, f'bruin-bridge-publisher-', logger=self._logger)
-        self._subscriber_tickets = NatsStreamingClient(config, f'bruin-bridge-subscriber-', logger=self._logger)
-        self._subscriber_details = NatsStreamingClient(config, f'bruin-bridge-subscriber-', logger=self._logger)
-        self._subscriber_post_note = NatsStreamingClient(config, f'bruin-bridge-subscriber-', logger=self._logger)
-        self._subscriber_post_ticket = NatsStreamingClient(config, f'bruin-bridge-subscriber-', logger=self._logger)
+        self._publisher = NATSClient(config, logger=self._logger)
+        self._subscriber_tickets = NATSClient(config, logger=self._logger)
+        self._subscriber_details = NATSClient(config, logger=self._logger)
+        self._subscriber_post_note = NATSClient(config, logger=self._logger)
+        self._subscriber_post_ticket = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
@@ -56,24 +56,17 @@ class Container:
         self._bruin_client.login()
         await self._event_bus.subscribe_consumer(consumer_name="tickets", topic="bruin.ticket.request",
                                                  action_wrapper=self._report_bruin_ticket,
-                                                 durable_name="bruin_bridge",
-                                                 queue="bruin_bridge",
-                                                 ack_wait=480)
+                                                 queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="ticket_details", topic="bruin.ticket.details.request",
                                                  action_wrapper=self._action_get_ticket_detail,
-                                                 durable_name="bruin_bridge",
-                                                 queue="bruin_bridge",
-                                                 ack_wait=480)
+                                                 queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="post_note", topic="bruin.ticket.note.append.request",
                                                  action_wrapper=self._action_post_note,
-                                                 durable_name="bruin_bridge",
-                                                 queue="bruin_bridge",
-                                                 ack_wait=480)
+                                                 queue="bruin_bridge")
+
         await self._event_bus.subscribe_consumer(consumer_name="post_ticket", topic="bruin.ticket.creation.request",
                                                  action_wrapper=self._action_post_ticket,
-                                                 durable_name="bruin_bridge",
-                                                 queue="bruin_bridge",
-                                                 ack_wait=480)
+                                                 queue="bruin_bridge")
 
     async def start_server(self):
         await self._server.run_server()

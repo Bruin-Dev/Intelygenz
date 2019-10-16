@@ -14,7 +14,9 @@ class TestPostNote:
         logger = Mock()
         event_bus = Mock()
         bruin_repository = Mock()
+
         post_note = PostNote(logger, event_bus, bruin_repository)
+
         assert post_note._logger is logger
         assert post_note._event_bus is event_bus
         assert post_note._bruin_repository is bruin_repository
@@ -22,76 +24,102 @@ class TestPostNote:
     @pytest.mark.asyncio
     async def post_note_test(self):
         logger = Mock()
+        append_note_response = 'Note appended'
+        request_id = 123
+        ticket_id = 321
+        response_topic = 'bruin.ticket.note.append.response'
+        note_contents = 'Some Note'
+        msg = {
+            'request_id': request_id,
+            'response_topic': response_topic,
+            'ticket_id': ticket_id,
+            'note': note_contents,
+        }
+        msg_published_in_topic = {
+            'request_id': request_id,
+            'status': 200
+        }
+
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
+
         bruin_repository = Mock()
-        bruin_repository.post_ticket_note = Mock(return_value='Note appeneded')
-        msg = {'request_id': 123,
-               'response_topic': f'bruin.ticket.note.append.response',
-               'ticket_id': 321,
-               'note': 'Some Note'}
+        bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
+
         post_note = PostNote(logger, event_bus, bruin_repository)
         await post_note.post_note(json.dumps(msg))
-        assert bruin_repository.post_ticket_note.called
-        assert bruin_repository.post_ticket_note.call_args[0][0] == msg['ticket_id']
-        assert bruin_repository.post_ticket_note.call_args[0][1] == msg['note']
-        assert event_bus.publish_message.called
-        assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
-        assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
-                                                                        'status': 200})
+
+        post_note._bruin_repository.post_ticket_note.assert_called_once_with(
+            ticket_id, note_contents
+        )
+        post_note._event_bus.publish_message.assert_awaited_once_with(
+            response_topic, json.dumps(msg_published_in_topic)
+        )
 
     @pytest.mark.asyncio
-    async def post_note_long_message_test(self):
+    async def post_note_with_very_long_message_test(self):
         logger = Mock()
+        append_note_response = 'Note appended'
+        request_id = 123
+        ticket_id = 321
+        response_topic = 'bruin.ticket.note.append.response'
+        note_contents = 'X' * 1500
+        msg = {
+            'request_id': request_id,
+            'response_topic': response_topic,
+            'ticket_id': ticket_id,
+            'note': note_contents,
+        }
+        msg_published_in_topic = {
+            'request_id': request_id,
+            'status': 400
+        }
+
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
+
         bruin_repository = Mock()
-        bruin_repository.post_ticket_note = Mock(return_value='Note appeneded')
-        long_note = "This note is supposed to be 1500 characters long!!This note is supposed to be 1500 characters " \
-                    "long!!This note is supposed to be 1500 characters long!!This note is supposed to be 1500 " \
-                    "characters long!!This note is supposed to be 1500 characters long!!This note is supposed to be " \
-                    "1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed to "\
-                    "be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed "\
-                    "to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is " \
-                    "supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note "\
-                    "is supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This " \
-                    "note is supposed to be 1500 characters long!!This note is supposed to be 1500 characters " \
-                    "long!!This note is supposed to be 1500 characters long!!This note is supposed to be 1500 " \
-                    "characters long!!This note is supposed to be 1500 characters long!!This note is supposed to be " \
-                    "1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed to "\
-                    "be 1500 characters long!!This note is supposed to be 1500 characters long!!This note is supposed "\
-                    "to be 1500 characters long!!This note is supposed to be 1500 characters long!!!!This note is " \
-                    "supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!!This note "\
-                    "is supposed to be 1500 characters long!!This note is supposed to be 1500 characters long!! "
-        msg = {'request_id': 123,
-               'response_topic': f'bruin.ticket.note.append.response',
-               'ticket_id': 321,
-               'note': long_note}
+        bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
+
         post_note = PostNote(logger, event_bus, bruin_repository)
         await post_note.post_note(json.dumps(msg))
-        assert bruin_repository.post_ticket_note.called is False
-        assert event_bus.publish_message.called
-        assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
-        assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
-                                                                        'status': 400})
+
+        post_note._bruin_repository.post_ticket_note.assert_not_called()
+        post_note._event_bus.publish_message.assert_awaited_once_with(
+            response_topic, json.dumps(msg_published_in_topic)
+        )
 
     @pytest.mark.asyncio
-    async def post_note_none_return_test(self):
+    async def post_note_returning_none_result_test(self):
         logger = Mock()
+        append_note_response = None
+        request_id = 123
+        ticket_id = 321
+        response_topic = 'bruin.ticket.note.append.response'
+        note_contents = 'Some Note'
+        msg = {
+            'request_id': request_id,
+            'response_topic': response_topic,
+            'ticket_id': ticket_id,
+            'note': note_contents,
+        }
+        msg_published_in_topic = {
+            'request_id': request_id,
+            'status': 500
+        }
+
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
+
         bruin_repository = Mock()
-        bruin_repository.post_ticket_note = Mock(return_value=None)
-        msg = {'request_id': 123,
-               'response_topic': f'bruin.ticket.note.append.response',
-               'ticket_id': 321,
-               'note': 'Some Note'}
+        bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
+
         post_note = PostNote(logger, event_bus, bruin_repository)
         await post_note.post_note(json.dumps(msg))
-        assert bruin_repository.post_ticket_note.called
-        assert bruin_repository.post_ticket_note.call_args[0][0] == msg['ticket_id']
-        assert bruin_repository.post_ticket_note.call_args[0][1] == msg['note']
-        assert event_bus.publish_message.called
-        assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
-        assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
-                                                                        'status': 500})
+
+        post_note._bruin_repository.post_ticket_note.assert_called_once_with(
+            ticket_id, note_contents
+        )
+        post_note._event_bus.publish_message.assert_awaited_once_with(
+            response_topic, json.dumps(msg_published_in_topic)
+        )
