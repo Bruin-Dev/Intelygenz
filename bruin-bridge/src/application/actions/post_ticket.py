@@ -22,6 +22,7 @@ class PostTicket:
         status = 500
         result = self._bruin_repository.post_ticket(client_id, category, services, notes, contacts)
         if result is not None:
+            self._logger.info(f'Ticket created for client id: {client_id} with ticket id: {result["ticketIds"][0]}')
             status = 200
         response = {
             'request_id': msg_dict['request_id'],
@@ -30,4 +31,3 @@ class PostTicket:
         }
         await self._event_bus.publish_message(msg_dict['response_topic'],
                                               json.dumps(response, default=str))
-        self._logger.info(f'Ticket created for client id: {client_id} with ticket id: {result["ticketIds"][0]}')

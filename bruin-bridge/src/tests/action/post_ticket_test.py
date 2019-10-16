@@ -25,17 +25,17 @@ class TestPostTicket:
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
-        bruin_repository.post_ticket = Mock(return_value='Ticket created')
+        bruin_repository.post_ticket = Mock(return_value={"ticketIds": [123]})
         msg = {'request_id': 123,
                'response_topic': f'bruin.ticket.creation.response',
-               'client_id': 321,
+               'clientId': 321,
                'category': 'Some Category',
                'services': ['List of Services'],
                'contacts': ['List of Contacts']}
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(json.dumps(msg))
         assert bruin_repository.post_ticket.called
-        assert bruin_repository.post_ticket.call_args[0][0] == msg['client_id']
+        assert bruin_repository.post_ticket.call_args[0][0] == msg['clientId']
         assert bruin_repository.post_ticket.call_args[0][1] == msg['category']
         assert bruin_repository.post_ticket.call_args[0][2] == msg['services']
         assert bruin_repository.post_ticket.call_args[0][3] == []
@@ -43,6 +43,7 @@ class TestPostTicket:
         assert event_bus.publish_message.called
         assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
         assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
+                                                                        'ticketIds': {"ticketIds": [123]},
                                                                         'status': 200})
 
     @pytest.mark.asyncio
@@ -54,7 +55,7 @@ class TestPostTicket:
         bruin_repository.post_ticket = Mock(return_value=None)
         msg = {'request_id': 123,
                'response_topic': f'bruin.ticket.creation.response',
-               'client_id': 321,
+               'clientId': 321,
                'category': 'Some Category',
                'services': ['List of Services'],
                'notes': ['List of Notes'],
@@ -62,7 +63,7 @@ class TestPostTicket:
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(json.dumps(msg))
         assert bruin_repository.post_ticket.called
-        assert bruin_repository.post_ticket.call_args[0][0] == msg['client_id']
+        assert bruin_repository.post_ticket.call_args[0][0] == msg['clientId']
         assert bruin_repository.post_ticket.call_args[0][1] == msg['category']
         assert bruin_repository.post_ticket.call_args[0][2] == msg['services']
         assert bruin_repository.post_ticket.call_args[0][3] == msg['notes']
@@ -70,4 +71,5 @@ class TestPostTicket:
         assert event_bus.publish_message.called
         assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
         assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
+                                                                        'ticketIds': None,
                                                                         'status': 500})
