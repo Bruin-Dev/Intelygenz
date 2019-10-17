@@ -7,7 +7,7 @@ from shortuuid import uuid
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.nats.clients import NatsStreamingClient
+from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 
 
@@ -20,7 +20,7 @@ class Container:
         self._server = QuartServer(config)
         self._service_id = uuid()
 
-        self._publisher = NatsStreamingClient(config, f'service-affecting-monitor-publisher-', logger=self._logger)
+        self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
