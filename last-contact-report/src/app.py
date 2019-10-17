@@ -1,5 +1,5 @@
 from config import config
-from igz.packages.nats.clients import NatsStreamingClient
+from igz.packages.nats.clients import NATSClient
 from igz.packages.eventbus.eventbus import EventBus
 from application.actions.alert import Alert
 from igz.packages.Logger.logger_client import LoggerClient
@@ -20,8 +20,8 @@ class Container:
         self._server = QuartServer(config)
         self._service_id = uuid()
 
-        self._publisher = NatsStreamingClient(config, f'last-contact-report-publisher-', logger=self._logger)
-        self.subscriber_alert = NatsStreamingClient(config, f'last-contact-report-alert-', logger=self._logger)
+        self._publisher = NATSClient(config, logger=self._logger)
+        self.subscriber_alert = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.add_consumer(self.subscriber_alert, consumer_name="sub-alert")
         self._event_bus.set_producer(self._publisher)
