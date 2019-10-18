@@ -21,7 +21,7 @@ resource "aws_cloudwatch_log_metric_filter" "exception_detected_metric" {
   log_group_name = data.aws_cloudwatch_log_group.log_group_automation.name
 
   metric_transformation {
-    name      = "ExceptionMessagesDetectedInServices "
+    name      = local.exception_detected_metric-metric_transformation-name
     namespace = "LogMetrics"
     value     = "1"
     default_value = "0"
