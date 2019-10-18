@@ -21,6 +21,6 @@ resource "aws_cloudwatch_metric_alarm" "errors_messages_services_alarm" {
   threshold                 = "5"
   alarm_description         = "This metric monitors number of message errors for all the services in the cluster"
   insufficient_data_actions = []
-  alarm_actions     = [ aws_cloudformation_stack.sns_topic_alarm.outputs["NotificationTopic"] ]
+  alarm_actions     = [ aws_cloudformation_stack.sns_topic_alarm.outputs["TopicARN"] ]
   #depends_on = [aws_cloudformation_stack.sns_topic_alarm]
 }
