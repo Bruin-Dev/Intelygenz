@@ -12,9 +12,9 @@
                         "ECS/ContainerInsights",
                         "RunningTaskCount",
                         "ServiceName",
-                        "automation-${ENVIRONMENT}-service-outage-triage",
+                        "${ENVIRONMENT}-service-outage-triage",
                         "ClusterName",
-                        "automation-${ENVIRONMENT}",
+                        "${ENVIRONMENT}",
                         {
                             "period":300,
                             "stat":"Average"
@@ -22,17 +22,7 @@
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-metrics-prometheus",
-                        ".",
-                        ".",
-                        {
-                            "period":300,
-                            "stat":"Average"
-                        }
-                    ],
-                    [
-                        "...",
-                        "automation-${ENVIRONMENT}-service-outage-monitor",
+                        "${ENVIRONMENT}-metrics-prometheus",
                         ".",
                         ".",
                         {
@@ -42,7 +32,7 @@
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-velocloud-bridge",
+                        "${ENVIRONMENT}-service-outage-monitor",
                         ".",
                         ".",
                         {
@@ -52,7 +42,7 @@
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-last-contact-report",
+                        "${ENVIRONMENT}-velocloud-bridge",
                         ".",
                         ".",
                         {
@@ -62,7 +52,7 @@
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-bruin-bridge",
+                        "${ENVIRONMENT}-last-contact-report",
                         ".",
                         ".",
                         {
@@ -72,7 +62,7 @@
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-metrics-grafana",
+                        "${ENVIRONMENT}-bruin-bridge",
                         ".",
                         ".",
                         {
@@ -82,7 +72,7 @@
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-nats-server",
+                        "${ENVIRONMENT}-metrics-grafana",
                         ".",
                         ".",
                         {
@@ -92,7 +82,7 @@
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-service-affecting-monitor",
+                        "${ENVIRONMENT}-nats-server",
                         ".",
                         ".",
                         {
@@ -102,7 +92,7 @@
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-t7-bridge",
+                        "${ENVIRONMENT}-service-affecting-monitor",
                         ".",
                         ".",
                         {
@@ -112,7 +102,7 @@
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-velocloud-orchestrator",
+                        "${ENVIRONMENT}-t7-bridge",
                         ".",
                         ".",
                         {
@@ -122,7 +112,17 @@
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-notifier",
+                        "${ENVIRONMENT}-velocloud-orchestrator",
+                        ".",
+                        ".",
+                        {
+                            "period":300,
+                            "stat":"Average"
+                        }
+                    ],
+                    [
+                        "...",
+                        "${ENVIRONMENT}-notifier",
                         ".",
                         ".",
                         {
@@ -152,73 +152,73 @@
                         "ECS/ContainerInsights",
                         "CpuUtilized",
                         "ServiceName",
-                        "automation-${ENVIRONMENT}-nats-server",
+                        "${ENVIRONMENT}-nats-server",
                         "ClusterName",
-                        "automation-${ENVIRONMENT}"
+                        "${ENVIRONMENT}"
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-bruin-bridge",
+                        "${ENVIRONMENT}-bruin-bridge",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-metrics-grafana",
+                        "${ENVIRONMENT}-metrics-grafana",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-last-contact-report",
+                        "${ENVIRONMENT}-last-contact-report",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-velocloud-bridge",
+                        "${ENVIRONMENT}-velocloud-bridge",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-service-affecting-monitor",
+                        "${ENVIRONMENT}-service-affecting-monitor",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-notifier",
+                        "${ENVIRONMENT}-notifier",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-velocloud-orchestrator",
+                        "${ENVIRONMENT}-velocloud-orchestrator",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-t7-bridge",
+                        "${ENVIRONMENT}-t7-bridge",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-metrics-prometheus",
+                        "${ENVIRONMENT}-metrics-prometheus",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-service-outage-monitor",
+                        "${ENVIRONMENT}-service-outage-monitor",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-service-outage-triage",
+                        "${ENVIRONMENT}-service-outage-triage",
                         ".",
                         "."
                     ]
@@ -240,76 +240,76 @@
                         "ECS/ContainerInsights",
                         "MemoryUtilized",
                         "ServiceName",
-                        "automation-${ENVIRONMENT}-metrics-grafana",
+                        "${ENVIRONMENT}-metrics-grafana",
                         "ClusterName",
-                        "automation-${ENVIRONMENT}",
+                        "${ENVIRONMENT}",
                         {
                             "stat":"Average"
                         }
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-bruin-bridge",
+                        "${ENVIRONMENT}-bruin-bridge",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-last-contact-report",
+                        "${ENVIRONMENT}-last-contact-report",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-service-affecting-monitor",
+                        "${ENVIRONMENT}-service-affecting-monitor",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-notifier",
+                        "${ENVIRONMENT}-notifier",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-velocloud-orchestrator",
+                        "${ENVIRONMENT}-velocloud-orchestrator",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-velocloud-bridge",
+                        "${ENVIRONMENT}-velocloud-bridge",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-service-outage-monitor",
+                        "${ENVIRONMENT}-service-outage-monitor",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-service-outage-triage",
+                        "${ENVIRONMENT}-service-outage-triage",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-t7-bridge",
+                        "${ENVIRONMENT}-t7-bridge",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-metrics-prometheus",
+                        "${ENVIRONMENT}-metrics-prometheus",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "automation-${ENVIRONMENT}-nats-server",
+                        "${ENVIRONMENT}-nats-server",
                         ".",
                         "."
                     ]
@@ -328,7 +328,7 @@
             "width":24,
             "height":6,
             "properties":{
-                "query":"SOURCE 'automation-${ENVIRONMENT}' | fields @timestamp, @message as msg_error | filter @message like /edge_monitoring: ERROR/",
+                "query":"SOURCE '${ENVIRONMENT}' | fields @timestamp, @message as msg_error | filter @message like /edge_monitoring: ERROR/",
                 "region":"us-east-1",
                 "title":"Error messages detected in edge_monitoring service",
                 "view":"table"
@@ -341,7 +341,7 @@
             "width":24,
             "height":6,
             "properties":{
-                "query":"SOURCE 'automation-${ENVIRONMENT}' | fields @timestamp, @message | filter @message like /Exception/",
+                "query":"SOURCE '${ENVIRONMENT}' | fields @timestamp, @message | filter @message like /Exception/",
                 "region":"us-east-1",
                 "stacked":false,
                 "view":"table",
@@ -355,7 +355,7 @@
             "width":24,
             "height":6,
             "properties":{
-                "query":"SOURCE 'automation-${ENVIRONMENT}' | fields @timestamp, @message as msg_error | filter @message like \": ERROR\"",
+                "query":"SOURCE '${ENVIRONMENT}' | fields @timestamp, @message as msg_error | filter @message like \": ERROR\"",
                 "region":"us-east-1",
                 "title":"Error messages detected in services",
                 "view":"table"
