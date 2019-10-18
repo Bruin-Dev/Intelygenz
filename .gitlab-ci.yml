@@ -368,6 +368,13 @@ terraform-validate-basic-infra:
     - terraform init infra-as-code/basic-infra
     - terraform validate infra-as-code/basic-infra
 
+terraform-validate-metrics-dashboards-alarms:
+  stage: validation
+  <<: *terraform_template
+  script:
+    - terraform init infra-as-code/metrics-dashboards-alarms
+    - terraform validate infra-as-code/metrics-dashboards-alarms
+
 terraform-validate-network-resources:
   stage: validation
   <<: *terraform_template
@@ -501,6 +508,7 @@ deploy-branches:
     - terraform init infra-as-code/ecs-services
     - terraform apply -auto-approve infra-as-code/ecs-services
     - terraform init infra-as-code/metrics_dashboards_alarms
+    - terraform validate infra-as-code/metrics_dashboards_alarms
     - terraform workspace new $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics_dashboards_alarms || terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics_dashboards_alarms
     - terraform get -update infra-as-code/metrics_dashboards_alarms
     - terraform apply -auto-approve infra-as-code/metrics_dashboards_alarms
