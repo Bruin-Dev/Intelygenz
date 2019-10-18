@@ -12,7 +12,7 @@ resource "aws_cloudformation_stack" "sns_topic_alarm" {
 
 resource "aws_cloudwatch_metric_alarm" "errors_messages_services_alarm" {
   alarm_name                = local.cluster_task_running-alarm_name
-  comparison_operator       = "LessThanThreshold"
+  comparison_operator       = "GreaterThanOrEqualToThreshold"
   evaluation_periods        = "2"
   metric_name               = local.exception_detected_metric-metric_transformation-name
   namespace                 = "LogMetrics"
