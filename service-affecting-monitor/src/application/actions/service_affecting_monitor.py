@@ -1,5 +1,6 @@
 import base64
 import json
+import re
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from apscheduler.util import undefined
@@ -49,7 +50,7 @@ class ServiceAffectingMonitor:
                                 id='_service_affecting_monitor_process')
 
     async def _service_affecting_monitor_process(self):
-        edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1602}
+        edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1651}
         edge_status_request = {'request_id': uuid(),
                                'response_topic': f'edge.status.response.{self._service_id}',
                                'edge': edge_id,
@@ -84,22 +85,72 @@ class ServiceAffectingMonitor:
                                            'Packet Loss', 5)
 
     async def _notify_trouble(self, edge_status, link, input, output, trouble, threshold):
-        # TODO remove production check here when production part gets implemented
-        if self._config.MONITOR_CONFIG['environment'] == 'dev' or self._config.MONITOR_CONFIG['environment'] \
-                == 'production':
-            email_obj = self._compose_email_object(edge_status, link, input, output, trouble, threshold)
+        ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
+
+        if self._config.MONITOR_CONFIG['environment'] == 'dev':
+            email_obj = self._compose_email_object(edge_status, trouble, ticket_dict)
             await self._event_bus.rpc_request("notification.email.request", json.dumps(email_obj), timeout=10)
-        # elif self._config.MONITOR_CONFIG['environment'] == 'production':
-        #     TODO create repair tickets
-        #     pass
+        elif self._config.MONITOR_CONFIG['environment'] == 'production':
+            client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]
+            ticket_exists = await self._ticket_existence(client_id, edge_status['edge_info']['edges']['serialNumber'],
+                                                         trouble)
+            if ticket_exists is False:
+                # TODO contact TBD
+                ticket_note = self._ticket_object_to_string(ticket_dict)
+                ticket_details = {
+                    "request_id": uuid(),
+                    "response_topic": f'"bruin.ticket.creation..response.{self._service_id}',
+                    "clientId": client_id,
+                    "category": "VAS",
+                    "services": [
+                        {
+                            "serviceNumber": edge_status['edge_info']['edges']['serialNumber']
+                        }
+                    ],
+                    "notes": ticket_note,
+                    "contacts": [
+                        {
+                            "email": "fake@gmail.com",
+                            "phone": "3127595750",
+                            "name": "Hames Black",
+                            "type": "site"
+                        },
+                        {
+                            "email": "fake@gmail.com",
+                            "phone": "3127595750",
+                            "name": "Hames Black",
+                            "type": "ticket"
+                        }
+                    ]
+                }
+                ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
+                                                              json.dumps(ticket_details), timeout=30)
+                self._logger.info(f'Ticket created with ticket id: {ticket_id["ticketIds"][0]}')
 
-    def _compose_email_object(self, edges_status_to_report, link, input, output, trouble, threshold):
-        with open('src/templates/service_affecting_monitor.html') as template:
-            email_html = "".join(template.readlines())
-            email_html = email_html.replace('%%TROUBLE%%', trouble)
-            email_html = email_html.replace('%%SERIAL_NUMBER%%',
-                                            f'{edges_status_to_report["edge_info"]["edges"]["serialNumber"]}')
+    async def _ticket_existence(self, client_id, serial, trouble):
+        ticket_request_msg = {'request_id': uuid(), 'response_topic': f'bruin.ticket.response.{self._service_id}',
+                              'client_id': client_id, 'ticket_status': ['New', 'InProgress', 'Draft'],
+                              'category': 'SD-WAN'}
+        all_tickets = await  self._event_bus.rpc_request("bruin.ticket.request",
+                                                         json.dumps(ticket_request_msg, default=str),
+                                                         timeout=15)
+        for ticket in all_tickets['tickets']:
+            ticket_detail_msg = {'request_id': uuid(),
+                                 'response_topic': f'bruin.ticket.details.response.{self._service_id}',
+                                 'ticket_id': ticket['ticketID']}
+            ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
+                                                               json.dumps(ticket_detail_msg, default=str),
+                                                               timeout=15)
+            for ticket_detail in ticket_details['ticket_details']['ticketDetails']:
+                if 'detailValue' in ticket_detail.keys():
+                    if ticket_detail['detailValue'] == serial:
+                        for ticket_note in (ticket_details['ticket_details']['ticketNotes']):
+                            if ticket_note['noteValue'] is not None:
+                                if trouble in ticket_note['noteValue']:
+                                    return True
+        return False
 
+    def _compose_ticket_dict(self, edges_status_to_report, link, input, output, trouble, threshold):
         edge_overview = OrderedDict()
         edge_overview["Edge Name"] = edges_status_to_report["edge_info"]["edges"]["name"]
         edge_overview["Trouble"] = trouble
@@ -123,11 +174,21 @@ class ServiceAffectingMonitor:
             f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/ \n'
+
+        return edge_overview
+
+    def _compose_email_object(self, edges_status_to_report, trouble, ticket_dict):
+        with open('src/templates/service_affecting_monitor.html') as template:
+            email_html = "".join(template.readlines())
+            email_html = email_html.replace('%%TROUBLE%%', trouble)
+            email_html = email_html.replace('%%SERIAL_NUMBER%%',
+                                            f'{edges_status_to_report["edge_info"]["edges"]["serialNumber"]}')
+
         rows = []
-        for idx, key in enumerate(edge_overview.keys()):
+        for idx, key in enumerate(ticket_dict.keys()):
             row = EVEN_ROW if idx % 2 == 0 else ODD_ROW
             row = row.replace('%%KEY%%', key)
-            row = row.replace('%%VALUE%%', str(edge_overview[key]))
+            row = row.replace('%%VALUE%%', str(ticket_dict[key]))
             rows.append(row)
         email_html = email_html.replace('%%OVERVIEW_ROWS%%', "".join(rows))
 
@@ -152,3 +213,10 @@ class ServiceAffectingMonitor:
                 'attachments': []
             }
         }
+
+    def _ticket_object_to_string(self, ticket_dict):
+        edge_triage_str = "#*Automation Engine*# \n"
+        for key in ticket_dict.keys():
+            parsed_key = re.sub(r" LABELMARK(.)*", "", key)
+            edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]} \n'
+        return edge_triage_str
