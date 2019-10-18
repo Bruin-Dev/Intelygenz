@@ -1,0 +1,47 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "MetTel Notificacion Topics",
+  "Metadata": {
+    "Authors": {
+      "Description": "IGZ"
+    },
+    "License": {
+      "Description": "No"
+    },
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "Topics"
+          },
+          "Parameters": [
+            "OperatorEMail"
+          ]
+        }
+      ],
+      "ParameterLabels": {}
+    }
+  },
+  "Parameters": {
+    "OperatorEMail": {
+      "Description": "EMail address to notify if there are any alarms to nofity",
+      "Type": "String",
+      "AllowedPattern": "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)",
+      "ConstraintDescription": "must be a valid email address.",
+      "Default": "xoan.mallon@intelygenz.com"
+    }
+  },
+  "Conditions": {},
+  "Mappings": {},
+  "Resources": {
+    "NotificationTopic": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "Subscription": [ { "Endpoint": { "Ref": "OperatorEMail" }, "Protocol": "email" } ]
+      }
+    }
+  },
+  "Outputs": {
+    "TopicARN": {"Value": {"Ref": "NotificationTopic"}}
+  }
+}
