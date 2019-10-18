@@ -9,5 +9,5 @@ locals {
   cluster_task_running-alarm_name = "tasks_running-${var.ENVIRONMENT}"
 
   // cloudfourmation local variables
-  stack_alarms-name = "sns_topic_alarm_stack"
+  stack_alarms-name = "snsTopicAlarmErrorMessagesStack"
 }
