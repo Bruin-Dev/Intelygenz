@@ -1,5 +1,6 @@
 data "template_file" "cluster_dashboard_definition" {
-  template = file("${path.module}/dashboard-definitions/dashboard_cluster_definition.json")   dashboard_cluster_definition.json
+  template = file("${path.module}/dashboard-definitions/dashboard_cluster_definition.json")
+  
   vars = {
     ENVIRONMENT = var.ENVIRONMENT
   }
