@@ -4,7 +4,7 @@ data "aws_cloudwatch_log_group" "log_group_automation" {
 
 resource "aws_cloudwatch_log_metric_filter" "errors_detected_metric" {
   name           = "Erros_messages_detected_in_services"
-  pattern        = ": ERROR"
+  pattern        = "\": ERROR\""
   log_group_name = data.aws_cloudwatch_log_group.log_group_automation.name
 
   metric_transformation {

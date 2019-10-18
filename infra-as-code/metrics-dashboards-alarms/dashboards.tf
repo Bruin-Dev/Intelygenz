@@ -7,6 +7,6 @@ data "template_file" "cluster_dashboard_definition" {
 }
 
 resource "aws_cloudwatch_dashboard" "cluster_dashboard" {
-  dashboard_name = local.dashboard_name
+  dashboard_name = local.cluster_dashboard_name
   dashboard_body = data.template_file.cluster_dashboard_definition.rendered
 }
