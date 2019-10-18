@@ -1,5 +1,5 @@
 data "template_file" "cloudformation_sns_stack_alarms" {
-  template = file("${path.module}/cloud-fourmation-templates/mettel_notification_topic_stack.json")
+  template = file("${path.module}/cloudfourmation-templates/mettel_notification_topic_stack.json")
 }
 
 resource "aws_cloudformation_stack" "sns_topic_alarm" {
