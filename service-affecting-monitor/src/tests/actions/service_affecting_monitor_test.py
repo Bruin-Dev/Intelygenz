@@ -438,7 +438,7 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def _notify_trouble_pro_ticket_exists_test(self):
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value="Ticket Created")
+        event_bus.rpc_request = CoroutineMock(side_effects=[{'ticketIds': [123]}, 'Slack Sent'])
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -501,7 +501,7 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def _notify_trouble_pro_ticket_not_exists_test(self):
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value={'ticketIds': [123]})
+        event_bus.rpc_request = CoroutineMock(side_effects=[{'ticketIds': [123]}, 'Slack Sent'])
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -561,7 +561,7 @@ class TestServiceAffectingMonitor:
         assert service_affecting_monitor._ticket_object_to_string.called
         assert service_affecting_monitor._ticket_object_to_string.call_args[0][0] == 'Some ordered dict object'
         assert event_bus.rpc_request.called
-        assert 'Some string object' in event_bus.rpc_request.call_args[0][1]
+        assert 'Some string object' in event_bus.rpc_request.mock_calls[0][1][1]
 
     @pytest.mark.asyncio
     async def _notify_trouble_none_test(self):
@@ -616,7 +616,7 @@ class TestServiceAffectingMonitor:
                                                                            'Trouble: LATENCY\n '
                                                                            'TimeStamp: 2019-09-10 10:34:00-04:00 ',
                                                               'createdDate': '2019-09-10 10:34:00-04:00'}]}}
-        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details])
+        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details, 'Slack Sent'])
         ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'PACKET_LOSS')
         assert ticket_exists is False
         assert event_bus.rpc_request.called
