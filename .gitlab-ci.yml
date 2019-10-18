@@ -463,6 +463,10 @@ deploy-branches:
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
+<<<<<<< HEAD
+=======
+    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
+>>>>>>> feat(Add terraform definition for metrics related with errors and exception, also created dashboards for each cluster in ECS. Add jobs in gitlabci for deploy and delete metrics and dashboard created with terraform)
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
@@ -496,6 +500,10 @@ deploy-branches:
     - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
     - terraform init infra-as-code/ecs-services
     - terraform apply -auto-approve infra-as-code/ecs-services
+    - terraform init infra-as-code/metrics_dashboards_alarms
+    - terraform workspace new $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics_dashboards_alarms || terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics_dashboards_alarms
+    - terraform get -update infra-as-code/metrics_dashboards_alarms
+    - terraform apply -auto-approve infra-as-code/metrics_dashboards_alarms
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
@@ -532,6 +540,10 @@ destroy-branches:
     - terraform init infra-as-code/dev
     - terraform refresh infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
+    - terraform workspace $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics_dashboards_alarms
+    - terraform destroy -auto-approve infra-as-code/metrics_dashboards_alarms
+    - terraform workspace select default infra-as-code/metrics_dashboards_alarms
+    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics_dashboards_alarms
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
