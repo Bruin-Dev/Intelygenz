@@ -10,11 +10,6 @@ resource "aws_cloudformation_stack" "sns_topic_alarm" {
   )
 }
 
-output "arn" {
-  value       = aws_cloudformation_stack.sns_topic_alarm.outputs["ARN"]
-  description = "Email SNS topic ARN"
-}
-
 resource "aws_cloudwatch_metric_alarm" "errors_messages_services_alarm" {
   alarm_name                = local.cluster_task_running-alarm_name
   comparison_operator       = "LessThanThreshold"
