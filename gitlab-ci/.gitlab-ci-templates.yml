@@ -21,6 +21,19 @@
     - pytest --cov
 
 .build_app_image: &build_app_image
+  stage: acceptance_tests
+  image: docker:18-git
+  services:
+    - docker:18-dind
+  before_script:
+    - apk add --no-cache py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
+    - pip install docker-compose
+  script:
+    - docker-compose -f docker-compose-ci.yml up --build --abort-on-container-exit
+  after_script:
+    - docker-compose -f docker-compose-ci.yml down && docker-compose -f docker-compose-ci.yml rm -v
+
+.job_app_build_template: &build_app_image
   services:
     - docker:18-dind
   before_script:
