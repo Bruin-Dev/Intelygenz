@@ -25,62 +25,62 @@ include:
 igzpackages-linter:
   variables:
     MODULE: custompackages/igzpackages/
-  <<: *lint_module
+  extends: lint_module
 
 velocloud-linter:
   variables:
     MODULE: custompackages/velocloud/velocloud_client
-  <<: *lint_module
+  extends: lint_module
 
 notifier-linter:
   variables:
     MODULE: notifier
-  <<: *lint_module
+  extends: lint_module
 
 velocloud-orchestrator-linter:
   variables:
     MODULE: velocloud-orchestrator
-  <<: *lint_module
+  extends: lint_module
 
 last-contact-report-linter:
   variables:
     MODULE: last-contact-report
-  <<: *lint_module
+  extends: lint_module
 
 service-outage-triage-linter:
   variables:
     MODULE: service-outage-triage
-  <<: *lint_module
+  extends: lint_module
 
 service-outage-monitor-linter:
   variables:
     MODULE: service-outage-monitor
-  <<: *lint_module
+  extends: lint_module
 
 service-affecting-monitor-linter:
   variables:
     MODULE: service-affecting-monitor
-  <<: *lint_module
+  extends: lint_module
 
 velocloud-bridge-linter:
   variables:
     MODULE: velocloud-bridge
-  <<: *lint_module
+  extends: lint_module
 
 bruin-bridge:
   variables:
     MODULE: bruin-bridge
-  <<: *lint_module
+  extends: lint_module
 
 acceptance-test-linter:
   variables:
     MODULE: acceptance-tests
-  <<: *lint_module
+  extends: lint_module
 
 t7-bridge-linter:
   variables:
     MODULE: t7-bridge
-  <<: *lint_module
+  extends: lint_module
 
 #
 # Modules unit tests
@@ -113,48 +113,48 @@ velocloud-test:
 notifier-test:
   variables:
     MODULE: notifier
-  <<: *unittest_module
+  extends: unittest_module
 
 velocloud-orchestrator-test:
   variables:
     MODULE: velocloud-orchestrator
-  <<: *unittest_module
+  extends: unittest_module
 
 last-contact-report-test:
   variables:
     MODULE: last-contact-report
-  <<: *unittest_module
+  extends: unittest_module
 
 
 service-outage-triage-test:
   variables:
     MODULE: service-outage-triage
-  <<: *unittest_module
+  extends: unittest_module
 
 service-outage-monitor-test:
   variables:
     MODULE: service-outage-monitor
-  <<: *unittest_module
+  extends: unittest_module
 
 service-affecting-monitor-test:
   variables:
     MODULE: service-affecting-monitor
-  <<: *unittest_module
+  extends: unittest_module
 
 velocloud-bridge-test:
   variables:
     MODULE: velocloud-bridge
-  <<: *unittest_module
+  extends: unittest_module
 
 bruin-bridge-test:
   variables:
     MODULE: bruin-bridge
-  <<: *unittest_module
+  extends: unittest_module
 
 t7-bridge-test:
   variables:
     MODULE: t7-bridge
-  <<: *unittest_module
+  extends: unittest_module
 
 #
 # Acceptance/Integration tests
@@ -162,7 +162,7 @@ t7-bridge-test:
 event_sourcing_acceptance_test:
   variables:
     BLUEPRINT: ${HONESTCODE_EVENT_SOURCING_BLUEPRINT}
-  <<: *acceptance_test_module
+  extends: acceptance_test_module
 
 #
 # Images builds
@@ -172,7 +172,7 @@ nats-streaming-build:
   variables:
     MODULE_NAME: nats-streaming-server
     MODULE_VERSION: ${NATS_MODULE_VERSION}
-  <<: *build_app_image
+  extends: build_app_image
 
 grafana-build:
   stage: build
@@ -225,63 +225,63 @@ notifier-build:
   variables:
     MODULE_NAME: notifier
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+  extends: build_app_image
 
 velocloud-bridge-build:
   stage: build
   variables:
     MODULE_NAME: velocloud-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+  extends: build_app_image
 
 bruin-bridge-build:
   stage: build
   variables:
     MODULE_NAME: bruin-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+  extends: build_app_image
 
 velocloud-orchestrator-build:
   stage: build
   variables:
     MODULE_NAME: velocloud-orchestrator
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+  extends: build_app_image
 
 last-contact-report-build:
   stage: build
   variables:
     MODULE_NAME: last-contact-report
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+  extends: build_app_image
 
 service-outage-triage-build:
   stage: build
   variables:
     MODULE_NAME: service-outage-triage
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+  extends: build_app_image
 
 service-outage-monitor-build:
   stage: build
   variables:
     MODULE_NAME: service-outage-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+  extends: build_app_image
 
 service-affecting-monitor-build:
   stage: build
   variables:
     MODULE_NAME: service-affecting-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+  extends: build_app_image
 
 t7-bridge-build:
   stage: build
   variables:
     MODULE_NAME: t7-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+  extends: build_app_image
 
 # =========
 # TERRAFORM
@@ -289,21 +289,21 @@ t7-bridge-build:
 
 terraform-validate-basic-infra:
   stage: validation
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - terraform init infra-as-code/basic-infra
     - terraform validate infra-as-code/basic-infra
 
 terraform-validate-metrics-dashboards-alarms:
   stage: validation
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - terraform init infra-as-code/metrics-dashboards-alarms
     - terraform validate infra-as-code/metrics-dashboards-alarms
 
 terraform-validate-network-resources:
   stage: validation
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
     - terraform init infra-as-code/network-resources
@@ -311,7 +311,7 @@ terraform-validate-network-resources:
 
 terraform-validate-dev:
   stage: validation
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
@@ -333,14 +333,14 @@ terraform-validate-dev:
 
 basic-infra:
   stage: basic_infra
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
 
 network-resources-infra-branches:
   stage: basic_infra
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
     - terraform init infra-as-code/network-resources
@@ -355,7 +355,7 @@ network-resources-infra-branches:
 
 network-resources-infra-master:
   stage: basic_infra
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
     - apk add gettext
@@ -369,7 +369,7 @@ network-resources-infra-master:
 
 deploy-branches:
   stage: deploy
-  <<: *terraform_template
+  extends: terraform_template
   variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
@@ -425,7 +425,7 @@ deploy-branches:
 
 destroy-branches:
   stage: deploy
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
@@ -458,7 +458,7 @@ destroy-branches:
 
 deploy-master:
   stage: deploy
-  <<: *terraform_template
+  extends: terraform_template
   variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
@@ -511,7 +511,7 @@ deploy-master:
 
 destroy-master:
   stage: deploy
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - export ENVIRONMENT_SLUG=master
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
@@ -543,7 +543,7 @@ destroy-master:
 
 destroy-network-resources-branches:
   stage: basic_infra
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
     - terraform init infra-as-code/network-resources
@@ -559,7 +559,7 @@ destroy-network-resources-branches:
 
 destroy-network-resources-master:
   stage: basic_infra
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
     - apk add gettext
@@ -574,7 +574,7 @@ destroy-network-resources-master:
 
 grafana_user_creation_branches:
   stage: grafana_user_creation
-  <<: *grafana_user_creation_template
+  extends: grafana_user_creation_template
   before_script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
   only:
@@ -584,7 +584,7 @@ grafana_user_creation_branches:
 
 grafana_user_creation_master:
   stage: grafana_user_creation
-  <<: *grafana_user_creation_template
+  extends: grafana_user_creation_template
   before_script:
     - export ENVIRONMENT_SLUG=master
   only:
