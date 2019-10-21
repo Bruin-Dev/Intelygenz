@@ -416,11 +416,10 @@ network-resources-infra-branches:
   <<: *terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
-    - apk add gettext
-    - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
-    - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
+    - terraform workspace new $CI_JOB_STAGE-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources || terraform workspace select $CI_JOB_STAGE-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources
+    - terraform get -update infra-as-code/network-resources
     - terraform apply -auto-approve infra-as-code/network-resources
   only:
     - branches
@@ -505,20 +504,20 @@ destroy-branches:
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - terraform init infra-as-code/metrics-dashboards-alarms
-    - terraform workspace select deploy-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms
+    - terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms
     - terraform destroy -auto-approve infra-as-code/metrics-dashboards-alarms
     - terraform workspace select default infra-as-code/metrics-dashboards-alarms
-    - terraform workspace delete deploy-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms
+    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms
     - terraform init infra-as-code/ecs-services
-    - terraform workspace select deploy-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
+    - terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
     - terraform destroy -auto-approve infra-as-code/ecs-services
     - terraform workspace select default infra-as-code/ecs-services
-    - terraform workspace delete deploy-$TF_VAR_ENVIRONMENT infra-as-code/infra-as-code/ecs-services
+    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/infra-as-code/ecs-services
     - terraform init infra-as-code/dev
-    - terraform workspace select deploy-$TF_VAR_ENVIRONMENT infra-as-code/dev
+    - terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
     - terraform workspace select default infra-as-code/dev
-    - terraform workspace delete deploy-$TF_VAR_ENVIRONMENT infra-as-code/infra-as-code/dev
+    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/infra-as-code/dev
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
@@ -618,12 +617,11 @@ destroy-network-resources-branches:
   <<: *terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
-    - apk add gettext
-    - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
-    - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
-    - terraform refresh infra-as-code/network-resources
+    - terraform workspace select $CI_JOB_STAGE-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources
     - terraform destroy -auto-approve infra-as-code/network-resources
+    - terraform workspace select default infra-as-code/network-resources
+    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/infra-as-code/network-resources
   when: manual
   only:
     - branches
