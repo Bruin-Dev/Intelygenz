@@ -322,7 +322,7 @@ terraform-validate-ecs-services:
     - terraform init infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
     - terraform init infra-as-code/ecs-services
-    - terraform workspace new ecs-services-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services || terraform workspace select new ecs-services-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
+    - terraform workspace new ecs-services-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services || terraform workspace select ecs-services-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
 
 terraform-validate-dev:
