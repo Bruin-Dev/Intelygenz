@@ -108,7 +108,7 @@ locals {
   exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices"
   errors_detected_metric-metric_transformation-name = "ErrorsMessagesDetectedInServices"
   running_task_count-metric_transformation-name = "RunningTaskCount"
-
+  exception_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices"
   // dashboards local variables
   cluster_dashboard_name = "cluster-${var.ENVIRONMENT}"
 
@@ -132,4 +132,8 @@ locals {
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms-${var.ENVIRONMENT}"
   cloudformation_sns_stack_alarms_errors_exceptions_messages-description-stack="MetTel Notificacion Topic for Alarms"
   cloudformation_sns_stack_alarms_errors_exceptions_messages-description-operator_email="Email address to notify if there are any active alarms in MetTel automation infrastructure"
+  cluster_task_running-alarm_name = "tasks_running-${var.ENVIRONMENT}"
+
+  // cloudfourmation local variables
+  stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicAlarmErrorMessagesInServicesStack"
 }
