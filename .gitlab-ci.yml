@@ -72,6 +72,11 @@ bruin-bridge:
     MODULE: bruin-bridge
   extends: .lint_module
 
+acceptance-test-linter:
+  variables:
+    MODULE: acceptance-tests
+  extends: lint_module
+
 t7-bridge-linter:
   variables:
     MODULE: t7-bridge
@@ -150,6 +155,14 @@ t7-bridge-test:
   variables:
     MODULE: t7-bridge
   extends: .unittest_module
+
+#
+# Acceptance/Integration tests
+#
+event_sourcing_acceptance_test:
+  variables:
+    BLUEPRINT: ${HONESTCODE_EVENT_SOURCING_BLUEPRINT}
+  extends: acceptance_test_module
 
 #
 # Images builds
@@ -283,7 +296,7 @@ terraform-validate-basic-infra:
 
 terraform-validate-metrics-dashboards-alarms:
   stage: validation
-  <<: *terraform_template
+  extends: terraform_template
   script:
     - terraform init infra-as-code/metrics-dashboards-alarms
     - terraform validate infra-as-code/metrics-dashboards-alarms
