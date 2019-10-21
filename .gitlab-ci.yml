@@ -7,9 +7,6 @@ stages:
   - deploy
   - grafana_user_creation
 
-include:
-  - local: 'gitlab-ci/.gitlab-ci-templates.yml'
-
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
   NATS_CLUSTER_NAME: "automation-engine-nats"
@@ -17,6 +14,9 @@ variables:
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
   REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
+
+include:
+  - local: 'gitlab-ci/.gitlab-ci-templates.yml'
 
 # ===============
 # Modules linters
