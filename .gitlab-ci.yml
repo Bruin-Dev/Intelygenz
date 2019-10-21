@@ -295,13 +295,6 @@ terraform-validate-basic-infra:
     - terraform init infra-as-code/basic-infra
     - terraform validate infra-as-code/basic-infra
 
-terraform-validate-metrics-dashboards-alarms:
-  stage: validation
-  extends: .terraform_template
-  script:
-    - terraform init infra-as-code/metrics-dashboards-alarms
-    - terraform validate infra-as-code/metrics-dashboards-alarms
-
 terraform-validate-network-resources:
   stage: validation
   extends: .terraform_template
