@@ -346,7 +346,7 @@ terraform-validate-dev:
     - export TF_VAR_BRUIN_LOGIN_URL_PRO=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - export TF_VAR_env_network_resources=basic_infra-dev-$TF_VAR_CURRENT_ENVIRONMENT
+    - export TF_VAR_env_network_resources=basic_infra-$TF_VAR_CURRENT_ENVIRONMENT
     - terraform init infra-as-code/dev
     - terraform workspace new $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/dev || terraform workspace select $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/dev
     - terraform validate infra-as-code/dev
