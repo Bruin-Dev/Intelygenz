@@ -103,4 +103,16 @@ locals {
   automation-velocloud-orchestrator-ecs_service-name = "${var.ENVIRONMENT}-velocloud-orchestrator"
   automation-velocloud-orchestrator-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-orchestrator.family}:${aws_ecs_task_definition.automation-velocloud-orchestrator.revision}"
   automation-velocloud-orchestrator-service_discovery_service-name = "velocloud-orchestrator-${var.ENVIRONMENT}"
+
+  // metrics local variables
+  exception_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices"
+
+  // dashboards local variables
+  cluster_dashboard_name = "cluster-${var.ENVIRONMENT}"
+
+  // alarms local variables
+  cluster_task_running-alarm_name = "tasks_running-${var.ENVIRONMENT}"
+
+  // cloudfourmation local variables
+  stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicAlarmErrorMessagesInServicesStack"
 }
