@@ -87,4 +87,5 @@ variable "alarms_subscriptions_email_addresses" {
 variable "env_network_resources" {
   type = "string"
   description = "Variable for references to common network resources per environment"
+  default = "xoan.mallon@intelygenz.com,sancho.munoz@intelygenz.com"
 }
