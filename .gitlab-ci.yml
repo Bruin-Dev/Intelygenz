@@ -399,9 +399,6 @@ deploy-branches:
 =======
 >>>>>>> feat(Removed innesary step from job to deploy ecs-services infrastructure)
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - apk --upgrade --no-cache add curl bash
-    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
-    - chmod +x /usr/local/bin/ecs-cli
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
     - terraform workspace new dev-$TF_VAR_ENVIRONMENT infra-as-code/dev || terraform workspace select dev-$TF_VAR_ENVIRONMENT infra-as-code/dev
@@ -441,6 +438,7 @@ deploy-branches-ecs-services:
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk --upgrade --no-cache add curl bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - chmod +x /usr/local/bin/ecs-cli
     - /bin/bash ci-utils/task_healthcheck.sh -t nats
     - terraform init infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
