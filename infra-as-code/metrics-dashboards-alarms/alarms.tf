@@ -2,11 +2,14 @@ data "template_file" "cloudformation_sns_stack_alarms" {
   template = file("${path.module}/cloudformation-templates/mettel_notification_topic_stack.json")
 }
 
-resource "aws_cloudformation_stack" "sns_topic_alarm" {
-  name          = local.stack_alarms-name
+resource "aws_cloudformation_stack" "sns_topic_alarm_errors_exceptions_services" {
+  name          = local.stack_alarms-errors_exceptions_messages_in_services-name
   template_body = data.template_file.cloudformation_sns_stack_alarms.rendered
+  parameters = {
+    OperatorEmail = var.alarms_subscriptions_email_addresses
+  }
   tags = merge(
-    map("Name", local.stack_alarms-name)
+    map("Name", local.stack_alarms-errors_exceptions_messages_in_services-name)
   )
 }
 
@@ -21,6 +24,5 @@ resource "aws_cloudwatch_metric_alarm" "errors_messages_services_alarm" {
   threshold                 = "5"
   alarm_description         = "This metric monitors number of message errors for all the services in the cluster"
   insufficient_data_actions = []
-  alarm_actions     = [ aws_cloudformation_stack.sns_topic_alarm.outputs["TopicARN"] ]
-  #depends_on = [aws_cloudformation_stack.sns_topic_alarm]
+  alarm_actions     = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services.outputs["TopicARN"] ]
 }

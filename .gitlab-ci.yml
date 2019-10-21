@@ -380,9 +380,6 @@ terraform-validate-network-resources:
   <<: *terraform_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
-    - apk add gettext
-    - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
-    - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
 
@@ -402,21 +399,8 @@ terraform-validate-dev:
     - export TF_VAR_BRUIN_LOGIN_URL_PRO=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - apk add gettext
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
-    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
-    - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
-    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
-    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
-    - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
     - terraform init infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
 
@@ -485,27 +469,18 @@ deploy-branches:
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - apk add gettext
-    - apk --upgrade --no-cache add curl
-    - apk add bash
+    - apk --upgrade --no-cache add curl bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
+    - terraform validate infra-as-code/dev
+    - terraform workspace new $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/dev || terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/dev
+    - terraform get -update infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - /bin/bash ci-utils/task_healthcheck.sh -t nats
-    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
-    - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
-    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
-    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
-    - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
     - terraform init infra-as-code/ecs-services
+    - terraform validate infra-as-code/ecs-services
+    - terraform workspace new $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services || terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
+    - terraform get -update infra-as-code/ecs-services
     - terraform apply -auto-approve infra-as-code/ecs-services
     - terraform init infra-as-code/metrics-dashboards-alarms
     - terraform validate infra-as-code/metrics-dashboards-alarms
@@ -529,29 +504,21 @@ destroy-branches:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - apk add gettext
-    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
-    - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
-    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
-    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
-    - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
-    - terraform init infra-as-code/ecs-services
-    - terraform refresh infra-as-code/ecs-services
-    - terraform destroy -auto-approve infra-as-code/ecs-services
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - mv temp_references_dev.tf infra-as-code/dev/references.tf
-    - terraform init infra-as-code/dev
-    - terraform refresh infra-as-code/dev
-    - terraform destroy -auto-approve infra-as-code/dev
-    - terraform workspace $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms
+    - terraform init infra-as-code/metrics-dashboards-alarms
+    - terraform workspace select deploy-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms
     - terraform destroy -auto-approve infra-as-code/metrics-dashboards-alarms
     - terraform workspace select default infra-as-code/metrics-dashboards-alarms
-    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms
+    - terraform workspace delete deploy-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms
+    - terraform init infra-as-code/ecs-services
+    - terraform workspace select deploy-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
+    - terraform destroy -auto-approve infra-as-code/ecs-services
+    - terraform workspace select default infra-as-code/ecs-services
+    - terraform workspace delete deploy-$TF_VAR_ENVIRONMENT infra-as-code/infra-as-code/ecs-services
+    - terraform init infra-as-code/dev
+    - terraform workspace select deploy-$TF_VAR_ENVIRONMENT infra-as-code/dev
+    - terraform destroy -auto-approve infra-as-code/dev
+    - terraform workspace select default infra-as-code/dev
+    - terraform workspace delete deploy-$TF_VAR_ENVIRONMENT infra-as-code/infra-as-code/dev
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
