@@ -350,6 +350,9 @@ terraform-validate-dev:
     - terraform init infra-as-code/dev
     - terraform workspace new $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/dev || terraform workspace select $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/dev
     - terraform validate infra-as-code/dev
+    - terraform init -reconfigure infra-as-code/ecs-services
+    - terraform workspace new $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services || terraform workspace select $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
+    - terraform validate infra-as-code/ecs-services
 
 basic-infra:
   stage: basic_infra
