@@ -3,7 +3,7 @@ data "terraform_remote_state" "tfstate-dev-resources" {
   config = {
     bucket = "automation-infrastructure"
     region = "us-east-1"
-    key = "env:/deploy-${var.ENVIRONMENT}/terraform-dev-resources.tfstate"
+    key = "env:/dev-${var.CURRENT_ENVIRONMENT}/terraform-network-resources.tfstate"
   }
 }
 
@@ -12,6 +12,6 @@ data "terraform_remote_state" "tfstate-network-resources" {
   config = {
     bucket = "automation-infrastructure"
     region = "us-east-1"
-    key = "env:/${var.env_network_resources}/terraform-network-resources.tfstate"
+    key = "env:/network-resources-${var.CURRENT_ENVIRONMENT}/terraform-network-resources.tfstate"
   }
 }
