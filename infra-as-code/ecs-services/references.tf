@@ -3,7 +3,7 @@ data "terraform_remote_state" "tfstate-dev-resources" {
   config = {
     bucket = "automation-infrastructure"
     region = "us-east-1"
-    key = "terraform-dev-resources.tfstate"
+    key = "env:/deploy-${var.ENVIRONMENT}/terraform-dev-resources.tfstate"
   }
 }
 
