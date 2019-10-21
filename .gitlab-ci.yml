@@ -7,6 +7,9 @@ stages:
   - deploy
   - grafana_user_creation
 
+include:
+  - local: '/gitlab-ci/.gitlab-ci-templates.yml'
+
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
   NATS_CLUSTER_NAME: "automation-engine-nats"
@@ -14,83 +17,6 @@ variables:
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
   REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-
-#
-# Using gitlab-ci anchors to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
-#
-.job_linter_template: &lint_module
-  stage: validation
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - pip install pycodestyle
-  script:
-    - pycodestyle --max-line-length=120 ${MODULE}
-
-.job_unittest_template: &unittest_module
-  stage: unit_test
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - cd ${MODULE}
-    - pip install -r requirements.txt
-  script:
-    - pytest --cov
-
-.job_acceptance_test_template: &acceptance_test_module
-  stage: acceptance_tests
-  image: docker:18-git
-  services:
-    - docker:18-dind
-  before_script:
-    - apk add --no-cache py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
-    - pip install docker-compose
-  script:
-    - docker-compose -f docker-compose-ci.yml up --build --abort-on-container-exit
-  after_script:
-    - docker-compose -f docker-compose-ci.yml down && docker-compose -f docker-compose-ci.yml rm -v
-
-.job_app_build_template: &build_app_image
-  services:
-    - docker:18-dind
-  before_script:
-    - apk add --no-cache curl jq python py-pip
-    - pip install awscli
-    - $(aws ecr get-login --no-include-email --region us-east-1)
-  script:
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
-  after_script:
-    - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
-    - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
-
-
-.job_terraform_template: &terraform_template
-  image:
-    name: hashicorp/terraform:0.12.7
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  before_script:
-    - terraform init -backend=true -get=true -input=false
-
-.job_grafana_user_creation: &grafana_user_creation_template
-  tags:
-    - docker
-    - dind
-  variables:
-    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
-  script:
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - apk --upgrade --no-cache add curl python3 bash py-pip
-    - pip3 install requests
-    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
-    - chmod +x /usr/local/bin/ecs-cli
-    - /bin/bash ci-utils/task_healthcheck.sh -t grafana
-    - python3 ci-utils/grafana_users_creation.py
 
 # ===============
 # Modules linters
@@ -399,6 +325,7 @@ terraform-validate-dev:
     - export TF_VAR_BRUIN_LOGIN_URL_PRO=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
+    - export TF_VAR_env_network_resources=basic_infra-dev-$TF_VAR_CURRENT_ENVIRONMENT
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
     - terraform init infra-as-code/ecs-services
@@ -468,6 +395,7 @@ deploy-branches:
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
+    - export TF_VAR_env_network_resources=basic_infra-$TF_VAR_CURRENT_ENVIRONMENT
     - apk --upgrade --no-cache add curl bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
@@ -503,6 +431,7 @@ destroy-branches:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
+    - export TF_VAR_env_network_resources=basic_infra-$TF_VAR_CURRENT_ENVIRONMENT
     - terraform init infra-as-code/metrics-dashboards-alarms
     - terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms
     - terraform destroy -auto-approve infra-as-code/metrics-dashboards-alarms

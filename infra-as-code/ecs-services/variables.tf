@@ -77,3 +77,8 @@ variable "CURRENT_ENVIRONMENT" {
   description = "Name of the environment to identify the network resources to be used"
   type = "string"
 }
+
+variable "env_network_resources" {
+  type = "string"
+  description = "Variable for references to common network resources per environment"
+}
