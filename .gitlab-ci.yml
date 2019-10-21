@@ -25,17 +25,17 @@ include:
 igzpackages-linter:
   variables:
     MODULE: custompackages/igzpackages/
-  extends: lint_module
+  extends: .lint_module
 
 velocloud-linter:
   variables:
     MODULE: custompackages/velocloud/velocloud_client
-  extends: lint_module
+  extends: .lint_module
 
 notifier-linter:
   variables:
     MODULE: notifier
-  extends: lint_module
+  extends: .lint_module
 
 velocloud-orchestrator-linter:
   variables:
