@@ -331,7 +331,7 @@ terraform-validate-dev:
     - terraform init infra-as-code/dev
     - terraform workspace new $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/dev || terraform workspace select $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/dev
     - terraform validate infra-as-code/dev
-    - terraform init -reconfigure infra-as-code/ecs-services
+    - terraform init infra-as-code/ecs-services
     - terraform workspace new $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services || terraform workspace select $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
 
@@ -445,12 +445,12 @@ destroy-branches:
     - terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
     - terraform destroy -auto-approve infra-as-code/ecs-services
     - terraform workspace select default infra-as-code/ecs-services
-    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/infra-as-code/ecs-services
+    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
     - terraform init infra-as-code/dev
     - terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
     - terraform workspace select default infra-as-code/dev
-    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/infra-as-code/dev
+    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/dev
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
@@ -554,7 +554,7 @@ destroy-network-resources-branches:
     - terraform workspace select $CI_JOB_STAGE-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources
     - terraform destroy -auto-approve infra-as-code/network-resources
     - terraform workspace select default infra-as-code/network-resources
-    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/infra-as-code/network-resources
+    - terraform workspace delete $CI_JOB_STAGE-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources
   when: manual
   only:
     - branches
