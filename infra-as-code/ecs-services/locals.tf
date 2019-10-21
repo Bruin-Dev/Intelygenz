@@ -103,5 +103,4 @@ locals {
   automation-velocloud-orchestrator-ecs_service-name = "${var.ENVIRONMENT}-velocloud-orchestrator"
   automation-velocloud-orchestrator-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-orchestrator.family}:${aws_ecs_task_definition.automation-velocloud-orchestrator.revision}"
   automation-velocloud-orchestrator-service_discovery_service-name = "velocloud-orchestrator-${var.ENVIRONMENT}"
-
 }
