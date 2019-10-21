@@ -311,6 +311,7 @@ terraform-validate-ecs-services:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
     - terraform init infra-as-code/ecs-services
     - terraform workspace new ecs-services-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services || terraform workspace select new ecs-services-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
