@@ -307,7 +307,7 @@ terraform-validate-network-resources:
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
     - terraform init infra-as-code/network-resources
-    - terraform workspace new network-resources-$TF_VAR_ENVIRONMENT infra-as-code/dev || terraform workspace select network-resources-$TF_VAR_ENVIRONMENT infra-as-code/dev
+    - terraform workspace new network-resources-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources || terraform workspace select network-resources-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
 
 terraform-validate-ecs-services:
