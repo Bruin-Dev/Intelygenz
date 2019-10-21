@@ -331,6 +331,8 @@ terraform-validate-ecs-services:
 terraform-validate-dev:
   stage: validation
   extends: .terraform_template
+  variables:
+    STAGE_NAME_TERRAFORM_WORKSPACE: deploy
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
@@ -346,6 +348,7 @@ terraform-validate-dev:
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - export TF_VAR_env_network_resources=basic_infra-dev-$TF_VAR_CURRENT_ENVIRONMENT
     - terraform init infra-as-code/dev
+    - terraform workspace new $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/dev || terraform workspace select $STAGE_NAME_TERRAFORM_WORKSPACE-$TF_VAR_ENVIRONMENT infra-as-code/dev
     - terraform validate infra-as-code/dev
 
 basic-infra:
