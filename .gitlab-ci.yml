@@ -390,17 +390,6 @@ deploy-branches:
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
-    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
-    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
-    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
-    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
-    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
-    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
-    - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
-    - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk --upgrade --no-cache add curl bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
@@ -410,17 +399,6 @@ deploy-branches:
     - terraform workspace new dev-$TF_VAR_ENVIRONMENT infra-as-code/dev || terraform workspace select dev-$TF_VAR_ENVIRONMENT infra-as-code/dev
     - terraform get -update infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - /bin/bash ci-utils/task_healthcheck.sh -t nats
-    - terraform init infra-as-code/ecs-services
-    - terraform validate infra-as-code/ecs-services
-    - terraform workspace new ecs-services-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services || terraform workspace select ecs-services-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
-    - terraform get -update infra-as-code/ecs-services
-    - terraform apply -auto-approve infra-as-code/ecs-services
-    - terraform init infra-as-code/metrics-dashboards-alarms
-    - terraform validate infra-as-code/metrics-dashboards-alarms
-    - terraform workspace new metrics-dashboards-alarms-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms || terraform workspace select $CI_JOB_STAGE-$TF_VAR_ENVIRONMENT infra-as-code/metrics-dashboards-alarms
-    - terraform get -update infra-as-code/metrics-dashboards-alarms
-    - terraform apply -auto-approve infra-as-code/metrics-dashboards-alarms
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
@@ -442,8 +420,6 @@ deploy-branches-ecs-services:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
-    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
