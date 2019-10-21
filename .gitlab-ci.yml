@@ -409,7 +409,6 @@ deploy-branches:
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - export TF_VAR_env_network_resources=basic_infra-$TF_VAR_CURRENT_ENVIRONMENT
     - apk --upgrade --no-cache add curl bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
@@ -432,7 +431,7 @@ deploy-branches:
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
-    on_stop: destroy-branches
+    on_stop: destroy-branches-dev
   only:
     - branches
   except:
@@ -463,7 +462,6 @@ deploy-branches-ecs-services:
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - export TF_VAR_env_network_resources=basic_infra-$TF_VAR_CURRENT_ENVIRONMENT
     - apk --upgrade --no-cache add curl bash
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - /bin/bash ci-utils/task_healthcheck.sh -t nats
@@ -475,7 +473,7 @@ deploy-branches-ecs-services:
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
-    on_stop: destroy-branches
+    on_stop: destroy-branches-ecs-services
   only:
     - branches
   except:
