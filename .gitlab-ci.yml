@@ -8,7 +8,7 @@ stages:
   - grafana_user_creation
 
 include:
-  - local: '/gitlab-ci/.gitlab-ci-templates.yml'
+  - local: 'gitlab-ci/.gitlab-ci-templates.yml'
 
 variables:
   NATS_SERVER1: "nats://nats-streaming:4222"
