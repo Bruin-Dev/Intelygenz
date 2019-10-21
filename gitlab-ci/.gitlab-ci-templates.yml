@@ -20,7 +20,7 @@
   script:
     - pytest --cov
 
-.build_app_image: &build_app_image
+.acceptance_test_module: &acceptance_test_module
   stage: acceptance_tests
   image: docker:18-git
   services:
@@ -33,7 +33,7 @@
   after_script:
     - docker-compose -f docker-compose-ci.yml down && docker-compose -f docker-compose-ci.yml rm -v
 
-.job_app_build_template: &build_app_image
+.build_app_image: &build_app_image
   services:
     - docker:18-dind
   before_script:
