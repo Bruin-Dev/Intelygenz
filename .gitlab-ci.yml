@@ -330,7 +330,7 @@ terraform-validate-dev:
     - terraform init infra-as-code/dev
     - terraform workspace new dev-$TF_VAR_ENVIRONMENT infra-as-code/dev || terraform workspace select dev-$TF_VAR_ENVIRONMENT infra-as-code/dev
     - terraform validate infra-as-code/dev
-    - terraform workspace select default infra-as-code/dev
+    - rm -rf .terraform
     - terraform init infra-as-code/ecs-services
     - terraform workspace new ecs-services-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services || terraform workspace select new ecs-services-$TF_VAR_ENVIRONMENT infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
