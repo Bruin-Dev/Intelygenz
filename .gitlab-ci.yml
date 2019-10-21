@@ -365,8 +365,8 @@ network-resources-infra-branches:
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
     - terraform init infra-as-code/network-resources
+    - terraform workspace new network-resources-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources || terraform workspace select network-resources-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
-    - terraform workspace network-resources-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources || terraform workspace select network-resources-$TF_VAR_CURRENT_ENVIRONMENT infra-as-code/network-resources
     - terraform get -update infra-as-code/network-resources
     - terraform apply -auto-approve infra-as-code/network-resources
   only:
