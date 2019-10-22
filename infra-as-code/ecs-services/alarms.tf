@@ -1,10 +1,14 @@
-data "template_file" "cloudformation_sns_stack_alarms" {
+data "template_file" "cloudformation_sns_stack_alarms_erros_exceptions_messages" {
   template = file("${path.module}/cloudformation-templates/mettel_notification_topic_stack.json")
+  vars {
+    stack_description = local.cloudformation_sns_stack_alarms_erros_exceptions_messages-description-stack
+    operatorEmail_description = local.cloudformation_sns_stack_alarms_erros_exceptions_messages-description-operator_email
+  }
 }
 
 resource "aws_cloudformation_stack" "sns_topic_alarm_errors_exceptions_services" {
   name          = local.stack_alarms-errors_exceptions_messages_in_services-name
-  template_body = data.template_file.cloudformation_sns_stack_alarms.rendered
+  template_body = data.template_file.cloudformation_sns_stack_alarms_erros_exceptions_messages.rendered
   parameters = {
     OperatorEmail = var.alarms_subscriptions_email_addresses
   }
