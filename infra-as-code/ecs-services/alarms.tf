@@ -29,7 +29,7 @@ resource "aws_cloudwatch_metric_alarm" "exception_messages_services_alarm" {
   alarm_description         = "This metric monitors number of exception messages for all the services in the cluster"
   insufficient_data_actions = []
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services.outputs["TopicARN"] ]
-  depends_on                = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services ]
+  #depends_on                = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services ]
 }
 
 /*
