@@ -53,7 +53,8 @@ class ServiceOutageTriage:
     async def _poll_tickets(self):
         self._logger.info("Requesting tickets from Bruin")
         ticket_request_msg = {'request_id': uuid(), 'response_topic': f'bruin.ticket.response.{self._service_id}',
-                              'client_id': 85940, 'ticket_status': ['New', 'InProgress', 'Draft'], 'category': 'SD-WAN'}
+                              'client_id': 85940, 'ticket_status': ['New', 'InProgress', 'Draft'], 'category': 'SD-WAN',
+                              'ticket_topic': 'VOO'}
         all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
                                                         json.dumps(ticket_request_msg, default=str),
                                                         timeout=15)
