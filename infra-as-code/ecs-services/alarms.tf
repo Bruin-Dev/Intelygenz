@@ -28,9 +28,11 @@ resource "aws_cloudwatch_metric_alarm" "exception_messages_services_alarm" {
   threshold                 = "5"
   alarm_description         = "This metric monitors number of exception messages for all the services in the cluster"
   insufficient_data_actions = []
-  alarm_actions     = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services.outputs["TopicARN"] ]
+  alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services.outputs["TopicARN"] ]
+  depends_on                = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services ]
 }
 
+/*
 resource "aws_cloudwatch_metric_alarm" "errors_messages_services_alarm" {
   alarm_name                = local.cluster_task_running-alarm_name
   comparison_operator       = "GreaterThanOrEqualToThreshold"
@@ -43,4 +45,4 @@ resource "aws_cloudwatch_metric_alarm" "errors_messages_services_alarm" {
   alarm_description         = "This metric monitors number of error messages for all the services in the cluster"
   insufficient_data_actions = []
   alarm_actions     = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services.outputs["TopicARN"] ]
-}
+}*/

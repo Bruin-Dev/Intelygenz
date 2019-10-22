@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "operatorEmail_description",
+  "Description": "${operatorEmail_description}",
   "Metadata": {
     "Authors": {
       "Description": "IGZ"
@@ -37,7 +37,7 @@
     "NotificationTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
-        "Subscription": [ { "Endpoint": { "Ref": "OperatorEmail" },"Protocol": "email" } ]
+        "Subscription": [ { "Endpoint": { "Ref": "OperatorEmail" }, "Protocol": "email" } ]
       }
     }
   },
