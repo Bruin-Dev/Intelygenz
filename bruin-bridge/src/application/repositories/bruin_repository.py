@@ -4,10 +4,11 @@ class BruinRepository:
         self._logger = logger
         self._bruin_client = bruin_client
 
-    def get_all_filtered_tickets(self, client_id, ticket_id, ticket_status, category):
+    def get_all_filtered_tickets(self, client_id, ticket_id, ticket_status, category, ticket_topic):
         ticket_list = []
         for status in ticket_status:
-            status_ticket_list = self._bruin_client.get_all_tickets(client_id, ticket_id, status, category)
+            status_ticket_list = self._bruin_client.get_all_tickets(client_id, ticket_id, status, category,
+                                                                    ticket_topic)
             if status_ticket_list is not None:
                 ticket_list = ticket_list + status_ticket_list
             else:

@@ -28,7 +28,7 @@ class TestGetTicket:
         bruin_repository = Mock()
         bruin_repository.get_all_filtered_tickets = Mock(return_value=['Some ticket list'])
         msg = {'request_id': "123", 'response_topic': 'bruin.ticket.response',
-               'client_id': 123, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN'}
+               'client_id': 123, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN', 'ticket_topic': 'VOO'}
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(json.dumps(msg))
         assert bruin_repository.get_all_filtered_tickets.called
@@ -36,6 +36,7 @@ class TestGetTicket:
         assert bruin_repository.get_all_filtered_tickets.call_args[0][1] == ''
         assert bruin_repository.get_all_filtered_tickets.call_args[0][2] == msg['ticket_status']
         assert bruin_repository.get_all_filtered_tickets.call_args[0][3] == msg['category']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][4] == msg['ticket_topic']
         assert event_bus.publish_message.called
         assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
         assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
@@ -50,7 +51,8 @@ class TestGetTicket:
         bruin_repository = Mock()
         bruin_repository.get_all_filtered_tickets = Mock(return_value=['Some ticket list'])
         msg = {'request_id': "123", 'response_topic': 'bruin.ticket.response',
-               'client_id': 123, 'ticket_id': 321, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN'}
+               'client_id': 123, 'ticket_id': 321, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN',
+               'ticket_topic': 'VOO'}
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(json.dumps(msg))
         assert bruin_repository.get_all_filtered_tickets.called
@@ -58,6 +60,7 @@ class TestGetTicket:
         assert bruin_repository.get_all_filtered_tickets.call_args[0][1] == msg['ticket_id']
         assert bruin_repository.get_all_filtered_tickets.call_args[0][2] == msg['ticket_status']
         assert bruin_repository.get_all_filtered_tickets.call_args[0][3] == msg['category']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][4] == msg['ticket_topic']
         assert event_bus.publish_message.called
         assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
         assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
@@ -72,7 +75,8 @@ class TestGetTicket:
         bruin_repository = Mock()
         bruin_repository.get_all_filtered_tickets = Mock(return_value=None)
         msg = {'request_id': "123", 'response_topic': 'bruin.ticket.response',
-               'client_id': 123, 'ticket_id': 321, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN'}
+               'client_id': 123, 'ticket_id': 321, 'ticket_status': ['New', 'In-Progress'], 'category': 'SD-WAN',
+               'ticket_topic': 'VOO'}
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(json.dumps(msg))
         assert bruin_repository.get_all_filtered_tickets.called
@@ -80,6 +84,7 @@ class TestGetTicket:
         assert bruin_repository.get_all_filtered_tickets.call_args[0][1] == msg['ticket_id']
         assert bruin_repository.get_all_filtered_tickets.call_args[0][2] == msg['ticket_status']
         assert bruin_repository.get_all_filtered_tickets.call_args[0][3] == msg['category']
+        assert bruin_repository.get_all_filtered_tickets.call_args[0][4] == msg['ticket_topic']
         assert event_bus.publish_message.called
         assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
         assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],

@@ -50,18 +50,19 @@ class BruinClient:
         }
         return headers
 
-    def get_all_tickets(self, client_id, ticket_id, ticket_status, category):
+    def get_all_tickets(self, client_id, ticket_id, ticket_status, category, ticket_topic):
         @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
                                      min=self._config.NATS_CONFIG['min']),
                stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
-        def get_all_tickets(client_id, ticket_id, ticket_status, category):
+        def get_all_tickets(client_id, ticket_id, ticket_status, category, ticket_topic):
             self._logger.info(f'Getting all tickets for client id: {client_id}')
 
             params = {
                 "ClientId": client_id,
                 "TicketId": ticket_id,
                 "TicketStatus": ticket_status,
-                "Category": category
+                "Category": category,
+                "TicketTopic": ticket_topic
             }
             response = requests.get(f"{self._config.BRUIN_CONFIG['base_url']}/api/Ticket",
                                     headers=self._get_request_headers(),
@@ -73,7 +74,7 @@ class BruinClient:
                 self.login()
                 raise Exception
 
-        return get_all_tickets(client_id, ticket_id, ticket_status, category)
+        return get_all_tickets(client_id, ticket_id, ticket_status, category, ticket_topic)
 
     def get_ticket_details(self, ticket_id):
         @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],

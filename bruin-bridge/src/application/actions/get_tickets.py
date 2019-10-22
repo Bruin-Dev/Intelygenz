@@ -12,18 +12,20 @@ class GetTicket:
 
     async def get_all_tickets(self, msg):
         msg_dict = json.loads(msg)
-        self._logger.info(f'Collecting all tickets for client id: { msg_dict["client_id"]}...')
+        self._logger.info(f'Collecting all tickets for client id: {msg_dict["client_id"]}...')
         ticket_id = ''
         if 'ticket_id' in msg_dict.keys():
             ticket_id = msg_dict['ticket_id']
         client_id = msg_dict['client_id']
         ticket_status = msg_dict['ticket_status']
         category = msg_dict['category']
+        ticket_topic = msg_dict['ticket_topic']
         status = 500
         filtered_tickets = self._bruin_repository.get_all_filtered_tickets(client_id,
                                                                            ticket_id,
                                                                            ticket_status,
-                                                                           category)
+                                                                           category,
+                                                                           ticket_topic)
         if filtered_tickets is not None:
             status = 200
 
