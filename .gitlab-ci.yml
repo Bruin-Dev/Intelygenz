@@ -442,6 +442,7 @@ destroy-branches-dev:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
+    - terraform init infra-as-code/dev
     - terraform workspace select dev-$TF_VAR_ENVIRONMENT infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
     - terraform workspace select default infra-as-code/dev
