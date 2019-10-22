@@ -1,6 +1,6 @@
 data "template_file" "cloudformation_sns_stack_alarms_erros_exceptions_messages" {
   template = file("${path.module}/cloudformation-templates/mettel_notification_topic_stack.json")
-  vars {
+  vars = {
     stack_description = local.cloudformation_sns_stack_alarms_erros_exceptions_messages-description-stack
     operatorEmail_description = local.cloudformation_sns_stack_alarms_erros_exceptions_messages-description-operator_email
   }
