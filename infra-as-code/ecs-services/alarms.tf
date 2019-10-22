@@ -1,8 +1,8 @@
 data "template_file" "cloudformation_sns_stack_alarms_erros_exceptions_messages" {
   template = file("${path.module}/cloudformation-templates/mettel_notification_topic_stack.json")
   vars = {
-    stack_description = local.cloudformation_sns_stack_alarms_erros_exceptions_messages-description-stack
-    operatorEmail_description = local.cloudformation_sns_stack_alarms_erros_exceptions_messages-description-operator_email
+    stack_description = local.cloudformation_sns_stack_alarms_errors_exceptions_messages-description-stack
+    operatorEmail_description = local.cloudformation_sns_stack_alarms_errors_exceptions_messages-description-operator_email
   }
 }
 
@@ -17,16 +17,30 @@ resource "aws_cloudformation_stack" "sns_topic_alarm_errors_exceptions_services"
   )
 }
 
-resource "aws_cloudwatch_metric_alarm" "errors_messages_services_alarm" {
+resource "aws_cloudwatch_metric_alarm" "exception_messages_services_alarm" {
   alarm_name                = local.cluster_task_running-alarm_name
   comparison_operator       = "GreaterThanOrEqualToThreshold"
   evaluation_periods        = "2"
-  metric_name               = local.exception_detected_metric-metric_transformation-name
+  metric_name               = local.exceptions_detected_metric-metric_transformation-name
   namespace                 = "LogMetrics"
   period                    = "120"
   statistic                 = "Sum"
   threshold                 = "5"
-  alarm_description         = "This metric monitors number of message errors for all the services in the cluster"
+  alarm_description         = "This metric monitors number of exception messages for all the services in the cluster"
+  insufficient_data_actions = []
+  alarm_actions     = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services.outputs["TopicARN"] ]
+}
+
+resource "aws_cloudwatch_metric_alarm" "errors_messages_services_alarm" {
+  alarm_name                = local.cluster_task_running-alarm_name
+  comparison_operator       = "GreaterThanOrEqualToThreshold"
+  evaluation_periods        = "2"
+  metric_name               = local.errors_detected_metric-metric_transformation-name
+  namespace                 = "LogMetrics"
+  period                    = "120"
+  statistic                 = "Sum"
+  threshold                 = "5"
+  alarm_description         = "This metric monitors number of error messages for all the services in the cluster"
   insufficient_data_actions = []
   alarm_actions     = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services.outputs["TopicARN"] ]
 }

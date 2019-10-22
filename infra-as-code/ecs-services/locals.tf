@@ -105,7 +105,8 @@ locals {
   automation-velocloud-orchestrator-service_discovery_service-name = "velocloud-orchestrator-${var.ENVIRONMENT}"
 
   // metrics local variables
-  exception_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices"
+  exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices"
+  errors_detected_metric-metric_transformation-name = "ErrorsMessagesDetectedInServices"
 
   // dashboards local variables
   cluster_dashboard_name = "cluster-${var.ENVIRONMENT}"
@@ -115,6 +116,6 @@ locals {
 
   // cloudfourmation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicAlarmErrorMessagesInServicesStack"
-  cloudformation_sns_stack_alarms_erros_exceptions_messages-description-stack="MetTel Notificacion Topics for Errors and Exceptions Detected in ECS Services"
-  cloudformation_sns_stack_alarms_erros_exceptions_messages-description-operator_email="Email address to notify if there are any alarms due to messages detected with Errors or Exceptions in ECS services"
+  cloudformation_sns_stack_alarms_errors_exceptions_messages-description-stack="MetTel Notificacion Topics for Errors and Exceptions Detected in ECS Services"
+  cloudformation_sns_stack_alarms_errors_exceptions_messages-description-operator_email="Email address to notify if there are any alarms due to messages detected with Errors or Exceptions in ECS services"
 }
