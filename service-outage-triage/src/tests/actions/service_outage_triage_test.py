@@ -495,39 +495,10 @@ class TestServiceOutageTriage:
         tickets_list = [ticket_details]
         tickets = {'tickets': tickets_list}
 
-        edge_serial = 'VC05200026138'
-        filtered_ticket_details = {'ticketID': ticket_id, 'serial': edge_serial}
-        filtered_tickets_list = [filtered_ticket_details]
-
-        edge_status = {
-            'edge_id': 'edge-123',
-            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
-        }
-        edge_event = {'edge_events': 'Some event info'}
-        append_ticket = {'ticket_appended': 'Success'}
-        send_to_slack = {'slack_sent': 'Success'}
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[
-            tickets, edge_status, edge_event,
-            append_ticket, send_to_slack
-        ])
-
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
-        service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
-        service_outage_triage._compose_ticket_note_object = Mock()
-        service_outage_triage._ticket_object_to_string = Mock()
-        service_outage_triage._ticket_object_to_email_obj = Mock()
-
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = environment
-        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-            await service_outage_triage._poll_tickets()
-
-        service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
-        service_outage_triage._compose_ticket_note_object.assert_called_once_with(edge_status, edge_event)
-        service_outage_triage._ticket_object_to_string.assert_not_called()
-        service_outage_triage._ticket_object_to_email_obj.assert_not_called()
+        await service_outage_triage._poll_tickets()
+        assert event_bus.rpc_request.called
+        assert service_outage_triage._filtered_ticket_details.called is False
+        assert logger.error.called is True
 
     @pytest.mark.asyncio
     async def filtered_ticket_details_test(self):
@@ -936,9 +907,6 @@ class TestServiceOutageTriage:
         }
 
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
-
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         current_datetime = datetime.now()
         datetime_mock = Mock()
