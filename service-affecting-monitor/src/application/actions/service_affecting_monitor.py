@@ -95,7 +95,8 @@ class ServiceAffectingMonitor:
             ticket_exists = await self._ticket_existence(client_id, edge_status['edge_info']['edges']['serialNumber'],
                                                          trouble)
             if ticket_exists is False:
-                # TODO contact TBD
+                # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact
+                # TODO for each site, we should change this hardcode
                 ticket_note = self._ticket_object_to_string(ticket_dict)
                 ticket_details = {
                     "request_id": uuid(),
@@ -110,15 +111,15 @@ class ServiceAffectingMonitor:
                     "notes": ticket_note,
                     "contacts": [
                         {
-                            "email": "fake@gmail.com",
-                            "phone": "3127595750",
-                            "name": "Hames Black",
+                            "email": "gclark@titanamerica.com",
+                            "phone": "757-533-7151",
+                            "name": "Gary Clark",
                             "type": "site"
                         },
                         {
-                            "email": "fake@gmail.com",
-                            "phone": "3127595750",
-                            "name": "Hames Black",
+                            "email": "gclark@titanamerica.com",
+                            "phone": "757-342-9649",
+                            "name": "Gary Clark",
                             "type": "ticket"
                         }
                     ]
