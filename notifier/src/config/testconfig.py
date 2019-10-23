@@ -3,7 +3,7 @@ import logging
 import sys
 
 NATS_CONFIG = {
-    'servers': 'nats://nats-streaming:4222',
+    'servers': 'nats://nats-server:4222',
     'cluster_name': 'automation-engine-nats',
     'client_ID': 'base-microservice',
     'subscriber': {

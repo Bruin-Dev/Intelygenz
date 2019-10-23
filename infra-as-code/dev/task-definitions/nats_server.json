@@ -1,6 +1,6 @@
 [
   {
-    "name": "nats-streaming",
+    "name": "nats-server",
     "image": "${image}",
     "portMappings": [
       {
@@ -24,7 +24,7 @@
     "healthCheck": {
       "command": [
         "CMD-SHELL",
-        "curl -f http://localhost:8222/streaming/serverz || exit 1"
+        "curl -f http://localhost:8222/varz || exit 1"
       ],
       "interval": 90,
       "retries": 5,

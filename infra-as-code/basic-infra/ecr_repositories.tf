@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "automation-nats-server" {
-  name = "automation-nats-streaming-server"
+  name = "automation-nats-server"
 }
 
 resource "aws_ecr_repository" "automation-velocloud-orchestrator" {

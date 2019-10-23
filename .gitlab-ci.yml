@@ -1,14 +1,13 @@
 stages:
   - validation
   - unit_test
-  - acceptance_tests
   - basic_infra
   - build
   - deploy
   - grafana_user_creation
 
 variables:
-  NATS_SERVER1: "nats://nats-streaming:4222"
+  NATS_SERVER1: "nats://nats-server:4222"
   NATS_CLUSTER_NAME: "automation-engine-nats"
   NATS_MODULE_VERSION: 0.15.1
   DOCKER_HOST: tcp://docker:2375/
@@ -157,7 +156,7 @@ t7-bridge-test:
 nats-streaming-build:
   stage: build
   variables:
-    MODULE_NAME: nats-streaming-server
+    MODULE_NAME: nats
     MODULE_VERSION: ${NATS_MODULE_VERSION}
   extends: .build_app_image
 

@@ -1,5 +1,5 @@
 data "aws_ecr_repository" "automation-nats-server" {
-  name = "automation-nats-streaming-server"
+  name = "automation-nats-server"
 }
 
 data "template_file" "automation-nats-server" {
