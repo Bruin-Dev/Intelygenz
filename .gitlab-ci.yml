@@ -1,7 +1,6 @@
 stages:
   - validation
   - unit_test
-  - acceptance_tests
   - basic_infra
   - build
   - deploy
@@ -39,7 +38,7 @@ notifier-linter:
 velocloud-orchestrator-linter:
   variables:
     MODULE: velocloud-orchestrator
-  extends: .lint_module
+  <<: *lint_module
 
 last-contact-report-linter:
   variables:
@@ -225,7 +224,7 @@ bruin-bridge-build:
   variables:
     MODULE_NAME: bruin-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  extends: .build_app_image
+  <<: *build_app_image
 
 velocloud-orchestrator-build:
   stage: build
