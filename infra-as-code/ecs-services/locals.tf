@@ -109,6 +109,7 @@ locals {
   errors_detected_metric-metric_transformation-name = "ErrorsMessagesDetectedInServices"
   running_task_count-metric_transformation-name = "RunningTaskCount"
   exception_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices"
+
   // dashboards local variables
   cluster_dashboard_name = "cluster-${var.ENVIRONMENT}"
 
@@ -133,9 +134,14 @@ locals {
   cloudformation_sns_stack_alarms_errors_exceptions_messages-description-stack="MetTel Notificacion Topic for Alarms"
   cloudformation_sns_stack_alarms_errors_exceptions_messages-description-operator_email="Email address to notify if there are any active alarms in MetTel automation infrastructure"
   cluster_task_running-alarm_name = "tasks_running-${var.ENVIRONMENT}"
+  exception_messages_services_alarm-name = "exception_messages_services-${var.ENVIRONMENT}"
+  error_messages_services_alarm-name = "error_messages_services-${var.ENVIRONMENT}"
+  running_task_count_velocloud-orchestator_alarm-name = "running_tasks_count-velocloud-orchestrator-${var.ENVIRONMENT}"
+  running_task_count_bruin-bridge_alarm-name = "running_tasks_count-bruin-bridge-${var.ENVIRONMENT}"
+  running_task_count_service-outage-triage_alarm-name = "running_tasks_count-service-outage-triage-${var.ENVIRONMENT}"
 
   // cloudfourmation local variables
-  stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicAlarmErrorMessagesInServicesStack"
-  cloudformation_sns_stack_alarms_errors_exceptions_messages-description-stack="MetTel Notificacion Topics for Alarms due to Errors and Exceptions Detected in ECS Services"
+  stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms"
+  cloudformation_sns_stack_alarms_errors_exceptions_messages-description-stack="MetTel Notificacion Topic for Alarms"
   cloudformation_sns_stack_alarms_errors_exceptions_messages-description-operator_email="Email address to notify if there are any alarms due to messages detected with Errors or Exceptions in ECS services"
 }
