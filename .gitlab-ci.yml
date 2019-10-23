@@ -373,7 +373,7 @@ network-resources-infra-master:
 
 deploy-branches:
   stage: deploy
-  <<: *terraform_template
+  extends: .terraform_template
   variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
@@ -428,7 +428,7 @@ deploy-branches:
 
 destroy-branches:
   stage: deploy
-  <<: *terraform_template
+  extends: .terraform_template
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
