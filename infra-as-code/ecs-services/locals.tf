@@ -118,6 +118,9 @@ locals {
   running_task_count_velocloud-orchestator_alarm-name = "running_tasks_count-velocloud-orchestrator-${var.ENVIRONMENT}"
   running_task_count_bruin-bridge_alarm-name = "running_tasks_count-bruin-bridge-${var.ENVIRONMENT}"
   running_task_count_service-outage-triage_alarm-name = "running_tasks_count-service-outage-triage-${var.ENVIRONMENT}"
+  running_task_count_service-alarm-evaluation_periods = "2"
+  running_task_count_service-alarm-period = "180"
+  running_task_count_service-alarm-thresold = "1"
 
   // cloudfourmation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms"
