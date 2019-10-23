@@ -51,9 +51,9 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-orchestator
   evaluation_periods        = "1"
   metric_name               = local.running_task_count-metric_transformation-name
   namespace                 = "ECS/ContainerInsights"
-  period                    = "300"
+  period                    = "180"
   statistic                 = "Sum"
-  threshold                 = "3"
+  threshold                 = "1"
   insufficient_data_actions = []
   alarm_description         = "This metric monitors the number of running tasks of velocloud-orchestrator service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services.outputs["TopicARN"] ]
@@ -66,12 +66,12 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-orchestator
 resource "aws_cloudwatch_metric_alarm" "running_task_count_bruin-bridge_alarm" {
   alarm_name                = local.running_task_count_bruin-bridge_alarm-name
   comparison_operator       = "LessThanOrEqualToThreshold"
-  evaluation_periods        = "1"
+  evaluation_periods        = "2"
   metric_name               = local.running_task_count-metric_transformation-name
   namespace                 = "ECS/ContainerInsights"
-  period                    = "300"
+  period                    = "180"
   statistic                 = "Sum"
-  threshold                 = "3"
+  threshold                 = "1"
   insufficient_data_actions = []
   alarm_description         = "This metric monitors the number of running tasks of bruin-bridge service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services.outputs["TopicARN"] ]
@@ -84,12 +84,12 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_bruin-bridge_alarm" {
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-triage_alarm" {
   alarm_name                = local.running_task_count_service-outage-triage_alarm-name
   comparison_operator       = "LessThanOrEqualToThreshold"
-  evaluation_periods        = "1"
+  evaluation_periods        = "2"
   metric_name               = local.running_task_count-metric_transformation-name
   namespace                 = "ECS/ContainerInsights"
-  period                    = "300"
+  period                    = "180"
   statistic                 = "Sum"
-  threshold                 = "3"
+  threshold                 = "1"
   insufficient_data_actions = []
   alarm_description         = "This metric monitors the number of running tasks of service-outage-triage service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarm_errors_exceptions_services.outputs["TopicARN"] ]

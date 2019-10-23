@@ -122,5 +122,5 @@ locals {
   // cloudfourmation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms"
   cloudformation_sns_stack_alarms_errors_exceptions_messages-description-stack="MetTel Notificacion Topic for Alarms"
-  cloudformation_sns_stack_alarms_errors_exceptions_messages-description-operator_email="Email address to notify if there are any alarms due to messages detected with Errors or Exceptions in ECS services"
+  cloudformation_sns_stack_alarms_errors_exceptions_messages-description-operator_email="Email address to notify if there are any active alarms in MetTel automation infrastructure"
 }
