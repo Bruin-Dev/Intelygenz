@@ -141,7 +141,7 @@ locals {
   running_task_count_service-outage-triage_alarm-name = "running_tasks_count-service-outage-triage-${var.ENVIRONMENT}"
   running_task_count_service-alarm-evaluation_periods = "2"
   running_task_count_service-alarm-period = "300"
-  running_task_count_service-alarm-thresold = "2"
+  running_task_count_service-alarm-threshold = "3"
 
   // cloudfourmation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms"
