@@ -113,14 +113,20 @@ locals {
   cluster_dashboard_name = "cluster-${var.ENVIRONMENT}"
 
   // alarms local variables
-  exception_messages_services_alarm-name = "exception_messages_services-${var.ENVIRONMENT}"
-  error_messages_services_alarm-name = "error_messages_services-${var.ENVIRONMENT}"
-  running_task_count_velocloud-orchestator_alarm-name = "running_tasks_count-velocloud-orchestrator-${var.ENVIRONMENT}"
-  running_task_count_bruin-bridge_alarm-name = "running_tasks_count-bruin-bridge-${var.ENVIRONMENT}"
-  running_task_count_service-outage-triage_alarm-name = "running_tasks_count-service-outage-triage-${var.ENVIRONMENT}"
+  exception_messages_services_alarm-name = "Exception messages services ${var.ENVIRONMENT}"
+  error_messages_services_alarm-name = "Error messages services ${var.ENVIRONMENT}"
+  exception_messages_services_alarm-evaluation_periods = "1"
+  exception_messages_services_alarm-period = "180"
+  exception_messages_services_alarm-threshold = "5"
+  error_messages_services_alarm-evaluation_periods = "1"
+  error_messages_services_alarm-period = "180"
+  error_messages_services_alarm-threshold = "5"
+  running_task_count_velocloud-orchestator_alarm-name = "Running tasks count velocloud-orchestrator service in ECS cluster ${var.ENVIRONMENT}"
+  running_task_count_bruin-bridge_alarm-name = "Running tasks count bruin-bridge service in ECS cluster ${var.ENVIRONMENT}"
+  running_task_count_service-outage-triage_alarm-name = "Running tasks count service-outage-triage service in ECS cluster ${var.ENVIRONMENT}"
   running_task_count_service-alarm-evaluation_periods = "2"
   running_task_count_service-alarm-period = "300"
-  running_task_count_service-alarm-thresold = "2"
+  running_task_count_service-alarm-threshold = "3"
 
   // cloudfourmation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms"
