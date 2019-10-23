@@ -25,7 +25,10 @@ BRUIN_CONFIG = {
     'base_url': os.environ["BRUIN_BASE_URL"],
     'client_id': os.environ["BRUIN_CLIENT_ID"],
     'client_secret': os.environ["BRUIN_CLIENT_SECRET"],
-    'login_url': os.environ["BRUIN_LOGIN_URL"]
+    'login_url': os.environ["BRUIN_LOGIN_URL"],
+    'multiplier': 5,
+    'min': 5,
+    'stop_delay': 18000
 }
 
 LOG_CONFIG = {

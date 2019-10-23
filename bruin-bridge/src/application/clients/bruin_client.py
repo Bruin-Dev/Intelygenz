@@ -11,9 +11,9 @@ class BruinClient:
         self._bearer_token = ""
 
     def login(self):
-        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
-                                     min=self._config.NATS_CONFIG['min']),
-               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
         def login():
             self._logger.info("Logging into Bruin...")
             creds = str.encode(self._config.BRUIN_CONFIG["client_id"] + ":" + self._config.BRUIN_CONFIG["client_secret"]
@@ -51,9 +51,9 @@ class BruinClient:
         return headers
 
     def get_all_tickets(self, client_id, ticket_id, ticket_status, category, ticket_topic):
-        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
-                                     min=self._config.NATS_CONFIG['min']),
-               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
         def get_all_tickets(client_id, ticket_id, ticket_status, category, ticket_topic):
             self._logger.info(f'Getting all tickets for client id: {client_id}')
 
@@ -77,9 +77,9 @@ class BruinClient:
         return get_all_tickets(client_id, ticket_id, ticket_status, category, ticket_topic)
 
     def get_ticket_details(self, ticket_id):
-        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
-                                     min=self._config.NATS_CONFIG['min']),
-               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
         def get_ticket_details(ticket_id):
             self._logger.info(f'Getting ticket details for ticket id: {ticket_id}')
             response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details',
@@ -94,9 +94,9 @@ class BruinClient:
         return get_ticket_details(ticket_id)
 
     def post_ticket_note(self, ticket_id, ticket_note):
-        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
-                                     min=self._config.NATS_CONFIG['min']),
-               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
         def post_ticket_note(ticket_id, ticket_note):
             self._logger.info(f'Getting posting notes for ticket id: {ticket_id}')
             payload = {
@@ -115,9 +115,9 @@ class BruinClient:
         return post_ticket_note(ticket_id, ticket_note)
 
     def post_ticket(self, client_id, category, services, notes, contacts):
-        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
-                                     min=self._config.NATS_CONFIG['min']),
-               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']))
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
         def post_ticket(client_id, category, services, notes, contacts):
             self._logger.info(f'Posting note for client id:{client_id}')
             payload = {
