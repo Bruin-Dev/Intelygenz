@@ -292,10 +292,10 @@ class TestAlert:
         alert = Alert(event_bus, scheduler, logger, config, service_id)
         alert._compose_email_object = Mock(return_value=email_contents)
 
-        current_datetime = "2018-07-27T20:27:44.000Z"
-        current_timestamp = datetime.strptime(current_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
+        current_timestamp = "2018-07-27T20:27:44.000Z"
+        current_datetime = datetime.strptime(current_timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
         datetime_mock = Mock(wraps=datetime)
-        datetime_mock.now = Mock(return_value=current_timestamp)
+        datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(alert_module, 'datetime', new=datetime_mock):
             await alert.receive_all_edges(event)
 

@@ -249,11 +249,11 @@ class TestServiceOutageMonitor:
             uuid_1, uuid_2, uuid_3, uuid_4, uuid_5, uuid_6, uuid_7,
         ]
 
-        current_timestamp = datetime.now()
-        current_timestamp_previous_week = current_timestamp - timedelta(days=7)
+        current_datetime = datetime.now()
+        current_datetime_previous_week = current_datetime - timedelta(days=7)
 
         datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_timestamp)
+        datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(service_outage_monitor_module, 'uuid', side_effect=uuid_side_effect):
             with patch.object(service_outage_monitor_module, 'datetime', new=datetime_mock):
                 await service_outage_monitor._service_outage_monitor_process()
@@ -287,8 +287,8 @@ class TestServiceOutageMonitor:
                     'request_id': uuid_3,
                     'response_topic': f'alert.response.event.edge.{service_id}',
                     'edge': 'edge-1',
-                    'start_date': current_timestamp_previous_week,
-                    'end_date': current_timestamp,
+                    'start_date': current_datetime_previous_week,
+                    'end_date': current_datetime,
                 }, default=str),
                 timeout=10,
             ),
@@ -312,8 +312,8 @@ class TestServiceOutageMonitor:
                     'request_id': uuid_5,
                     'response_topic': f'alert.response.event.edge.{service_id}',
                     'edge': 'edge-2',
-                    'start_date': current_timestamp_previous_week,
-                    'end_date': current_timestamp,
+                    'start_date': current_datetime_previous_week,
+                    'end_date': current_datetime,
                 }, default=str),
                 timeout=10,
             ),
@@ -337,8 +337,8 @@ class TestServiceOutageMonitor:
                     'request_id': uuid_7,
                     'response_topic': f'alert.response.event.edge.{service_id}',
                     'edge': 'edge-3',
-                    'start_date': current_timestamp_previous_week,
-                    'end_date': current_timestamp,
+                    'start_date': current_datetime_previous_week,
+                    'end_date': current_datetime,
                 }, default=str),
                 timeout=10,
             ),
