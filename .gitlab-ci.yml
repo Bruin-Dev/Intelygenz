@@ -374,41 +374,6 @@ network-resources-infra-master:
 deploy-branches:
   stage: deploy
   extends: .terraform_template
-  script:
-    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
-    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
-    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
-    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
-    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
-    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
-    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
-    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
-    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
-    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
-    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
-    - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
-    - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
-    - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - terraform init infra-as-code/dev
-    - terraform validate infra-as-code/dev
-    - terraform workspace new dev-$TF_VAR_ENVIRONMENT infra-as-code/dev || terraform workspace select dev-$TF_VAR_ENVIRONMENT infra-as-code/dev
-    - terraform get -update infra-as-code/dev
-    - terraform apply -auto-approve infra-as-code/dev
-  environment:
-    name: $CI_COMMIT_REF_NAME
-    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
-    on_stop: destroy-branches-ecs-services
-  only:
-    - branches
-  except:
-    - master
-
-deploy-branches-ecs-services:
-  extends: .terraform_template
-  stage: deploy
   variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
