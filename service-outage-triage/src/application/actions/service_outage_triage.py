@@ -101,9 +101,9 @@ class ServiceOutageTriage:
                                                   json.dumps(ticket_note),
                                                   timeout=10)
             slack_message = {'request_id': uuid(),
-                             'message': f'Triage appeneded to ticket:'
+                             'message': f'Triage appended to ticket: '
                                         f'https://app.bruin.com/helpdesk?clientId=85940&ticketId='
-                                        f'{ticket_id["ticketID"]} , in '
+                                        f'{ticket_id["ticketID"]}, in '
                                         f'{self._config.TRIAGE_CONFIG["environment"]}',
                              'response_topic': f'notification.slack.request.{self._service_id}'}
             await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
@@ -208,9 +208,9 @@ class ServiceOutageTriage:
                                                       json.dumps(ticket_append_note_msg),
                                                       timeout=15)
                     slack_message = {'request_id': uuid(),
-                                     'message': f'Events appeneded to ticket:'
+                                     'message': f'Events appended to ticket: '
                                                 f'https://app.bruin.com/helpdesk?clientId=85940&'
-                                                f'ticketId={ticket_id["ticketID"]} , in '
+                                                f'ticketId={ticket_id["ticketID"]}, in '
                                                 f'{self._config.TRIAGE_CONFIG["environment"]}',
                                      'response_topic': f'notification.slack.request.{self._service_id}'}
                     await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
