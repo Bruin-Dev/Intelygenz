@@ -8,6 +8,7 @@ stages:
 
 variables:
   NATS_SERVER1: "nats://nats-server:4222"
+  NATS_CLUSTER_NAME: "automation-engine-nats"
   NATS_MODULE_VERSION: 2.1.0
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
