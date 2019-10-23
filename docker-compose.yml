@@ -1,13 +1,13 @@
 version: '3.1'
 services:
   nats-server:
-    image: 'nats:2.1.0'
-    expose:
-      - "4222"
-      - "6222"
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: nats-server/Dockerfile
     ports:
-      - "8222:8222"
-      - "6222:6222"
+      - 4222:4222
+      - 8222:8222
     hostname: nats-server
 
   # EXAMPLE OF BASE-MICROSERVICE
