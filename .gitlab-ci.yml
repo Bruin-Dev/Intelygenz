@@ -463,7 +463,7 @@ destroy-branches:
     - master
 
 deploy-master:
-  stage: deploy-dev
+  stage: deploy
   extends: .terraform_template
   variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
@@ -516,7 +516,7 @@ deploy-master:
     - master
 
 destroy-master:
-  stage: deploy-dev
+  stage: deploy
   extends: .terraform_template
   script:
     - export ENVIRONMENT_SLUG=master
