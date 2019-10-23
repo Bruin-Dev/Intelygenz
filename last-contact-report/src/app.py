@@ -35,9 +35,7 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="sub-alert",
                                                  topic=f"alert.response.all.edges.{self._service_id}",
                                                  action_wrapper=self._receive_alert_edges,
-                                                 durable_name="last-contact-report",
-                                                 queue="last-contact-report",
-                                                 ack_wait=480)
+                                                 queue="last-contact-report")
 
         await self._alert.start_alert_job(exec_on_start=False)
         self._scheduler.start()
