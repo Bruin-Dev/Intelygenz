@@ -59,6 +59,17 @@ class ServiceAffectingMonitor:
         edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(edge_status_request,
                                                                                           default=str), timeout=30)
         self._logger.info(f'Edge received from event bus')
+
+        if 'edge_info' not in edge_status.keys() or 'links' not in edge_status['edge_info'].keys():
+            self._logger.error(f'Data received from Velocloud is incomplete')
+            self._logger.error(f'{json.dumps(edge_status, indent=2)}')
+            slack_message = {'request_id': uuid(),
+                             'message': f'Error while monitoring edge for service affecting trouble, seems like data '
+                                        f'is corrupted: \n {json.dumps(edge_status, indent=2)} \n'
+                                        f'The environment is {self._config.MONITOR_CONFIG["environment"]}'}
+            await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
+                                              timeout=10)
+
         for link in edge_status['edge_info']['links']:
             await self._latency_check(edge_status, link)
             await self._packet_loss_check(edge_status, link)
