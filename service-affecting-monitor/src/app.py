@@ -2,7 +2,6 @@ import asyncio
 from application.actions.service_affecting_monitor import ServiceAffectingMonitor
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
-from shortuuid import uuid
 
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
@@ -29,7 +28,7 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
 
-        await self._service_affecting_monitor.start_service_affecting_monitor_job(exec_on_start=False)
+        await self._service_affecting_monitor.start_service_affecting_monitor_job(exec_on_start=True)
 
         self._scheduler.start()
 

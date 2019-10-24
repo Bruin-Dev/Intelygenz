@@ -2,7 +2,6 @@ import asyncio
 from application.actions.service_outage_monitor import ServiceOutageMonitor
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
-from shortuuid import uuid
 
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
