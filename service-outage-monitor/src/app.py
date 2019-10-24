@@ -18,14 +18,13 @@ class Container:
         self._logger.info(f'Service Outage Monitor starting in {config.MONITOR_CONFIG["environment"]}...')
         self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
-        self._service_id = uuid()
 
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
         self._service_outage_monitor = ServiceOutageMonitor(self._event_bus, self._logger, self._scheduler,
-                                                            self._service_id, config)
+                                                            config)
 
     async def _start(self):
         await self._event_bus.connect()

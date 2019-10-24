@@ -34,12 +34,11 @@ EVEN_ROW = ' <tr>' \
 
 class Alert:
 
-    def __init__(self, event_bus: EventBus, scheduler, logger, config, service_id):
+    def __init__(self, event_bus: EventBus, scheduler, logger, config):
         self._event_bus = event_bus
         self._scheduler = scheduler
         self._logger = logger
         self._config = config
-        self._service_id = service_id
 
     async def start_alert_job(self, exec_on_start=False):
         self._logger.info("Scheduled task: alert report process configured to run first day of each month")
@@ -52,18 +51,12 @@ class Alert:
                                 id='_alert_process')
 
     async def _alert_process(self):
-        await self._request_all_edges()
-
-    async def _request_all_edges(self):
         self._logger.info("Requesting all edges with details for alert report")
-        request = dict(request_id=uuid(), response_topic=f"alert.response.all.edges.{self._service_id}", filter=[])
-        await self._event_bus.publish_message("alert.request.all.edges", json.dumps(request))
-
-    async def receive_all_edges(self, msg):
+        request = dict(request_id=uuid(), filter=[])
         self._logger.info("Processing all edges with details for alert report")
-        all_edges = json.loads(msg)["edges"]
+        all_edges = await self._event_bus.rpc_request("alert.request.all.edges", json.dumps(request), timeout=5)
         edges_to_report = []
-        for edge_info in all_edges:
+        for edge_info in all_edges["edges"]:
             raw_last_contact = edge_info["edge"]["lastContact"]
             if '0000-00-00 00:00:00' not in raw_last_contact:
                 last_contact = datetime.strptime(raw_last_contact, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -111,7 +104,6 @@ class Alert:
 
         return {
             'request_id': uuid(),
-            'response_topic': f"notification.email.response.{self._service_id}",
             'email_data': {
                 'subject': f'Last contact edges ({datetime.now().strftime("%Y-%m-%d")})',
                 'recipient': self._config["last_contact"]["recipient"],

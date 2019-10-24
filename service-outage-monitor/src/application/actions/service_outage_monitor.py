@@ -33,11 +33,10 @@ EVEN_ROW = ' <tr>' \
 
 class ServiceOutageMonitor:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, service_id, config):
+    def __init__(self, event_bus: EventBus, logger, scheduler, config):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
-        self._service_id = service_id
         self._config = config
 
     async def start_service_outage_monitor_job(self, exec_on_start=False):
@@ -52,7 +51,6 @@ class ServiceOutageMonitor:
 
     async def _service_outage_monitor_process(self):
         edge_list_request = {'request_id': uuid(),
-                             'response_topic': f'edge.list.response.{self._service_id}',
                              'filter': [{'host': 'mettel.velocloud.net', 'enterprise_ids': []},
                                         {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
                                         {'host': 'metvco04.mettel.net', 'enterprise_ids': []}]}
@@ -61,7 +59,6 @@ class ServiceOutageMonitor:
         self._logger.info(f'Splitting and sending edges to the event bus')
         for edge in edge_list['edges']:
             edge_status_request = {'request_id': uuid(),
-                                   'response_topic': f'edge.status.response.{self._service_id}',
                                    'edge': edge}
             edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(edge_status_request),
                                                             timeout=45)
@@ -74,7 +71,6 @@ class ServiceOutageMonitor:
                 if self._config.MONITOR_CONFIG['environment'] == 'dev' or self._config.MONITOR_CONFIG['environment'] \
                                                               == 'production':
                     events_msg = {'request_id': uuid(),
-                                  'response_topic': f'alert.response.event.edge.{self._service_id}',
                                   'edge': edge_status['edge_id'],
                                   'start_date': (datetime.now(utc) - timedelta(days=7)),
                                   'end_date': datetime.now(utc)}
@@ -192,7 +188,6 @@ class ServiceOutageMonitor:
 
         return {
             'request_id': uuid(),
-            'response_topic': f"notification.email.response.{self._service_id}",
             'email_data': {
                 'subject': f'Service outage monitor ({datetime.now().strftime("%Y-%m-%d")})',
                 'recipient': self._config.MONITOR_CONFIG["recipient"],

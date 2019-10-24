@@ -19,7 +19,6 @@ services:
     environment:
       - "BLUEPRINT=${BLUEPRINT}"
       - "NATS_SERVER1=${NATS_SERVER1}"
-      - "NATS_CLUSTER_NAME=${NATS_CLUSTER_NAME}"
     links:
       - nats-streaming
     depends_on:

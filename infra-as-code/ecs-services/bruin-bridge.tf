@@ -12,7 +12,6 @@ data "template_file" "automation-bruin-bridge" {
 
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
-    NATS_CLUSTER_NAME = var.NATS_CLUSTER_NAME
     BRUIN_CLIENT_ID = var.BRUIN_CLIENT_ID
     BRUIN_CLIENT_SECRET = var.BRUIN_CLIENT_SECRET
     BRUIN_LOGIN_URL = var.BRUIN_LOGIN_URL

@@ -19,15 +19,13 @@ class TestAlert:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
-        alert = Alert(event_bus, scheduler, logger, config, service_id)
+        alert = Alert(event_bus, scheduler, logger, config)
 
         assert alert._event_bus is event_bus
         assert alert._scheduler is scheduler
         assert alert._logger is logger
         assert alert._config is config
-        assert alert._service_id == service_id
 
     @pytest.mark.asyncio
     async def start_alert_job_with_exec_on_start_test(self):
@@ -36,9 +34,8 @@ class TestAlert:
         scheduler = Mock()
         scheduler.add_job = Mock()
         config = Mock()
-        service_id = 123
 
-        alert = Alert(event_bus, scheduler, logger, config, service_id)
+        alert = Alert(event_bus, scheduler, logger, config)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -62,9 +59,8 @@ class TestAlert:
         scheduler = Mock()
         scheduler.add_job = Mock()
         config = Mock()
-        service_id = 123
 
-        alert = Alert(event_bus, scheduler, logger, config, service_id)
+        alert = Alert(event_bus, scheduler, logger, config)
 
         await alert.start_alert_job(exec_on_start=False)
 
@@ -77,38 +73,13 @@ class TestAlert:
         )
 
     @pytest.mark.asyncio
-    async def request_all_edges_test(self):
+    async def alert_process_test(self):
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
         test_uuid = 'random-uuid'
-
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
-        alert = Alert(event_bus, scheduler, logger, config, service_id)
-
-        with patch.object(alert_module, 'uuid', return_value=test_uuid):
-            await alert._request_all_edges()
-
-        event_bus.publish_message.assert_awaited_once_with(
-            "alert.request.all.edges",
-            json.dumps({
-                'request_id': test_uuid,
-                'response_topic': f"alert.response.all.edges.{service_id}",
-                'filter': [],
-            })
-        )
-
-    @pytest.mark.asyncio
-    async def receive_all_edges_test(self):
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        logger = Mock()
-        scheduler = Mock()
-        config = Mock()
-        service_id = 123
 
         edge_1 = {
             "edge_id": {
@@ -150,32 +121,36 @@ class TestAlert:
             "enterprise": "Fake Corp"
         }
         edges_list = [edge_1, edge_2, edge_3]
-        event = json.dumps({
-            "request_id": 123,
-            "edges": edges_list,
-        })
+        event = {"request_id": 123, "edges": edges_list}
         email_contents = {'email': "<div>Some email</div>"}
+        event_bus.rpc_request = CoroutineMock(return_value=event)
 
-        alert = Alert(event_bus, scheduler, logger, config, service_id)
+        alert = Alert(event_bus, scheduler, logger, config)
         alert._compose_email_object = Mock(return_value=email_contents)
 
-        await alert.receive_all_edges(event)
+        with patch.object(alert_module, 'uuid', return_value=test_uuid):
+            await alert._alert_process()
 
         reported_edges = alert._compose_email_object.call_args[0][0]
         assert len(reported_edges) == 3
+        alert._event_bus.rpc_request.assert_awaited_once_with(
+            'alert.request.all.edges',
+            json.dumps(dict(request_id=test_uuid, filter=[])),
+            timeout=5
+        )
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
             json.dumps(email_contents),
         )
 
     @pytest.mark.asyncio
-    async def receive_all_edges_with_invalid_last_contact_dates_test(self):
+    async def alert_process_with_invalid_last_contact_dates_test(self):
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
+        test_uuid = 'random-uuid'
 
         edge_1 = {
             "edge_id": {
@@ -216,32 +191,36 @@ class TestAlert:
             },
             "enterprise": "Fake Corp"
         }
-        event = json.dumps({
-            "request_id": 123,
-            "edges": [edge_1, edge_2, edge_3],
-        })
+        event = {"request_id": 123, "edges": [edge_1, edge_2, edge_3]}
         email_contents = {'email': "<div>Some email</div>"}
+        event_bus.rpc_request = CoroutineMock(return_value=event)
 
-        alert = Alert(event_bus, scheduler, logger, config, service_id)
+        alert = Alert(event_bus, scheduler, logger, config)
         alert._compose_email_object = Mock(return_value=email_contents)
 
-        await alert.receive_all_edges(event)
+        with patch.object(alert_module, 'uuid', return_value=test_uuid):
+            await alert._alert_process()
 
         reported_edges = alert._compose_email_object.call_args[0][0]
         assert len(reported_edges) == 1
+        alert._event_bus.rpc_request.assert_awaited_once_with(
+            'alert.request.all.edges',
+            json.dumps(dict(request_id=test_uuid, filter=[])),
+            timeout=5
+        )
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
             json.dumps(email_contents),
         )
 
     @pytest.mark.asyncio
-    async def receive_all_edges_with_less_than_30_days_elapsed_since_last_contact_test(self):
+    async def alert_process_with_less_than_30_days_elapsed_since_last_contact_test(self):
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
+        test_uuid = 'random-uuid'
 
         edge_1 = {
             "edge_id": {
@@ -283,13 +262,11 @@ class TestAlert:
             "enterprise": "Fake Corp"
         }
         edges_list = [edge_1, edge_2, edge_3]
-        event = json.dumps({
-            "request_id": 123,
-            "edges": edges_list,
-        })
+        event = {"request_id": 123, "edges": edges_list}
         email_contents = {'email': "<div>Some email</div>"}
+        event_bus.rpc_request = CoroutineMock(return_value=event)
 
-        alert = Alert(event_bus, scheduler, logger, config, service_id)
+        alert = Alert(event_bus, scheduler, logger, config)
         alert._compose_email_object = Mock(return_value=email_contents)
 
         current_timestamp = "2018-07-27T20:27:44.000Z"
@@ -297,10 +274,16 @@ class TestAlert:
         datetime_mock = Mock(wraps=datetime)
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.object(alert_module, 'datetime', new=datetime_mock):
-            await alert.receive_all_edges(event)
+            with patch.object(alert_module, 'uuid', return_value=test_uuid):
+                await alert._alert_process()
 
         reported_edges = alert._compose_email_object.call_args[0][0]
         assert len(reported_edges) == 2
+        alert._event_bus.rpc_request.assert_awaited_once_with(
+            'alert.request.all.edges',
+            json.dumps(dict(request_id=test_uuid, filter=[])),
+            timeout=5
+        )
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
             json.dumps(email_contents),
@@ -311,9 +294,8 @@ class TestAlert:
         logger = Mock()
         scheduler = Mock()
         config = testconfig.ALERTS_CONFIG
-        service_id = 123
 
-        alert = Alert(event_bus, scheduler, logger, config, service_id)
+        alert = Alert(event_bus, scheduler, logger, config)
         edges_to_report = [
             {"edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z"},
              "enterprise": "Fake Corp"}]

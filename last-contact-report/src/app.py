@@ -18,7 +18,6 @@ class Container:
         self._logger.info("Last contact report starting...")
         self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
-        self._service_id = uuid()
 
         self._publisher = NATSClient(config, logger=self._logger)
         self.subscriber_alert = NATSClient(config, logger=self._logger)
@@ -26,18 +25,14 @@ class Container:
         self._event_bus.add_consumer(self.subscriber_alert, consumer_name="sub-alert")
         self._event_bus.set_producer(self._publisher)
 
-        self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG, self._service_id)
+        self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG)
 
         self._receive_alert_edges = ActionWrapper(self._alert, "receive_all_edges", is_async=True, logger=self._logger)
 
     async def _start(self):
         await self._event_bus.connect()
-        await self._event_bus.subscribe_consumer(consumer_name="sub-alert",
-                                                 topic=f"alert.response.all.edges.{self._service_id}",
-                                                 action_wrapper=self._receive_alert_edges,
-                                                 queue="last-contact-report")
 
-        await self._alert.start_alert_job(exec_on_start=False)
+        await self._alert.start_alert_job(exec_on_start=True)
         self._scheduler.start()
 
     async def start_server(self):

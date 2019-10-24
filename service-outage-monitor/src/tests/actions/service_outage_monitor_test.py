@@ -23,14 +23,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
 
         assert service_outage_monitor._event_bus is event_bus
         assert service_outage_monitor._logger is logger
         assert service_outage_monitor._scheduler is scheduler
-        assert service_outage_monitor._service_id == service_id
         assert service_outage_monitor._config is config
 
     @pytest.mark.asyncio
@@ -39,9 +37,8 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -64,9 +61,8 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
 
         await service_outage_monitor.start_service_outage_monitor_job(exec_on_start=False)
 
@@ -84,13 +80,12 @@ class TestServiceOutageMonitor:
         logger.error = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
         edge_list = {'edges': []}
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
 
         uuid_ = uuid()
         with patch.object(service_outage_monitor_module, 'uuid', return_value=uuid_):
@@ -100,7 +95,6 @@ class TestServiceOutageMonitor:
             'edge.list.request',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'edge.list.response.{service_id}',
                 'filter': [
                     {'host': 'mettel.velocloud.net', 'enterprise_ids': []},
                     {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
@@ -116,7 +110,6 @@ class TestServiceOutageMonitor:
         logger.error = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
         edge_list = {'edges': ['edge-1', 'edge-2', 'edge-3']}
 
         edge_1_status = {
@@ -140,7 +133,7 @@ class TestServiceOutageMonitor:
             edge_3_status,
         ])
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
         service_outage_monitor._compose_email_object = Mock()
 
         uuid_1 = uuid()
@@ -156,7 +149,6 @@ class TestServiceOutageMonitor:
                 'edge.list.request',
                 json.dumps({
                     'request_id': uuid_1,
-                    'response_topic': f'edge.list.response.{service_id}',
                     'filter': [
                         {'host': 'mettel.velocloud.net', 'enterprise_ids': []},
                         {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
@@ -169,7 +161,6 @@ class TestServiceOutageMonitor:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_2,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': 'edge-1',
                 }),
                 timeout=45,
@@ -178,7 +169,6 @@ class TestServiceOutageMonitor:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_3,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': 'edge-2',
                 }),
                 timeout=45,
@@ -187,7 +177,6 @@ class TestServiceOutageMonitor:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_4,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': 'edge-3',
                 }),
                 timeout=45,
@@ -201,7 +190,6 @@ class TestServiceOutageMonitor:
         logger.error = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
         edge_list = {'edges': ['edge-1', 'edge-2', 'edge-3']}
 
         edge_1_status = {
@@ -233,7 +221,7 @@ class TestServiceOutageMonitor:
             edge_3_status, edge_3_events, edge_3_email,
         ])
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
         service_outage_monitor._compose_email_object = Mock(side_effect=[
             edge_1_email, edge_2_email, edge_3_email,
         ])
@@ -263,7 +251,6 @@ class TestServiceOutageMonitor:
                 'edge.list.request',
                 json.dumps({
                     'request_id': uuid_1,
-                    'response_topic': f'edge.list.response.{service_id}',
                     'filter': [
                         {'host': 'mettel.velocloud.net', 'enterprise_ids': []},
                         {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
@@ -276,7 +263,6 @@ class TestServiceOutageMonitor:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_2,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': 'edge-1',
                 }),
                 timeout=45,
@@ -285,7 +271,6 @@ class TestServiceOutageMonitor:
                 f'alert.request.event.edge',
                 json.dumps({
                     'request_id': uuid_3,
-                    'response_topic': f'alert.response.event.edge.{service_id}',
                     'edge': 'edge-1',
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
@@ -301,7 +286,6 @@ class TestServiceOutageMonitor:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_4,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': 'edge-2',
                 }),
                 timeout=45,
@@ -310,7 +294,6 @@ class TestServiceOutageMonitor:
                 f'alert.request.event.edge',
                 json.dumps({
                     'request_id': uuid_5,
-                    'response_topic': f'alert.response.event.edge.{service_id}',
                     'edge': 'edge-2',
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
@@ -326,7 +309,6 @@ class TestServiceOutageMonitor:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_6,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': 'edge-3',
                 }),
                 timeout=45,
@@ -335,7 +317,6 @@ class TestServiceOutageMonitor:
                 f'alert.request.event.edge',
                 json.dumps({
                     'request_id': uuid_7,
-                    'response_topic': f'alert.response.event.edge.{service_id}',
                     'edge': 'edge-3',
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
@@ -356,7 +337,6 @@ class TestServiceOutageMonitor:
         logger.error = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
         edge_list = {'edges': ['edge-1', 'edge-2', 'edge-3']}
 
         edge_1_status = {
@@ -380,7 +360,7 @@ class TestServiceOutageMonitor:
             edge_3_status,
         ])
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
         service_outage_monitor._compose_email_object = Mock()
 
         uuid_1 = uuid()
@@ -396,7 +376,6 @@ class TestServiceOutageMonitor:
                 'edge.list.request',
                 json.dumps({
                     'request_id': uuid_1,
-                    'response_topic': f'edge.list.response.{service_id}',
                     'filter': [
                         {'host': 'mettel.velocloud.net', 'enterprise_ids': []},
                         {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
@@ -409,7 +388,6 @@ class TestServiceOutageMonitor:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_2,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': 'edge-1',
                 }),
                 timeout=45,
@@ -418,7 +396,6 @@ class TestServiceOutageMonitor:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_3,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': 'edge-2',
                 }),
                 timeout=45,
@@ -427,7 +404,6 @@ class TestServiceOutageMonitor:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_4,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': 'edge-3',
                 }),
                 timeout=45,
@@ -440,7 +416,6 @@ class TestServiceOutageMonitor:
         logger = Mock()
         logger.error = Mock()
         scheduler = Mock()
-        service_id = 123
 
         edge_list = {'edges': ['edge-1']}
 
@@ -460,7 +435,7 @@ class TestServiceOutageMonitor:
         config = Mock()
         config.MONITOR_CONFIG = {'environment': 'dev'}
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
         service_outage_monitor._compose_email_object = Mock(return_value=edge_email)
 
         await service_outage_monitor._service_outage_monitor_process()
@@ -472,7 +447,6 @@ class TestServiceOutageMonitor:
         logger = Mock()
         logger.error = Mock()
         scheduler = Mock()
-        service_id = 123
 
         edge_list = {'edges': ['edge-1']}
 
@@ -492,7 +466,7 @@ class TestServiceOutageMonitor:
         config = Mock()
         config.MONITOR_CONFIG = {'environment': 'production'}
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
         service_outage_monitor._compose_email_object = Mock(return_value=edge_email)
 
         await service_outage_monitor._service_outage_monitor_process()
@@ -504,7 +478,6 @@ class TestServiceOutageMonitor:
         logger = Mock()
         logger.error = Mock()
         scheduler = Mock()
-        service_id = 123
 
         edge_list = {'edges': ['edge-1']}
         edge_status = {
@@ -518,7 +491,7 @@ class TestServiceOutageMonitor:
         config = Mock()
         config.MONITOR_CONFIG = {'environment': None}
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
         service_outage_monitor._compose_email_object = Mock()
 
         await service_outage_monitor._service_outage_monitor_process()
@@ -530,7 +503,6 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
         edge_alive_state = "EDGE_ALIVE"
         link_alive_state = "LINK_ALIVE"
@@ -556,7 +528,7 @@ class TestServiceOutageMonitor:
             }
         ]
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
 
         edge_online_time = service_outage_monitor._find_recent_occurence_of_event(
             event_list, event_type=edge_alive_state, message=None)
@@ -575,9 +547,8 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
         service_outage_monitor._find_recent_occurence_of_event = Mock()
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
@@ -625,9 +596,8 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
         service_outage_monitor._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -669,9 +639,8 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
         service_outage_monitor._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -705,9 +674,8 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, service_id, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
         service_outage_monitor._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {

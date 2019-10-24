@@ -25,7 +25,6 @@ class Container:
         self._logger.info("Velocloud orchestrator starting...")
         self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
-        self._service_id = uuid()
 
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
@@ -41,7 +40,7 @@ class Container:
         self._status_repository = StatusRepository(self._redis_client, self._logger)
         self._edge_monitoring = EdgeMonitoring(self._event_bus, self._logger, self._prometheus_repository,
                                                self._scheduler, self._edge_repository, self._status_repository,
-                                               self._stats_repo, self._service_id, config)
+                                               self._stats_repo, config)
 
     async def _start(self):
         self._edge_monitoring.start_prometheus_metrics_server()

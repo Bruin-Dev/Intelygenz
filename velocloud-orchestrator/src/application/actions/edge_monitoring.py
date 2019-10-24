@@ -10,7 +10,7 @@ from igz.packages.eventbus.eventbus import EventBus
 class EdgeMonitoring:
 
     def __init__(self, event_bus: EventBus, logger, prometheus_repository, scheduler, edge_repository,
-                 status_repository, statistic_repository, service_id, config):
+                 status_repository, statistic_repository, config):
         self._event_bus = event_bus
         self._logger = logger
         self._prometheus_repository = prometheus_repository
@@ -18,7 +18,6 @@ class EdgeMonitoring:
         self._edge_repository = edge_repository
         self._status_repository = status_repository
         self._statistic_repository = statistic_repository
-        self._service_id = service_id
         self._config = config
 
     async def _edge_monitoring_process(self):

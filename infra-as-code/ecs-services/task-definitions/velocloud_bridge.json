@@ -40,10 +40,7 @@
         "name": "NATS_SERVER1",
         "value": "${NATS_SERVER1}"
       },
-      {
-        "name": "NATS_CLUSTER_NAME",
-        "value": "${NATS_CLUSTER_NAME}"
-      },
+
       {
         "name": "VELOCLOUD_CREDENTIALS",
         "value": "${VELOCLOUD_CREDENTIALS}"

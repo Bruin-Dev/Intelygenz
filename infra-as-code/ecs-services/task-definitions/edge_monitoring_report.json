@@ -41,10 +41,6 @@
         "value": "${NATS_SERVER1}"
       },
       {
-        "name": "NATS_CLUSTER_NAME",
-        "value": "${NATS_CLUSTER_NAME}"
-      },
-      {
         "name": "LAST_CONTACT_RECIPIENT",
         "value": "${LAST_CONTACT_RECIPIENT}"
       }

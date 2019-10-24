@@ -12,7 +12,6 @@ data "template_file" "automation-velocloud-bridge" {
 
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
-    NATS_CLUSTER_NAME = var.NATS_CLUSTER_NAME
     VELOCLOUD_CREDENTIALS = var.VELOCLOUD_CREDENTIALS
     VELOCLOUD_VERIFY_SSL = var.VELOCLOUD_VERIFY_SSL
   }

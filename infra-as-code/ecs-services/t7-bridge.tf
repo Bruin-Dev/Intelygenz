@@ -12,7 +12,6 @@ data "template_file" "automation-t7-bridge" {
 
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
-    NATS_CLUSTER_NAME = var.NATS_CLUSTER_NAME
     T7_BASE_URL = var.T7_BASE_URL
     T7_TOKEN = var.T7_TOKEN
 

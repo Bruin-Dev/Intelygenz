@@ -37,10 +37,6 @@
         "value": "${NATS_SERVER1}"
       },
       {
-        "name": "NATS_CLUSTER_NAME",
-        "value": "${NATS_CLUSTER_NAME}"
-      },
-      {
         "name": "SLACK_URL",
         "value": "${SLACK_URL}"
       },

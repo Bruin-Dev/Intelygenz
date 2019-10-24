@@ -29,10 +29,9 @@ class TestEdgeMonitoring:
         edge_repository = Mock()
         status_repository = Mock()
         config = Mock()
-        service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         assert isinstance(edge_monitoring, EdgeMonitoring)
         assert edge_monitoring._event_bus is event_bus
         assert edge_monitoring._logger is logger
@@ -41,7 +40,6 @@ class TestEdgeMonitoring:
         assert edge_monitoring._edge_repository is edge_repository
         assert edge_monitoring._status_repository is status_repository
         assert edge_monitoring._statistic_repository is statistic_repository
-        assert edge_monitoring._service_id == service_id
         assert edge_monitoring._config is config
 
     def start_metrics_server_test(self):
@@ -53,13 +51,12 @@ class TestEdgeMonitoring:
         status_repository = Mock()
         statistic_repository = Mock()
         config = Mock()
-        service_id = 123
 
         prometheus_repository = Mock()
         prometheus_repository.start_prometheus_metrics_server = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring.start_prometheus_metrics_server()
         prometheus_repository.start_prometheus_metrics_server.assert_called_once()
 
@@ -73,7 +70,6 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         statistic_repository = Mock()
         config = Mock()
-        service_id = 123
         request_id = 'random-uuid'
 
         event_bus = Mock()
@@ -121,7 +117,7 @@ class TestEdgeMonitoring:
         status_repository.set_current_cycle_request_id = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring._process_edge = CoroutineMock()
 
         await edge_monitoring._process_all_edges(request_id=request_id)
@@ -155,7 +151,6 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         statistic_repository = Mock()
         config = Mock()
-        service_id = 123
         request_id = 'random-uuid'
 
         event_bus = Mock()
@@ -201,7 +196,7 @@ class TestEdgeMonitoring:
         status_repository.set_current_cycle_request_id = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring._process_edge = CoroutineMock()
 
         await edge_monitoring._process_all_edges(request_id=request_id)
@@ -220,7 +215,6 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         statistic_repository = Mock()
         config = Mock()
-        service_id = 123
         request_id = 'random-uuid'
 
         redis_edge_3_info = {
@@ -302,7 +296,7 @@ class TestEdgeMonitoring:
         status_repository.set_current_cycle_request_id = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring._process_edge = CoroutineMock()
 
         await edge_monitoring._process_all_edges(request_id=request_id)
@@ -335,7 +329,6 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         statistic_repository = Mock()
         config = Mock()
-        service_id = 123
         request_id = 'random-uuid'
 
         event_bus = Mock()
@@ -383,7 +376,7 @@ class TestEdgeMonitoring:
         status_repository.set_current_cycle_request_id = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring._process_edge = CoroutineMock()
 
         await edge_monitoring._process_all_edges(request_id=request_id)
@@ -402,7 +395,6 @@ class TestEdgeMonitoring:
         statistic_repository = Mock()
         config = Mock()
         event_bus = Mock()
-        service_id = 123
 
         edge_id = {'host': 'test_host1'}
         edge_info = {
@@ -437,7 +429,7 @@ class TestEdgeMonitoring:
         status_repository.set_edges_processed = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
 
         await edge_monitoring._process_edge(velocloud_edge)
 
@@ -462,7 +454,6 @@ class TestEdgeMonitoring:
         statistic_repository = Mock()
         config = Mock()
         event_bus = Mock()
-        service_id = 123
 
         edge_info = {
             'enterprise_name': 'evil-corp',
@@ -492,7 +483,7 @@ class TestEdgeMonitoring:
         status_repository.set_edges_processed = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
 
         await edge_monitoring._process_edge(edge)
 
@@ -511,7 +502,6 @@ class TestEdgeMonitoring:
         statistic_repository = Mock()
         config = Mock()
         event_bus = Mock()
-        service_id = 123
 
         velocloud_edge_state = 'CONNECTED'
         redis_edge_state = 'DISCONNECTED'
@@ -558,7 +548,7 @@ class TestEdgeMonitoring:
         status_repository.set_edges_processed = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
 
         await edge_monitoring._process_edge(velocloud_edge)
 
@@ -579,7 +569,6 @@ class TestEdgeMonitoring:
         statistic_repository = Mock()
         config = Mock()
         event_bus = Mock()
-        service_id = 123
 
         velocloud_link_1_state = 'DISCONNECTED'
         velocloud_link_2_state = 'CONNECTED'
@@ -627,7 +616,7 @@ class TestEdgeMonitoring:
         status_repository.set_edges_processed = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
 
         await edge_monitoring._process_edge(velocloud_edge)
 
@@ -654,7 +643,6 @@ class TestEdgeMonitoring:
         statistic_repository = Mock()
         config = Mock()
         event_bus = Mock()
-        service_id = 123
 
         edge = {
             'request_id': 1234,
@@ -687,7 +675,7 @@ class TestEdgeMonitoring:
         status_repository.set_status = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
 
         await edge_monitoring._process_edge(edge)
@@ -710,10 +698,9 @@ class TestEdgeMonitoring:
         status_repository = Mock()
         statistic_repository = Mock()
         config = testconfig
-        service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
 
         next_run_time = datetime.now()
@@ -746,10 +733,9 @@ class TestEdgeMonitoring:
         status_repository = Mock()
         statistic_repository = Mock()
         config = testconfig
-        service_id = 123
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring._edge_monitoring_process = CoroutineMock()
 
         await edge_monitoring.start_edge_monitor_job(exec_on_start=False)
@@ -773,7 +759,6 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         edge_repository = Mock()
         config = testconfig
-        service_id = 123
 
         edge_monitoring_status = "IDLE"
 
@@ -788,7 +773,7 @@ class TestEdgeMonitoring:
         statistic_repository._statistic_client.clear_dictionaries = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring._process_all_edges = CoroutineMock()
 
         current_cycle_timestamp = 1000000
@@ -824,7 +809,6 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         edge_repository = Mock()
         config = testconfig
-        service_id = 123
 
         current_timestamp = 100000
         current_cycle_timestamp = 50000
@@ -845,7 +829,7 @@ class TestEdgeMonitoring:
         statistic_repository._statistic_client.clear_dictionaries = Mock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring._process_all_edges = CoroutineMock()
 
         datetime_mock = Mock()
@@ -881,7 +865,6 @@ class TestEdgeMonitoring:
         edge_repository = Mock()
         statistic_repository = Mock()
         config = testconfig
-        service_id = 123
 
         # We make these two values equal so the status is not set to IDLE
         current_timestamp = 50000
@@ -895,7 +878,7 @@ class TestEdgeMonitoring:
         status_repository.get_current_cycle_timestamp = Mock(return_value=current_cycle_timestamp)
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
         edge_monitoring._process_all_edges = CoroutineMock()
 
         datetime_mock = Mock()
@@ -920,7 +903,6 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         prometheus_repository = Mock()
         config = Mock()
-        service_id = 123
 
         logger = Mock()
         logger.info = Mock()
@@ -940,7 +922,7 @@ class TestEdgeMonitoring:
         event_bus.rpc_request = CoroutineMock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
 
         await edge_monitoring._send_stats_to_notifier()
 
@@ -964,7 +946,6 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         prometheus_repository = Mock()
         config = Mock()
-        service_id = 123
 
         logger = Mock()
         logger.info = Mock()
@@ -984,7 +965,7 @@ class TestEdgeMonitoring:
         event_bus.rpc_request = CoroutineMock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
 
         await edge_monitoring._send_stats_to_notifier()
 
@@ -1001,7 +982,6 @@ class TestEdgeMonitoring:
         scheduler = Mock()
         prometheus_repository = Mock()
         config = Mock()
-        service_id = 123
         current_cycle_request_id = 567
 
         redis_edge_info_1 = {
@@ -1063,7 +1043,7 @@ class TestEdgeMonitoring:
         event_bus.rpc_request = CoroutineMock()
 
         edge_monitoring = EdgeMonitoring(event_bus, logger, prometheus_repository, scheduler, edge_repository,
-                                         status_repository, statistic_repository, service_id, config)
+                                         status_repository, statistic_repository, config)
 
         await edge_monitoring._send_stats_to_notifier()
 

@@ -12,7 +12,6 @@ data "template_file" "automation-last-contact-report" {
 
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
-    NATS_CLUSTER_NAME = var.NATS_CLUSTER_NAME
     LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
   }
 }

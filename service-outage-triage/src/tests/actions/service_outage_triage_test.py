@@ -25,14 +25,12 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         assert service_outage_triage._event_bus is event_bus
         assert service_outage_triage._logger is logger
         assert service_outage_triage._scheduler is scheduler
-        assert service_outage_triage._service_id == service_id
         assert service_outage_triage._config is config
 
     @pytest.mark.asyncio
@@ -41,9 +39,8 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -66,9 +63,8 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         await service_outage_triage.start_service_outage_triage_job(exec_on_start=False)
 
@@ -85,7 +81,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         tickets_list = []
         tickets = {'tickets': tickets_list}
@@ -94,7 +89,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
 
         uuid_ = uuid()
@@ -105,7 +100,6 @@ class TestServiceOutageTriage:
             'bruin.ticket.request',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'bruin.ticket.response.{service_id}',
                 'client_id': 85940,
                 'ticket_status': ['New', 'InProgress', 'Draft'],
                 'category': 'SD-WAN',
@@ -119,14 +113,13 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         tickets = None
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._filtered_ticket_details = CoroutineMock()
 
         uuid_1 = uuid()
@@ -140,7 +133,6 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 json.dumps({
                     'request_id': uuid_1,
-                    'response_topic': f'bruin.ticket.response.{service_id}',
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
@@ -155,7 +147,6 @@ class TestServiceOutageTriage:
                         f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
                         'Environment: dev'
                     ),
-                    'response_topic': f'notification.slack.request.{service_id}',
                 }),
                 timeout=10,
             ),
@@ -168,14 +159,13 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         tickets = {'some-key-1': [], 'some-key-2': []}
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._filtered_ticket_details = CoroutineMock()
 
         uuid_1 = uuid()
@@ -189,7 +179,6 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 json.dumps({
                     'request_id': uuid_1,
-                    'response_topic': f'bruin.ticket.response.{service_id}',
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
@@ -203,8 +192,7 @@ class TestServiceOutageTriage:
                     'message': (
                         f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
                         'Environment: dev'
-                    ),
-                    'response_topic': f'notification.slack.request.{service_id}',
+                    )
                 }),
                 timeout=10,
             ),
@@ -217,7 +205,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         tickets_list = None
         tickets = {'tickets': tickets_list}
@@ -225,7 +212,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._filtered_ticket_details = CoroutineMock()
 
         uuid_1 = uuid()
@@ -239,7 +226,6 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 json.dumps({
                     'request_id': uuid_1,
-                    'response_topic': f'bruin.ticket.response.{service_id}',
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
@@ -253,8 +239,7 @@ class TestServiceOutageTriage:
                     'message': (
                         f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
                         'Environment: dev'
-                    ),
-                    'response_topic': f'notification.slack.request.{service_id}',
+                    )
                 }),
                 timeout=10,
             ),
@@ -267,7 +252,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         environment = 'dev'
         ticket_id = 3521039
@@ -302,7 +286,7 @@ class TestServiceOutageTriage:
             append_ticket, send_to_slack
         ])
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
         service_outage_triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
         service_outage_triage._ticket_object_to_email_obj = Mock(return_value=ticket_note_as_email_object)
@@ -330,7 +314,6 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 json.dumps({
                     'request_id': uuid_1,
-                    'response_topic': f'bruin.ticket.response.{service_id}',
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
@@ -341,7 +324,6 @@ class TestServiceOutageTriage:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_2,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': edge_id_by_serial,
                 }),
                 timeout=10,
@@ -350,7 +332,6 @@ class TestServiceOutageTriage:
                 'alert.request.event.edge',
                 json.dumps({
                     'request_id': uuid_3,
-                    'response_topic': f'alert.response.event.edge.{service_id}',
                     'edge': edge_id_by_serial,
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
@@ -369,8 +350,7 @@ class TestServiceOutageTriage:
                     'message': (
                         'Triage appended to ticket: '
                         f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id}, in {environment}'
-                    ),
-                    'response_topic': f'notification.slack.request.{service_id}',
+                    )
                 }),
                 timeout=10,
             ),
@@ -384,7 +364,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         environment = 'production'
         ticket_id = 3521039
@@ -419,7 +398,7 @@ class TestServiceOutageTriage:
             append_ticket, send_to_slack
         ])
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
         service_outage_triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
         service_outage_triage._ticket_object_to_string = Mock(return_value=ticket_note_as_string)
@@ -448,7 +427,6 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 json.dumps({
                     'request_id': uuid_1,
-                    'response_topic': f'bruin.ticket.response.{service_id}',
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
@@ -459,7 +437,6 @@ class TestServiceOutageTriage:
                 'edge.status.request',
                 json.dumps({
                     'request_id': uuid_2,
-                    'response_topic': f'edge.status.response.{service_id}',
                     'edge': edge_id_by_serial,
                 }),
                 timeout=10,
@@ -468,7 +445,6 @@ class TestServiceOutageTriage:
                 'alert.request.event.edge',
                 json.dumps({
                     'request_id': uuid_3,
-                    'response_topic': f'alert.response.event.edge.{service_id}',
                     'edge': edge_id_by_serial,
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
@@ -479,7 +455,6 @@ class TestServiceOutageTriage:
                 'bruin.ticket.note.append.request',
                 json.dumps({
                     'request_id': uuid_4,
-                    'response_topic': f'bruin.ticket.note.append.response.{service_id}',
                     'ticket_id': ticket_id,
                     'note': ticket_note_as_string,
                 }),
@@ -492,8 +467,7 @@ class TestServiceOutageTriage:
                     'message': (
                         'Triage appended to ticket: '
                         f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id}, in {environment}'
-                    ),
-                    'response_topic': f'notification.slack.request.{service_id}',
+                    )
                 }),
                 timeout=10,
             ),
@@ -507,7 +481,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         environment = None
         ticket_id = 3521039
@@ -534,7 +507,7 @@ class TestServiceOutageTriage:
             append_ticket, send_to_slack
         ])
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
         service_outage_triage._compose_ticket_note_object = Mock()
         service_outage_triage._ticket_object_to_string = Mock()
@@ -555,7 +528,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         tickets_list = []
         tickets = {'tickets': tickets_list}
@@ -563,7 +535,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
 
@@ -575,7 +547,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         ticket_id = 3521039
 
@@ -595,7 +566,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
@@ -605,7 +576,6 @@ class TestServiceOutageTriage:
             'bruin.ticket.details.request',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'bruin.ticket.details.response.{service_id}',
                 'ticket_id': ticket_id,
             }),
             timeout=15,
@@ -617,7 +587,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         ticket_id = 3521039
         invalid_serial = 'VC12345678912'
@@ -638,7 +607,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
@@ -648,7 +617,6 @@ class TestServiceOutageTriage:
             'bruin.ticket.details.request',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'bruin.ticket.details.response.{service_id}',
                 'ticket_id': ticket_id,
             }),
             timeout=15,
@@ -660,7 +628,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         ticket_id = 3521039
         edge_serial = 'VC05200026138'
@@ -682,7 +649,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
@@ -692,7 +659,6 @@ class TestServiceOutageTriage:
             'bruin.ticket.details.request',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'bruin.ticket.details.response.{service_id}',
                 'ticket_id': ticket_id,
             }),
             timeout=15,
@@ -704,7 +670,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         ticket_id = 3521039
         edge_serial = 'VC05200026138'
@@ -726,7 +691,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
@@ -736,7 +701,6 @@ class TestServiceOutageTriage:
             'bruin.ticket.details.request',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'bruin.ticket.details.response.{service_id}',
                 'ticket_id': ticket_id,
             }),
             timeout=15,
@@ -748,7 +712,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         ticket_id = 3521039
         edge_serial = 'VC05200026138'
@@ -770,7 +733,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
@@ -780,7 +743,6 @@ class TestServiceOutageTriage:
             'bruin.ticket.details.request',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'bruin.ticket.details.response.{service_id}',
                 'ticket_id': ticket_id,
             }),
             timeout=15,
@@ -792,7 +754,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         current_timestamp = '2019-09-10 10:45:00'
         ticket_notes_timestamp = '2019-09-10 10:34:00-04:00'
@@ -818,7 +779,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._extract_field_from_string = Mock(return_value=ticket_notes_timestamp_naive)
         service_outage_triage._check_for_new_events = CoroutineMock()
 
@@ -835,7 +796,6 @@ class TestServiceOutageTriage:
             'bruin.ticket.details.request',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'bruin.ticket.details.response.{service_id}',
                 'ticket_id': ticket_id,
             }),
             timeout=15,
@@ -851,7 +811,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         current_timestamp = '2019-09-10 11:05:00'
         ticket_notes_timestamp = '2019-09-10 10:34:00-04:00'
@@ -877,7 +836,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._extract_field_from_string = Mock(return_value=ticket_notes_timestamp_naive)
         service_outage_triage._check_for_new_events = CoroutineMock()
 
@@ -894,7 +853,6 @@ class TestServiceOutageTriage:
             'bruin.ticket.details.request',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'bruin.ticket.details.response.{service_id}',
                 'ticket_id': ticket_id,
             }),
             timeout=15,
@@ -913,7 +871,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
         event_list = [
             {
@@ -933,7 +890,7 @@ class TestServiceOutageTriage:
             }
         ]
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         edge_online_time = service_outage_triage._find_recent_occurence_of_event(event_list, 'EDGE_ALIVE')
         assert json.dumps(edge_online_time, default=str) == json.dumps('2019-07-30 02:38:00-04:00')
@@ -950,10 +907,9 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
         dict_as_string = 'Edge Name: Test \nTimeStamp1: 2019-08-29 14:36:19-04:00 \nTimeStamp2 : Now \n'
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         timestamp = service_outage_triage._extract_field_from_string(dict_as_string, 'TimeStamp1: ', '\nTimeStamp2')
 
@@ -964,7 +920,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         timestamp = '2019-07-30 00:26:00-04:00'
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
@@ -977,7 +932,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         current_datetime = datetime.now()
         datetime_mock = Mock()
@@ -992,7 +947,6 @@ class TestServiceOutageTriage:
             'alert.request.event.edge',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'alert.response.event.edge.{service_id}',
                 'edge': {
                     "host": "mettel.velocloud.net",
                     "enterprise_id": 137,
@@ -1009,7 +963,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         timestamp = '2019-07-30 00:26:00-04:00'
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
@@ -1041,7 +994,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._compose_event_note_object = Mock()
 
         current_datetime = datetime.now()
@@ -1057,7 +1010,6 @@ class TestServiceOutageTriage:
             'alert.request.event.edge',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'alert.response.event.edge.{service_id}',
                 'edge': {
                     "host": "mettel.velocloud.net",
                     "enterprise_id": 137,
@@ -1075,7 +1027,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         timestamp = '2019-07-30 00:26:00-04:00'
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
@@ -1107,7 +1058,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
 
         await service_outage_triage._check_for_new_events(timestamp, ticket)
@@ -1119,7 +1070,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         timestamp = '2019-07-30 00:26:00-04:00'
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
@@ -1150,7 +1100,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
 
         await service_outage_triage._check_for_new_events(timestamp, ticket)
@@ -1165,7 +1115,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         timestamp = '2019-07-30 00:26:00-04:00'
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
@@ -1196,7 +1145,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
 
         await service_outage_triage._check_for_new_events(timestamp, ticket)
@@ -1213,7 +1162,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         timestamp = '2019-07-30 00:26:00-04:00'
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
@@ -1250,7 +1198,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
 
         await service_outage_triage._check_for_new_events(timestamp, ticket)
@@ -1267,7 +1215,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         timestamp = '2019-07-30 00:26:00-04:00'
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
@@ -1316,7 +1263,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
 
         await service_outage_triage._check_for_new_events(timestamp, ticket)
@@ -1399,7 +1346,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         timestamp = '2019-07-30 00:26:00-04:00'
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
@@ -1448,7 +1394,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
 
         await service_outage_triage._check_for_new_events(timestamp, ticket)
@@ -1531,7 +1477,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         environment = 'production'
 
@@ -1569,7 +1514,7 @@ class TestServiceOutageTriage:
             rpc_response_append_ticket, rpc_response_slack_msg,
         ])
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._compose_event_note_object = Mock(side_effect=[
             events_note, events_note
         ])
@@ -1599,7 +1544,6 @@ class TestServiceOutageTriage:
                 'alert.request.event.edge',
                 json.dumps({
                     'request_id': uuid_1,
-                    'response_topic': f'alert.response.event.edge.{service_id}',
                     'edge': {
                         "host": "mettel.velocloud.net",
                         "enterprise_id": 137,
@@ -1614,7 +1558,6 @@ class TestServiceOutageTriage:
                 'bruin.ticket.note.append.request',
                 json.dumps({
                     'request_id': uuid_2,
-                    'response_topic': f'bruin.ticket.note.append.response.{service_id}',
                     'ticket_id': ticket_id,
                     'note': events_ticket_note,
                 }),
@@ -1627,8 +1570,7 @@ class TestServiceOutageTriage:
                     'message': (
                         'Events appended to ticket: https://app.bruin.com/helpdesk?clientId=85940&'
                         f'ticketId={ticket_id}, in production'
-                    ),
-                    'response_topic': f'notification.slack.request.{service_id}',
+                    )
                 }),
                 timeout=10,
             ),
@@ -1639,7 +1581,6 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
         environment = None
 
@@ -1667,7 +1608,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._compose_event_note_object = Mock(side_effect=[
             events_note, events_note
         ])
@@ -1693,7 +1634,6 @@ class TestServiceOutageTriage:
             'alert.request.event.edge',
             json.dumps({
                 'request_id': uuid_,
-                'response_topic': f'alert.response.event.edge.{service_id}',
                 'edge': {
                     "host": "mettel.velocloud.net",
                     "enterprise_id": 137,
@@ -1715,9 +1655,8 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         event_str = service_outage_triage._compose_event_note_object(events_to_report)
 
@@ -1733,9 +1672,8 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         event_str = service_outage_triage._compose_event_note_object(events_to_report)
 
@@ -1751,9 +1689,8 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         event_str = service_outage_triage._compose_event_note_object(events_to_report)
 
@@ -1765,9 +1702,8 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._find_recent_occurence_of_event = Mock()
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
@@ -1817,9 +1753,8 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -1864,9 +1799,8 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -1911,9 +1845,8 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -1950,9 +1883,8 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         service_outage_triage._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -1988,13 +1920,12 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
         ticket_dict = OrderedDict()
         ticket_dict['EdgeName'] = 'Test'
         ticket_dict['Edge Status'] = 'ok'
         ticket_dict["Company Events URL"] = 'test.com',
         ticket_dict['Events URL'] = 'event.com'
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         email = service_outage_triage._ticket_object_to_email_obj(ticket_dict)
 
         assert 'Service outage triage' in email["email_data"]["subject"]
@@ -2006,11 +1937,10 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
         ticket_dict = OrderedDict()
         ticket_dict['EdgeName'] = 'Test'
         ticket_dict['Edge Status'] = 'ok'
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         email = service_outage_triage._ticket_object_to_email_obj(ticket_dict)
 
         assert 'Service outage triage' in email["email_data"]["subject"]
@@ -2022,8 +1952,7 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, service_id, config)
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
         ticket_note = service_outage_triage._ticket_object_to_string(test_dict)
         assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'

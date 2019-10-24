@@ -32,11 +32,10 @@ EVEN_ROW = ' <tr>' \
 
 class ServiceAffectingMonitor:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, service_id, config):
+    def __init__(self, event_bus: EventBus, logger, scheduler, config):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
-        self._service_id = service_id
         self._config = config
 
     async def start_service_affecting_monitor_job(self, exec_on_start=False):
@@ -52,7 +51,6 @@ class ServiceAffectingMonitor:
     async def _service_affecting_monitor_process(self):
         edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1651}
         edge_status_request = {'request_id': uuid(),
-                               'response_topic': f'edge.status.response.{self._service_id}',
                                'edge': edge_id,
                                'interval': {"end": datetime.now(utc),
                                             "start": (datetime.now(utc) - timedelta(minutes=15))}}
@@ -220,7 +218,6 @@ class ServiceAffectingMonitor:
 
         return {
             'request_id': uuid(),
-            'response_topic': f"notification.email.response.{self._service_id}",
             'email_data': {
                 'subject': f'Service affecting trouble detected: {trouble}',
                 'recipient': self._config.MONITOR_CONFIG["recipient"],

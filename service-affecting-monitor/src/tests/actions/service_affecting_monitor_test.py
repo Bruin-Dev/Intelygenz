@@ -22,14 +22,12 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
 
         assert service_affecting_monitor._event_bus is event_bus
         assert service_affecting_monitor._logger is logger
         assert service_affecting_monitor._scheduler is scheduler
-        assert service_affecting_monitor._service_id == service_id
         assert service_affecting_monitor._config is config
 
     @pytest.mark.asyncio
@@ -38,9 +36,8 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -63,9 +60,8 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
 
         await service_affecting_monitor.start_service_affecting_monitor_job(exec_on_start=False)
 
@@ -82,7 +78,6 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
 
         link_1 = {
             'bestLatencyMsRx': 14,
@@ -114,7 +109,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edges_to_report)
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
 
@@ -135,7 +130,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         link_1_best_latency_ms_rx = 14
         link_1_best_latency_ms_tx = 115
@@ -178,7 +172,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link_1)
@@ -192,7 +186,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Latency'
         tx_wireless_threshold = 120
@@ -223,7 +216,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link)
@@ -238,7 +231,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Latency'
         rx_wireless_threshold = 120
@@ -269,7 +261,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link)
@@ -284,7 +276,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         link_best_latency_ms_rx = 115
         link_best_latency_ms_tx = 118
@@ -313,7 +304,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link)
@@ -325,7 +316,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Latency'
         tx_public_wired_threshold = 50
@@ -356,7 +346,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link)
@@ -371,7 +361,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Latency'
         rx_public_wired_threshold = 50
@@ -402,7 +391,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link)
@@ -417,7 +406,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         link_best_latency_ms_rx = 40
         link_best_latency_ms_tx = 45
@@ -446,7 +434,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link)
@@ -458,7 +446,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Latency'
         tx_private_wired_threshold = 50
@@ -489,7 +476,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link)
@@ -504,7 +491,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Latency'
         rx_private_wired_threshold = 50
@@ -535,7 +521,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link)
@@ -550,7 +536,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         link_best_latency_ms_rx = 40
         link_best_latency_ms_tx = 45
@@ -579,7 +564,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link)
@@ -591,7 +576,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         link_best_latency_ms_rx = 40
         link_best_latency_ms_tx = 45
@@ -620,7 +604,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(edge_status=edges_to_report, link=link)
@@ -632,7 +616,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         link_1_best_loss_packets_rx = 6
         link_1_best_loss_packets_tx = 7
@@ -675,7 +658,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link_1)
@@ -689,7 +672,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Packet Loss'
         tx_wireless_threshold = 8
@@ -720,7 +702,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link)
@@ -735,7 +717,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Packet Loss'
         rx_wireless_threshold = 8
@@ -766,7 +747,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link)
@@ -781,7 +762,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         link_best_loss_packets_rx = 7
         link_best_loss_packets_tx = 7
@@ -810,7 +790,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link)
@@ -822,7 +802,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Packet Loss'
         tx_public_wired_threshold = 5
@@ -853,7 +832,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link)
@@ -868,7 +847,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Packet Loss'
         rx_public_wired_threshold = 5
@@ -899,7 +877,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link)
@@ -914,7 +892,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         link_best_loss_packets_rx = 1
         link_best_loss_packets_tx = 1
@@ -943,7 +920,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link)
@@ -955,7 +932,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Packet Loss'
         tx_private_wired_threshold = 5
@@ -986,7 +962,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link)
@@ -1001,7 +977,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         trouble_text = 'Packet Loss'
         rx_private_wired_threshold = 5
@@ -1032,7 +1007,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link)
@@ -1047,7 +1022,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         link_best_loss_packets_rx = 1
         link_best_loss_packets_tx = 1
@@ -1076,7 +1050,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link)
@@ -1088,7 +1062,6 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
 
         link_best_loss_packets_rx = 6
         link_best_loss_packets_tx = 4
@@ -1117,7 +1090,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(edge_status=edges_to_report, link=link)
@@ -1130,12 +1103,11 @@ class TestServiceAffectingMonitor:
         event_bus.rpc_request = CoroutineMock(return_value="Email Sent")
         logger = Mock()
         scheduler = Mock()
-        service_id = 123
 
         config = Mock()
         config.MONITOR_CONFIG = {'environment': 'dev'}
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._compose_email_object = Mock(return_value='Some email object')
 
@@ -1147,15 +1119,14 @@ class TestServiceAffectingMonitor:
         event_bus.rpc_request.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def _notify_trouble_pro_ticket_exists_test(self):
+    async def notify_trouble_with_production_environment_test(self):
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effects=[{'ticketIds': [123]}, 'Slack Sent'])
         logger = Mock()
         scheduler = Mock()
+
         config = Mock()
         config.MONITOR_CONFIG = {'environment': 'production'}
-
-        service_id = 123
 
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
@@ -1193,7 +1164,7 @@ class TestServiceAffectingMonitor:
                 ]
             }
         }
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._ticket_existence = CoroutineMock(return_value=True)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
@@ -1218,7 +1189,6 @@ class TestServiceAffectingMonitor:
         config = testconfig
         config.MONITOR_CONFIG['environment'] = 'production'
 
-        service_id = 123
 
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
@@ -1256,7 +1226,7 @@ class TestServiceAffectingMonitor:
                 ]
             }
         }
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._ticket_existence = CoroutineMock(return_value=False)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
@@ -1280,12 +1250,11 @@ class TestServiceAffectingMonitor:
         event_bus.rpc_request = CoroutineMock(return_value="Email Sent")
         logger = Mock()
         scheduler = Mock()
-        service_id = 123
 
         config = Mock()
         config.MONITOR_CONFIG = {'environment': None}
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._compose_email_object = Mock(return_value='Some email object')
 
@@ -1302,8 +1271,7 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -1321,8 +1289,7 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -1393,9 +1360,8 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
             "edge_id": {
@@ -1448,8 +1414,7 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
             "edge_id": {

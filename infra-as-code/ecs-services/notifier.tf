@@ -12,7 +12,6 @@ data "template_file" "automation-notifier" {
 
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
-    NATS_CLUSTER_NAME = var.NATS_CLUSTER_NAME
     SLACK_URL = local.slack_url
     EMAIL_ACC_PWD = var.EMAIL_ACC_PWD
 
