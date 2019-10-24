@@ -9,10 +9,6 @@ import json
 class TestSlackClient:
 
     def instantiation_test(self):
-        """
-        Test that the SlackClient instance contains the expected
-        attributes.
-        """
         mock_logger = Mock()
 
         test_client = SlackClient(config, mock_logger)
@@ -22,9 +18,6 @@ class TestSlackClient:
         assert test_client._logger is mock_logger
 
     def send_to_slack_test(self):
-        """
-        Test that the notification is sent to the Slack channel as expected.
-        """
         mock_logger = Mock()
         test_msg = {'text': 'This is a dummy message'}
         msg_delivery_status = 200
@@ -49,10 +42,6 @@ class TestSlackClient:
             assert response == test_response
 
     def send_to_slack_with_bad_status_code_test(self):
-        """
-        Test the behaviour of the Slack client when the status code of the
-        response is different from 200.
-        """
         mock_logger = Mock()
         test_msg = {'text': 'This is a dummy message'}
         msg_delivery_status = 404
@@ -74,10 +63,6 @@ class TestSlackClient:
             assert response == test_response
 
     def send_to_slack_with_insecure_url_test(self):
-        """
-        Test the behaviour of the Slack client when the URL the message is
-        sent to is not secure (i.e., it doesn't use HTTPS protocol).
-        """
         mock_logger = Mock()
         test_msg = {'text': 'This is a dummy message'}
 

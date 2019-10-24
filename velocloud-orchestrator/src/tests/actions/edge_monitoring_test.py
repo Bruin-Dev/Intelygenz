@@ -17,10 +17,6 @@ from config import testconfig
 class TestEdgeMonitoring:
 
     def instance_test(self):
-        """
-        Test that the EdgeMonitoring instance contains the expected
-        attributes.
-        """
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
@@ -43,7 +39,6 @@ class TestEdgeMonitoring:
         assert edge_monitoring._config is config
 
     def start_metrics_server_test(self):
-        """ Test that starting the metrics server works as expected. """
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -62,10 +57,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def process_all_edges_test(self):
-        """
-        Test that the edges are requested and later processed.
-        This test doesn't watch out for the behavior of Redis.
-        """
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -142,11 +133,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def process_all_edges_without_redis_data_test(self):
-        """
-        Test that the edges are requested and later processed.
-        This test takes into account that Redis doesn't have any edge data
-        stored at all.
-        """
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -206,11 +192,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def process_all_edges_with_redis_data_test(self):
-        """
-        Test that the edges are requested and later processed.
-        This test takes into account that Redis has data from edges stored
-        that should be loaded into the monitoring server.
-        """
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -312,19 +293,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def process_all_edges_with_redis_data_equal_to_velocloud_data_test(self):
-        """
-        Test that the edges are requested and later processed.
-        This test takes into account that Redis has data from edges stored
-        and also that the data is the same returned by the Velocloud API.
-
-        TODO: Remove this ugly warning by the time the comparison process is
-              improved
-        A WORD OF WARNING: Here, "the data stored in Redis is the same
-        returned by the Velocloud API" means that both datasets have the
-        same length. However, this comparison is VERY fragile as data could
-        be different if we are talking about contents. Take this into
-        account when reading the test.
-        """
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -386,10 +354,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def process_edge_test(self):
-        """
-        Test that the edge is processed as expected.
-        This test doesn't watch out for the behavior of Redis.
-        """
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -444,11 +408,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def process_edge_without_redis_data_test(self):
-        """
-        Test that the edge is processed as expected.
-        This test takes into account that Redis doesn't have any data stored
-        for this edge.
-        """
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -491,12 +450,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def process_edge_with_redis_data_and_edge_state_changed_test(self):
-        """
-        Test that the edge is processed as expected.
-        This test takes into account that Redis has data stored for this edge
-        and observes how Prometheus updates its info about edges when the edge
-        state in Redis is different from the one returned by the Velocloud API.
-        """
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -558,12 +511,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def process_edge_with_redis_data_and_link_state_changed_test(self):
-        """
-        Test that the edge is processed as expected.
-        This test takes into account that Redis has data stored for this edge
-        and observes how Prometheus updates its info about links when the link
-        state in Redis is different from the one returned by the Velocloud API.
-        """
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -633,11 +580,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def process_edge_with_no_remaining_edges_test(self):
-        """
-        Test that the edge is processed as expected.
-        This test observes the behavior of this process when there are no more
-        edges that need to be processed.
-        """
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -685,10 +627,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def start_edge_monitor_job_with_exec_on_start_test(self):
-        """
-        Test that the edge monitor job gets scheduled at the expected time
-        when the execution is set to start immediately.
-        """
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
@@ -720,10 +658,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def start_edge_monitor_job_with_no_exec_on_start_test(self):
-        """
-        Test that the edge monitor job gets scheduled at the expected time
-        when its execution is not scheduled for a particular moment.
-        """
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
@@ -750,9 +684,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def edge_monitoring_process_in_idle_status_test(self):
-        """
-        Test how the monitoring process behave when it's set to stay idle.
-        """
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
@@ -796,13 +727,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def edge_monitoring_process_in_processing_status_with_retriggering_test(self):
-        """
-        Test how the monitoring process behave when it's set to start
-        processing Velocloud edges.
-        In this particular case, the process is triggered again because the
-        execution cycle defined in the configuration expires by the time the
-        process has finished.
-        """
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
@@ -851,13 +775,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def edge_monitoring_process_in_processing_status_with_no_retriggering_test(self):
-        """
-        Test how the monitoring process behave when it's set to start
-        processing Velocloud edges.
-        In this particular case, the process is NOT triggered again because the
-        execution cycle defined in the configuration has not expired by the
-        time the process has finished.
-        """
         event_bus = Mock()
         logger = Mock()
         prometheus_repository = Mock()
@@ -896,10 +813,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def send_stats_to_notifier_with_statistics_test(self):
-        """
-        Test that statistics are sent to the topic for Slack notifications.
-        This test doesn't watch out for the behavior of Redis.
-        """
         scheduler = Mock()
         prometheus_repository = Mock()
         config = Mock()
@@ -938,11 +851,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def send_stats_to_notifier_with_no_statistics_test(self):
-        """
-        Test that statistics are NOT sent to the topic for Slack notifications
-        if there are no statistics registered.
-        This test doesn't watch out for the behavior of Redis.
-        """
         scheduler = Mock()
         prometheus_repository = Mock()
         config = Mock()
@@ -975,10 +883,6 @@ class TestEdgeMonitoring:
 
     @pytest.mark.asyncio
     async def send_stats_to_notifier_with_redis_data_test(self):
-        """
-        Test how stats are updated within the statistics client by using edges
-        info, which is stored in Redis.
-        """
         scheduler = Mock()
         prometheus_repository = Mock()
         config = Mock()

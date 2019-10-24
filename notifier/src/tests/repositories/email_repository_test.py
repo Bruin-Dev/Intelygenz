@@ -6,10 +6,6 @@ from application.repositories.email_repository import EmailRepository
 class TestEmailRepository:
 
     def instantiation_test(self):
-        """
-        Test that the EmailRepository instance contains the expected
-        attributes.
-        """
         mock_client = Mock()
         mock_logger = Mock()
 
@@ -20,9 +16,6 @@ class TestEmailRepository:
         assert test_repo._logger is mock_logger
 
     def send_to_email_test(self):
-        """
-        Test that notifications are sent through email correctly.
-        """
         mock_client = Mock()
         mock_client.send_to_email = Mock(return_value=200)
         mock_logger = Mock()

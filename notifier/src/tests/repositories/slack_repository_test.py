@@ -6,10 +6,6 @@ from application.repositories.slack_repository import SlackRepository
 class TestSlackRepository:
 
     def instantiation_test(self):
-        """
-        Test that the SlackRepository instance contains the expected
-        attributes.
-        """
         mock_client = Mock()
         mock_logger = Mock()
 
@@ -20,10 +16,6 @@ class TestSlackRepository:
         assert test_repo._logger is mock_logger
 
     def send_to_slack_test(self):
-        """
-        Test that notifications are sent to the corresponding Slack channel
-        correctly.
-        """
         mock_client = Mock()
         mock_logger = Mock()
         test_msg = 'This is a dummy message'

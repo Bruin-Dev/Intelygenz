@@ -9,10 +9,6 @@ import json
 class TestEmailNotifier:
 
     def instantiation_test(self):
-        """
-        Test that the SendToEmail action instance contains the expected
-        attributes.
-        """
         test_bus = Mock()
         mock_email_repository = Mock()
         mock_logger = Mock()
@@ -26,10 +22,6 @@ class TestEmailNotifier:
 
     @pytest.mark.asyncio
     async def send_to_email_job_test(self):
-        """
-        Test that the notification is sent to through email and also published
-        in the corresponding topic.
-        """
         mock_email_repository = Mock()
         test_bus = Mock()
         test_bus.publish_message = CoroutineMock()
@@ -58,10 +50,6 @@ class TestEmailNotifier:
 
     @pytest.mark.asyncio
     async def send_to_email_job_no_message_test(self):
-        """
-        Test the behaviour of the notification action when the email which is
-        going to be sent does not have any data.
-        """
         mock_email_repository = Mock()
         test_bus = Mock()
         test_bus.publish_message = CoroutineMock()

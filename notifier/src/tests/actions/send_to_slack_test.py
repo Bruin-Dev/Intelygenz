@@ -9,10 +9,6 @@ import json
 class TestSlackNotifier:
 
     def instantiation_test(self):
-        """
-        Test that the SendToSlack action instance contains the expected
-        attributes.
-        """
         mock_slack_repository = Mock()
         test_bus = Mock()
         mock_logger = Mock()
@@ -26,10 +22,6 @@ class TestSlackNotifier:
 
     @pytest.mark.asyncio
     async def send_to_slack_test(self):
-        """
-        Test that the notification is sent to the Slack channel and also
-        published in the corresponding topic.
-        """
         mock_slack_repository = Mock()
         test_bus = Mock()
         test_bus.publish_message = CoroutineMock()

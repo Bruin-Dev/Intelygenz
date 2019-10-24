@@ -10,9 +10,6 @@ from config import testconfig as config
 class TestEmailClient:
 
     def instantiation_test(self):
-        """
-        Test that the EmailClient instance contains the expected attributes.
-        """
         mock_logger = Mock()
 
         test_client = EmailClient(config, mock_logger)
@@ -21,9 +18,6 @@ class TestEmailClient:
         assert test_client._logger is mock_logger
 
     def email_login_test(self):
-        """
-        Test that login against the SMTP server work as expected.
-        """
         mock_logger = Mock()
 
         test_client = EmailClient(config, mock_logger)
@@ -39,9 +33,6 @@ class TestEmailClient:
             )
 
     def send_to_email_test(self):
-        """
-        Test that message is sent to the email address as expected.
-        """
         mock_logger = Mock()
         test_msg = {
             "subject": "subject",
@@ -76,9 +67,6 @@ class TestEmailClient:
         test_client._logger.exception.assert_not_called()
 
     def send_to_email_with_failure_test(self):
-        """
-        Test the behaviour of the client when the message delivery fails.
-        """
         mock_logger = Mock()
         test_msg = {}
 
