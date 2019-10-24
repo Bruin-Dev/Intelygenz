@@ -113,7 +113,6 @@ class ServiceAffectingMonitor:
                 ticket_note = self._ticket_object_to_string(ticket_dict)
                 ticket_details = {
                     "request_id": uuid(),
-                    "response_topic": f'"bruin.ticket.creation..response.{self._service_id}',
                     "clientId": client_id,
                     "category": "VAS",
                     "services": [
@@ -144,23 +143,20 @@ class ServiceAffectingMonitor:
                                  'message': f'Ticket created with ticket id: {ticket_id["ticketIds"][0]}\n'
                                             f'https://app.bruin.com/helpdesk?clientId=85940&'
                                             f'ticketId={ticket_id["ticketIds"][0]} , in '
-                                            f'{self._config.MONITOR_CONFIG["environment"]}',
-                                 'response_topic': f'notification.slack.request.{self._service_id}'}
+                                            f'{self._config.MONITOR_CONFIG["environment"]}'}
                 await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
                                                   timeout=10)
 
                 self._logger.info(f'Ticket created with ticket id: {ticket_id["ticketIds"][0]}')
 
     async def _ticket_existence(self, client_id, serial, trouble):
-        ticket_request_msg = {'request_id': uuid(), 'response_topic': f'bruin.ticket.response.{self._service_id}',
-                              'client_id': client_id, 'ticket_status': ['New', 'InProgress', 'Draft'],
+        ticket_request_msg = {'request_id': uuid(), 'client_id': client_id, 'ticket_status': ['New', 'InProgress', 'Draft'],
                               'category': 'SD-WAN', 'ticket_topic': 'VAS'}
         all_tickets = await  self._event_bus.rpc_request("bruin.ticket.request",
                                                          json.dumps(ticket_request_msg, default=str),
                                                          timeout=15)
         for ticket in all_tickets['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
-                                 'response_topic': f'bruin.ticket.details.response.{self._service_id}',
                                  'ticket_id': ticket['ticketID']}
             ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
                                                                json.dumps(ticket_detail_msg, default=str),

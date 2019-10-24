@@ -1189,7 +1189,6 @@ class TestServiceAffectingMonitor:
         config = testconfig
         config.MONITOR_CONFIG['environment'] = 'production'
 
-
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
             "edge_id": {
@@ -1307,8 +1306,7 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026137'}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -1326,8 +1324,7 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{'otherDetails': None}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -1345,8 +1342,7 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
                                              "ticketNotes": [{"noteValue": None}]}}
@@ -1464,8 +1460,7 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
-        service_id = 123
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, service_id, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         ticket_note = service_affecting_monitor._ticket_object_to_string(test_dict)
         assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'
