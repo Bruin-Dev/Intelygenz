@@ -103,6 +103,7 @@ class TestServiceOutageTriage:
                 'client_id': 85940,
                 'ticket_status': ['New', 'InProgress', 'Draft'],
                 'category': 'SD-WAN',
+                'ticket_topic': 'VOO'
             }),
             timeout=15,
         )
@@ -136,6 +137,7 @@ class TestServiceOutageTriage:
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
+                    'ticket_topic': 'VOO'
                 }),
                 timeout=15,
             ),
@@ -182,6 +184,7 @@ class TestServiceOutageTriage:
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
+                    'ticket_topic': 'VOO'
                 }),
                 timeout=15,
             ),
@@ -229,6 +232,7 @@ class TestServiceOutageTriage:
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
+                    'ticket_topic': 'VOO'
                 }),
                 timeout=15,
             ),
@@ -317,6 +321,7 @@ class TestServiceOutageTriage:
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
+                    'ticket_topic': 'VOO'
                 }),
                 timeout=15,
             ),
@@ -430,6 +435,7 @@ class TestServiceOutageTriage:
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
+                    'ticket_topic': 'VOO'
                 }),
                 timeout=15,
             ),
