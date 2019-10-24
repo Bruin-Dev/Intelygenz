@@ -60,7 +60,7 @@ class ServiceAffectingMonitor:
                                                                                           default=str), timeout=30)
         self._logger.info(f'Edge received from event bus')
 
-        if 'edge_info' not in edge_status.keys() or 'links' not in edge_status['edge_info'].keys():
+        if edge_status and 'edge_info' not in edge_status.keys() or 'links' not in edge_status['edge_info'].keys():
             self._logger.error(f'Data received from Velocloud is incomplete')
             self._logger.error(f'{json.dumps(edge_status, indent=2)}')
             slack_message = {'request_id': uuid(),
