@@ -136,7 +136,7 @@ class TestAlert:
         alert._event_bus.rpc_request.assert_awaited_once_with(
             'alert.request.all.edges',
             json.dumps(dict(request_id=test_uuid, filter=[])),
-            timeout=5
+            timeout=200
         )
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
@@ -206,7 +206,7 @@ class TestAlert:
         alert._event_bus.rpc_request.assert_awaited_once_with(
             'alert.request.all.edges',
             json.dumps(dict(request_id=test_uuid, filter=[])),
-            timeout=5
+            timeout=200
         )
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
@@ -282,7 +282,7 @@ class TestAlert:
         alert._event_bus.rpc_request.assert_awaited_once_with(
             'alert.request.all.edges',
             json.dumps(dict(request_id=test_uuid, filter=[])),
-            timeout=5
+            timeout=200
         )
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',

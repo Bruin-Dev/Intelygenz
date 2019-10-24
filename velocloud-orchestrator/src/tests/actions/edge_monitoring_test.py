@@ -125,7 +125,7 @@ class TestEdgeMonitoring:
                 {'host': 'mettel.velocloud.net', 'enterprise_ids': []},
                 {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
                 {'host': 'metvco04.mettel.net', 'enterprise_ids': []},
-            ]}), timeout=900),
+            ]}), timeout=60),
             call("edge.status.request", json.dumps({'request_id': request_id, 'edge': "test_host1"}), timeout=10),
             call("edge.status.request", json.dumps({'request_id': request_id, 'edge': "test_host2"}), timeout=10),
         ], any_order=False)
