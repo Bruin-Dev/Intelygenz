@@ -85,7 +85,7 @@ class EdgeMonitoring:
         }
         self._status_repository.set_current_cycle_request_id(request_id)
 
-        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(msg), timeout=900)
+        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(msg), timeout=60)
         self._logger.info(f'Edge list received from event bus')
         edge_status_requests = [
             {'request_id': edge_list["request_id"], 'edge': edge} for edge in edge_list["edges"]]

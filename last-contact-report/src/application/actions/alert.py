@@ -53,8 +53,8 @@ class Alert:
     async def _alert_process(self):
         self._logger.info("Requesting all edges with details for alert report")
         request = dict(request_id=uuid(), filter=[])
+        all_edges = await self._event_bus.rpc_request("alert.request.all.edges", json.dumps(request), timeout=200)
         self._logger.info("Processing all edges with details for alert report")
-        all_edges = await self._event_bus.rpc_request("alert.request.all.edges", json.dumps(request), timeout=5)
         edges_to_report = []
         for edge_info in all_edges["edges"]:
             raw_last_contact = edge_info["edge"]["lastContact"]

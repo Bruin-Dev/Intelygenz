@@ -27,12 +27,10 @@ class Container:
 
         self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG)
 
-        self._receive_alert_edges = ActionWrapper(self._alert, "receive_all_edges", is_async=True, logger=self._logger)
-
     async def _start(self):
         await self._event_bus.connect()
 
-        await self._alert.start_alert_job(exec_on_start=True)
+        await self._alert.start_alert_job(exec_on_start=False)
         self._scheduler.start()
 
     async def start_server(self):
