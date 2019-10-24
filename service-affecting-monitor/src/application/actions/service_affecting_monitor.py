@@ -150,7 +150,8 @@ class ServiceAffectingMonitor:
                 self._logger.info(f'Ticket created with ticket id: {ticket_id["ticketIds"][0]}')
 
     async def _ticket_existence(self, client_id, serial, trouble):
-        ticket_request_msg = {'request_id': uuid(), 'client_id': client_id, 'ticket_status': ['New', 'InProgress', 'Draft'],
+        ticket_request_msg = {'request_id': uuid(), 'client_id': client_id,
+                              'ticket_status': ['New', 'InProgress', 'Draft'],
                               'category': 'SD-WAN', 'ticket_topic': 'VAS'}
         all_tickets = await  self._event_bus.rpc_request("bruin.ticket.request",
                                                          json.dumps(ticket_request_msg, default=str),
