@@ -1060,6 +1060,7 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def packet_loss_check_with_unknown_link_type_test(self):
         scheduler = Mock()
+        event_bus = Mock()
         config = Mock()
 
         link_best_loss_packets_rx = 6
