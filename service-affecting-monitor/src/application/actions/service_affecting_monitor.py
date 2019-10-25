@@ -57,10 +57,10 @@ class ServiceAffectingMonitor:
                                'interval': {"end": datetime.now(utc),
                                             "start": (datetime.now(utc) - timedelta(minutes=15))}}
         edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(edge_status_request,
-                                                                                          default=str), timeout=30)
+                                                                                          default=str), timeout=15)
         self._logger.info(f'Edge received from event bus')
 
-        if edge_status is not None and \
+        if edge_status is None or \
                 ('edge_info' not in edge_status.keys() or 'links' not in edge_status['edge_info'].keys()):
             self._logger.error(f'Data received from Velocloud is incomplete')
             self._logger.error(f'{json.dumps(edge_status, indent=2)}')
@@ -70,6 +70,9 @@ class ServiceAffectingMonitor:
                                         f'The environment is {self._config.MONITOR_CONFIG["environment"]}'}
             await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
                                               timeout=10)
+            return
+
+        self._logger.info(f'{edge_status}')
 
         for link in edge_status['edge_info']['links']:
             await self._latency_check(edge_status, link)
