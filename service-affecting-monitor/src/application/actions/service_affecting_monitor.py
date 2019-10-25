@@ -44,16 +44,20 @@ class ServiceAffectingMonitor:
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._service_affecting_monitor_process, 'interval', seconds=60,
+        self._scheduler.add_job(self._monitor_each_edge, 'interval', seconds=600,
                                 next_run_time=next_run_time, replace_existing=True,
-                                id='_service_affecting_monitor_process')
+                                id='_monitor_each_edge')
 
-    async def _service_affecting_monitor_process(self):
-        edge_id = {"host": "mettel.velocloud.net", "enterprise_id": 137, "edge_id": 1651}
+    async def _monitor_each_edge(self):
+        monitored_edges = [await self._service_affecting_monitor_process(device) for device in
+                           self._config.MONITOR_CONFIG['device_by_id']]
+
+    async def _service_affecting_monitor_process(self, device):
+        edge_id = {"host": device['host'], "enterprise_id": device['enterprise_id'], "edge_id": device['edge_id']}
         edge_status_request = {'request_id': uuid(),
                                'edge': edge_id,
                                'interval': {"end": datetime.now(utc),
-                                            "start": (datetime.now(utc) - timedelta(minutes=15))}}
+                                            "start": (datetime.now(utc) - timedelta(minutes=10))}}
         edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(edge_status_request,
                                                                                           default=str), timeout=15)
         self._logger.info(f'Edge received from event bus')
@@ -73,31 +77,31 @@ class ServiceAffectingMonitor:
         self._logger.info(f'{edge_status}')
 
         for link in edge_status['edge_info']['links']:
-            await self._latency_check(edge_status, link)
-            await self._packet_loss_check(edge_status, link)
+            await self._latency_check(device, edge_status, link)
+            await self._packet_loss_check(device, edge_status, link)
         self._logger.info("End of service affecting monitor job")
 
-    async def _latency_check(self, edge_status, link):
+    async def _latency_check(self, device, edge_status, link):
         if 'PUBLIC_WIRELESS' in link['serviceGroups']:
             if link['bestLatencyMsRx'] > 120 or link['bestLatencyMsTx'] > 120:
-                await self._notify_trouble(edge_status, link, link['bestLatencyMsRx'], link['bestLatencyMsTx'],
+                await self._notify_trouble(device, edge_status, link, link['bestLatencyMsRx'], link['bestLatencyMsTx'],
                                            'Latency', 120)
         elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
             if link['bestLatencyMsRx'] > 50 or link['bestLatencyMsTx'] > 50:
-                await self._notify_trouble(edge_status, link, link['bestLatencyMsRx'], link['bestLatencyMsTx'],
+                await self._notify_trouble(device, edge_status, link, link['bestLatencyMsRx'], link['bestLatencyMsTx'],
                                            'Latency', 50)
 
-    async def _packet_loss_check(self, edge_status, link):
+    async def _packet_loss_check(self, device, edge_status, link):
         if 'PUBLIC_WIRELESS' in link['serviceGroups']:
             if link['bestLossPctRx'] > 8 or link['bestLossPctTx'] > 8:
-                await self._notify_trouble(edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
+                await self._notify_trouble(device, edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
                                            'Packet Loss', 8)
         elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
             if link['bestLossPctRx'] > 5 or link['bestLossPctTx'] > 5:
-                await self._notify_trouble(edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
+                await self._notify_trouble(device, edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
                                            'Packet Loss', 5)
 
-    async def _notify_trouble(self, edge_status, link, input, output, trouble, threshold):
+    async def _notify_trouble(self, device, edge_status, link, input, output, trouble, threshold):
         ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
 
         if self._config.MONITOR_CONFIG['environment'] == 'dev':
@@ -117,21 +121,21 @@ class ServiceAffectingMonitor:
                     "category": "VAS",
                     "services": [
                         {
-                            "serviceNumber": edge_status['edge_info']['edges']['serialNumber']
+                            "serviceNumber": device['serial']
                         }
                     ],
                     "notes": ticket_note,
                     "contacts": [
                         {
-                            "email": "gclark@titanamerica.com",
-                            "phone": "757-533-7151",
-                            "name": "Gary Clark",
+                            "email": device['email'],
+                            "phone": device['phone'],
+                            "name": device['name'],
                             "type": "site"
                         },
                         {
-                            "email": "gclark@titanamerica.com",
-                            "phone": "757-342-9649",
-                            "name": "Gary Clark",
+                            "email": device['email'],
+                            "phone": device['phone'],
+                            "name": device['name'],
                             "type": "ticket"
                         }
                     ]

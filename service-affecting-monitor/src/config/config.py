@@ -4,6 +4,7 @@
 import os
 import logging
 import sys
+from config import contact_info
 
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
@@ -22,6 +23,7 @@ NATS_CONFIG = {
 
 MONITOR_CONFIG = {
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
+    'device_by_id': contact_info.devices_by_id,
     'environment': os.environ["CURRENT_ENVIRONMENT"]
 }
 LOG_CONFIG = {
