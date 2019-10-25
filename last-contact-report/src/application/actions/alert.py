@@ -11,34 +11,15 @@ from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
 
-ODD_ROW = '<tr>' \
-          '<td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; ' \
-          'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
-          'white-space: nowrap">%%ENTERPRISE%%</td>' \
-          '<td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; ' \
-          'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
-          'white-space: nowrap">%%COUNT%%</td>' \
-          ' </tr>'
-
-EVEN_ROW = ' <tr>' \
-           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; ' \
-           'color: #596872; font-weight: normal; ' \
-           'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
-           'white-space: nowrap">%%ENTERPRISE%%</td>' \
-           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; ' \
-           'color: #596872; font-weight: normal; ' \
-           'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
-           'white-space: nowrap">%%COUNT%%</td>' \
-           '</tr>'
-
 
 class Alert:
 
-    def __init__(self, event_bus: EventBus, scheduler, logger, config):
+    def __init__(self, event_bus: EventBus, scheduler, logger, config, template_renderer):
         self._event_bus = event_bus
         self._scheduler = scheduler
         self._logger = logger
         self._config = config
+        self._template_renderer = template_renderer
 
     async def start_alert_job(self, exec_on_start=False):
         self._logger.info("Scheduled task: alert report process configured to run first day of each month")
@@ -76,54 +57,5 @@ class Alert:
                                             f'/monitor/edge/{edge_info["edge_id"]["edge_id"]}/'
 
                     edges_to_report.append(edge_for_alert)
-        email_obj = self._compose_email_object(edges_to_report)
+        email_obj = self._template_renderer._compose_email_object(edges_to_report)
         await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))
-
-    def _compose_email_object(self, edges_to_report):
-        with open('src/templates/last_contact.html') as template:
-            email_html = "".join(template.readlines())
-            email_html = email_html.replace('%%EDGE_COUNT%%', str(len(edges_to_report)))
-
-        enterprises = {}
-        for edge in edges_to_report:
-            if edge['enterprise'] not in enterprises.keys():
-                enterprises[edge['enterprise']] = 0
-            enterprises[edge['enterprise']] += 1
-
-        rows = []
-        for idx, enterprise in enumerate(enterprises.keys()):
-            row = EVEN_ROW if idx % 2 == 0 else ODD_ROW
-            row = row.replace('%%ENTERPRISE%%', enterprise)
-            row = row.replace('%%COUNT%%', str(enterprises[enterprise]))
-            rows.append(row)
-        email_html = email_html.replace('%%ROWS%%', "".join(rows))
-
-        edges_dataframe = pd.DataFrame(edges_to_report)
-        edges_dataframe.index.name = 'idx'
-        edges_dataframe.to_csv('last_contact.csv', index=False)
-
-        return {
-            'request_id': uuid(),
-            'email_data': {
-                'subject': f'Last contact edges ({datetime.now().strftime("%Y-%m-%d")})',
-                'recipient': self._config["last_contact"]["recipient"],
-                'text': 'this is the accessible text for the email',
-                'html': email_html,
-                'images': [
-                    {
-                        'name': 'logo',
-                        'data': base64.b64encode(open('src/templates/images/logo.png', 'rb').read()).decode('utf-8')
-                    },
-                    {
-                        'name': 'header',
-                        'data': base64.b64encode(open('src/templates/images/header.jpg', 'rb').read()).decode('utf-8')
-                    },
-                ],
-                'attachments': [
-                    {
-                        'name': 'last_contact.csv',
-                        'data': base64.b64encode(open('last_contact.csv', 'rb').read()).decode('utf-8')
-                    }
-                ]
-            }
-        }

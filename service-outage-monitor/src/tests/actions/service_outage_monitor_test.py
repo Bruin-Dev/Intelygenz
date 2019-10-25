@@ -14,6 +14,7 @@ from apscheduler.util import undefined
 from asynctest import CoroutineMock
 
 from config import testconfig
+from application.repositories.template_management import TemplateRenderer
 
 
 class TestServiceOutageMonitor:
@@ -23,8 +24,10 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
+        template_renderer = Mock()
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler,
+                                                      config, template_renderer)
 
         assert service_outage_monitor._event_bus is event_bus
         assert service_outage_monitor._logger is logger
@@ -37,8 +40,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
+        template_renderer = Mock()
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -61,8 +65,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
+        template_renderer = Mock()
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
 
         await service_outage_monitor.start_service_outage_monitor_job(exec_on_start=False)
 
@@ -80,12 +85,13 @@ class TestServiceOutageMonitor:
         logger.error = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
         edge_list = {'edges': []}
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
 
         uuid_ = uuid()
         with patch.object(service_outage_monitor_module, 'uuid', return_value=uuid_):
@@ -110,6 +116,7 @@ class TestServiceOutageMonitor:
         logger.error = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
         edge_list = {'edges': ['edge-1', 'edge-2', 'edge-3']}
 
         edge_1_status = {
@@ -133,8 +140,8 @@ class TestServiceOutageMonitor:
             edge_3_status,
         ])
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
-        service_outage_monitor._compose_email_object = Mock()
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_outage_monitor._template_renderer._compose_email_object = Mock()
 
         uuid_1 = uuid()
         uuid_2 = uuid()
@@ -182,7 +189,7 @@ class TestServiceOutageMonitor:
                 timeout=45,
             ),
         ], any_order=True)
-        service_outage_monitor._compose_email_object.assert_not_called()
+        service_outage_monitor._template_renderer._compose_email_object.assert_not_called()
 
     @pytest.mark.asyncio
     async def service_outage_monitor_process_with_offline_edges_test(self):
@@ -190,6 +197,7 @@ class TestServiceOutageMonitor:
         logger.error = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
         edge_list = {'edges': ['edge-1', 'edge-2', 'edge-3']}
 
         edge_1_status = {
@@ -221,8 +229,8 @@ class TestServiceOutageMonitor:
             edge_3_status, edge_3_events, edge_3_email,
         ])
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
-        service_outage_monitor._compose_email_object = Mock(side_effect=[
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_outage_monitor._template_renderer._compose_email_object = Mock(side_effect=[
             edge_1_email, edge_2_email, edge_3_email,
         ])
 
@@ -329,7 +337,7 @@ class TestServiceOutageMonitor:
                 timeout=10,
             ),
         ], any_order=False)
-        assert service_outage_monitor._compose_email_object.call_count == 3
+        assert service_outage_monitor._template_renderer._compose_email_object.call_count == 3
 
     @pytest.mark.asyncio
     async def service_outage_monitor_process_with_unknown_edge_state_test(self):
@@ -337,6 +345,7 @@ class TestServiceOutageMonitor:
         logger.error = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
         edge_list = {'edges': ['edge-1', 'edge-2', 'edge-3']}
 
         edge_1_status = {
@@ -360,8 +369,8 @@ class TestServiceOutageMonitor:
             edge_3_status,
         ])
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
-        service_outage_monitor._compose_email_object = Mock()
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_outage_monitor._template_renderer._compose_email_object = Mock()
 
         uuid_1 = uuid()
         uuid_2 = uuid()
@@ -409,7 +418,7 @@ class TestServiceOutageMonitor:
                 timeout=45,
             ),
         ], any_order=True)
-        service_outage_monitor._compose_email_object.assert_not_called()
+        service_outage_monitor._template_renderer._compose_email_object.assert_not_called()
 
     @pytest.mark.asyncio
     async def service_outage_monitor_process_with_dev_environment_test(self):
@@ -433,14 +442,17 @@ class TestServiceOutageMonitor:
         ])
 
         config = Mock()
+        template_renderer = Mock()
+
+
         config.MONITOR_CONFIG = {'environment': 'dev'}
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
-        service_outage_monitor._compose_email_object = Mock(return_value=edge_email)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_outage_monitor._template_renderer._compose_email_object = Mock(return_value=edge_email)
 
         await service_outage_monitor._service_outage_monitor_process()
 
-        service_outage_monitor._compose_email_object.assert_called()
+        service_outage_monitor._template_renderer._compose_email_object.assert_called()
 
     @pytest.mark.asyncio
     async def service_outage_monitor_process_with_production_environment_test(self):
@@ -464,14 +476,15 @@ class TestServiceOutageMonitor:
         ])
 
         config = Mock()
+        template_renderer = Mock()
         config.MONITOR_CONFIG = {'environment': 'production'}
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
-        service_outage_monitor._compose_email_object = Mock(return_value=edge_email)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_outage_monitor._template_renderer._compose_email_object = Mock(return_value=edge_email)
 
         await service_outage_monitor._service_outage_monitor_process()
 
-        service_outage_monitor._compose_email_object.assert_called()
+        service_outage_monitor._template_renderer._compose_email_object.assert_called()
 
     @pytest.mark.asyncio
     async def service_outage_monitor_process_with_unknown_config_test(self):
@@ -489,20 +502,22 @@ class TestServiceOutageMonitor:
         event_bus.rpc_request = CoroutineMock(side_effect=[edge_list, edge_status])
 
         config = Mock()
+        template_renderer = Mock()
         config.MONITOR_CONFIG = {'environment': None}
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
-        service_outage_monitor._compose_email_object = Mock()
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_outage_monitor._template_renderer._compose_email_object = Mock()
 
         await service_outage_monitor._service_outage_monitor_process()
 
-        service_outage_monitor._compose_email_object.assert_not_called()
+        service_outage_monitor._template_renderer._compose_email_object.assert_not_called()
 
     def find_recent_occurence_of_event_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = Mock()
+        template_renderer = Mock()
 
         edge_alive_state = "EDGE_ALIVE"
         link_alive_state = "LINK_ALIVE"
@@ -528,7 +543,7 @@ class TestServiceOutageMonitor:
             }
         ]
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
 
         edge_online_time = service_outage_monitor._find_recent_occurence_of_event(
             event_list, event_type=edge_alive_state, message=None)
@@ -547,8 +562,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_outage_monitor._find_recent_occurence_of_event = Mock()
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
@@ -584,7 +600,7 @@ class TestServiceOutageMonitor:
         }
         events_to_report = {'events': {'data': 'Some Event Info'}}
 
-        email = service_outage_monitor._compose_email_object(edges_to_report, events_to_report)
+        email = service_outage_monitor._template_renderer._compose_email_object(edges_to_report, events_to_report)
 
         assert 'Service outage monitor' in email["email_data"]["subject"]
         assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
@@ -596,8 +612,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_outage_monitor._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -627,7 +644,7 @@ class TestServiceOutageMonitor:
         }
         events_to_report = {'events': {'data': 'Some Event Info'}}
 
-        email = service_outage_monitor._compose_email_object(edges_to_report, events_to_report)
+        email = service_outage_monitor._template_renderer._compose_email_object(edges_to_report, events_to_report)
 
         assert 'Service outage monitor' in email["email_data"]["subject"]
         assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
@@ -639,8 +656,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_outage_monitor._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -662,7 +680,7 @@ class TestServiceOutageMonitor:
         }
         events_to_report = {'events': {'data': 'Some Event Info'}}
 
-        email = service_outage_monitor._compose_email_object(edges_to_report, events_to_report)
+        email = service_outage_monitor._template_renderer._compose_email_object(edges_to_report, events_to_report)
 
         assert 'Service outage monitor' in email["email_data"]["subject"]
         assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
@@ -674,8 +692,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
-        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config)
+        service_outage_monitor = ServiceOutageMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_outage_monitor._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -697,7 +716,7 @@ class TestServiceOutageMonitor:
         }
         events_to_report = {'events': {'data': 'Some Event Info'}}
 
-        email = service_outage_monitor._compose_email_object(edges_to_report, events_to_report)
+        email = service_outage_monitor._template_renderer._compose_email_object(edges_to_report, events_to_report)
 
         assert 'Service outage monitor' in email["email_data"]["subject"]
         assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]

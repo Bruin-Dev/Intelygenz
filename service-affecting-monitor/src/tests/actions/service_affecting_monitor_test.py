@@ -13,6 +13,7 @@ from apscheduler.util import undefined
 from asynctest import CoroutineMock
 
 from config import testconfig
+from application.repositories.template_management import TemplateRenderer
 
 
 class TestServiceAffectingMonitor:
@@ -22,8 +23,9 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
 
         assert service_affecting_monitor._event_bus is event_bus
         assert service_affecting_monitor._logger is logger
@@ -36,8 +38,9 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -60,8 +63,9 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
 
         await service_affecting_monitor.start_service_affecting_monitor_job(exec_on_start=False)
 
@@ -113,8 +117,10 @@ class TestServiceAffectingMonitor:
         }
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edges_to_report)
+        template_renderer = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler,
+                                                            config, template_renderer)
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
 
@@ -134,6 +140,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_no_troubles_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -182,7 +189,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link_1)
@@ -195,6 +202,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_wireless_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -231,7 +239,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -245,6 +253,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_wireless_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -281,7 +290,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -295,6 +304,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_wireless_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -329,7 +339,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -340,6 +350,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_public_wired_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -376,7 +387,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -390,6 +401,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_public_wired_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -426,7 +438,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -440,6 +452,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_public_wired_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -474,7 +487,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -485,6 +498,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_private_wired_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -521,7 +535,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -535,6 +549,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_private_wired_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -566,12 +581,24 @@ class TestServiceAffectingMonitor:
                     "edgeState": "OFFLINE",
                     "serialNumber": "VC05200028729",
                 },
-                "links": [link]
+                "links": [
+                    {
+                        'bestLatencyMsRx': 14,
+                        'bestLatencyMsTx': 14,
+                        'serviceGroups': ['None']
+                    },
+                    {
+                        'bestLatencyMsRx': 49,
+                        'bestLatencyMsTx': 20,
+                        'serviceGroups': ['None']
+                    },
+
+                ]
             }
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -585,6 +612,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_private_wired_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -619,7 +647,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -630,6 +658,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_unknown_link_type_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -664,7 +693,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -675,6 +704,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_no_troubles(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -723,7 +753,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link_1)
@@ -736,6 +766,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_wireless_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -772,7 +803,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -786,6 +817,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_wireless_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -822,7 +854,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -836,6 +868,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_wireless_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -870,7 +903,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -881,6 +914,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_public_wired_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -917,7 +951,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -931,6 +965,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_public_wired_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -967,7 +1002,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -981,6 +1016,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_public_wired_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -1015,7 +1051,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1026,6 +1062,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_private_wired_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -1062,7 +1099,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1076,6 +1113,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_private_wired_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -1112,7 +1150,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1126,6 +1164,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_public_wired_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -1160,7 +1199,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1171,6 +1210,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_unknown_link_type_test(self):
         scheduler = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = testconfig
         device = {
             "host": "mettel.velocloud.net",
@@ -1205,7 +1245,7 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1218,6 +1258,7 @@ class TestServiceAffectingMonitor:
         event_bus.rpc_request = CoroutineMock(return_value="Email Sent")
         logger = Mock()
         scheduler = Mock()
+        template_renderer = Mock()
         device = {
             "serial": 'VC05200033383',
             "host": "mettel.velocloud.net",
@@ -1229,15 +1270,15 @@ class TestServiceAffectingMonitor:
         }
         config = testconfig
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
-        service_affecting_monitor._compose_email_object = Mock(return_value='Some email object')
+        service_affecting_monitor._template_renderer._compose_email_object = Mock(return_value='Some email object')
 
         await service_affecting_monitor._notify_trouble(device, 'Some Edge Status', 'Some Link Info', 'Input results',
                                                         'Output results', 'LATENCY', 120)
 
         service_affecting_monitor._compose_ticket_dict.assert_called_once()
-        service_affecting_monitor._compose_email_object.assert_called_once()
+        service_affecting_monitor._template_renderer._compose_email_object.assert_called_once()
         event_bus.rpc_request.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -1247,6 +1288,7 @@ class TestServiceAffectingMonitor:
                                                            'Slack Sent'])
         logger = Mock()
         scheduler = Mock()
+        template_renderer = Mock()
         device = {
             "serial": 'VC05200033383',
             "host": "mettel.velocloud.net",
@@ -1298,7 +1340,7 @@ class TestServiceAffectingMonitor:
                 ]
             }
         }
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._ticket_existence = CoroutineMock(return_value=True)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
@@ -1322,6 +1364,7 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
         config.MONITOR_CONFIG['environment'] = 'production'
         device = {
             "serial": 'VC05200033383',
@@ -1371,7 +1414,7 @@ class TestServiceAffectingMonitor:
                 ]
             }
         }
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._ticket_existence = CoroutineMock(return_value=False)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
@@ -1395,6 +1438,7 @@ class TestServiceAffectingMonitor:
         event_bus.rpc_request = CoroutineMock(return_value="Email Sent")
         logger = Mock()
         scheduler = Mock()
+        template_renderer = Mock()
         device = {
             "serial": 'VC05200033383',
             "host": "mettel.velocloud.net",
@@ -1408,15 +1452,15 @@ class TestServiceAffectingMonitor:
         config = testconfig
         config.MONITOR_CONFIG['environment'] = None
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
-        service_affecting_monitor._compose_email_object = Mock(return_value='Some email object')
+        service_affecting_monitor._template_renderer._compose_email_object = Mock(return_value='Some email object')
 
         await service_affecting_monitor._notify_trouble(device, 'Some Edge Status', 'Some Link Info', 'Input results',
                                                         'Output results', 'LATENCY', 120)
 
         service_affecting_monitor._compose_ticket_dict.assert_called_once()
-        service_affecting_monitor._compose_email_object.assert_not_called()
+        service_affecting_monitor._template_renderer._compose_email_object.assert_not_called()
         event_bus.rpc_request.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -1424,8 +1468,9 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        template_renderer = Mock()
         config = testconfig
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -1443,7 +1488,8 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        template_renderer = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -1461,7 +1507,8 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        template_renderer = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026137'}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -1479,7 +1526,8 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        template_renderer = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{'otherDetails': None}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -1496,8 +1544,9 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
+        template_renderer = Mock()
         config = testconfig
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
                                              "ticketNotes": [{"noteValue": None}]}}
@@ -1511,8 +1560,9 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
             "edge_id": {
@@ -1565,7 +1615,8 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        template_renderer = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
             "edge_id": {
@@ -1604,7 +1655,7 @@ class TestServiceAffectingMonitor:
         }
 
         test_dict = {'test_key': 'test_value'}
-        email = service_affecting_monitor._compose_email_object(edges_to_report, 'Latency', test_dict)
+        email = service_affecting_monitor._template_renderer._compose_email_object(edges_to_report, 'Latency', test_dict)
 
         assert 'Service affecting trouble detected: ' in email["email_data"]["subject"]
         assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
@@ -1615,7 +1666,8 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         ticket_note = service_affecting_monitor._ticket_object_to_string(test_dict)
         assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'

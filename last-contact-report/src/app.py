@@ -8,6 +8,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
+from application.repositories.template_management import TemplateRenderer
 
 
 class Container:
@@ -23,8 +24,9 @@ class Container:
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.add_consumer(self.subscriber_alert, consumer_name="sub-alert")
         self._event_bus.set_producer(self._publisher)
+        self._template_renderer = TemplateRenderer(config)
 
-        self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG)
+        self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG, self._template_renderer)
 
     async def _start(self):
         await self._event_bus.connect()

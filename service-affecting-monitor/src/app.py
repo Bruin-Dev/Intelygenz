@@ -8,6 +8,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
+from application.repositories.template_management import TemplateRenderer
 
 
 class Container:
@@ -21,9 +22,10 @@ class Container:
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.set_producer(self._publisher)
+        self._template_renderer = TemplateRenderer(config)
 
         self._service_affecting_monitor = ServiceAffectingMonitor(self._event_bus, self._logger, self._scheduler,
-                                                                  config)
+                                                                  config, self._template_renderer)
 
     async def _start(self):
         await self._event_bus.connect()

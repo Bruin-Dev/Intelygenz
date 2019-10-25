@@ -9,35 +9,16 @@ from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
 
-ODD_ROW = '<tr>' \
-          '<td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; ' \
-          'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
-          'white-space: nowrap">%%KEY%%</td>' \
-          '<td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal; ' \
-          'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
-          'white-space: nowrap">%%VALUE%%</td>' \
-          ' </tr>'
-
-EVEN_ROW = ' <tr>' \
-           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; ' \
-           'color: #596872; font-weight: normal; ' \
-           'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
-           'white-space: nowrap">%%KEY%%</td>' \
-           '<td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF; ' \
-           'color: #596872; font-weight: normal; ' \
-           'font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD; ' \
-           'white-space: nowrap">%%VALUE%%</td>' \
-           '</tr>'
-
 
 class ServiceAffectingMonitor:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, config):
+    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._monitoring_minutes = config.MONITOR_CONFIG["monitoring_minutes"]
+        self._template_renderer = template_renderer
 
     async def start_service_affecting_monitor_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service affecting')
@@ -50,7 +31,6 @@ class ServiceAffectingMonitor:
                                 id='_monitor_each_edge')
 
     async def _monitor_each_edge(self):
-
         monitored_edges = [await self._service_affecting_monitor_process(device) for device in
                            self._config.MONITOR_CONFIG['device_by_id']]
 
@@ -107,7 +87,7 @@ class ServiceAffectingMonitor:
         ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
 
         if self._config.MONITOR_CONFIG['environment'] == 'dev':
-            email_obj = self._compose_email_object(edge_status, trouble, ticket_dict)
+            email_obj = self._template_renderer._compose_email_object(edge_status, trouble, ticket_dict)
             await self._event_bus.rpc_request("notification.email.request", json.dumps(email_obj), timeout=10)
         elif self._config.MONITOR_CONFIG['environment'] == 'production':
             client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]
@@ -164,9 +144,9 @@ class ServiceAffectingMonitor:
         ticket_request_msg = {'request_id': uuid(), 'client_id': client_id,
                               'ticket_status': ['New', 'InProgress', 'Draft'],
                               'category': 'SD-WAN', 'ticket_topic': 'VAS'}
-        all_tickets = await  self._event_bus.rpc_request("bruin.ticket.request",
-                                                         json.dumps(ticket_request_msg, default=str),
-                                                         timeout=15)
+        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
+                                                        json.dumps(ticket_request_msg, default=str),
+                                                        timeout=15)
         for ticket in all_tickets['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'ticket_id': ticket['ticketID']}
@@ -205,42 +185,6 @@ class ServiceAffectingMonitor:
             f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/] \n'
 
         return edge_overview
-
-    def _compose_email_object(self, edges_status_to_report, trouble, ticket_dict):
-        with open('src/templates/service_affecting_monitor.html') as template:
-            email_html = "".join(template.readlines())
-            email_html = email_html.replace('%%TROUBLE%%', trouble)
-            email_html = email_html.replace('%%SERIAL_NUMBER%%',
-                                            f'{edges_status_to_report["edge_info"]["edges"]["serialNumber"]}')
-
-        rows = []
-        for idx, key in enumerate(ticket_dict.keys()):
-            row = EVEN_ROW if idx % 2 == 0 else ODD_ROW
-            row = row.replace('%%KEY%%', key)
-            row = row.replace('%%VALUE%%', str(ticket_dict[key]))
-            rows.append(row)
-        email_html = email_html.replace('%%OVERVIEW_ROWS%%', "".join(rows))
-
-        return {
-            'request_id': uuid(),
-            'email_data': {
-                'subject': f'Service affecting trouble detected: {trouble}',
-                'recipient': self._config.MONITOR_CONFIG["recipient"],
-                'text': 'this is the accessible text for the email',
-                'html': email_html,
-                'images': [
-                    {
-                        'name': 'logo',
-                        'data': base64.b64encode(open('src/templates/images/logo.png', 'rb').read()).decode('utf-8')
-                    },
-                    {
-                        'name': 'header',
-                        'data': base64.b64encode(open('src/templates/images/header.jpg', 'rb').read()).decode('utf-8')
-                    },
-                ],
-                'attachments': []
-            }
-        }
 
     def _ticket_object_to_string(self, ticket_dict):
         edge_triage_str = "#*Automation Engine*# \n"
