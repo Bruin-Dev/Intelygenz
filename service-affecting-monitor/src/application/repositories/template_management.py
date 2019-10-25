@@ -5,7 +5,6 @@ from shortuuid import uuid
 from datetime import datetime, timedelta
 from pytz import timezone
 import base64
-from config import config
 
 
 class TemplateRenderer:
