@@ -1171,14 +1171,14 @@ class TestServiceAffectingMonitor:
 
         await service_affecting_monitor._notify_trouble(edges_to_report, 'Some Link Info', 'Input results',
                                                         'Output results', 'LATENCY', 120)
-        assert service_affecting_monitor._ticket_existence.called
-        assert service_affecting_monitor._ticket_existence.call_args[0][0] == '85940'
-        assert service_affecting_monitor._ticket_existence.call_args[0][1] == edges_to_report['edge_info']['edges'][
-                                                                              'serialNumber']
-        assert service_affecting_monitor._ticket_existence.call_args[0][2] == 'LATENCY'
-        assert service_affecting_monitor._compose_ticket_dict.called
-        assert service_affecting_monitor._ticket_object_to_string.called is False
-        assert event_bus.rpc_request.called is False
+
+        service_affecting_monitor._ticket_existence.assert_awaited_once_with('85940',
+                                                                             edges_to_report['edge_info']['edges'][
+                                                                              'serialNumber'], 'LATENCY')
+
+        service_affecting_monitor._compose_ticket_dict.assert_called_once()
+        service_affecting_monitor._ticket_object_to_string.assert_not_called()
+        event_bus.rpc_request.assert_not_called()
 
     @pytest.mark.asyncio
     async def _notify_trouble_pro_ticket_not_exists_test(self):
@@ -1232,14 +1232,14 @@ class TestServiceAffectingMonitor:
 
         await service_affecting_monitor._notify_trouble(edges_to_report, 'Some Link Info', 'Input results',
                                                         'Output results', 'LATENCY', 120)
-        assert service_affecting_monitor._ticket_existence.called
-        assert service_affecting_monitor._ticket_existence.call_args[0][0] == '85940'
-        assert service_affecting_monitor._ticket_existence.call_args[0][1] == edges_to_report['edge_info']['edges'][
-            'serialNumber']
-        assert service_affecting_monitor._ticket_existence.call_args[0][2] == 'LATENCY'
-        assert service_affecting_monitor._compose_ticket_dict.called
-        assert service_affecting_monitor._ticket_object_to_string.called
-        assert service_affecting_monitor._ticket_object_to_string.call_args[0][0] == 'Some ordered dict object'
+
+        service_affecting_monitor._ticket_existence.assert_awaited_once_with('85940',
+                                                                             edges_to_report['edge_info']['edges'][
+                                                                                 'serialNumber'], 'LATENCY')
+
+        service_affecting_monitor._compose_ticket_dict.assert_called_once()
+        service_affecting_monitor._ticket_object_to_string.assert_called_with('Some ordered dict object')
+
         assert event_bus.rpc_request.called
         assert 'Some string object' in event_bus.rpc_request.mock_calls[0][1][1]
 

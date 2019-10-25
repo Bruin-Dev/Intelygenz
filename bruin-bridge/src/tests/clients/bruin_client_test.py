@@ -194,40 +194,42 @@ class TestBruinClient:
 
     def post_ticket_ok_test(self):
         logger = Mock()
-        response = Mock()
-        response.json = Mock(return_value='Ticket Created')
-        response.status_code = 200
-        requests.post = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config)
-        bruin_client._bearer_token = "Someverysecretaccesstoken"
-        post_ticket = bruin_client.post_ticket(123, 'Some Category', ['Services'], ['Notes'], ['Contacts'])
-        assert requests.post.called
-        assert requests.post.call_args[1]['json']['clientId'] == 123
-        assert requests.post.call_args[1]['json']['category'] == 'Some Category'
-        assert requests.post.call_args[1]['json']['services'] == ['Services']
-        assert requests.post.call_args[1]['json']['notes'] == ['Notes']
-        assert requests.post.call_args[1]['json']['contacts'] == ['Contacts']
-        assert post_ticket == 'Ticket Created'
+        client_id = 321
+        category = 'Some Category'
+        notes = ['List of Notes']
+        services = ['List of Services']
+        contacts = ['List of Contacts']
+        expected_post_response = 'Ticket Created'
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=expected_post_response)
+        response_mock.status_code = 200
+        with patch.object(bruin_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            bruin_client = BruinClient(logger, config)
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            post_ticket = bruin_client.post_ticket(client_id, category, services, notes, contacts)
+            mock_post.assert_called_once()
+            assert post_ticket == expected_post_response
 
     def post_ticket_ko_test(self):
         logger = Mock()
-        response = Mock()
-        response.json = Mock(return_value='Ticket Created')
-        response.status_code = 500
-        requests.post = Mock(return_value=response)
-        bruin_client = BruinClient(logger, config)
-        bruin_client.login = Mock()
-        bruin_client._bearer_token = "Someverysecretaccesstoken"
-        post_ticket = None
-        try:
-            post_ticket = bruin_client.post_ticket(123, 'Some Category', ['Services'], ['Notes'], ['Contacts'])
-        except Exception as e:
-            error = e
-        assert isinstance(error, RetryError)
-        assert requests.post.called
-        assert requests.post.call_args[1]['json']['clientId'] == 123
-        assert requests.post.call_args[1]['json']['category'] == 'Some Category'
-        assert requests.post.call_args[1]['json']['services'] == ['Services']
-        assert requests.post.call_args[1]['json']['notes'] == ['Notes']
-        assert requests.post.call_args[1]['json']['contacts'] == ['Contacts']
-        assert post_ticket is None
+        client_id = 321
+        category = 'Some Category'
+        notes = ['List of Notes']
+        services = ['List of Services']
+        contacts = ['List of Contacts']
+        expected_post_response = 'Ticket Created'
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=expected_post_response)
+        response_mock.status_code = 500
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            post_ticket = None
+            with raises(Exception):
+                post_ticket = bruin_client.post_ticket(client_id, category, services, notes, contacts)
+            bruin_client.login.assert_called()
+            assert post_ticket is None

@@ -22,54 +22,82 @@ class TestPostTicket:
     @pytest.mark.asyncio
     async def post_ticket_test(self):
         logger = Mock()
+
+        post_ticket_response = {"ticketIds": [123]}
+        request_id = 123
+        client_id = 321
+        response_topic = 'bruin.ticket.creation.response'
+        category = 'Some Category'
+        services = ['List of Services']
+        contacts = ['List of Contacts']
+
+        msg = {'request_id': request_id,
+               'response_topic': response_topic,
+               'clientId': client_id,
+               'category': category,
+               'services': services,
+               'contacts': contacts
+               }
+
+        msg_published_in_topic = {
+                                  'request_id': msg['request_id'],
+                                  'ticketIds': post_ticket_response,
+                                  'status': 200
+                                 }
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
+
         bruin_repository = Mock()
-        bruin_repository.post_ticket = Mock(return_value={"ticketIds": [123]})
-        msg = {'request_id': 123,
-               'response_topic': f'bruin.ticket.creation.response',
-               'clientId': 321,
-               'category': 'Some Category',
-               'services': ['List of Services'],
-               'contacts': ['List of Contacts']}
+        bruin_repository.post_ticket = Mock(return_value=post_ticket_response)
+
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(json.dumps(msg))
-        assert bruin_repository.post_ticket.called
-        assert bruin_repository.post_ticket.call_args[0][0] == msg['clientId']
-        assert bruin_repository.post_ticket.call_args[0][1] == msg['category']
-        assert bruin_repository.post_ticket.call_args[0][2] == msg['services']
-        assert bruin_repository.post_ticket.call_args[0][3] == []
-        assert bruin_repository.post_ticket.call_args[0][4] == msg['contacts']
-        assert event_bus.publish_message.called
-        assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
-        assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
-                                                                        'ticketIds': {"ticketIds": [123]},
-                                                                        'status': 200})
+
+        post_ticket._bruin_repository.post_ticket.assert_called_once_with(
+            client_id, category, services, [], contacts
+        )
+        post_ticket._event_bus.publish_message.assert_awaited_once_with(
+            response_topic, json.dumps(msg_published_in_topic)
+        )
 
     @pytest.mark.asyncio
     async def post_ticket_none_return_test(self):
         logger = Mock()
+        post_ticket_response = None
+        request_id = 123
+        client_id = 321
+        response_topic = 'bruin.ticket.creation.response'
+        category = 'Some Category'
+        notes = ['List of Notes']
+        services = ['List of Services']
+        contacts = ['List of Contacts']
+
+        msg = {'request_id': request_id,
+               'response_topic': response_topic,
+               'clientId': client_id,
+               'category': category,
+               'services': services,
+               'notes': notes,
+               'contacts': contacts
+               }
+
+        msg_published_in_topic = {
+            'request_id': msg['request_id'],
+            'ticketIds': post_ticket_response,
+            'status': 500
+        }
+
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
+
         bruin_repository = Mock()
-        bruin_repository.post_ticket = Mock(return_value=None)
-        msg = {'request_id': 123,
-               'response_topic': f'bruin.ticket.creation.response',
-               'clientId': 321,
-               'category': 'Some Category',
-               'services': ['List of Services'],
-               'notes': ['List of Notes'],
-               'contacts': ['List of Contacts']}
+        bruin_repository.post_ticket = Mock(return_value=post_ticket_response)
+
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(json.dumps(msg))
-        assert bruin_repository.post_ticket.called
-        assert bruin_repository.post_ticket.call_args[0][0] == msg['clientId']
-        assert bruin_repository.post_ticket.call_args[0][1] == msg['category']
-        assert bruin_repository.post_ticket.call_args[0][2] == msg['services']
-        assert bruin_repository.post_ticket.call_args[0][3] == msg['notes']
-        assert bruin_repository.post_ticket.call_args[0][4] == msg['contacts']
-        assert event_bus.publish_message.called
-        assert event_bus.publish_message.call_args[0][0] == msg['response_topic']
-        assert event_bus.publish_message.call_args[0][1] == json.dumps({'request_id': msg['request_id'],
-                                                                        'ticketIds': None,
-                                                                        'status': 500})
+        post_ticket._bruin_repository.post_ticket.assert_called_once_with(
+            client_id, category, services, notes, contacts
+        )
+        post_ticket._event_bus.publish_message.assert_awaited_once_with(
+            response_topic, json.dumps(msg_published_in_topic)
+        )
