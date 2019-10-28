@@ -21,7 +21,7 @@ resource "aws_cloudwatch_metric_alarm" "exception_messages_services_alarm" {
   alarm_name                = local.exception_messages_services_alarm-name
   comparison_operator       = "GreaterThanOrEqualToThreshold"
   evaluation_periods        = local.exception_messages_services_alarm-evaluation_periods
-  metric_name               = aws_cloudwatch_log_metric_filter.exception_detected_metric.name
+  metric_name               = local.exception_detected_metric-metric_transformation-name
   namespace                 = "LogMetrics"
   period                    = local.exception_messages_services_alarm-period
   statistic                 = "Sum"
@@ -35,7 +35,7 @@ resource "aws_cloudwatch_metric_alarm" "error_messages_services_alarm" {
   alarm_name                = local.error_messages_services_alarm-name
   comparison_operator       = "GreaterThanOrEqualToThreshold"
   evaluation_periods        = local.error_messages_services_alarm-evaluation_periods
-  metric_name               = aws_cloudwatch_log_metric_filter.errors_detected_metric.name
+  metric_name               = local.errors_detected_metric-metric_transformation-name
   namespace                 = "LogMetrics"
   period                    = local.error_messages_services_alarm-period
   statistic                 = "Sum"
