@@ -45,7 +45,7 @@ resource "aws_cloudwatch_metric_alarm" "error_messages_services_alarm" {
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
 }
 
-resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-orchestator_alarm" {
+resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-orchestrator_alarm" {
   alarm_name                = local.running_task_count_velocloud-orchestator_alarm-name
   comparison_operator       = "LessThanOrEqualToThreshold"
   evaluation_periods        = local.running_task_count_service-alarm-evaluation_periods
@@ -95,6 +95,177 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-triage
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
   dimensions = {
     ServiceName = "${var.ENVIRONMENT}-service-outage-triage"
+    ClusterName = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-affecting-monitor_alarm" {
+  alarm_name = local.running_task_count_service-affecting-monitor_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of service-affecting-monitor service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-service-affecting-monitor"
+    ClusterName = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_t7-bridge_alarm" {
+  alarm_name = local.running_task_count_t7-bridge-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of t7-bridge service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-t7-bridge"
+    ClusterName = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_notifier_alarm" {
+  alarm_name = local.running_task_count_notifier-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of notifier service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-notifier"
+    ClusterName = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_metrics-grafana_alarm" {
+  alarm_name = local.running_task_count_metrics-grafana-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of metrics-grafana service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-metrics-grafana"
+    ClusterName = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_metrics-prometheus_alarm" {
+  alarm_name = local.running_task_count_metrics-prometheus-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of metrics-prometheus service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-metrics-prometheus"
+    ClusterName = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server_alarm" {
+  alarm_name = local.running_task_count_nats-server-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of nats-server service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-nats-server"
+    ClusterName = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor_alarm" {
+  alarm_name = local.running_task_count_service-outage-monitor-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of service-outage-monitor service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-service-outage-monitor"
+    ClusterName = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_last-contact-report_alarm" {
+  alarm_name = local.running_task_count_last-contact-report-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of last-contact-report service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-last-contact-report"
+    ClusterName = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-bridge_alarm" {
+  alarm_name = local.running_task_count_velocloud-bridge-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of velocloud-bridge service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-velocloud-bridge"
     ClusterName = var.ENVIRONMENT
   }
 }
