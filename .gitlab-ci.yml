@@ -399,7 +399,7 @@ deploy-branches:
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - export TF_VAR_alarms_subscriptions_email_addresses=${AWS_ALARMS_NOTIFIER_EMAIL}
+    - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
     - apk --upgrade --no-cache add curl bash gettext
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
     - chmod +x /usr/local/bin/ecs-cli
@@ -490,6 +490,7 @@ deploy-master:
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_PRO}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=production
+    - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
     - apk add gettext
     - apk --upgrade --no-cache add curl
     - apk add bash

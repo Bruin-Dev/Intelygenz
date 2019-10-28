@@ -10,7 +10,7 @@ resource "aws_cloudformation_stack" "sns_topic_alarms" {
   name          = local.stack_alarms-errors_exceptions_messages_in_services-name
   template_body = data.template_file.cloudformation_sns_stack_alarms_erros_exceptions_messages.rendered
   parameters = {
-    OperatorEmail = var.alarms_subscriptions_email_addresses
+    OperatorEmail = var.ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS
   }
   tags = merge(
     map("Name", local.stack_alarms-errors_exceptions_messages_in_services-name)
