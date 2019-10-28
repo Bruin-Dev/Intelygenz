@@ -225,7 +225,6 @@
                 ],
                 "region":"us-east-1",
                 "title":"Average of CpuUtilized by Service",
-                "time_zone": "LOCAL",
                 "period":300
             }
         },
@@ -319,7 +318,6 @@
                 "stacked":false,
                 "region":"us-east-1",
                 "title":"Average of MemoryUtilized by Service",
-                "time_zone": "LOCAL",
                 "period":300
             }
         },
@@ -334,7 +332,6 @@
                 "region":"us-east-1",
                 "stacked":false,
                 "view":"table",
-                "time_zone": "LOCAL",
                 "title":"Exception messages detected in services"
             }
         },
@@ -348,7 +345,6 @@
                 "query":"SOURCE '${ENVIRONMENT}' | fields @timestamp, @message as msg_error | filter @message like \": ERROR\"",
                 "region":"us-east-1",
                 "title":"Error messages detected in services",
-                "time_zone": "LOCAL",
                 "view":"table"
             }
         }

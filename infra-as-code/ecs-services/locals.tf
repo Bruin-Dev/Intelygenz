@@ -105,10 +105,10 @@ locals {
   automation-velocloud-orchestrator-service_discovery_service-name = "velocloud-orchestrator-${var.ENVIRONMENT}"
 
   // metrics local variables
-  exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices"
-  errors_detected_metric-metric_transformation-name = "ErrorsMessagesDetectedInServices"
-  running_task_count-metric_transformation-name = "RunningTaskCount"
-  exception_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices"
+  exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"
+  errors_detected_metric-metric_transformation-name = "ErrorsMessagesDetectedInServices-${var.ENVIRONMENT}"
+  running_task_count-metric_transformation-name = "RunningTaskCount-${var.ENVIRONMENT}"
+  exception_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"
 
   // dashboards local variables
   cluster_dashboard_name = "cluster-${var.ENVIRONMENT}"
