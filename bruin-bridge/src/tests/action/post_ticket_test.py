@@ -28,6 +28,7 @@ class TestPostTicket:
         client_id = 321
         response_topic = 'bruin.ticket.creation.response'
         category = 'Some Category'
+        notes = []
         services = ['List of Services']
         contacts = ['List of Contacts']
 
@@ -54,7 +55,7 @@ class TestPostTicket:
         await post_ticket.post_ticket(json.dumps(msg))
 
         post_ticket._bruin_repository.post_ticket.assert_called_once_with(
-            client_id, category, services, [], contacts
+            client_id, category, services, notes, contacts
         )
         post_ticket._event_bus.publish_message.assert_awaited_once_with(
             response_topic, json.dumps(msg_published_in_topic)

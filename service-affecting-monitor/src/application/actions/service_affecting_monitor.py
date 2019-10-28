@@ -124,7 +124,6 @@ class ServiceAffectingMonitor:
                             "serviceNumber": device['serial']
                         }
                     ],
-                    "notes": ticket_note,
                     "contacts": [
                         {
                             "email": device['email'],
@@ -142,6 +141,13 @@ class ServiceAffectingMonitor:
                 }
                 ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
                                                               json.dumps(ticket_details), timeout=30)
+
+                ticket_append_note_msg = {'request_id': uuid(),
+                                          'ticket_id': ticket_id["ticketIds"][0],
+                                          'note': ticket_note}
+                await self._event_bus.rpc_request("bruin.ticket.note.append.request",
+                                                  json.dumps(ticket_append_note_msg),
+                                                  timeout=15)
 
                 slack_message = {'request_id': uuid(),
                                  'message': f'Ticket created with ticket id: {ticket_id["ticketIds"][0]}\n'

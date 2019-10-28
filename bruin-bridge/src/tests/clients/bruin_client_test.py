@@ -224,12 +224,12 @@ class TestBruinClient:
         response_mock.json = Mock(return_value=expected_post_response)
         response_mock.status_code = 500
 
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = Mock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
         with patch.object(bruin_client_module.requests, 'post', return_value=response_mock):
-            bruin_client = BruinClient(logger, config)
-            bruin_client.login = Mock()
-            bruin_client._bearer_token = "Someverysecretaccesstoken"
-            post_ticket = None
             with raises(Exception):
                 post_ticket = bruin_client.post_ticket(client_id, category, services, notes, contacts)
+                assert post_ticket is None
             bruin_client.login.assert_called()
-            assert post_ticket is None
