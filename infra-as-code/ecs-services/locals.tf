@@ -107,7 +107,7 @@ locals {
   // metrics local variables
   exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"
   errors_detected_metric-metric_transformation-name = "ErrorsMessagesDetectedInServices-${var.ENVIRONMENT}"
-  running_task_count-metric_transformation-name = "RunningTaskCount-${var.ENVIRONMENT}"
+  running_task_count-metric_transformation-name = "RunningTaskCount"
   exception_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"
 
   // dashboards local variables
