@@ -530,13 +530,7 @@ class TestServiceOutageTriage:
         service_outage_triage._ticket_object_to_email_obj.assert_not_called()
 
     @pytest.mark.asyncio
-    async def filter_tickets_ok_test(self):
-        event_bus = Mock()
-        tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
-                                             "ticketNotes": [{"noteValue": 'test info',
-                                                              'createdDate': '2019-09-10 10:34:00-04:00'}]}}
-        event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
+    async def filtered_ticket_details_test(self):
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -550,8 +544,9 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config)
 
         filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
-        assert event_bus.rpc_request.called
-        assert filtered_tickets == [{"ticketID": 3521039, "serial": "VC05200026138"}]
+
+        event_bus.rpc_request.assert_not_awaited()
+        assert filtered_tickets == []
 
     @pytest.mark.asyncio
     async def filtered_ticket_details_with_no_detailvalue_key_in_ticket_details_test(self):

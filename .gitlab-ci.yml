@@ -1,6 +1,7 @@
 stages:
   - validation
   - unit_test
+  - acceptance_tests
   - basic_infra
   - build
   - deploy
@@ -68,7 +69,6 @@ velocloud-bridge-linter:
 bruin-bridge:
   variables:
     MODULE: bruin-bridge
-  <<: *lint_module
   extends: .lint_module
 
 t7-bridge-linter:
