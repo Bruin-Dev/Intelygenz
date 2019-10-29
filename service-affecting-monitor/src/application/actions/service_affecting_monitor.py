@@ -59,7 +59,7 @@ class ServiceAffectingMonitor:
                                'interval': {"end": datetime.now(utc),
                                             "start": (datetime.now(utc) - timedelta(minutes=10))}}
         edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(edge_status_request,
-                                                                                          default=str), timeout=15)
+                                                                                          default=str), timeout=60)
         self._logger.info(f'Edge received from event bus')
 
         if edge_status is None or \
@@ -141,23 +141,22 @@ class ServiceAffectingMonitor:
                 }
                 ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
                                                               json.dumps(ticket_details), timeout=30)
-
                 ticket_append_note_msg = {'request_id': uuid(),
-                                          'ticket_id': ticket_id["ticketIds"][0],
+                                          'ticket_id': ticket_id["ticketIds"]["ticketIds"][0],
                                           'note': ticket_note}
                 await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                   json.dumps(ticket_append_note_msg),
                                                   timeout=15)
 
                 slack_message = {'request_id': uuid(),
-                                 'message': f'Ticket created with ticket id: {ticket_id["ticketIds"][0]}\n'
+                                 'message': f'Ticket created with ticket id: {ticket_id["ticketIds"]["ticketIds"][0]}\n'
                                             f'https://app.bruin.com/helpdesk?clientId=85940&'
-                                            f'ticketId={ticket_id["ticketIds"][0]} , in '
+                                            f'ticketId={ticket_id["ticketIds"]["ticketIds"][0]} , in '
                                             f'{self._config.MONITOR_CONFIG["environment"]}'}
                 await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
                                                   timeout=10)
 
-                self._logger.info(f'Ticket created with ticket id: {ticket_id["ticketIds"][0]}')
+                self._logger.info(f'Ticket created with ticket id: {ticket_id["ticketIds"]["ticketIds"][0]}')
 
     async def _ticket_existence(self, client_id, serial, trouble):
         ticket_request_msg = {'request_id': uuid(), 'client_id': client_id,

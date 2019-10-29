@@ -1244,7 +1244,8 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def notify_trouble_with_production_environment_exists_test(self):
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[{'ticketIds': [123]}, 'Note Posted', 'Slack Sent'])
+        event_bus.rpc_request = CoroutineMock(side_effect=[{'ticketIds': {'ticketIds': [123]}}, 'Note Posted',
+                                                           'Slack Sent'])
         logger = Mock()
         scheduler = Mock()
         device = {
@@ -1317,7 +1318,8 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def _notify_trouble_pro_ticket_not_exists_test(self):
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[{'ticketIds': [123]}, 'Note posted', 'Slack Sent'])
+        event_bus.rpc_request = CoroutineMock(side_effect=[{'ticketIds': {'ticketIds': [123]}}, 'Note Posted',
+                                                           'Slack Sent'])
         logger = Mock()
         scheduler = Mock()
         config = testconfig
