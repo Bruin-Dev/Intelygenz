@@ -33,10 +33,10 @@ class VelocloudRepository:
                           f'enterprise:{edge["enterprise_id"]} from host:{edge["host"]}')
         return self._velocloud_client.get_link_information(edge, interval)
 
-    def get_link_service_groups_information(self, edge, interval=None):
+    def get_link_service_groups_information(self, edge):
         self._logger.info(f'Getting link service group information from edge:{edge["edge_id"]} in '
                           f'enterprise:{edge["enterprise_id"]} from host:{edge["host"]}')
-        return self._velocloud_client.get_link_service_groups_information(edge, interval)
+        return self._velocloud_client.get_link_service_groups_information(edge)
 
     def get_enterprise_information(self, edge):
         enterprise_info = self._velocloud_client.get_enterprise_information(edge)

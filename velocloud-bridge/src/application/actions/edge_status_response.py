@@ -25,7 +25,7 @@ class ReportEdgeStatus:
         if "interval" in msg.keys():
             interval = msg["interval"]
         links = self._velocloud_repository.get_link_information(edgeids, interval)
-        link_service_group = self._velocloud_repository.get_link_service_groups_information(edgeids, interval)
+        link_service_group = self._velocloud_repository.get_link_service_groups_information(edgeids)
         if links is not None and isinstance(links, Exception) is False:
             for link in links:
                 link_dict = link.to_dict()
