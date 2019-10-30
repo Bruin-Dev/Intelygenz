@@ -31,6 +31,19 @@
       "startPeriod": 30,
       "timeout": 5
     },
-    "environment": []
+    "environment": [
+      {
+        "name": "NATSCLUSTER",
+        "value": "${NATSCLUSTER}"
+      },
+      {
+        "name": "PORT",
+        "value": "${PORT}"
+      },
+      {
+        "name": "CLUSTER_MODE",
+        "value": "${CLUSTER_MODE}"
+      }
+    ]
   }
 ]
