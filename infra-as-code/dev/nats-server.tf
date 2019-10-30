@@ -3,7 +3,7 @@ data "aws_ecr_repository" "automation-nats-server" {
 }
 
 data "template_file" "automation-nats-server" {
-  template = file("${path.module}/task-definitions/nats_server.json")
+  template = file("${path.module}/task-definitions/nats_server_seed.json")
 
   vars = {
     image = local.automation-nats-server-image

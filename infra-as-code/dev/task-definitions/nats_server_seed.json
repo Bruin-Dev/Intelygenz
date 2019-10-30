@@ -43,10 +43,6 @@
       {
         "name": "CLUSTER_MODE",
         "value": "${CLUSTER_MODE}"
-      },
-      {
-        "name": "NATSROUTECLUSTER",
-        "value": "${NATSROUTECLUSTER}"
       }
     ]
   }
