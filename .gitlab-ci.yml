@@ -224,7 +224,7 @@ bruin-bridge-build:
   variables:
     MODULE_NAME: bruin-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  <<: *build_app_image
+  extends: .build_app_image
 
 velocloud-orchestrator-build:
   stage: build
