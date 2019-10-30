@@ -1,6 +1,6 @@
 [
   {
-    "name": "nats-server",
+    "name": "${CONTAINER_NAME}",
     "image": "${image}",
     "portMappings": [
       {

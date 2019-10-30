@@ -1,0 +1,67 @@
+data "template_file" "automation-nats-server-1" {
+  template = file("${path.module}/task-definitions/nats_server.json")
+
+  vars = {
+    image = local.automation-nats-server-image
+    log_group = var.ENVIRONMENT
+    log_prefix = local.log_prefix
+
+    CONTAINER_NAME = local.automation-nats-server-1-task_definition_template-container_name
+    NATSCLUSTER =  local.automation-nats-server-1-task_definition_template-natscluster
+    NATSROUTECLUSTER = local.automation-nats-server-1-task_definition_template-natsroutecluster
+    PORT = local.automation-nats-server-1-task_definition_template-ecs_service-port
+    CLUSTER_MODE = local.automation-nats-server-1-task_definition_template-ecs_service-cluster_mode
+  }
+}
+
+resource "aws_ecs_task_definition" "automation-nats-server-1" {
+  family = local.automation-nats-server-1-ecs_task_definition-family
+  container_definitions = data.template_file.automation-nats-server-1.rendered
+  requires_compatibilities = [
+    "FARGATE"]
+  network_mode = "awsvpc"
+  cpu = "256"
+  memory = "1024"
+  execution_role_arn = data.aws_iam_role.ecs_execution_role.arn
+  task_role_arn = data.aws_iam_role.ecs_execution_role.arn
+}
+
+resource "aws_service_discovery_service" "nats-server-1" {
+  name = "nats-server-1-${var.ENVIRONMENT}"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.automation-zone.id
+
+    dns_records {
+      ttl = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+}
+
+resource "aws_ecs_service" "automation-nats-server-1" {
+  name = local.automation-nats-server-1-ecs_service-name
+  task_definition = local.automation-nats-server-1-ecs_service-task_definition
+  desired_count = 1
+  launch_type = "FARGATE"
+  cluster = aws_ecs_cluster.automation.id
+
+  network_configuration {
+    security_groups = [
+      aws_security_group.automation-nats_service.id]
+    subnets = [
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
+      data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
+    assign_public_ip = false
+  }
+
+  service_registries {
+    registry_arn = aws_service_discovery_service.nats-server.arn
+  }
+}

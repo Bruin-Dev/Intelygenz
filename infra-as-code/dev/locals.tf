@@ -13,13 +13,27 @@ locals {
   // automation-nats-server local vars
   automation-nats-server-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_MODULE_VERSION}"
   automation-nats-server-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server"
-  automation-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server"
-  automation-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server"
+  automation-nats-server-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server"
+  automation-nats-server-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-ecs_service-name = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server.family}:${aws_ecs_task_definition.automation-nats-server.revision}"
+  automation-nats-server-task_definition_template-container_name = "nats-server"
   automation-nats-server-task_definition_template-natscluster = "nats://localhost:5222"
   automation-nats-server-task_definition_template-ecs_service-port = "4222"
   automation-nats-server-task_definition_template-ecs_service-cluster_mode = "s"
+
+  // automation-nats-server-1 local vars
+  automation-nats-server-1-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_MODULE_VERSION}"
+  automation-nats-server-1-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-ecs_service-name = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server-1.family}:${aws_ecs_task_definition.automation-nats-server-1.revision}"
+  automation-nats-server-1-task_definition_template-container_name = "nats-server-1"
+  automation-nats-server-1-task_definition_template-natscluster = "nats://localhost:5223"
+  automation-nats-server-1-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:5222"
+  automation-nats-server-1-task_definition_template-ecs_service-port = "4223"
+  automation-nats-server-1-task_definition_template-ecs_service-cluster_mode = "n"
 
   // automation-redis local vars
   automation-redis-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-redis"

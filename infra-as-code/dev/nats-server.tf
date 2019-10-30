@@ -10,6 +10,7 @@ data "template_file" "automation-nats-server" {
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
 
+    CONTAINER_NAME = local.automation-nats-server-task_definition_template-container_name
     NATSCLUSTER =  local.automation-nats-server-task_definition_template-natscluster
     PORT = local.automation-nats-server-task_definition_template-ecs_service-port
     CLUSTER_MODE = local.automation-nats-server-task_definition_template-ecs_service-cluster_mode
@@ -68,7 +69,7 @@ resource "aws_security_group" "automation-nats_service" {
   }
 
   tags = {
-    Name = local.automation-nats_service-security_group-tag-Name
+    Name = local.automation-nats-server-nats_service-security_group-tag-Name
     Environment = var.ENVIRONMENT
   }
 }
