@@ -17,7 +17,7 @@ locals {
   automation-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-ecs_service-name = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server.family}:${aws_ecs_task_definition.automation-nats-server.revision}"
-  automation-nats-server-task_definition_template-natscluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:5222"
+  automation-nats-server-task_definition_template-natscluster = "nats://localhost:5222"
   automation-nats-server-task_definition_template-ecs_service-port = "4222"
   automation-nats-server-task_definition_template-ecs_service-cluster_mode = "s"
 
