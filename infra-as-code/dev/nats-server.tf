@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "automation-nats-server" {
 
 resource "aws_security_group" "automation-nats_service" {
   vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
-  name = local.automation-nats_service-security_group-name
+  name = local.automation-nats-server-nats_service-security_group-name
   description = "Allow egress from container"
 
   egress {
@@ -62,6 +62,15 @@ resource "aws_security_group" "automation-nats_service" {
   ingress {
     from_port = 4222
     to_port = 4222
+    protocol = "TCP"
+    cidr_blocks = [
+      var.cidr_base[var.CURRENT_ENVIRONMENT]
+    ]
+  }
+
+  ingress {
+    from_port = 5222
+    to_port = 5222
     protocol = "TCP"
     cidr_blocks = [
       var.cidr_base[var.CURRENT_ENVIRONMENT]

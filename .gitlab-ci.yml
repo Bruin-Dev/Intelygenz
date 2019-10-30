@@ -409,7 +409,7 @@ deploy-branches:
     - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - /bin/bash ci-utils/task_healthcheck.sh -t nats
+    - /bin/bash ci-utils/task_healthcheck.sh -t nats-server
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
     - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
@@ -502,7 +502,7 @@ deploy-master:
     - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - /bin/bash ci-utils/task_healthcheck.sh -t nats
+    - /bin/bash ci-utils/task_healthcheck.sh -t nats-server
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
     - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf

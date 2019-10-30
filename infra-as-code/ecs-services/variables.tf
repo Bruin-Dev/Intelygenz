@@ -91,3 +91,7 @@ variable "alarms_protocol" {
   description = "SNS Protocol to use. email or email-json"
   type        = "string"
 }
+
+variable "NATS_MODULE_VERSION" {
+  default = "latest"
+}

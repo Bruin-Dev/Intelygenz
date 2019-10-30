@@ -5,6 +5,8 @@ source $(dirname "$0")/common_functions.sh
 task_major_number () {
     if [[ ${TASK} == *prometheus* ]] || [[ ${TASK} == *grafana* ]] || [[ ${TASK} == *notifier* ]]; then
         tasks_running=$(ecs-cli ps --cluster ${TF_VAR_ENVIRONMENT} --desired-status RUNNING | grep ${TASK} | awk '{ print $4 }')
+    elif [[ ${TASK} == *nats-server* ]]; then
+         tasks_running=$(ecs-cli ps --cluster ${TF_VAR_ENVIRONMENT} --desired-status RUNNING | grep nats-server | grep -v nats-server- | awk '{ print $4 }')
     else
         tasks_running=$(ecs-cli ps --cluster ${TF_VAR_ENVIRONMENT} --desired-status RUNNING | grep ${TASK} | awk '{ print $5 }')
     fi
