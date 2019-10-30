@@ -74,7 +74,7 @@ resource "aws_security_group" "automation-nats_service-1" {
     to_port = 5223
     protocol = "TCP"
     cidr_blocks = [
-      var.cidr_base[var.CURRENT_ENVIRONMENT]
+      "0.0.0.0/0"
     ]
   }
 

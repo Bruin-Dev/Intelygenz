@@ -10,6 +10,10 @@
       {
         "containerPort": 8222,
         "hostPort": 8222
+      },
+      {
+        "containerPort": 5223,
+        "hostPort": 5223
       }
     ],
     "networkMode": "awsvpc",
