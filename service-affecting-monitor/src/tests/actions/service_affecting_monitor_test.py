@@ -135,7 +135,11 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
 
         link_1_best_latency_ms_rx = 14
         link_1_best_latency_ms_tx = 115
@@ -482,7 +486,11 @@ class TestServiceAffectingMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = Mock()
-        service_id = 123
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
 
         trouble_text = 'Latency'
         tx_private_wired_threshold = 50
@@ -1253,8 +1261,8 @@ class TestServiceAffectingMonitor:
         config = Mock()
         config.MONITOR_CONFIG = {'environment': 'production'}
 
-        service_id = 123
-
+        client_id = '85940'
+        trouble = 'LATENCY'
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
             "edge_id": {
