@@ -21,7 +21,8 @@ function create_nats_cluster_seed() {
 function create_nats_cluster_not_seed() {
     if [[ ! -z "${PORT}" && ! -z "${NATSCLUSTER}" && ! -z "${NATSROUTECLUSTER}" ]]; then
         s_info "Starting NATS in cluster mode using port ${PORT}, cluster URL ${NATSCLUSTER} and route url ${NATSROUTECLUSTER}"
-        nc -zv nats-server-automation-6f491498.automation-6f491498.local 5222
+        nc -v nats-server-automation-6f491498.automation-6f491498.local 5222
+        ping nats://nats-server-automation-6f491498.automation-6f491498.local:5222
         nats-server -p "$PORT" -cluster "$NATSCLUSTER" -routes "${NATSROUTECLUSTER}" -m 8222
     else
       s_err "It's necessary provide PORT, NATSCLUSTER and NATSROUTECLUSTER environment variables"
