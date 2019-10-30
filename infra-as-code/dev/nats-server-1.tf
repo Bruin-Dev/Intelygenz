@@ -24,6 +24,7 @@ resource "aws_ecs_task_definition" "automation-nats-server-1" {
   memory = "1024"
   execution_role_arn = data.aws_iam_role.ecs_execution_role.arn
   task_role_arn = data.aws_iam_role.ecs_execution_role.arn
+  depends_on = [aws_service_discovery_service.nats-server]
 }
 
 resource "aws_service_discovery_service" "nats-server-1" {
