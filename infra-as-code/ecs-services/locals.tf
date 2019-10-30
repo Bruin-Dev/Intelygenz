@@ -144,7 +144,7 @@ locals {
   cloudformation_sns_stack_alarms_errors_exceptions_messages-description-operator_email="Email address to notify if there are any active alarms in MetTel automation infrastructure"
 
   // automation-nats-server-1 local vars
-  automation-nats-server-1-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_MODULE_VERSION}"
+  automation-nats-server-1-image = "${data.aws_ecr_repository.automation-nats-server-1.repository_url}:${var.NATS_MODULE_VERSION}"
   automation-nats-server-1-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-1"
   automation-nats-server-1-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-1"
   automation-nats-server-1-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-1"

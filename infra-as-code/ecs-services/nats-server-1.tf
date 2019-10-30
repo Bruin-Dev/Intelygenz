@@ -1,3 +1,7 @@
+data "aws_ecr_repository" "automation-nats-server-1" {
+  name = "automation-nats-server"
+}
+
 data "template_file" "automation-nats-server-1" {
   template = file("${path.module}/task-definitions/nats_server.json")
 
