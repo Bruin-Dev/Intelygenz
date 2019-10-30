@@ -13,8 +13,8 @@ function create_nats_cluster_seed() {
         s_info "Starting NATS in cluster mode seed server using port $PORT and cluster URL ${NATSCLUSTER}"
         nats-server -p "$PORT" -cluster "$NATSCLUSTER" -m 8222
     else
-      s_err "It's necessary provide PORT and NATSCLUSTER environment variables"
-      exit 1
+        s_err "It's necessary provide PORT and NATSCLUSTER environment variables"
+        exit 1
     fi
 }
 
@@ -25,14 +25,14 @@ function create_nats_cluster_not_seed() {
         curl -v nats-server-automation-6f491498.automation-6f491498.local:5222
         nats-server -p "$PORT" -cluster "$NATSCLUSTER" -routes "${NATSROUTECLUSTER}" -m 8222
     else
-      s_err "It's necessary provide PORT, NATSCLUSTER and NATSROUTECLUSTER environment variables"
+        s_err "It's necessary provide PORT, NATSCLUSTER and NATSROUTECLUSTER environment variables"
     fi
 }
 
 check_conditions_nats_cluster() {
     if [[ -z "${CLUSTER_MODE}" ]]; then
-      s_err "It's necessary provide CLUSTER_MODE as environment variable"
-      exit 1
+        s_err "It's necessary provide CLUSTER_MODE as environment variable"
+        exit 1
     elif [[ "$CLUSTER_MODE" == "s" ]]; then
         create_nats_cluster_seed
     elif [[ "$CLUSTER_MODE" == "n" ]]; then
