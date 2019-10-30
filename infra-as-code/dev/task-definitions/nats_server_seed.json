@@ -10,6 +10,10 @@
       {
         "containerPort": 8222,
         "hostPort": 8222
+      },
+      {
+        "containerPort": "${NATSCLUSTERPORT}",
+        "hostPort": "${NATSCLUSTERPORT}"
       }
     ],
     "networkMode": "awsvpc",

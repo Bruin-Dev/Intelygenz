@@ -12,6 +12,7 @@ data "template_file" "automation-nats-server-1" {
 
     CONTAINER_NAME = local.automation-nats-server-1-task_definition_template-container_name
     NATSCLUSTER =  local.automation-nats-server-1-task_definition_template-natscluster
+    NATSCLUSTERPORT =  local.automation-nats-server-1-task_definition_template-natscluster_port
     NATSROUTECLUSTER = local.automation-nats-server-1-task_definition_template-natsroutecluster
     PORT = local.automation-nats-server-1-task_definition_template-ecs_service-port
     CLUSTER_MODE = local.automation-nats-server-1-task_definition_template-ecs_service-cluster_mode
@@ -104,7 +105,7 @@ resource "aws_service_discovery_service" "nats-server-1" {
 }
 
 resource "aws_ecs_service" "automation-nats-server-1" {
-  name = "${var.ENVIRONMENT}-natsnotseed"
+  name = "${var.ENVIRONMENT}-nats-server-1"
   task_definition = local.automation-nats-server-1-ecs_service-task_definition
   desired_count = 1
   launch_type = "FARGATE"
