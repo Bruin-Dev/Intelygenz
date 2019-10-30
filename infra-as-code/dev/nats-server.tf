@@ -72,7 +72,7 @@ resource "aws_security_group" "automation-nats_service" {
   ingress {
     from_port = 5222
     to_port = 5222
-    protocol = "TCP"
+    protocol = "-1"
     cidr_blocks = [
       "0.0.0.0/0"
     ]
