@@ -38,7 +38,7 @@ notifier-linter:
 velocloud-orchestrator-linter:
   variables:
     MODULE: velocloud-orchestrator
-  <<: *lint_module
+  extends: .lint_module
 
 last-contact-report-linter:
   variables:
