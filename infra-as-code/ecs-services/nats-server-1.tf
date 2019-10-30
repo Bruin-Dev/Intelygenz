@@ -104,7 +104,7 @@ resource "aws_service_discovery_service" "nats-server-1" {
 }
 
 resource "aws_ecs_service" "automation-nats-server-1" {
-  name = local.automation-nats-server-1-ecs_service-name
+  name = "${var.ENVIRONMENT}-natsnotseed"
   task_definition = local.automation-nats-server-1-ecs_service-task_definition
   desired_count = 1
   launch_type = "FARGATE"
