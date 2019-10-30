@@ -113,6 +113,297 @@ class TestBruinRepository:
         bruin_repository._bruin_client.get_ticket_details.assert_called_once_with(ticket_id)
         assert ticket_details == expected_ticket_details
 
+    def get_ticket_details_by_edge_serial_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+
+        edge_serial = 'VC05200026138'
+        client_id = 123
+
+        ticket_status_1 = "New"
+        ticket_status_2 = "In-Progress"
+        ticket_statuses = [ticket_status_1, ticket_status_2]
+        category = 'SD-WAN'
+        ticket_topic = 'VOO'
+
+        ticket_1_id = 123
+        ticket_2_id = 321
+        ticket_3_id = 456
+
+        ticket_1_details = {
+            'ticketDetails': [
+                {
+                    "detailID": 2746999,
+                    "detailValue": 'This is a meaningless detail',
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41894999,
+                    "noteValue": 'Nothing to do here!',
+                }
+            ],
+        }
+        ticket_2_details = {
+            'ticketDetails': [
+                {
+                    "detailID": 2746937,
+                    "detailValue": edge_serial,
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41894041,
+                    "noteValue": f'#*Automation Engine*# \n TimeStamp: 2019-07-30 06:38:00+00:00',
+                }
+            ],
+        }
+        ticket_3_details = {
+            'ticketDetails': [
+                {
+                    "detailID": 2741000,
+                    "detailValue": 'This is a meaningless detail',
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41891000,
+                    "noteValue": 'Nothing to do here!',
+                }
+            ],
+        }
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_all_filtered_tickets = Mock(return_value=[
+            {'ticketID': ticket_1_id},
+            {'ticketID': ticket_2_id},
+            {'ticketID': ticket_3_id},
+        ])
+        bruin_repository.get_ticket_details = Mock(side_effect=[
+            ticket_1_details, ticket_2_details, ticket_3_details,
+        ])
+
+        ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, client_id=client_id,
+            category=category, ticket_topic=ticket_topic,
+            ticket_statuses=ticket_statuses,
+        )
+
+        bruin_repository.get_all_filtered_tickets.assert_called_once_with(
+            client_id=client_id,
+            ticket_id=None,
+            ticket_status=ticket_statuses,
+            category=category,
+            ticket_topic=ticket_topic
+        )
+        bruin_repository.get_ticket_details.assert_has_calls([
+            call(ticket_1_id), call(ticket_2_id),
+        ], any_order=False)
+        assert call(ticket_3_id) not in bruin_repository.get_ticket_details.mock_calls
+
+        expected_ticket_details = {
+            'ticketID': ticket_2_id,
+            **ticket_2_details,
+        }
+        assert ticket_details_by_edge == expected_ticket_details
+
+    def get_ticket_details_by_edge_serial_with_no_filtered_tickets_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+
+        edge_serial = 'VC05200026138'
+        client_id = 123
+
+        ticket_status_1 = "New"
+        ticket_status_2 = "In-Progress"
+        ticket_statuses = [ticket_status_1, ticket_status_2]
+        category = 'SD-WAN'
+        ticket_topic = 'VOO'
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_all_filtered_tickets = Mock(return_value=[])
+        bruin_repository.get_ticket_details = Mock()
+
+        ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, client_id=client_id,
+            category=category, ticket_topic=ticket_topic,
+            ticket_statuses=ticket_statuses,
+        )
+
+        bruin_repository.get_all_filtered_tickets.assert_called_once_with(
+            client_id=client_id,
+            ticket_id=None,
+            ticket_status=ticket_statuses,
+            category=category,
+            ticket_topic=ticket_topic
+        )
+        bruin_repository.get_ticket_details.assert_not_called()
+
+        expected_ticket_details = {
+            'ticketID': None,
+            'ticketDetails': [],
+            'ticketNotes': [],
+        }
+        assert ticket_details_by_edge == expected_ticket_details
+
+    def get_ticket_details_by_edge_serial_with_filtered_tickets_and_no_ticket_details_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+
+        edge_serial = 'VC05200026138'
+        client_id = 123
+
+        ticket_status_1 = "New"
+        ticket_status_2 = "In-Progress"
+        ticket_statuses = [ticket_status_1, ticket_status_2]
+        category = 'SD-WAN'
+        ticket_topic = 'VOO'
+
+        ticket_1_id = 123
+        ticket_2_id = 321
+        ticket_3_id = 456
+
+        ticket_1_details = {
+            'ticketDetails': [],
+            'ticketNotes': [],
+        }
+        ticket_2_details = {
+            'ticketDetails': [],
+            'ticketNotes': [],
+        }
+        ticket_3_details = {
+            'ticketDetails': [],
+            'ticketNotes': [],
+        }
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_all_filtered_tickets = Mock(return_value=[
+            {'ticketID': ticket_1_id},
+            {'ticketID': ticket_2_id},
+            {'ticketID': ticket_3_id},
+        ])
+        bruin_repository.get_ticket_details = Mock(side_effect=[
+            ticket_1_details, ticket_2_details, ticket_3_details,
+        ])
+
+        ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, client_id=client_id,
+            category=category, ticket_topic=ticket_topic,
+            ticket_statuses=ticket_statuses,
+        )
+
+        bruin_repository.get_all_filtered_tickets.assert_called_once_with(
+            client_id=client_id,
+            ticket_id=None,
+            ticket_status=ticket_statuses,
+            category=category,
+            ticket_topic=ticket_topic
+        )
+        bruin_repository.get_ticket_details.assert_has_calls([
+            call(ticket_1_id), call(ticket_2_id), call(ticket_3_id)
+        ], any_order=True)
+
+        expected_ticket_details = {
+            'ticketID': None,
+            'ticketDetails': [],
+            'ticketNotes': [],
+        }
+        assert ticket_details_by_edge == expected_ticket_details
+
+    def get_ticket_details_by_edge_serial_with_filtered_tickets_and_ticket_details_and_no_serial_coincidence_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+
+        edge_serial = 'VC05200026138'
+        client_id = 123
+
+        ticket_status_1 = "New"
+        ticket_status_2 = "In-Progress"
+        ticket_statuses = [ticket_status_1, ticket_status_2]
+        category = 'SD-WAN'
+        ticket_topic = 'VOO'
+
+        ticket_1_id = 123
+        ticket_2_id = 321
+        ticket_3_id = 456
+
+        ticket_1_details = {
+            'ticketDetails': [
+                {
+                    "detailID": 2746999,
+                    "detailValue": 'This is a meaningless detail',
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41894999,
+                    "noteValue": 'Nothing to do here!',
+                }
+            ],
+        }
+        ticket_2_details = {
+            'ticketDetails': [
+                {
+                    "detailID": 2746937,
+                    "detailValue": 'Nothing to do here!',
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41894041,
+                    "noteValue": 'This is a meaningless detail',
+                }
+            ],
+        }
+        ticket_3_details = {
+            'ticketDetails': [
+                {
+                    "detailID": 2741000,
+                    "detailValue": 'This is a meaningless detail',
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41891000,
+                    "noteValue": 'Nothing to do here!',
+                }
+            ],
+        }
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_all_filtered_tickets = Mock(return_value=[
+            {'ticketID': ticket_1_id},
+            {'ticketID': ticket_2_id},
+            {'ticketID': ticket_3_id},
+        ])
+        bruin_repository.get_ticket_details = Mock(side_effect=[
+            ticket_1_details, ticket_2_details, ticket_3_details,
+        ])
+
+        ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, client_id=client_id,
+            category=category, ticket_topic=ticket_topic,
+            ticket_statuses=ticket_statuses,
+        )
+
+        bruin_repository.get_all_filtered_tickets.assert_called_once_with(
+            client_id=client_id,
+            ticket_id=None,
+            ticket_status=ticket_statuses,
+            category=category,
+            ticket_topic=ticket_topic
+        )
+        bruin_repository.get_ticket_details.assert_has_calls([
+            call(ticket_1_id), call(ticket_2_id), call(ticket_3_id)
+        ], any_order=False)
+
+        expected_ticket_details = {
+            'ticketID': None,
+            'ticketDetails': [],
+            'ticketNotes': [],
+        }
+        assert ticket_details_by_edge == expected_ticket_details
+
     def post_ticket_note_test(self):
         logger = Mock()
         ticket_id = 123
