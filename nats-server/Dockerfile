@@ -1,6 +1,6 @@
 FROM nats:2.1.0-alpine3.10
 
-RUN apk --no-cache add curl bash
+RUN apk --no-cache add curl bash net-tools
 
 COPY /nats-server/nats.sh .
 CMD ["/bin/bash", "./nats.sh", "$CLUSTER_MODE"]
