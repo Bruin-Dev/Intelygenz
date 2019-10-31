@@ -1,8 +1,4 @@
-data "aws_ecr_repository" "automation-nats-server" {
-  name = "automation-nats-server"
-}
-
-data "template_file" "automation-nats-server-1" {
+data "template_file" "automation-nats-server-2" {
   template = file("${path.module}/task-definitions/nats_server.json")
 
   vars = {
@@ -10,18 +6,18 @@ data "template_file" "automation-nats-server-1" {
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
 
-    CONTAINER_NAME = local.automation-nats-server-1-task_definition_template-container_name
-    NATSCLUSTER =  local.automation-nats-server-1-task_definition_template-natscluster
-    NATSCLUSTERPORT = var.NATS_SERVER_1_CLIENTS_PORT
-    NATSROUTECLUSTER = local.automation-nats-server-1-task_definition_template-natsroutecluster
-    PORT = var.NATS_SERVER_1_CLIENTS_PORT
-    CLUSTER_MODE = var.NATS_SERVER_1_CLUSTER_MODE
+    CONTAINER_NAME = local.automation-nats-server-2-task_definition_template-container_name
+    NATSCLUSTER =  local.automation-nats-server-2-task_definition_template-natscluster
+    NATSCLUSTERPORT = var.NATS_SERVER_2_CLIENTS_PORT
+    NATSROUTECLUSTER = local.automation-nats-server-2-task_definition_template-natsroutecluster
+    PORT = var.NATS_SERVER_2_CLIENTS_PORT
+    CLUSTER_MODE = var.NATS_SERVER_2_CLUSTER_MODE
   }
 }
 
-resource "aws_ecs_task_definition" "automation-nats-server-1" {
-  family = local.automation-nats-server-1-ecs_task_definition-family
-  container_definitions = data.template_file.automation-nats-server-1.rendered
+resource "aws_ecs_task_definition" "automation-nats-server-2" {
+  family = local.automation-nats-server-2-ecs_task_definition-family
+  container_definitions = data.template_file.automation-nats-server-2.rendered
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
@@ -31,9 +27,9 @@ resource "aws_ecs_task_definition" "automation-nats-server-1" {
   task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
 }
 
-resource "aws_security_group" "automation-nats_service-1" {
+resource "aws_security_group" "automation-nats_service-2" {
   vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
-  name = local.automation-nats-server-1-nats_service-security_group-name
+  name = local.automation-nats-server-2-nats_service-security_group-name
   description = "Allow egress from container"
 
   egress {
@@ -71,8 +67,8 @@ resource "aws_security_group" "automation-nats_service-1" {
   }
 
   ingress {
-    from_port = var.NATS_SERVER_1_CLUSTER_PORT
-    to_port = var.NATS_SERVER_1_CLUSTER_PORT
+    from_port = var.NATS_SERVER_2_CLUSTER_PORT
+    to_port = var.NATS_SERVER_2_CLUSTER_PORT
     protocol = "TCP"
     cidr_blocks = [
       var.cidr_base[var.CURRENT_ENVIRONMENT]
@@ -80,13 +76,13 @@ resource "aws_security_group" "automation-nats_service-1" {
   }
 
   tags = {
-    Name = local.automation-nats-server-1-nats_service-security_group-tag-Name
+    Name = local.automation-nats-server-2-nats_service-security_group-tag-Name
     Environment = var.ENVIRONMENT
   }
 }
 
-resource "aws_service_discovery_service" "nats-server-1" {
-  name = "nats-server-1-${var.ENVIRONMENT}"
+resource "aws_service_discovery_service" "nats-server-2" {
+  name = "nats-server-2-${var.ENVIRONMENT}"
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
@@ -104,16 +100,16 @@ resource "aws_service_discovery_service" "nats-server-1" {
   }
 }
 
-resource "aws_ecs_service" "automation-nats-server-1" {
-  name = "${var.ENVIRONMENT}-nats-server-1"
-  task_definition = local.automation-nats-server-1-ecs_service-task_definition
+resource "aws_ecs_service" "automation-nats-server-2" {
+  name = "${var.ENVIRONMENT}-nats-server-2"
+  task_definition = local.automation-nats-server-2-ecs_service-task_definition
   desired_count = 1
   launch_type = "FARGATE"
   cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
 
   network_configuration {
     security_groups = [
-      aws_security_group.automation-nats_service-1.id]
+      aws_security_group.automation-nats_service-2.id]
     subnets = [
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
@@ -121,6 +117,6 @@ resource "aws_ecs_service" "automation-nats-server-1" {
   }
 
   service_registries {
-    registry_arn = aws_service_discovery_service.nats-server-1.arn
+    registry_arn = aws_service_discovery_service.nats-server-2.arn
   }
 }

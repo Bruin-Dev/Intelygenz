@@ -111,11 +111,29 @@ variable "NATS_SERVER_1_CLUSTER_PORT" {
 variable "NATS_SERVER_1_CLIENTS_PORT" {
   default = "4223"
   type = string
-  description = "Port for clients in NATS seed node"
+  description = "Port for clients in NATS seed node 1"
 }
 
 variable "NATS_SERVER_1_CLUSTER_MODE" {
   default = "n"
   type = string
   description = "NATS server 1 node cluster mode"
+}
+
+variable "NATS_SERVER_2_CLUSTER_PORT" {
+  default = 5224
+  type = number
+  description = "NATS server 2 cluster port"
+}
+
+variable "NATS_SERVER_2_CLIENTS_PORT" {
+  default = "4224"
+  type = string
+  description = "Port for clients in NATS seed node 2"
+}
+
+variable "NATS_SERVER_2_CLUSTER_MODE" {
+  default = "n"
+  type = string
+  description = "NATS server 2 node cluster mode"
 }
