@@ -12,6 +12,7 @@ data "template_file" "automation-nats-server-1" {
 
     CONTAINER_NAME = local.automation-nats-server-1-task_definition_template-container_name
     NATSCLUSTER =  local.automation-nats-server-1-task_definition_template-natscluster
+    NATSCLUSTERPORT = var.NATS_SERVER_1_CLIENTS_PORT
     NATSROUTECLUSTER = local.automation-nats-server-1-task_definition_template-natsroutecluster
     PORT = var.NATS_SERVER_1_CLIENTS_PORT
     CLUSTER_MODE = var.NATS_SERVER_1_CLUSTER_MODE
