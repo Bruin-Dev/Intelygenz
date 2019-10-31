@@ -12,9 +12,9 @@ data "template_file" "automation-nats-server" {
 
     CONTAINER_NAME = local.automation-nats-server-task_definition_template-container_name
     NATSCLUSTER =  local.automation-nats-server-task_definition_template-natscluster
-    NATSCLUSTERPORT = tonumber(local.automation-nats-server-task_definition_template-natscluster_port)
-    PORT = local.automation-nats-server-task_definition_template-ecs_service-port
-    CLUSTER_MODE = local.automation-nats-server-task_definition_template-ecs_service-cluster_mode
+    NATSCLUSTERPORT = var.NATS_SERVER_SEED_CLUSTER_PORT
+    PORT = var.NATS_SERVER_SEED_CLIENTS_PORT
+    CLUSTER_MODE = var.NATS_SERVER_SEED_CLUSTER_MODE
   }
 }
 
@@ -70,11 +70,11 @@ resource "aws_security_group" "automation-nats_service" {
   }
 
   ingress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port = var.NATS_SERVER_SEED_CLUSTER_PORT
+    to_port = var.NATS_SERVER_SEED_CLUSTER_PORT
+    protocol = "TCP"
     cidr_blocks = [
-      "0.0.0.0/0"
+      var.cidr_base[var.CURRENT_ENVIRONMENT]
     ]
   }
 

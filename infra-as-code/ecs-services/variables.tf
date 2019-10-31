@@ -95,3 +95,27 @@ variable "alarms_protocol" {
 variable "NATS_MODULE_VERSION" {
   default = "latest"
 }
+
+variable "NATS_SERVER_SEED_CLUSTER_PORT" {
+  default = 5222
+  type = number
+  description = "NATS edge server cluster port"
+}
+
+variable "NATS_SERVER_1_CLUSTER_PORT" {
+  default = 5223
+  type = number
+  description = "NATS server 1 cluster port"
+}
+
+variable "NATS_SERVER_1_CLIENTS_PORT" {
+  default = "4223"
+  type = string
+  description = "Port for clients in NATS seed node"
+}
+
+variable "NATS_SERVER_1_CLUSTER_MODE" {
+  default = "n"
+  type = string
+  description = "NATS server 1 node cluster mode"
+}

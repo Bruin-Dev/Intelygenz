@@ -13,8 +13,8 @@ data "template_file" "automation-nats-server-1" {
     CONTAINER_NAME = local.automation-nats-server-1-task_definition_template-container_name
     NATSCLUSTER =  local.automation-nats-server-1-task_definition_template-natscluster
     NATSROUTECLUSTER = local.automation-nats-server-1-task_definition_template-natsroutecluster
-    PORT = local.automation-nats-server-1-task_definition_template-ecs_service-port
-    CLUSTER_MODE = local.automation-nats-server-1-task_definition_template-ecs_service-cluster_mode
+    PORT = var.NATS_SERVER_1_CLIENTS_PORT
+    CLUSTER_MODE = var.NATS_SERVER_1_CLUSTER_MODE
   }
 }
 
@@ -70,11 +70,11 @@ resource "aws_security_group" "automation-nats_service-1" {
   }
 
   ingress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port = var.NATS_SERVER_1_CLUSTER_PORT
+    to_port = var.NATS_SERVER_1_CLUSTER_PORT
+    protocol = "TCP"
     cidr_blocks = [
-      "0.0.0.0/0"
+      var.cidr_base[var.CURRENT_ENVIRONMENT]
     ]
   }
 

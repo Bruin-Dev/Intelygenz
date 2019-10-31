@@ -18,10 +18,7 @@ locals {
   automation-nats-server-ecs_service-name = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server.family}:${aws_ecs_task_definition.automation-nats-server.revision}"
   automation-nats-server-task_definition_template-container_name = "nats-server"
-  automation-nats-server-task_definition_template-natscluster = "nats://0.0.0.0:5222"
-  automation-nats-server-task_definition_template-natscluster_port = "5222"
-  automation-nats-server-task_definition_template-ecs_service-port = "4222"
-  automation-nats-server-task_definition_template-ecs_service-cluster_mode = "s"
+  automation-nats-server-task_definition_template-natscluster = "nats://0.0.0.0:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
 
   // automation-redis local vars
   automation-redis-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-redis"

@@ -12,9 +12,9 @@
         "hostPort": 8222
       },
       {
-        "containerPort": 5223,
-        "hostPort": 5223
-      }
+        "containerPort": ${NATSCLUSTERPORT},
+        "hostPort": ${NATSCLUSTERPORT}
+    }
     ],
     "networkMode": "awsvpc",
     "logConfiguration": {
