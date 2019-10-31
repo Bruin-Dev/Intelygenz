@@ -11,7 +11,7 @@ function s_err() {
 function create_nats_cluster_seed() {
     if [[ ! -z "${PORT}" && ! -z "${NATSCLUSTER}" ]]; then
         s_info "Starting NATS in cluster mode seed server using port $PORT and cluster URL ${NATSCLUSTER}"
-        nats-server -p "$PORT" -cluster "$NATSCLUSTER" -m 8222
+        nats-server -p "$PORT" -cluster "$NATSCLUSTER" -m 8222 -D
     else
         s_err "It's necessary provide PORT and NATSCLUSTER environment variables"
         exit 1
@@ -21,7 +21,7 @@ function create_nats_cluster_seed() {
 function create_nats_cluster_not_seed() {
     if [[ ! -z "${PORT}" && ! -z "${NATSCLUSTER}" && ! -z "${NATSROUTECLUSTER}" ]]; then
         s_info "Starting NATS in cluster mode using port ${PORT}, cluster URL ${NATSCLUSTER} and route url ${NATSROUTECLUSTER}"
-        nats-server -p "$PORT" -cluster "$NATSCLUSTER" -routes "${NATSROUTECLUSTER}" -m 8222
+        nats-server -p "$PORT" -cluster "$NATSCLUSTER" -routes "${NATSROUTECLUSTER}" -m 8222 -D
     else
         s_err "It's necessary provide PORT, NATSCLUSTER and NATSROUTECLUSTER environment variables"
     fi
