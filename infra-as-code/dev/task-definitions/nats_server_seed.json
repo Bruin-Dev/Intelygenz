@@ -42,7 +42,7 @@
       },
       {
         "name": "PORT",
-        "value": "${NATS_SERVER_SEED_CLIENTS_PORT}"
+        "value": "${PORT}"
       },
       {
         "name": "CLUSTER_MODE",
