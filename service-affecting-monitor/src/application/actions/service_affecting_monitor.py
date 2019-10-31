@@ -191,16 +191,13 @@ class ServiceAffectingMonitor:
         edge_overview['Scan Time'] = datetime.now(timezone('US/Eastern'))
         edge_overview["Input"] = input
         edge_overview["Output"] = output
-        edge_overview["Edge URL"] = \
-            f'[Edge|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+        edge_overview["Links"] = \
+            f'[Edge|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/ - ' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/]'
-        edge_overview["QoE URL"] = \
-            f'[QoE|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/]' \
+            f'[QoE|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/ - ' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/]'
-
-        edge_overview["Transport URL"] = \
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/]' \
             f'[Transport|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/] \n'
