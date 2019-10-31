@@ -192,18 +192,18 @@ class ServiceAffectingMonitor:
         edge_overview["Input"] = input
         edge_overview["Output"] = output
         edge_overview["Edge URL"] = \
-            f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'[Edge|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/'
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/]'
         edge_overview["QoE URL"] = \
-            f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'[QoE|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/'
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/]'
 
         edge_overview["Transport URL"] = \
-            f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'[Transport|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/ \n'
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/] \n'
 
         return edge_overview
 

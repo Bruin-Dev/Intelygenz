@@ -229,19 +229,19 @@ class ServiceOutageTriage:
         edge_triage_dict["Orchestrator instance"] = edges_status_to_report['edge_id']['host']
         edge_triage_dict["Edge Name"] = edges_status_to_report["edge_info"]["edges"]["name"]
         edge_triage_dict["Edge URL"] = \
-            f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'[Edge|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/'
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/]'
 
         edge_triage_dict["QoE URL"] = \
-            f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'[QoE|[https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/'
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/]'
 
         edge_triage_dict["Transport URL"] = \
-            f'https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'[Transport|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/ \n'
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/] \n'
 
         edge_triage_dict["Edge Status"] = edges_status_to_report["edge_info"]["edges"]["edgeState"]
 
@@ -271,10 +271,10 @@ class ServiceOutageTriage:
             edge_triage_dict["Interface GE2 Status"] = f'{link_data["GE2"][0]["link"]["state"]}\n'
             edge_triage_dict["Label LABELMARK4"] = link_data["GE2"][0]["link"]['displayName']
 
-        edge_triage_dict["Company Events URL"] = f'https://{edges_status_to_report["edge_id"]["host"]}/#!/' \
+        edge_triage_dict["Company Events URL"] = f'[Events|https://{edges_status_to_report["edge_id"]["host"]}/#!/' \
                                                  f'operator/customer/' \
                                                  f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-                                                 f'/monitor/events/'
+                                                 f'/monitor/events/]'
         edge_triage_dict["Last Edge Online"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
                                                                                     ["data"], 'EDGE_UP')
         edge_triage_dict["Last Edge Offline"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
