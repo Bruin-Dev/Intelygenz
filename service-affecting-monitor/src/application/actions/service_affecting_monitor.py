@@ -187,20 +187,20 @@ class ServiceAffectingMonitor:
         edge_overview["Interface"] = link['link']['interface']
         edge_overview["Name"] = link['link']['displayName']
         edge_overview["Threshold"] = threshold
-        edge_overview['Interval for Scan'] = '15 Minutes'
+        edge_overview['Interval for Scan'] = '10 Minutes'
         edge_overview['Scan Time'] = datetime.now(timezone('US/Eastern'))
         edge_overview["Input"] = input
         edge_overview["Output"] = output
         edge_overview["Links"] = \
-            f'[Edge|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/ - ' \
+            f'[Edge|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/]' \
-            f'[QoE|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/ - ' \
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/] - ' \
+            f'[QoE|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/]' \
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/] - ' \
             f'[Transport|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/] \n'
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/] - \n'
 
         return edge_overview
 
