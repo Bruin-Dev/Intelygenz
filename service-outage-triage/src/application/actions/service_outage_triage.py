@@ -232,7 +232,7 @@ class ServiceOutageTriage:
             f'[Edge|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/] - ' \
-            f'[QoE|[https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
+            f'[QoE|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
             f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/] - ' \
             f'[Transport|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
