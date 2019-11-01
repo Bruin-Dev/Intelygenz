@@ -43,7 +43,6 @@ class Container:
     async def _start(self):
         self._edge_monitoring.start_prometheus_metrics_server()
         await self._event_bus.connect()
-        await self._edge_monitoring.test_t7()
         await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
         self._scheduler.start()
 

@@ -20,15 +20,6 @@ class EdgeMonitoring:
         self._statistic_repository = statistic_repository
         self._config = config
 
-    async def test_t7(self):
-        ticket_detail_msg = {'request_id': uuid(),
-                             'ticket_id': 4356880}
-
-        house = await self._event_bus.rpc_request("t7.prediction.request",
-                                                  json.dumps(ticket_detail_msg),
-                                                  timeout=15)
-        print(house)
-
     async def _edge_monitoring_process(self):
         self._logger.info("Starting velocloud edge monitoring process")
         if "PROCESSING_VELOCLOUD_EDGES" in self._status_repository.get_status():

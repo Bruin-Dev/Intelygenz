@@ -49,13 +49,6 @@ class ServiceAffectingMonitor:
                                 id='_monitor_each_edge')
 
     async def _monitor_each_edge(self):
-        ticket_detail_msg = {'request_id': uuid(),
-                             'ticket_id': 4356880}
-
-        house = await self._event_bus.rpc_request("t7.prediction.request",
-                                                  json.dumps(ticket_detail_msg),
-                                                  timeout=15)
-        print(house)
 
         monitored_edges = [await self._service_affecting_monitor_process(device) for device in
                            self._config.MONITOR_CONFIG['device_by_id']]
