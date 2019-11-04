@@ -7,9 +7,8 @@ import base64
 
 
 class TemplateRenderer:
-    def __init__(self, service_id, config):
+    def __init__(self, config):
         self._config = config
-        self._service_id = service_id
 
     def _find_recent_occurence_of_event(self, event_list, event_type, message=None):
         for event_obj in (i for i in event_list if isinstance(i, dict)):
@@ -119,7 +118,6 @@ class TemplateRenderer:
         email_html = templ.render(**template_vars)
         return {
             'request_id': uuid(),
-            'response_topic': f"notification.email.response.{self._service_id}",
             'email_data': {
                 'subject': f'Service outage monitor ({datetime.now().strftime("%Y-%m-%d")})',
                 'recipient': self._config.MONITOR_CONFIG["recipient"],

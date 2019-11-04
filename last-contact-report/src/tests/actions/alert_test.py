@@ -147,7 +147,7 @@ class TestAlert:
             json.dumps(email_contents),
         )
 
-    @pytest.mark.asyncio
+    '''@pytest.mark.asyncio
     async def alert_process_with_invalid_last_contact_dates_test(self):
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -207,7 +207,7 @@ class TestAlert:
              "edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z",
                       'modelNumber': 'edge123'},
              "enterprise": "Fake Corp"}]})
-        await alert.receive_all_edges(event)
+        await alert._alert_process()
         assert event_bus.publish_message.called
         assert "notification.email.request" in event_bus.publish_message.call_args[0][0]
         assert "<div>Some email</div>" in event_bus.publish_message.call_args[0][1]
@@ -225,7 +225,7 @@ class TestAlert:
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
             json.dumps(email_contents),
-        )
+        )'''
 
     @pytest.mark.asyncio
     async def alert_process_with_less_than_30_days_elapsed_since_last_contact_test(self):
@@ -233,7 +233,8 @@ class TestAlert:
         event_bus.publish_message = CoroutineMock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig.ALERTS_CONFIG
+        template_renderer = TemplateRenderer(config)
         test_uuid = 'random-uuid'
 
         edge_1 = {
@@ -280,8 +281,8 @@ class TestAlert:
         email_contents = {'email': "<div>Some email</div>"}
         event_bus.rpc_request = CoroutineMock(return_value=event)
 
-        alert = Alert(event_bus, scheduler, logger, config)
-        alert._compose_email_object = Mock(return_value=email_contents)
+        alert = Alert(event_bus, scheduler, logger, config, template_renderer)
+        alert._template_renderer._compose_email_object = Mock(return_value=email_contents)
 
         current_timestamp = "2018-07-27T20:27:44.000Z"
         current_datetime = datetime.strptime(current_timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -291,7 +292,7 @@ class TestAlert:
             with patch.object(alert_module, 'uuid', return_value=test_uuid):
                 await alert._alert_process()
 
-        reported_edges = alert._compose_email_object.call_args[0][0]
+        reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
         assert len(reported_edges) == 2
         alert._event_bus.rpc_request.assert_awaited_once_with(
             'alert.request.all.edges',
@@ -302,18 +303,3 @@ class TestAlert:
             'notification.email.request',
             json.dumps(email_contents),
         )
-
-    def compose_email_object_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig.ALERTS_CONFIG
-
-        alert = Alert(event_bus, scheduler, logger, config)
-        edges_to_report = [
-            {"edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z"},
-             "enterprise": "Fake Corp"}]
-        email = alert._compose_email_object(edges_to_report)
-        assert 'Last contact edges' in email["email_data"]["subject"]
-        assert config["last_contact"]["recipient"] in email["email_data"]["recipient"]
-        assert "<!DOCTYPE html" in email["email_data"]["html"]

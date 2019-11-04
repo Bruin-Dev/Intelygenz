@@ -26,7 +26,8 @@ class Container:
         self._event_bus.set_producer(self._publisher)
         self._template_renderer = TemplateRenderer(config)
 
-        self._alert = Alert(self._event_bus, self._scheduler, self._logger, config.ALERTS_CONFIG, self._template_renderer)
+        self._alert = Alert(self._event_bus, self._scheduler, self._logger,
+                            config.ALERTS_CONFIG, self._template_renderer)
 
     async def _start(self):
         await self._event_bus.connect()

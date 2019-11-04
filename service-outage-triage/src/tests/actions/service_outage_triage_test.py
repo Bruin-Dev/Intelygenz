@@ -85,6 +85,7 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         tickets_list = []
         tickets = {'tickets': tickets_list}
@@ -118,6 +119,7 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         tickets = None
 
@@ -165,6 +167,7 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         tickets = {'some-key-1': [], 'some-key-2': []}
 
@@ -212,6 +215,7 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         tickets_list = None
         tickets = {'tickets': tickets_list}
@@ -260,6 +264,7 @@ class TestServiceOutageTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         environment = 'dev'
         ticket_id = 3521039
@@ -297,7 +302,8 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
         service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
         service_outage_triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
-        service_outage_triage._ticket_object_to_email_obj = Mock(return_value=ticket_note_as_email_object)
+        service_outage_triage._template_renderer._ticket_object_to_email_obj =\
+            Mock(return_value=ticket_note_as_email_object)
 
         uuid_1 = uuid()
         uuid_2 = uuid()
@@ -366,7 +372,7 @@ class TestServiceOutageTriage:
         ], any_order=False)
         service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
         service_outage_triage._compose_ticket_note_object.assert_called_once_with(edge_status, edge_event)
-        service_outage_triage._ticket_object_to_email_obj.assert_called_once_with(ticket_note_object)
+        service_outage_triage._template_renderer._ticket_object_to_email_obj.assert_called_once_with(ticket_note_object)
 
     @pytest.mark.asyncio
     async def poll_tickets_with_filtered_tickets_and_production_environment_test(self):
@@ -523,7 +529,7 @@ class TestServiceOutageTriage:
         service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
         service_outage_triage._compose_ticket_note_object = Mock()
         service_outage_triage._ticket_object_to_string = Mock()
-        service_outage_triage._ticket_object_to_email_obj = Mock()
+        service_outage_triage._template_renderer._ticket_object_to_email_obj = Mock()
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = environment
@@ -533,13 +539,14 @@ class TestServiceOutageTriage:
         service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
         service_outage_triage._compose_ticket_note_object.assert_called_once_with(edge_status, edge_event)
         service_outage_triage._ticket_object_to_string.assert_not_called()
-        service_outage_triage._ticket_object_to_email_obj.assert_not_called()
+        service_outage_triage._template_renderer._ticket_object_to_email_obj.assert_not_called()
 
     @pytest.mark.asyncio
     async def filtered_ticket_details_test(self):
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         tickets_list = []
         tickets = {'tickets': tickets_list}
@@ -1953,40 +1960,6 @@ class TestServiceOutageTriage:
         assert ticket_object['Label LABELMARK2'] is None
         assert ticket_object['Label LABELMARK4'] is None
         assert service_outage_triage._find_recent_occurence_of_event.called
-
-    def ticket_object_to_email_obj_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        ticket_dict = OrderedDict()
-        ticket_dict['EdgeName'] = 'Test'
-        ticket_dict['Edge Status'] = 'ok'
-        ticket_dict["Company Events URL"] = 'test.com',
-        ticket_dict['Events URL'] = 'event.com'
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
-        email = service_outage_triage._ticket_object_to_email_obj(ticket_dict)
-
-        assert 'Service outage triage' in email["email_data"]["subject"]
-        assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
-        assert "<!DOCTYPE html" in email["email_data"]["html"]
-
-    def ticket_object_to_email_obj_no_events_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        ticket_dict = OrderedDict()
-        ticket_dict['EdgeName'] = 'Test'
-        ticket_dict['Edge Status'] = 'ok'
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
-        email = service_outage_triage._ticket_object_to_email_obj(ticket_dict)
-
-        assert 'Service outage triage' in email["email_data"]["subject"]
-        assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
-        assert "<!DOCTYPE html" in email["email_data"]["html"]
 
     def ticket_object_to_string_test(self):
         event_bus = Mock()

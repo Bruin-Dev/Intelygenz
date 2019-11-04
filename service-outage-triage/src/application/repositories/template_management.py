@@ -7,9 +7,8 @@ import base64
 
 
 class TemplateRenderer:
-    def __init__(self, _service_id, _config):
-        self._config = _config
-        self._service_id = _service_id
+    def __init__(self, config):
+        self._config = config
 
     def _ticket_object_to_email_obj(self, ticket_dict, **kwargs):
         template_vars = {}
@@ -53,7 +52,6 @@ class TemplateRenderer:
         email_html = templ.render(**template_vars)
         return {
                 'request_id': uuid(),
-                'response_topic': f"notification.email.response.{self._service_id}",
                 'email_data': {
                     'subject': f'Service outage triage ({datetime.now().strftime("%Y-%m-%d")})',
                     'recipient': self._config.TRIAGE_CONFIG["recipient"],

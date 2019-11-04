@@ -7,8 +7,7 @@ import pandas as pd
 
 class TemplateRenderer:
 
-    def __init__(self, service_id, config):
-        self._service_id = service_id
+    def __init__(self, config):
         self._config = config
 
     def _compose_email_object(self, edges_to_report, **kwargs):
@@ -42,7 +41,6 @@ class TemplateRenderer:
 
         return {
             'request_id': uuid(),
-            'response_topic': f"notification.email.response.{self._service_id}",
             'email_data': {
                 'subject': f'Last contact edges ({datetime.now().strftime("%Y-%m-%d")})',
                 'recipient': self._config["last_contact"]["recipient"],
