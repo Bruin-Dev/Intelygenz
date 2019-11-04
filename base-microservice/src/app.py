@@ -53,9 +53,6 @@ class Container:
 
     def __init__(self):
         self._my_scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
-        self._service_id1 = uuid()
-        self._service_id2 = uuid()
-        self._service_id3 = uuid()
         self.redis_connection = redis.Redis(host="redis", port=6379, decode_responses=True)
 
         self.client1 = NATSClient(config, logger=logger)
@@ -87,9 +84,9 @@ class Container:
         msg = {
             "data": "Some message"
         }
-        await self.event_bus.publish_message(f'topic1.{self._service_id1}', json.dumps(msg))
-        await self.event_bus.publish_message(f'topic1.{self._service_id2}', json.dumps(msg))
-        await self.event_bus.publish_message(f'topic1.{self._service_id3}', json.dumps(msg))
+        await self.event_bus.publish_message(f'topic1', json.dumps(msg))
+        await self.event_bus.publish_message(f'topic2', json.dumps(msg))
+        await self.event_bus.publish_message(f'topic3', json.dumps(msg))
 
     async def start_publish_job(self, exec_on_start=False):
         logger.info(f'Starting publish job')
@@ -118,14 +115,14 @@ class Container:
         # Generate some requests.
         logger.info('starting metrics loop')
 
-        await self.event_bus.subscribe_consumer(consumer_name="consumer4", topic=f'topic1.{self._service_id1}',
+        await self.event_bus.subscribe_consumer(consumer_name="consumer4", topic=f'topic1',
                                                 action_wrapper=self.from_first_action)
 
-        await self.event_bus.subscribe_consumer(consumer_name="consumer3", topic=f'topic1.{self._service_id2}',
+        await self.event_bus.subscribe_consumer(consumer_name="consumer3", topic=f'topic2',
                                                 action_wrapper=self.durable_action,
                                                 queue="queue")
 
-        await self.event_bus.subscribe_consumer(consumer_name="consumer2", topic=f'topic1.{self._service_id3}',
+        await self.event_bus.subscribe_consumer(consumer_name="consumer2", topic=f'topic3',
                                                 action_wrapper=self.durable_action,
                                                 queue="queue")
 
