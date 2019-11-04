@@ -27,7 +27,7 @@ class TestPostNote:
         append_note_response = 'Note appended'
         request_id = 123
         ticket_id = 321
-        response_topic = 'bruin.ticket.note.append.response'
+        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
         note_contents = 'Some Note'
         msg = {
             'request_id': request_id,
@@ -62,7 +62,7 @@ class TestPostNote:
         append_note_response = 'Note appended'
         request_id = 123
         ticket_id = 321
-        response_topic = 'bruin.ticket.note.append.response'
+        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
         note_contents = 'X' * 1500
         msg = {
             'request_id': request_id,
@@ -95,7 +95,7 @@ class TestPostNote:
         append_note_response = None
         request_id = 123
         ticket_id = 321
-        response_topic = 'bruin.ticket.note.append.response'
+        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
         note_contents = 'Some Note'
         msg = {
             'request_id': request_id,

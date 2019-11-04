@@ -29,7 +29,7 @@ class TestSlackNotifier:
 
         msg_delivery_status = 200
         request_id = "123"
-        response_topic = "some.topic"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         msg_body = "Failed Edges to be slacked"
         msg_dict = {
             "request_id": request_id,

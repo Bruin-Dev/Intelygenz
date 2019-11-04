@@ -27,7 +27,7 @@ class TestGetTicket:
         logger = Mock()
         filtered_tickets_list = [{'ticketID': 123}, {'ticketID': 321}]
         request_id = "123"
-        response_topic = "bruin.ticket.response"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         client_id = 123
         ticket_id = 321
         ticket_status_list = ['New', 'In-Progress']
@@ -69,7 +69,7 @@ class TestGetTicket:
         logger = Mock()
         filtered_tickets_list = [{'ticketID': 123}, {'ticketID': 321}]
         request_id = "123"
-        response_topic = "bruin.ticket.response"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         client_id = 123
         ticket_id = ''
         ticket_status_list = ['New', 'In-Progress']
@@ -111,7 +111,7 @@ class TestGetTicket:
         logger = Mock()
         filtered_tickets_list = None
         request_id = "123"
-        response_topic = "bruin.ticket.response"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         client_id = 123
         ticket_id = 321
         ticket_status_list = ['New', 'In-Progress']

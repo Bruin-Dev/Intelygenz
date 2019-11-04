@@ -26,7 +26,7 @@ class TestPostTicket:
         post_ticket_response = {"ticketIds": [123]}
         request_id = 123
         client_id = 321
-        response_topic = 'bruin.ticket.creation.response'
+        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
         category = 'Some Category'
         notes = []
         services = ['List of Services']
@@ -67,7 +67,7 @@ class TestPostTicket:
         post_ticket_response = None
         request_id = 123
         client_id = 321
-        response_topic = 'bruin.ticket.creation.response'
+        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
         category = 'Some Category'
         notes = ['List of Notes']
         services = ['List of Services']

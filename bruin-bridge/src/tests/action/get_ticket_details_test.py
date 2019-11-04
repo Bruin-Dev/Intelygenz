@@ -23,7 +23,7 @@ class TestGetTicketDetails:
     async def send_ticket_details_test(self):
         logger = Mock()
         request_id = "123"
-        response_topic = "bruin.ticket.details.response"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         ticket_id = 123
         msg = {
             'request_id': request_id,
@@ -55,7 +55,7 @@ class TestGetTicketDetails:
     async def send_ticket_details_with_no_ticket_details_returned_test(self):
         logger = Mock()
         request_id = "123"
-        response_topic = "bruin.ticket.details.response"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         ticket_id = 123
         msg = {
             'request_id': request_id,

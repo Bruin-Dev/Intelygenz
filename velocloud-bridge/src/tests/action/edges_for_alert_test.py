@@ -41,7 +41,7 @@ class TestEdgesForAlert:
     async def gather_and_send_edge_list_test(self):
         edge_data = [{"edges": {"edges": "Some edge data", "enterprise": "FakeCorp"}}]
         request_id = "123"
-        response_topic = "some.topic"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         future = asyncio.Future()
         future.set_result(edge_data)
         futures_edges = [future]

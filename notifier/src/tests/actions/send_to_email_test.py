@@ -29,7 +29,7 @@ class TestEmailNotifier:
 
         msg_delivery_status = 200
         request_id = "123"
-        response_topic = "some.topic"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
         msg_body = "Failed Edges to be emailed"
         msg_dict = {
             "request_id": request_id,
@@ -56,7 +56,7 @@ class TestEmailNotifier:
         mock_logger = Mock()
 
         request_id = "123"
-        response_topic = "some.topic"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1c"
         msg_body = ""
         msg_dict = {
             "request_id": request_id,

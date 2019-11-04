@@ -29,7 +29,7 @@ class TestGetPrediction:
 
         request_id = 123
         ticket_id = 321
-        response_topic = 't7.prediction.response'
+        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
         msg_published_in_topic = {
             'request_id': request_id,
             'ticket_id': ticket_id,
@@ -65,7 +65,7 @@ class TestGetPrediction:
 
         request_id = 123
         ticket_id = 321
-        response_topic = 't7.prediction.response'
+        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
         msg_published_in_topic = {
             'request_id': request_id,
             'ticket_id': ticket_id,
