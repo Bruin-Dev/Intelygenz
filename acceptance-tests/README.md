@@ -80,7 +80,7 @@ acceptance-tests/
 
 # Technologies used
 
-- [Asyncio nats streaming](https://github.com/nats-io/asyncio-nats-streaming)
+- [Asyncio nats client](https://github.com/nats-io/asyncio-nats)
 - [Behave for python](https://pypi.org/project/behave/)
 
 # Useful documentation

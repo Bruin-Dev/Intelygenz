@@ -47,4 +47,4 @@ production.
 - [Notifier](../notifier/README.md)
 
 # Running in docker-compose 
-`docker-compose up --build service-outage-triage bruin-bridge velocloud-bridge notifier nats-streaming `
+`docker-compose up --build service-outage-triage bruin-bridge velocloud-bridge notifier nats-server `

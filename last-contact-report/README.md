@@ -32,4 +32,4 @@ Should look something like this.
 - [Notifier](../notifier/README.md)
 
 # Running in docker-compose 
-`docker-compose up --build last-contact-report velocloud-bridge notifier nats-streaming `
+`docker-compose up --build last-contact-report velocloud-bridge notifier nats-server `

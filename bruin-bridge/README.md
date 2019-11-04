@@ -119,4 +119,4 @@ And then a response message is publish to the response topic provided by the req
 }
 ```
 # Running in docker-compose 
-`docker-compose up --build nats-streaming bruin-bridge `
+`docker-compose up --build nats-server bruin-bridge `

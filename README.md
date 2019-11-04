@@ -42,7 +42,7 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
  - [Virtualenv](https://virtualenv.pypa.io/en/latest/)
  - [Hypercorn to deploy Quart server](https://pgjones.gitlab.io/hypercorn/)
  - [Requests for python HTTP requests](http://docs.python-requests.org/en/master/)
- - [NATS(in streaming mode, as event bus)](https://github.com/nats-io/nats-streaming-server)
+ - [NATS (as event bus)](https://github.com/nats-io/nats-server)
  - [Docker](https://www.docker.com/)
  - [Docker-compose](https://docs.docker.com/compose/)
  - [markdown-toc (for Table of Contents generation in READMEs)](https://github.com/jonschlinkert/markdown-toc)

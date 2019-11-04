@@ -87,4 +87,4 @@ request message's `response_topic` field.
 }
 ```
 # Running in docker-compose 
-`docker-compose up --build nats-streaming notifier `
+`docker-compose up --build nats-server notifier `

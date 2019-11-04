@@ -21,11 +21,11 @@ pip install -r requirements.txt
 ````
 ## Get an instance of NATS cluster up in local environment
 
-- [JUST ONCE] Go to /etc/hosts and add ``127.0.0.1	nats-streaming``
+- [JUST ONCE] Go to /etc/hosts and add ``127.0.0.1	nats-server``
 - Go to project root
-- Type the following ``docker-compose up nats-streaming``
+- Type the following ``docker-compose up nats-server``
 
-Now you can execute your python code related to NATS connections, using nats-streaming as host name
+Now you can execute your python code related to NATS connections, using nats-server as host name
 
 
 ## Get an instance of Redis up in local environment
@@ -80,7 +80,7 @@ pip freeze | grep -v "pkg-resources" > requirements.txt #The grep -v is needed o
 
 # Technologies used
 
-- [Asyncio nats streaming](https://github.com/nats-io/asyncio-nats-streaming)
+- [Asyncio nats client](https://github.com/nats-io/asyncio-nats)
 - [ASGI library for async](https://pypi.org/project/asgiref/)
 
 # Useful documentation

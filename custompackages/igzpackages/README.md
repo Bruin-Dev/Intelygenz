@@ -1,8 +1,8 @@
 #Packages
 ## nats
 ### clients
-This is a wrapper of the official [nats streaming client for python](https://github.com/nats-io/asyncio-nats-streaming)
-It expects to recieve a config object that has something like [this one](../../base-microservice/src/config/config.py) with a NATS_CONFIG dictionary
+This is a wrapper of the official [NATS client for python](https://github.com/nats-io/asyncio-nats)
+It expects to receive a config object that has something like [this one](../../base-microservice/src/config/config.py) with a NATS_CONFIG dictionary
 There are a lot of possible configurations due different scenarios. 
 All non-critical parameters for a base configuration are set to a default.
 
