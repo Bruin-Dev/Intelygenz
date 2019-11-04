@@ -8,7 +8,6 @@ REQUIRES = [
     "async-timeout == 3.0.1",
     "asyncio == 3.4.3",
     "asyncio-nats-client == 0.9.2",
-    "asyncio-nats-streaming == 0.4.0",
     "h11 == 0.8.1",
     "asynctest == 0.12.2",
     "nats-python==0.4.0",
