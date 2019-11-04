@@ -41,16 +41,16 @@ a call to the bruin client to receive all the tickets matching the filter. At th
 from the bruin clients for each status should be combined into one big list of tickets. Which gets sent back to the callback
 function. If any of the tickets received from bruin client return `None` then that `None` is return back to the callback.
 
-And with that list, we format it into a response message and publish it to the response topic provided by the request message.
+And with that list, we format it into a response message and publish it to the response topic that was built by NATS under
+the hood.
 
 
 ### Request message
 ```
 {
     'request_id': 123, 
-    'response_topic': f'bruin.ticket.response.{service_id}',
-    'ticket_id': 123
-    'client_id': 85940, 
+    'ticket_id': 123,
+    'client_id': 85940,
     'ticket_status': ['New', 'InProgress'], 
     'category': 'SD-WAN'
 }
@@ -73,15 +73,14 @@ from.
 
 Using that `ticket_id` as a parameter we make a call to the bruin repository which calls to the bruin client to receive 
 a list of details pertaining to the associated `ticket_id`. Now that we have the list we format it into a response message 
-and publish it to the response topic provided in the request message. 
+and publish it to the response topic that was built by NATS under the hood.
 
 
 ### Request message
 ```
 {
     'request_id': 123,
-    'response_topic': f'bruin.ticket.details.response.{service_id}',
-    'ticket_id': 123}
+    'ticket_id': 123,
 }
 ```
 ### Response message
@@ -100,13 +99,12 @@ we need the `note` field for what note to append.
 
 We call the bruin repository with these fields so that it can call the bruin client to post the note to the ticket.
 The bruin client should return some success message indicating that our note was successfuly posted to the ticket of `ticket_id`.
-And then a response message is publish to the response topic provided by the request message.
+And then a response message is published to the response topic that was built by NATS under the hood.
 
 ### Request message
 ```
 {
     'request_id': 123,
-    'response_topic': f'bruin.ticket.note.append.response.{service_id}',
     'ticket_id': 123
     'note': `Some Ticket Note`
 }

@@ -26,16 +26,15 @@ The email client will attempt to send the email in a try/catch. The email client
 the library `smtplib` and the fields `sender_email` and `password` from the configs file. From there it will use
 `MIMEMultipart` to format the data from the `email_data` dictionary into a format that can be sent as an email. Then
 it uses the `sender_email` from configs, the `recipient` field from the `email_data` dictionary, and the newly formatted
-`MIMEMultipart` message to send the email. If its sent successfully then a status code of 200 will be returned. And 
-the send_to_email function will put this in a dictionary and publish it to the topic identified by the `response_topic` field of
-the request message. If any error occurs during the process then an error message is printed out and a status code of 
+`MIMEMultipart` message to send the email. If it's sent successfully then a status code of 200 will be returned. And
+the send_to_email function will put this in a dictionary and publish it to the topic identified that was built by NATS under
+the hood. If any error occurs during the process then an error message is printed out and a status code of
 500 is returned and published instead. 
 
 ### Request message
  ```
 {
     'request_id': 123,
-    'response_topic': f"notification.email.response.{self._service_id}",
     'email_data': {
         'subject': 'Some Subject',
         'recipient': self._config.TRIAGE_CONFIG["recipient"],
@@ -69,14 +68,13 @@ first must check that the webhook url is a valid url by checking to see if the s
 printed to the console and returned to determine if the message was successfully sent or not based on the status
 code of the request call. 200 is a success and anything else is a failure.
 
-This returned message goes back to the `send_to_slack` function to publish it to the topic identified by the   
-request message's `response_topic` field.
+This returned message goes back to the `send_to_slack` function to publish it to the topic that was built by NATS under
+the hood.
 ### Request message
 ```
 {
     'request_id': 123,
     'message':'Some message',
-    'response_topic': f'notification.slack.request.{service_id}'
 }
 ```
 ### Response message
