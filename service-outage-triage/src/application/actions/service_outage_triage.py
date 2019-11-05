@@ -26,7 +26,7 @@ class ServiceOutageTriage:
                           f'{self._config.TRIAGE_CONFIG["polling_minutes"]} minutes')
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now(timezone('US/Eastern'))
+            next_run_time = datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone']))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._poll_tickets, 'interval', minutes=self._config.TRIAGE_CONFIG["polling_minutes"],
                                 next_run_time=next_run_time,
@@ -129,7 +129,8 @@ class ServiceOutageTriage:
                                     if 'TimeStamp: ' in ticket_note['noteValue']:
                                         last_timestamp = self._extract_field_from_string(ticket_note['noteValue'],
                                                                                          "TimeStamp: ")
-                                        timestamp_difference = datetime.now(timezone('US/Eastern')
+                                        timestamp_difference = datetime.now(timezone(
+                                            self._config.TRIAGE_CONFIG['timezone'])
                                                                             ) - parse(last_timestamp)
                                         if timestamp_difference > timedelta(minutes=30):
                                             await self._check_for_new_events(last_timestamp, ticket_item)
@@ -146,10 +147,10 @@ class ServiceOutageTriage:
                 if message is not None:
                     if event_obj['message'] == message:
                         time = parse(event_obj['eventTime'])
-                        return time.astimezone(timezone('US/Eastern'))
+                        return time.astimezone(timezone(self._config.TRIAGE_CONFIG['timezone']))
                 else:
                     time = parse(event_obj['eventTime'])
-                    return time.astimezone(timezone('US/Eastern'))
+                    return time.astimezone(timezone(self._config.TRIAGE_CONFIG['timezone']))
         return None
 
     def _extract_field_from_string(self, dict_as_string, key1, key2='#DEFAULT_END#'):
@@ -172,7 +173,7 @@ class ServiceOutageTriage:
         events_msg = {'request_id': uuid(),
                       'edge': edge_id,
                       'start_date': timestamp,
-                      'end_date': datetime.now(timezone('US/Eastern')),
+                      'end_date': datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone'])),
                       'filter': filter_events_status_list}
         edge_status_request = {
             'request_id': uuid(),
@@ -210,7 +211,8 @@ class ServiceOutageTriage:
                                                                                      step_amount)]
             for events in split_event_lists:
                 event_obj = self._compose_event_note_object(events)
-                event_timestamp = parse(events[len(events) - 1]["eventTime"]).astimezone(timezone("US/Eastern"))
+                event_timestamp = parse(events[len(events) - 1]["eventTime"]).astimezone(timezone(
+                                                                                self._config.TRIAGE_CONFIG['timezone']))
                 event_ticket_note = "#*Automation Engine*#" + event_obj + 'TimeStamp: ' + str(
                     event_timestamp + timedelta(seconds=1))
                 if self._config.TRIAGE_CONFIG['environment'] == 'production':
@@ -240,7 +242,8 @@ class ServiceOutageTriage:
                     event_str = event_str + f'Device: Interface GE1\n'
                 if 'GE2' in event['message']:
                     event_str = event_str + f'Device: Interface GE2\n'
-            event_str = event_str + f'eventTime: {parse(event["eventTime"]).astimezone(timezone("US/Eastern"))}\n'
+            event_str = event_str + f'eventTime: \
+            {parse(event["eventTime"]).astimezone(timezone(self._config.TRIAGE_CONFIG["timezone"]))}\n'
             full_event_str = full_event_str + '\n' + event_str
         return full_event_str
 
@@ -315,7 +318,7 @@ class ServiceOutageTriage:
                                                                                               ["events"],
                                                                                               'LINK_DEAD',
                                                                                               'Link GE2 is now DEAD')
-        edge_triage_dict["TimeStamp"] = datetime.now(timezone('US/Eastern'))
+        edge_triage_dict["TimeStamp"] = datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone']))
         return edge_triage_dict
 
     def _ticket_object_to_string(self, ticket_dict):

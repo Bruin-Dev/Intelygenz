@@ -25,7 +25,8 @@ LOG_CONFIG = {
 ALERTS_CONFIG = {
     'last_contact': {
         'recipient': "some.recipient@email.com",
-    }
+    },
+    'timezone': 'US/Eastern'
 }
 
 

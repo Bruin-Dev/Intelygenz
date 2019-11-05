@@ -1,17 +1,15 @@
-from unittest.mock import call
-import json
 from collections import OrderedDict
+from datetime import datetime
 from unittest.mock import Mock
+from unittest.mock import call
 from unittest.mock import patch
 
-from datetime import datetime
-
 import pytest
-from application.actions import service_affecting_monitor as service_affecting_monitor_module
 from application.actions.service_affecting_monitor import ServiceAffectingMonitor
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
 
+from application.actions import service_affecting_monitor as service_affecting_monitor_module
 from config import testconfig
 from application.repositories.template_management import TemplateRenderer
 

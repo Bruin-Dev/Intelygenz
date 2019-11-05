@@ -23,7 +23,8 @@ NATS_CONFIG = {
 ALERTS_CONFIG = {
     'last_contact': {
         'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
-    }
+    },
+    'timezone': 'US/Eastern'
 }
 
 LOG_CONFIG = {

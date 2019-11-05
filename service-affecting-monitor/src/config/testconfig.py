@@ -16,6 +16,7 @@ NATS_CONFIG = {
 MONITOR_CONFIG = {
     'recipient': "some.recipient@email.com",
     'environment': "dev",
+    'timezone': 'US/Eastern',
     'monitoring_minutes': 10
 }
 

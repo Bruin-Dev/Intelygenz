@@ -48,7 +48,7 @@ class EdgeMonitoring:
         self._logger.info(f'Scheduled task: edge monitoring process configured to run each {seconds} seconds')
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now(timezone('US/Eastern'))
+            next_run_time = datetime.now(timezone(self._config.ORCHESTRATOR_CONFIG['timezone']))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._edge_monitoring_process, 'interval', seconds=seconds, next_run_time=next_run_time,
                                 replace_existing=True, id='_edge_monitoring_process')

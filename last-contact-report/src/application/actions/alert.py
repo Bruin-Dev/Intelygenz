@@ -23,7 +23,7 @@ class Alert:
         self._logger.info("Scheduled task: alert report process configured to run first day of each month")
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now(timezone('US/Eastern'))
+            next_run_time = datetime.now(timezone(self._config.ALERTS_CONFIG['timezone']))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._alert_process, 'cron', day=1, misfire_grace_time=86400, replace_existing=True,
                                 next_run_time=next_run_time,

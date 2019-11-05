@@ -21,7 +21,8 @@ NATS_CONFIG = {
 }
 
 SITES_MONITOR_CONFIG = {
-    'monitoring_seconds': int(os.environ["MONITORING_SECONDS"])
+    'monitoring_seconds': int(os.environ["MONITORING_SECONDS"]),
+    'timezone': 'US/Eastern'
 }
 
 LOG_CONFIG = {

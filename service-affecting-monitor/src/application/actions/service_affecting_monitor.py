@@ -24,7 +24,7 @@ class ServiceAffectingMonitor:
         self._logger.info(f'Scheduled task: service affecting')
         next_run_time = undefined
         if exec_on_start:
-            next_run_time = datetime.now(timezone('US/Eastern'))
+            next_run_time = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._monitor_each_edge, 'interval', minutes=self._monitoring_minutes,
                                 next_run_time=next_run_time, replace_existing=True,
@@ -169,7 +169,7 @@ class ServiceAffectingMonitor:
         edge_overview["Name"] = link['link']['displayName']
         edge_overview["Threshold"] = threshold
         edge_overview['Interval for Scan'] = f'{self._monitoring_minutes} Minutes'
-        edge_overview['Scan Time'] = datetime.now(timezone('US/Eastern'))
+        edge_overview['Scan Time'] = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         edge_overview["Input"] = input
         edge_overview["Output"] = output
         edge_overview["Links"] = \

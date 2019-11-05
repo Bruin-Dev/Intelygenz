@@ -965,7 +965,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         template_renderer = Mock()
 
         event_list = [

@@ -26,7 +26,8 @@ GRAFANA_CONFIG = {
 
 
 SITES_MONITOR_CONFIG = {
-    'monitoring_seconds': 0.01
+    'monitoring_seconds': 0.01,
+    'timezone': 'US/Eastern'
 }
 
 QUART_CONFIG = {
