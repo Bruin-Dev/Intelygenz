@@ -36,8 +36,8 @@ class TestAlert:
         logger = Mock()
         scheduler = Mock()
         scheduler.add_job = Mock()
-        config = testconfig
         template_renderer = Mock()
+        config = testconfig.ALERTS_CONFIG
 
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
 
