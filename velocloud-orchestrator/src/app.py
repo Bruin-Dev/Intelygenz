@@ -7,7 +7,6 @@ from application.repositories.statistic_repository import StatisticRepository
 from application.repositories.status_repository import StatusRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
-from redis import Redis
 
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
@@ -32,16 +31,18 @@ class Container:
         self._stats_client = StatisticClient(config)
         self._stats_repo = StatisticRepository(config, self._stats_client, self._logger)
 
-        self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
-        self._edge_repository = EdgeRepository(self._redis_client, self._logger)
+        self._edge_repository = EdgeRepository(self._logger)
 
-        self._status_repository = StatusRepository(self._redis_client, self._logger)
+        self._status_repository = StatusRepository(self._logger)
         self._edge_monitoring = EdgeMonitoring(self._event_bus, self._logger, self._prometheus_repository,
                                                self._scheduler, self._edge_repository, self._status_repository,
                                                self._stats_repo, config)
 
     async def _start(self):
         self._edge_monitoring.start_prometheus_metrics_server()
+        self._prometheus_repository.reset_counter()
+        self._prometheus_repository.reset_edges_counter()
+
         await self._event_bus.connect()
         await self._edge_monitoring.start_edge_monitor_job(exec_on_start=True)
         self._scheduler.start()

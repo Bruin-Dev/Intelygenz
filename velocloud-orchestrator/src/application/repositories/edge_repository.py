@@ -1,6 +1,6 @@
 class EdgeRepository:
 
-    def __init__(self, redis_client, logger):
+    def __init__(self, logger):
         self._edge_cache = dict()
         self._logger = logger
 
