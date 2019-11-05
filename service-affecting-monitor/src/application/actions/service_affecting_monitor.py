@@ -66,23 +66,27 @@ class ServiceAffectingMonitor:
 
     async def _latency_check(self, device, edge_status, link):
         if 'PUBLIC_WIRELESS' in link['serviceGroups']:
-            if link['bestLatencyMsRx'] > 120 or link['bestLatencyMsTx'] > 120:
+            if link['bestLatencyMsRx'] > self._config.MONITOR_CONFIG["latency_wireless"] or \
+               link['bestLatencyMsTx'] > self._config.MONITOR_CONFIG["latency_wireless"]:
                 await self._notify_trouble(device, edge_status, link, link['bestLatencyMsRx'], link['bestLatencyMsTx'],
-                                           'Latency', 120)
+                                           'Latency', self._config.MONITOR_CONFIG["latency_wireless"])
         elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
-            if link['bestLatencyMsRx'] > 50 or link['bestLatencyMsTx'] > 50:
+            if link['bestLatencyMsRx'] > self._config.MONITOR_CONFIG["latency_wired"] or \
+               link['bestLatencyMsTx'] > self._config.MONITOR_CONFIG["latency_wired"]:
                 await self._notify_trouble(device, edge_status, link, link['bestLatencyMsRx'], link['bestLatencyMsTx'],
-                                           'Latency', 50)
+                                           'Latency', self._config.MONITOR_CONFIG["latency_wired"])
 
     async def _packet_loss_check(self, device, edge_status, link):
         if 'PUBLIC_WIRELESS' in link['serviceGroups']:
-            if link['bestLossPctRx'] > 8 or link['bestLossPctTx'] > 8:
+            if link['bestLossPctRx'] > self._config.MONITOR_CONFIG["packet_loss_wireless"] or \
+               link['bestLossPctTx'] > self._config.MONITOR_CONFIG["packet_loss_wireless"]:
                 await self._notify_trouble(device, edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
-                                           'Packet Loss', 8)
+                                           'Packet Loss', self._config.MONITOR_CONFIG["packet_loss_wireless"])
         elif 'PUBLIC_WIRED' in link['serviceGroups'] or 'PRIVATE_WIRED' in link['serviceGroups']:
-            if link['bestLossPctRx'] > 5 or link['bestLossPctTx'] > 5:
+            if link['bestLossPctRx'] > self._config.MONITOR_CONFIG["packet_loss_wired"] or \
+               link['bestLossPctTx'] > self._config.MONITOR_CONFIG["packet_loss_wired"]:
                 await self._notify_trouble(device, edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
-                                           'Packet Loss', 5)
+                                           'Packet Loss', self._config.MONITOR_CONFIG["packet_loss_wired"])
 
     async def _notify_trouble(self, device, edge_status, link, input, output, trouble, threshold):
         ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)

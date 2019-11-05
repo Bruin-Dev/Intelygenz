@@ -17,6 +17,10 @@ MONITOR_CONFIG = {
     'recipient': "some.recipient@email.com",
     'environment': "dev",
     'timezone': 'US/Eastern',
+    "latency_wireless": 120,
+    "latency_wired": 50,
+    "packet_loss_wireless": 8,
+    "packet_loss_wired": 5,
     'monitoring_minutes': 10
 }
 
