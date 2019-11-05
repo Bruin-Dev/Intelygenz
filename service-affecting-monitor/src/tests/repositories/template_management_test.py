@@ -9,9 +9,8 @@ class TestTemplateRenderer:
     def instantiation_test(self):
         mock_service_id = Mock()
         config = testconfig
-        test_repo = TemplateRenderer(mock_service_id, config)
+        test_repo = TemplateRenderer(config)
         assert test_repo._config == config
-        assert test_repo._service_id is mock_service_id
 
     def ticket_object_to_email_obj_test(self):
         event_bus = Mock()
@@ -19,7 +18,7 @@ class TestTemplateRenderer:
         scheduler = Mock()
         config = testconfig
         service_id = 123
-        template_renderer = TemplateRenderer(service_id, config)
+        template_renderer = TemplateRenderer(config)
 
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
@@ -70,8 +69,7 @@ class TestTemplateRenderer:
         kwargs = dict(logo="logo.png",
                       header="header.jpg")
         config = testconfig
-        service_id = 123
-        template_renderer = TemplateRenderer(service_id, config)
+        template_renderer = TemplateRenderer(config)
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
             "edge_id": {
@@ -122,9 +120,8 @@ class TestTemplateRenderer:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        service_id = 123
 
-        template_renderer = TemplateRenderer(service_id, config)
+        template_renderer = TemplateRenderer(config)
 
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",

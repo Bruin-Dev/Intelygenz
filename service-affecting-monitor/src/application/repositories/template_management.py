@@ -8,8 +8,7 @@ import base64
 
 
 class TemplateRenderer:
-    def __init__(self, service_id, config):
-        self._service_id = service_id
+    def __init__(self, config):
         self._config = config
 
     def _compose_email_object(self, edges_status_to_report, trouble, ticket_dict, **kwargs):
@@ -35,7 +34,6 @@ class TemplateRenderer:
 
         return {
             'request_id': uuid(),
-            'response_topic': f"notification.email.response.{self._service_id}",
             'email_data': {
                 'subject': f'Service affecting trouble detected: {trouble}',
                 'recipient': self._config.MONITOR_CONFIG["recipient"],
