@@ -54,7 +54,7 @@ class BruinClient:
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
-        def get_all_tickets(client_id, ticket_id, ticket_status, category, ticket_topic):
+        def get_all_tickets():
             self._logger.info(f'Getting all tickets for client id: {client_id}')
 
             params = {
@@ -74,13 +74,13 @@ class BruinClient:
                 self.login()
                 raise Exception
 
-        return get_all_tickets(client_id, ticket_id, ticket_status, category, ticket_topic)
+        return get_all_tickets()
 
     def get_ticket_details(self, ticket_id):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
-        def get_ticket_details(ticket_id):
+        def get_ticket_details():
             self._logger.info(f'Getting ticket details for ticket id: {ticket_id}')
             response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details',
                                     headers=self._get_request_headers(),
@@ -91,13 +91,13 @@ class BruinClient:
             else:
                 self.login()
                 raise Exception
-        return get_ticket_details(ticket_id)
+        return get_ticket_details()
 
     def post_ticket_note(self, ticket_id, ticket_note):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
-        def post_ticket_note(ticket_id, ticket_note):
+        def post_ticket_note():
             self._logger.info(f'Getting posting notes for ticket id: {ticket_id}')
             payload = {
                 "note": ticket_note
@@ -112,13 +112,13 @@ class BruinClient:
             else:
                 self.login()
                 raise Exception
-        return post_ticket_note(ticket_id, ticket_note)
+        return post_ticket_note()
 
     def post_ticket(self, client_id, category, services, notes, contacts):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
-        def post_ticket(client_id, category, services, notes, contacts):
+        def post_ticket():
             self._logger.info(f'Posting note for client id:{client_id}')
             payload = {
               "clientId": client_id,
@@ -137,4 +137,4 @@ class BruinClient:
             else:
                 self.login()
                 raise Exception
-        return post_ticket(client_id, category, services, notes, contacts)
+        return post_ticket()

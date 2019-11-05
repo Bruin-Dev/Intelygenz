@@ -35,7 +35,7 @@ class NATSClient:
     async def publish(self, topic, message):
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
-        async def publish(topic, message):
+        async def publish():
 
             if self._nc.is_connected:
                 await self._nc.publish(topic, message.encode())
@@ -44,12 +44,12 @@ class NATSClient:
                 await self.connect_to_nats()
                 await self._nc.publish(topic, message.encode())
 
-        await publish(topic, message)
+        await publish()
 
     async def rpc_request(self, topic, message, timeout=10):
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
-        async def rpc_request(topic, message, timeout):
+        async def rpc_request():
             if self._nc.is_connected:
                 rpc_request = await self._nc.timed_request(topic, message.encode(), timeout)
                 return json.loads(rpc_request.data)
@@ -59,7 +59,7 @@ class NATSClient:
                 rpc_request = await self._nc.timed_request(topic, message.encode(), timeout)
                 return json.loads(rpc_request.data)
 
-        return await rpc_request(topic, message, timeout)
+        return await rpc_request()
 
     async def _cb_with_ack_and_action(self, msg):
         self._logger.info(f'Message received from topic {msg.subject}')
@@ -84,7 +84,7 @@ class NATSClient:
     async def subscribe_action(self, topic, action: ActionWrapper, queue=""):
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
-        async def subscribe_action(topic, action: ActionWrapper, queue=""):
+        async def subscribe_action():
             self._topic_action[topic] = action
             if self._nc.is_connected:
                 sub = await self._nc.subscribe(topic,
@@ -105,7 +105,7 @@ class NATSClient:
                                                    "pending_limits"])
             self._subs.append(sub)
 
-        await subscribe_action(topic, action, queue)
+        await subscribe_action()
 
     async def close_nats_connections(self):
         for sub in self._subs:
