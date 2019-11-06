@@ -150,7 +150,7 @@ def check_redis_cluster_is_deleted(cluster, start_time):
         redis_cluster_status = check_redis_cluster_exists(cluster)
         if redis_cluster_status['exists']:
             logging.info("Waiting for Redis cluster {} to be deleted".format(cluster))
-            logging.info("Time elapsed for delete Redis cluster {} seconds".format(actual_time-start_time))
+            logging.info("Time elapsed for delete Redis cluster {} seconds".format(actual_time - start_time))
             logging.info("Actual state of Redis cluster is: {}".format(
                 redis_cluster_status['redis_cluster_information']['CacheClusters'][0]['CacheClusterStatus']))
             time.sleep(30)
@@ -217,7 +217,7 @@ def delete_targets_group_for_alb(alb_arn, cluster):
         for i in range(len(target_groups_to_delete)):
             target_group_arn = target_groups_to_delete[i]['TargetGroupArn']
             target_group_name = target_groups_to_delete[i]['TargetGroupName']
-            logging.info("Deleting target group with name {} and arn {}".format(target_group_arn, target_group_name ))
+            logging.info("Deleting target group with name {} and arn {}".format(target_group_arn, target_group_name))
             subprocess.call(['aws', 'elbv2', 'delete-target-group', '--target-group-arn', target_group_arn],
                             stdout=FNULL)
 
@@ -238,7 +238,7 @@ def delete_alb(cluster):
 def get_security_groups(cluster):
     security_groups = []
     security_groups_list_call = subprocess.Popen(['aws', 'ec2', 'describe-security-groups', '--filters',
-                                                  'Name=tag:Environment, Values='+cluster, '--region', 'us-east-1'],
+                                                  'Name=tag:Environment, Values=' + cluster, '--region', 'us-east-1'],
                                                  stdout=subprocess.PIPE, stderr=FNULL)
     security_groups_list = json.loads(security_groups_list_call.stdout.read())['SecurityGroups']
     if len(security_groups_list) > 0:
@@ -251,7 +251,8 @@ def delete_security_groups(cluster):
     security_groups_cluster = get_security_groups(cluster)
     security_groups_cluster_size = len(security_groups_cluster)
     if security_groups_cluster_size > 0:
-        logging.info("There are {} security group/s associated with cluster {}".format(security_groups_cluster_size, cluster))
+        logging.info(
+            "There are {} security group/s associated with cluster {}".format(security_groups_cluster_size, cluster))
         for element in security_groups_cluster:
             security_group_name = element['GroupName']
             security_group_id = element['GroupId']
@@ -285,9 +286,99 @@ def delete_dashboard(cluster):
         logging.error("Dashboard for cluster {} doesn't exists".format(cluster))
 
 
+def get_cluster_alarms(cluster):
+    cluster_alarms = {'has_alarms': False}
+    cluster_alarms_list_call = subprocess.Popen(['aws', 'cloudwatch', 'describe-alarms', '--region', 'us-east-1'],
+                                                stdout=subprocess.PIPE, stderr=FNULL)
+    cluster_alarms_list = json.loads(cluster_alarms_list_call.stdout.read())['MetricAlarms']
+    if len(cluster_alarms_list) > 0:
+        cluster_alarm_elements = {}
+        for i in range(len(cluster_alarms_list)):
+            alarm_name = cluster_alarms_list[i]['AlarmName']
+            if cluster in alarm_name:
+                cluster_alarm_elements.update({i: alarm_name})
+        if len(cluster_alarm_elements) > 0:
+            cluster_alarms.update({'has_alarms': True, 'cluster_alarms': cluster_alarm_elements})
+    return cluster_alarms
+
+
+def delete_alarms(cluster):
+    cluster_alarms = get_cluster_alarms(cluster)
+    if cluster_alarms['has_alarms']:
+        logging.info("There are alarms associated with cluster: {}".format(cluster))
+        for i in cluster_alarms['cluster_alarms'].keys():
+            alarm_name = cluster_alarms['cluster_alarms'][i]
+            logging.info("Alarm with name {} it's going to be deleted".format(alarm_name))
+            subprocess.call(['aws', 'cloudwatch', 'delete-alarms', '--alarm-names', alarm_name], stdout=FNULL)
+    else:
+        logging.error("There aren't alarms associated with cluster: {}".format(cluster))
+
+
+def get_log_metric_for_cluster(cluster):
+    metrics_logs_for_cluster = {'has_log_metrics': False}
+    metrics_logs_list_call = subprocess.Popen(
+        ['aws', 'logs', 'describe-metric-filters', '--log-group-name', cluster, '--region',
+         'us-east-1'], stdout=subprocess.PIPE, stderr=FNULL)
+    try:
+        metrics_logs_list = json.loads(metrics_logs_list_call.stdout.read())['metricFilters']
+        if metrics_logs_list is not None and len(metrics_logs_list) > 0:
+            metrics_logs_for_cluster_elements = {}
+            for i in range(len(metrics_logs_list)):
+                metric_log_filter = metrics_logs_list[i]['filterName']
+                metrics_logs_for_cluster_elements.update({i: metric_log_filter})
+                logging.debug("Cluster has associated metric with filterName {}".format(metric_log_filter))
+            metrics_logs_for_cluster.update({'has_log_metrics': True, 'log_metrics_filters':
+                                            metrics_logs_for_cluster_elements})
+    except ValueError as e:
+        pass
+    return metrics_logs_for_cluster
+
+
+def delete_log_metrics(cluster):
+    log_metrics_for_cluster = get_log_metric_for_cluster(cluster)
+    if log_metrics_for_cluster['has_log_metrics']:
+        logging.info("Cluster {} has associated {} log metric/s filter/s".format(cluster,
+                                                                                 len(log_metrics_for_cluster['log_metrics_filters'])))
+        for i in log_metrics_for_cluster['log_metrics_filters'].keys():
+            log_metric_filter_name = log_metrics_for_cluster['log_metrics_filters'][i]
+            logging.info("Log metric filter with name {} it's going to be deleted".format(log_metric_filter_name))
+            subprocess.call(['aws', 'logs', 'delete-metric-filter', '--log-group-name', cluster, '--filter-name',
+                             log_metric_filter_name], stdout=FNULL)
+    else:
+        logging.error("Cluster {} doesn't have any log metric associated to its log group".format(cluster))
+
+
+def check_log_group_exists(cluster):
+    log_group_list_call = subprocess.Popen(
+        ['aws', 'logs', 'describe-log-groups', '--region', 'us-east-1'], stdout=subprocess.PIPE, stderr=FNULL)
+    log_group_list = json.loads(log_group_list_call.stdout.read())['logGroups']
+    if len(log_group_list) > 0:
+        if any(log_group['logGroupName'] == cluster for log_group in log_group_list):
+            return True
+    return False
+
+
+def delete_log_group(cluster):
+    if check_log_group_exists(cluster):
+        logging.info("Cluster {} has a log group associated".format(cluster))
+        logging.info("Log group with name {} it's going to be deleted".format(cluster))
+        subprocess.call(['aws', 'logs', 'delete-log-group', '--log-group-name', cluster], stdout=FNULL)
+    else:
+        logging.error("Cluster {} doesn't have any log group associated".format(cluster))
+
+
+def delete_metrics_resources(cluster):
+    delete_dashboard(cluster)
+    delete_alarms(cluster)
+    delete_log_metrics(cluster)
+    delete_log_group(cluster)
+
+
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "hc:d:e:r:a:s:m:", ["cluster=", "servicediscovery", "ecs-cluster", "redis-cluster", "alb", "security-groups", "metrics"])
+        opts, args = getopt.getopt(argv, "hc:d:e:r:a:s:m:",
+                                   ["cluster=", "servicediscovery", "ecs-cluster", "redis-cluster", "alb",
+                                    "security-groups", "metrics"])
     except getopt.GetoptError:
         print('delete_deployments_resources.py -c <ecs_cluster_identifier> [-e] [-d] [-r] [-a] [-s] [-m]')
         sys.exit(2)
@@ -308,7 +399,7 @@ def main(argv):
         elif opt in ("-s", "--security-groups"):
             delete_security_groups(cluster)
         elif opt in ("-m", "--metrics"):
-            delete_dashboard(cluster)
+            delete_metrics_resources(cluster)
 
 
 if __name__ == "__main__":
