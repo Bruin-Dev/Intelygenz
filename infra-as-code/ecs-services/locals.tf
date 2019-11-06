@@ -168,6 +168,14 @@ locals {
   running_task_count_nats-server_alarm-name = "Running tasks count of nats-server service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_nats-server_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_nats-server"
 
+  // alarm running_task_count_nats-server-1 local variables
+  running_task_count_nats-server-1_alarm-name = "Running tasks count of nats-server-1 service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_nats-server-1_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_nats-server-1"
+
+  // alarm running_task_count_nats-server-2 local variables
+  running_task_count_nats-server-2_alarm-name = "Running tasks count of nats-server-2 service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_nats-server-2_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_nats-server-2"
+
   // alarm running_task_count_service-outage-monitor local variables
   running_task_count_service-outage-monitor_alarm-name = "Running tasks count of service-outage-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_service-outage-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-monitor"

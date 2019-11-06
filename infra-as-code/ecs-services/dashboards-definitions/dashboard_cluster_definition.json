@@ -82,6 +82,26 @@
                     ],
                     [
                         "...",
+                        "${ENVIRONMENT}-nats-server-1",
+                        ".",
+                        ".",
+                        {
+                            "period":300,
+                            "stat":"Sum"
+                        }
+                    ],
+                    [
+                        "...",
+                        "${ENVIRONMENT}-nats-server-2",
+                        ".",
+                        ".",
+                        {
+                            "period":300,
+                            "stat":"Sum"
+                        }
+                    ],
+                    [
+                        "...",
                         "${ENVIRONMENT}-nats-server",
                         ".",
                         ".",
