@@ -79,6 +79,7 @@ resource "aws_security_group" "automation-dev-inbound" {
 
   tags = {
     Name = local.automation-dev-inbound-security_group-tag-Name
+    Environment = var.ENVIRONMENT
   }
 }
 

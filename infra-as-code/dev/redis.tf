@@ -48,5 +48,6 @@ resource "aws_security_group" "automation-redis-sg" {
 
   tags = {
     Name = local.automation-redis-security_group-tag-Name
+    Environment = var.ENVIRONMENT
   }
 }
