@@ -17,6 +17,7 @@ TRIAGE_CONFIG = {
     'polling_minutes': 10,
     'recipient': "some.recipient@email.com",
     'timezone': 'US/Eastern',
+    'monitoring_seconds': 120,
     'id_by_serial': {
         "VC05200026138": {
             "host": "mettel.velocloud.net",
