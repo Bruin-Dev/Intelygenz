@@ -25,6 +25,7 @@ TRIAGE_CONFIG = {
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'timezone': 'US/Eastern',
     'monitoring_seconds': 120,
+    'event_limit': 15,
     #   ["VCE20000000940", "VCE20000000895", "VC05200026138", "VC05400001485",
     #   "VC05400001548", "VC05200033081", "VC05200037161", "VC05200059766",
     #   "VC05200033383", "VC05200029594", "VC05200039471", "VC05200038423",

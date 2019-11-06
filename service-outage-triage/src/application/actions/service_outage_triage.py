@@ -193,22 +193,8 @@ class ServiceOutageTriage:
         if len(event_list) > 0:
             sorted_event_list = sorted(event_list, key=lambda event: event['eventTime'])
 
-            event_str = self._compose_event_note_object(sorted_event_list)
-
-            quotient = len(event_str) // 1000
-            step_amount = len(sorted_event_list)
-
-            if quotient == 2 or quotient == 1:
-                step_amount = (len(sorted_event_list)) // 2
-            if quotient > 2:
-                if len(event_str) % 1000 == 0:
-                    split_amount = quotient - 1
-                else:
-                    split_amount = quotient
-                step_amount = (len(sorted_event_list) // split_amount)
-
-            split_event_lists = [sorted_event_list[i:i + step_amount] for i in range(0, len(sorted_event_list),
-                                                                                     step_amount)]
+            split_event_lists = [sorted_event_list[i:i + self._config.TRIAGE_CONFIG['event_limit']]
+                                 for i in range(0, len(sorted_event_list), self._config.TRIAGE_CONFIG['event_limit'])]
             for events in split_event_lists:
                 event_obj = self._compose_event_note_object(events)
                 event_timestamp = parse(events[len(events) - 1]["eventTime"]).astimezone(timezone(
@@ -242,8 +228,8 @@ class ServiceOutageTriage:
                     event_str = event_str + f'Device: Interface GE1\n'
                 if 'GE2' in event['message']:
                     event_str = event_str + f'Device: Interface GE2\n'
-            event_str = event_str + f'eventTime: \
-            {parse(event["eventTime"]).astimezone(timezone(self._config.TRIAGE_CONFIG["timezone"]))}\n'
+            event_str = event_str + \
+                f'eventTime: {parse(event["eventTime"]).astimezone(timezone(self._config.TRIAGE_CONFIG["timezone"]))}\n'
             full_event_str = full_event_str + '\n' + event_str
         return full_event_str
 

@@ -1100,7 +1100,7 @@ class TestServiceOutageTriage:
         service_outage_triage._compose_event_note_object.assert_any_call(events_data_sorted_by_timestamp)
 
     @pytest.mark.asyncio
-    async def check_for_new_events_with_meaningful_events_and_event_note_having_less_than_1k_chars_test(self):
+    async def check_for_new_events_with_meaningful_events_and_event_note_less_than_event_limit_test(self):
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -1141,15 +1141,15 @@ class TestServiceOutageTriage:
         await service_outage_triage._check_for_new_events(timestamp, ticket)
 
         service_outage_triage._compose_event_note_object.assert_has_calls([
-            call(events_data),
-            call(events_data),
+            call(events_data)
         ], any_order=False)
 
     @pytest.mark.asyncio
-    async def check_for_new_events_with_meaningful_events_and_event_note_having_between_1k_and_2k_chars_test(self):
+    async def check_for_new_events_with_meaningful_events_and_event_note_more_than_event_limit_test(self):
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        config.TRIAGE_CONFIG['event_limit'] = 2
         template_renderer = Mock()
 
         timestamp = '2019-07-30 00:26:00-04:00'
