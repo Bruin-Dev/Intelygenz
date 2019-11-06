@@ -218,7 +218,8 @@ def delete_targets_group_for_alb(alb_arn, cluster):
             target_group_arn = target_groups_to_delete[i]['TargetGroupArn']
             target_group_name = target_groups_to_delete[i]['TargetGroupName']
             logging.info("Deleting target group with name {} and arn {}".format(target_group_arn, target_group_name ))
-            subprocess.call(['aws', 'elbv2', 'delete-target-group', '--target-group-arn', target_group_arn], stdout=FNULL)
+            subprocess.call(['aws', 'elbv2', 'delete-target-group', '--target-group-arn', target_group_arn],
+                            stdout=FNULL)
 
 
 def delete_alb(cluster):
@@ -237,7 +238,7 @@ def delete_alb(cluster):
 def get_security_groups(cluster):
     security_groups = []
     security_groups_list_call = subprocess.Popen(['aws', 'ec2', 'describe-security-groups', '--filters',
-                                                  'Name=Name, Values=*'+cluster+'*', '--region', 'us-east-1'],
+                                                  'Name=tag:Environment, Values='+cluster, '--region', 'us-east-1'],
                                                  stdout=subprocess.PIPE, stderr=FNULL)
     security_groups_list = json.loads(security_groups_list_call.stdout.read())['SecurityGroups']
     if len(security_groups_list) > 0:
@@ -247,7 +248,6 @@ def get_security_groups(cluster):
 
 
 def delete_security_groups(cluster):
-    logging.info("It's in function")
     security_groups_cluster = get_security_groups(cluster)
     security_groups_cluster_size = len(security_groups_cluster)
     if security_groups_cluster_size > 0:
@@ -256,17 +256,44 @@ def delete_security_groups(cluster):
             security_group_name = element['GroupName']
             security_group_id = element['GroupId']
             logging.info("Deleting SecurityGroup with name {} and id {}".format(security_group_name, security_group_id))
+            subprocess.call(['aws', 'ec2', 'delete-security-group', '--group-id', security_group_id], stdout=FNULL)
+    else:
+        logging.error("There isn't any security group associated with cluster {}".format(cluster))
+
+
+def get_cluster_dashboard(cluster):
+    cluster_dashboard_exists = {'exists': False}
+    cluster_dashboard_list_call = subprocess.Popen(['aws', 'cloudwatch', 'list-dashboards'], stdout=subprocess.PIPE,
+                                                   stderr=FNULL)
+    cluster_dashboard_list = json.loads(cluster_dashboard_list_call.stdout.read())['DashboardEntries']
+    if len(cluster_dashboard_list) > 0:
+        cluster_dashboard_name = 'cluster-' + cluster
+        for element in cluster_dashboard_list:
+            if element['DashboardName'] == cluster_dashboard_name:
+                cluster_dashboard_exists.update({'exists': True, 'dashboard_information': element})
+    return cluster_dashboard_exists
+
+
+def delete_dashboard(cluster):
+    cluster_dashboard = get_cluster_dashboard(cluster)
+    if cluster_dashboard['exists']:
+        dashboard_name = cluster_dashboard['dashboard_information']['DashboardName']
+        logging.info("Dashboard for cluster {} exists".format(cluster))
+        logging.info("Dashboard with name {} it's going to be removed".format(dashboard_name))
+        subprocess.call(['aws', 'cloudwatch', 'delete-dashboards', '--dashboard-names', dashboard_name], stdout=FNULL)
+    else:
+        logging.error("Dashboard for cluster {} doesn't exists".format(cluster))
 
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "hc:d:e:r:a:s:", ["cluster=", "servicediscovery", "ecs-cluster", "redis-cluster", "alb", "security-groups"])
+        opts, args = getopt.getopt(argv, "hc:d:e:r:a:s:m:", ["cluster=", "servicediscovery", "ecs-cluster", "redis-cluster", "alb", "security-groups", "metrics"])
     except getopt.GetoptError:
-        print('delete_deployments_resources.py -c <ecs_cluster_identifier> [-e] [-s] [-r] [-a] [-sg]')
+        print('delete_deployments_resources.py -c <ecs_cluster_identifier> [-e] [-d] [-r] [-a] [-s] [-m]')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('delete_deployments_resources.py -c <ecs_cluster_identifier> [-e] [-s] [-r] [-a] [-sg]')
+            print('delete_deployments_resources.py -c <ecs_cluster_identifier> [-e] [-d] [-r] [-a] [-s] [-m]')
             sys.exit()
         elif opt in ("-c", "--cluster"):
             cluster = arg
@@ -280,6 +307,8 @@ def main(argv):
             delete_alb(cluster)
         elif opt in ("-s", "--security-groups"):
             delete_security_groups(cluster)
+        elif opt in ("-m", "--metrics"):
+            delete_dashboard(cluster)
 
 
 if __name__ == "__main__":

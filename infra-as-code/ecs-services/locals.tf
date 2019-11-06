@@ -113,30 +113,72 @@ locals {
   // dashboards local variables
   cluster_dashboard_name = "cluster-${var.ENVIRONMENT}"
 
-  // alarms local variables
-  exception_messages_services_alarm-name = "Exception messages detected in services of ECS cluster with name ${var.ENVIRONMENT}"
-  error_messages_services_alarm-name = "Error messages detected in services of ECS cluster with name ${var.ENVIRONMENT}"
-  exception_messages_services_alarm-evaluation_periods = "1"
-  exception_messages_services_alarm-period = "180"
-  exception_messages_services_alarm-threshold = "5"
-  error_messages_services_alarm-evaluation_periods = "1"
-  error_messages_services_alarm-period = "180"
-  error_messages_services_alarm-threshold = "5"
-  running_task_count_velocloud-orchestator_alarm-name = "Running tasks count of velocloud-orchestrator service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_bruin-bridge_alarm-name = "Running tasks count of bruin-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_service-outage-triage_alarm-name = "Running tasks count of service-outage-triage service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_service-affecting-monitor_alarm-name = "Running tasks count of service-affecting-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_t7-bridge-name = "Running tasks count of t7-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_notifier-name = "Running tasks count of notifier service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_metrics-grafana-name = "Running tasks count of metrics-grafana service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_metrics-prometheus-name = "Running tasks count of metrics-prometheus service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_service-outage-monitor-name = "Running tasks count of service-outage-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_last-contact-report-name = "Running tasks count of last-contact-report service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_velocloud-bridge-name = "Running tasks count of velocloud-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_nats-server-name = "Running tasks count of nats-server service in ECS cluster with name ${var.ENVIRONMENT}"
+  // alarms common local variables
   running_task_count_service-alarm-evaluation_periods = "2"
   running_task_count_service-alarm-period = "300"
   running_task_count_service-alarm-threshold = "3"
+
+  // alarm exception_messages_services local variables
+  exception_messages_services_alarm-evaluation_periods = "1"
+  exception_messages_services_alarm-period = "180"
+  exception_messages_services_alarm-threshold = "5"
+  exception_messages_services_alarm-name = "Exception messages detected in services of ECS cluster with name ${var.ENVIRONMENT}"
+  exception_messages_services_alarm-tag-Name = "${var.ENVIRONMENT}-exception_messages_detected"
+
+  // alarm error_messages_services local variables
+  error_messages_services_alarm-evaluation_periods = "1"
+  error_messages_services_alarm-period = "180"
+  error_messages_services_alarm-threshold = "5"
+  error_messages_services_alarm-name = "Error messages detected in services of ECS cluster with name ${var.ENVIRONMENT}"
+  error_messages_services_alarm-tag-Name = "${var.ENVIRONMENT}-error_messages_detected"
+
+  // alarm running_task_count_velocloud-orchestrator local variables
+  running_task_count_velocloud-orchestator_alarm-name = "Running tasks count of velocloud-orchestrator service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_velocloud-orchestator_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_velocloud-orchestrator"
+
+  // alarm running_task_count_bruin-bridge local variables
+  running_task_count_bruin-bridge_alarm-name = "Running tasks count of bruin-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_bruin-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_bruin-bridge"
+
+  // alarm running_task_count_service-outage-triage local variables
+  running_task_count_service-outage-triage_alarm-name = "Running tasks count of service-outage-triage service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_service-outage-triage_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-triage"
+
+  // alarm running_task_count_service-affecting-monitor local variables
+  running_task_count_service-affecting-monitor_alarm-name = "Running tasks count of service-affecting-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_service-affecting-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-affecting-monitor"
+
+  // alarm running_task_count_t7-bridge local variables
+  running_task_count_t7-bridge_alarm-name = "Running tasks count of t7-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_t7-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_t7-bridge"
+
+  // alarm running_task_count_notifier local variables
+  running_task_count_notifier_alarm-name = "Running tasks count of notifier service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_notifier_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_notifier"
+
+  // alarm running_task_count_metrics-grafana local variables
+  running_task_count_metrics-grafana_alarm-name = "Running tasks count of metrics-grafana service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_metrics-grafana_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_metrics-grafana"
+
+  // alarm running_task_count_metrics-prometheus local variables
+  running_task_count_metrics-prometheus_alarm-name = "Running tasks count of metrics-prometheus service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_metrics-prometheus_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_metrics-prometheus"
+
+  // alarm running_task_count_nats-server local variables
+  running_task_count_nats-server_alarm-name = "Running tasks count of nats-server service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_nats-server_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_nats-server"
+
+  // alarm running_task_count_service-outage-monitor local variables
+  running_task_count_service-outage-monitor_alarm-name = "Running tasks count of service-outage-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_service-outage-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-monitor"
+
+  // alarm running_task_count_last-contact-report local variables
+  running_task_count_last-contact-report_alarm-name = "Running tasks count of last-contact-report service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_last-contact-report_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_last-contact-report"
+
+  // alarm running_task_count_velocloud-bridge_
+  running_task_count_velocloud-bridge_alarm-name = "Running tasks count of velocloud-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_velocloud-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_velocloud-bridge"
 
   // cloudformation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms-${var.ENVIRONMENT}"

@@ -29,6 +29,10 @@ resource "aws_cloudwatch_metric_alarm" "exception_messages_services_alarm" {
   insufficient_data_actions = []
   alarm_description         = "This metric monitors number of exception messages for all the services in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
+  tags = {
+    Name = local.exception_messages_services_alarm-name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "error_messages_services_alarm" {
@@ -43,6 +47,10 @@ resource "aws_cloudwatch_metric_alarm" "error_messages_services_alarm" {
   insufficient_data_actions = []
   alarm_description         = "This metric monitors number of error messages for all the services in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
+  tags = {
+    Name = local.error_messages_services_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-orchestrator_alarm" {
@@ -60,6 +68,10 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-orchestrato
   dimensions = {
     ServiceName = "${var.ENVIRONMENT}-velocloud-orchestrator"
     ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_velocloud-orchestator_alarm-tag-Name
+    Environment = var.ENVIRONMENT
   }
 }
 
@@ -79,6 +91,10 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_bruin-bridge_alarm" {
     ServiceName = "${var.ENVIRONMENT}-bruin-bridge"
     ClusterName = var.ENVIRONMENT
   }
+  tags = {
+    Name = local.running_task_count_bruin-bridge_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-triage_alarm" {
@@ -96,6 +112,10 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-triage
   dimensions = {
     ServiceName = "${var.ENVIRONMENT}-service-outage-triage"
     ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_service-outage-triage_alarm-tag-Name
+    Environment = var.ENVIRONMENT
   }
 }
 
@@ -116,10 +136,14 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-affecting-mon
     ServiceName = "${var.ENVIRONMENT}-service-affecting-monitor"
     ClusterName = var.ENVIRONMENT
   }
+  tags = {
+    Name = local.running_task_count_service-affecting-monitor_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_t7-bridge_alarm" {
-  alarm_name = local.running_task_count_t7-bridge-name
+  alarm_name = local.running_task_count_t7-bridge_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
   metric_name = local.running_task_count-metric_transformation-name
@@ -135,10 +159,14 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_t7-bridge_alarm" {
     ServiceName = "${var.ENVIRONMENT}-t7-bridge"
     ClusterName = var.ENVIRONMENT
   }
+  tags = {
+    Name = local.running_task_count_t7-bridge_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_notifier_alarm" {
-  alarm_name = local.running_task_count_notifier-name
+  alarm_name = local.running_task_count_notifier_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
   metric_name = local.running_task_count-metric_transformation-name
@@ -154,10 +182,14 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_notifier_alarm" {
     ServiceName = "${var.ENVIRONMENT}-notifier"
     ClusterName = var.ENVIRONMENT
   }
+  tags = {
+    Name = local.running_task_count_notifier_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_metrics-grafana_alarm" {
-  alarm_name = local.running_task_count_metrics-grafana-name
+  alarm_name = local.running_task_count_metrics-grafana_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
   metric_name = local.running_task_count-metric_transformation-name
@@ -173,10 +205,14 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_metrics-grafana_alarm
     ServiceName = "${var.ENVIRONMENT}-metrics-grafana"
     ClusterName = var.ENVIRONMENT
   }
+  tags = {
+    Name = local.running_task_count_metrics-grafana_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_metrics-prometheus_alarm" {
-  alarm_name = local.running_task_count_metrics-prometheus-name
+  alarm_name = local.running_task_count_metrics-prometheus_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
   metric_name = local.running_task_count-metric_transformation-name
@@ -192,10 +228,14 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_metrics-prometheus_al
     ServiceName = "${var.ENVIRONMENT}-metrics-prometheus"
     ClusterName = var.ENVIRONMENT
   }
+  tags = {
+    Name = local.running_task_count_metrics-prometheus_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server_alarm" {
-  alarm_name = local.running_task_count_nats-server-name
+  alarm_name = local.running_task_count_nats-server_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
   metric_name = local.running_task_count-metric_transformation-name
@@ -211,10 +251,14 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server_alarm" {
     ServiceName = "${var.ENVIRONMENT}-nats-server"
     ClusterName = var.ENVIRONMENT
   }
+  tags = {
+    Name = local.running_task_count_nats-server_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor_alarm" {
-  alarm_name = local.running_task_count_service-outage-monitor-name
+  alarm_name = local.running_task_count_service-outage-monitor_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
   metric_name = local.running_task_count-metric_transformation-name
@@ -230,10 +274,14 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
     ServiceName = "${var.ENVIRONMENT}-service-outage-monitor"
     ClusterName = var.ENVIRONMENT
   }
+  tags = {
+    Name = local.running_task_count_service-outage-monitor_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_last-contact-report_alarm" {
-  alarm_name = local.running_task_count_last-contact-report-name
+  alarm_name = local.running_task_count_last-contact-report_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
   metric_name = local.running_task_count-metric_transformation-name
@@ -249,10 +297,14 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_last-contact-report_a
     ServiceName = "${var.ENVIRONMENT}-last-contact-report"
     ClusterName = var.ENVIRONMENT
   }
+  tags = {
+    Name = local.running_task_count_last-contact-report_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-bridge_alarm" {
-  alarm_name = local.running_task_count_velocloud-bridge-name
+  alarm_name = local.running_task_count_velocloud-bridge_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
   metric_name = local.running_task_count-metric_transformation-name
@@ -267,5 +319,9 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-bridge_alar
   dimensions = {
     ServiceName = "${var.ENVIRONMENT}-velocloud-bridge"
     ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_velocloud-bridge_alarm-tag-Name
+    Environment = var.ENVIRONMENT
   }
 }
