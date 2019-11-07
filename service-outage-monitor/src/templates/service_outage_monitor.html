@@ -277,7 +277,7 @@ font-family: Arial, sans-serif;
                         <td style="word-wrap: break-word; font-size: 0px; padding: 0px 20px 0px 20px;" align="center">
                           <div style="cursor:auto;color:#FFFFFF;font-family:'Roboto', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 20px; text-align:center;">
                           	<h2 style="color:#47B585;letter-spacing:0.25em; font-size: 18px; line-height: 25px;">MONITORED EDGES</h2>
-							<p class="intro" style="color:#596872; font-size: 16px; line-height: 22px; font-family:'Roboto', Helvetica, Arial, sans-serif; letter-spacing: 0.05em;">%%EDGE_COUNT%% Edges monitored last day.</p>
+							<p class="intro" style="color:#596872; font-size: 16px; line-height: 22px; font-family:'Roboto', Helvetica, Arial, sans-serif; letter-spacing: 0.05em;">{{ __EDGE_COUNT__ }} Edges monitored last day.</p>
                           </div>
                         </td>
                       </tr>
@@ -355,7 +355,29 @@ font-family: Arial, sans-serif;
                         <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;"></th>
 						<th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;"></th>
                       </tr>
-                      %%OVERVIEW_ROWS%%
+                      {% for i in __OVERVIEW_ROWS__ %}
+                        {% if i["type"] == "odd"  %}
+                          <tr>
+                              <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal;
+                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
+                              white-space: nowrap">{{ i["__KEY__"] }}</td>
+                              <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal;
+                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
+                              white-space: nowrap">{{ i["__VALUE__"] }}</td>
+                              </tr>
+                          {% elif i["type"] == "even" %}
+                          <tr>
+                              <td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF;
+                              color: #596872; font-weight: normal;
+                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
+                              white-space: nowrap">{{ i["__KEY__"] }}</td>
+                              <td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF;
+                              color: #596872; font-weight: normal;
+                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
+                              white-space: nowrap">{{ i["__VALUE__"] }}</td>
+                              </tr>
+                          {% endif %}
+                        {% endfor %}
                     </tbody>
                   </table>
 				<!-- END DATA TABLE -->
@@ -382,7 +404,7 @@ font-family: Arial, sans-serif;
 						<table role="presentation" cellpadding="0" cellspacing="0" style="vertical-align:top;" width="100%" border="0">
 							<tr>
 								<td>
-									<h2 style="color:#263640;letter-spacing:0.25em; font-size: 18px; line-height: 25px; text-align: center;">EVENTS FOR DEVICE %%SERIAL_NUMBER%%</h2>
+									<h2 style="color:#263640;letter-spacing:0.25em; font-size: 18px; line-height: 25px; text-align: center;">EVENTS FOR DEVICE __</h2>
 								</td>
 							</tr>
 						</table>
@@ -401,20 +423,32 @@ font-family: Arial, sans-serif;
                         <th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;"></th>
 						<th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;"></th>
                       </tr>
-                      %%EVENT_ROWS%%
+                      {% for i in __EVENT_ROWS__ %}
+                        {% if i["type"] == "odd"  %}
+                          <tr>
+                              <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal;
+                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
+                              white-space: nowrap">{{ i["__KEY__"] }}</td>
+                              <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal;
+                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
+                              white-space: nowrap">{{ i["__VALUE__"] }}</td>
+                              </tr>
+                          {% elif i["type"] == "even" %}
+                          <tr>
+                              <td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF;
+                              color: #596872; font-weight: normal;
+                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
+                              white-space: nowrap">{{ i["__KEY__"] }}</td>
+                              <td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF;
+                              color: #596872; font-weight: normal;
+                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
+                              white-space: nowrap">{{ i["__VALUE__"] }}</td>
+                              </tr>
+                          {% endif %}
+                        {% endfor %}
                     </tbody>
                   </table>
 				<!-- END DATA TABLE -->
-
-                </div>
-                <!--[if mso | IE]></td></tr></table><![endif]-->
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!--[if mso | IE]></td></tr></table><![endif]-->
-	<!-- END DATA TABLE -->
 
 
 	<!-- START FOOTER -->

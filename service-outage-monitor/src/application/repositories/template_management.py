@@ -30,7 +30,7 @@ class TemplateRenderer:
         templ = templateEnv.get_template(template)
 
         template_vars["__EDGE_COUNT__"] = '1'
-        template_vars["__SERIAL_NUMBERS__"] = f'{edges_status_to_report["edge_info"]["edges"]["serialNumber"]}'
+        template_vars["__SERIAL_NUMBER__"] = f'{edges_status_to_report["edge_info"]["edges"]["serialNumber"]}'
 
         edge_overview = OrderedDict()
 
