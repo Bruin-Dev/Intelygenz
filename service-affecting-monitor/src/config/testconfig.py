@@ -15,7 +15,8 @@ NATS_CONFIG = {
 
 MONITOR_CONFIG = {
     'recipient': "some.recipient@email.com",
-    'environment': "dev"
+    'environment': "dev",
+    'monitoring_minutes': 10
 }
 
 LOG_CONFIG = {

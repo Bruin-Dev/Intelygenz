@@ -21,7 +21,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
 
@@ -35,7 +35,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
 
@@ -48,7 +48,7 @@ class TestServiceAffectingMonitor:
 
         scheduler.add_job.assert_called_once_with(
             service_affecting_monitor._monitor_each_edge, 'interval',
-            seconds=600,
+            minutes=testconfig.MONITOR_CONFIG["monitoring_minutes"],
             next_run_time=next_run_time,
             replace_existing=True,
             id='_monitor_each_edge',
@@ -59,7 +59,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
 
@@ -67,7 +67,7 @@ class TestServiceAffectingMonitor:
 
         scheduler.add_job.assert_called_once_with(
             service_affecting_monitor._monitor_each_edge, 'interval',
-            seconds=600,
+            minutes=testconfig.MONITOR_CONFIG["monitoring_minutes"],
             next_run_time=undefined,
             replace_existing=True,
             id='_monitor_each_edge',
@@ -77,7 +77,7 @@ class TestServiceAffectingMonitor:
     async def service_affecting_monitor_process_test(self):
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         device = {
                   "host": "mettel.velocloud.net",
                   "enterprise_id": 137,
@@ -134,7 +134,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_no_troubles_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -195,7 +195,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_wireless_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -245,7 +245,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_wireless_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -295,7 +295,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_wireless_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -340,7 +340,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_public_wired_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -390,7 +390,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_public_wired_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -440,7 +440,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_public_wired_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -485,7 +485,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_private_wired_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -535,7 +535,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_private_wired_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -585,7 +585,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_private_wired_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -630,7 +630,7 @@ class TestServiceAffectingMonitor:
     async def latency_check_with_unknown_link_type_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -675,7 +675,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_no_troubles(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -736,7 +736,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_wireless_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -786,7 +786,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_wireless_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -836,7 +836,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_wireless_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -881,7 +881,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_public_wired_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -931,7 +931,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_public_wired_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -981,7 +981,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_public_wired_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -1026,7 +1026,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_private_wired_link_and_tx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -1076,7 +1076,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_private_wired_link_and_rx_values_above_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -1126,7 +1126,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_public_wired_link_and_both_tx_and_rx_values_below_threshold_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -1171,7 +1171,7 @@ class TestServiceAffectingMonitor:
     async def packet_loss_check_with_unknown_link_type_test(self):
         scheduler = Mock()
         event_bus = Mock()
-        config = Mock()
+        config = testconfig
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -1227,8 +1227,7 @@ class TestServiceAffectingMonitor:
             "phone": "111-111-1111",
             "name": "Fake Guy"
         }
-        config = Mock()
-        config.MONITOR_CONFIG = {'environment': 'dev'}
+        config = testconfig
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
@@ -1258,8 +1257,8 @@ class TestServiceAffectingMonitor:
             "name": "Fake Guy"
         }
 
-        config = Mock()
-        config.MONITOR_CONFIG = {'environment': 'production'}
+        config = testconfig
+        config.MONITOR_CONFIG["environment"] = 'production'
 
         client_id = '85940'
         trouble = 'LATENCY'
@@ -1406,8 +1405,8 @@ class TestServiceAffectingMonitor:
             "name": "Fake Guy"
         }
 
-        config = Mock()
-        config.MONITOR_CONFIG = {'environment': None}
+        config = testconfig
+        config.MONITOR_CONFIG['environment'] = None
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
@@ -1425,7 +1424,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
@@ -1443,7 +1442,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
@@ -1461,7 +1460,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026137'}],
@@ -1479,7 +1478,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{'otherDetails': None}],
@@ -1497,7 +1496,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
@@ -1615,7 +1614,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config)
         ticket_note = service_affecting_monitor._ticket_object_to_string(test_dict)

@@ -37,6 +37,7 @@ class ServiceAffectingMonitor:
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
+        self._monitoring_minutes = config.MONITOR_CONFIG["monitoring_minutes"]
 
     async def start_service_affecting_monitor_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service affecting')
@@ -44,7 +45,7 @@ class ServiceAffectingMonitor:
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._monitor_each_edge, 'interval', seconds=600,
+        self._scheduler.add_job(self._monitor_each_edge, 'interval', minutes=self._monitoring_minutes,
                                 next_run_time=next_run_time, replace_existing=True,
                                 id='_monitor_each_edge')
 
@@ -58,7 +59,7 @@ class ServiceAffectingMonitor:
         edge_status_request = {'request_id': uuid(),
                                'edge': edge_id,
                                'interval': {"end": datetime.now(utc),
-                                            "start": (datetime.now(utc) - timedelta(minutes=10))}}
+                                            "start": (datetime.now(utc) - timedelta(minutes=self._monitoring_minutes))}}
         edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(edge_status_request,
                                                                                           default=str), timeout=60)
         self._logger.info(f'Edge received from event bus')
@@ -188,7 +189,7 @@ class ServiceAffectingMonitor:
         edge_overview["Interface"] = link['link']['interface']
         edge_overview["Name"] = link['link']['displayName']
         edge_overview["Threshold"] = threshold
-        edge_overview['Interval for Scan'] = '10 Minutes'
+        edge_overview['Interval for Scan'] = f'{self._monitoring_minutes} Minutes'
         edge_overview['Scan Time'] = datetime.now(timezone('US/Eastern'))
         edge_overview["Input"] = input
         edge_overview["Output"] = output
@@ -201,7 +202,7 @@ class ServiceAffectingMonitor:
             f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/qoe/] - ' \
             f'[Transport|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
-            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/] - \n'
+            f'/monitor/edge/{edges_status_to_report["edge_id"]["edge_id"]}/links/] \n'
 
         return edge_overview
 
