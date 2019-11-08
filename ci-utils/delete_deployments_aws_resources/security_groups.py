@@ -24,13 +24,13 @@ class SecurityGroups:
                 security_groups.append(element)
         return security_groups
 
-    def delete_security_groups(self, cluster):
-        logging.info("Checking if there are security groups associated with the environment {}".format(cluster))
-        security_groups_cluster = self._get_security_groups(cluster)
+    def delete_security_groups(self, environment):
+        logging.info("Checking if there are security groups associated with the environment {}".format(environment))
+        security_groups_cluster = self._get_security_groups(environment)
         security_groups_cluster_size = len(security_groups_cluster)
         if security_groups_cluster_size > 0:
             logging.info(
-                "There are {} security group/s associated with cluster {}".format(security_groups_cluster_size, cluster))
+                "There are {} security group/s associated with the environment {}".format(security_groups_cluster_size, environment))
             for element in security_groups_cluster:
                 security_group_name = element['GroupName']
                 security_group_id = element['GroupId']
@@ -38,4 +38,4 @@ class SecurityGroups:
                                                                                     security_group_id))
                 subprocess.call(['aws', 'ec2', 'delete-security-group', '--group-id', security_group_id], stdout=FNULL)
         else:
-            logging.error("There isn't any security group associated with cluster {}".format(cluster))
+            logging.error("There isn't any security group associated with the environment {}".format(environment))

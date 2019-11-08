@@ -15,7 +15,7 @@ class EcsServices:
     @staticmethod
     def _delete_ecs_service(environment, service_name, service_id):
         logging.info(
-            "Update desired count of service {} with id {} of cluster {} to 0 ".format(service_name, service_id,
+            "Update desired count of service {} with id {} of ECS cluster {} to 0 ".format(service_name, service_id,
                                                                                        environment))
         subprocess.call(['aws', 'ecs', 'update-service', '--cluster', environment, '--service', service_id,
                          '--desired-count', '0'], stdout=FNULL)
@@ -131,15 +131,16 @@ class EcsServices:
             logging.error("Doesn't exists namespace for servicediscovery of environment {}".format(environment))
 
     def delete_ecs_cluster(self, environment):
+        print("Environment is {}".format(environment))
         self.delete_servicediscovery(environment)
         cluster_information = self._check_if_ecs_cluster_exists(environment)
         if cluster_information['exists']:
-            logging.info("There is an ECS cluster with the name {} with {} services active {} tasks running".format(
-                environment, cluster_information['ecs_cluster_information']['activeServicesCount'],
-                cluster_information['ecs_cluster_information']['runningTasksCount']))
+            logging.info("There is an ECS cluster for the environment {} with {} services active {} tasks running".
+                         format(environment, cluster_information['ecs_cluster_information']['activeServicesCount'],
+                                cluster_information['ecs_cluster_information']['runningTasksCount']))
             remove_ecs_cluster_call = subprocess.call(
-                    ['aws', 'ecs', 'delete-cluster', '--cluster', environment, '--region', 'us-east-1'],
-                    stdout=FNULL, stderr=FNULL)
+                ['aws', 'ecs', 'delete-cluster', '--cluster', environment, '--region', 'us-east-1'],
+                stdout=FNULL, stderr=FNULL)
             if remove_ecs_cluster_call == 0:
                 logging.info("ECS cluster {} has been sucessfully removed".format(environment))
             else:
@@ -149,7 +150,7 @@ class EcsServices:
 
     @staticmethod
     def _check_if_ecs_cluster_exists(environment):
-        logging.info("Checking if there is an ECS cluster with the name {}".format(environment))
+        logging.info("Checking if there is an ECS cluster for the environment {}".format(environment))
         cluster_exists = {'exists': False}
         cluster_exists_check_call = subprocess.Popen(['aws', 'ecs', 'describe-clusters', '--cluster', environment],
                                                      stdout=subprocess.PIPE, stderr=FNULL)
