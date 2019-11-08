@@ -10,14 +10,13 @@ from igz.packages.eventbus.eventbus import EventBus
 class EdgeMonitoring:
 
     def __init__(self, event_bus: EventBus, logger, prometheus_repository, scheduler, edge_repository,
-                 status_repository, statistic_repository, config):
+                 status_repository, config):
         self._event_bus = event_bus
         self._logger = logger
         self._prometheus_repository = prometheus_repository
         self._scheduler = scheduler
         self._edge_repository = edge_repository
         self._status_repository = status_repository
-        self._statistic_repository = statistic_repository
         self._config = config
 
     async def _edge_monitoring_process(self):
@@ -39,7 +38,6 @@ class EdgeMonitoring:
             self._logger.info("IDLE status: asking edge list. Orchestrator status = REQUESTING_VELOCLOUD_EDGES...")
             self._status_repository.set_status("REQUESTING_VELOCLOUD_EDGES")
             self._status_repository.set_edges_processed(0)
-            self._statistic_repository._statistic_client.clear_dictionaries()
             self._status_repository.set_current_cycle_timestamp(datetime.timestamp(datetime.now()))
             await self._process_all_edges(uuid())
             self._logger.info("Sending edge status tasks. Orchestrator status = PROCESSING_VELOCLOUD_EDGES...")
@@ -54,25 +52,6 @@ class EdgeMonitoring:
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._edge_monitoring_process, 'interval', seconds=seconds, next_run_time=next_run_time,
                                 replace_existing=True, id='_edge_monitoring_process')
-
-    async def _send_stats_to_notifier(self):
-        current_cycle_request_id = self._status_repository.get_current_cycle_request_id()
-        cache_keys = [cache_edge for cache_edge in self._edge_repository.get_keys() if 'host' in cache_edge]
-        for cache_edge in cache_keys:
-            cache_data = json.loads(self._edge_repository.get_edge(cache_edge))
-            if cache_data["request_id"] == current_cycle_request_id:
-                if cache_data["cache_edge"]["edges"]["edgeState"] == 'CONNECTED':
-                    self._logger.info('Edge seems OK')
-                else:
-                    self._logger.error('Edge seems KO, failure!')
-                    self._statistic_repository.store_stats(cache_data["cache_edge"])
-
-        slack_msg = self._statistic_repository._statistic_client.get_statistics()
-        if slack_msg is not None:
-            msg = {'request_id': current_cycle_request_id, 'message': slack_msg}
-            await self._event_bus.rpc_request("notification.slack.request", json.dumps(msg), timeout=5)
-        else:
-            self._logger.error("No statistics present")
 
     async def _process_all_edges(self, request_id):
         msg = {

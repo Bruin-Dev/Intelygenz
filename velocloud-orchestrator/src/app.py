@@ -1,9 +1,7 @@
 import asyncio
 from application.actions.edge_monitoring import EdgeMonitoring
-from application.clients.statistic_client import StatisticClient
 from application.repositories.edge_repository import EdgeRepository
 from application.repositories.prometheus_repository import PrometheusRepository
-from application.repositories.statistic_repository import StatisticRepository
 from application.repositories.status_repository import StatusRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
@@ -28,15 +26,12 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         self._prometheus_repository = PrometheusRepository(config)
-        self._stats_client = StatisticClient(config)
-        self._stats_repo = StatisticRepository(config, self._stats_client, self._logger)
 
         self._edge_repository = EdgeRepository(self._logger)
 
         self._status_repository = StatusRepository(self._logger)
         self._edge_monitoring = EdgeMonitoring(self._event_bus, self._logger, self._prometheus_repository,
-                                               self._scheduler, self._edge_repository, self._status_repository,
-                                               self._stats_repo, config)
+                                               self._scheduler, self._edge_repository, self._status_repository, config)
 
     async def _start(self):
         self._edge_monitoring.start_prometheus_metrics_server()
