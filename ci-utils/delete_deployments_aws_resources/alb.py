@@ -44,8 +44,11 @@ class ApplicationLoadBalancer:
         return target_groups
 
     def _delete_targets_group_for_alb(self, alb_arn, cluster):
+        logging.info("Checking if there are target groups associated with {} ALB".format(cluster))
         target_groups_to_delete = self._get_targets_groups_for_alb_and_cluster(alb_arn, cluster)
-        if len(target_groups_to_delete) > 0:
+        num_target_groups_to_delete = len(target_groups_to_delete)
+        if num_target_groups_to_delete > 0:
+            logging.info("The ALB {} has {} associated target groups".format(cluster, num_target_groups_to_delete))
             for i in range(len(target_groups_to_delete)):
                 target_group_arn = target_groups_to_delete[i]['TargetGroupArn']
                 target_group_name = target_groups_to_delete[i]['TargetGroupName']
@@ -54,6 +57,7 @@ class ApplicationLoadBalancer:
                                 stdout=FNULL)
 
     def delete_alb(self, cluster):
+        logging.info("Checking if there is an ALB with the name {}".format(cluster))
         alb_exists = self._check_alb_exists(cluster)
         if alb_exists['exists']:
             logging.info("ALB with name {} exists".format(cluster))

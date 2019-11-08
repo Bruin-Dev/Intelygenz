@@ -9,7 +9,6 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-
 FNULL = open(os.devnull, 'w')
 
 
@@ -19,7 +18,8 @@ class RedisCluster:
         redis_cluster_exists = {}
         try:
             redis_cluster_call = subprocess.Popen(
-                ['aws', 'elasticache', 'describe-cache-clusters', '--cache-cluster-id', cluster, '--region', 'us-east-1'],
+                ['aws', 'elasticache', 'describe-cache-clusters', '--cache-cluster-id', cluster, '--region',
+                 'us-east-1'],
                 stdout=subprocess.PIPE, stderr=FNULL)
             redis_cluster = json.loads(redis_cluster_call.stdout.read())
             if redis_cluster is not None:
@@ -51,10 +51,13 @@ class RedisCluster:
 
     def delete_redis_cluster(self, cluster):
         redis_cluster = self._check_redis_cluster_exists(cluster)
+        logging.info("Checking if there is a redis cluster with the name {}".format(cluster))
         if redis_cluster['exists']:
             logging.info("Redis cluster {} exists and has {} cache nodes".format(cluster,
-                                                                                 redis_cluster['redis_cluster_information']
-                                                                                 ['CacheClusters'][0]['NumCacheNodes']))
+                                                                                 redis_cluster[
+                                                                                     'redis_cluster_information'][
+                                                                                     'CacheClusters'][0][
+                                                                                     'NumCacheNodes']))
             logging.info("Redis cluster {} it's going to be deleted".format(cluster))
             subprocess.call(
                 ['aws', 'elasticache', 'delete-cache-cluster', '--cache-cluster-id', cluster, '--region', 'us-east-1'],

@@ -25,6 +25,7 @@ class SecurityGroups:
         return security_groups
 
     def delete_security_groups(self, cluster):
+        logging.info("Checking if there are security groups associated with the environment {}".format(cluster))
         security_groups_cluster = self._get_security_groups(cluster)
         security_groups_cluster_size = len(security_groups_cluster)
         if security_groups_cluster_size > 0:
