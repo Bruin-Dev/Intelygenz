@@ -26,7 +26,6 @@ MONITOR_CONFIG = {
     'device_by_id': contact_info.devices_by_id,
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
-    'monitoring_seconds': 600,
     "latency_wireless": 120,
     "latency_wired": 50,
     "packet_loss_wireless": 8,

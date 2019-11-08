@@ -33,7 +33,7 @@ class DevelopmentAction:
         self._event_bus = event_bus
         self._config = config
 
-    async def post_triage_note(self, ticket_dict, ticket_id):
+    async def run_triage_action(self, ticket_dict, ticket_id):
         ticket_note = self._ticket_object_to_email_obj(ticket_dict)
         await self._event_bus.rpc_request("notification.email.request",
                                           json.dumps(ticket_note),
@@ -45,7 +45,7 @@ class DevelopmentAction:
                                     f'{self._config.TRIAGE_CONFIG["environment"]}'}
         await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
 
-    async def post_event_note(self, event_note, ticket_id):
+    async def run_event_action(self, event_note, ticket_id):
         pass
 
     def _ticket_object_to_email_obj(self, ticket_dict):

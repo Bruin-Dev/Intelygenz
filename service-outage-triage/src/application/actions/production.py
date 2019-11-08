@@ -9,14 +9,14 @@ class ProductionAction:
         self._event_bus = event_bus
         self._config = config
 
-    async def post_triage_note(self, ticket_dict, ticket_id):
+    async def run_triage_action(self, ticket_dict, ticket_id):
         ticket_note = self._ticket_object_to_string(ticket_dict)
-        await self._post_ticket_request("Triage", ticket_id, ticket_note)
+        await self._make_rpc_requests("Triage", ticket_id, ticket_note)
 
-    async def post_event_note(self, event_note, ticket_id):
-        await self._post_ticket_request("Events", ticket_id, event_note)
+    async def run_event_action(self, event_note, ticket_id):
+        await self._make_rpc_requests("Events", ticket_id, event_note)
 
-    async def _post_ticket_request(self, note_type, ticket_id, ticket_note):
+    async def _make_rpc_requests(self, note_type, ticket_id, ticket_note):
         ticket_append_note_msg = {'request_id': uuid(),
                                   'ticket_id': ticket_id,
                                   'note': ticket_note}

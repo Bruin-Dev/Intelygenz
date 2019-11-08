@@ -25,7 +25,7 @@ class TestProductionAction:
         assert development_action._config == config
 
     @pytest.mark.asyncio
-    async def post_triage_note_test(self):
+    async def run_triage_action_test(self):
         config = testconfig
 
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
@@ -44,7 +44,7 @@ class TestProductionAction:
         development_action._ticket_object_to_email_obj = Mock(return_value=ticket_note_as_email_object)
 
         with patch.object(development_module, 'uuid', return_value=uuid_1):
-            await development_action.post_triage_note(test_dict, ticket_id)
+            await development_action.run_triage_action(test_dict, ticket_id)
 
         event_bus.rpc_request.assert_has_awaits([
             call(
@@ -65,9 +65,6 @@ class TestProductionAction:
             )
         ], any_order=False
         )
-
-    def post_event_note_test(self):
-        pass
 
     def ticket_object_to_email_obj_test(self):
         event_bus = Mock()
