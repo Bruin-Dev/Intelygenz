@@ -21,7 +21,7 @@ class EdgeRepository:
 
     def get_last_edge_list(self):
         if "edge_list" in self._edge_cache.keys():
-            self._logger.info(f'Getting edge list from redis')
+            self._logger.info(f'Getting edge list from cache')
             edge_list = self._edge_cache["edge_list"]
             self._logger.info(f'edge_list = {edge_list}')
             return edge_list
