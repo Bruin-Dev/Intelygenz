@@ -136,7 +136,7 @@ class ServiceOutageTriage:
                                     break
                         if not triage_exists:
                             filtered_ticket_ids.append(ticket_item)
-                            break
+                        break
         return filtered_ticket_ids
 
     def _find_recent_occurence_of_event(self, event_list, event_type, message=None):
