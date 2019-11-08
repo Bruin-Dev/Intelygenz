@@ -1,5 +1,8 @@
 import asyncio
 from application.actions.service_outage_triage import ServiceOutageTriage
+from application.actions.production import ProductionAction
+from application.actions.development import DevelopmentAction
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
 
@@ -24,8 +27,13 @@ class Container:
         self._event_bus.set_producer(self._publisher)
         self._template_renderer = TemplateRenderer(config)
 
+        if config.TRIAGE_CONFIG['environment'] == 'production':
+            self._notifier_action = ProductionAction(self._event_bus, config)
+        if config.TRIAGE_CONFIG['environment'] == 'dev':
+            self._notifier_action = DevelopmentAction(self._event_bus, config)
+
         self._service_outage_triage = ServiceOutageTriage(self._event_bus, self._logger, self._scheduler,
-                                                          config, self._template_renderer)
+                                                          config, self._notifier_action, self._template_renderer)
 
     async def _start(self):
         await self._event_bus.connect()
