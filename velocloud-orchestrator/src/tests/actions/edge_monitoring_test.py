@@ -132,7 +132,7 @@ class TestEdgeMonitoring:
         assert edge_monitoring._process_edge.await_count == 2
 
     @pytest.mark.asyncio
-    async def process_all_edges_without_redis_data_test(self):
+    async def process_all_edges_without_cache_data_test(self):
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -191,14 +191,14 @@ class TestEdgeMonitoring:
         prometheus_repository.dec.assert_not_called()
 
     @pytest.mark.asyncio
-    async def process_all_edges_with_redis_data_test(self):
+    async def process_all_edges_with_cache_data_test(self):
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
         config = Mock()
         request_id = 'random-uuid'
 
-        redis_edge_3_info = {
+        cache_edge_3_info = {
             'enterprise_name': 'evil-corp',
             'edges': {'edgeState': 'DISCONNECTED'},
             'links': [
@@ -207,7 +207,7 @@ class TestEdgeMonitoring:
             ],
         }
 
-        redis_edge_4_info = {
+        cache_edge_4_info = {
             'enterprise_name': 'evil-corp',
             'edges': {'edgeState': 'CONNECTED'},
             'links': [
@@ -216,7 +216,7 @@ class TestEdgeMonitoring:
             ],
         }
 
-        redis_edge_5_info = {
+        cache_edge_5_info = {
             'enterprise_name': 'evil-corp',
             'edges': {'edgeState': 'CONNECTED'},
             'links': [
@@ -255,15 +255,15 @@ class TestEdgeMonitoring:
         ])
 
         edge_repository = Mock()
-        # Let's simulate that Redis has data that was not included within the
+        # Let's simulate that the Cache has data that was not included within the
         # response to the RPC request targeting at edge.list.request topic
         edge_repository.get_last_edge_list = Mock(
             return_value=json.dumps(["edge-id-3", "edge-id-4", "edge-id-5"])
         )
         edge_repository.get_edge = Mock(side_effect=[
-            json.dumps({'request_id': request_id, 'redis_edge': redis_edge_3_info}),
-            json.dumps({'request_id': request_id, 'redis_edge': redis_edge_4_info}),
-            json.dumps({'request_id': request_id, 'redis_edge': redis_edge_5_info}),
+            json.dumps({'request_id': request_id, 'cache_edge': cache_edge_3_info}),
+            json.dumps({'request_id': request_id, 'cache_edge': cache_edge_4_info}),
+            json.dumps({'request_id': request_id, 'cache_edge': cache_edge_5_info}),
         ])
         edge_repository.set_current_edge_list = Mock()
 
@@ -286,13 +286,13 @@ class TestEdgeMonitoring:
             call('edge-id-3'), call('edge-id-4'), call('edge-id-5')
         ], any_order=True)
         prometheus_repository.dec.assert_has_calls([
-            call(redis_edge_3_info),
-            call(redis_edge_4_info),
-            call(redis_edge_5_info),
+            call(cache_edge_3_info),
+            call(cache_edge_4_info),
+            call(cache_edge_5_info),
         ], any_order=True)
 
     @pytest.mark.asyncio
-    async def process_all_edges_with_redis_data_equal_to_velocloud_data_test(self):
+    async def process_all_edges_with_cache_data_equal_to_velocloud_data_test(self):
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -374,9 +374,9 @@ class TestEdgeMonitoring:
             'edge_id': edge_id,
             'edge_info': edge_info,
         }
-        redis_edge = {
+        cache_edge = {
             'request_id': 1234,
-            'redis_edge': edge_info,
+            'cache_edge': edge_info,
         }
 
         edge_repository = Mock()
@@ -403,11 +403,11 @@ class TestEdgeMonitoring:
             status_repository.get_edges_processed.return_value + 1
         )
         edge_repository.set_edge.assert_called_once_with(
-            edge_id, json.dumps(redis_edge)
+            edge_id, json.dumps(cache_edge)
         )
 
     @pytest.mark.asyncio
-    async def process_edge_without_redis_data_test(self):
+    async def process_edge_without_cache_data_test(self):
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -449,7 +449,7 @@ class TestEdgeMonitoring:
         prometheus_repository.inc.assert_called_once_with(edge_info)
 
     @pytest.mark.asyncio
-    async def process_edge_with_redis_data_and_edge_state_changed_test(self):
+    async def process_edge_with_cache_data_and_edge_state_changed_test(self):
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -457,7 +457,7 @@ class TestEdgeMonitoring:
         event_bus = Mock()
 
         velocloud_edge_state = 'CONNECTED'
-        redis_edge_state = 'DISCONNECTED'
+        cache_edge_state = 'DISCONNECTED'
 
         velocloud_edge = {
             'request_id': 1234,
@@ -472,22 +472,22 @@ class TestEdgeMonitoring:
             },
         }
 
-        redis_edge_info = {
+        cache_edge_info = {
             'enterprise_name': 'evil-corp',
-            'edges': {'edgeState': redis_edge_state},
+            'edges': {'edgeState': cache_edge_state},
             'links': [
                 {'link': {'state': 'DISCONNECTED'}},
                 {'link': {'state': 'DISCONNECTED'}},
             ],
         }
-        redis_edge = {
+        cache_edge = {
             'request_id': 1234,
-            'redis_edge': redis_edge_info,
+            'cache_edge': cache_edge_info,
         }
 
         edge_repository = Mock()
         edge_repository.get_edge = Mock(return_value=json.dumps({
-            'redis_edge': redis_edge_info,
+            'cache_edge': cache_edge_info,
         }))
         edge_repository.set_current_edge_list = Mock()
         edge_repository.set_edge = Mock()
@@ -506,11 +506,11 @@ class TestEdgeMonitoring:
         await edge_monitoring._process_edge(velocloud_edge)
 
         prometheus_repository.update_edge.assert_called_once_with(
-            velocloud_edge['edge_info'], redis_edge['redis_edge']
+            velocloud_edge['edge_info'], cache_edge['cache_edge']
         )
 
     @pytest.mark.asyncio
-    async def process_edge_with_redis_data_and_link_state_changed_test(self):
+    async def process_edge_with_cache_data_and_link_state_changed_test(self):
         logger = Mock()
         scheduler = Mock()
         statistic_repository = Mock()
@@ -519,13 +519,13 @@ class TestEdgeMonitoring:
 
         velocloud_link_1_state = 'DISCONNECTED'
         velocloud_link_2_state = 'CONNECTED'
-        redis_link_1_state = 'CONNECTED'
-        redis_link_2_state = 'DISCONNECTED'
+        cache_link_1_state = 'CONNECTED'
+        cache_link_2_state = 'DISCONNECTED'
 
         velocloud_link_1 = {'link': {'state': velocloud_link_1_state}}
         velocloud_link_2 = {'link': {'state': velocloud_link_2_state}}
-        redis_link_1 = {'link': {'state': redis_link_1_state}}
-        redis_link_2 = {'link': {'state': redis_link_2_state}}
+        cache_link_1 = {'link': {'state': cache_link_1_state}}
+        cache_link_2 = {'link': {'state': cache_link_2_state}}
 
         velocloud_edge = {
             'request_id': 1234,
@@ -537,19 +537,19 @@ class TestEdgeMonitoring:
             },
         }
 
-        redis_edge_info = {
+        cache_edge_info = {
             'enterprise_name': 'evil-corp',
             'edges': {'edgeState': 'CONNECTED'},
-            'links': [redis_link_1, redis_link_2],
+            'links': [cache_link_1, cache_link_2],
         }
-        redis_edge = {
+        cache_edge = {
             'request_id': 1234,
-            'redis_edge': redis_edge_info,
+            'cache_edge': cache_edge_info,
         }
 
         edge_repository = Mock()
         edge_repository.get_edge = Mock(return_value=json.dumps({
-            'redis_edge': redis_edge_info,
+            'cache_edge': cache_edge_info,
         }))
         edge_repository.set_current_edge_list = Mock()
         edge_repository.set_edge = Mock()
@@ -570,11 +570,11 @@ class TestEdgeMonitoring:
         prometheus_repository.update_link.assert_has_calls([
             call(
                 velocloud_edge['edge_info'], velocloud_link_1,
-                redis_edge['redis_edge'], redis_link_1,
+                cache_edge['cache_edge'], cache_link_1,
             ),
             call(
                 velocloud_edge['edge_info'], velocloud_link_2,
-                redis_edge['redis_edge'], redis_link_2,
+                cache_edge['cache_edge'], cache_link_2,
             ),
         ])
 
@@ -882,13 +882,13 @@ class TestEdgeMonitoring:
         logger.error.assert_called_once()
 
     @pytest.mark.asyncio
-    async def send_stats_to_notifier_with_redis_data_test(self):
+    async def send_stats_to_notifier_with_cache_data_test(self):
         scheduler = Mock()
         prometheus_repository = Mock()
         config = Mock()
         current_cycle_request_id = 567
 
-        redis_edge_info_1 = {
+        cache_edge_info_1 = {
             'enterprise_name': 'evil-corp',
             'edges': {'edgeState': 'CONNECTED'},
             'links': [
@@ -897,7 +897,7 @@ class TestEdgeMonitoring:
             ],
         }
 
-        redis_edge_info_2 = {
+        cache_edge_info_2 = {
             'enterprise_name': 'evil-corp',
             'edges': {'edgeState': 'DISCONNECTED'},
             'links': [
@@ -906,7 +906,7 @@ class TestEdgeMonitoring:
             ],
         }
 
-        redis_edge_info_3 = {
+        cache_edge_info_3 = {
             'enterprise_name': 'evil-corp',
             'edges': {'edgeState': 'DISCONNECTED'},
             'links': [
@@ -928,15 +928,15 @@ class TestEdgeMonitoring:
         edge_repository.get_edge = Mock(side_effect=[
             json.dumps({
                 'request_id': current_cycle_request_id,
-                'redis_edge': redis_edge_info_1,
+                'cache_edge': cache_edge_info_1,
             }),
             json.dumps({
                 'request_id': 789,
-                'redis_edge': redis_edge_info_2,
+                'cache_edge': cache_edge_info_2,
             }),
             json.dumps({
                 'request_id': current_cycle_request_id,
-                'redis_edge': redis_edge_info_3,
+                'cache_edge': cache_edge_info_3,
             }),
         ])
 
@@ -961,4 +961,4 @@ class TestEdgeMonitoring:
 
         # One edge is DISCONNECTED with current_cycle_request_id as its request_id
         logger.error.assert_called_once()  # One edge is DISCONNECTED
-        statistic_repository.store_stats.assert_called_once_with(redis_edge_info_3)
+        statistic_repository.store_stats.assert_called_once_with(cache_edge_info_3)

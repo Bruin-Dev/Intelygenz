@@ -49,7 +49,7 @@ ORCHESTRATOR_CONFIG = {
 ````
 ## How to run it
 ````$
-docker-compose up --build nats-server velocloud-bridge prometheus grafana redis
+docker-compose up --build nats-server velocloud-bridge prometheus grafana 
 # Wait until everything is up and running
 docker-compose up --build velocloud-orchestrator
 ````

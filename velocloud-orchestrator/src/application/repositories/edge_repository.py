@@ -28,5 +28,5 @@ class EdgeRepository:
 
     def get_keys(self):
         self._logger.info(f'Getting keys from cache')
-        redis_keys = self._edge_cache.keys()
-        return redis_keys
+        cache_keys = self._edge_cache.keys()
+        return cache_keys

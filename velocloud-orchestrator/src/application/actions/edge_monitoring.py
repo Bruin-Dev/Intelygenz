@@ -57,15 +57,15 @@ class EdgeMonitoring:
 
     async def _send_stats_to_notifier(self):
         current_cycle_request_id = self._status_repository.get_current_cycle_request_id()
-        redis_keys = [redis_edge for redis_edge in self._edge_repository.get_keys() if 'host' in redis_edge]
-        for redis_edge in redis_keys:
-            redis_data = json.loads(self._edge_repository.get_edge(redis_edge))
-            if redis_data["request_id"] == current_cycle_request_id:
-                if redis_data["redis_edge"]["edges"]["edgeState"] == 'CONNECTED':
+        cache_keys = [cache_edge for cache_edge in self._edge_repository.get_keys() if 'host' in cache_edge]
+        for cache_edge in cache_keys:
+            cache_data = json.loads(self._edge_repository.get_edge(cache_edge))
+            if cache_data["request_id"] == current_cycle_request_id:
+                if cache_data["cache_edge"]["edges"]["edgeState"] == 'CONNECTED':
                     self._logger.info('Edge seems OK')
                 else:
                     self._logger.error('Edge seems KO, failure!')
-                    self._statistic_repository.store_stats(redis_data["redis_edge"])
+                    self._statistic_repository.store_stats(cache_data["cache_edge"])
 
         slack_msg = self._statistic_repository._statistic_client.get_statistics()
         if slack_msg is not None:
@@ -92,14 +92,14 @@ class EdgeMonitoring:
         self._prometheus_repository.set_cycle_total_edges(len(edge_status_requests))
         self._status_repository.set_edges_to_process(len(edge_status_requests))
 
-        redis_edge_list = self._edge_repository.get_last_edge_list()
-        if redis_edge_list is not None:
-            decoded_redis_edge_list = json.loads(redis_edge_list)
-            if len(decoded_redis_edge_list) != len(edge_list["edges"]):
-                for redis_edge in decoded_redis_edge_list:
-                    if redis_edge not in edge_list['edges']:
-                        redis_edge_info = json.loads(self._edge_repository.get_edge(str(redis_edge)))
-                        self._prometheus_repository.dec(redis_edge_info["redis_edge"])
+        cache_edge_list = self._edge_repository.get_last_edge_list()
+        if cache_edge_list is not None:
+            decoded_cache_edge_list = json.loads(cache_edge_list)
+            if len(decoded_cache_edge_list) != len(edge_list["edges"]):
+                for cache_edge in decoded_cache_edge_list:
+                    if cache_edge not in edge_list['edges']:
+                        cache_edge_info = json.loads(self._edge_repository.get_edge(str(cache_edge)))
+                        self._prometheus_repository.dec(cache_edge_info["cache_edge"])
 
         self._edge_repository.set_current_edge_list(json.dumps(edge_list["edges"]))
 
@@ -117,21 +117,21 @@ class EdgeMonitoring:
         edges_processed = edges_processed + 1
         self._status_repository.set_edges_processed(edges_processed)
 
-        redis_edge = self._edge_repository.get_edge(str(edge['edge_id']))
-        if redis_edge is None:
+        cache_edge = self._edge_repository.get_edge(str(edge['edge_id']))
+        if cache_edge is None:
             self._prometheus_repository.inc(edge['edge_info'])
         else:
-            redis_edge_data = json.loads(redis_edge)
-            if redis_edge_data['redis_edge']['edges']['edgeState'] != edge['edge_info']['edges']['edgeState']:
-                self._prometheus_repository.update_edge(edge['edge_info'], redis_edge_data['redis_edge'])
+            cache_edge_data = json.loads(cache_edge)
+            if cache_edge_data['cache_edge']['edges']['edgeState'] != edge['edge_info']['edges']['edgeState']:
+                self._prometheus_repository.update_edge(edge['edge_info'], cache_edge_data['cache_edge'])
 
-            for link, redis_link in zip(edge['edge_info']['links'], redis_edge_data['redis_edge']['links']):
-                if link['link']['state'] != redis_link['link']['state']:
+            for link, cache_link in zip(edge['edge_info']['links'], cache_edge_data['cache_edge']['links']):
+                if link['link']['state'] != cache_link['link']['state']:
                     self._prometheus_repository.update_link(edge['edge_info'], link,
-                                                            redis_edge_data['redis_edge'], redis_link)
+                                                            cache_edge_data['cache_edge'], cache_link)
 
-        redis_data = {"request_id": edge["request_id"], "redis_edge": edge['edge_info']}
-        self._edge_repository.set_edge(edge['edge_id'], json.dumps(redis_data))
+        cache_data = {"request_id": edge["request_id"], "cache_edge": edge['edge_info']}
+        self._edge_repository.set_edge(edge['edge_id'], json.dumps(cache_data))
         self._logger.info(f'Edges processed: {edges_processed} / {edges_to_process}')
         if edges_processed == edges_to_process:
             self._logger.info("All edges processed, starting the cycle again")

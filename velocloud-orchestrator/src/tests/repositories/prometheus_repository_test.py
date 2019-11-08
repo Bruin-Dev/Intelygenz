@@ -63,20 +63,20 @@ class TestPrometheusRepository:
         test_link_status = [{"link": {"state": "OK"}}]
         test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
                                    "links": test_link_status}}
-        redis_test_enterprise_name = 'Test'
-        redis_edge_state = 'Edge_KO'
-        redis_link_status = [{"link": {"state": "KO"}}]
-        redis_edge = {"edge_info": {"edges": {"edgeState": redis_edge_state},
-                                    "enterprise_name": redis_test_enterprise_name,
-                                    "links": redis_link_status}}
+        cache_test_enterprise_name = 'Test'
+        cache_edge_state = 'Edge_KO'
+        cache_link_status = [{"link": {"state": "KO"}}]
+        cache_edge = {"edge_info": {"edges": {"edgeState": cache_edge_state},
+                                    "enterprise_name": cache_test_enterprise_name,
+                                    "links": cache_link_status}}
         self.test_pro_repo.reset_counter()
-        self.test_pro_repo.inc(redis_edge["edge_info"])
-        self.test_pro_repo.update_edge(test_edge["edge_info"], redis_edge["edge_info"])
+        self.test_pro_repo.inc(cache_edge["edge_info"])
+        self.test_pro_repo.update_edge(test_edge["edge_info"], cache_edge["edge_info"])
 
         assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': test_edge_state}) == 1
-        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': redis_test_enterprise_name,
-                                                                     'state': redis_edge_state}) == 0
+        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': cache_test_enterprise_name,
+                                                                     'state': cache_edge_state}) == 0
 
     def update_link_test(self):
         test_enterprise_name = 'Test'
@@ -84,19 +84,19 @@ class TestPrometheusRepository:
         test_link_status = [{"link": {"state": "OK"}}]
         test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
                                    "links": test_link_status}}
-        redis_test_enterprise_name = 'Test'
-        redis_edge_state = 'Edge_OK'
-        redis_link_status = [{"link": {"state": "KO"}}]
-        redis_edge = {"edge_info": {"edges": {"edgeState": redis_edge_state},
-                                    "enterprise_name": redis_test_enterprise_name,
-                                    "links": redis_link_status}}
+        cache_test_enterprise_name = 'Test'
+        cache_edge_state = 'Edge_OK'
+        cache_link_status = [{"link": {"state": "KO"}}]
+        cache_edge = {"edge_info": {"edges": {"edgeState": cache_edge_state},
+                                    "enterprise_name": cache_test_enterprise_name,
+                                    "links": cache_link_status}}
         self.test_pro_repo.reset_counter()
-        self.test_pro_repo.inc(redis_edge["edge_info"])
+        self.test_pro_repo.inc(cache_edge["edge_info"])
         self.test_pro_repo.update_link(test_edge["edge_info"], test_link_status[0],
-                                       redis_edge["edge_info"], redis_link_status[0])
+                                       cache_edge["edge_info"], cache_link_status[0])
         assert REGISTRY.get_sample_value('link_state_gauge', labels={'enterprise_name': test_enterprise_name,
                                                                      'state': 'OK'}) == 1
-        assert REGISTRY.get_sample_value('link_state_gauge', labels={'enterprise_name': redis_test_enterprise_name,
+        assert REGISTRY.get_sample_value('link_state_gauge', labels={'enterprise_name': cache_test_enterprise_name,
                                                                      'state': 'KO'}) == 0
 
     def reset_counter_test(self):
