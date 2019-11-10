@@ -162,7 +162,7 @@ class TestBruinRepository:
             'ticketDetails': [
                 {
                     "detailID": 2741000,
-                    "detailValue": 'This is a meaningless detail',
+                    "detailValue": edge_serial,
                 },
             ],
             'ticketNotes': [
@@ -197,15 +197,20 @@ class TestBruinRepository:
             ticket_topic=ticket_topic
         )
         bruin_repository.get_ticket_details.assert_has_calls([
-            call(ticket_1_id), call(ticket_2_id),
+            call(ticket_1_id), call(ticket_2_id), call(ticket_3_id),
         ], any_order=False)
-        assert call(ticket_3_id) not in bruin_repository.get_ticket_details.mock_calls
 
-        expected_ticket_details = {
-            'ticketID': ticket_2_id,
-            **ticket_2_details,
-        }
-        assert ticket_details_by_edge == expected_ticket_details
+        expected_ticket_details_list = [
+            {
+                'ticketID': ticket_2_id,
+                **ticket_2_details,
+            },
+            {
+                'ticketID': ticket_3_id,
+                **ticket_3_details,
+            },
+        ]
+        assert ticket_details_by_edge == expected_ticket_details_list
 
     def get_ticket_details_by_edge_serial_with_no_filtered_tickets_test(self):
         logger = Mock()
@@ -239,12 +244,8 @@ class TestBruinRepository:
         )
         bruin_repository.get_ticket_details.assert_not_called()
 
-        expected_ticket_details = {
-            'ticketID': None,
-            'ticketDetails': [],
-            'ticketNotes': [],
-        }
-        assert ticket_details_by_edge == expected_ticket_details
+        expected_ticket_details_list = []
+        assert ticket_details_by_edge == expected_ticket_details_list
 
     def get_ticket_details_by_edge_serial_with_filtered_tickets_and_no_ticket_details_test(self):
         logger = Mock()
@@ -303,12 +304,8 @@ class TestBruinRepository:
             call(ticket_1_id), call(ticket_2_id), call(ticket_3_id)
         ], any_order=True)
 
-        expected_ticket_details = {
-            'ticketID': None,
-            'ticketDetails': [],
-            'ticketNotes': [],
-        }
-        assert ticket_details_by_edge == expected_ticket_details
+        expected_ticket_details_list = []
+        assert ticket_details_by_edge == expected_ticket_details_list
 
     def get_ticket_details_by_edge_serial_with_filtered_tickets_and_ticket_details_and_no_serial_coincidence_test(self):
         logger = Mock()
@@ -397,12 +394,8 @@ class TestBruinRepository:
             call(ticket_1_id), call(ticket_2_id), call(ticket_3_id)
         ], any_order=False)
 
-        expected_ticket_details = {
-            'ticketID': None,
-            'ticketDetails': [],
-            'ticketNotes': [],
-        }
-        assert ticket_details_by_edge == expected_ticket_details
+        expected_ticket_details_list = []
+        assert ticket_details_by_edge == expected_ticket_details_list
 
     def post_ticket_note_test(self):
         logger = Mock()

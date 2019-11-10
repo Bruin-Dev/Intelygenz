@@ -23,6 +23,8 @@ class BruinRepository:
     def get_ticket_details_by_edge_serial(self, edge_serial, client_id,
                                           ticket_topic, category='SD-WAN',
                                           ticket_statuses=None):
+        result = []
+
         filtered_tickets = self.get_all_filtered_tickets(
             client_id=client_id, category=category, ticket_topic=ticket_topic,
             ticket_id=None, ticket_status=ticket_statuses,
@@ -33,19 +35,17 @@ class BruinRepository:
             ticket_details_dict = self.get_ticket_details(ticket_id)
 
             ticket_details_items = ticket_details_dict['ticketDetails']
-            for detail_item in ticket_details_items:
-                detail_value = detail_item['detailValue']
-                if detail_value == edge_serial:
-                    return {
-                        'ticketID': ticket_id,
-                        **ticket_details_dict,
-                    }
-        else:
-            return {
-                'ticketID': None,
-                'ticketDetails': [],
-                'ticketNotes': [],
-            }
+            ticket_details_items_as_booleans = map(
+                lambda ticket_detail: ticket_detail['detailValue'] == edge_serial,
+                ticket_details_items,
+            )
+            if any(ticket_details_items_as_booleans):
+                result.append({
+                    'ticketID': ticket_id,
+                    **ticket_details_dict,
+                })
+
+        return result
 
     def post_ticket_note(self, ticket_id, note):
         return self._bruin_client.post_ticket_note(ticket_id, note)
