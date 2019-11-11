@@ -25,7 +25,7 @@ class TemplateRenderer:
         rows = []
         for idx, key in enumerate(ticket_dict.keys()):
             rows.append({
-                "type": "even" if idx % 2 == 0 else "row",
+                "type": "even" if idx % 2 == 0 else "odd",
                 "__KEY__": key,
                 "__VALUE__": str(ticket_dict[key])
             })
