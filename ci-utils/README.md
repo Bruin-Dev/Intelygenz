@@ -86,6 +86,7 @@ Once the credentials have been configured, it is possible to use the script in t
 ```bash
 python <repository_directory>/ci-utils/delete_environments_aws_resources/main.py -e <environment_name> [commands]
 ```
+>To use any command it's necessary to specify the name as the first argument of the `main.py` script through the -e parameter.
 
 ### Commands <a name="delete_environments_aws_resources_commands"></a>
 
@@ -115,4 +116,4 @@ CLI supports a number of commands. These are explained below:
 
   * `CloudWatch Log Filters`
 
-* `-s`, `--security-groups`: Search and later erasure of all the `Security Groups` associated to the different resources created in *AWS* for the specified environment will be removed.
+* `-s`, `--security-groups`: All the `Security Groups` associated to the different resources created in *AWS* for the specified environment will be removed.
