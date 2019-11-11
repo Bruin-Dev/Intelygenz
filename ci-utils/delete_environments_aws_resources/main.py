@@ -11,41 +11,44 @@ import redis as redis_module
 import alb as alb_module
 import security_groups as security_groups_module
 import metrics as metrics_module
+import s3 as s3_module
 
 
 logging.basicConfig(level=logging.INFO)
 
 
 def _print_usage():
-    print('main.py -e <environment> [-a] | [-c] [-d] [-r] [-l] [-s] [-m]')
+    print('main.py -e <environment> [-a] | [-c] [-d] [-r] [-l] [-s] [-m] [-b]')
 
 
-def _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance, metrics_instance):
+def _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance, metrics_instance, s3_isntance):
     logging.info("There are going to be deleted all AWS resources associated with the environment {}".format(environment))
     ecs_instance.delete_ecs_cluster(environment)
     redis_instance.delete_redis_cluster(environment)
     alb_instance.delete_alb(environment)
     security_groups_instance.delete_security_groups(environment)
     metrics_instance.delete_metrics_resources(environment)
+    s3_instance.delete_s3buckets(environment)
 
 
 if __name__ == "__main__":
     argv = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(argv, "he:acdrlsm",
+        opts, args = getopt.getopt(argv, "he:acdrlsmb",
                                    ["environment=", "all", "ecs-cluster", "servicediscovery", "redis-cluster",
                                     "application-load-balancer",
-                                    "security-groups", "metrics"])
+                                    "security-groups", "metrics", "buckets"])
     except getopt.GetoptError:
         _print_usage()
         sys.exit(2)
 
     delete_all = False
-    if argv[0] != "-h" and (argv[0] != "-e" or re.match("-h|-a|-e|-d|-r|-l|-s|-m", argv[1])):
+    if argv[0] != "-h" and (argv[0] != "-e" or re.match("-h|-a|-e|-d|-r|-l|-s|-m|-b", argv[1])):
         _print_usage()
         sys.exit(2)
     elif "-a" or "--all" in argv[2:]:
+        print(argv[2:])
         delete_all = True
 
     ecs_instance = ecs_module.EcsServices()
@@ -53,6 +56,7 @@ if __name__ == "__main__":
     alb_instance = alb_module.ApplicationLoadBalancer()
     security_groups_instance = security_groups_module.SecurityGroups()
     metrics_instance = metrics_module.Metrics()
+    s3_instance = s3_module.S3Buckets()
 
     _, environment = opts.pop(0)
     if delete_all:
@@ -75,3 +79,5 @@ if __name__ == "__main__":
             security_groups_instance.delete_security_groups(environment)
         elif opt in ("-m", "--metrics"):
             metrics_instance.delete_metrics_resources(environment)
+        elif opt in ("-b", "--buckets"):
+            s3_instance.delete_s3buckets(environment)

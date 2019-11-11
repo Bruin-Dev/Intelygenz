@@ -8,7 +8,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-FNULL = open(os.devnull, 'w')
+FNULL = open('/dev/null', 'w')
 
 
 class Metrics:
