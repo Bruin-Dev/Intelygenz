@@ -323,7 +323,8 @@ font-family: Arial, sans-serif;
       <!--[if mso | IE]></td></tr></table><![endif]-->
 	<!-- END DIVIDER -->
 
-
+    {% set odd_row_bg_color = '#EDEFF0' %}
+    {% set even_row_bg_color = '#FFFFFF' %}
 	<!-- START DATA TABLE -->
       <!--[if mso | IE]><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" align="center" style="width:600px;"><tr><td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;"><![endif]-->
       <div style="margin:0px auto;max-width:600px;background:#ffffff;">
@@ -356,27 +357,17 @@ font-family: Arial, sans-serif;
 						<th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;"></th>
                       </tr>
                       {% for i in __OVERVIEW_ROWS__ %}
-                        {% if i["type"] == "odd"  %}
-                          <tr>
-                              <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal;
-                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
-                              white-space: nowrap">{{ i["__KEY__"] }}</td>
-                              <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal;
-                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
-                              white-space: nowrap">{{ i["__VALUE__"] }}</td>
-                              </tr>
-                          {% elif i["type"] == "even" %}
-                          <tr>
-                              <td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF;
+                        {% set current_row_bg_color = odd_row_bg_color if i["type"] == "odd" else even_row_bg_color %}
+                        <tr>
+                              <td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
                               color: #596872; font-weight: normal;
                               font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
                               white-space: nowrap">{{ i["__KEY__"] }}</td>
-                              <td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF;
+                              <td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
                               color: #596872; font-weight: normal;
                               font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
                               white-space: nowrap">{{ i["__VALUE__"] }}</td>
-                              </tr>
-                          {% endif %}
+                        </tr>
                         {% endfor %}
                     </tbody>
                   </table>
@@ -424,27 +415,17 @@ font-family: Arial, sans-serif;
 						<th bgcolor="#263640" style="background-color: #263640; color: #ffffff; font-weight: bold; font-size: 16px; line-height: 22px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;"></th>
                       </tr>
                       {% for i in __EVENT_ROWS__ %}
-                        {% if i["type"] == "odd"  %}
-                          <tr>
-                              <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal;
-                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
-                              white-space: nowrap">{{ i["__KEY__"] }}</td>
-                              <td class="odd" bgcolor="#EDEFF0" style="background-color: #EDEFF0; color: #596872; font-weight: normal;
-                              font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
-                              white-space: nowrap">{{ i["__VALUE__"] }}</td>
-                              </tr>
-                          {% elif i["type"] == "even" %}
-                          <tr>
-                              <td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF;
+                        {% set current_row_bg_color = odd_row_bg_color if i["type"] == "odd" else even_row_bg_color %}
+                        <tr>
+                              <td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
                               color: #596872; font-weight: normal;
                               font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
                               white-space: nowrap">{{ i["__KEY__"] }}</td>
-                              <td class="even" bgcolor="#FFFFFF" style="background-color: #FFFFFF;
+                              <td class="{{ i['type'] }}" bgcolor="{{ current_row_bg_color }}" style="background-color: {{ current_row_bg_color }};
                               color: #596872; font-weight: normal;
                               font-size: 14px; line-height: 20px; padding: 15px; letter-spacing: 0.05em; border: 1px solid #DDDDDD;
                               white-space: nowrap">{{ i["__VALUE__"] }}</td>
-                              </tr>
-                          {% endif %}
+                        </tr>
                         {% endfor %}
                     </tbody>
                   </table>
