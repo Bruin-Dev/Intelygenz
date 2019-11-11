@@ -12,6 +12,8 @@ In this folder are stored a series of scripts implemented in bash and python use
     - [Usage](#grafana_users_creation_usage)
 + [Scripts utils delete_environments_aws_resources](#scripts_utils-delete_environments_aws_resources)
     - [Description](#delete_environments_aws_resources_description)
+    - [Usage](#delete_environments_aws_resources_usage)
+    - [Commands](#delete_environments_aws_resources_commands)
 
 ## Script task_healtheck<a name="task_healthcheck"></a>
 
@@ -29,7 +31,7 @@ To use this script it is necessary do the following:
 * Provide as parameter `-t` the name of the service on which you want to perform the check performed by the script explained above, as shown below:
 
     ```sh
-    /bin/bash task_healthcheck.sh -t <service_name>
+    $ /bin/bash <repository_directory>/ci-utils/task_healthcheck.sh -t <service_name>
     ```
 
 ## Script grafana_users_creation<a name="grafana_users_creation"></a>
@@ -66,17 +68,46 @@ To use this script it is necessary to declare a series of variables, exposed bel
 
 ### Description <a name="delete_environments_aws_resources_description"></a>
 
-In the folder [`delete_environments_aws_resources`](./delete_environments_aws_resources) a series of *Python* files are stored, these allow the deletion of the resources created in AWS associated to an environment. The files mentioned are listed below:
+In the folder [`delete_environments_aws_resources`](./delete_environments_aws_resources) a series of *Python* files are stored, these allow the deletion of the resources created in AWS associated to an environment.
 
-* [`alb_py`](./delete_environments_aws_resources/alb_py): *Python* file where the class `ApplicationLoadBalancer` is implemented, in this one all the necessary functions to delete the Application Load Balancer associated to an environment are collected, as well as all the resources related to it (`TargetGroups`).
+>It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying echo -n "<branch_name>" | sha256sum | cut -c1-8 on the branch name related to the ephemeral environment.
 
-* [`ecs.py`](./delete_environments_aws_resources/ecs.py): *Python* file where the `EcsServices` class is implemented, in this one there are all the necessary functions to delete the ECS cluster associated to an environment, as well as all the resources related to it:
+### Usage <a name="delete_environments_aws_resources_usage"></a>
+
+In order to be able to use the CLI mentioned in the previous section it is necessary to previously define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
+
+```sh
+$ export AWS_ACCESS_KEY_ID=<access_key>
+$ export AWS_SECRET_ACCESS_KEY=<secret_key>
+```
+
+Once the credentials have been configured, it is possible to use the script in the following way:
+
+```bash
+python <repository_directory>/ci-utils/delete_environments_aws_resources/main.py -e <environment_name> [commands]
+```
+
+### Commands <a name="delete_environments_aws_resources_commands"></a>
+
+CLI supports a number of commands. These are explained below:
+
+* `-a`, `--all`: All the resources in AWS associated to the specified environment will be deleted, carrying out the corresponding orderly deletion of them so as not to produce dependency errors during the process.
+
+    >**If this option is specified, any other option will be ignored.**
+
+* `-c`, `--ecs-cluster`: The ECS cluster associated to the environment provided will be removed, as well as all the resources related to it:
   
   * `ECS Services` defined in the cluster and `Tasks` of each one of them.
   
   * `Namespaces` and `Services` associated with the same to perform [*services discovery*](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html) in the cluster
 
-* [`metrics.py`](./delete_environments_aws_resources/metrics.py): *Python* file where the `Metrics` class is implemented, this one gathers the functions for the erasure of all the resources related to metrics for an environment:
+* `-d`, `--service-discovery`: The `namespace` created for the `Service Discovery` of the environment provided will be deleted, previously all the services associated to that namespace will be deleted.
+
+* `-r`, `--redis-cluster`: The `ElastiCache Redis Cluster` associated to the specified environment will be removed.
+
+* `-l`, `--load-balancer`: The `Application Load Balancer (ALB)` associated to the specified environment will be removed, as well as all the resources related to it (`TargetGroups`).
+
+* `-m`, `--metrics`: All the resources related to metrics for the specified will be removed
 
   * `CloudWatch Alarms`
   
@@ -84,8 +115,4 @@ In the folder [`delete_environments_aws_resources`](./delete_environments_aws_re
 
   * `CloudWatch Log Filters`
 
-* [`redis.py`](./delete_environments_aws_resources/redis.py): *Python* file where the `RedisCluster` class is implemented, in charge of deleting and verifying the same of the ElatiCache Redis cluster associated to an environment.
-
-* [`security_groups.py`](./delete_environments_aws_resources/security_groups.py): *Python* file where the `SecurityGroups` class is implemented, in this one the search and later erasure of all the security groups associated to the different resources created in *AWS* for an environment is carried out.
-
-* [`main.py`](./delete_environments_aws_resources)
+* `-s`, `--security-groups`: Search and later erasure of all the `Security Groups` associated to the different resources created in *AWS* for the specified environment will be removed.
