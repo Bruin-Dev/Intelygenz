@@ -449,8 +449,7 @@ destroy-branches:
     - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
     - terraform init infra-as-code/ecs-services
     - terraform refresh infra-as-code/ecs-services
-    ## TODO: change commando terraform destroy -auto-approve infra-as-code/ecs-service for
-    ## terraform destroy -auto-approve infra-as-code/ecs-service
+    ## TODO: change command terraform destroy -auto-approve infra-as-code/ecs-service for terraform destroy -auto-approve infra-as-code/ecs-services
     - terraform destroy -auto-approve infra-as-code/ecs-service || python3 ci-utils/delete_environments_aws_resources/main.py -e $TF_VAR_ENVIRONMENT -a
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
