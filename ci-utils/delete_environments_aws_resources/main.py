@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     _, environment = opts.pop(0)
     if delete_all:
-        _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance, metrics_instance)
+        _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance, metrics_instance, s3_instance)
         sys.exit(0)
 
     for opt, _ in opts:
