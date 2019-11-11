@@ -7,6 +7,8 @@ import json
 import time
 import logging
 
+import common_utils as common_utils_module
+
 logging.basicConfig(level=logging.INFO)
 
 FNULL = open('/dev/null', 'w')
@@ -59,8 +61,9 @@ class EcsServices:
             logging.error("There are no services associated with the cluster {}".format(environment))
 
     @staticmethod
-    def _check_servicediscovery_namespace_exists(actual_namespaces, environment):
-        if any(namespaces['Name'] == environment for namespaces in actual_namespaces['Namespaces']):
+    def _check_servicediscovery_namespace_exists(actual_namespaces, namespace_name):
+        logging.info("environment to search is: {}".format(namespace_name))
+        if any(namespaces['Name'] == namespace_name for namespaces in actual_namespaces['Namespaces']):
             return True
         else:
             return False
@@ -88,6 +91,7 @@ class EcsServices:
         if len(services) == 0:
             logging.info('There is no services to delete from environment {}'.format(environment))
         else:
+            common_utils_instance = common_utils_module.CommonUtils()
             for index in range(len(services)):
                 for key in services[index]:
                     logging.info(
@@ -95,9 +99,22 @@ class EcsServices:
                             services[index]["service_name"],
                             services[index]["service_id"],
                             environment))
-                subprocess.call(
-                    ['aws', 'servicediscovery', 'delete-service', '--id', services[index]["service_id"], '--region',
-                     'us-east-1'], stdout=FNULL)
+                    remove_service_cmd = 'aws, servicediscovery, delete-service, --id, ' + services[index]["service_id"] + \
+                                         ', --region, us-east-1'
+                    remove_service_result = subprocess.call(remove_service_cmd.split(', '), stdout=FNULL)
+                    common_utils_instance.check_current_state_call(remove_service_result,
+                                                                   'Service from Service Discovery', services[index]["service_id"])
+                    if remove_service_result != 0:
+                        service_from_discovery_service_delete_try = 0
+                        current_exit_code = 0
+                        while common_utils_instance.can_retry_call(service_from_discovery_service_delete_try) and \
+                                current_exit_code != 0:
+                            current_exit_code, service_from_discovery_service_delete_try = common_utils_instance.\
+                                retry_call(remove_service_cmd, service_from_discovery_service_delete_try)
+                        common_utils_instance.check_current_state_call(current_exit_code,
+                                                                       'Service from Service Discovery',
+                                                                       services[index]["service_id"])
+
 
     @staticmethod
     def _delete_namespace_service(environment, namespace_id):
@@ -122,7 +139,7 @@ class EcsServices:
         servicediscovery_namespaces_list_call = subprocess.Popen(
             ['aws', 'servicediscovery', 'list-namespaces', '--region', 'us-east-1'], stdout=subprocess.PIPE)
         actual_namespaces = json.loads(servicediscovery_namespaces_list_call.stdout.read())
-        if self._check_servicediscovery_namespace_exists(actual_namespaces, environment):
+        if self._check_servicediscovery_namespace_exists(actual_namespaces, namespace_name):
             logging.info("Exists namespace for service discovery of environment {}".format(environment))
             namespace_id = self._get_servicediscovery_id(actual_namespaces, namespace_name)
             services = self._get_services_in_namespace(environment, namespace_id)
@@ -139,18 +156,22 @@ class EcsServices:
             logging.info("There is an ECS cluster for the environment {} with {} services active {} tasks running".
                          format(environment, cluster_information['ecs_cluster_information']['activeServicesCount'],
                                 cluster_information['ecs_cluster_information']['runningTasksCount']))
-            logging.info("ECS cluster information is: {}".format(cluster_information['ecs_cluster_information']))
-            ## TODO: Remove sleep, used for test use case
-            logging.info("Waiting while all ECS resources related with ECS cluster {} are removed".format(environment))
-            time.sleep(10)
             logging.info("ECS cluster for the environment {} is going to be removed".format(environment))
-            remove_ecs_cluster_call = subprocess.call(
-                ['aws', 'ecs', 'delete-cluster', '--cluster', environment, '--region', 'us-east-1'],
-                stdout=FNULL, stderr=FNULL)
-            if remove_ecs_cluster_call == 0:
-                logging.info("ECS cluster {} has been sucessfully removed".format(environment))
-            else:
-                logging.error("Problems occurred during the deletion of cluster ECS {}".format(environment))
+            cmd_call_remove_ecs_cluster = 'aws, ecs, delete-cluster, --cluster, ' + environment + ', --region' + \
+                                          ', us-east-1'
+            remove_ecs_cluster_call = subprocess.call(cmd_call_remove_ecs_cluster.split(', '), stdout=FNULL, stderr=FNULL)
+            common_utils_instance = common_utils_module.CommonUtils()
+            common_utils_instance.check_current_state_call(remove_ecs_cluster_call,
+                                                           'ECS Cluster', environment)
+            if remove_ecs_cluster_call != 0:
+                ecs_cluster_delete_try = 0
+                current_exit_code = 0
+                while common_utils_instance.can_retry_call(ecs_cluster_delete_try) and \
+                        current_exit_code != 0:
+                    current_exit_code, ecs_cluster_delete_try = common_utils_instance.retry_call(
+                        cmd_call_remove_ecs_cluster, ecs_cluster_delete_try)
+                common_utils_instance.check_current_state_call(current_exit_code, 'Security Group',
+                                                               environment)
         else:
             logging.error("There is no ECS cluster with the name {}".format(environment))
 

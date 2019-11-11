@@ -12,22 +12,24 @@ import alb as alb_module
 import security_groups as security_groups_module
 import metrics as metrics_module
 import s3 as s3_module
+import route53 as route53_module
 
 
 logging.basicConfig(level=logging.INFO)
 
 
 def _print_usage():
-    print('main.py -e <environment> [-a] | [-c] [-d] [-r] [-l] [-s] [-m] [-b]')
+    print('main.py -e <environment> [-a] | [-c] [-d] [-r] [-l] [-s] [-m] [-b] [-z]')
 
 
-def _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance, metrics_instance, s3_isntance):
+def _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance, metrics_instance, s3_instance, route53_instance):
     logging.info("There are going to be deleted all AWS resources associated with the environment {}".format(environment))
     ecs_instance.delete_ecs_cluster(environment)
     redis_instance.delete_redis_cluster(environment)
     alb_instance.delete_alb(environment)
     security_groups_instance.delete_security_groups(environment)
     metrics_instance.delete_metrics_resources(environment)
+    route53_instance.delete_environment_record_set(environment)
     s3_instance.delete_s3buckets(environment)
 
 
@@ -35,16 +37,16 @@ if __name__ == "__main__":
     argv = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(argv, "he:acdrlsmb",
+        opts, args = getopt.getopt(argv, "he:acdrlsmbz",
                                    ["environment=", "all", "ecs-cluster", "servicediscovery", "redis-cluster",
                                     "application-load-balancer",
-                                    "security-groups", "metrics", "buckets"])
+                                    "security-groups", "metrics", "buckets", "hosted-zones"])
     except getopt.GetoptError:
         _print_usage()
         sys.exit(2)
 
     delete_all = False
-    if argv[0] != "-h" and (argv[0] != "-e" or re.match("-h|-a|-e|-d|-r|-l|-s|-m|-b", argv[1])):
+    if argv[0] != "-h" and (argv[0] != "-e" or re.match("-h|-a|-e|-d|-r|-l|-s|-m|-b|-z", argv[1])):
         _print_usage()
         sys.exit(2)
     elif "-a" in argv[2:] or "--all" in argv[2:]:
@@ -56,6 +58,7 @@ if __name__ == "__main__":
     security_groups_instance = security_groups_module.SecurityGroups()
     metrics_instance = metrics_module.Metrics()
     s3_instance = s3_module.S3Buckets()
+    route53_instance = route53_module.Route53()
 
     _, environment = opts.pop(0)
     if delete_all:
@@ -80,3 +83,5 @@ if __name__ == "__main__":
             metrics_instance.delete_metrics_resources(environment)
         elif opt in ("-b", "--buckets"):
             s3_instance.delete_s3buckets(environment)
+        elif opt in ("-z", "--hosted-zones"):
+            route53_instance.delete_environment_record_set(environment)

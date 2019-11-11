@@ -44,18 +44,20 @@ class RedisCluster:
                 time.sleep(30)
                 actual_time = time.time()
             else:
-                logging.info("Redis cluster {} has been deleted successfully".format(environment))
+                logging.info("ElastiCache Redis cluster {} has been deleted successfully".format(environment))
                 correct_exit = True
                 break
         if timeout > actual_time and not correct_exit:
-            logging.error("The maximum waiting time for deleting the Redis cluster "
-                          "{} (5 minutes) has elapsed and it has not been possible to delete it".format(environment))
+            logging.error("The maximum waiting time for deleting the ElastiCache Redis cluster "
+                          "{} ({} seconds) has elapsed and it has not been possible to delete it".format(environment,
+                                                                                                         timeout))
 
     def delete_redis_cluster(self, environment):
         redis_cluster = self._check_redis_cluster_exists(environment)
-        logging.info("Checking if there is a redis cluster related with the environment {}".format(environment))
+        logging.info("Checking if there is a ElastiCache Redis Cluster related with the environment {}".
+                     format(environment))
         if redis_cluster['exists']:
-            logging.info("There is a redis cluster related with environment exists and has {} cache nodes".
+            logging.info("There is a ElastiCache Redis cluster related with environment exists and has {} cache nodes".
                          format(environment, redis_cluster['redis_cluster_information']['CacheClusters'][0]
             ['NumCacheNodes']))
             logging.info("Redis cluster {} it's going to be deleted".format(environment))
@@ -66,4 +68,4 @@ class RedisCluster:
             start_time = time.time()
             self._check_redis_cluster_is_deleted(environment, start_time)
         else:
-            logging.error("There isn't a redis cluster related with the environment {}".format(environment))
+            logging.error("There isn't a ElastiCache Redis cluster related with the environment {}".format(environment))
