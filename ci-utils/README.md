@@ -31,7 +31,7 @@ To use this script it is necessary do the following:
 * Provide as parameter `-t` the name of the service on which you want to perform the check performed by the script explained above, as shown below:
 
     ```sh
-    $ /bin/bash <repository_directory>/ci-utils/task_healthcheck.sh -t <service_name>
+    $ /bin/bash ci-utils/task_healthcheck.sh -t <service_name>
     ```
 
 ## Script grafana_users_creation<a name="grafana_users_creation"></a>
@@ -84,7 +84,7 @@ $ export AWS_SECRET_ACCESS_KEY=<secret_key>
 Once the credentials have been configured, it is possible to use the script in the following way:
 
 ```bash
-python <repository_directory>/ci-utils/delete_environments_aws_resources/main.py -e <environment_name> [commands]
+python ci-utils/delete_environments_aws_resources/main.py -e <environment_name> [commands]
 ```
 >To use any command it's necessary to specify the name as the first argument of the `main.py` script through the -e parameter.
 
