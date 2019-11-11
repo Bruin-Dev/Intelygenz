@@ -15,7 +15,11 @@ NATS_CONFIG = {
 
 MONITOR_CONFIG = {
     'recipient': "some.recipient@email.com",
-    'environment': "dev"
+    'environment': "dev",
+    'timezone': "US/Eastern",
+    'jobs_intervals': {
+        'outage_detector': 600,
+    }
 }
 
 LOG_CONFIG = {

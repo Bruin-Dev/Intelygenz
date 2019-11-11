@@ -22,7 +22,11 @@ NATS_CONFIG = {
 
 MONITOR_CONFIG = {
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
-    'environment': os.environ["CURRENT_ENVIRONMENT"]
+    'environment': os.environ["CURRENT_ENVIRONMENT"],
+    'timezone': "US/Eastern",
+    'jobs_intervals': {
+        'outage_detector': 600,
+    }
 }
 LOG_CONFIG = {
     'name': 'service-outage-monitor',
