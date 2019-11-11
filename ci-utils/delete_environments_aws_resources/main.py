@@ -58,7 +58,6 @@ if __name__ == "__main__":
     s3_instance = s3_module.S3Buckets()
 
     _, environment = opts.pop(0)
-    print("delete_all value is {}".format(delete_all))
     if delete_all:
         _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance, metrics_instance, s3_instance)
         sys.exit(0)
