@@ -435,7 +435,7 @@ class TestServiceOutageTriage:
         custom_triage_config['environment'] = environment
         with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
             with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
-                with patch.dict(config.TRIAGE_CONFIG, custom_triage_config, template_renderer):
+                with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
                     await service_outage_triage._poll_tickets()
 
         event_bus.rpc_request.assert_has_awaits([
