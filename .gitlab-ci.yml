@@ -440,7 +440,7 @@ destroy-branches:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - apk add --no-cache curl jq python py-pip gettext
+    - apk add --no-cache curl jq python3 gettext
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
     - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
@@ -451,7 +451,7 @@ destroy-branches:
     - terraform refresh infra-as-code/ecs-services
     ## TODO: change commando terraform destroy -auto-approve infra-as-code/ecs-service for
     ## terraform destroy -auto-approve infra-as-code/ecs-service
-    - terraform destroy -auto-approve infra-as-code/ecs-service || python ci-utils/delete_environments_aws_resources/main.py -e $TF_VAR_ENVIRONMENT -a
+    - terraform destroy -auto-approve infra-as-code/ecs-service || python3 ci-utils/delete_environments_aws_resources/main.py -e $TF_VAR_ENVIRONMENT -a
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf

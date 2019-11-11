@@ -47,8 +47,7 @@ if __name__ == "__main__":
     if argv[0] != "-h" and (argv[0] != "-e" or re.match("-h|-a|-e|-d|-r|-l|-s|-m|-b", argv[1])):
         _print_usage()
         sys.exit(2)
-    elif "-a" or "--all" in argv[2:]:
-        print(argv[2:])
+    elif "-a" in argv[2:] or "--all" in argv[2:]:
         delete_all = True
 
     ecs_instance = ecs_module.EcsServices()
@@ -59,6 +58,7 @@ if __name__ == "__main__":
     s3_instance = s3_module.S3Buckets()
 
     _, environment = opts.pop(0)
+    print("delete_all value is {}".format(delete_all))
     if delete_all:
         _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance, metrics_instance, s3_instance)
         sys.exit(0)
