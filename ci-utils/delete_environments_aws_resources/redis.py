@@ -36,8 +36,10 @@ class RedisCluster:
             redis_cluster_status = self._check_redis_cluster_exists(environment)
             if redis_cluster_status['exists']:
                 logging.info("Waiting for Redis cluster {} to be deleted".format(environment))
-                logging.info("Time elapsed for delete Redis cluster {} seconds".format(actual_time - start_time))
-                logging.info("Actual state of Redis cluster is: {}".format(
+                logging.info("Time elapsed for delete ElastiCache Redis cluster {} is  {} seconds".format(environment,
+                                                                                                          actual_time -
+                                                                                                          start_time))
+                logging.info("Actual state of ElastiCache Redis cluster is: {}".format(
                     redis_cluster_status['redis_cluster_information']['CacheClusters'][0]['CacheClusterStatus']))
                 time.sleep(30)
                 actual_time = time.time()
@@ -54,11 +56,12 @@ class RedisCluster:
         logging.info("Checking if there is a redis cluster related with the environment {}".format(environment))
         if redis_cluster['exists']:
             logging.info("There is a redis cluster related with environment exists and has {} cache nodes".
-                         format(environment,redis_cluster['redis_cluster_information']['CacheClusters'][0]
-                                                         ['NumCacheNodes']))
+                         format(environment, redis_cluster['redis_cluster_information']['CacheClusters'][0]
+            ['NumCacheNodes']))
             logging.info("Redis cluster {} it's going to be deleted".format(environment))
             subprocess.call(
-                ['aws', 'elasticache', 'delete-cache-cluster', '--cache-cluster-id', environment, '--region', 'us-east-1'],
+                ['aws', 'elasticache', 'delete-cache-cluster', '--cache-cluster-id', environment, '--region',
+                 'us-east-1'],
                 stdout=FNULL)
             start_time = time.time()
             self._check_redis_cluster_is_deleted(environment, start_time)

@@ -17,7 +17,7 @@ class EcsServices:
     def _delete_ecs_service(environment, service_name, service_id):
         logging.info(
             "Update desired count of service {} with id {} of ECS cluster {} to 0 ".format(service_name, service_id,
-                                                                                       environment))
+                                                                                           environment))
         subprocess.call(['aws', 'ecs', 'update-service', '--cluster', environment, '--service', service_id,
                          '--desired-count', '0'], stdout=FNULL)
         logging.info("Deleting service {} with id {} of cluster {}".format(service_name, service_id, environment))
@@ -140,6 +140,7 @@ class EcsServices:
                          format(environment, cluster_information['ecs_cluster_information']['activeServicesCount'],
                                 cluster_information['ecs_cluster_information']['runningTasksCount']))
             logging.info("ECS cluster information is: {}".format(cluster_information['ecs_cluster_information']))
+            ## TODO: Remove sleep, used for test use case
             logging.info("Waiting while all ECS resources related with ECS cluster {} are removed".format(environment))
             time.sleep(10)
             logging.info("ECS cluster for the environment {} is going to be removed".format(environment))
