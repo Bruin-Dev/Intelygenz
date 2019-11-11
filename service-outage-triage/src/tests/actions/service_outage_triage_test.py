@@ -1661,7 +1661,7 @@ class TestServiceOutageTriage:
         custom_triage_config['environment'] = environment
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
             with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
-                with patch.dict(config.TRIAGE_CONFIG, custom_triage_config, template_renderer):
+                with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
                     await service_outage_triage._check_for_new_events(timestamp, ticket)
 
         service_outage_triage._compose_event_note_object.assert_has_calls([
