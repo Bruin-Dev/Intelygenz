@@ -98,22 +98,22 @@ CLI supports a number of commands. These are explained below:
 
 * `-c`, `--ecs-cluster`: The ECS cluster associated to the environment provided will be removed, as well as all the resources related to it:
   
-  * `ECS Services` defined in the cluster and `Tasks` of each one of them.
+  * *ECS Services* defined in the ECS cluster and *Tasks* of each one of them.
   
-  * `Namespaces` and `Services` associated with the same to perform [*services discovery*](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html) in the cluster
+  * *Namespaces* and *Services* associated with the same to perform [*Services Discovery*](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html) in the cluster
 
-* `-d`, `--service-discovery`: The `namespace` created for the `Service Discovery` of the environment provided will be deleted, previously all the services associated to that namespace will be deleted.
+* `-d`, `--service-discovery`: The *namespace* created for the *Service Discovery* of the environment provided will be deleted, previously all the services associated to that namespace will be deleted.
 
-* `-r`, `--redis-cluster`: The `ElastiCache Redis Cluster` associated to the specified environment will be removed.
+* `-r`, `--redis-cluster`: The *ElastiCache Redis Cluster* associated to the specified environment will be removed.
 
-* `-l`, `--load-balancer`: The `Application Load Balancer (ALB)` associated to the specified environment will be removed, as well as all the resources related to it (`TargetGroups`).
+* `-l`, `--load-balancer`: The *Application Load Balancer (ALB)* associated to the specified environment will be removed, as well as all the resources related to it (*Target Groups*).
 
 * `-m`, `--metrics`: All the resources related to metrics for the specified will be removed
 
-  * `CloudWatch Alarms`
+  * *CloudWatch Alarms*
   
-  * `CloudWatch Dashboard`
+  * *CloudWatch Dashboard*
 
-  * `CloudWatch Log Filters`
+  * *CloudWatch Log Filters*
 
-* `-s`, `--security-groups`: All the `Security Groups` associated to the different resources created in *AWS* for the specified environment will be removed.
+* `-s`, `--security-groups`: All the *Security Groups* associated to the different resources created in *AWS* for the specified environment will be removed.
