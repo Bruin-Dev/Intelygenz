@@ -102,7 +102,7 @@ class TemplateRenderer:
         for idx, key in enumerate(edge_overview.keys()):
             parsed_key = re.sub(r" LABELMARK(.)*", "", key)
             rows.append({
-                "type": "even" if idx % 2 == 0 else "row",
+                "type": "even" if idx % 2 == 0 else "odd",
                 "__KEY__": parsed_key,
                 "__VALUE__": str(edge_overview[key])
             })
@@ -110,7 +110,7 @@ class TemplateRenderer:
         rows = []
         for idx, key in enumerate(edge_events.keys()):
             rows.append({
-                "type": "even" if idx % 2 == 0 else "row",
+                "type": "even" if idx % 2 == 0 else "odd",
                 "__KEY__": key,
                 "__VALUE__": str(edge_events[key])
             })
