@@ -42,12 +42,23 @@ class EdgeRepository:
         return full_id_str in edges.keys()
 
     def remove_edge(self, full_id):
-        edges = self.get_all_edges()
+        stored_edges = self.get_all_edges()
 
+        self.__remove_edge_from_store(stored_edges, full_id)
+        self._redis_client.set(self._root_key, json.dumps(stored_edges))
+
+    def remove_edge_set(self, *edges_to_remove):
+        stored_edges = self.get_all_edges()
+
+        for full_id in edges_to_remove:
+            self.__remove_edge_from_store(stored_edges, full_id)
+
+        self._redis_client.set(self._root_key, json.dumps(stored_edges))
+
+    def __remove_edge_from_store(self, stored_edges_dict, full_id):
         full_id_str = self.__compound_full_id_str(full_id)
-        if full_id_str in edges.keys():
-            del edges[full_id_str]
-            self._redis_client.set(self._root_key, json.dumps(edges))
+        if full_id_str in stored_edges_dict.keys():
+            del stored_edges_dict[full_id_str]
             self._logger.info(f'Edge with full ID {full_id_str} removed from Redis key {self._root_key}')
 
     def __compound_full_id_str(self, full_id_dict):

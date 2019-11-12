@@ -276,4 +276,85 @@ class TestEdgeRepository:
         edge_repository.remove_edge({'host': 'missing', 'enterprise_id': 0, 'edge_id': 0})
 
         edge_repository.get_all_edges.assert_called_once()
-        redis_client.set.assert_not_called()
+        redis_client.set.assert_called_once_with(
+            root_key,
+            json.dumps(root_key_contents)
+        )
+
+    def remove_edge_set_test(self):
+        edge_1_host = 'mettel.velocloud.net'
+        edge_1_enterprise_id = 1111
+        edge_1_id = 2222
+        edge_1_full_id = {'host': edge_1_host, 'enterprise_id': edge_1_enterprise_id, 'edge_id': edge_1_id}
+        edge_1_full_id_str = f'{edge_1_host}|{edge_1_enterprise_id}|{edge_1_id}'
+        edge_1_status = {'edges': {'edgeState': 'OFFLINE'}}
+
+        edge_2_host = 'mettel.velocloud.net'
+        edge_2_enterprise_id = 3333
+        edge_2_id = 4444
+        edge_2_full_id_str = f'{edge_2_host}|{edge_2_enterprise_id}|{edge_2_id}'
+        edge_2_status = {'edges': {'edgeState': 'CONNECTED'}}
+
+        edge_3_host = 'mettel.velocloud.net'
+        edge_3_enterprise_id = 5555
+        edge_3_id = 6666
+        edge_3_full_id = {'host': edge_3_host, 'enterprise_id': edge_3_enterprise_id, 'edge_id': edge_3_id}
+        edge_3_full_id_str = f'{edge_3_host}|{edge_3_enterprise_id}|{edge_3_id}'
+        edge_3_status = {'edges': {'edgeState': 'OFFLINE'}}
+
+        root_key_contents = {
+            edge_1_full_id_str: edge_1_status,
+            edge_2_full_id_str: edge_2_status,
+            edge_3_full_id_str: edge_3_status,
+        }
+
+        root_key = 'test-key'
+        logger = Mock()
+        redis_client = Mock()
+
+        edge_repository = EdgeRepository(logger, redis_client, root_key)
+        edge_repository.get_all_edges = Mock(return_value=root_key_contents)
+
+        edge_repository.remove_edge_set(edge_1_full_id, edge_3_full_id)
+
+        edge_repository.get_all_edges.assert_called_once()
+        redis_client.set.assert_called_once_with(
+            root_key,
+            json.dumps({edge_2_full_id_str: edge_2_status})
+        )
+
+    def remove_edge_set_with_no_existing_edges_test(self):
+        edge_1_host = 'mettel.velocloud.net'
+        edge_1_enterprise_id = 1111
+        edge_1_id = 2222
+        edge_1_full_id_str = f'{edge_1_host}|{edge_1_enterprise_id}|{edge_1_id}'
+        edge_1_status = {'edges': {'edgeState': 'OFFLINE'}}
+
+        edge_2_host = 'mettel.velocloud.net'
+        edge_2_enterprise_id = 3333
+        edge_2_id = 4444
+        edge_2_full_id = {'host': edge_2_host, 'enterprise_id': edge_2_enterprise_id, 'edge_id': edge_2_id}
+
+        edge_3_host = 'mettel.velocloud.net'
+        edge_3_enterprise_id = 5555
+        edge_3_id = 6666
+        edge_3_full_id = {'host': edge_3_host, 'enterprise_id': edge_3_enterprise_id, 'edge_id': edge_3_id}
+
+        root_key_contents = {
+            edge_1_full_id_str: edge_1_status,
+        }
+
+        root_key = 'test-key'
+        logger = Mock()
+        redis_client = Mock()
+
+        edge_repository = EdgeRepository(logger, redis_client, root_key)
+        edge_repository.get_all_edges = Mock(return_value=root_key_contents)
+
+        edge_repository.remove_edge_set(edge_2_full_id, edge_3_full_id)
+
+        edge_repository.get_all_edges.assert_called_once()
+        redis_client.set.assert_called_once_with(
+            root_key,
+            json.dumps(root_key_contents)
+        )
