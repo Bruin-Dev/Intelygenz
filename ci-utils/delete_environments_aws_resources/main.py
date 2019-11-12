@@ -68,7 +68,7 @@ if __name__ == "__main__":
     if delete_all:
         _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance, metrics_instance,
                     s3_instance, route53_instance, cloud_formation_instance)
-        sys.exit()
+        sys.exit(0)
 
     for opt, _ in opts:
         if opt == '-h':

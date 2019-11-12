@@ -196,9 +196,11 @@ class EcsServices:
     @staticmethod
     def _check_ecs_cluster_is_active(cluster_info):
         ecs_cluster_is_active = False
-        if cluster_info['status'] != "INACTIVE" and (cluster_info['registeredContainerInstancesCount'] > 0 or
-                                                     cluster_info['runningTasksCount'] > 0 or cluster_info[
-                                                         'pendingTasksCount'] > 0 or cluster_info['activeServicesCount']
-                                                     > 0):
+        if cluster_info['status'] == "ACTIVE" or (
+                cluster_info['status'] != "ACTIVE" and (cluster_info['registeredContainerInstancesCount'] > 0 or
+                                                        cluster_info['runningTasksCount'] > 0 or cluster_info[
+                                                            'pendingTasksCount'] > 0 or cluster_info[
+                                                            'activeServicesCount']
+                                                        > 0)):
             ecs_cluster_is_active = True
         return ecs_cluster_is_active
