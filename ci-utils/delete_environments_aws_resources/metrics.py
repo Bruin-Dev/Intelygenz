@@ -86,7 +86,7 @@ class Metrics:
     @staticmethod
     def _delete_log_metrics(environment, log_metrics_for_cluster):
         for i in log_metrics_for_cluster.keys():
-            log_metric_filter_name = log_metrics_for_cluster['log_metrics_filters'][i]
+            log_metric_filter_name = log_metrics_for_cluster[i]
             logging.info("Log metric filter with name {} it's going to be deleted".format(log_metric_filter_name))
             subprocess.call(
                 ['aws', 'logs', 'delete-metric-filter', '--log-group-name', environment, '--filter-name',
