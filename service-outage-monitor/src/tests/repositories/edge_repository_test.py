@@ -69,7 +69,8 @@ class TestEdgeRepository:
             json.dumps({
                 stored_edge_id: stored_edge_status,
                 f'{new_edge_host}|{str(new_edge_enterprise_id)}|{str(new_edge_id)}': new_edge_status,
-            })
+            }),
+            ex=60,
         )
 
     def add_edge_with_update_existing_edge_test(self):
@@ -103,7 +104,8 @@ class TestEdgeRepository:
             root_key,
             json.dumps({
                 stored_edge_full_id: new_edge_status,
-            })
+            }),
+            ex=60,
         )
 
     def add_edge_with_no_update_existing_edge_and_edge_not_actually_existing_test(self):
@@ -138,7 +140,8 @@ class TestEdgeRepository:
             root_key,
             json.dumps({
                 stored_edge_full_id: new_edge_status,
-            })
+            }),
+            ex=60,
         )
 
     def add_edge_with_no_update_existing_edge_and_edge_actually_existing_test(self):

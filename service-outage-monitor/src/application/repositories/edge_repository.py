@@ -15,7 +15,7 @@ class EdgeRepository:
         self._logger.info(f'Clearing contents for Redis key "{self._root_key}"...')
         self._redis_client.set(self._root_key, {})
 
-    def add_edge(self, full_id, status, update_existing=True):
+    def add_edge(self, full_id, status, update_existing=True, time_to_live=60):
         full_id_str = self.__compound_full_id_str(full_id)
 
         if not update_existing and self.exists_edge(full_id):
@@ -27,7 +27,7 @@ class EdgeRepository:
         stored_edges = self.get_all_edges()
         stored_edges[full_id_str] = status
 
-        self._redis_client.set(self._root_key, json.dumps(stored_edges))
+        self._redis_client.set(self._root_key, json.dumps(stored_edges), ex=time_to_live)
         self._logger.info(
             f'Edge with full ID "{full_id_str}" written in Redis key "{self._root_key}" successfully'
         )
