@@ -47,6 +47,18 @@ class BruinRepository:
 
         return result
 
+    def get_outage_ticket_details_by_edge_serial(self, edge_serial, client_id,
+                                                 category='SD-WAN', ticket_statuses=None):
+        ticket_details_list = self.get_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, client_id=client_id, ticket_topic='VOO',
+            category=category, ticket_statuses=ticket_statuses,
+        )
+
+        if not ticket_details_list:
+            return
+
+        return ticket_details_list[0]
+
     def post_ticket_note(self, ticket_id, note):
         return self._bruin_client.post_ticket_note(ticket_id, note)
 

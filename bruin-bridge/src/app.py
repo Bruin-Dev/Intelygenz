@@ -4,6 +4,7 @@ from application.repositories.bruin_repository import BruinRepository
 from application.actions.get_tickets import GetTicket
 from application.actions.get_ticket_details import GetTicketDetails
 from application.actions.get_ticket_details_by_edge_serial import GetTicketDetailsByEdgeSerial
+from application.actions.get_outage_ticket_details_by_edge_serial import GetOutageTicketDetailsByEdgeSerial
 from application.actions.post_note import PostNote
 from igz.packages.nats.clients import NATSClient
 from application.actions.post_ticket import PostTicket
@@ -26,6 +27,7 @@ class Container:
         self._subscriber_tickets = NATSClient(config, logger=self._logger)
         self._subscriber_details = NATSClient(config, logger=self._logger)
         self._subscriber_details_by_edge_serial = NATSClient(config, logger=self._logger)
+        self._subscriber_outage_details_by_edge_serial = NATSClient(config, logger=self._logger)
         self._subscriber_post_note = NATSClient(config, logger=self._logger)
         self._subscriber_post_ticket = NATSClient(config, logger=self._logger)
 
@@ -35,6 +37,10 @@ class Container:
         self._event_bus.add_consumer(
             self._subscriber_details_by_edge_serial,
             consumer_name="ticket_details_by_edge_serial"
+        )
+        self._event_bus.add_consumer(
+            self._subscriber_outage_details_by_edge_serial,
+            consumer_name="outage_ticket_details_by_edge_serial"
         )
         self._event_bus.add_consumer(self._subscriber_post_note, consumer_name="post_note")
         self._event_bus.add_consumer(self._subscriber_post_ticket, consumer_name="post_ticket")
@@ -47,6 +53,9 @@ class Container:
         self._get_ticket_details_by_edge_serial = GetTicketDetailsByEdgeSerial(
             self._logger, self._event_bus, self._bruin_repository
         )
+        self._get_outage_ticket_details_by_edge_serial = GetOutageTicketDetailsByEdgeSerial(
+            self._logger, self._event_bus, self._bruin_repository
+        )
         self._post_note = PostNote(self._logger, self._event_bus, self._bruin_repository)
         self._post_ticket = PostTicket(self._logger, self._event_bus, self._bruin_repository)
 
@@ -56,6 +65,10 @@ class Container:
                                                        is_async=True, logger=self._logger)
         self._action_get_ticket_detail_by_edge_serial = ActionWrapper(
             self._get_ticket_details_by_edge_serial, "send_ticket_details_by_edge_serial",
+            is_async=True, logger=self._logger,
+        )
+        self._action_get_outage_ticket_detail_by_edge_serial = ActionWrapper(
+            self._get_outage_ticket_details_by_edge_serial, "send_outage_ticket_details_by_edge_serial",
             is_async=True, logger=self._logger,
         )
         self._action_post_note = ActionWrapper(self._post_note, "post_note",
@@ -76,6 +89,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="ticket_details_by_edge_serial",
                                                  topic="bruin.ticket.details.by_edge_serial.request",
                                                  action_wrapper=self._action_get_ticket_detail_by_edge_serial,
+                                                 queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="outage_ticket_details_by_edge_serial",
+                                                 topic="bruin.ticket.outage.details.by_edge_serial.request",
+                                                 action_wrapper=self._action_get_outage_ticket_detail_by_edge_serial,
                                                  queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="post_note", topic="bruin.ticket.note.append.request",
                                                  action_wrapper=self._action_post_note,
