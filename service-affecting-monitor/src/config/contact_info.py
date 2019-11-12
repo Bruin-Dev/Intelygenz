@@ -22,16 +22,14 @@ devices_by_id = [
 
     },
     {
-        # ASK BRIAN, site name is 5700 Lake Wright Drive, Norfolk. Site name TA Corp - Twin Oaks Complex
-        # Other contacts in norfolk are Gary Clark or Jeff Mack. Are any of those?
         # TA Corp - Twin Oaks Complex
-        # "serial": 'VC05200026138',
-        # "host": "mettel.velocloud.net",
-        # "enterprise_id": 137,
-        # "edge_id": 958,
-        # "email": "UNKNOWN",
-        # "phone": "UNKNOWN",
-        # "name": "UNKNOWN"
+        "serial": 'VC05200026138',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 958,
+        "email": "gclark@titanamerica.com",
+        "phone": "757-533-7151",
+        "name": "Gary Clark"
 
     },
     {
@@ -112,39 +110,36 @@ devices_by_id = [
 
     },
     {
-        # # NOT SURE ASK BRIAN
         # # TA Corp - QTS Data Center
-        # "serial": 'VCE20000000940',
-        # "host": "mettel.velocloud.net",
-        # "enterprise_id": 137,
-        # "edge_id": 2419,
-        # "email": "jrossi@west.com ",
-        # "phone": "502-618-5535",
-        # "name": "Justin Rossi"
+        "serial": 'VCE20000000940',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2419,
+        "email": "jrossi@west.com ",
+        "phone": "502-618-5535",
+        "name": "Justin Rossi"
 
     },
     {
-        # # NOT SURE ASK BRIAN
         # # TA Corp - QTS Data Center BACKUP DEVICE
-        # "serial": 'VCE20000000895',
-        # "host": "mettel.velocloud.net",
-        # "enterprise_id": 137,
-        # "edge_id": 2419,
-        # "email": "jrossi@west.com ",
-        # "phone": "502-618-5535",
-        # "name": "Justin Rossi"
+        "serial": 'VCE20000000895',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2419,
+        "email": "jrossi@west.com ",
+        "phone": "502-618-5535",
+        "name": "Justin Rossi"
 
     },
     {
-        # ASK BRIAN
         # # TA FL - Zephyrhills RM
-        # "serial": 'VC05200059766',
-        # "host": "mettel.velocloud.net",
-        # "enterprise_id": 137,
-        # "edge_id": 2839,
-        # "email": "jaylor@titanamerica.com",
-        # "phone": "540-512-7663",
-        # "name": "Jennifer Aylor"
+        "serial": 'VC05200059766',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2839,
+        "email": "JFritts@titanamerica.com",
+        "phone": "941-286-3237",
+        "name": "Jim Frit"
 
     },
     {
