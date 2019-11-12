@@ -25,6 +25,8 @@ class Container:
 
         self._online_edge_repository = EdgeRepository(root_key='ONLINE_EDGES')
         self._quarantine_edge_repository = EdgeRepository(root_key='EDGES_QUARANTINE')
+        self._online_edge_repository.initialize_root_key()
+        self._quarantine_edge_repository.initialize_root_key()
 
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
