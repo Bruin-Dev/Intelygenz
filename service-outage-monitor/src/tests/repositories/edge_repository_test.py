@@ -1,7 +1,10 @@
 import json
+import time
 
 from unittest.mock import Mock
+from unittest.mock import patch
 
+from application.repositories import edge_repository as edge_repository_module
 from application.repositories.edge_repository import EdgeRepository
 
 
@@ -51,7 +54,7 @@ class TestEdgeRepository:
         new_edge_status = {'edges': {'edgeState': 'CONNECTED'}}
 
         stored_edge_id = 'mettel.velocloud.net|1111|2222'
-        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}}
+        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}, 'addition_timestamp': 123456789}
         currently_stored_edges = {stored_edge_id: stored_edge_status}
 
         root_key = 'test-key'
@@ -61,14 +64,20 @@ class TestEdgeRepository:
         edge_repository = EdgeRepository(logger, redis_client, root_key)
         edge_repository.get_all_edges = Mock(return_value=currently_stored_edges)
 
-        edge_repository.add_edge(new_edge_full_id, new_edge_status)
+        current_timestamp = time.time()
+        time_mock = Mock()
+        time_mock.time = Mock(return_value=current_timestamp)
+        with patch.object(edge_repository_module, 'time', new=time_mock):
+            edge_repository.add_edge(new_edge_full_id, new_edge_status)
 
         edge_repository.get_all_edges.assert_called_once()
         redis_client.set.assert_called_once_with(
             root_key,
             json.dumps({
                 stored_edge_id: stored_edge_status,
-                f'{new_edge_host}|{str(new_edge_enterprise_id)}|{str(new_edge_id)}': new_edge_status,
+                f'{new_edge_host}|{str(new_edge_enterprise_id)}|{str(new_edge_id)}': {
+                    **new_edge_status, 'addition_timestamp': current_timestamp
+                }
             }),
             ex=60,
         )
@@ -79,7 +88,7 @@ class TestEdgeRepository:
         stored_edge_id = 2222
 
         stored_edge_full_id = f'{stored_edge_host}|{stored_edge_enterprise_id}|{stored_edge_id}'
-        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}}
+        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}, 'addition_timestamp': 123456789}
         currently_stored_edges = {stored_edge_full_id: stored_edge_status}
 
         new_edge_full_id = {
@@ -97,13 +106,17 @@ class TestEdgeRepository:
         edge_repository.exists_edge = Mock(return_value=True)
         edge_repository.get_all_edges = Mock(return_value=currently_stored_edges)
 
-        edge_repository.add_edge(new_edge_full_id, new_edge_status, update_existing=True)
+        current_timestamp = time.time()
+        time_mock = Mock()
+        time_mock.time = Mock(return_value=current_timestamp)
+        with patch.object(edge_repository_module, 'time', new=time_mock):
+            edge_repository.add_edge(new_edge_full_id, new_edge_status, update_existing=True)
 
         edge_repository.get_all_edges.assert_called_once()
         redis_client.set.assert_called_once_with(
             root_key,
             json.dumps({
-                stored_edge_full_id: new_edge_status,
+                stored_edge_full_id: {**new_edge_status, 'addition_timestamp': current_timestamp},
             }),
             ex=60,
         )
@@ -114,7 +127,7 @@ class TestEdgeRepository:
         stored_edge_id = 2222
 
         stored_edge_full_id = f'{stored_edge_host}|{stored_edge_enterprise_id}|{stored_edge_id}'
-        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}}
+        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}, 'addition_timestamp': 123456789}
         currently_stored_edges = {stored_edge_full_id: stored_edge_status}
 
         new_edge_full_id = {
@@ -132,14 +145,18 @@ class TestEdgeRepository:
         edge_repository.exists_edge = Mock(return_value=False)
         edge_repository.get_all_edges = Mock(return_value=currently_stored_edges)
 
-        edge_repository.add_edge(new_edge_full_id, new_edge_status, update_existing=False)
+        current_timestamp = time.time()
+        time_mock = Mock()
+        time_mock.time = Mock(return_value=current_timestamp)
+        with patch.object(edge_repository_module, 'time', new=time_mock):
+            edge_repository.add_edge(new_edge_full_id, new_edge_status, update_existing=False)
 
         edge_repository.exists_edge.assert_called_once_with(new_edge_full_id)
         edge_repository.get_all_edges.assert_called_once()
         redis_client.set.assert_called_once_with(
             root_key,
             json.dumps({
-                stored_edge_full_id: new_edge_status,
+                stored_edge_full_id: {**new_edge_status, 'addition_timestamp': current_timestamp},
             }),
             ex=60,
         )
@@ -150,7 +167,7 @@ class TestEdgeRepository:
         stored_edge_id = 2222
 
         stored_edge_full_id = f'{stored_edge_host}|{stored_edge_enterprise_id}|{stored_edge_id}'
-        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}}
+        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}, 'addition_timestamp': 123456789}
         currently_stored_edges = {stored_edge_full_id: stored_edge_status}
 
         new_edge_full_id = {

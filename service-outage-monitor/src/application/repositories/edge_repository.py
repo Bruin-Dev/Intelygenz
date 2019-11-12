@@ -1,4 +1,5 @@
 import json
+import time
 
 
 class EdgeRepository:
@@ -23,6 +24,8 @@ class EdgeRepository:
                 f'Edge with full ID "{full_id_str}" will not be overwritten in Redis key "{self._root_key}"'
             )
             return
+
+        status['addition_timestamp'] = time.time()
 
         stored_edges = self.get_all_edges()
         stored_edges[full_id_str] = status
