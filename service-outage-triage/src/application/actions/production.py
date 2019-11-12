@@ -5,7 +5,8 @@ from shortuuid import uuid
 
 class ProductionAction:
 
-    def __init__(self, event_bus, config):
+    def __init__(self, logger, event_bus, config):
+        self._logger = logger
         self._event_bus = event_bus
         self._config = config
 
@@ -27,7 +28,7 @@ class ProductionAction:
                          'message': f'{note_type} appended to ticket: '
                                     f'https://app.bruin.com/helpdesk?clientId=85940&'
                                     f'ticketId={ticket_id}, in '
-                                    f'{self._config.TRIAGE_CONFIG["environment"]}'}
+                                    f'{self._config.ENV_CONFIG["environment"]}'}
         await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
                                           timeout=10)
 

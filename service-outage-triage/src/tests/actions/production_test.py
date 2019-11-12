@@ -15,23 +15,26 @@ from config import testconfig
 class TestProductionAction:
 
     def instance_test(self):
+        logger = Mock()
         event_bus = Mock()
         config = Mock()
 
-        production_action = ProductionAction(event_bus, config)
+        production_action = ProductionAction(logger, event_bus, config)
 
+        assert production_action._logger == logger
         assert production_action._event_bus == event_bus
         assert production_action._config == config
 
     @pytest.mark.asyncio
     async def run_triage_action_test(self):
+        logger = Mock()
         event_bus = Mock()
         config = Mock()
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
         test_note = 'Test Note'
         ticket_id = 123
 
-        production_action = ProductionAction(event_bus, config)
+        production_action = ProductionAction(logger, event_bus, config)
         production_action._ticket_object_to_string = Mock(return_value=test_note)
         production_action._make_rpc_requests = CoroutineMock()
 
@@ -42,12 +45,13 @@ class TestProductionAction:
 
     @pytest.mark.asyncio
     async def run_event_action_test(self):
+        logger = Mock()
         event_bus = Mock()
         config = Mock()
         test_note = 'Test Note'
         ticket_id = 123
 
-        production_action = ProductionAction(event_bus, config)
+        production_action = ProductionAction(logger, event_bus, config)
         production_action._make_rpc_requests = CoroutineMock()
 
         await production_action.run_event_action(test_note, ticket_id)
@@ -56,10 +60,12 @@ class TestProductionAction:
 
     @pytest.mark.asyncio
     async def make_rpc_requests_test(self):
+        logger = Mock()
+
         config = testconfig
         environment = 'production'
 
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config = config.ENV_CONFIG.copy()
         custom_triage_config['environment'] = environment
 
         test_note = 'Test Note'
@@ -75,9 +81,9 @@ class TestProductionAction:
         uuid_2 = uuid()
         uuid_side_effect = [uuid_1, uuid_2]
 
-        production_action = ProductionAction(event_bus, config)
+        production_action = ProductionAction(logger, event_bus, config)
         with patch.object(production_module, 'uuid', side_effect=uuid_side_effect):
-            with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            with patch.dict(config.ENV_CONFIG, custom_triage_config):
                 await production_action._make_rpc_requests("Triage", ticket_id, test_note)
 
         event_bus.rpc_request.assert_has_awaits([
@@ -106,11 +112,12 @@ class TestProductionAction:
         )
 
     def ticket_object_to_string_test(self):
+        logger = Mock()
         event_bus = Mock()
         config = Mock()
 
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
 
-        production_action = ProductionAction(event_bus, config)
+        production_action = ProductionAction(logger, event_bus, config)
         ticket_note = production_action._ticket_object_to_string(test_dict)
         assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'

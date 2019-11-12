@@ -13,9 +13,12 @@ NATS_CONFIG = {
     }
 }
 
+ENV_CONFIG = {
+    'environment': 'dev',
+}
+
 MONITOR_CONFIG = {
     'recipient': "some.recipient@email.com",
-    'environment': "dev",
     'timezone': 'US/Eastern',
     'monitoring_seconds': 600,
     "latency_wireless": 120,

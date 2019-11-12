@@ -16,16 +16,20 @@ from config import testconfig
 class TestProductionAction:
 
     def instance_test(self):
+        logger = Mock()
         event_bus = Mock()
         config = Mock()
 
-        development_action = DevelopmentAction(event_bus, config)
+        development_action = DevelopmentAction(logger, event_bus, config)
 
+        assert development_action._logger == logger
         assert development_action._event_bus == event_bus
         assert development_action._config == config
 
     @pytest.mark.asyncio
     async def run_triage_action_test(self):
+        logger = Mock()
+
         config = testconfig
 
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
@@ -40,7 +44,7 @@ class TestProductionAction:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[ticket_note_as_email_object, send_to_slack])
 
-        development_action = DevelopmentAction(event_bus, config)
+        development_action = DevelopmentAction(logger, event_bus, config)
         development_action._ticket_object_to_email_obj = Mock(return_value=ticket_note_as_email_object)
 
         with patch.object(development_module, 'uuid', return_value=uuid_1):
@@ -67,6 +71,7 @@ class TestProductionAction:
         )
 
     def ticket_object_to_email_obj_test(self):
+        logger = Mock()
         event_bus = Mock()
         config = testconfig
         ticket_dict = OrderedDict()
@@ -74,7 +79,7 @@ class TestProductionAction:
         ticket_dict['Edge Status'] = 'ok'
         ticket_dict["Last Edge Online"] = 'test time'
         ticket_dict['Events URL'] = 'event.com'
-        development_action = DevelopmentAction(event_bus, config)
+        development_action = DevelopmentAction(logger, event_bus, config)
         email = development_action._ticket_object_to_email_obj(ticket_dict)
 
         assert 'Service outage triage' in email["email_data"]["subject"]
@@ -82,12 +87,13 @@ class TestProductionAction:
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 
     def ticket_object_to_email_obj_no_events_test(self):
+        logger = Mock()
         event_bus = Mock()
         config = testconfig
         ticket_dict = OrderedDict()
         ticket_dict['EdgeName'] = 'Test'
         ticket_dict['Edge Status'] = 'ok'
-        development_action = DevelopmentAction(event_bus, config)
+        development_action = DevelopmentAction(logger, event_bus, config)
         email = development_action._ticket_object_to_email_obj(ticket_dict)
 
         assert 'Service outage triage' in email["email_data"]["subject"]

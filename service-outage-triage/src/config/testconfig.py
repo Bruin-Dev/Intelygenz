@@ -12,8 +12,12 @@ NATS_CONFIG = {
         'max_pub_acks_inflight': 6000
     }
 }
+
+ENV_CONFIG = {
+    'environment': 'dev',
+}
+
 TRIAGE_CONFIG = {
-    'environment': "dev",
     'polling_minutes': 10,
     'recipient': "some.recipient@email.com",
     'timezone': 'US/Eastern',
