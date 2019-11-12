@@ -43,10 +43,6 @@ class SecurityGroups:
                                                                                      security_group_id))
                 cmd_call_remove_sg = 'aws, ec2, delete-security-group, --group-id, ' + security_group_id
                 remove_security_group = subprocess.call(cmd_call_remove_sg.split(', '), stdout=FNULL)
-                if remove_security_group == 0:
-                    logging.info("Call ok")
-                else:
-                    logging.info("Call ko")
                 common_utils_instance.check_current_state_call(remove_security_group,
                                                                'Security Group', security_group_name)
                 if remove_security_group != 0:
