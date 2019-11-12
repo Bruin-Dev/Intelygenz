@@ -124,7 +124,7 @@ class TestBruinRepository:
         ticket_status_2 = "In-Progress"
         ticket_statuses = [ticket_status_1, ticket_status_2]
         category = 'SD-WAN'
-        ticket_topic = 'VOO'
+        ticket_topic = 'VAS'
 
         ticket_1_id = 123
         ticket_2_id = 321
@@ -223,7 +223,7 @@ class TestBruinRepository:
         ticket_status_2 = "In-Progress"
         ticket_statuses = [ticket_status_1, ticket_status_2]
         category = 'SD-WAN'
-        ticket_topic = 'VOO'
+        ticket_topic = 'VAS'
 
         bruin_repository = BruinRepository(logger, bruin_client)
         bruin_repository.get_all_filtered_tickets = Mock(return_value=[])
@@ -258,7 +258,7 @@ class TestBruinRepository:
         ticket_status_2 = "In-Progress"
         ticket_statuses = [ticket_status_1, ticket_status_2]
         category = 'SD-WAN'
-        ticket_topic = 'VOO'
+        ticket_topic = 'VAS'
 
         ticket_1_id = 123
         ticket_2_id = 321
@@ -318,7 +318,7 @@ class TestBruinRepository:
         ticket_status_2 = "In-Progress"
         ticket_statuses = [ticket_status_1, ticket_status_2]
         category = 'SD-WAN'
-        ticket_topic = 'VOO'
+        ticket_topic = 'VAS'
 
         ticket_1_id = 123
         ticket_2_id = 321

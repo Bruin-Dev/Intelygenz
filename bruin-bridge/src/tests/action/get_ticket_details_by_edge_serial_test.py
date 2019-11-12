@@ -25,7 +25,6 @@ class TestGetTicketDetailsByEdgeSerial:
 
         request_id = "123"
         response_topic = 'some.random.rpc.inbox'
-        ticket_id = 321
         client_id = 123
         edge_serial = 'VC05200026138'
         msg = {
@@ -34,8 +33,10 @@ class TestGetTicketDetailsByEdgeSerial:
             'edge_serial': edge_serial,
             'client_id': client_id,
         }
-        ticket_details = {
-            'ticketID': ticket_id,
+        ticket_1_id = 321
+        ticket_2_id = 456
+        ticket_1_details = {
+            'ticketID': ticket_1_id,
             'ticketDetails': [
                 {
                     "detailID": 2746937,
@@ -49,9 +50,25 @@ class TestGetTicketDetailsByEdgeSerial:
                 }
             ],
         }
+        ticket_2_details = {
+            'ticketID': ticket_2_id,
+            'ticketDetails': [
+                {
+                    "detailID": 2746938,
+                    "detailValue": edge_serial,
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41894042,
+                    "noteValue": f'#*Automation Engine*# \n TimeStamp: 2019-07-30 09:38:00+00:00',
+                }
+            ],
+        }
+        ticket_details_list = [ticket_1_details, ticket_2_details]
         get_ticket_details_response = {
             'request_id': request_id,
-            'ticket_details': ticket_details,
+            'ticket_details_list': ticket_details_list,
             'status': 200,
         }
 
@@ -59,7 +76,7 @@ class TestGetTicketDetailsByEdgeSerial:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details)
+        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
 
         ticket_details = GetTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
         await ticket_details.send_ticket_details_by_edge_serial(json.dumps(msg))
@@ -77,7 +94,6 @@ class TestGetTicketDetailsByEdgeSerial:
 
         request_id = "123"
         response_topic = 'some.random.rpc.inbox'
-        ticket_id = None
         client_id = 123
         edge_serial = 'VC05200026138'
         msg = {
@@ -86,14 +102,10 @@ class TestGetTicketDetailsByEdgeSerial:
             'edge_serial': edge_serial,
             'client_id': client_id,
         }
-        ticket_details = {
-            'ticketID': ticket_id,
-            'ticketDetails': [],
-            'ticketNotes': [],
-        }
+        ticket_details_list = []
         get_ticket_details_response = {
             'request_id': request_id,
-            'ticket_details': ticket_details,
+            'ticket_details_list': ticket_details_list,
             'status': 500,
         }
 
@@ -101,7 +113,7 @@ class TestGetTicketDetailsByEdgeSerial:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details)
+        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
 
         ticket_details = GetTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
         await ticket_details.send_ticket_details_by_edge_serial(json.dumps(msg))

@@ -20,15 +20,14 @@ class GetTicketDetailsByEdgeSerial:
             f'(client ID: {client_id})...'
         )
 
-        ticket_details = self._bruin_repository.get_ticket_details_by_edge_serial(
+        ticket_details_list = self._bruin_repository.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
         )
-        ticket_id = ticket_details['ticketID']
-        if ticket_id:
+        if ticket_details_list:
             status = 200
             self._logger.info(
-                f'Ticket found for edge with serial {edge_serial} and client ID {client_id}. '
-                f'Ticket ID is {ticket_id}.')
+                f'Tickets found for edge with serial {edge_serial} and client ID {client_id}. '
+                f'Ticket IDs are: {", ".join(str(ticket["ticketID"]) for ticket in ticket_details_list)}.')
         else:
             status = 500
             self._logger.info(
@@ -36,9 +35,12 @@ class GetTicketDetailsByEdgeSerial:
 
         response = {
             'request_id': request_id,
-            'ticket_details': ticket_details,
+            'ticket_details_list': ticket_details_list,
             'status': status
         }
         await self._event_bus.publish_message(response_topic, json.dumps(response))
 
-        self._logger.info(f'Details of ticket {ticket_id} published in {response_topic} topic!')
+        self._logger.info(
+            f'Publishing response to ticket details request for edge with serial {edge_serial} '
+            f'(client ID: {client_id}) in {response_topic} topic'
+        )
