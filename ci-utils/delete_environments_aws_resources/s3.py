@@ -19,14 +19,14 @@ class S3Buckets:
                      "for store Terraform tfstate files".format(self._s3_bucket_backend, environment))
         s3buckets_check = self._check_s3buckets_exists(environment)
         if s3buckets_check['s3_buckets']:
-            logging.info("The environment {} has associated {} directories to store Terraform state"
+            logging.info("The environment {} has associated {} directories to store Terraform state file"
                          " that are going to be deleted".format(environment, len(s3buckets_check['buckets_list'])))
             for element in s3buckets_check['buckets_list']:
                 logging.info("Removing directory {} from s3 bucket {}".format(element, self._s3_bucket_backend))
                 subprocess.call(['aws', 's3', 'rm', element, '--region', 'us-east-1'], stdout=FNULL)
         else:
             logging.error("The environment {} hasn't any associated directories in bucket {} to store Terraform "
-                          "state".format(environment, self._s3_bucket_backend))
+                          "state file".format(environment, self._s3_bucket_backend))
 
     def _check_s3buckets_exists(self, environment):
         has_s3_buckets = {'s3_buckets': False}

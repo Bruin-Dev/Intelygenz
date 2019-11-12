@@ -62,7 +62,6 @@ class EcsServices:
 
     @staticmethod
     def _check_servicediscovery_namespace_exists(actual_namespaces, namespace_name):
-        logging.info("environment to search is: {}".format(namespace_name))
         if any(namespaces['Name'] == namespace_name for namespaces in actual_namespaces['Namespaces']):
             return True
         else:
@@ -99,22 +98,23 @@ class EcsServices:
                             services[index]["service_name"],
                             services[index]["service_id"],
                             environment))
-                    remove_service_cmd = 'aws, servicediscovery, delete-service, --id, ' + services[index]["service_id"] + \
+                    remove_service_cmd = 'aws, servicediscovery, delete-service, --id, ' + services[index][
+                        "service_id"] + \
                                          ', --region, us-east-1'
                     remove_service_result = subprocess.call(remove_service_cmd.split(', '), stdout=FNULL)
                     common_utils_instance.check_current_state_call(remove_service_result,
-                                                                   'Service from Service Discovery', services[index]["service_id"])
+                                                                   'Service from Service Discovery',
+                                                                   services[index]["service_id"])
                     if remove_service_result != 0:
                         service_from_discovery_service_delete_try = 0
                         current_exit_code = 0
                         while common_utils_instance.can_retry_call(service_from_discovery_service_delete_try) and \
                                 current_exit_code != 0:
-                            current_exit_code, service_from_discovery_service_delete_try = common_utils_instance.\
+                            current_exit_code, service_from_discovery_service_delete_try = common_utils_instance. \
                                 retry_call(remove_service_cmd, service_from_discovery_service_delete_try)
                         common_utils_instance.check_current_state_call(current_exit_code,
                                                                        'Service from Service Discovery',
                                                                        services[index]["service_id"])
-
 
     @staticmethod
     def _delete_namespace_service(environment, namespace_id):
@@ -127,13 +127,11 @@ class EcsServices:
         logging.info("Checking if there are AWS resources related to the service discovery of the {}"
                      " cluster".format(environment))
         cluster_information = self._check_if_ecs_cluster_exists(environment)
-        if cluster_information['exists']:
+        if cluster_information['exists'] and not cluster_information['inactive']:
             logging.info("There is an ECS cluster with the name {} with {} services active {} tasks running".format(
                 environment, cluster_information['ecs_cluster_information']['activeServicesCount'],
                 cluster_information['ecs_cluster_information']['runningTasksCount']))
             self._stop_task_and_delete_services(environment)
-        else:
-            logging.error("There is no ECS cluster with the name {}".format(environment))
         namespace_name = environment + '.local'
         logging.info("Checking if there is a namespace for service discovery of environment {}".format(environment))
         servicediscovery_namespaces_list_call = subprocess.Popen(
@@ -152,36 +150,55 @@ class EcsServices:
         self.delete_servicediscovery(environment)
         logging.info("Checking if there is an ECS cluster for the environment {}".format(environment))
         cluster_information = self._check_if_ecs_cluster_exists(environment)
-        if cluster_information['exists']:
+        if cluster_information['exists'] and not cluster_information['inactive']:
             logging.info("There is an ECS cluster for the environment {} with {} services active {} tasks running".
                          format(environment, cluster_information['ecs_cluster_information']['activeServicesCount'],
                                 cluster_information['ecs_cluster_information']['runningTasksCount']))
             logging.info("ECS cluster for the environment {} is going to be removed".format(environment))
             cmd_call_remove_ecs_cluster = 'aws, ecs, delete-cluster, --cluster, ' + environment + ', --region' + \
                                           ', us-east-1'
-            remove_ecs_cluster_call = subprocess.call(cmd_call_remove_ecs_cluster.split(', '), stdout=FNULL, stderr=FNULL)
+            remove_ecs_cluster_call = subprocess.call(cmd_call_remove_ecs_cluster.split(', '), stdout=FNULL,
+                                                      stderr=FNULL)
             common_utils_instance = common_utils_module.CommonUtils()
             common_utils_instance.check_current_state_call(remove_ecs_cluster_call,
                                                            'ECS Cluster', environment)
             if remove_ecs_cluster_call != 0:
                 ecs_cluster_delete_try = 0
-                current_exit_code = 0
+                current_exit_code = remove_ecs_cluster_call
                 while common_utils_instance.can_retry_call(ecs_cluster_delete_try) and \
                         current_exit_code != 0:
                     current_exit_code, ecs_cluster_delete_try = common_utils_instance.retry_call(
                         cmd_call_remove_ecs_cluster, ecs_cluster_delete_try)
                 common_utils_instance.check_current_state_call(current_exit_code, 'Security Group',
                                                                environment)
+        elif cluster_information['exists'] and cluster_information['inactive']:
+            logging.info("There is an ECS cluster for the environment {} but it's not going to be deleted because "
+                         "it's INACTIVE and without pending tasks or services ".format(environment))
         else:
-            logging.error("There is no ECS cluster with the name {}".format(environment))
+            logging.error("There isn't an ECS cluster for the environment {}".format(environment))
 
-    @staticmethod
-    def _check_if_ecs_cluster_exists(environment):
+    def _check_if_ecs_cluster_exists(self, environment):
         cluster_exists = {'exists': False}
         cluster_exists_check_call = subprocess.Popen(['aws', 'ecs', 'describe-clusters', '--cluster', environment],
                                                      stdout=subprocess.PIPE, stderr=FNULL)
         cluster_exists_check_result_list = json.loads(cluster_exists_check_call.stdout.read())
         cluster_exists_check_result = cluster_exists_check_result_list['clusters']
         if len(cluster_exists_check_result) > 0:
-            cluster_exists.update({'exists': True, 'ecs_cluster_information': cluster_exists_check_result[0]})
+            if self._check_ecs_cluster_is_active(cluster_exists_check_result[0]):
+                cluster_exists.update({'exists': True,
+                                       'inactive': False,
+                                       'ecs_cluster_information': cluster_exists_check_result[0]})
+            else:
+                cluster_exists.update({'exists': True,
+                                       'inactive': True})
         return cluster_exists
+
+    @staticmethod
+    def _check_ecs_cluster_is_active(cluster_info):
+        ecs_cluster_is_active = False
+        if cluster_info['status'] != "INACTIVE" and (cluster_info['registeredContainerInstancesCount'] > 0 or
+                                                     cluster_info['runningTasksCount'] > 0 or cluster_info[
+                                                         'pendingTasksCount'] > 0 or cluster_info['activeServicesCount']
+                                                     > 0):
+            ecs_cluster_is_active = True
+        return ecs_cluster_is_active

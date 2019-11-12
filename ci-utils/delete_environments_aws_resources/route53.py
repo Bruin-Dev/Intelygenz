@@ -17,29 +17,28 @@ class Route53:
     _hosted_zone_for_records_name = 'mettel-automation.net.'
 
     def delete_environment_record_set(self, environment):
+        logging.info("Checking if there is a hosted zone for {}".format(self._hosted_zone_for_records_name))
         hosted_zone_information = self._check_hosted_zone_for_records()
         if hosted_zone_information['exists']:
+            logging.info("Hosted zone {} exists and its identifier is {}".format(self._hosted_zone_for_records_name,
+                                                                                 hosted_zone_information
+                                                                                 ['hosted_zone_id']))
             hosted_zone_id = hosted_zone_information['hosted_zone_id']
-            logging.info("hosted_zone_id is {}".format(hosted_zone_id))
             environment_record = self._check_resource_record_environment(hosted_zone_id, environment)
             if environment_record['exists']:
-                logging.info("There is a record set for environment {} in hosted-zone with {}".
+                logging.info("There is a record set for environment {} in hosted zone with identifier {}".
                              format(environment, hosted_zone_id))
                 record_set_id_to_delete = environment_record['record_information']
                 logging.info("Record set {} it's going to be deleted".format(record_set_id_to_delete))
-                data_record_to_delete = {}
-                data_record_to_delete_changes = [{'Action': 'DELETE',
-                                                  'ResourceRecordSet': environment_record['record_information']}]
-                data_record_to_delete['Changes'] = data_record_to_delete_changes
-                data_record_to_delete['Comment'] = 'Removing record with name ' + \
-                                                   environment_record['record_information']['Name']
-                data_record_to_delete_json = json.dumps(data_record_to_delete)
+                data_record_to_delete_json = self._get_json_for_delete_record(environment_record['record_information'])
                 subprocess.call(['aws', 'route53', 'change-resource-record-sets', '--hosted-zone-id',
                                  hosted_zone_id, '--region', 'us-east-1',
                                  '--change-batch', data_record_to_delete_json])
             else:
-                logging.error("There isn't a record set for environment {} in hosted-zone with {}".
-                              format(environment, environment_record['hosted_zone_id']))
+                logging.error("There isn't a record set for environment {} in hosted zone with identifier {}".
+                              format(environment, hosted_zone_information['hosted_zone_id']))
+        else:
+            logging.error("Hosted zone {} doesn't exists".format(self._hosted_zone_for_records_name))
 
     def _check_hosted_zone_for_records(self):
         hosted_zone_of_hosted_zone_for_records = {'exists': False}
@@ -65,3 +64,13 @@ class Route53:
                 if element['Name'] == record_set_to_search:
                     resource_record_environment.update({'exists': True, 'record_information': element})
         return resource_record_environment
+
+    @staticmethod
+    def _get_json_for_delete_record(record_information):
+        data_record_to_delete = {}
+        data_record_to_delete_changes = [{'Action': 'DELETE',
+                                          'ResourceRecordSet': record_information}]
+        data_record_to_delete['Changes'] = data_record_to_delete_changes
+        data_record_to_delete['Comment'] = 'Removing record with name ' + record_information['Name']
+        data_record_to_delete_json = json.dumps(data_record_to_delete)
+        return data_record_to_delete_json

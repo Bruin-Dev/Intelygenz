@@ -86,15 +86,11 @@ Once the credentials have been configured, it is possible to use the script in t
 ```bash
 python ci-utils/delete_environments_aws_resources/main.py -e <environment_name> [commands]
 ```
->To use any command it's necessary to specify the name as the first argument of the `main.py` script through the -e parameter.
+>To use any command it's necessary to specify the environment name as the first argument of the `main.py` script through the -e parameter.
 
 ### Commands <a name="delete_environments_aws_resources_commands"></a>
 
 CLI supports a number of commands. These are explained below:
-
-* `-a`, `--all`: All the resources in AWS associated to the specified environment will be deleted, carrying out the corresponding orderly deletion of them so as not to produce dependency errors during the process.
-
-    >**If this option is specified, any other option will be ignored.**
 
 * `-c`, `--ecs-cluster`: The ECS cluster associated to the environment provided will be removed, as well as all the resources related to it:
   
@@ -117,3 +113,9 @@ CLI supports a number of commands. These are explained below:
   * *CloudWatch Log Filters*
 
 * `-s`, `--security-groups`: All the *Security Groups* associated to the different resources created in *AWS* for the specified environment will be removed.
+
+* `-z`, `--hosted-zones`: All the record set created for specified environment in hosted zone with name `mettel-automation.net` in *AWS Route53 Service* will be removed
+
+* `-a`, `--all`: All the resources in AWS associated to the specified environment will be deleted, carrying out the corresponding orderly deletion of them so as not to produce dependency errors during the process.
+
+    >**If this option is specified, any other option will be ignored.**

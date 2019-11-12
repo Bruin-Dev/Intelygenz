@@ -83,23 +83,14 @@ class Metrics:
             pass
         return metrics_logs_for_cluster
 
-    def _delete_log_metrics(self, environment):
-        log_metrics_for_cluster = self._get_log_metric_for_cluster(environment)
-        if log_metrics_for_cluster['has_log_metrics']:
-            logging.info("The environment {} has associated {} log metric/s filter/s".format(environment,
-                                                                                             len(log_metrics_for_cluster
-                                                                                                 [
-                                                                                                  'log_metrics_filters']
-                                                                                                 )))
-            for i in log_metrics_for_cluster['log_metrics_filters'].keys():
-                log_metric_filter_name = log_metrics_for_cluster['log_metrics_filters'][i]
-                logging.info("Log metric filter with name {} it's going to be deleted".format(log_metric_filter_name))
-                subprocess.call(
-                    ['aws', 'logs', 'delete-metric-filter', '--log-group-name', environment, '--filter-name',
-                     log_metric_filter_name], stdout=FNULL)
-        else:
-            logging.error("The environment {} doesn't have any log metric associated to its log group".
-                          format(environment))
+    @staticmethod
+    def _delete_log_metrics(environment, log_metrics_for_cluster):
+        for i in log_metrics_for_cluster.keys():
+            log_metric_filter_name = log_metrics_for_cluster['log_metrics_filters'][i]
+            logging.info("Log metric filter with name {} it's going to be deleted".format(log_metric_filter_name))
+            subprocess.call(
+                ['aws', 'logs', 'delete-metric-filter', '--log-group-name', environment, '--filter-name',
+                 log_metric_filter_name], stdout=FNULL)
 
     @staticmethod
     def _check_log_group_exists(cluster):
@@ -113,6 +104,14 @@ class Metrics:
 
     def _delete_log_group(self, environment):
         if self._check_log_group_exists(environment):
+            log_metrics_for_cluster = self._get_log_metric_for_cluster(environment)
+            if log_metrics_for_cluster['has_log_metrics']:
+                logging.info("The environment {} has associated {} log metric/s filter/s".format(environment, len(
+                    log_metrics_for_cluster['log_metrics_filters'])))
+                self._delete_log_metrics(environment, log_metrics_for_cluster['log_metrics_filters'])
+            else:
+                logging.error("The environment {} doesn't have any log metric associated to its log group".
+                              format(environment))
             logging.info("The environment {} has a log group associated".format(environment))
             logging.info("Log group with name {} it's going to be deleted".format(environment))
             subprocess.call(['aws', 'logs', 'delete-log-group', '--log-group-name', environment], stdout=FNULL)
@@ -123,5 +122,4 @@ class Metrics:
         logging.info("Checking if there are metrics resources for environment {}".format(environment))
         self._delete_dashboard(environment)
         self._delete_alarms(environment)
-        self._delete_log_metrics(environment)
         self._delete_log_group(environment)
