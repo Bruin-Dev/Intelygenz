@@ -41,9 +41,9 @@ class ServiceOutageDetector:
             edge_status = await self._get_edge_status_by_id(edge_full_id)
 
             if self._is_offline(edge_status):
-                self._quarantine_edge_repository.add_edge(full_id=edge_full_id, status=edge_status)
+                self._quarantine_edge_repository.add_edge(full_id=edge_full_id, status=edge_status, time_to_live=600)
             else:
-                self._online_edge_repository.add_edge(full_id=edge_full_id, status=edge_status)
+                self._online_edge_repository.add_edge(full_id=edge_full_id, status=edge_status, time_to_live=600)
 
     async def _get_all_edges(self):
         edge_list_request_dict = {

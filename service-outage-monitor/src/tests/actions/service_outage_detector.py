@@ -140,8 +140,8 @@ class TestServiceOutageDetector:
             call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
         ])
         service_outage_detector._online_edge_repository.add_edge.assert_has_calls([
-            call(full_id=edge_1_full_id, status=edge_1_status),
-            call(full_id=edge_3_full_id, status=edge_3_status),
+            call(full_id=edge_1_full_id, status=edge_1_status, time_to_live=600),
+            call(full_id=edge_3_full_id, status=edge_3_status, time_to_live=600),
         ])
 
     @pytest.mark.asyncio
@@ -179,8 +179,8 @@ class TestServiceOutageDetector:
             call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
         ])
         service_outage_detector._quarantine_edge_repository.add_edge.assert_has_calls([
-            call(full_id=edge_1_full_id, status=edge_1_status),
-            call(full_id=edge_3_full_id, status=edge_3_status),
+            call(full_id=edge_1_full_id, status=edge_1_status, time_to_live=600),
+            call(full_id=edge_3_full_id, status=edge_3_status, time_to_live=600),
         ])
 
     @pytest.mark.asyncio
