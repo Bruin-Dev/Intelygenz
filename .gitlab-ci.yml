@@ -431,20 +431,12 @@ deploy-branches:
 destroy-branches:
   stage: deploy
   extends: .terraform_template
-  variables:
-    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-    AWS_DEFAULT_REGION: $AWS_REGION
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - apk add --no-cache jq python3 gettext py-pip
-    - apk add --update-cache --upgrade curl
-    - pip3 install awscli
-    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
-    - chmod +x /usr/local/bin/ecs-cli
+    - apk add --no-cache gettext
     - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
     - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
     - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
@@ -453,8 +445,7 @@ destroy-branches:
     - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
     - terraform init infra-as-code/ecs-services
     - terraform refresh infra-as-code/ecs-services
-    ## TODO: change command terraform destroy -auto-approve infra-as-code/ecs-service for terraform destroy -auto-approve infra-as-code/ecs-services
-    - terraform destroy -auto-approve infra-as-code/ecs-service || python3 ci-utils/delete_environments_aws_resources/main.py -e $TF_VAR_ENVIRONMENT -d -m -f
+    - terraform destroy -auto-approve infra-as-code/ecs-services
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
@@ -463,12 +454,32 @@ destroy-branches:
     - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform refresh infra-as-code/dev
-    ## TODO: change command terraform destroy -auto-approve infra-as-code/de for terraform destroy -auto-approve infra-as-code/dev
-    - terraform destroy -auto-approve infra-as-code/de || python3 ci-utils/delete_environments_aws_resources/main.py -e $TF_VAR_ENVIRONMENT -c -l -r -z -s
+    - terraform destroy -auto-approve infra-as-code/dev
     - python3 ci-utils/delete_environments_aws_resources/main.py -e $TF_VAR_ENVIRONMENT -b
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
+  when: manual
+  only:
+    - branches
+  except:
+    - master
+
+delete_environments_aws_resources-branches:
+  stage: deploy
+  extends: .terraform_template
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_REGION
+  script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - apk add --no-cache jq python3 gettext py-pip
+    - apk add --update-cache --upgrade curl
+    - pip3 install awscli
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - python3 ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -a
   when: manual
   only:
     - branches

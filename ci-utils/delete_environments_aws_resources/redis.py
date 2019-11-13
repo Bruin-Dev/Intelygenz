@@ -20,7 +20,6 @@ class RedisCluster:
         redis_cache_subnet_group_result = self._delete_cache_subnet_group(environment)
         result_delete_redis_resources = self._check_delete_redis_resources(redis_cluster_delete_result,
                                                                            redis_cache_subnet_group_result)
-        logging.info("result_delete_redis_resources is {}".format(result_delete_redis_resources))
         return result_delete_redis_resources
 
     @staticmethod

@@ -99,8 +99,7 @@ class EcsServices:
                             services[index]["service_id"],
                             environment))
                     remove_service_cmd = 'aws, servicediscovery, delete-service, --id, ' + services[index][
-                        "service_id"] + \
-                                         ', --region, us-east-1'
+                        "service_id"] + ', --region, us-east-1'
                     remove_service_result = subprocess.call(remove_service_cmd.split(', '), stdout=FNULL)
                     common_utils_instance.check_current_state_call(remove_service_result,
                                                                    'Service from Service Discovery',

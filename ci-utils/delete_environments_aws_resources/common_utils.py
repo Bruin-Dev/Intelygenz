@@ -1,7 +1,7 @@
 #!/bin/python
+import logging
 import subprocess
 import time
-import logging
 
 logging.basicConfig(level=logging.INFO)
 
@@ -10,7 +10,7 @@ FNULL = open('/dev/null', 'w')
 
 class CommonUtils:
     _default_wait_time_between_calls = 10
-    _max_retries_call = 3
+    _max_retries_call = 5
 
     def can_retry_call(self, call_try):
         if call_try <= self._max_retries_call:
@@ -22,6 +22,7 @@ class CommonUtils:
         logging.info(
             f"Try number for call {call_try}: Waiting {self._default_wait_time_between_calls} seconds before try call "
             f"{cmd_call} again")
+        time.sleep(self._default_wait_time_between_calls)
         call_result = subprocess.call(cmd_call.split(', '), stdout=FNULL)
         call_try += 1
         return call_result, call_try
