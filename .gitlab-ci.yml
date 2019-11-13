@@ -471,7 +471,7 @@ destroy-branches:
 
 delete_environments_aws_resources-branches:
   stage: deploy
-  image: alpine:3.10.3
+  image: python:3.5-alpine3.10
   variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
@@ -479,7 +479,6 @@ delete_environments_aws_resources-branches:
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - apk add --no-cache jq python3 py-pip
     - apk add --update-cache --upgrade curl
     - pip3 install awscli
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest

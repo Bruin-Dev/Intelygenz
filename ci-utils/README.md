@@ -92,6 +92,9 @@ python ci-utils/delete_environments_aws_resources/main.py -e <environment_name> 
 
 CLI supports a number of commands. These are explained below:
 
+* `-a`, `--all`: All the resources in AWS associated to the specified environment will be deleted, carrying out the corresponding orderly deletion of them so as not to produce dependency errors during the process.
+
+    >**If this option is specified, any other option will be ignored.**
 * `-c`, `--ecs-cluster`: The ECS cluster associated to the environment provided will be removed, as well as all the resources related to it:
   
   * *ECS Services* defined in the ECS cluster and *Tasks* of each one of them.
@@ -104,7 +107,9 @@ CLI supports a number of commands. These are explained below:
 
 * `-l`, `--load-balancer`: The *Application Load Balancer (ALB)* associated to the specified environment will be removed, as well as all the resources related to it (*Target Groups*).
 
-* `-m`, `--metrics`: All the resources related to metrics for the specified will be removed
+* `-s`, `--security-groups`: All the *Security Groups* associated to the different resources created in *AWS* for the specified environment will be removed.
+
+* `-m`, `--metrics`: All the resources related to metrics created for the specified will be removed, being these the ones specified below:
 
   * *CloudWatch Alarms*
   
@@ -112,10 +117,8 @@ CLI supports a number of commands. These are explained below:
 
   * *CloudWatch Log Filters*
 
-* `-s`, `--security-groups`: All the *Security Groups* associated to the different resources created in *AWS* for the specified environment will be removed.
+* `-z`, `--hosted-zones`: All the record set created for specified environment in hosted zone with name `mettel-automation.net` in *AWS Route53 Service* will be deleted.
 
-* `-z`, `--hosted-zones`: All the record set created for specified environment in hosted zone with name `mettel-automation.net` in *AWS Route53 Service* will be removed
+* `-f`, `--cloud-formation`: The *Cloud Formation Stack* resources created for the specified environment will be removed
 
-* `-a`, `--all`: All the resources in AWS associated to the specified environment will be deleted, carrying out the corresponding orderly deletion of them so as not to produce dependency errors during the process.
-
-    >**If this option is specified, any other option will be ignored.**
+* `-b`, `--buckets`: All *Terraform* files with `tfstate` extension related to the specified environment will be deleted, these are used to know the state of the resources created by it and are stored in an  *S3 Bucket* that is specified in the creation of its with *Terraform*.

@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def _print_usage():
-    print('main.py -e <environment> [-a] | [-c] [-d] [-r] [-l] [-s] [-m] [-b] [-z] [-f]')
+    print('main.py -e <environment> [-a] | [-c] [-d] [-r] [-l] [-s] [-m] [-z] [-f] [-b]')
 
 
 def _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance,
