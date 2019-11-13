@@ -12,9 +12,10 @@ resource "aws_cloudformation_stack" "sns_topic_alarms" {
   parameters = {
     OperatorEmail = var.ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS
   }
-  tags = merge(
-    map("Name", local.stack_alarms-errors_exceptions_messages_in_services-name)
-  )
+  tags = {
+    Name = local.stack_alarms-errors_exceptions_messages_in_services-name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "exception_messages_services_alarm" {

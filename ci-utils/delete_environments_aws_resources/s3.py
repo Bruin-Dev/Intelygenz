@@ -3,7 +3,6 @@
 
 import os
 import subprocess
-import json
 import logging
 
 logging.basicConfig(level=logging.INFO)

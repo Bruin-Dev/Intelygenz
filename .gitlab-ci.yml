@@ -469,7 +469,7 @@ destroy-branches:
   except:
     - master
 
-delete_environments_aws_resources-branches:
+destroy-branches-test:
   stage: deploy
   image: python:3.5-alpine3.10
   variables:
