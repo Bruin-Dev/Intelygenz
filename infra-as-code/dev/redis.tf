@@ -14,6 +14,7 @@ resource "aws_elasticache_cluster" "automation-redis" {
 
   tags = {
     Name = local.automation-redis-elasticache_cluster-tag-Name
+    Environment = var.ENVIRONMENT
   }
 }
 
