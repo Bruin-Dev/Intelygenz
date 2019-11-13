@@ -2,25 +2,25 @@ import json
 from unittest.mock import Mock
 
 import pytest
-from application.actions.get_ticket_details_by_edge_serial import GetTicketDetailsByEdgeSerial
+from application.actions.get_affecting_ticket_details_by_edge_serial import GetAffectingTicketDetailsByEdgeSerial
 from asynctest import CoroutineMock
 
 
-class TestGetTicketDetailsByEdgeSerial:
+class TestGetAffectingTicketDetailsByEdgeSerial:
 
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
         bruin_repository = Mock()
 
-        ticket_details = GetTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
+        ticket_details = GetAffectingTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
 
         assert ticket_details._logger is logger
         assert ticket_details._event_bus is event_bus
         assert ticket_details._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
-    async def get_ticket_details_by_edge_serial_test(self):
+    async def get_affecting_ticket_details_by_edge_serial_test(self):
         logger = Mock()
 
         request_id = "123"
@@ -76,12 +76,12 @@ class TestGetTicketDetailsByEdgeSerial:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
+        bruin_repository.get_affecting_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
 
-        ticket_details = GetTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
-        await ticket_details.send_ticket_details_by_edge_serial(json.dumps(msg))
+        ticket_details = GetAffectingTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
+        await ticket_details.send_affecting_ticket_details_by_edge_serial(json.dumps(msg))
 
-        ticket_details._bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
+        ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_called_once_with(
             edge_serial=edge_serial, client_id=client_id,
         )
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
@@ -89,7 +89,7 @@ class TestGetTicketDetailsByEdgeSerial:
         )
 
     @pytest.mark.asyncio
-    async def get_ticket_details_by_edge_serial_with_no_details_found_test(self):
+    async def get_affecting_ticket_details_by_edge_serial_with_no_details_found_test(self):
         logger = Mock()
 
         request_id = "123"
@@ -113,12 +113,12 @@ class TestGetTicketDetailsByEdgeSerial:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
+        bruin_repository.get_affecting_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
 
-        ticket_details = GetTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
-        await ticket_details.send_ticket_details_by_edge_serial(json.dumps(msg))
+        ticket_details = GetAffectingTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
+        await ticket_details.send_affecting_ticket_details_by_edge_serial(json.dumps(msg))
 
-        ticket_details._bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
+        ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_called_once_with(
             edge_serial=edge_serial, client_id=client_id,
         )
         ticket_details._event_bus.publish_message.assert_awaited_once_with(

@@ -6,7 +6,7 @@ from application.actions.get_outage_ticket_details_by_edge_serial import GetOuta
 from asynctest import CoroutineMock
 
 
-class TestGetTicketDetailsByEdgeSerial:
+class TestGetOutageTicketDetailsByEdgeSerial:
 
     def instance_test(self):
         logger = Mock()

@@ -3,7 +3,7 @@ from application.clients.bruin_client import BruinClient
 from application.repositories.bruin_repository import BruinRepository
 from application.actions.get_tickets import GetTicket
 from application.actions.get_ticket_details import GetTicketDetails
-from application.actions.get_ticket_details_by_edge_serial import GetTicketDetailsByEdgeSerial
+from application.actions.get_affecting_ticket_details_by_edge_serial import GetAffectingTicketDetailsByEdgeSerial
 from application.actions.get_outage_ticket_details_by_edge_serial import GetOutageTicketDetailsByEdgeSerial
 from application.actions.post_note import PostNote
 from igz.packages.nats.clients import NATSClient
@@ -26,7 +26,7 @@ class Container:
         self._publisher = NATSClient(config, logger=self._logger)
         self._subscriber_tickets = NATSClient(config, logger=self._logger)
         self._subscriber_details = NATSClient(config, logger=self._logger)
-        self._subscriber_details_by_edge_serial = NATSClient(config, logger=self._logger)
+        self._subscriber_affecting_details_by_edge_serial = NATSClient(config, logger=self._logger)
         self._subscriber_outage_details_by_edge_serial = NATSClient(config, logger=self._logger)
         self._subscriber_post_note = NATSClient(config, logger=self._logger)
         self._subscriber_post_ticket = NATSClient(config, logger=self._logger)
@@ -35,8 +35,8 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
         self._event_bus.add_consumer(self._subscriber_details, consumer_name="ticket_details")
         self._event_bus.add_consumer(
-            self._subscriber_details_by_edge_serial,
-            consumer_name="ticket_details_by_edge_serial"
+            self._subscriber_affecting_details_by_edge_serial,
+            consumer_name="affecting_ticket_details_by_edge_serial"
         )
         self._event_bus.add_consumer(
             self._subscriber_outage_details_by_edge_serial,
@@ -50,7 +50,7 @@ class Container:
         self._get_tickets = GetTicket(self._logger, config.BRUIN_CONFIG, self._event_bus,
                                       self._bruin_repository)
         self._get_ticket_details = GetTicketDetails(self._logger, self._event_bus, self._bruin_repository)
-        self._get_ticket_details_by_edge_serial = GetTicketDetailsByEdgeSerial(
+        self._get_affecting_ticket_details_by_edge_serial = GetAffectingTicketDetailsByEdgeSerial(
             self._logger, self._event_bus, self._bruin_repository
         )
         self._get_outage_ticket_details_by_edge_serial = GetOutageTicketDetailsByEdgeSerial(
@@ -63,8 +63,8 @@ class Container:
                                                   is_async=True, logger=self._logger)
         self._action_get_ticket_detail = ActionWrapper(self._get_ticket_details, "send_ticket_details",
                                                        is_async=True, logger=self._logger)
-        self._action_get_ticket_detail_by_edge_serial = ActionWrapper(
-            self._get_ticket_details_by_edge_serial, "send_ticket_details_by_edge_serial",
+        self._action_get_affecting_ticket_detail_by_edge_serial = ActionWrapper(
+            self._get_affecting_ticket_details_by_edge_serial, "send_affecting_ticket_details_by_edge_serial",
             is_async=True, logger=self._logger,
         )
         self._action_get_outage_ticket_detail_by_edge_serial = ActionWrapper(
@@ -86,9 +86,9 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="ticket_details", topic="bruin.ticket.details.request",
                                                  action_wrapper=self._action_get_ticket_detail,
                                                  queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="ticket_details_by_edge_serial",
-                                                 topic="bruin.ticket.details.by_edge_serial.request",
-                                                 action_wrapper=self._action_get_ticket_detail_by_edge_serial,
+        await self._event_bus.subscribe_consumer(consumer_name="affecting_ticket_details_by_edge_serial",
+                                                 topic="bruin.ticket.affecting.details.by_edge_serial.request",
+                                                 action_wrapper=self._action_get_affecting_ticket_detail_by_edge_serial,
                                                  queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="outage_ticket_details_by_edge_serial",
                                                  topic="bruin.ticket.outage.details.by_edge_serial.request",

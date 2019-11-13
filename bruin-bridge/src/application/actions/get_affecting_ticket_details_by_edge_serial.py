@@ -1,14 +1,14 @@
 import json
 
 
-class GetTicketDetailsByEdgeSerial:
+class GetAffectingTicketDetailsByEdgeSerial:
 
     def __init__(self, logger, event_bus, bruin_repository):
         self._logger = logger
         self._event_bus = event_bus
         self._bruin_repository = bruin_repository
 
-    async def send_ticket_details_by_edge_serial(self, msg):
+    async def send_affecting_ticket_details_by_edge_serial(self, msg):
         msg_dict = json.loads(msg)
         request_id = msg_dict['request_id']
         response_topic = msg_dict['response_topic']
@@ -16,11 +16,11 @@ class GetTicketDetailsByEdgeSerial:
         client_id = msg_dict["client_id"]
 
         self._logger.info(
-            f'Looking for a ticket for edge with serial {edge_serial} '
+            f'Looking for an affecting ticket for edge with serial {edge_serial} '
             f'(client ID: {client_id})...'
         )
 
-        ticket_details_list = self._bruin_repository.get_ticket_details_by_edge_serial(
+        ticket_details_list = self._bruin_repository.get_affecting_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
         )
         if ticket_details_list:
@@ -41,6 +41,6 @@ class GetTicketDetailsByEdgeSerial:
         await self._event_bus.publish_message(response_topic, json.dumps(response))
 
         self._logger.info(
-            f'Publishing response to ticket details request for edge with serial {edge_serial} '
+            f'Publishing response to affecting ticket details request for edge with serial {edge_serial} '
             f'(client ID: {client_id}) in {response_topic} topic'
         )

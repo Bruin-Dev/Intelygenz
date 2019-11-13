@@ -397,6 +397,85 @@ class TestBruinRepository:
         expected_ticket_details_list = []
         assert ticket_details_by_edge == expected_ticket_details_list
 
+    def get_affecting_ticket_details_by_edge_serial_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+
+        edge_serial = 'VC05200026138'
+        client_id = 123
+
+        ticket_status_1 = "New"
+        ticket_status_2 = "In-Progress"
+        ticket_statuses = [ticket_status_1, ticket_status_2]
+        category = 'SD-WAN'
+        ticket_topic = 'VAS'
+
+        ticket_id = 123
+        ticket_details = {
+            'ticketID': ticket_id,
+            'ticketDetails': [
+                {
+                    "detailID": 2746999,
+                    "detailValue": 'This is a meaningless detail',
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41894999,
+                    "noteValue": 'Nothing to do here!',
+                }
+            ],
+        }
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=[ticket_details])
+
+        affecting_ticket_details_by_edge = bruin_repository.get_affecting_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, client_id=client_id,
+            category=category, ticket_statuses=ticket_statuses,
+        )
+
+        bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
+            edge_serial=edge_serial,
+            client_id=client_id,
+            ticket_topic=ticket_topic,
+            ticket_statuses=ticket_statuses,
+            category=category,
+        )
+        assert affecting_ticket_details_by_edge == ticket_details
+
+    def get_affecting_ticket_details_by_edge_serial_with_no_ticket_details_found_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+
+        edge_serial = 'VC05200026138'
+        client_id = 123
+
+        ticket_status_1 = "New"
+        ticket_status_2 = "In-Progress"
+        ticket_statuses = [ticket_status_1, ticket_status_2]
+        category = 'SD-WAN'
+        ticket_topic = 'VAS'
+
+        ticket_details_list = []
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
+
+        affecting_ticket_details_by_edge = bruin_repository.get_affecting_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, client_id=client_id,
+            category=category, ticket_statuses=ticket_statuses,
+        )
+
+        bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
+            edge_serial=edge_serial,
+            client_id=client_id,
+            ticket_topic=ticket_topic,
+            ticket_statuses=ticket_statuses,
+            category=category,
+        )
+        assert affecting_ticket_details_by_edge is None
+
     def get_outage_ticket_details_by_edge_serial_test(self):
         logger = Mock()
         bruin_client = Mock()
