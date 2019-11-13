@@ -1,4 +1,5 @@
 import asyncio
+from application.actions.service_outage_detector import DetectedOutagesObserver
 from application.actions.service_outage_detector import ServiceOutageDetector
 from application.actions.service_outage_monitor import ServiceOutageMonitor
 from application.repositories.template_management import TemplateRenderer
@@ -29,6 +30,8 @@ class Container:
                                                       root_key='ONLINE_EDGES')
         self._quarantine_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
                                                           root_key='EDGES_QUARANTINE')
+        self._reporting_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
+                                                          root_key='EDGES_TO_REPORT')
 
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
@@ -41,6 +44,11 @@ class Container:
                                                               self._online_edge_repository,
                                                               self._quarantine_edge_repository,
                                                               config)
+        self._detected_outages_observer = DetectedOutagesObserver(self._event_bus, self._logger, self._scheduler,
+                                                                  self._online_edge_repository,
+                                                                  self._quarantine_edge_repository,
+                                                                  self._reporting_edge_repository,
+                                                                  config)
 
 
     async def _start(self):
@@ -48,9 +56,11 @@ class Container:
 
         self._online_edge_repository.initialize_root_key()
         self._quarantine_edge_repository.initialize_root_key()
+        self._reporting_edge_repository.initialize_root_key()
 
         # await self._service_outage_monitor.start_service_outage_monitor_job(exec_on_start=False)
         await self._service_outage_detector.start_service_outage_detector_job(exec_on_start=True)
+        await self._detected_outages_observer.start_detected_outages_observer_job(exec_on_start=False)
 
         self._scheduler.start()
 

@@ -26,6 +26,7 @@ MONITOR_CONFIG = {
     'timezone': "US/Eastern",
     'jobs_intervals': {
         'outage_detector': 600,
+        'outage_observer': 300,
     }
 }
 LOG_CONFIG = {
