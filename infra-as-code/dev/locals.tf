@@ -5,6 +5,7 @@ locals {
   // automation-alb local vars
   automation-dev-inbound-security_group-name = "${var.ENVIRONMENT}-inbound"
   automation-dev-inbound-security_group-tag-Name = "${var.ENVIRONMENT}-inbound"
+  automation-front_end-lb_target_group-tag-Name = "${var.ENVIRONMENT}-automation-front_end"
 
   // dns local vars
   automation-route53_record-name = "${var.SUBDOMAIN}.${data.aws_route53_zone.automation.name}"

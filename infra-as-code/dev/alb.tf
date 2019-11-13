@@ -137,4 +137,9 @@ resource "aws_lb_target_group" "automation-front_end" {
   lifecycle {
     create_before_destroy = true
   }
+
+  tags = {
+    Name = local.automation-front_end-lb_target_group-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }

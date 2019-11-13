@@ -62,6 +62,11 @@ resource "aws_lb_target_group" "automation-metrics-grafana" {
     protocol            = "HTTP"
     path                = "/api/health"
   }
+
+  tags = {
+    Name = local.automation-metrics-grafana-target_group-tag-Name
+    Environment = var.ENVIRONMENT
+  }
 }
 
 resource "aws_security_group" "automation-grafana_service" {
