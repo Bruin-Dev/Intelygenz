@@ -25,10 +25,11 @@ class EdgeRepository:
             )
             return
 
-        status['addition_timestamp'] = time.time()
-
         stored_edges = self.get_all_edges()
-        stored_edges[full_id_str] = status
+        stored_edges[full_id_str] = {
+            'edge_status': status,
+            'addition_timestamp': time.time(),
+        }
 
         self._redis_client.set(self._root_key, json.dumps(stored_edges), ex=time_to_live)
         self._logger.info(

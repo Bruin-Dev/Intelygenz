@@ -53,9 +53,12 @@ class TestEdgeRepository:
         new_edge_full_id = {'host': new_edge_host, 'enterprise_id': new_edge_enterprise_id, 'edge_id': new_edge_id}
         new_edge_status = {'edges': {'edgeState': 'CONNECTED'}}
 
-        stored_edge_id = 'mettel.velocloud.net|1111|2222'
-        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}, 'addition_timestamp': 123456789}
-        currently_stored_edges = {stored_edge_id: stored_edge_status}
+        stored_edge_full_id = 'mettel.velocloud.net|1111|2222'
+        stored_edge_value = {
+            'edge_status': {'edges': {'edgeState': 'OFFLINE'}},
+            'addition_timestamp': 123456789,
+        }
+        currently_stored_edges = {stored_edge_full_id: stored_edge_value}
 
         root_key = 'test-key'
         logger = Mock()
@@ -74,9 +77,9 @@ class TestEdgeRepository:
         redis_client.set.assert_called_once_with(
             root_key,
             json.dumps({
-                stored_edge_id: stored_edge_status,
+                stored_edge_full_id: stored_edge_value,
                 f'{new_edge_host}|{str(new_edge_enterprise_id)}|{str(new_edge_id)}': {
-                    **new_edge_status, 'addition_timestamp': current_timestamp
+                    'edge_status': new_edge_status, 'addition_timestamp': current_timestamp
                 }
             }),
             ex=60,
@@ -88,8 +91,11 @@ class TestEdgeRepository:
         stored_edge_id = 2222
 
         stored_edge_full_id = f'{stored_edge_host}|{stored_edge_enterprise_id}|{stored_edge_id}'
-        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}, 'addition_timestamp': 123456789}
-        currently_stored_edges = {stored_edge_full_id: stored_edge_status}
+        stored_edge_value = {
+            'edge_status': {'edges': {'edgeState': 'OFFLINE'}},
+            'addition_timestamp': 123456789,
+        }
+        currently_stored_edges = {stored_edge_full_id: stored_edge_value}
 
         new_edge_full_id = {
             'host': stored_edge_host,
@@ -116,7 +122,10 @@ class TestEdgeRepository:
         redis_client.set.assert_called_once_with(
             root_key,
             json.dumps({
-                stored_edge_full_id: {**new_edge_status, 'addition_timestamp': current_timestamp},
+                stored_edge_full_id: {
+                    'edge_status': new_edge_status,
+                    'addition_timestamp': current_timestamp
+                },
             }),
             ex=60,
         )
@@ -127,8 +136,11 @@ class TestEdgeRepository:
         stored_edge_id = 2222
 
         stored_edge_full_id = f'{stored_edge_host}|{stored_edge_enterprise_id}|{stored_edge_id}'
-        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}, 'addition_timestamp': 123456789}
-        currently_stored_edges = {stored_edge_full_id: stored_edge_status}
+        stored_edge_value = {
+            'edge_status': {'edges': {'edgeState': 'OFFLINE'}},
+            'addition_timestamp': 123456789,
+        }
+        currently_stored_edges = {stored_edge_full_id: stored_edge_value}
 
         new_edge_full_id = {
             'host': stored_edge_host,
@@ -156,7 +168,10 @@ class TestEdgeRepository:
         redis_client.set.assert_called_once_with(
             root_key,
             json.dumps({
-                stored_edge_full_id: {**new_edge_status, 'addition_timestamp': current_timestamp},
+                stored_edge_full_id: {
+                    'edge_status': new_edge_status,
+                    'addition_timestamp': current_timestamp,
+                },
             }),
             ex=60,
         )
