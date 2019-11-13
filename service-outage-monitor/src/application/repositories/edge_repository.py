@@ -3,6 +3,8 @@ import time
 
 from collections import namedtuple
 from typing import Dict
+from typing import List
+from typing import Union
 
 
 EdgeIdentifier = namedtuple(typename='EdgeIdentifier', field_names=['host', 'enterprise_id', 'edge_id'])
@@ -22,26 +24,19 @@ class EdgeRepository:
         self._logger.info(f'Clearing contents for Redis key "{self._root_key}"...')
         self._redis_client.set(self._root_key, {})
 
-    def add_edge(self, full_id: dict, status: dict, update_existing=True, time_to_live=60):
-        edge_identifier = EdgeIdentifier(**full_id)
-        full_id_str = self.__full_id_dict_to_str(full_id)
-
-        if not update_existing and self.exists_edge(full_id):
-            self._logger.info(
-                f'Edge with {edge_identifier} will not be overwritten in Redis key "{self._root_key}"'
-            )
-            return
-
+    def add_edge(self, full_id: Union[EdgeIdentifier, dict], status: dict, update_existing=True, time_to_live=60):
         stored_edges = self._get_all_edges_raw()
-        stored_edges[full_id_str] = {
-            'edge_status': status,
-            'addition_timestamp': time.time(),
-        }
+        self.__add_edge_to_store(stored_edges, full_id, status, update_existing=update_existing)
+        self._redis_client.set(self._root_key, json.dumps(stored_edges), ex=time_to_live)
+
+    def add_edge_set(self, new_edges: Dict[EdgeIdentifier, dict], update_existing=True, time_to_live=60):
+        # TODO: Add support for full IDs with dict format (not only EdgeIdentifier format)
+        stored_edges = self._get_all_edges_raw()
+
+        for full_id, edge_value in new_edges.items():
+            self.__add_edge_to_store(stored_edges, full_id, edge_value, update_existing=update_existing)
 
         self._redis_client.set(self._root_key, json.dumps(stored_edges), ex=time_to_live)
-        self._logger.info(
-            f'Edge with {edge_identifier} written in Redis key "{self._root_key}" successfully'
-        )
 
     def get_all_edges(self) -> Dict[EdgeIdentifier, dict]:
         edges_from_redis = self._get_all_edges_raw()
@@ -72,6 +67,28 @@ class EdgeRepository:
 
     def _get_all_edges_raw(self) -> Dict[str, dict]:
         return json.loads(self._redis_client.get(self._root_key))
+
+    def __add_edge_to_store(self, stored_edges: Dict[str, dict], full_id: Union[EdgeIdentifier, dict], status: dict,
+                            **kwargs):
+        if isinstance(full_id, EdgeIdentifier):
+            full_id = dict(full_id._asdict())
+
+        edge_identifier = EdgeIdentifier(**full_id)
+        full_id_str = self.__full_id_dict_to_str(full_id)
+
+        if not kwargs.get('update_existing', True) and self.exists_edge(full_id):
+            self._logger.info(
+                f'Edge with {edge_identifier} will not be overwritten in Redis key "{self._root_key}"'
+            )
+            return
+
+        stored_edges[full_id_str] = {
+            'edge_status': status,
+            'addition_timestamp': time.time(),
+        }
+        self._logger.info(
+            f'Edge with {edge_identifier} written in Redis key "{self._root_key}" successfully'
+        )
 
     def __remove_edge_from_store(self, stored_edges: Dict[str, dict], full_id: dict):
         edge_identifier = EdgeIdentifier(**full_id)

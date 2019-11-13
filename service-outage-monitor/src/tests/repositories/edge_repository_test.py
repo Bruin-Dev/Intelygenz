@@ -47,11 +47,52 @@ class TestEdgeRepository:
 
         redis_client.set.assert_called_once_with(root_key, root_key_contents)
 
-    def add_edge_test(self):
+    def add_edge_with_full_id_as_dict_test(self):
         new_edge_host = 'mettel.velocloud.net'
         new_edge_enterprise_id = 1234
         new_edge_id = 5678
         new_edge_full_id = {'host': new_edge_host, 'enterprise_id': new_edge_enterprise_id, 'edge_id': new_edge_id}
+        new_edge_status = {'edges': {'edgeState': 'CONNECTED'}}
+
+        stored_edge_full_id = 'mettel.velocloud.net|1111|2222'
+        stored_edge_value = {
+            'edge_status': {'edges': {'edgeState': 'OFFLINE'}},
+            'addition_timestamp': 123456789,
+        }
+        currently_stored_edges = {stored_edge_full_id: stored_edge_value}
+
+        root_key = 'test-key'
+        logger = Mock()
+        redis_client = Mock()
+
+        edge_repository = EdgeRepository(logger, redis_client, root_key)
+        edge_repository._get_all_edges_raw = Mock(return_value=currently_stored_edges)
+
+        current_timestamp = time.time()
+        time_mock = Mock()
+        time_mock.time = Mock(return_value=current_timestamp)
+        with patch.object(edge_repository_module, 'time', new=time_mock):
+            edge_repository.add_edge(new_edge_full_id, new_edge_status)
+
+        edge_repository._get_all_edges_raw.assert_called_once()
+        redis_client.set.assert_called_once_with(
+            root_key,
+            json.dumps({
+                stored_edge_full_id: stored_edge_value,
+                f'{new_edge_host}|{str(new_edge_enterprise_id)}|{str(new_edge_id)}': {
+                    'edge_status': new_edge_status, 'addition_timestamp': current_timestamp
+                }
+            }),
+            ex=60,
+        )
+
+    def add_edge_with_full_id_as_edge_identifier_test(self):
+        new_edge_host = 'mettel.velocloud.net'
+        new_edge_enterprise_id = 1234
+        new_edge_id = 5678
+        new_edge_full_id = EdgeIdentifier(host=new_edge_host,
+                                          enterprise_id=new_edge_enterprise_id,
+                                          edge_id=new_edge_id)
         new_edge_status = {'edges': {'edgeState': 'CONNECTED'}}
 
         stored_edge_full_id = 'mettel.velocloud.net|1111|2222'
@@ -204,8 +245,56 @@ class TestEdgeRepository:
         edge_repository.add_edge(new_edge_full_id, new_edge_status, update_existing=False)
 
         edge_repository.exists_edge.assert_called_once_with(new_edge_full_id)
-        edge_repository._get_all_edges_raw.assert_not_called()
-        redis_client.set.assert_not_called()
+        edge_repository._get_all_edges_raw.assert_called_once()
+        redis_client.set.assert_called_once_with(
+            root_key,
+            json.dumps(currently_stored_edges),
+            ex=60
+        )
+
+    def add_edge_set_test(self):
+        stored_edge_host = 'mettel.velocloud.net'
+        stored_edge_enterprise_id = 1111
+        stored_edge_id = 2222
+
+        stored_edge_full_id = f'{stored_edge_host}|{stored_edge_enterprise_id}|{stored_edge_id}'
+        stored_edge_status = {'edges': {'edgeState': 'OFFLINE'}, 'addition_timestamp': 123456789}
+        currently_stored_edges = {stored_edge_full_id: stored_edge_status}
+
+        new_edge_1_full_id = {
+            'host': 'mettel.velocloud.net',
+            'enterprise_id': 3333,
+            'edge_id': 4444,
+        }
+        new_edge_1_identifier = EdgeIdentifier(**new_edge_1_full_id)
+        new_edge_1_status = {'edges': {'edgeState': 'CONNECTED'}}
+        new_edge_2_full_id = {
+            'host': 'mettel.velocloud.net',
+            'enterprise_id': 5555,
+            'edge_id': 6666,
+        }
+        new_edge_2_identifier = EdgeIdentifier(**new_edge_2_full_id)
+        new_edge_2_status = {'edges': {'edgeState': 'CONNECTED'}}
+        new_edges = {
+            new_edge_1_identifier: new_edge_1_status,
+            new_edge_2_identifier: new_edge_2_status,
+        }
+
+        root_key = 'test-key'
+        logger = Mock()
+        redis_client = Mock()
+
+        edge_repository = EdgeRepository(logger, redis_client, root_key)
+        edge_repository._get_all_edges_raw = Mock(return_value=currently_stored_edges)
+
+        edge_repository.add_edge_set(new_edges)
+
+        edge_repository._get_all_edges_raw.assert_called_once()
+        redis_client.set.assert_called_once_with(
+            root_key,
+            json.dumps(currently_stored_edges),
+            ex=60
+        )
 
     def get_all_edges_raw_test(self):
         root_key_contents = {
