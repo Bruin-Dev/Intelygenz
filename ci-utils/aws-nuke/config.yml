@@ -1,0 +1,55 @@
+account-blacklist:
+- '999999999999'
+accounts:
+  '374050862540':
+    filters:
+      CloudFormationStack:
+      - invert: true
+        property: tag:Environment
+        value: automation-f4a65292
+      CloudWatchAlarm:
+      - invert: true
+        type: contains
+        value: automation-f4a65292
+      CloudWatchLogsLogGroup:
+      - invert: true
+        type: regex
+        value: automation-f4a65292|/aws/ecs/containerinsights/automation-f4a65292/performance
+      ECSCluster:
+      - invert: true
+        value: arn:aws:ecs:us-east-1:374050862540:cluster/automation-f4a65292
+      ECSService:
+      - invert: true
+        type: contains
+        value: automation-f4a65292
+      ECSTaskDefinition:
+      - invert: true
+        type: contains
+        value: automation-f4a65292
+      ELBv2:
+      - invert: true
+        property: tag:Environment
+        value: automation-f4a65292
+      ELBv2TargetGroup:
+      - invert: true
+        property: tag:Environment
+        value: automation-f4a65292
+      ElasticacheCacheCluster:
+      - invert: true
+        value: automation-f4a65292
+      ElasticacheSubnetGroup:
+      - invert: true
+        type: contains
+        value: automation-f4a65292
+      ServiceDiscoveryNamespace:
+      - invert: true
+        value: ns-2rltz2ltjma6ybjc
+      ServiceDiscoveryService:
+      - invert: true
+        type: regex
+        value: srv-2ivbxjcj74qunk42|srv-4wrw3ibrhutf6fq2|srv-5jlikbnx2wg2bf3u|srv-eogqsq2eqjy5nwvh|srv-epittl5s4ydbh6au|srv-ljvkzl4evzyi5qx3|srv-lmlwqemga6szx664|srv-ryzp6no3pe4cp2l4|srv-tghhxu26ltykx2n6|srv-vt26br3bpugku7xd|srv-ychhenrdgfaoxclk|srv-z5zxoudkq3qad5p5
+regions:
+- us-east-1
+resource-types:
+  targets:
+  - CloudWatchLogsLogGroup
