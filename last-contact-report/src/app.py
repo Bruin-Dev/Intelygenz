@@ -24,7 +24,7 @@ class Container:
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.add_consumer(self.subscriber_alert, consumer_name="sub-alert")
         self._event_bus.set_producer(self._publisher)
-        self._template_renderer = TemplateRenderer(config)
+        self._template_renderer = TemplateRenderer(config.ALERTS_CONFIG)
 
         self._alert = Alert(self._event_bus, self._scheduler, self._logger,
                             config.ALERTS_CONFIG, self._template_renderer)
