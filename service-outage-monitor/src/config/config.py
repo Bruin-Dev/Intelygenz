@@ -39,3 +39,7 @@ QUART_CONFIG = {
     'title': 'service-outage-monitor',
     'port': 5000
 }
+
+REDIS = {
+    "host": os.environ["REDIS_HOSTNAME"]
+}
