@@ -8,7 +8,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-FNULL = open('/dev/null', 'w')
+FNULL = open(os.devnull, 'w')
 
 
 class S3Buckets:

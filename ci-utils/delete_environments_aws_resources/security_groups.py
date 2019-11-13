@@ -10,7 +10,7 @@ import common_utils as common_utils_module
 
 logging.basicConfig(level=logging.INFO)
 
-FNULL = open('/dev/null', 'w')
+FNULL = open(os.devnull, 'w')
 
 
 class SecurityGroups:

@@ -1,11 +1,13 @@
 #!/bin/python
+
+import os
 import logging
 import subprocess
 import time
 
 logging.basicConfig(level=logging.INFO)
 
-FNULL = open('/dev/null', 'w')
+FNULL = open(os.devnull, 'w')
 
 
 class CommonUtils:
