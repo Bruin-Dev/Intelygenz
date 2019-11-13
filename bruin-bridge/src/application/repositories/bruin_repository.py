@@ -49,6 +49,8 @@ class BruinRepository:
 
     def get_affecting_ticket_details_by_edge_serial(self, edge_serial, client_id,
                                                     category='SD-WAN', ticket_statuses=None):
+        if ticket_statuses is None:
+            ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_details_list = self.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id, ticket_topic='VAS',
             category=category, ticket_statuses=ticket_statuses,
@@ -57,10 +59,12 @@ class BruinRepository:
         if not ticket_details_list:
             return
 
-        return ticket_details_list[0]
+        return ticket_details_list
 
     def get_outage_ticket_details_by_edge_serial(self, edge_serial, client_id,
                                                  category='SD-WAN', ticket_statuses=None):
+        if ticket_statuses is None:
+            ticket_statuses = ['New', 'InProgress', 'Draft']
         ticket_details_list = self.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id, ticket_topic='VOO',
             category=category, ticket_statuses=ticket_statuses,

@@ -411,7 +411,7 @@ class TestBruinRepository:
         ticket_topic = 'VAS'
 
         ticket_id = 123
-        ticket_details = {
+        ticket_details = [{
             'ticketID': ticket_id,
             'ticketDetails': [
                 {
@@ -425,10 +425,10 @@ class TestBruinRepository:
                     "noteValue": 'Nothing to do here!',
                 }
             ],
-        }
+        }]
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=[ticket_details])
+        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details)
 
         affecting_ticket_details_by_edge = bruin_repository.get_affecting_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
