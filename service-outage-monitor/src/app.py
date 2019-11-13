@@ -6,6 +6,7 @@ from application.repositories.edge_repository import EdgeRepository
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
+from redis import Redis
 
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
@@ -23,10 +24,11 @@ class Container:
         self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
 
-        self._online_edge_repository = EdgeRepository(root_key='ONLINE_EDGES')
-        self._quarantine_edge_repository = EdgeRepository(root_key='EDGES_QUARANTINE')
-        self._online_edge_repository.initialize_root_key()
-        self._quarantine_edge_repository.initialize_root_key()
+        self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._online_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
+                                                      root_key='ONLINE_EDGES')
+        self._quarantine_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
+                                                          root_key='EDGES_QUARANTINE')
 
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
@@ -43,6 +45,9 @@ class Container:
 
     async def _start(self):
         await self._event_bus.connect()
+
+        self._online_edge_repository.initialize_root_key()
+        self._quarantine_edge_repository.initialize_root_key()
 
         # await self._service_outage_monitor.start_service_outage_monitor_job(exec_on_start=False)
         await self._service_outage_detector.start_service_outage_detector_job(exec_on_start=True)
