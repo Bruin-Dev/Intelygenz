@@ -147,7 +147,7 @@ class TestAlert:
             json.dumps(email_contents),
         )
 
-    '''@pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def alert_process_with_invalid_last_contact_dates_test(self):
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -207,13 +207,13 @@ class TestAlert:
              "edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z",
                       'modelNumber': 'edge123'},
              "enterprise": "Fake Corp"}]})
-        await alert._alert_process()
-        assert event_bus.publish_message.called
-        assert "notification.email.request" in event_bus.publish_message.call_args[0][0]
-        assert "<div>Some email</div>" in event_bus.publish_message.call_args[0][1]
 
         with patch.object(alert_module, 'uuid', return_value=test_uuid):
             await alert._alert_process()
+
+        assert event_bus.publish_message.called
+        assert "notification.email.request" in event_bus.publish_message.call_args[0][0]
+        assert "<div>Some email</div>" in event_bus.publish_message.call_args[0][1]
 
         reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
         assert len(reported_edges) == 1
@@ -224,8 +224,8 @@ class TestAlert:
         )
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
-            json.dumps(email_contents),
-        )'''
+            json.dumps(email_contents["email"]),
+        )
 
     @pytest.mark.asyncio
     async def alert_process_with_less_than_30_days_elapsed_since_last_contact_test(self):
