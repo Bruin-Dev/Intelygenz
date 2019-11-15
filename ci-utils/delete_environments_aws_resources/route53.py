@@ -51,7 +51,7 @@ class Route53:
         return hosted_zone_of_hosted_zone_for_records
 
     def _check_resource_record_environment(self, hosted_zone_id, environment):
-        logging.info(f"Checking if there is a record set for environment {environment}  in hosted "
+        logging.info(f"Checking if there is a record set for environment {environment} in hosted "
                      f"zone with id {hosted_zone_id}")
         resource_record_environment = {'exists': False}
         resources_records_set_list_call = subprocess.Popen(['aws', 'route53', 'list-resource-record-sets',
