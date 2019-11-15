@@ -46,8 +46,8 @@ class RedisCluster:
         cluster_delete_result = {}
         if redis_cluster['exists']:
             logging.info("There is a ElastiCache Redis cluster related with environment exists and has {} cache nodes".
-                         format(environment, redis_cluster['redis_cluster_information']['CacheClusters'][0]
-            ['NumCacheNodes']))
+                         format(environment,
+                                redis_cluster['redis_cluster_information']['CacheClusters'][0]['NumCacheNodes']))
             logging.info("Redis cluster {} it's going to be deleted".format(environment))
             subprocess.call(
                 ['aws', 'elasticache', 'delete-cache-cluster', '--cache-cluster-id', environment, '--region',
@@ -113,8 +113,8 @@ class RedisCluster:
             logging.info("There is an ElastiCache Subnet Group for the environment {} with name".
                          format(environment, cache_subnet_group_name))
             logging.info("ElastiCache Subnet Group {} it's going to be deleted".format(cache_subnet_group_name))
-            cmd_call_remove_cache_subnet_group = 'aws, elasticache, delete-cache-subnet-group, --cache-subnet-group, ' + \
-                                                 cache_subnet_group_name
+            cmd_call_remove_cache_subnet_group = 'aws, elasticache, delete-cache-subnet-group, ' \
+                                                 '--cache-subnet-group, ' + cache_subnet_group_name
             remove_cache_subnet_group = subprocess.call(cmd_call_remove_cache_subnet_group.split(', '), stdout=FNULL)
             common_utils_instance.check_current_state_call(remove_cache_subnet_group,
                                                            'ElastiCache Subnet Group', cache_subnet_group_name)

@@ -25,7 +25,8 @@ def _print_usage():
 
 def _delete_all(environment, ecs_instance, redis_instance, alb_instance, security_groups_instance,
                 metrics_instance, s3_instance, route53_instance, cloudformation_instance):
-    logging.info("There are going to be deleted all AWS resources associated with the environment {}".format(environment))
+    logging.info("There are going to be deleted all AWS resources associated with the environment {}"
+                 .format(environment))
     ecs_instance.delete_ecs_cluster(environment)
     redis_instance.delete_redis_resources(environment)
     alb_instance.delete_alb(environment)

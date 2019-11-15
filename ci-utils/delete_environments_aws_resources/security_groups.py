@@ -61,4 +61,3 @@ class SecurityGroups:
                                                                    security_group_name)
         else:
             logging.error("There isn't any security group associated with the environment {}".format(environment))
-

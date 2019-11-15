@@ -52,7 +52,8 @@ class ApplicationLoadBalancer:
             for i in range(len(target_groups_to_delete)):
                 target_group_arn = target_groups_to_delete[i]['TargetGroupArn']
                 target_group_name = target_groups_to_delete[i]['TargetGroupName']
-                logging.info("Deleting target group with name {} and arn {}".format(target_group_arn, target_group_name))
+                logging.info("Deleting target group with name {} and arn {}".
+                             format(target_group_arn, target_group_name))
                 subprocess.call(['aws', 'elbv2', 'delete-target-group', '--target-group-arn', target_group_arn],
                                 stdout=FNULL)
 
@@ -67,4 +68,5 @@ class ApplicationLoadBalancer:
             subprocess.call(['aws', 'elbv2', 'delete-load-balancer', '--load-balancer-arn', alb_arn], stdout=FNULL)
             self._delete_targets_group_for_alb(alb_arn, environment)
         else:
-            logging.error("There isn't an ALB related with the environment {}".format(environment))
+            logging.error("There isn't an ALB related with the environment {}".
+                          format(environment))

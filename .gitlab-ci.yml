@@ -75,6 +75,11 @@ t7-bridge-linter:
     MODULE: t7-bridge
   extends: .lint_module
 
+ci-utils-linter:
+  variables:
+    MODULE: ci-utils
+  extends: .lint_module
+
 #
 # Modules unit tests
 #

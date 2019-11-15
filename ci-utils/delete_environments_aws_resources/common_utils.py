@@ -37,4 +37,3 @@ class CommonUtils:
         else:
             logging.info("There where problems trying to delete AWS resource {} with name {}".
                          format(aws_resource, aws_resource_name))
-
