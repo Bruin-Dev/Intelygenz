@@ -78,7 +78,6 @@ class AWSNukeConfigurationGenerator:
         aws_nuke_rules_service_discovery_namespace = self._generate_servicediscovery_namespace_rules(environment_name)
         if len(aws_nuke_rules_service_discovery_namespace) > 0:
             aws_nuke_rules_services.append(aws_nuke_rules_service_discovery_namespace)
-            logging.info("Appended value services {}".format(aws_nuke_rules_service_discovery_namespace))
             namespace_id = aws_nuke_rules_service_discovery_namespace['ServiceDiscoveryNamespace'][0]['value']
             aws_nuke_rules_service_discovery_services = self. \
                 _generate_resources_rules_aws_services_of_namespace_in_environment(environment_name, namespace_id)
