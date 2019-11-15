@@ -34,7 +34,8 @@ class ReportEdgeStatus:
                     if link_dict['linkId'] == link_service_dict['linkId']:
                         link_dict['serviceGroups'] = link_service_dict['serviceGroups']
                         break
-                link_status.append(link_dict)
+                if link_dict['link']['backupState'] == 'UNCONFIGURED':
+                    link_status.append(link_dict)
         elif links is None:
             link_status = None
         elif isinstance(links, Exception):

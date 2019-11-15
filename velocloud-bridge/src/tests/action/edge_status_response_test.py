@@ -39,7 +39,8 @@ class TestEdgeStatusResponse:
         velocloud_repo.get_edge_information().to_dict = Mock(return_value=dict(edge_status=[]))
         velocloud_repo.get_link_information = Mock(return_value=[])
         dict_object = Mock()
-        dict_object.to_dict = Mock(return_value={"link_data": "STABLE", "linkId": "123"})
+        dict_object.to_dict = Mock(return_value={"link_data": "STABLE", "linkId": "123", 'link': {'backupState':
+                                                                                                  'UNCONFIGURED'}})
         velocloud_repo.get_link_information = Mock(return_value=[dict_object])
         velocloud_repo.get_link_service_groups_information = Mock(return_value=[])
         dict_service_object_wireless = Mock()
@@ -68,6 +69,8 @@ class TestEdgeStatusResponse:
                                                                                      "links":
                                                                                          [{"link_data": "STABLE",
                                                                                            "linkId": "123",
+                                                                                           'link': {'backupState':
+                                                                                                        'UNCONFIGURED'},
                                                                                            "serviceGroups": "wired"}
                                                                                           ]},
                                                                        "status": 200})
@@ -86,7 +89,8 @@ class TestEdgeStatusResponse:
         velocloud_repo.get_edge_information().to_dict = Mock(return_value=dict(edge_status=[]))
         velocloud_repo.get_link_information = Mock(return_value=[])
         dict_object = Mock()
-        dict_object.to_dict = Mock(return_value={"link_data": "STABLE", "linkId": "123"})
+        dict_object.to_dict = Mock(return_value={"link_data": "STABLE", "linkId": "123", 'link': {'backupState':
+                                                                                                  'UNCONFIGURED'}})
         velocloud_repo.get_link_information = Mock(return_value=[dict_object])
         velocloud_repo.get_link_service_groups_information = Mock(return_value=[])
         dict_service_object = Mock()
@@ -113,6 +117,8 @@ class TestEdgeStatusResponse:
                                                                                      "links":
                                                                                          [{"link_data": "STABLE",
                                                                                            "linkId": "123",
+                                                                                           'link': {'backupState':
+                                                                                                        'UNCONFIGURED'},
                                                                                            "serviceGroups": "wireless"}
                                                                                           ]},
                                                                        "status": 200})
@@ -131,7 +137,8 @@ class TestEdgeStatusResponse:
         velocloud_repo.get_edge_information().to_dict = Mock(return_value=dict(edge_status=[]))
         velocloud_repo.get_link_information = Mock(return_value=[])
         dict_object = Mock()
-        dict_object.to_dict = Mock(return_value={"link_data": "STABLE", "linkId": "123"})
+        dict_object.to_dict = Mock(return_value={"link_data": "STABLE", "linkId": "123", "link": {'backupState':
+                                                                                                  'UNCONFIGURED'}})
         velocloud_repo.get_link_information = Mock(return_value=[dict_object])
         velocloud_repo.get_link_service_groups_information = Mock(return_value=[])
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
@@ -154,7 +161,9 @@ class TestEdgeStatusResponse:
                                                                                      "edges": {"edge_status": []},
                                                                                      "links":
                                                                                          [{"link_data": "STABLE",
-                                                                                           "linkId": "123"}
+                                                                                           "linkId": "123",
+                                                                                           "link": {'backupState':
+                                                                                                    'UNCONFIGURED'}}
                                                                                           ]},
                                                                        "status": 200})
         assert actions._logger.info.called
