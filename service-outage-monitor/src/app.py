@@ -1,10 +1,8 @@
 import asyncio
 from application.actions.service_outage_detector import DetectedOutagesObserver
 from application.actions.service_outage_detector import ServiceOutageDetector
+from application.actions.service_outage_detector import ServiceOutageReporter
 from application.actions.service_outage_monitor import ServiceOutageMonitor
-from application.repositories.template_management import TemplateRenderer
-from application.repositories.edge_repository import EdgeRepository
-
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
 from redis import Redis
@@ -15,6 +13,8 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 
+from application.repositories.edge_repository import EdgeRepository
+from application.repositories.edge_repository_template_renderer import EdgeRepositoryTemplateRenderer
 
 
 class Container:
@@ -36,10 +36,9 @@ class Container:
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.set_producer(self._publisher)
-        self._template_renderer = TemplateRenderer(config)
 
         self._service_outage_monitor = ServiceOutageMonitor(self._event_bus, self._logger, self._scheduler,
-                                                            config, self._template_renderer)
+                                                            config)
         self._service_outage_detector = ServiceOutageDetector(self._event_bus, self._logger, self._scheduler,
                                                               self._online_edge_repository,
                                                               self._quarantine_edge_repository,
@@ -49,7 +48,7 @@ class Container:
                                                                   self._quarantine_edge_repository,
                                                                   self._reporting_edge_repository,
                                                                   config)
-
+        self._service_outage_report = ServiceOutageReporter
 
     async def _start(self):
         await self._event_bus.connect()

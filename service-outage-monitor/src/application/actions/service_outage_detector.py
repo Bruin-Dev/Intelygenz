@@ -177,3 +177,34 @@ class DetectedOutagesObserver:
         if client_id_match:
             client_id = client_id_match.group('client_id')
             return client_id
+
+
+class ServiceOutageReporter:
+    def __init__(self, logger, event_bus, scheduler, reporting_edge_repository, edge_repository_template_renderer, config):
+        self._logger = logger
+        self._event_bus = event_bus
+        self._scheduler = scheduler
+        self._reporting_edge_repository = reporting_edge_repository
+        self._edge_repository_template_renderer = edge_repository_template_renderer
+        self._config = config
+
+    async def start_service_outage_reporter_job(self, exec_on_start=False):
+        self._logger.info('Scheduling Service Outage Reporter job...')
+        next_run_time = undefined
+
+        if exec_on_start:
+            tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+            next_run_time = datetime.now(tz)
+            self._logger.info('Service Outage Reporter job is going to be executed immediately')
+
+        self._scheduler.add_job(self._service_outage_reporter_process, 'interval',
+                                seconds=self._config.MONITOR_CONFIG['jobs_intervals']['outage_reporter'],
+                                next_run_time=next_run_time, replace_existing=True,
+                                id='_service_outage_reporter_process')
+
+    async def _service_outage_reporter_process(self):
+        email_report = self._edge_repository_template_renderer._compose_email_object()
+        await self._event_bus.rpc_request("notification.email.request",
+                                          json.dumps(email_report),
+                                          timeout=10)
+        self._reporting_edge_repository.reset_root_key()
