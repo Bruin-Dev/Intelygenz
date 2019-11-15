@@ -22,20 +22,34 @@ In this folder are stored a series of scripts implemented in bash and python use
 
 ### Description <a name="task_healthcheck_description"></a>
 
-[This script](./task_healthcheck.sh) has been implemented in *shell scripting*, it is used to check if for a service of a given ECS cluster the last task definition relative to a service provided as parameter is being executed, as well as if it has a `HEALTHY` state.
+This [script](./task_healthcheck.sh) has been implemented in *shell scripting*, it is used to check if for a service of a given ECS cluster the last task definition relative to a service provided as parameter is being executed, as well as if it has a `HEALTHY` state.
 
 This script loads the content of [another script](./common_functions.sh), where a series of util functions are declared being able to use them during its execution.
 
 ### Usage <a name="task_healthcheck_usage"></a>
 
-To use this script it is necessary do the following:
+In order to use this [script](./task_healthcheck.sh) it is necessary to perform the following steps previously:
 
-* Declare previously the variable `TF_VAR_ENVIRONMENT` with the value of the ECS cluster on which you want to use it.
-* Provide as parameter `-t` the name of the service on which you want to perform the check performed by the script explained above, as shown below:
+* Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
 
     ```sh
-    $ /bin/bash ci-utils/task_healthcheck.sh -t <service_name>
+    $ export AWS_ACCESS_KEY_ID=<access_key>
+    $ export AWS_SECRET_ACCESS_KEY=<secret_key>
     ```
+
+* Declare the variable `TF_VAR_ENVIRONMENT` with the value of the ECS cluster on which you it is going to to used in the following way:
+
+    ```sh
+    $ export TF_VAR_ENVIRONMENT=<environment_name>
+    ```
+
+    >It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment.
+
+Once the previous steps have been carried out, it is possible to use this [script](./task_healthcheck.sh) providing as parameter `-t` the name of the service on which you want to perform the check performed by the script explained above, as shown below:
+
+```sh
+$ /bin/bash ci-utils/task_healthcheck.sh -t <service_name>
+```
 
 ## Script grafana_users_creation<a name="grafana_users_creation"></a>
 
