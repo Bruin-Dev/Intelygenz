@@ -14,6 +14,9 @@ In this folder are stored a series of scripts implemented in bash and python use
     - [Description](#delete_environments_aws_resources_description)
     - [Usage](#delete_environments_aws_resources_usage)
     - [Commands](#delete_environments_aws_resources_commands)
++ [Aws_nuke_conf_generator](#aws_nuke_conf_generator)
+    - [Description](#aws_nuke_conf_generator_description)
+    - [Usage](#aws_nuke_conf_generator_usage)
 
 ## Script task_healtheck<a name="task_healthcheck"></a>
 
@@ -70,7 +73,7 @@ To use this script it is necessary to declare a series of variables, exposed bel
 
 In the folder [`delete_environments_aws_resources`](./delete_environments_aws_resources) a series of *Python* files are stored, these allow the deletion of the resources created in AWS associated to an environment.
 
->It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying echo -n "<branch_name>" | sha256sum | cut -c1-8 on the branch name related to the ephemeral environment.
+>It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment.
 
 ### Usage <a name="delete_environments_aws_resources_usage"></a>
 
@@ -127,4 +130,18 @@ CLI supports a number of commands. These are explained below:
 
 ### Description <a name="aws_nuke_conf_generator_description"></a>
 
-This [script](./aws-nuke/aws_nuke_conf_generator.py) has been implemented to generate the configuration file used by [aws-nuke](https://github.com/rebuy-de/aws-nuke) to delete resources in AWS.
+This [script](./aws-nuke/aws_nuke_conf_generator.py) has been implemented to generate the configuration file used by [`aws-nuke`](https://github.com/rebuy-de/aws-nuke) to delete resources in AWS.
+
+The generated configuration file will allow filtering on the resources to be deleted specified in it, so that `aws-nuke` will only delete those associated with the environment specified in that file.
+
+In order to carry out this process of generating a configuration file, a [template file](./aws-nuke/config_template.yml) is used on which the script applies the relevant changes to the resources to be filtered.
+
+### Usage <a name="aws_nuke_conf_generator_usage"></a>
+
+To use the [script](./aws-nuke/aws_nuke_conf_generator.py) to be used by aws-nuke to generate the configuration file relative to the environment in which the AWS resources are to be removed, it is necessary to specify this environment, using the `-e` option, as shown below:
+
+```sh
+$ python ci-utils/aws-nuke/aws_nuke_conf_generator.py -e <environment_name>
+```
+
+>It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment.
