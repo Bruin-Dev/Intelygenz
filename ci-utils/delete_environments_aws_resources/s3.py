@@ -33,11 +33,11 @@ class S3Buckets:
                                     f's3://{self._s3_bucket_backend}/terraform-{environment}-ecs-services.tfstate']
         s3_buckets_list_exists = []
         for element in s3_buckets_list_to_check:
-            logging.info("Checking if s3 bucket with name {} exists".format(element))
+            logging.info("Checking if directory {} exists in s3 bucket".format(element))
             s3_bucket_list_call = subprocess.Popen(['aws', 's3', 'ls', element], stdout=subprocess.PIPE,
                                                    stderr=FNULL)
             s3_bucket_list_call_result = s3_bucket_list_call.stdout.read().decode()
-            if s3_bucket_list_call_result is not '':
+            if s3_bucket_list_call_result != '':
                 logging.info("Directory {} exists in s3 bucket {}".format(element, self._s3_bucket_backend))
                 s3_buckets_list_exists.append(element)
             else:

@@ -127,4 +127,4 @@ CLI supports a number of commands. These are explained below:
 
 ### Description <a name="aws_nuke_conf_generator_description"></a>
 
-This [script](./aws-nuke/aws_nuke_conf_generator.py) 
+This [script](./aws-nuke/aws_nuke_conf_generator.py) has been implemented to generate the configuration file used by [aws-nuke](https://github.com/rebuy-de/aws-nuke) to delete resources in AWS.

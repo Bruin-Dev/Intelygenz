@@ -127,7 +127,7 @@ class EcsServices:
                      " cluster".format(environment))
         cluster_information = self._check_if_ecs_cluster_exists(environment)
         if cluster_information['exists'] and not cluster_information['inactive']:
-            logging.info("There is an ECS cluster with the name {} with {} services active {} tasks running".format(
+            logging.info("There is an ECS cluster with the name {} with {} services active and {} tasks running".format(
                 environment, cluster_information['ecs_cluster_information']['activeServicesCount'],
                 cluster_information['ecs_cluster_information']['runningTasksCount']))
             self._stop_task_and_delete_services(environment)
@@ -150,7 +150,7 @@ class EcsServices:
         logging.info("Checking if there is an ECS cluster for the environment {}".format(environment))
         cluster_information = self._check_if_ecs_cluster_exists(environment)
         if cluster_information['exists'] and not cluster_information['inactive']:
-            logging.info("There is an ECS cluster for the environment {} with {} services active {} tasks running".
+            logging.info("There is an ECS cluster for the environment {} with {} services active and {} tasks running".
                          format(environment, cluster_information['ecs_cluster_information']['activeServicesCount'],
                                 cluster_information['ecs_cluster_information']['runningTasksCount']))
             logging.info("ECS cluster for the environment {} is going to be removed".format(environment))
