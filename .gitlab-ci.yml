@@ -492,7 +492,7 @@ destroy-branches-aws-nuke:
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -c
+    - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -d
     - python ci-utils/aws-nuke/aws_nuke_conf_generator.py -e $ENVIRONMENT
     - aws-nuke -c ${AWS_NUKE_CONFIG_FILE} --profile default --force ${AWS_NUKE_OPTS}
     - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -z -b
