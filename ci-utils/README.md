@@ -77,7 +77,7 @@ In the folder [`delete_environments_aws_resources`](./delete_environments_aws_re
 
 ### Usage <a name="delete_environments_aws_resources_usage"></a>
 
-In order to be able to use the CLI mentioned in the previous section it is necessary to previously define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
+In order to be able to use the CLI mentioned previously it is necessary to previously define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
 
 ```sh
 $ export AWS_ACCESS_KEY_ID=<access_key>
@@ -152,7 +152,7 @@ In order to carry out this process of generating a configuration file, a [templa
 
 ### Usage <a name="aws_nuke_conf_generator_usage"></a>
 
-In order to be able to use the [script](./aws-nuke/aws_nuke_conf_generator.py) mentioned in the previous section it is necessary to previously define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
+In order to be able to use the [script](./aws-nuke/aws_nuke_conf_generator.py) mentioned previously it is necessary to previously define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
 
 ```sh
 $ export AWS_ACCESS_KEY_ID=<access_key>
