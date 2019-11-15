@@ -31,7 +31,7 @@ class GetAffectingTicketDetailsByEdgeSerial:
         else:
             status = 500
             self._logger.info(
-                f'Ticket not found for edge with serial {edge_serial} and client ID {client_id}.')
+                f'Error trying to get a ticket for edge with serial {edge_serial} and client ID {client_id}.')
 
         response = {
             'request_id': request_id,
