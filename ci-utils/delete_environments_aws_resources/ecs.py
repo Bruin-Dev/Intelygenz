@@ -120,6 +120,7 @@ class EcsServices:
         subprocess.call(
             ['aws', 'servicediscovery', 'delete-namespace', '--id', namespace_id, '--region', 'us-east-1'],
             stdout=FNULL)
+        logging.info(f"Namespace {namespace_id} was sucessfully removed")
 
     def delete_servicediscovery(self, environment):
         logging.info("Checking if there are AWS resources related to the service discovery of the {}"

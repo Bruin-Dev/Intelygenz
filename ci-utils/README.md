@@ -9,8 +9,8 @@ In this folder are stored a series of scripts implemented in bash and python use
     - [Usage](#task_healthcheck_usage)
 + [Grafana_users_creation](#grafana_users_creation)
     - [Description](#grafana_users_creation_description)
-    - [Usage](#grafana_users_creation_usage)
-+ [Scripts utils delete_environments_aws_resources](#scripts_utils-delete_environments_aws_resources)
+    - [Usage](#grafana_users_creation_usae)
++ [Script utils delete_environments_aws_resources](#script_utils-delete_environments_aws_resources)
     - [Description](#delete_environments_aws_resources_description)
     - [Usage](#delete_environments_aws_resources_usage)
     - [Commands](#delete_environments_aws_resources_commands)
@@ -64,7 +64,7 @@ To use this script it is necessary to declare a series of variables, exposed bel
 
 >The number of elements that must have the variables `GRAFANA_USER_EMAIL`, `GRAFANA_USER_LOGIN`, `GRAFANA_USER_NAME` and `GRAFANA_USER_PASSWORD` must be the same, since it is necessary to have all the fields related to the users to be created to be able to do it.
 
-## Scripts utils delete_environments_aws_resources <a name="scripts_utils-delete_environments_aws_resources"></a>
+## Script utils delete_environments_aws_resources <a name="script_utils-delete_environments_aws_resources"></a>
 
 ### Description <a name="delete_environments_aws_resources_description"></a>
 
@@ -122,3 +122,9 @@ CLI supports a number of commands. These are explained below:
 * `-f`, `--cloud-formation`: The *Cloud Formation Stack* resources created for the specified environment will be removed
 
 * `-b`, `--buckets`: All *Terraform* files with `tfstate` extension related to the specified environment will be deleted, these are used to know the state of the resources created by it and are stored in an  *S3 Bucket* that is specified in the creation of its with *Terraform*.
+
+## Script aws_nuke_conf_generator <a name="aws_nuke_conf_generator"></a>
+
+### Description <a name="aws_nuke_conf_generator_description"></a>
+
+This [script](./aws-nuke/aws_nuke_conf_generator.py) 

@@ -15,7 +15,7 @@ class S3Buckets:
 
     def delete_s3buckets(self, environment):
         logging.info("Checking if there are directories in s3 bucket {} related to the {} environment"
-                     "for store Terraform tfstate files".format(self._s3_bucket_backend, environment))
+                     " for store Terraform tfstate files".format(self._s3_bucket_backend, environment))
         s3buckets_check = self._check_s3buckets_exists(environment)
         if s3buckets_check['s3_buckets']:
             logging.info("The environment {} has associated {} directories to store Terraform state file"

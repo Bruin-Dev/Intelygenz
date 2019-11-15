@@ -15,6 +15,20 @@ FNULL = open(os.devnull, 'w')
 
 _config_template = os.path.join(os.getcwd(), "ci-utils", 'aws-nuke', 'config_template.yml')
 _config_file = os.path.join(os.getcwd(), "ci-utils", 'aws-nuke', 'config.yml')
+_aws_service_discovery_resources_list = ['ServiceDiscoveryNamespace',
+                                         'ServiceDiscoveryService']
+_aws_common_resources_list = ['CloudWatchLogsLogGroup',
+                              'CloudWatchAlarm',
+                              'CloudFormationStack'
+                              'ElasticacheCacheCluster',
+                              'ElasticacheSubnetGroup',
+                              'ElasticacheSubnetGroup'
+                              'ECSService',
+                              'ECSTaskDefinition'
+                              'ECSTaskDefinition',
+                              'ELBv2',
+                              'ELBv2TargetGroup',
+                              'EC2SecurityGroup']
 
 
 def _print_usage():
@@ -37,12 +51,16 @@ class AWSNukeConfigurationGenerator:
             environment_name)
         aws_services_ecs_cluster_rules = self._generate_ecs_cluster_for_environment_rules(environment_name)
         if len(aws_services_discovery_rules) > 0:
+            logging.info(f"Generated aws-nuke filters for {', '.join(_aws_service_discovery_resources_list)}"
+                         f" AWS resources")
             specific_rules_list.extend(aws_services_discovery_rules)
         if len(aws_services_ecs_cluster_rules) > 0:
+            logging.info("Generated aws-nuke filter for ECSCluster resource")
             specific_rules_list.extend(aws_services_ecs_cluster_rules)
         return specific_rules_list
 
     def _generate_aws_nuke_general_configuration_rules_environment(self, environment_name):
+        logging.info(f"Generating aws-nuke filter for {', '.join(_aws_common_resources_list)} AWS resources")
         return [self._generate_rule_aws_nuke_equal_to_value('CloudWatchLogsLogGroup', environment_name),
                 self._generate_rules_aws_nuke_contains('CloudWatchAlarm', environment_name),
                 self._generate_rules_aws_nuke_has_property('CloudFormationStack', 'tag:Environment',
@@ -69,7 +87,8 @@ class AWSNukeConfigurationGenerator:
 
     def _generate_servicediscovery_namespace_rules(self, environment_name):
         aws_nuke_entry_namespace = {}
-        logging.info("Checking if there is a namespace for service discovery of environment {}".format(environment_name))
+        logging.info(
+            "Checking if there is a namespace for service discovery of environment {}".format(environment_name))
         servicediscovery_namespaces_list_call = subprocess.Popen(
             ['aws', 'servicediscovery', 'list-namespaces', '--region', 'us-east-1'], stdout=subprocess.PIPE)
         actual_namespaces = json.loads(servicediscovery_namespaces_list_call.stdout.read())
