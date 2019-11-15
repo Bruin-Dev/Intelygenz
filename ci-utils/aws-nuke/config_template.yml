@@ -6,45 +6,41 @@ accounts:
       CloudFormationStack:
       - invert: true
         property: tag:Environment
-        value: automation-f4a65292
+        value: environment
       CloudWatchAlarm:
       - invert: true
         type: contains
-        value: automation-f4a65292
+        value: environment
       CloudWatchLogsLogGroup:
       - invert: true
-        value: automation-f4a65292
-      EC2SecurityGroup:
-      - invert: true
-        property: Name
-        type: contains
-        value: automation-f4a65292
+        type: regex
+        value: environment
       ECSCluster:
       - invert: true
         value: ecs-cluster-environment-arn
       ECSService:
       - invert: true
         type: contains
-        value: automation-f4a65292
+        value: environment
       ECSTaskDefinition:
       - invert: true
         type: contains
-        value: automation-f4a65292
+        value: environment
       ELBv2:
       - invert: true
         property: tag:Environment
-        value: automation-f4a65292
+        value: environment
       ELBv2TargetGroup:
       - invert: true
         property: tag:Environment
-        value: automation-f4a65292
+        value: environment
       ElasticacheCacheCluster:
       - invert: true
-        value: automation-f4a65292
+        value: environment
       ElasticacheSubnetGroup:
       - invert: true
         type: contains
-        value: automation-f4a65292
+        value: environment
       ServiceDiscoveryNamespace:
       - invert: true
         value: environment-namespace
@@ -52,6 +48,10 @@ accounts:
       - invert: true
         type: regex
         value: environment-namespace-services
+      EC2SecurityGroup:
+        - type: contains
+          property: Name
+          value: environment
 regions:
 - us-east-1
 resource-types:

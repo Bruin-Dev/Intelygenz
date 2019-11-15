@@ -86,9 +86,9 @@ if __name__ == "__main__":
             security_groups_instance.delete_security_groups(environment)
         elif opt in ("-m", "--metrics"):
             metrics_instance.delete_metrics_resources(environment)
-        elif opt in ("-b", "--buckets"):
-            s3_instance.delete_s3buckets(environment)
         elif opt in ("-z", "--hosted-zones"):
             route53_instance.delete_environment_record_set(environment)
         elif opt in ("-f", "--cloud-formation"):
             cloud_formation_instance.delete_cloud_formation_resources(environment)
+        elif opt in ("-b", "--buckets"):
+            s3_instance.delete_s3buckets(environment)

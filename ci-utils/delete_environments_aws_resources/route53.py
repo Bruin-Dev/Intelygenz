@@ -30,6 +30,8 @@ class Route53:
                 subprocess.call(['aws', 'route53', 'change-resource-record-sets', '--hosted-zone-id',
                                  hosted_zone_id, '--region', 'us-east-1',
                                  '--change-batch', data_record_to_delete_json], stdout=FNULL)
+                logging.info("Record set for environment {} in hosted zone {} was successfully deleted".
+                             format(environment, hosted_zone_id))
             else:
                 logging.error("There isn't a record set for environment {} in hosted zone with identifier {}".
                               format(environment, hosted_zone_information['hosted_zone_id']))

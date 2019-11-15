@@ -22,8 +22,8 @@ class CommonUtils:
 
     def retry_call(self, cmd_call, call_try):
         logging.info(
-            f"Try number for call {call_try}: Waiting {self._default_wait_time_between_calls} seconds before try call "
-            f"{cmd_call} again")
+            "Try number for call {}: Waiting {} seconds before try call "
+            "{} again".format(call_try, self._default_wait_time_between_calls, cmd_call))
         time.sleep(self._default_wait_time_between_calls)
         call_result = subprocess.call(cmd_call.split(', '), stdout=FNULL)
         call_try += 1
