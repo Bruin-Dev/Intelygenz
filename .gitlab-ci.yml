@@ -487,6 +487,8 @@ destroy-branches-aws-nuke:
     - curl -L --output aws-nuke https://github.com/rebuy-de/aws-nuke/releases/download/v${AWS_NUKE_VERSION}/aws-nuke-v${AWS_NUKE_VERSION}-linux-amd64
     - chmod +x ./aws-nuke
     - mv ./aws-nuke /bin/aws-nuke
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - chmod +x /usr/local/bin/ecs-cli
   script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
