@@ -16,5 +16,5 @@
 - 3\. Clear _EDGES_TO_REPORT_
 
 #### Additional info
-Stores of Redis:
+Stores of Redis:k
 - _EDGES_TO_REPORT_
