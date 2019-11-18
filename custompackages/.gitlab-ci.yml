@@ -60,6 +60,7 @@ velocloud-test:
     - cd ${MODULE}
   script:
     - pytest --cov
+  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
   only:
     refs:
       - master
