@@ -4,7 +4,7 @@
 
 | Module      | Coverage |
 |:-----------:|:--------:|
-| igzpackages |[![igzpackages-test](https://gitlab.intelygenz.com/KP_KPMG/saba_reactnative_app/badges/dev/feature/add-new-environments-separation?jobi=igzpackages-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments)
+| igzpackages |[![igzpackages-test](https://gitlab.intelygenz.com/KP_KPMG/saba_reactnative_app/badges/dev/feature/add-new-environments-separation?job=igzpackages-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments)
 
 # Table of Contents
 

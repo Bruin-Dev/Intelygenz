@@ -39,7 +39,7 @@ igzpackages-test:
     - python setup.py install
   script:
     - pytest --cov
-  coverage: '/^TOTAL.*\s+(\d+\%)$/'
+  coverage: '/TOTAL.*\s+(\d+%)$/'
   only:
     refs:
       - master
