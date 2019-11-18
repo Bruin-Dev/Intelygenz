@@ -342,7 +342,7 @@ network-resources-infra-master:
 
 deploy-branches:
   stage: deploy
-  extends: .terraform_template_deploy
+  extends: .terraform_template_deploy_environment
   variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
@@ -377,7 +377,7 @@ deploy-branches:
 
 destroy-branches:
   stage: deploy
-  extends: .terraform_template_destroy
+  extends: .terraform_template_destroy_environment
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
@@ -452,7 +452,7 @@ destroy-branches-aws-nuke:
 
 deploy-master:
   stage: deploy
-  extends: .terraform_template_deploy
+  extends: .terraform_template_deploy_environment
   variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
@@ -485,7 +485,7 @@ deploy-master:
 
 destroy-master:
   stage: deploy
-  extends: .terraform_template_destroy
+  extends: .terraform_template_destroy_environment
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=master
