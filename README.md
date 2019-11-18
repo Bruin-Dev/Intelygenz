@@ -1,6 +1,10 @@
-| Environment        | Status           |
+| Environment   | Status        |
 |:-------------:|:-------------:|
 | master      | [![pipeline status](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/pipeline.svg)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master) |
+
+| Module      | Coverage |
+|:-----------:|:--------:|
+| igzpackages |[![igzpackages-test](https://gitlab.intelygenz.com/KP_KPMG/saba_reactnative_app/badges/master/coverage.svg?job=igzpackages-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master) |
 
 # Table of Contents
 
