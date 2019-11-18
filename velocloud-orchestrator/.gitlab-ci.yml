@@ -20,6 +20,7 @@ velocloud-orchestrator-test:
   variables:
     MODULE: velocloud-orchestrator
   extends: .unittest_module
+  coverage: '/^TOTAL.+?(\d\d.\d+\%)$/'
   only:
     refs:
       - master

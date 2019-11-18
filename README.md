@@ -1,10 +1,20 @@
 | Environment   | Status        |
 |:-------------:|:-------------:|
-| master      | [![pipeline status](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/pipeline.svg)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master) |
+| master        | [![pipeline status](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/pipeline.svg)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master) |
 
 | Module      | Coverage |
 |:-----------:|:--------:|
+| bruin-bridge |[![igzpackages-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
 | igzpackages |[![igzpackages-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=igzpackages-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| service-outage-triage|[![service-outage-triage-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=service-outage-triage-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| t7-bridge|[![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| velocloud-bridge|[![velocloud-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=velocloud-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| velocloud-orchestrator|[![velocloud-orchestrator-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=velocloud-orchestrator-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| velocloud|[![velocloud-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=velocloud-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
 
 # Table of Contents
 

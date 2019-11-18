@@ -20,6 +20,7 @@ last-contact-report-test:
   variables:
     MODULE: last-contact-report
   extends: .unittest_module
+  coverage: '/^TOTAL.+?(\d\d.\d+\%)$/'
   only:
     refs:
       - master
