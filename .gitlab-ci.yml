@@ -315,7 +315,7 @@ terraform-validate-dev:
 
 basic-infra:
   stage: basic_infra
-  extends: .terraform_template
+  extends: .terraform_basic_template
   script:
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
