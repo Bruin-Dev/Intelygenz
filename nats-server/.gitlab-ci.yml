@@ -1,0 +1,9 @@
+# =========================================
+# Images builds jobs for nats-server module
+# =========================================
+nats-server-build:
+  stage: build
+  variables:
+    MODULE_NAME: nats-server
+    MODULE_VERSION: ${NATS_MODULE_VERSION}
+  extends: .build_app_image
