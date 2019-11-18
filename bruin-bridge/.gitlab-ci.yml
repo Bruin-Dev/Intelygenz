@@ -23,3 +23,6 @@ bruin-bridge-build:
     MODULE_NAME: bruin-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
+  only:
+    - master
+    - /^*dev/feature/.*$/
