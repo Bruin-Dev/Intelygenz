@@ -37,7 +37,7 @@ t7-bridge-build:
     MODULE_NAME: t7-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
-  coverage: '/^TOTAL.+?(\d\d.\d+\%)$/'
+  coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
     refs:
       - master

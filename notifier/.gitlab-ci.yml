@@ -20,7 +20,7 @@ notifier-test:
   variables:
     MODULE: notifier
   extends: .unittest_module
-  coverage: '/^TOTAL.+?(\d\d.\d+\%)$/'
+  coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
     refs:
       - master

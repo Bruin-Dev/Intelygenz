@@ -20,7 +20,7 @@ bruin-bridge-test:
   variables:
     MODULE: bruin-bridge
   extends: .unittest_module
-  coverage: '/^TOTAL.+?(\d\d.\d+\%)$/'
+  coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
     refs:
       - master
