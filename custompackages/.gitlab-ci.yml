@@ -1,6 +1,3 @@
-include:
-  - local: 'gitlab-ci/basic-templates/.gitlab-ci-basic-templates.yml'
-
 igzpackages-linter:
   variables:
     MODULE: custompackages/igzpackages/
