@@ -18,6 +18,7 @@ include:
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-basic-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-deploy-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-destroy-templates.yml'
+  - local: 'custompackages/.gitlab-ci.yml'
 
 # ===============
 # Modules linters
