@@ -1,0 +1,204 @@
+# ===============================================
+# Linter validation jobs for infra-as-code module
+# ===============================================
+terraform-validate-basic-infra:
+  stage: validation
+  extends: .terraform_basic_template
+  script:
+    - terraform init infra-as-code/basic-infra
+    - terraform validate infra-as-code/basic-infra
+
+terraform-validate-network-resources:
+  stage: validation
+  extends: .terraform_validate_template
+  script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - apk add gettext
+    - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
+    - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
+    - terraform init infra-as-code/network-resources
+    - terraform validate infra-as-code/network-resources
+
+terraform-validate-ecs-services:
+  stage: validation
+  extends: .terraform_validate_template
+  script:
+    - apk add gettext
+    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
+    - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
+    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
+    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
+    - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
+    - terraform init infra-as-code/ecs-services
+    - terraform validate infra-as-code/ecs-services
+
+terraform-validate-dev:
+  stage: validation
+  extends: .terraform_validate_template
+  script:
+    - envsubst < infra-as-code/dev/init.tf > temp.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
+    - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
+    - mv temp.tf infra-as-code/dev/init.tf
+    - mv temp_vars.tf infra-as-code/dev/variables.tf
+    - mv temp_references_dev.tf infra-as-code/dev/references.tf
+    - terraform init infra-as-code/dev
+    - terraform validate infra-as-code/dev
+
+# ==================================================
+# Terraform deployment jobs for infra-as-code module
+# ==================================================
+basic-infra:
+  stage: basic_infra
+  extends: .terraform_basic_template
+  script:
+    - terraform init infra-as-code/basic-infra
+    - terraform apply -auto-approve infra-as-code/basic-infra
+
+network-resources-infra-branches:
+  stage: basic_infra
+  extends: .terraform_template_deploy_network-resources
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+  only:
+    - branches
+  except:
+    - master
+
+network-resources-infra-master:
+  stage: basic_infra
+  extends: .terraform_template_deploy_network-resources
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+  only:
+    - master
+
+deploy-branches:
+  stage: deploy
+  extends: .terraform_template_deploy_environment
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
+    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
+    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
+    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
+    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
+    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
+    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
+    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
+    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
+    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
+    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
+    - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
+    - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
+  environment:
+    name: $CI_COMMIT_REF_NAME
+    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
+    on_stop: destroy-branches
+  only:
+    - branches
+  except:
+    - master
+
+deploy-master:
+  stage: deploy
+  extends: .terraform_template_deploy_environment
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export ENVIRONMENT_SLUG=master
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
+    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
+    - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
+    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
+    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
+    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
+    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
+    - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
+    - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
+    - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
+    - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_PRO}
+    - export TF_VAR_T7_TOKEN=${T7_TOKEN_PRO}
+    - export TF_VAR_CURRENT_ENVIRONMENT=production
+    - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
+  environment:
+    name: $CI_COMMIT_REF_NAME
+    url: http://${ENVIRONMENT_SLUG}.mettel-automation.net:3000/
+    on_stop: destroy-master
+  only:
+    - master
+
+# ===============================================
+# Terraform destroy jobs for infra-as-code module
+# ===============================================
+destroy-network-resources-branches:
+  stage: basic_infra
+  extends: .terraform_template_destroy_network-resources
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+  when: manual
+  only:
+    - branches
+  except:
+    - master
+
+destroy-network-resources-master:
+  stage: basic_infra
+  extends: .terraform_template_destroy_network-resources
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export TF_VAR_CURRENT_ENVIRONMENT="production"
+  when: manual
+  only:
+    - master
+
+destroy-branches:
+  stage: deploy
+  extends: .terraform_template_destroy_environment
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
+  environment:
+    name: $CI_COMMIT_REF_NAME
+    action: stop
+  when: manual
+  only:
+    - branches
+  except:
+    - master
+
+destroy-master:
+  stage: deploy
+  extends: .terraform_template_destroy_environment
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export ENVIRONMENT_SLUG=master
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
+    - export TF_VAR_CURRENT_ENVIRONMENT=production
+  environment:
+    name: $CI_COMMIT_REF_NAME
+    action: stop
+  when: manual
+  only:
+    - master

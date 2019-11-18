@@ -1,0 +1,25 @@
+# ===========================================================
+# Linter validation jobs for service-affecting-monitor module
+# ===========================================================
+service-affecting-monitor-linter:
+  variables:
+    MODULE: service-affecting-monitor
+  extends: .lint_module
+
+# ====================================================
+# Unit tests jobs for service-affecting-monitor module
+# ====================================================
+service-affecting-monitor-test:
+  variables:
+    MODULE: service-affecting-monitor
+  extends: .unittest_module
+
+# =======================================================
+# Images builds jobs for service-affecting-monitor module
+# =======================================================
+service-affecting-monitor-build:
+  stage: build
+  variables:
+    MODULE_NAME: service-affecting-monitor
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  extends: .build_app_image

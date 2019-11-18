@@ -1,3 +1,6 @@
+# =============================================
+# Linter validation jobs for igzpackages module
+# =============================================
 igzpackages-linter:
   variables:
     MODULE: custompackages/igzpackages/
@@ -7,3 +10,31 @@ velocloud-linter:
   variables:
     MODULE: custompackages/velocloud/velocloud_client
   extends: .lint_module
+
+# ======================================
+# Unit tests jobs for igzpackages module
+# ======================================
+igzpackages-test:
+  variables:
+    MODULE: custompackages/igzpackages
+  stage: unit_test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd ${MODULE}
+    - python setup.py install
+  script:
+    - pytest --cov
+
+velocloud-test:
+  variables:
+    MODULE: velocloud_client
+  stage: unit_test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd custompackages/velocloud/
+    - python setup.py install
+    - cd ${MODULE}
+  script:
+    - pytest --cov

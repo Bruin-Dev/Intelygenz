@@ -1,0 +1,25 @@
+# =======================================================
+# Linter validation jobs for service-outage-triage module
+# =======================================================
+service-outage-triage-linter:
+  variables:
+    MODULE: service-outage-triage
+  extends: .lint_module
+
+# ================================================
+# Unit tests jobs for service-outage-triage module
+# ================================================
+service-outage-triage-test:
+  variables:
+    MODULE: service-outage-triage
+  extends: .unittest_module
+
+# ===================================================
+# Images builds jobs for service-outage-triage module
+# ===================================================
+service-outage-triage-build:
+  stage: build
+  variables:
+    MODULE_NAME: service-outage-triage
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  extends: .build_app_image
