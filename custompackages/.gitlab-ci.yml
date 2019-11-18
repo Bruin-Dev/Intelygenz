@@ -1,5 +1,5 @@
 include:
-  - local: '../gitlab-ci/basic-templates/.gitlab-ci-basic-templates.yml'
+  - local: 'gitlab-ci/basic-templates/.gitlab-ci-basic-templates.yml'
 
 igzpackages-linter:
   variables:
