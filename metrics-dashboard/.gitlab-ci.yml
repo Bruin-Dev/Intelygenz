@@ -22,6 +22,11 @@ grafana-build:
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 prometheus-build:
   stage: build
@@ -44,6 +49,11 @@ prometheus-build:
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID}
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 # =======================================================
 # Grafana user creation jobs for metrics-dashboard module
@@ -54,7 +64,9 @@ grafana_user_creation_branches:
   before_script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
   only:
-    - branches
+    refs:
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
   except:
     - master
 

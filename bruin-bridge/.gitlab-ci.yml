@@ -13,7 +13,6 @@ bruin-bridge-linter:
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
 
-
 # =======================================
 # Unit tests jobs for bruin-bridge module
 # =======================================

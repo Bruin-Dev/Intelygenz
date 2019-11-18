@@ -7,6 +7,11 @@ terraform-validate-basic-infra:
   script:
     - terraform init infra-as-code/basic-infra
     - terraform validate infra-as-code/basic-infra
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 terraform-validate-network-resources:
   stage: validation
@@ -18,6 +23,11 @@ terraform-validate-network-resources:
     - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 terraform-validate-ecs-services:
   stage: validation
@@ -32,6 +42,11 @@ terraform-validate-ecs-services:
     - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
     - terraform init infra-as-code/ecs-services
     - terraform validate infra-as-code/ecs-services
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 terraform-validate-dev:
   stage: validation
@@ -45,6 +60,12 @@ terraform-validate-dev:
     - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
+
 
 # ==================================================
 # Terraform deployment jobs for infra-as-code module
@@ -55,6 +76,11 @@ basic-infra:
   script:
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 network-resources-infra-branches:
   stage: basic_infra
@@ -63,7 +89,9 @@ network-resources-infra-branches:
     - terraform init -backend=true -get=true -input=false
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
   only:
-    - branches
+    refs:
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
   except:
     - master
 
@@ -107,7 +135,9 @@ deploy-branches:
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
     on_stop: destroy-branches
   only:
-    - branches
+    refs:
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
   except:
     - master
 
@@ -155,7 +185,9 @@ destroy-network-resources-branches:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
   when: manual
   only:
-    - branches
+    refs:
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
   except:
     - master
 
@@ -183,7 +215,9 @@ destroy-branches:
     action: stop
   when: manual
   only:
-    - branches
+    refs:
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
   except:
     - master
 

@@ -5,6 +5,13 @@ velocloud-bridge-linter:
   variables:
     MODULE: velocloud-bridge
   extends: .lint_module
+  only:
+    refs:
+      - master
+      - /^*feature/.*$/
+      - /^*fix/.*$/
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 # ===========================================
 # Unit tests jobs for velocloud-bridge module
@@ -13,6 +20,13 @@ velocloud-bridge-test:
   variables:
     MODULE: velocloud-bridge
   extends: .unittest_module
+  only:
+    refs:
+      - master
+      - /^*feature/.*$/
+      - /^*fix/.*$/
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 # ==============================================
 # Images builds jobs for velocloud-bridge module
@@ -23,3 +37,8 @@ velocloud-bridge-build:
     MODULE_NAME: velocloud-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/

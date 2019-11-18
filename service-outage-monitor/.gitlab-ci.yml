@@ -5,6 +5,13 @@ service-outage-monitor-linter:
   variables:
     MODULE: service-outage-monitor
   extends: .lint_module
+  only:
+    refs:
+      - master
+      - /^*feature/.*$/
+      - /^*fix/.*$/
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 # =================================================
 # Unit tests jobs for service-outage-monitor module
@@ -13,6 +20,13 @@ service-outage-monitor-test:
   variables:
     MODULE: service-outage-monitor
   extends: .unittest_module
+  only:
+    refs:
+      - master
+      - /^*feature/.*$/
+      - /^*fix/.*$/
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 # ====================================================
 # Images builds jobs for service-outage-monitor module
@@ -23,3 +37,8 @@ service-outage-monitor-build:
     MODULE_NAME: service-outage-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
