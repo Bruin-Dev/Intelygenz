@@ -501,7 +501,7 @@ destroy-master:
 
 destroy-network-resources-branches:
   stage: basic_infra
-  extends: .terraform_template
+  extends: .terraform_template_destroy_network-resources
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
@@ -513,7 +513,7 @@ destroy-network-resources-branches:
 
 destroy-network-resources-master:
   stage: basic_infra
-  extends: .terraform_template
+  extends: .terraform_template_destroy_network-resources
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
