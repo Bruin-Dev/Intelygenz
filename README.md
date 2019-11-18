@@ -4,7 +4,7 @@
 
 | Module      | Coverage |
 |:-----------:|:--------:|
-| bruin-bridge |[![igzpackages-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
 | igzpackages |[![igzpackages-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=igzpackages-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
 | notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
