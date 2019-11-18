@@ -35,16 +35,6 @@
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
 
-
-.terraform_template: &terraform_template
-  image:
-    name: hashicorp/terraform:0.12.7
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  before_script:
-    - terraform init -backend=true -get=true -input=false
-
 .grafana_user_creation_template: &grafana_user_creation_template
   tags:
     - docker

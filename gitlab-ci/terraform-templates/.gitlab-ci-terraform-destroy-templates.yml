@@ -1,0 +1,40 @@
+.terraform_template_destroy_environment: &terraform_template_destroy_environment
+  image:
+    name: hashicorp/terraform:0.12.7
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    - apk add gettext
+    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
+    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
+    - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
+    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
+    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
+    - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
+    - terraform init infra-as-code/ecs-services
+    - terraform refresh infra-as-code/ecs-services
+    - terraform destroy -auto-approve infra-as-code/ecs-services
+    - envsubst < infra-as-code/dev/init.tf > temp.tf
+    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
+    - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
+    - mv temp.tf infra-as-code/dev/init.tf
+    - mv temp_vars.tf infra-as-code/dev/variables.tf
+    - mv temp_references_dev.tf infra-as-code/dev/references.tf
+    - terraform init infra-as-code/dev
+    - terraform refresh infra-as-code/dev
+    - terraform destroy -auto-approve infra-as-code/dev
+
+.terraform_template_destroy_network-resources: &terraform_template_destroy_network-resources
+  image:
+    name: hashicorp/terraform:0.12.7
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    - apk add gettext
+    - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
+    - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
+    - terraform init infra-as-code/network-resources
+    - terraform refresh infra-as-code/network-resources
+    - terraform destroy -auto-approve infra-as-code/network-resources

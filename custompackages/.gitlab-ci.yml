@@ -1,0 +1,12 @@
+include:
+  - local: '../gitlab-ci/basic-templates/.gitlab-ci-basic-templates.yml'
+
+igzpackages-linter:
+  variables:
+    MODULE: custompackages/igzpackages/
+  extends: .lint_module
+
+velocloud-linter:
+  variables:
+    MODULE: custompackages/velocloud/velocloud_client
+  extends: .lint_module

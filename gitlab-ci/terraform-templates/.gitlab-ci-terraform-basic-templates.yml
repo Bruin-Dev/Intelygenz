@@ -1,0 +1,30 @@
+.terraform_basic_template: &terraform_basic_template
+  image:
+    name: hashicorp/terraform:0.12.7
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+
+.terraform_validate_template: &terraform_validate_template
+  image:
+    name: hashicorp/terraform:0.12.7
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  before_script:
+    - terraform init -backend=true -get=true -input=false
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
+    - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
+    - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
+    - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
+    - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
+    - export TF_VAR_BRUIN_CLIENT_ID_PRO=${BRUIN_CLIENT_ID_PRO}
+    - export TF_VAR_BRUIN_CLIENT_SECRET_PRO=${BRUIN_CLIENT_SECRET_PRO}
+    - export TF_VAR_BRUIN_LOGIN_URL_PRO=${BRUIN_LOGIN_URL_PRO}
+    - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
+    - apk add gettext
