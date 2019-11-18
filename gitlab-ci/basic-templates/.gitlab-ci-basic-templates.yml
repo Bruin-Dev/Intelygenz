@@ -1,6 +1,7 @@
 #
-# Using gitlab-ci anchors to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
+# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
 #
+
 .lint_module: &lint_module
   stage: validation
   image: python:3.6

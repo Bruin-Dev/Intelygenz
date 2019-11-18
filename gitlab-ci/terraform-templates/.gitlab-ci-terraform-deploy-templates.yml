@@ -1,3 +1,7 @@
+#
+# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
+#
+
 .terraform_template_deploy_environment: &terraform_template_deploy_environment
   image:
     name: hashicorp/terraform:0.12.7
