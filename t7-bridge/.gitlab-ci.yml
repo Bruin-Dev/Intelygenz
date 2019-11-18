@@ -20,6 +20,7 @@ t7-bridge-test:
   variables:
     MODULE: t7-bridge
   extends: .unittest_module
+  coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
     refs:
       - master
@@ -37,7 +38,6 @@ t7-bridge-build:
     MODULE_NAME: t7-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
-  coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
     refs:
       - master
