@@ -10,14 +10,10 @@
     - pip install pycodestyle
   script:
     - pycodestyle --max-line-length=120 ${MODULE}
-
-.unittest_module: &unittest_module
-  stage: unit_test
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - cd ${MODULE}
-    - pip install -r requirements.txt
-  script:
-    - pytest --cov
-  coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
+  only:
+    refs:
+      - master
+      - /^*feature/.*$/
+      - /^*fix/.*$/
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
