@@ -201,12 +201,12 @@ Services involved: velocloud-orchestrator, velocloud-bridge, notifier.
 `/metrics-dashboard/prometheus/` and using the format below, you can add your server to the prometheus app. All the servers connected
 to the prometheus app can be found at `http://localhost:9090/targets`.
 
-- ```
+    ```
     - job_name: <the microservice thats hosting you server>
-        scrape_interval: 5s
-        static_configs:
-      - targets: [' <the microservice thats hosting you server>:<that server's port>'] 
-  ```  
+      scrape_interval: 5s
+      static_configs:
+      - targets: [' <the microservice thats hosting you server>:<that server's port>']
+    ```
 
 - [Grafana](http://localhost:3000) admin/q1w2e3r4
 
