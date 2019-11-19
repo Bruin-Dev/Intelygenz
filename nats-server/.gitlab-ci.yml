@@ -7,8 +7,3 @@ nats-server-build:
     MODULE_NAME: nats-server
     MODULE_VERSION: ${NATS_MODULE_VERSION}
   extends: .build_app_image
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/

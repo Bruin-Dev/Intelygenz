@@ -5,13 +5,6 @@ service-outage-triage-linter:
   variables:
     MODULE: service-outage-triage
   extends: .lint_module
-  only:
-    refs:
-      - master
-      - /^*feature/.*$/
-      - /^*fix/.*$/
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
 
 # ================================================
 # Unit tests jobs for service-outage-triage module
@@ -20,13 +13,6 @@ service-outage-triage-test:
   variables:
     MODULE: service-outage-triage
   extends: .unittest_module
-  only:
-    refs:
-      - master
-      - /^*feature/.*$/
-      - /^*fix/.*$/
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
 
 # ===================================================
 # Images builds jobs for service-outage-triage module
@@ -37,8 +23,3 @@ service-outage-triage-build:
     MODULE_NAME: service-outage-triage
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/

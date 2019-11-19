@@ -12,6 +12,13 @@
   script:
     - pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
+  only:
+    refs:
+      - master
+      - /^*feature/.*$/
+      - /^*fix/.*$/
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
 
 .unittest_with_setup_template: &unittest_with_setup_template
   stage: unit_test

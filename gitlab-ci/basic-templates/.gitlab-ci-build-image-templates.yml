@@ -15,3 +15,8 @@
   after_script:
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/

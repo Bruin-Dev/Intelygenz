@@ -5,13 +5,6 @@ last-contact-report-linter:
   variables:
     MODULE: last-contact-report
   extends: .lint_module
-  only:
-    refs:
-      - master
-      - /^*feature/.*$/
-      - /^*fix/.*$/
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
 
 # ==============================================
 # Unit tests jobs for last-contact-report module
@@ -20,13 +13,6 @@ last-contact-report-test:
   variables:
     MODULE: last-contact-report
   extends: .unittest_module
-  only:
-    refs:
-      - master
-      - /^*feature/.*$/
-      - /^*fix/.*$/
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
 
 # =================================================
 # Images builds jobs for last-contact-report module
@@ -37,8 +23,3 @@ last-contact-report-build:
     MODULE_NAME: last-contact-report
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/

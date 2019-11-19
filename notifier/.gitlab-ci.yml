@@ -5,13 +5,6 @@ notifier-linter:
   variables:
     MODULE: notifier
   extends: .lint_module
-  only:
-    refs:
-      - master
-      - /^*feature/.*$/
-      - /^*fix/.*$/
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
 
 # ===================================
 # Unit tests jobs for notifier module
@@ -20,13 +13,6 @@ notifier-test:
   variables:
     MODULE: notifier
   extends: .unittest_module
-  only:
-    refs:
-      - master
-      - /^*feature/.*$/
-      - /^*fix/.*$/
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
 
 # ======================================
 # Images builds jobs for notifier module
@@ -37,8 +23,3 @@ notifier-build:
     MODULE_NAME: notifier
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
