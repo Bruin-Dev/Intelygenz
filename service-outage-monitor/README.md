@@ -23,3 +23,37 @@
 Stores of Redis:
 - _EDGES_QUARANTINE_
 - _EDGES_TO_REPORT_
+
+# **INTERNAL WORKING**
+##### *TEMPLATE RENDERER SERVICE OUTAGE REPORT* 
+
+In the module **service_outage_report_template_renderer** the function *_compose_email* receives a list composed of the 
+dicts with the info of the edges which have to be reported.
+The function has optional arguments:
+- **fields** is a list with the names of the fields which are in the table with the results
+- **fields_edge** is the list with the name of key of the dict sent in the list of edges. The order must be the same in
+the argument **fields** to stablish the correlation with the columns of the table.
+----
+-- Example -- 
+
+edges_to_report = [{\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"detection_time": "01-01-2019",\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"serial_number": "TX124533",\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"enterprise": "Intelygenz",\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"links": "http://example1.es - http://example2.com - http://example3.net",\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tickets": "No"\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}]
+
+fields = ["Date of detection", "Serial Number", "Company", "LINKS", "Has ticket created?"]\
+fields_edge = ["detection_time", "serial_number", "enterprise", "links", "tickets"]
+
+
+_compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
+
+----
+This code generates a table like:
+
+
+| Date of detection | Serial Number |   Company   |                                     LINKS                                    | Has ticket created? |
+|:-----------------:|:-------------:|:-----------:|:----------------------------------------------------------------------------:|:-------------------:|
+|     01-01-2019    |   TX124533  | ajsdkfjhsda | http://example1.es<br>http://example2.com<br>http://example3.net |          No         |
