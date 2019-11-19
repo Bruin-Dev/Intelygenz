@@ -20,7 +20,6 @@ service-affecting-monitor-test:
   variables:
     MODULE: service-affecting-monitor
   extends: .unittest_module
-  coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
     refs:
       - master

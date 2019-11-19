@@ -20,7 +20,6 @@ service-outage-monitor-test:
   variables:
     MODULE: service-outage-monitor
   extends: .unittest_module
-  coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
     refs:
       - master
