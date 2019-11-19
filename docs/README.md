@@ -13,3 +13,6 @@
             + [Enviroment variables](PIPELINES.md#environment-variables)
         + [Infrastructure as code](INFRASTRUCTURE_AS_CODE.md)
     + [Infrastructure](SYSTEM_OVERVIEW.md#infrastructure)
+
+---
+With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2019
