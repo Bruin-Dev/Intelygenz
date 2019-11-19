@@ -35,25 +35,24 @@ The function has optional arguments:
 the argument **fields** to stablish the correlation with the columns of the table.
 ----
 -- Example -- 
-
-edges_to_report = [{\
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"detection_time": "01-01-2019",\
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"serial_number": "TX124533",\
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"enterprise": "Intelygenz",\
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"links": "http://example1.es - http://example2.com - http://example3.net",\
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tickets": "No"\
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}]
+```
+edges_to_report = [{
+    "detection_time": "01-01-2019",
+    "serial_number": "TX124533",
+    "enterprise": "Intelygenz",
+    "links": "http://example1.es - http://example2.com - http://example3.net",
+    "tickets": "No"
+    }]
 
 fields = ["Date of detection", "Serial Number", "Company", "LINKS", "Has ticket created?"]\
 fields_edge = ["detection_time", "serial_number", "enterprise", "links", "tickets"]
 
-
 _compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
-
+```
 ----
 This code generates a table like:
 
 
 | Date of detection | Serial Number |   Company   |                                     LINKS                                    | Has ticket created? |
 |:-----------------:|:-------------:|:-----------:|:----------------------------------------------------------------------------:|:-------------------:|
-|     01-01-2019    |   TX124533  | ajsdkfjhsda | http://example1.es<br>http://example2.com<br>http://example3.net |          No         |
+|     01-01-2019    |   TX124533  | Intelygenz | http://example1.es<br>http://example2.com<br>http://example3.net |          No         |
