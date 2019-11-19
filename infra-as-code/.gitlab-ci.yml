@@ -221,6 +221,19 @@ destroy-branches:
   except:
     - master
 
+destroy-branches-aws-nuke:
+  stage: deploy
+  extends: .destroy_environment_aws_nuke_template
+  before_script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+  only:
+    refs:
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
+  except:
+    - master
+
 destroy-master:
   stage: deploy
   extends: .terraform_template_destroy_environment

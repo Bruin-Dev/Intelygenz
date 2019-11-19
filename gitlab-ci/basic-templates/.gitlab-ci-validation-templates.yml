@@ -1,0 +1,23 @@
+#
+# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
+#
+
+.lint_module: &lint_module
+  stage: validation
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=120 ${MODULE}
+
+.unittest_module: &unittest_module
+  stage: unit_test
+  image: python:3.6
+  before_script:
+    - apt-get update -q -y
+    - cd ${MODULE}
+    - pip install -r requirements.txt
+  script:
+    - pytest --cov
+  coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'

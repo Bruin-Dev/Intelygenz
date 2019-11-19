@@ -1,0 +1,49 @@
+#
+# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
+#
+.grafana_user_creation_template: &grafana_user_creation_template
+  tags:
+    - docker
+    - dind
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_REGION
+  script:
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - apk --upgrade --no-cache add curl python3 bash py-pip
+    - pip3 install requests
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - chmod +x /usr/local/bin/ecs-cli
+    - /bin/bash ci-utils/task_healthcheck.sh -t grafana
+    - python3 ci-utils/grafana_users_creation.py
+
+.destroy_environment_aws_nuke_template: &destroy_environment_aws_nuke_template
+  stage: deploy
+  image: python:3.8.0-alpine3.10
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_REGION: $AWS_REGION
+    AWS_DEFAULT_REGION: $AWS_REGION
+    AWS_NUKE_VERSION: $AWS_NUKE_VERSION
+    AWS_NUKE_OPTS: "--no-dry-run"
+    AWS_NUKE_CONFIG_FILE: $AWS_NUKE_CONFIG_FILE
+  script:
+    - apk add --update-cache --upgrade curl
+    - apk add --no-cache py-pip
+    - pip3 install awscli
+    - curl -L --output aws-nuke https://github.com/rebuy-de/aws-nuke/releases/download/v${AWS_NUKE_VERSION}/aws-nuke-v${AWS_NUKE_VERSION}-linux-amd64
+    - chmod +x ./aws-nuke
+    - mv ./aws-nuke /bin/aws-nuke
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - chmod +x /usr/local/bin/ecs-cli
+    - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -d
+    - python ci-utils/aws-nuke/aws_nuke_conf_generator.py -e $ENVIRONMENT
+    - aws-nuke -c ${AWS_NUKE_CONFIG_FILE} --profile default --force ${AWS_NUKE_OPTS}
+    - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -z -b
+  when: manual
+  only:
+    - branches
+  except:
+    - master
