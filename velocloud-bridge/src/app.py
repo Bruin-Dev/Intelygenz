@@ -7,11 +7,11 @@ from application.actions.edge_status_response import ReportEdgeStatus
 from application.actions.edges_for_alert import EdgesForAlert
 from application.actions.edge_events_for_alert import EventEdgesForAlert
 from application.repositories.velocloud_repository import VelocloudRepository
+from application.clients.velocloud_client import VelocloudClient
 
 from igz.packages.Logger.logger_client import LoggerClient
 import asyncio
 from igz.packages.server.api import QuartServer
-from velocloud_client.client.velocloud_client import VelocloudClient
 
 
 class Container:

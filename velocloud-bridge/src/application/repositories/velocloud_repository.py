@@ -31,17 +31,29 @@ class VelocloudRepository:
     def get_link_information(self, edge, interval=None):
         self._logger.info(f'Getting link information from edge:{edge["edge_id"]} in '
                           f'enterprise:{edge["enterprise_id"]} from host:{edge["host"]}')
-        return self._velocloud_client.get_link_information(edge, interval)
+        link_status = []
+        links = self._velocloud_client.get_link_information(edge, interval)
+        link_service_group = self._velocloud_client.get_link_service_groups_information(edge)
+        if links is not None and isinstance(links, Exception) is False:
+            for link in links:
+                for link_service in link_service_group:
+                    if link['linkId'] == link_service['linkId']:
+                        link['serviceGroups'] = link_service['serviceGroups']
+                        break
+                if link['link']['backupState'] == 'UNCONFIGURED' or link['link']['backupState'] == 'ACTIVE':
+                    link_status.append(link)
 
-    def get_link_service_groups_information(self, edge):
-        self._logger.info(f'Getting link service group information from edge:{edge["edge_id"]} in '
-                          f'enterprise:{edge["enterprise_id"]} from host:{edge["host"]}')
-        return self._velocloud_client.get_link_service_groups_information(edge)
+        elif links is None:
+            link_status = None
+        elif isinstance(links, Exception):
+            link_status = links
+
+        return link_status
 
     def get_enterprise_information(self, edge):
         enterprise_info = self._velocloud_client.get_enterprise_information(edge)
         if isinstance(enterprise_info, Exception) is False:
-            return self._velocloud_client.get_enterprise_information(edge)._name
+            return self._velocloud_client.get_enterprise_information(edge)['name']
         else:
             return enterprise_info
 
@@ -52,6 +64,6 @@ class VelocloudRepository:
     def get_alert_information(self, edge):
         return {
             "edge_id": edge,
-            "edge": self._velocloud_client.get_edge_information(edge).to_dict(),
-            "enterprise": self._velocloud_client.get_enterprise_information(edge)._name
+            "edge": self._velocloud_client.get_edge_information(edge),
+            "enterprise": self._velocloud_client.get_enterprise_information(edge)['name']
         }

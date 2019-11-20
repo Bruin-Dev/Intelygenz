@@ -1,4 +1,5 @@
 from igz.packages.eventbus.eventbus import EventBus
+from datetime import datetime, timedelta, timezone
 import json
 
 
@@ -18,29 +19,14 @@ class ReportEdgeStatus:
 
         enterprise_name = self._velocloud_repository.get_enterprise_information(edgeids)
 
-        edge_status = self._velocloud_repository.get_edge_information(edgeids).to_dict()
+        edge_status = self._velocloud_repository.get_edge_information(edgeids)
 
-        link_status = []
-        interval = None
+        interval = {
+                    "start": (datetime.now() - timedelta(hours=8)).replace(tzinfo=timezone.utc).isoformat()
+                   }
         if "interval" in msg.keys():
             interval = msg["interval"]
-        links = self._velocloud_repository.get_link_information(edgeids, interval)
-        link_service_group = self._velocloud_repository.get_link_service_groups_information(edgeids)
-        if links is not None and isinstance(links, Exception) is False:
-            for link in links:
-                link_dict = link.to_dict()
-                for link_service in link_service_group:
-                    link_service_dict = link_service.to_dict()
-                    if link_dict['linkId'] == link_service_dict['linkId']:
-                        link_dict['serviceGroups'] = link_service_dict['serviceGroups']
-                        break
-                if link_dict['link']['backupState'] == 'UNCONFIGURED' or link_dict['link']['backupState'] == 'ACTIVE':
-                    link_status.append(link_dict)
-        elif links is None:
-            link_status = None
-        elif isinstance(links, Exception):
-            link_status = links
-
+        link_status = self._velocloud_repository.get_link_information(edgeids, interval)
         status = 200
         if enterprise_name is None or edge_status is None or link_status is None:
             status = 204

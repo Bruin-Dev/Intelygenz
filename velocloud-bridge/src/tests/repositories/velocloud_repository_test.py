@@ -41,32 +41,90 @@ class TestVelocloudRepository:
         edge_info = vr.get_edge_information(edge)
         assert test_velocloud_client.get_edge_information.called
 
-    def get_link_information_test(self):
+    def get_link_information_ok_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        test_velocloud_client.get_link_information = Mock()
+        link_status = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}]
+        link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
+        link_info_return = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'},
+                             "serviceGroups": ["PUBLIC_WIRED"]}]
+        test_velocloud_client.get_link_information = Mock(return_value=link_status)
+        test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         link_info = vr.get_link_information(edge)
         assert test_velocloud_client.get_link_information.called
+        assert test_velocloud_client.get_link_service_groups_information.called
+        assert link_info == link_info_return
 
-    def get_link_service_group_information_test(self):
+    def get_link_information_ko_wrong_id_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        test_velocloud_client.get_link_service_group_information = Mock()
+        link_status = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}]
+        link_service_group = [{"linkId": "143", "serviceGroups": ["PUBLIC_WIRED"]}]
+        link_info_return = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}]
+        test_velocloud_client.get_link_information = Mock(return_value=link_status)
+        test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
-        link_info = vr.get_link_service_groups_information(edge)
+        link_info = vr.get_link_information(edge)
+        assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
+        assert link_info == link_info_return
+
+    def get_link_information_ko_different_backup_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        link_status = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'STABLE'}}]
+        link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
+        link_info_return = [{"link_data": "STABLE", "linkId": "143", 'link': {'backupState': 'UNCONFIGURED'},
+                             "serviceGroups": ["PUBLIC_WIRED"]}]
+        test_velocloud_client.get_link_information = Mock(return_value=link_status)
+        test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        link_info = vr.get_link_information(edge)
+        assert test_velocloud_client.get_link_information.called
+        assert test_velocloud_client.get_link_service_groups_information.called
+        assert link_info == []
+
+    def get_link_information_ko_none_link_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        link_status = None
+        link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
+        test_velocloud_client.get_link_information = Mock(return_value=link_status)
+        test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        link_info = vr.get_link_information(edge)
+        assert test_velocloud_client.get_link_information.called
+        assert test_velocloud_client.get_link_service_groups_information.called
+        assert link_info is None
+
+    def get_link_information_ko_exception_link_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        link_status = Exception()
+        link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
+        test_velocloud_client.get_link_information = Mock(return_value=link_status)
+        test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        link_info = vr.get_link_information(edge)
+        assert test_velocloud_client.get_link_information.called
+        assert test_velocloud_client.get_link_service_groups_information.called
+        assert link_info == link_status
 
     def get_enterprise_information_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        test_velocloud_client.get_enterprise_information = Mock()
+        test_velocloud_client.get_enterprise_information = Mock(return_value={'name': 'test'})
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         enterprise_info = vr.get_enterprise_information(edge)
         assert test_velocloud_client.get_enterprise_information.called
+        assert enterprise_info == 'test'
 
     def get_enterprise_information_ko_test(self):
         mock_logger = Mock()

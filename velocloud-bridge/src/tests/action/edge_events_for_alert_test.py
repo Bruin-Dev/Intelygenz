@@ -25,7 +25,7 @@ class TestEventEdgesForAlert:
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
         edges_for_alert._logger.info = Mock()
-        velocloud_repo.get_all_edge_events().to_dict = Mock(return_value="Some edge event info")
+        velocloud_repo.get_all_edge_events = Mock(return_value="Some edge event info")
         edge_msg = {"request_id": "123", "response_topic": "alert.request.event.edge.response.123",
                     "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
                     "start_date": "2019-07-26 14:19:45.334427",
@@ -53,7 +53,7 @@ class TestEventEdgesForAlert:
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
         edges_for_alert._logger.info = Mock()
-        velocloud_repo.get_all_edge_events().to_dict = Mock(return_value="Some edge event info")
+        velocloud_repo.get_all_edge_events = Mock(return_value="Some edge event info")
         edge_msg = {"request_id": "123", "response_topic": "alert.request.event.edge.response.123",
                     "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
                     "start_date": "2019-07-26 14:19:45.334427",
@@ -80,7 +80,7 @@ class TestEventEdgesForAlert:
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
         edges_for_alert._logger.info = Mock()
-        velocloud_repo.get_all_edge_events().to_dict = Mock(return_value=None)
+        velocloud_repo.get_all_edge_events = Mock(return_value=None)
         edge_msg = {"request_id": "123", "response_topic": "alert.request.event.edge.response.123",
                     "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
                     "start_date": "2019-07-26 14:19:45.334427",
@@ -101,7 +101,7 @@ class TestEventEdgesForAlert:
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
         edges_for_alert._logger.info = Mock()
-        velocloud_repo.get_all_edge_events().to_dict = Mock(return_value=Exception())
+        velocloud_repo.get_all_edge_events = Mock(return_value=Exception())
         edge_msg = {"request_id": "123", "response_topic": "alert.request.event.edge.response.123",
                     "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
                     "start_date": "2019-07-26 14:19:45.334427",
