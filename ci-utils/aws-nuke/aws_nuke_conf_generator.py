@@ -121,8 +121,7 @@ class AWSNukeConfigurationGenerator:
         environment_namespace_name = environment_name + '.local'
         if any(namespaces['Name'] == environment_namespace_name for namespaces in actual_namespaces['Namespaces']):
             return True
-        else:
-            return False
+        return False
 
     @staticmethod
     def _get_servicediscovery_id(actual_namespaces_json, environment_name):

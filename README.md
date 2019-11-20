@@ -8,17 +8,17 @@
 
 | Module      | Coverage |
 |:-----------:|:--------:|
-| bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
-| igzpackages |[![igzpackages-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=igzpackages-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
-| last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
-| notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
-| service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
-| service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
-| service-outage-triage|[![service-outage-triage-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=service-outage-triage-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
-| t7-bridge|[![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
-| velocloud-bridge|[![velocloud-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=velocloud-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
-| velocloud-orchestrator|[![velocloud-orchestrator-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=velocloud-orchestrator-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
-| velocloud|[![velocloud-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/dev/feature/add-new-environments-separation/coverage.svg?job=velocloud-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/dev/feature/add-new-environments-separation)
+| bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| igzpackages |[![igzpackages-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=igzpackages-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| service-outage-triage|[![service-outage-triage-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-triage-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| t7-bridge|[![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| velocloud-bridge|[![velocloud-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| velocloud-orchestrator|[![velocloud-orchestrator-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-orchestrator-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| velocloud|[![velocloud-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 
 # Table of Contents
 
@@ -80,8 +80,12 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 
 - Create a branch from development
   
-  - "feature" branches starts with feature/feature-name
-  - "fix" branches starts with fix/issue-name
+  - "feature" branches starts with `feature/<feature-name>` or `dev/feature/<feature-name>`
+  - "fix" branches starts with `fix/<issue-name>` or `dev/fix/<issue-name>`
+
+  Branches whose name begins with `dev/feature/<feature-name>` or `dev/fix/issue-name` will perform both [CI](docs/PIPELINES.md#continuous-integration-ci) and [CD](docs/PIPELINES.md#continuous-delivery-cd) processing, while those whose name begins with `feature-<feature-name>` or `fix-<issue-name>` will perform only [CI](docs/PIPELINES.md#continuous-integration-ci) processing.
+
+  >It is strongly recommended to always start with a `feature/<feature-name>` or `fix/<issue-name>` branch, and once the development is ready, rename it to `dev/feature/<feature-name>` or `dev/fix/<issue-name>`.
 
 - When taking a fix or a feature, create a new branch. After first push to the remote repository, start a Merge Request with the title like the following: "WIP: your title goes here". That way, Maintainer and Approvers can read your changes while you develop them.
 - **Remember that all code must have automated tests(unit and integration and must be part of an acceptance test) in it's pipeline.** 
