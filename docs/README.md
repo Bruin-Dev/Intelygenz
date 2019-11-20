@@ -7,6 +7,7 @@
     + [System architecture](SYSTEM_OVERVIEW.md#system-architecture)
         + [Monorepo](MONOREPO.md)
         + [Pipelines](PIPELINES.md#pipelines)
+            + [Environments](PIPELINES.md#environments)
             + [CI](PIPELINES.md#continuous-integration-ci)
             + [CD](PIPELINES.md#continuous-delivery-cd)
             + [Semantic release](PIPELINES.md#semantic-release)

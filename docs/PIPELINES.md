@@ -11,6 +11,16 @@ Human error can and does occur when carrying out these boring and repetitive tas
 All of the automation is made with Gitlab CI technology, taking advantage of all the tools that Gitlab has.
 We separate the automatation in two parts, [continuous integration](#continuous-integration-ci) and [continuous delivery](#continuous-delivery-cd), that are explained in the next sections.
 
+# Environments
+
+In the project there are two types of environments:
+
+* **Production**: The environment is related to everything currently running in AWS related to the latest version of the `master` branch of the repository.
+
+* **Ephemerals**: These environments are created from branches that start with name `dev/feature` or `dev/fix`.
+
+>It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment. These names will identify all the resources created in AWS during the [CD](#continuous-delivery-cd) process, explained in the following sections.
+
 # Continuous integration (CI)
 
 > Continuous Integration (CI) is a development practice where developers integrate code into a shared repository frequently, preferably several times a day. Each integration can then be verified by an automated build and automated tests. While automated testing is not strictly part of CI it is typically implied.
