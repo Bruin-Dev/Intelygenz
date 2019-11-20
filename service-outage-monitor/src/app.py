@@ -1,7 +1,6 @@
 import asyncio
 from application.actions.service_outage_detector import DetectedOutagesObserver
 from application.actions.service_outage_detector import ServiceOutageDetector
-from application.actions.service_outage_monitor import ServiceOutageMonitor
 from application.repositories.edge_repository import EdgeRepository
 from application.repositories.template_management import TemplateRenderer
 from apscheduler.jobstores.redis import RedisJobStore
@@ -51,8 +50,7 @@ class Container:
         self._template_renderer = TemplateRenderer(config)
 
         # ACTIONS
-        self._service_outage_monitor = ServiceOutageMonitor(self._event_bus, self._logger, self._scheduler,
-                                                            config, self._template_renderer)
+
         self._service_outage_detector = ServiceOutageDetector(self._event_bus, self._logger, self._scheduler,
                                                               self._online_edge_repository,
                                                               self._quarantine_edge_repository,
