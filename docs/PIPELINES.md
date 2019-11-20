@@ -65,33 +65,33 @@ In these jobs services in the monorepo will be deployed to the selected environm
 
 * An [ECS Cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html) will be created for the environment with a set of resources
 
-    * An [ECS Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) that will use the new Docker image uploaded for each service of the project, being these services the specified below:
+  * An [ECS Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) that will use the new Docker image uploaded for each service of the project, being these services the specified below:
 
-        * [bruin-bridge](../bruin-bridge)
+    * [bruin-bridge](../bruin-bridge)
 
-        * [las-contact-report](../last-contact-report)
+    * [las-contact-report](../last-contact-report)
 
-        * [metrics-grafana](../metrics-dashboard/grafana)
+    * [metrics-grafana](../metrics-dashboard/grafana)
 
-        * [metrics-prometheus](../metrics-dashboard/prometheus)
+    * [metrics-prometheus](../metrics-dashboard/prometheus)
 
-        * [nats-server, nats-server-1, nats-server-2](../nats-server)
+    * [nats-server, nats-server-1, nats-server-2](../nats-server)
 
-        * [notifier](../notifier)
+    * [notifier](../notifier)
 
-        * [service-affecting-monitor](../service-affecting-monitor)
+    * [service-affecting-monitor](../service-affecting-monitor)
 
-        * [service-outage-monitor](../service-outage-monitor)
+    * [service-outage-monitor](../service-outage-monitor)
 
-        * [service-outage-triage](../service-outage-triage)
+    * [service-outage-triage](../service-outage-triage)
 
-        * [t7-bridge](../t7-bridge)
+    * [t7-bridge](../t7-bridge)
 
-        * [velocloud-bridge](../velocloud-bridge)
+    * [velocloud-bridge](../velocloud-bridge)
 
-        * [velocloud-orchestrator](../velocloud-orchestrator)
+    * [velocloud-orchestrator](../velocloud-orchestrator)
 
-    * A [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for each *ECS Service* deployed in this cluster
+  * A [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for each of the above *ECS Services*
 
 In this process, a series of resources will also be created in AWS for the selected environment, as follows:
 
@@ -107,11 +107,11 @@ In this process, a series of resources will also be created in AWS for the selec
 
 * A set of resources related to the metrics of the environment:
 
-    * [CloudWatch Alarms](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html)
+  * [CloudWatch Alarms](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html)
 
-    * [CloudWatch Dashboard](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html)
+  * [CloudWatch Dashboard](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html)
 
-    * [CloudWatch Log Filters](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html)
+  * [CloudWatch Log Filters](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html)
 
 * A [CloudFormation Stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html) for create the [SNS topic](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html) that will be used by *CloudWatch Alarms* notifications of this environment
 
