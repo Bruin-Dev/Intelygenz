@@ -13,13 +13,13 @@ We separate the automatation in two parts, [continuous integration](#continuous-
 
 # Environments
 
-In the project there are two types of environments:
+In the project there are two types of environments in the project:
 
 * **Production**: The environment is related to everything currently running in AWS related to the latest version of the `master` branch of the repository.
 
 * **Ephemerals**: These environments are created from branches that start with name `dev/feature` or `dev/fix`.
 
->It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment. These names will identify all the resources created in AWS during the [CD](#continuous-delivery-cd) process, explained in the following sections.
+>The name of any environment, regardless of the type, will identify all the resources created in the deployment process. The names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment. These names will identify all the resources created in AWS during the [continuous delivery](#continuous-delivery-cd) process, explained in the following sections.
 
 # Continuous integration (CI)
 
@@ -65,7 +65,31 @@ In these jobs services in the monorepo will be deployed to the selected environm
 
 * An [ECS Cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html) will be created for the environment with a set of resources
 
-    * An [ECS Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) that will use the new image docker uploaded for each service of the project
+    * An [ECS Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) that will use the new Docker image uploaded for each service of the project, being these services the specified below:
+
+        * [bruin-bridge](../bruin-bridge)
+
+        * [las-contact-report](../last-contact-report)
+
+        * [metrics-grafana](../metrics-dashboard/grafana)
+
+        * [metrics-prometheus](../metrics-dashboard/prometheus)
+
+        * [nats-server, nats-server-1, nats-server-2](../nats-server)
+
+        * [notifier](../notifier)
+
+        * [service-affecting-monitor](../service-affecting-monitor)
+
+        * [service-outage-monitor](../service-outage-monitor)
+
+        * [service-outage-triage](../service-outage-triage)
+
+        * [t7-bridge](../t7-bridge)
+
+        * [velocloud-bridge](../velocloud-bridge)
+
+        * [velocloud-orchestrator](../velocloud-orchestrator)
 
     * A [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for each *ECS Service* deployed in this cluster
 
@@ -90,6 +114,10 @@ In this process, a series of resources will also be created in AWS for the selec
     * [CloudWatch Log Filters](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html)
 
 * A [CloudFormation Stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html) for create the [SNS topic](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html) that will be used by *CloudWatch Alarms* notifications of this environment
+
+## Grafana user creation steps
+
+This area will cover the creation of a set os users in the Grafana Service created for the environment that is being used in this deployment.
 
 ---
 With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2019
