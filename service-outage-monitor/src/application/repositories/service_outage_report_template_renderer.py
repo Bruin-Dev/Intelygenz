@@ -1,18 +1,10 @@
-from collections import OrderedDict
-
 import jinja2
 from shortuuid import uuid
 from datetime import datetime, timedelta
 import base64
 import pandas as pd
-
-from collections import OrderedDict
-
-import jinja2
-from shortuuid import uuid
-from datetime import datetime, timedelta
-import base64
-import pandas as pd
+import pytz
+import datetime
 
 
 class ServiceOutageReportTemplateRenderer:
@@ -26,12 +18,14 @@ class ServiceOutageReportTemplateRenderer:
         template = "src/templates/{}".format(kwargs.get("template", "report_mail_template.html"))
         logo = "src/templates/images/{}".format(kwargs.get("logo", "logo.png"))
         header = "src/templates/images/{}".format(kwargs.get("header", "header.jpg"))
-        csv = "src/templates/{}".format(kwargs.get("csv", "report_mail_template.csv"))
+        date = datetime.now(pytz.timezone('US/Eastern'))
+        full_date = date.strftime("%b_%d_%Y_%H:%M:%S")
+        csv = "{}_{}.csv".format(kwargs.get("csv", "report_mail_template"), full_date)
         templateEnv = jinja2.Environment(loader=templateLoader)
         templ = templateEnv.get_template(template)
 
         template_vars["__EDGE_COUNT__"] = str(len(edges_to_report))
-        template_vars["__TIME_REPORT__"] = kwargs.get("time_report", None)
+        template_vars["__TIME_REPORT__"] = kwargs.get("time_report", "60") + " minutes"
         template_vars["__FIELDS__"] = kwargs.get("fields", list(edges_to_report[0].keys()))
         template_vars["__FIELDS_REL__"] = {field: field_related for field, field_related in
                                            zip(template_vars["__FIELDS__"], kwargs.get("fields_edge"))}
