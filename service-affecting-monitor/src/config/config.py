@@ -25,8 +25,7 @@ MONITOR_CONFIG = {
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'device_by_id': contact_info.devices_by_id,
     'environment': os.environ["CURRENT_ENVIRONMENT"],
-    'outage_detector_minutes': 10,
-    'quarantine_minutes': 10
+    'monitoring_minutes': 10,
 }
 LOG_CONFIG = {
     'name': 'service-affecting-monitor',
