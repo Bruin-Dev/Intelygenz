@@ -132,7 +132,7 @@ class ServiceAffectingMonitor:
 
                 slack_message = {'request_id': uuid(),
                                  'message': f'Ticket created with ticket id: {ticket_id["ticketIds"]["ticketIds"][0]}\n'
-                                            f'https://app.bruin.com/helpdesk?clientId=85940&'
+                                            f'https://app.bruin.com/helpdesk?clientId={client_id}&'
                                             f'ticketId={ticket_id["ticketIds"]["ticketIds"][0]} , in '
                                             f'{self._config.MONITOR_CONFIG["environment"]}'}
                 await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
