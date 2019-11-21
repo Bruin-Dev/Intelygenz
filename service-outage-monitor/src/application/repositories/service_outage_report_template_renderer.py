@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import base64
 import pandas as pd
 import pytz
-import datetime
 
 
 class ServiceOutageReportTemplateRenderer:
@@ -19,7 +18,7 @@ class ServiceOutageReportTemplateRenderer:
         logo = "src/templates/images/{}".format(kwargs.get("logo", "logo.png"))
         header = "src/templates/images/{}".format(kwargs.get("header", "header.jpg"))
         date = datetime.now(pytz.timezone('US/Eastern'))
-        full_date = date.strftime("%b_%d_%Y_%H:%M:%S")
+        full_date = date.strftime("%b_%d_%Y_%H-%M-%S")
         csv = "{}_{}.csv".format(kwargs.get("csv", "report_mail_template"), full_date)
         templateEnv = jinja2.Environment(loader=templateLoader)
         templ = templateEnv.get_template(template)
