@@ -1,7 +1,7 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
 FROM python:3.6-alpine
 
-RUN apk --no-cache add curl
+RUN apk --no-cache add curl gcc musl-dev
 
 RUN pip install --upgrade pip
 
