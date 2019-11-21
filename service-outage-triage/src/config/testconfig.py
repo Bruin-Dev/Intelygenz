@@ -14,6 +14,7 @@ NATS_CONFIG = {
 }
 TRIAGE_CONFIG = {
     'environment': "dev",
+    'polling_minutes': 10,
     'recipient': "some.recipient@email.com",
     'id_by_serial': {
         "VC05200026138": {

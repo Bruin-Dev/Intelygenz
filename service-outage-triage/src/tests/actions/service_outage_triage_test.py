@@ -40,7 +40,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         template_renderer = Mock()
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
@@ -54,7 +54,7 @@ class TestServiceOutageTriage:
 
         scheduler.add_job.assert_called_once_with(
             service_outage_triage._poll_tickets, 'interval',
-            seconds=120,
+            minutes=config.TRIAGE_CONFIG["polling_minutes"],
             next_run_time=next_run_time,
             replace_existing=True,
             id='_service_outage_triage_process',
@@ -65,7 +65,7 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         template_renderer = Mock()
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
@@ -74,7 +74,7 @@ class TestServiceOutageTriage:
 
         scheduler.add_job.assert_called_once_with(
             service_outage_triage._poll_tickets, 'interval',
-            seconds=120,
+            minutes=config.TRIAGE_CONFIG["polling_minutes"],
             next_run_time=undefined,
             replace_existing=True,
             id='_service_outage_triage_process',
