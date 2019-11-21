@@ -923,6 +923,267 @@ devices_by_id = [
         "phone": "Off# 561-842-5309 Cell# 561-723-2727",
         "name": "Micheal Durham"
     },
+    {
+        # TA FL - Nokomis
+        "serial": 'VC05200036931',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2137,
+        "email": "mboutiette@titanamerica.com",
+        "phone": "941-662-0518",
+        "name": "Mike Boutiette"
+    },
+    {
+        # TA VA - Dumfries
+        "serial": 'VC05200037103',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2141,
+        "email": "JSpivey@titanamerica.com",
+        "phone": "703-221-2003",
+        "name": "John Spivey"
+    },
+    {
+        # TA VA - Oakleys Lane
+        "serial": 'VC05200037046',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2152,
+        "email": "jgarner@titanamerica.com",
+        "phone": "Cell # 804-801-6021, Jeff Garner# 804-338-5855",
+        "name": "Jeff Garner"
+    },
+    {
+        # TA FL - Anderson Rd -Tampa
+        "serial": 'VC05200037265',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2153,
+        "email": "pdrennan@titanamerica.com",
+        "phone": "813-888-8262, 813-375-0447, 305-772-9912",
+        "name": "Patrick Drennan"
+    },
+    {
+        # TA FL - South Miami
+        "serial": 'VC05200059729',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2208,
+        "email": "ADiaz@titanamerica.com",
+        "phone": "Off# 305-667-2522, Diaz Cell# 786-318-6637, Colman Cell # 954-650-9412",
+        "name": "Alex Diaz & Paul Colman"
+    },
+    {
+        # TA FL - Pennsuco Ready Mix ‐ Medley
+        "serial": 'VC05200037842',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2212,
+        "email": "tsuarez@titanamerica.com",
+        "phone": "305-827-7458",
+        "name": "Tony Suarrez"
+    },
+    {
+        # TA FL - Stuart
+        "serial": 'VC05200039505',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2252,
+        "email": "dallison@titanamerica.com",
+        "phone": "561-722-6102",
+        "name": "Deanna Allison"
+    },
+    {
+        # Vendor - Symmetry
+        "serial": 'VC05400011335',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2358,
+        "email": "Jmack@titanamerica.com",
+        "phone": "757-858-6597",
+        "name": "Jeff Mack"
+    },
+    # { # LACK OF CONTACT
+    #     # TA FL - Industrial Lane (Tampa)
+    #     "serial": 'VC05200045077',
+    #     "host": "mettel.velocloud.net",
+    #     "enterprise_id": 137,
+    #     "edge_id": 2412,
+    #     "email": "Jmack@titanamerica.com",
+    #     "phone": "757-858-6597",
+    #     "name": "Jeff Mack"
+    # },
+    # {  # LACK OF CONTACT
+    #     # TA VA - Hampton (Truck Shop)
+    #     "serial": 'VC05200042079',
+    #     "host": "mettel.velocloud.net",
+    #     "enterprise_id": 137,
+    #     "edge_id": 2472,
+    #     "email": "Jmack@titanamerica.com",
+    #     "phone": "757-858-6597",
+    #     "name": "Jeff Mack"
+    # },
+    {
+        # SnW - P-05 New Bern
+        "serial": 'VC05200043154',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2494,
+        "email": "sdodd@snwreadymix.com",
+        "phone": "252-633-2115",
+        "name": "Sammy Dodd"
+    },
+    {
+        # SnW - P-02 Wallace
+        "serial": 'VC05200042630',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2495,
+        "email": "rlong@snwreadymix.com",
+        "phone": "910-285-2191",
+        "name": "Robert Long"
+    },
+    {
+        # SnW - P-03 Goldsboro
+        "serial": 'VC05200044090',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2497,
+        "email": "ndickerson@snwreadymix.com",
+        "phone": "919-751-1796",
+        "name": "Neil Dickerson"
+    },
+    {
+        # SnW - P-07 Supply
+        "serial": 'VC05200044130',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2498,
+        "email": "DBenton@snwreadymix.com",
+        "phone": "Site# 910-253-7588",
+        "name": "Dale Benton"
+    },
+    {
+        # SnW - P-27 Southport
+        "serial": 'VC05200044126',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2500,
+        "email": "fmorabito@snwreadymix.com",
+        "phone": "910-457-7533",
+        "name": "Frank Morabito"
+    },
+    {
+        # SnW - P-21 Conway
+        "serial": 'VC05200049069',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2517,
+        "email": "dgerancher@snwreadymix.com",
+        "phone": "843-347-9133",
+        "name": "Dave Gerancher"
+    },
+    {
+        # SnW - P-14 Morehead City
+        "serial": 'VC05200044086',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2518,
+        "email": "ymillis@snwreadymix.com",
+        "phone": "252-726-2566",
+        "name": "Yates Millis"
+    },
+    {
+        # SnW - P-22 Murrells Inlet
+        "serial": 'VC05200049397',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2519,
+        "email": "sholcombe@snwreadymix.com",
+        "phone": "843-651-0406",
+        "name": "Scott Holcombe"
+    },
+    {
+        # SnW - P-13 Lumberton
+        "serial": 'VC05200050975',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2530,
+        "email": "rnobles@snwreadymix.com",
+        "phone": "910-738-1164",
+        "name": "Robbie Nobles"
+    },
+    {
+        # SnW - P-16 Whiteville
+        "serial": 'VC05200051036',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2531,
+        "email": "jethompson@snwreadymix.com",
+        "phone": "910-641-0109",
+        "name": "Jeremy Thompson"
+    },
+    {
+        # SnW - P-18 Fayetteville
+        "serial": 'VC05200051057',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2532,
+        "email": "leet@snwreadymix.com",
+        "phone": "910-864-0138",
+        "name": "Tony Lee"
+    },
+    {
+        # SnW - P-10 Burgaw
+        "serial": 'VC05200051218',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2533,
+        "email": "sgrover@snwreadymix.com",
+        "phone": "Off: 910-259-4650 Cell: 910-520-3647",
+        "name": "Stephen (Steve) Grover"
+    },
+    {
+        # SnW - P-24 Spring Lake
+        "serial": 'VC05200048451',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2582,
+        "email": "pmclellan@snwreadymix.com",
+        "phone": "910-496-3232",
+        "name": "Phillip McLellan"
+    },
+    {
+        # SnW - P-26 Hubert
+        "serial": 'VC05200050688',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2588,
+        "email": "bhadden@snwreadymix.com",
+        "phone": "Site# 910-326-4162, FAX# 910-326-4538",
+        "name": "Brian Hadden/Corey Lanier"
+    },
+    {
+        # SnW - P-08 Elizabethtown
+        "serial": 'VC05200051203',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2590,
+        "email": "abritt@snwreadymix.com",
+        "phone": "910-645-6810",
+        "name": "Alan Britt"
+    },
+    {
+        # SnW - P-06 Wilmington
+        "serial": 'VC05200057818',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2863,
+        "email": "wkeyes@snwreadymix.com",
+        "phone": "910.616.3338",
+        "name": "William Keyes"
+    },
+
     # ######Rotech edges
     {
         # Orlando Data center
