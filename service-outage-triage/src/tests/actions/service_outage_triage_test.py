@@ -110,7 +110,7 @@ class TestServiceOutageTriage:
                 'category': 'SD-WAN',
                 'ticket_topic': 'VOO'
             }),
-            timeout=15,
+            timeout=90,
         )
         service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
 
@@ -145,7 +145,7 @@ class TestServiceOutageTriage:
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
                 }),
-                timeout=15,
+                timeout=90,
             ),
             call(
                 'notification.slack.request',
@@ -193,7 +193,7 @@ class TestServiceOutageTriage:
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
                 }),
-                timeout=15,
+                timeout=90,
             ),
             call(
                 'notification.slack.request',
@@ -242,7 +242,7 @@ class TestServiceOutageTriage:
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
                 }),
-                timeout=15,
+                timeout=90,
             ),
             call(
                 'notification.slack.request',
@@ -333,7 +333,7 @@ class TestServiceOutageTriage:
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
                 }),
-                timeout=15,
+                timeout=90,
             ),
             call(
                 'edge.status.request',
@@ -448,7 +448,7 @@ class TestServiceOutageTriage:
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
                 }),
-                timeout=15,
+                timeout=90,
             ),
             call(
                 'edge.status.request',

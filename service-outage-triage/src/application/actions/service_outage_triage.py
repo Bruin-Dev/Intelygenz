@@ -22,7 +22,8 @@ class ServiceOutageTriage:
         self._template_renderer = template_renderer
 
     async def start_service_outage_triage_job(self, exec_on_start=False):
-        self._logger.info(f'Scheduled task: service outage triage configured to run every minute')
+        self._logger.info(f'Scheduled task: service outage triage configured to run every '
+                          f'{self._config.TRIAGE_CONFIG["polling_minutes"]} minutes')
         next_run_time = undefined
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
@@ -38,7 +39,7 @@ class ServiceOutageTriage:
                               'ticket_topic': 'VOO'}
         all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
                                                         json.dumps(ticket_request_msg, default=str),
-                                                        timeout=15)
+                                                        timeout=90)
         filtered_ticket_ids = []
         if all_tickets is not None and "tickets" in all_tickets.keys() and all_tickets["tickets"] is not None:
             filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
