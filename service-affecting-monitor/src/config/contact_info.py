@@ -418,7 +418,511 @@ devices_by_id = [
         "phone": "843-546-5122",
         "name": "John Graham"
     },
-
+    # Lack of Contacts
+    # VC05200016715  -  TA FL - CORKSCREW (FORT MYERS) - AGG
+    # # TODO Two contacts
+    # {
+    #     # CORKSCREW (FORT MYERS)
+    #     "serial": 'VC05200016715',
+    #     "host": "mettel.velocloud.net",
+    #     "enterprise_id": 137,
+    #     "edge_id": 887,
+    #     "email": "",
+    #     "phone": "",
+    #     "name": ""
+    # },
+    # VC05200028729  -  TA FL - Blue Origin / Cape Canaveral - RM (SITE DROPS NIGHTLY)
+    # TODO No contact
+    # {
+    #     # Blue Origin / Cape Canaveral
+    #     "serial": 'VC05200028729',
+    #     "host": "mettel.velocloud.net",
+    #     "enterprise_id": 137,
+    #     "edge_id": 1602,
+    #     "email": "",
+    #     "phone": "",
+    #     "name": ""
+    # },
+    {
+        # Kinston
+        "serial": 'VC05200029227',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1172,
+        "email": "jjarman@snwreadymix.com",
+        "phone": "252-527-1881",
+        "name": "Johnny Jarman"
+    },
+    {
+        # P-04 Jacksonville
+        "serial": 'VC05200028614',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1202,
+        "email": "sanderson@snwreadymix.com",
+        "phone": "910-455-1293",
+        "name": "Stephen Anderson"
+    },
+    {
+        # Louisville Data Center
+        "serial": 'VC05200027456',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1483,
+        "email": "jrossi@west.com",
+        "phone": "502-618-5535",
+        "name": "Justin Rossi"
+    },
+    {
+        # Atlanta Data Center
+        "serial": 'VC05200032234',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1540,
+        "email": "jrossi@west.com",
+        "phone": "502-618-5535",
+        "name": "Justin Rossi"
+    },
+    {
+        # ST Needham
+        "serial": 'VC05200033462',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1755,
+        "email": "tgeer@titanamerica.com",
+        "phone": "Off# 781-972-2353 Cell# 781-548-0557 Main# 781-972-2300",
+        "name": "Traci Geer"
+    },
+    {
+        # Grant Street
+        "serial": 'VC05200037333',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1756,
+        "email": "dtaylor@titanamerica.com",
+        "phone": "407-466-5390",
+        "name": "David Taylor"
+    },
+    {
+        # Springfield
+        "serial": 'VC05200032322',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1757,
+        "email": "RYoung@titanamerica.com",
+        "phone": "Off# 571-451-2678 Cell# 540-878-6499",
+        "name": "Rick Young"
+    },
+    {
+        # Petersburg
+        "serial": 'VC05200034112',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1758,
+        "email": "cutter@powmix.com",
+        "phone": "804-733-7552",
+        "name": "Charles Utter"
+    },
+    {
+        # Port Norfolk
+        "serial": 'VC05200032818',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1759,
+        "email": "dhill@titanamerica.com",
+        "phone": "757-398-3008",
+        "name": "Donald Hill"
+    },
+    {
+        # Leesburg
+        "serial": 'VC05200039301',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1760,
+        "email": "TMcQuillen@titanamerica.com",
+        "phone": "Off# 703-443-2193 Cell# 571-436-3037",
+        "name": "Tom Stieringer"
+    },
+    {
+        # Centerville
+        "serial": 'VC05200038733',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1761,
+        "email": "rpalmer@powmix.com",
+        "phone": "Site# 703-830-9202 Cell# 571-220-3607",
+        "name": "JP Duritza [John Duritza]"
+    },
+    {
+        # Jacksonville
+        "serial": 'VC05200037536',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1777,
+        "email": "mhogsett@titanamerica.com",
+        "phone": "941-979-6417",
+        "name": "Mark Hogsett"
+    },
+    {
+        # Eastport Road
+        "serial": 'VC05200037410',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1780,
+        "email": "rwright@titanamerica.com",
+        "phone": "Off# 904-751-6499 Cell#(Rob) 843-714-3770",
+        "name": "Robert Wright"
+    },
+    {
+        # Ellenton
+        "serial": 'VC05200034046',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1782,
+        "email": "jparrino@titanamerica.com",
+        "phone": "Off# 941-723-9750  Cell# 347-539-9467",
+        "name": "Joe Parrino"
+    },
+    {
+        # Mainline (Fort Myers)
+        "serial": 'VC05200037423',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1785,
+        "email": "jboans@titanamerica.com",
+        "phone": "Off# 239-415-0012 Jonathan-Cell# 239-826-8102, Sergio-Cell # 239-728-4933",
+        "name": "Jonathan Boans/Segio Monrroy"
+    },
+    {
+        # St. Augustine
+        "serial": 'VC05200036924',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1792,
+        "email": "sbrown@titanamerica.com",
+        "phone": "904-476-3525",
+        "name": "Scott Brown"
+    },
+    {
+        # Tampa ST
+        "serial": 'VC05200037063',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1804,
+        "email": "kbrooks@titanamerica.com",
+        "phone": "Off # 781-972-2386 Cell # 813-526-0989",
+        "name": "Kevin Brooks"
+    },
+    {
+        # Tavares Block and RM
+        "serial": 'VC05200016367',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1844,
+        "email": "ndoezier@titanamerica.com",
+        "phone": "352-516-2615",
+        "name": "Nakeia Dozier"
+    },
+    {
+        # Castle Haynes Cement Terminal (Rocky Point)
+        "serial": 'VC05200014851',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1846,
+        "email": "cgish@titanamerica.com",
+        "phone": "Site# 910-675-2264 Cell# 540-354-6935 Jim B Cell 540-314-7703",
+        "name": "Chris Gish Jim Branch"
+    },
+    {
+        # Vero RM
+        "serial": 'VC05200036927',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1853,
+        "email": "jkinssey@titanamerica.com",
+        "phone": "772-569-2062",
+        "name": "James Kinssey"
+    },
+    {
+        # Deland
+        "serial": 'VC05200037064',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1876,
+        "email": "BPorter@TitanAmerica.com",
+        "phone": "Off# 386-734-5526 Cell# 386-566-2550",
+        "name": "Brian Porter"
+    },
+    {
+        # Cocoa RM
+        "serial": 'VC05200039098',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1896,
+        "email": "bswiger@titanamerica.com",
+        "phone": "Off# 321-636-6076 Cell# 754-264-5731",
+        "name": "Bill Swiger"
+    },
+    {
+        # Clear Brook
+        "serial": 'VC05200033092',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1942,
+        "email": "RPalmer@titanamerica.com",
+        "phone": "Site: 540-722-1146 Cell:  540-532-8793",
+        "name": "Ron Palmer"
+    },
+    {
+        # Daytona
+        "serial": 'VC05200037714',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1943,
+        "email": "MContos@titanamerica.com",
+        "phone": "Off# 386-258-7213   Cell# 386-589-7399",
+        "name": "Mike Contos"
+    },
+    {
+        # South Orange
+        "serial": 'VC05200037160',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1946,
+        "email": "hsolano@titanamerica.com",
+        "phone": "407-850-9307",
+        "name": "Henry Solano"
+    },
+    {
+        # Winter Garden
+        "serial": 'VC05200037698',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1947,
+        "email": "CGiordano@titanamerica.com",
+        "phone": "813-495-0877",
+        "name": "Chance Giordano"
+    },
+    {
+        # Orange Park
+        "serial": 'VC05200037178',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1948,
+        "email": "BFrolo@titanamerica.com",
+        "phone": "386-527-3423",
+        "name": "Bruce Frolo"
+    },
+    {
+        # Naples
+        "serial": 'VC05200037301',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1965,
+        "email": "kandreano@titanamerica.com",
+        "phone": "941-234-8318",
+        "name": "Kirk Andreano"
+    },
+    {
+        # Longwood
+        "serial": 'VC05200039051',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1994,
+        "email": "towens@titanamerica.com",
+        "phone": "Off# 407-767-9633  Cell# 386-589-5374",
+        "name": "Tony Owens"
+    },
+    {
+        # Holly Ridge
+        "serial": 'VC05200036910',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1995,
+        "email": "clanier@s&wreadymix.com",
+        "phone": "910-329-1219",
+        "name": "Thomas Deaver"
+    },
+    {
+        # Plant City
+        "serial": 'VC05200039330',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1998,
+        "email": "LWood@titanamerica.com",
+        "phone": "813-719-2729",
+        "name": "Lloyd Wood"
+    },
+    {
+        # Nicholson
+        "serial": 'VC05200037141',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2007,
+        "email": "dstrobel@titanamerica.com",
+        "phone": "Off# 804-737-3428 Cell# 804-614-4318",
+        "name": "Doug Strobel"
+    },
+    {
+        # Fort Myers (Canal Street)
+        "serial": 'VC05200036960',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2055,
+        "email": "rsilva@titanamerica.com",
+        "phone": "Off# 239-332-2456  Cell# 941-585-8431",
+        "name": "Rob Silva"
+    },
+    {
+        # Mangonia
+        "serial": 'VC05200036912',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2060,
+        "email": "mdurham@TitanAmerica.com",
+        "phone": "Cell#  561-842-5309 Off# 561-723-2727",
+        "name": "Michael Durham"
+    },
+    {
+        # Castle Haynes (RM)
+        "serial": 'VC05200035668',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2061,
+        "email": "twells@titanamerica.com",
+        "phone": "910-675-1201",
+        "name": "Tyler Wells"
+    },
+    {
+        # Richmond Terminal
+        "serial": 'VC05200036829',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2065,
+        "email": "hthomas@titanamerica.com",
+        "phone": "804-233-9669",
+        "name": "Howard Thomas"
+    },
+    {
+        # Oceana RM
+        "serial": 'VC05200036670',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2069,
+        "email": "RBeckles@titanamerica.com",
+        "phone": "757-422-0931",
+        "name": "Rhodney Beckles"
+    },
+    {
+        # Edgewater
+        "serial": 'VC05200037088',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2080,
+        "email": "mcontos@titanamerica.com",
+        "phone": "Off# 386-427-4291 Cell# 386 589-7399",
+        "name": "Mike Contos"
+    },
+    {
+        # Delray
+        "serial": 'VC05200036849',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2105,
+        "email": "MWilson@titanamerica.com",
+        "phone": "Off# 561-278-3984 Cell# 561-240-9327",
+        "name": "Mike Wilson"
+    },
+    {
+        # Newpost-Stafford
+        "serial": 'VC05200036954',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2121,
+        "email": "gmanuel@titanamerica.com",
+        "phone": "Site# 540-373-4747 Cell # 571-279-4661",
+        "name": "Greg Manuel"
+    },
+    {
+        # North Miami
+        "serial": 'VC05200036345',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2123,
+        "email": "cbruno@titanamerica.com",
+        "phone": "Off# 305-652-3583   Cell# 954-298-8084",
+        "name": "Desi Barreto"
+    },
+    {
+        # Norfolk Terminal
+        "serial": 'VC05200036815',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2125,
+        "email": "rprosser@titanamerica.com",
+        "phone": "336-514-7846",
+        "name": "Ryan Prosser"
+    },
+    {
+        # Chesterfield
+        "serial": 'VC05200036706',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2126,
+        "email": "jgarner@powmix.com",
+        "phone": "Cell:  804-338-5855 (JG) Cell: 804-398-0303 (JA)",
+        "name": "Jeff Garner John Adams"
+    },
+    {
+        # Sterling/Dulles
+        "serial": 'VC05200036914',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2129,
+        "email": "crhodes@titanamerica.com",
+        "phone": "703-234-1322",
+        "name": "Clarissa Rhodes"
+    },
+    {
+        # Bryan Park
+        "serial": 'VC05200037240',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2130,
+        "email": "cagnew@powmix.com",
+        "phone": "804-432-8361",
+        "name": "Carlos Agnew"
+    },
+    {
+        # Front Royal
+        "serial": 'VC05200036133',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2131,
+        "email": "tcecil@titanamerica.com",
+        "phone": "540-622-2350",
+        "name": "Tom Cecil"
+    },
+    {
+        # Greenland Rd
+        "serial": 'VC05200036791',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2133,
+        "email": "rhowell@titanamerica.com",
+        "phone": "386-527-3423",
+        "name": "Rob Howell"
+    },
+    {
+        # Fairgrounds – West Palm Beach
+        "serial": 'VC05200036967',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2136,
+        "email": "MDurham@titanamerica.com",
+        "phone": "Off# 561-842-5309 Cell# 561-723-2727",
+        "name": "Micheal Durham"
+    },
     # ######Rotech edges
     {
         # Orlando Data center
