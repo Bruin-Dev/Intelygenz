@@ -317,6 +317,80 @@ class TestEdgeRepository:
         redis_client.get.assert_called_once_with(root_key)
         assert edges == root_key_contents
 
+    def get_edge_with_full_id_as_dict_test(self):
+        edge_host = 'mettel.velocloud.net'
+        edge_enterprise_id = 1111
+        edge_id = 2222
+        edge_full_id = {'host': edge_host, 'enterprise_id': edge_enterprise_id, 'edge_id': edge_id}
+        edge_status = {'edges': {'edgeState': 'OFFLINE'}}
+        edge_value = {
+            'edge_status': edge_status,
+            'addition_timestamp': 12345678,
+        }
+        root_key_contents = {f'{edge_host}|{edge_enterprise_id}|{edge_id}': edge_value}
+
+        root_key = 'test-key'
+        logger = Mock()
+        redis_client = Mock()
+
+        edge_repository = EdgeRepository(logger, redis_client, root_key)
+        edge_repository._get_all_edges_raw = Mock(return_value=root_key_contents)
+
+        edge = edge_repository.get_edge(edge_full_id)
+
+        edge_repository._get_all_edges_raw.assert_called_once()
+        assert edge == edge_value
+
+    def get_edge_with_full_id_as_edge_identifier_test(self):
+        edge_host = 'mettel.velocloud.net'
+        edge_enterprise_id = 1111
+        edge_id = 2222
+        edge_full_id = {'host': edge_host, 'enterprise_id': edge_enterprise_id, 'edge_id': edge_id}
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+        edge_status = {'edges': {'edgeState': 'OFFLINE'}}
+        edge_value = {
+            'edge_status': edge_status,
+            'addition_timestamp': 12345678,
+        }
+        root_key_contents = {f'{edge_host}|{edge_enterprise_id}|{edge_id}': edge_value}
+
+        root_key = 'test-key'
+        logger = Mock()
+        redis_client = Mock()
+
+        edge_repository = EdgeRepository(logger, redis_client, root_key)
+        edge_repository._get_all_edges_raw = Mock(return_value=root_key_contents)
+
+        edge = edge_repository.get_edge(edge_identifier)
+
+        edge_repository._get_all_edges_raw.assert_called_once()
+        assert edge == edge_value
+
+    def get_edge_with_no_existing_full_id_test(self):
+        edge_host = 'mettel.velocloud.net'
+        edge_enterprise_id = 1111
+        edge_id = 2222
+        edge_status = {'edges': {'edgeState': 'OFFLINE'}}
+        edge_value = {
+            'edge_status': edge_status,
+            'addition_timestamp': 12345678,
+        }
+        root_key_contents = {f'{edge_host}|{edge_enterprise_id}|{edge_id}': edge_value}
+
+        root_key = 'test-key'
+        logger = Mock()
+        redis_client = Mock()
+
+        edge_repository = EdgeRepository(logger, redis_client, root_key)
+        edge_repository._get_all_edges_raw = Mock(return_value=root_key_contents)
+
+        edge = edge_repository.get_edge(
+            {'host': 'missing-host', 'enterprise_id': 0, 'edge_id': 0}
+        )
+
+        edge_repository._get_all_edges_raw.assert_called_once()
+        assert edge is None
+
     def get_all_edges_test(self):
         edge_host = 'mettel.velocloud.net'
         edge_enterprise_id = 1111

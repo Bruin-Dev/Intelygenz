@@ -38,6 +38,15 @@ class EdgeRepository:
 
         self._redis_client.set(self._root_key, json.dumps(stored_edges), ex=time_to_live)
 
+    def get_edge(self, full_id: Union[EdgeIdentifier, dict]):
+        if isinstance(full_id, EdgeIdentifier):
+            full_id = dict(full_id._asdict())
+
+        edges = self._get_all_edges_raw()
+        full_id_str = self.__full_id_dict_to_str(full_id)
+
+        return edges.get(full_id_str)
+
     def get_all_edges(self) -> Dict[EdgeIdentifier, dict]:
         edges_from_redis = self._get_all_edges_raw()
         return {
