@@ -37,9 +37,7 @@ VELOCLOUD_CONFIG = {
     'servers': parse_velocloud_config(),
     'multiplier': 5,
     'min': 5,
-    'max': 300,
-    'total': 8,
-    'backoff_factor': 2
+    'stop_delay': 18000
 
 }
 
