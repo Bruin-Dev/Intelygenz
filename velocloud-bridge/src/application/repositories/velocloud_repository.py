@@ -28,12 +28,12 @@ class VelocloudRepository:
     def get_edge_information(self, edge):
         return self._velocloud_client.get_edge_information(edge)
 
-    def get_link_information(self, edge, interval=None):
+    def get_link_information(self, edge, interval):
         self._logger.info(f'Getting link information from edge:{edge["edge_id"]} in '
                           f'enterprise:{edge["enterprise_id"]} from host:{edge["host"]}')
         link_status = []
         links = self._velocloud_client.get_link_information(edge, interval)
-        link_service_group = self._velocloud_client.get_link_service_groups_information(edge)
+        link_service_group = self._velocloud_client.get_link_service_groups_information(edge, interval)
         if links is not None and isinstance(links, Exception) is False:
             for link in links:
                 for link_service in link_service_group:

@@ -52,7 +52,8 @@ class TestVelocloudRepository:
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
-        link_info = vr.get_link_information(edge)
+        interval = "some Interval"
+        link_info = vr.get_link_information(edge, interval)
         assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
         assert link_info == link_info_return
@@ -67,7 +68,8 @@ class TestVelocloudRepository:
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
-        link_info = vr.get_link_information(edge)
+        interval = "some Interval"
+        link_info = vr.get_link_information(edge, interval)
         assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
         assert link_info == link_info_return
@@ -83,7 +85,8 @@ class TestVelocloudRepository:
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
-        link_info = vr.get_link_information(edge)
+        interval = "some Interval"
+        link_info = vr.get_link_information(edge, interval)
         assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
         assert link_info == []
@@ -97,7 +100,8 @@ class TestVelocloudRepository:
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
-        link_info = vr.get_link_information(edge)
+        interval = "some Interval"
+        link_info = vr.get_link_information(edge, interval)
         assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
         assert link_info is None
@@ -111,7 +115,8 @@ class TestVelocloudRepository:
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
-        link_info = vr.get_link_information(edge)
+        interval = "some Interval"
+        link_info = vr.get_link_information(edge, interval)
         assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
         assert link_info == link_status

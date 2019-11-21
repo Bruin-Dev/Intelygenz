@@ -65,8 +65,7 @@ class VelocloudClient:
     def _get_header_by_host(self, host):
         host_client = [client
                        for client in self._clients
-                       if host in
-                       client['host']][0]
+                       if host == client['host']][0]
         return host_client
 
     def get_edge_information(self, edge):
@@ -104,10 +103,10 @@ class VelocloudClient:
 
         return response.json()
 
-    def get_link_service_groups_information(self, edge):
+    def get_link_service_groups_information(self, edge, interval):
         # TODO Make link service call
         target_host_client = self._get_header_by_host(edge["host"])
-        edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"]}
+        edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"], "interval": interval}
         response = requests.post(f"https://{edge['host']}/portal/rest/metrics/getEdgeAppLinkMetrics",
                                  data=json.dumps(edgeids),
                                  headers=target_host_client['headers'],
