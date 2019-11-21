@@ -137,8 +137,7 @@ class ServiceOutageDetector:
         edge_list_response = await self._event_bus.rpc_request(
             'edge.list.request',
             json.dumps(edge_list_request_dict),
-            # TODO: Probably will take 4-6 minutes, check in local
-            timeout=60,
+            timeout=600,
         )
 
         return edge_list_response['edges']
