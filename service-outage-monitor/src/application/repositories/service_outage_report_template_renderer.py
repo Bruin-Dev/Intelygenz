@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import base64
 import pandas as pd
 import pytz
+import subprocess
 
 
 class ServiceOutageReportTemplateRenderer:
@@ -19,10 +20,9 @@ class ServiceOutageReportTemplateRenderer:
         header = "src/templates/images/{}".format(kwargs.get("header", "header.jpg"))
         date = datetime.now(pytz.timezone('US/Eastern'))
         full_date = date.strftime("%b_%d_%Y_%H-%M-%S")
-        csv = "{}_{}.csv".format(kwargs.get("csv", "report_mail_template"), full_date)
+        self.csv = "{}_{}.csv".format(kwargs.get("csv", "report_mail_template"), full_date)
         templateEnv = jinja2.Environment(loader=templateLoader)
         templ = templateEnv.get_template(template)
-
         template_vars["__EDGE_COUNT__"] = str(len(edges_to_report))
         template_vars["__TIME_REPORT__"] = kwargs.get("time_report", "60") + " minutes"
         template_vars["__FIELDS__"] = kwargs.get("fields", list(edges_to_report[0].keys()))
@@ -39,7 +39,7 @@ class ServiceOutageReportTemplateRenderer:
         template_vars["list_row"] = list_rows
         edges_dataframe = pd.DataFrame(edges_to_report)
         edges_dataframe.index.name = 'idx'
-        edges_dataframe.to_csv(csv, index=False)
+        edges_dataframe.to_csv(self.csv, index=False)
         email_html = templ.render(**template_vars)
 
         return {
@@ -61,9 +61,15 @@ class ServiceOutageReportTemplateRenderer:
                 ],
                 'attachments': [
                     {
-                        'name': csv,
-                        'data': base64.b64encode(open(csv, 'rb').read()).decode('utf-8')
+                        'name': self.csv,
+                        'data': base64.b64encode(open(self.csv, 'rb').read()).decode('utf-8')
                     }
                 ]
             }
         }
+
+    def _remove_csv_file(self):
+        args = ('rm', '-rf', self.csv)
+        subprocess.call(f"{' '.join(args)}", shell=True)
+
+
