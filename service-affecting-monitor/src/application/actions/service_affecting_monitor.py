@@ -59,8 +59,9 @@ class ServiceAffectingMonitor:
         self._logger.info(f'{edge_status}')
 
         for link in edge_status['edge_info']['links']:
-            await self._latency_check(device, edge_status, link)
-            await self._packet_loss_check(device, edge_status, link)
+            if 'serviceGroups' in link.keys():
+                await self._latency_check(device, edge_status, link)
+                await self._packet_loss_check(device, edge_status, link)
         self._logger.info("End of service affecting monitor job")
 
     async def _latency_check(self, device, edge_status, link):
