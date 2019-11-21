@@ -21,6 +21,7 @@ NATS_CONFIG = {
 }
 TRIAGE_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"],
+    'polling_minutes': 10,
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     #   ["VCE20000000940", "VCE20000000895", "VC05200026138", "VC05400001485",
     #   "VC05400001548", "VC05200033081", "VC05200037161", "VC05200059766",

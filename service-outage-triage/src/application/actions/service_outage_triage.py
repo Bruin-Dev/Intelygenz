@@ -27,7 +27,8 @@ class ServiceOutageTriage:
         if exec_on_start:
             next_run_time = datetime.now(timezone('US/Eastern'))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._poll_tickets, 'interval', seconds=120, next_run_time=next_run_time,
+        self._scheduler.add_job(self._poll_tickets, 'interval', minutes=self._config.TRIAGE_CONFIG["polling_minutes"],
+                                next_run_time=next_run_time,
                                 replace_existing=True, id='_service_outage_triage_process')
 
     async def _poll_tickets(self):
@@ -143,7 +144,7 @@ class ServiceOutageTriage:
                       'start_date': timestamp,
                       'end_date': datetime.now(timezone('US/Eastern'))}
         edge_events = await self._event_bus.rpc_request("alert.request.event.edge", json.dumps(
-                                                                                events_msg, default=str), timeout=10)
+            events_msg, default=str), timeout=10)
         filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
 
         event_list = [event for event in edge_events["events"]["data"] if event['event'] in filter_events_status_list]
@@ -171,7 +172,7 @@ class ServiceOutageTriage:
                 event_obj = self._compose_event_note_object(events)
                 event_timestamp = parse(events[len(events) - 1]["eventTime"]).astimezone(timezone("US/Eastern"))
                 event_ticket_note = "#*Automation Engine*#" + event_obj + 'TimeStamp: ' + str(
-                                                                                 event_timestamp + timedelta(seconds=1))
+                    event_timestamp + timedelta(seconds=1))
                 if self._config.TRIAGE_CONFIG['environment'] == 'production':
                     ticket_append_note_msg = {'request_id': uuid(),
                                               'ticket_id': ticket_id["ticketID"],
