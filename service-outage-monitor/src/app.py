@@ -1,5 +1,4 @@
 import asyncio
-from application.actions.service_outage_detector import DetectedOutagesObserver
 from application.actions.service_outage_detector import ServiceOutageDetector
 from application.repositories.edge_repository import EdgeRepository
 from application.repositories.template_management import TemplateRenderer
@@ -25,22 +24,17 @@ class Container:
         self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
 
         # SCHEDULER
-        jobstores = {
-            "default": RedisJobStore(host=config.REDIS["host"], port=6379, db=0, jobs_key='jobs.service-outage-monitor',
-                                     run_times_key='run-times.service-outage-monitor', )
-        }
-        self._scheduler = AsyncIOScheduler(timezone=self._config.MONITOR_CONFIG['timezone'], jobstores=jobstores)
+        self._scheduler = AsyncIOScheduler(timezone=config.MONITOR_CONFIG['timezone'])
 
         # HEALTHCHECK ENDPOINT
         self._server = QuartServer(config)
 
         # REPOSITORIES
-        self._online_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
-                                                      root_key='ONLINE_EDGES')
         self._quarantine_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
                                                           root_key='EDGES_QUARANTINE')
         self._reporting_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
                                                          root_key='EDGES_TO_REPORT')
+
         # EVENT BUS
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)
@@ -50,26 +44,18 @@ class Container:
         self._template_renderer = TemplateRenderer(config)
 
         # ACTIONS
-
         self._service_outage_detector = ServiceOutageDetector(self._event_bus, self._logger, self._scheduler,
-                                                              self._online_edge_repository,
                                                               self._quarantine_edge_repository,
+                                                              self._reporting_edge_repository,
                                                               config)
-        self._detected_outages_observer = DetectedOutagesObserver(self._event_bus, self._logger, self._scheduler,
-                                                                  self._online_edge_repository,
-                                                                  self._quarantine_edge_repository,
-                                                                  self._reporting_edge_repository,
-                                                                  config)
 
     async def _start(self):
         await self._event_bus.connect()
 
-        # self._online_edge_repository.initialize_root_key()
-        # self._quarantine_edge_repository.initialize_root_key()
-        # self._reporting_edge_repository.initialize_root_key()
-        #
-        # await self._service_outage_detector.start_service_outage_detector_job(exec_on_start=True)
-        # await self._detected_outages_observer.start_service_outage_reporter_job(exec_on_start=False)
+        self._service_outage_detector.load_persisted_quarantine()
+
+        await self._service_outage_detector.start_service_outage_detector_job(exec_on_start=True)
+        await self._service_outage_detector.start_service_outage_reporter_job(exec_on_start=False)
 
         self._scheduler.start()
 

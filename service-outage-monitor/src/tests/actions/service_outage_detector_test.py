@@ -7,49 +7,115 @@ from unittest.mock import call
 from unittest.mock import Mock
 from unittest.mock import patch
 
+from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
 from shortuuid import uuid
 
 from application.actions import service_outage_detector as service_outage_detector_module
 from application.actions.service_outage_detector import ServiceOutageDetector
-from application.actions.service_outage_detector import DetectedOutagesObserver
 from application.repositories.edge_repository import EdgeIdentifier
 from config import testconfig
 
 
 class TestServiceOutageDetector:
-
     def instance_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
         config = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        online_edge_repository, quarantine_edge_repository,
+                                                        quarantine_edge_repository, reporting_edge_repository,
                                                         config)
 
         assert service_outage_detector._event_bus is event_bus
         assert service_outage_detector._logger is logger
         assert service_outage_detector._scheduler is scheduler
-        assert service_outage_detector._online_edge_repository is online_edge_repository
         assert service_outage_detector._quarantine_edge_repository is quarantine_edge_repository
+        assert service_outage_detector._reporting_edge_repository is reporting_edge_repository
         assert service_outage_detector._config is config
 
+    @pytest.mark.asyncio
+    async def load_persisted_quarantine_test(self):
+        edge_1_identifier = EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=1234, edge_id=5678)
+        edge_2_identifier = EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=4321, edge_id=8765)
+
+        edge_1_full_id = edge_1_identifier._asdict()
+        edge_2_full_id = edge_2_identifier._asdict()
+
+        edge_1_addition_timestamp = 1234567890
+        edge_2_addition_timestamp = 9876543210
+        quarantine_edges = {
+            edge_1_identifier: {
+                'edge_status': {
+                    'edges': {'edgeState': 'OFFLINE'},
+                    'links': [
+                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+                        {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+                    ],
+                    'enterprise_name': 'EVIL-CORP|12345|',
+                },
+                'addition_timestamp': edge_1_addition_timestamp,
+            },
+            edge_2_identifier: {
+                'edge_status': {
+                    'edges': {'edgeState': 'CONNECTED'},
+                    'links': [
+                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+                        {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+                    ],
+                    'enterprise_name': 'EVIL-CORP|12345|',
+                },
+                'addition_timestamp': edge_2_addition_timestamp,
+            }
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+
+        quarantine_edge_repository = Mock()
+        quarantine_edge_repository.get_all_edges = Mock(return_value=quarantine_edges)
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
+        service_outage_detector._start_quarantine_job = CoroutineMock()
+
+        await service_outage_detector.load_persisted_quarantine()
+
+        quarantine_edge_repository.get_all_edges.assert_called_once()
+
+        quarantine_time = config.MONITOR_CONFIG['jobs_intervals']['quarantine']
+        service_outage_detector._start_quarantine_job.assert_has_awaits([
+            call(
+                edge_1_full_id,
+                run_date=datetime.fromtimestamp(edge_1_addition_timestamp + quarantine_time)
+            ),
+            call(
+                edge_2_full_id,
+                run_date=datetime.fromtimestamp(edge_2_addition_timestamp + quarantine_time)
+            ),
+        ])
+
+
+class TestServiceOutageDetectorJob:
     @pytest.mark.asyncio
     async def start_service_outage_detector_job_with_exec_on_start_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
         config = testconfig
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        online_edge_repository, quarantine_edge_repository,
+                                                        quarantine_edge_repository, reporting_edge_repository,
                                                         config)
 
         next_run_time = datetime.now()
@@ -63,21 +129,21 @@ class TestServiceOutageDetector:
             service_outage_detector._service_outage_detector_process, 'interval',
             seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_detector'],
             next_run_time=next_run_time,
-            replace_existing=True,
+            replace_existing=False,
             id='_service_outage_detector_process',
         )
 
     @pytest.mark.asyncio
-    async def start_service_outage_monitor_job_with_no_exec_on_start_test(self):
+    async def start_service_outage_detector_job_with_no_exec_on_start_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
         config = testconfig
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        online_edge_repository, quarantine_edge_repository,
+                                                        quarantine_edge_repository, reporting_edge_repository,
                                                         config)
 
         await service_outage_detector.start_service_outage_detector_job(exec_on_start=False)
@@ -86,9 +152,39 @@ class TestServiceOutageDetector:
             service_outage_detector._service_outage_detector_process, 'interval',
             seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_detector'],
             next_run_time=undefined,
-            replace_existing=True,
+            replace_existing=False,
             id='_service_outage_detector_process',
         )
+
+    @pytest.mark.asyncio
+    async def start_service_outage_detector_job_with_job_id_already_executing_test(self):
+        job_id = 'some-duplicated-id'
+        exception_instance = ConflictingIdError(job_id)
+
+        event_bus = Mock()
+        logger = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+
+        scheduler = Mock()
+        scheduler.add_job = Mock(side_effect=exception_instance)
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
+
+        try:
+            await service_outage_detector.start_service_outage_detector_job()
+            pytest.fail('Call to function did not raise the expected exception')
+        except:
+            scheduler.add_job.assert_called_once_with(
+                service_outage_detector._service_outage_detector_process, 'interval',
+                seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_detector'],
+                next_run_time=undefined,
+                replace_existing=False,
+                id='_service_outage_detector_process',
+            )
 
     @pytest.mark.asyncio
     async def service_outage_detector_process_with_no_edges_found_test(self):
@@ -97,12 +193,12 @@ class TestServiceOutageDetector:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
         config = testconfig
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        online_edge_repository, quarantine_edge_repository,
+                                                        quarantine_edge_repository, reporting_edge_repository,
                                                         config)
         service_outage_detector._get_all_edges = CoroutineMock(return_value=edge_list)
 
@@ -111,7 +207,7 @@ class TestServiceOutageDetector:
         service_outage_detector._get_all_edges.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def service_outage_detector_process_with_edges_found_and_online_edges_test(self):
+    async def service_outage_detector_process_with_edges_found_and_healthy_edges_test(self):
         edge_1_id = 5678
         edge_2_id = 8765
         edge_3_id = 3344
@@ -120,23 +216,49 @@ class TestServiceOutageDetector:
         edge_3_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1122, 'edge_id': edge_3_id}
         edge_list = [edge_1_full_id, edge_2_full_id, edge_3_full_id]
 
-        edge_1_status = {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'}
-        edge_2_status = {'edges': {'edgeState': 'OFFLINE'}, 'enterprise_name': 'EVIL-CORP|12345|'}
-        edge_3_status = {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'}
+        edge_1_status = {
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_2_status = {
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_3_status = {
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
         edge_statuses = [edge_1_status, edge_2_status, edge_3_status]
+
+        is_there_outage_side_effect = [False, False, False]
 
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
         config = testconfig
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        online_edge_repository, quarantine_edge_repository,
+                                                        quarantine_edge_repository, reporting_edge_repository,
                                                         config)
         service_outage_detector._get_all_edges = CoroutineMock(return_value=edge_list)
         service_outage_detector._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
+        service_outage_detector._is_there_an_outage = Mock(side_effect=is_there_outage_side_effect)
+        service_outage_detector._start_quarantine_job = Mock()
+        service_outage_detector._add_edge_to_quarantine = Mock()
 
         await service_outage_detector._service_outage_detector_process()
 
@@ -144,13 +266,14 @@ class TestServiceOutageDetector:
         service_outage_detector._get_edge_status_by_id.assert_has_awaits([
             call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
         ])
-        service_outage_detector._online_edge_repository.add_edge.assert_has_calls([
-            call(full_id=edge_1_full_id, status=edge_1_status, time_to_live=600),
-            call(full_id=edge_3_full_id, status=edge_3_status, time_to_live=600),
+        service_outage_detector._is_there_an_outage.assert_has_calls([
+            call(edge_1_status), call(edge_2_status),
         ])
+        service_outage_detector._start_quarantine_job.assert_not_called()
+        service_outage_detector._add_edge_to_quarantine.assert_not_called()
 
     @pytest.mark.asyncio
-    async def service_outage_detector_process_with_edges_found_and_offline_edges_test(self):
+    async def service_outage_detector_process_with_edges_found_and_edges_with_outages_test(self):
         edge_1_id = 5678
         edge_2_id = 8765
         edge_3_id = 3344
@@ -159,23 +282,49 @@ class TestServiceOutageDetector:
         edge_3_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1122, 'edge_id': edge_3_id}
         edge_list = [edge_1_full_id, edge_2_full_id, edge_3_full_id]
 
-        edge_1_status = {'edges': {'edgeState': 'OFFLINE'}, 'enterprise_name': 'EVIL-CORP|12345|'}
-        edge_2_status = {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'}
-        edge_3_status = {'edges': {'edgeState': 'OFFLINE'}, 'enterprise_name': 'EVIL-CORP|12345|'}
+        edge_1_status = {
+            'edges': {'edgeState': 'OFFLINE'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_2_status = {
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_3_status = {
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
         edge_statuses = [edge_1_status, edge_2_status, edge_3_status]
+
+        is_there_outage_side_effect = [True, False, True]
 
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
         config = testconfig
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        online_edge_repository, quarantine_edge_repository,
+                                                        quarantine_edge_repository, reporting_edge_repository,
                                                         config)
         service_outage_detector._get_all_edges = CoroutineMock(return_value=edge_list)
         service_outage_detector._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
+        service_outage_detector._is_there_an_outage = Mock(side_effect=is_there_outage_side_effect)
+        service_outage_detector._start_quarantine_job = CoroutineMock()
+        service_outage_detector._add_edge_to_quarantine = Mock()
 
         await service_outage_detector._service_outage_detector_process()
 
@@ -183,9 +332,12 @@ class TestServiceOutageDetector:
         service_outage_detector._get_edge_status_by_id.assert_has_awaits([
             call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
         ])
-        service_outage_detector._quarantine_edge_repository.add_edge.assert_has_calls([
-            call(full_id=edge_1_full_id, status=edge_1_status, time_to_live=600),
-            call(full_id=edge_3_full_id, status=edge_3_status, time_to_live=600),
+        service_outage_detector._start_quarantine_job.assert_has_awaits([
+            call(edge_1_full_id), call(edge_3_full_id)
+        ])
+        service_outage_detector._add_edge_to_quarantine.assert_has_calls([
+            call(edge_1_full_id, edge_1_status),
+            call(edge_3_full_id, edge_3_status),
         ])
 
     @pytest.mark.asyncio
@@ -204,15 +356,15 @@ class TestServiceOutageDetector:
 
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
         config = testconfig
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edge_list_response)
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        online_edge_repository, quarantine_edge_repository,
+                                                        quarantine_edge_repository, reporting_edge_repository,
                                                         config)
 
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
@@ -237,9 +389,11 @@ class TestServiceOutageDetector:
         uuid_ = uuid()
         edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_status = {
-            'edges': {
-                'edgeState': 'CONNECTED'
-            },
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE'}},
+            ],
             'enterprise_name': 'EVIL-CORP|12345|',
         }
         edge_status_response = {
@@ -251,15 +405,15 @@ class TestServiceOutageDetector:
 
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
         config = testconfig
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edge_status_response)
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        online_edge_repository, quarantine_edge_repository,
+                                                        quarantine_edge_repository, reporting_edge_repository,
                                                         config)
 
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
@@ -275,353 +429,232 @@ class TestServiceOutageDetector:
         )
         assert result == edge_status
 
-    def is_offline_edge_test(self):
-        edge_status_1 = {
-            'edges': {
-                'edgeState': 'CONNECTED'
-            },
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_status_2 = {
-            'edges': {
-                'edgeState': 'OFFLINE'
-            },
+    def add_edge_to_quarantine_test(self):
+        edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+            ],
             'enterprise_name': 'EVIL-CORP|12345|',
         }
 
+        event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        event_bus = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
         config = testconfig
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        online_edge_repository, quarantine_edge_repository,
+                                                        quarantine_edge_repository, reporting_edge_repository,
                                                         config)
 
-        result = service_outage_detector._is_offline(edge_status_1)
+        service_outage_detector._add_edge_to_quarantine(edge_full_id, edge_status)
+
+        quarantine_edge_repository.add_edge.assert_called_once_with(
+            edge_full_id, edge_status,
+            replace_existing=False,
+            time_to_live=config.MONITOR_CONFIG['quarantine_key_ttl'],
+        )
+
+    def is_there_an_outage_edge_test(self):
+        edge_status_1 = {
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_status_2 = {
+            'edges': {'edgeState': 'OFFLINE'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_status_3 = {
+            'edges': {'edgeState': 'CONNECTED'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        event_bus = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
+
+        result = service_outage_detector._is_there_an_outage(edge_status_1)
         assert result is False
 
-        result = service_outage_detector._is_offline(edge_status_2)
+        result = service_outage_detector._is_there_an_outage(edge_status_2)
+        assert result is True
+
+        result = service_outage_detector._is_there_an_outage(edge_status_3)
         assert result is True
 
 
-class TestDetectedOutagesObserver:
-
-    def instance_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        online_edge_repository = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = Mock()
-
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
-
-        assert detected_outages_observer._event_bus is event_bus
-        assert detected_outages_observer._logger is logger
-        assert detected_outages_observer._scheduler is scheduler
-        assert detected_outages_observer._online_edge_repository is online_edge_repository
-        assert detected_outages_observer._quarantine_edge_repository is quarantine_edge_repository
-        assert detected_outages_observer._reporting_edge_repository is reporting_edge_repository
-        assert detected_outages_observer._config is config
-
+class TestQuarantineJob:
     @pytest.mark.asyncio
-    async def start_detected_outages_observer_job_with_exec_on_start_test(self):
+    async def start_quarantine_job_with_run_date_undefined_test(self):
+        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
 
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
 
-        next_run_time = datetime.now()
+        current_datetime = datetime.now()
+        current_timestamp = datetime.timestamp(current_datetime)
         datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=next_run_time)
+        datetime_mock.now = Mock(return_value=current_datetime)
+        datetime_mock.timestamp = Mock(return_value=current_timestamp)
         with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
             with patch.object(service_outage_detector_module, 'timezone', new=Mock()):
-                await detected_outages_observer.start_detected_outages_observer_job(exec_on_start=True)
+                await service_outage_detector._start_quarantine_job(edge_full_id, run_date=None)
 
+        job_run_date = current_datetime + timedelta(seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
         scheduler.add_job.assert_called_once_with(
-            detected_outages_observer._observe_detected_outages, 'interval',
-            seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_observer'],
-            next_run_time=next_run_time,
-            replace_existing=True,
-            id='_detected_outages_observer_process',
+            service_outage_detector._process_edge_from_quarantine, 'date',
+            run_date=job_run_date,
+            replace_existing=False,
+            misfire_grace_time=9999,
+            id=f'_quarantine_{json.dumps(edge_full_id)}',
+            kwargs={'edge_full_id': edge_full_id},
         )
 
     @pytest.mark.asyncio
-    async def start_detected_outages_observer_job_with_no_exec_on_start_test(self):
+    async def start_quarantine_job_with_custom_run_date_test(self):
+        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
 
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
 
-        await detected_outages_observer.start_detected_outages_observer_job(exec_on_start=False)
+        job_run_date = datetime.fromtimestamp(999999)
+        await service_outage_detector._start_quarantine_job(edge_full_id, run_date=job_run_date)
 
         scheduler.add_job.assert_called_once_with(
-            detected_outages_observer._observe_detected_outages, 'interval',
-            seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_observer'],
-            next_run_time=undefined,
-            replace_existing=True,
-            id='_detected_outages_observer_process',
+            service_outage_detector._process_edge_from_quarantine, 'date',
+            run_date=job_run_date,
+            replace_existing=False,
+            misfire_grace_time=9999,
+            id=f'_quarantine_{json.dumps(edge_full_id)}',
+            kwargs={'edge_full_id': edge_full_id},
         )
 
     @pytest.mark.asyncio
-    async def observe_detected_outages_test(self):
-        quarantine_edges = {}
-        online_edges = {
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=123, edge_id=456): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 123456789,
-            },
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=789, edge_id=321): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 987654321,
-            },
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=654, edge_id=987): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 789123456,
-            },
-        }
+    async def start_quarantine_job_with_job_id_already_executing_test(self):
+        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        job_id = 'some-duplicated-id'
+        exception_instance = ConflictingIdError(job_id)
 
         event_bus = Mock()
         logger = Mock()
-        scheduler = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-
-        quarantine_edge_repository = Mock()
-        quarantine_edge_repository.get_all_edges = Mock(return_value=quarantine_edges)
-
-        online_edge_repository = Mock()
-        online_edge_repository.get_all_edges = Mock(return_value=online_edges)
-
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
-        detected_outages_observer._purge_edge_stores = Mock()
-        detected_outages_observer._process_quarantine = CoroutineMock()
-
-        await detected_outages_observer._observe_detected_outages()
-
-        detected_outages_observer._purge_edge_stores.assert_called_once()
-        detected_outages_observer._process_quarantine.assert_called_once()
-
-    def purge_edge_stores_test(self):
-        online_edges = {
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=123, edge_id=456): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 123456789,
-            },
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=789, edge_id=321): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 987654321,
-            },
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=654, edge_id=987): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 789123456,
-            },
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
 
-        online_edge_repository = Mock()
-        online_edge_repository.get_all_edges = Mock(return_value=online_edges)
-
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
-        detected_outages_observer._remove_online_edges_from_quarantine = Mock()
-        detected_outages_observer._remove_online_edges_from_edges_to_report = Mock()
-        detected_outages_observer._clear_online_edges_store = Mock()
-
-        detected_outages_observer._purge_edge_stores()
-
-        online_edge_repository.get_all_edges.assert_called_once()
-        detected_outages_observer._remove_online_edges_from_quarantine.assert_called_once_with(online_edges.keys())
-        detected_outages_observer._remove_online_edges_from_edges_to_report.assert_called_once_with(online_edges.keys())
-        detected_outages_observer._clear_online_edges_store.assert_called_once()
-
-    def remove_online_edges_from_quarantine_test(self):
-        online_edges = {
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=123, edge_id=456): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 123456789,
-            },
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=789, edge_id=321): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 987654321,
-            },
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=654, edge_id=987): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 789123456,
-            },
-        }
-
-        event_bus = Mock()
-        logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
+        scheduler.add_job = Mock(side_effect=exception_instance)
 
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
 
-        detected_outages_observer._remove_online_edges_from_quarantine(online_edges.keys())
+        current_datetime = datetime.now()
+        current_timestamp = datetime.timestamp(current_datetime)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        datetime_mock.timestamp = Mock(return_value=current_timestamp)
 
-        quarantine_edge_repository.remove_edge_set.assert_called_once_with(*online_edges.keys())
-
-    def remove_online_edges_from_edges_to_report_test(self):
-        online_edges = {
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=123, edge_id=456): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 123456789,
-            },
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=789, edge_id=321): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 987654321,
-            },
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=654, edge_id=987): {
-                'edge_status': {'edges': {'edgeState': 'CONNECTED'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-                'addition_timestamp': 789123456,
-            },
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        online_edge_repository = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
-
-        detected_outages_observer._remove_online_edges_from_edges_to_report(online_edges.keys())
-
-        reporting_edge_repository.remove_edge_set.assert_called_once_with(*online_edges.keys())
-
-    def clear_online_edges_store_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        online_edge_repository = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
-
-        detected_outages_observer._clear_online_edges_store()
-
-        online_edge_repository.reset_root_key.assert_called_once()
+        try:
+            with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
+                with patch.object(service_outage_detector_module, 'timezone', new=Mock()):
+                    await service_outage_detector._start_quarantine_job(edge_full_id)
+            pytest.fail('Call to function did not raise the expected exception')
+        except:
+            job_run_date = current_datetime + timedelta(seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
+            scheduler.add_job.assert_called_once_with(
+                service_outage_detector._process_edge_from_quarantine, 'date',
+                run_date=job_run_date,
+                replace_existing=False,
+                misfire_grace_time=9999,
+                id=f'_quarantine_{json.dumps(edge_full_id)}',
+                kwargs={'edge_full_id': edge_full_id},
+            )
 
     @pytest.mark.asyncio
-    async def process_quarantine_with_no_outages_yet_test(self):
-        quarantine_edge_1_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-            'addition_timestamp': 123456789,
-        }
-        quarantine_edge_2_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-            'addition_timestamp': 987654321,
-        }
-        quarantine_edge_3_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-            'addition_timestamp': 789123456,
-        }
-        quarantine_edges = {
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=123, edge_id=456): quarantine_edge_1_value,
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=789, edge_id=321): quarantine_edge_2_value,
-            EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=654, edge_id=987): quarantine_edge_3_value,
+    async def process_edge_from_quarantine_with_no_outage_occurring_test(self):
+        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
         }
 
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
+        quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
 
-        quarantine_edge_repository = Mock()
-        quarantine_edge_repository.get_all_edges = Mock(return_value=quarantine_edges)
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
+        service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
+        service_outage_detector._is_there_an_outage = Mock(return_value=False)
+        service_outage_detector._get_outage_ticket_for_edge = CoroutineMock()
+        service_outage_detector._add_edge_to_reporting = Mock()
 
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
-        detected_outages_observer._is_there_an_outage = Mock(return_value=False)
-        detected_outages_observer._get_outage_ticket_for_edge = CoroutineMock()
+        await service_outage_detector._process_edge_from_quarantine(edge_full_id)
 
-        await detected_outages_observer._process_quarantine()
-
-        quarantine_edge_repository.get_all_edges.assert_called_once()
-        detected_outages_observer._is_there_an_outage.assert_has_calls([
-            call(quarantine_edge_1_value),
-            call(quarantine_edge_2_value),
-            call(quarantine_edge_3_value),
-        ])
-        detected_outages_observer._get_outage_ticket_for_edge.assert_not_awaited()
+        service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        service_outage_detector._is_there_an_outage.assert_called_once_with(edge_status)
+        service_outage_detector._get_outage_ticket_for_edge.assert_not_awaited()
+        service_outage_detector._add_edge_to_reporting.assert_not_called()
 
     @pytest.mark.asyncio
-    async def process_quarantine_with_some_outages_and_some_missing_outage_tickets_test(self):
-        quarantine_edge_1_identifier = EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=123, edge_id=456)
-        quarantine_edge_2_identifier = EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=789, edge_id=321)
-        quarantine_edge_3_identifier = EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=654, edge_id=987)
-        quarantine_edge_1_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}},
-            'addition_timestamp': 123456789,
+    async def process_edge_from_quarantine_with_outage_occurring_and_existing_ticket_test(self):
+        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
         }
-        quarantine_edge_2_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}},
-            'addition_timestamp': 987654321,
-        }
-        quarantine_edge_3_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}},
-            'addition_timestamp': 789123456,
-        }
-        quarantine_edges = {
-            quarantine_edge_1_identifier: quarantine_edge_1_value,
-            quarantine_edge_2_identifier: quarantine_edge_2_value,
-            quarantine_edge_3_identifier: quarantine_edge_3_value,
-        }
-
-        has_edge_1_outage = True
-        has_edge_2_outage = False
-        has_edge_3_outage = True
-        has_edge_outage_side_effect = [has_edge_1_outage, has_edge_2_outage, has_edge_3_outage]
-
-        edge_1_outage_ticket_id = 12345
-        edge_3_outage_ticket_id = None
-        edge_1_outage_ticket = {
+        outage_ticket = {
             'ticketID': 12345,
             'ticketDetails': [
                 {
@@ -636,98 +669,63 @@ class TestDetectedOutagesObserver:
                 }
             ],
         }
-        edge_3_outage_ticket = None
-        edge_outage_ticket_side_effect = [edge_1_outage_ticket, edge_3_outage_ticket]
-
-        dict_for_edge_1_reporting = {
-            **quarantine_edge_1_value,
-            'ticketID': edge_1_outage_ticket_id,
-        }
-        dict_for_edge_3_reporting = {
-            **quarantine_edge_3_value,
-            'ticketID': edge_3_outage_ticket_id,
-        }
-
-        edges_to_report = {
-            quarantine_edge_1_identifier: dict_for_edge_1_reporting,
-            quarantine_edge_3_identifier: dict_for_edge_3_reporting,
-        }
 
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
+        quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
 
-        quarantine_edge_repository = Mock()
-        quarantine_edge_repository.get_all_edges = Mock(return_value=quarantine_edges)
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
+        service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
+        service_outage_detector._is_there_an_outage = CoroutineMock(return_value=True)
+        service_outage_detector._get_outage_ticket_for_edge = CoroutineMock(return_value=outage_ticket)
+        service_outage_detector._add_edge_to_reporting = Mock()
 
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
-        detected_outages_observer._is_there_an_outage = Mock(side_effect=has_edge_outage_side_effect)
-        detected_outages_observer._get_outage_ticket_for_edge = CoroutineMock(
-            side_effect=edge_outage_ticket_side_effect)
-        detected_outages_observer._move_edges_to_reporting = Mock()
+        await service_outage_detector._process_edge_from_quarantine(edge_full_id)
 
-        await detected_outages_observer._process_quarantine()
+        service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        service_outage_detector._is_there_an_outage.assert_called_once_with(edge_status)
+        service_outage_detector._get_outage_ticket_for_edge.assert_awaited_once_with(edge_full_id)
+        service_outage_detector._add_edge_to_reporting.assert_not_called()
 
-        quarantine_edge_repository.get_all_edges.assert_called_once()
-        detected_outages_observer._is_there_an_outage.assert_has_calls([
-            call(quarantine_edge_1_value),
-            call(quarantine_edge_2_value),
-            call(quarantine_edge_3_value),
-        ])
-        detected_outages_observer._get_outage_ticket_for_edge.assert_has_awaits([
-            call(quarantine_edge_1_value),
-            call(quarantine_edge_3_value),
-        ])
-        detected_outages_observer._move_edges_to_reporting.assert_called_once_with(edges_to_report)
+    @pytest.mark.asyncio
+    async def process_edge_from_quarantine_with_outage_occurring_and_no_existing_ticket_test(self):
+        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        outage_ticket = None
 
-    def is_there_an_outage_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
 
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
+        service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
+        service_outage_detector._is_there_an_outage = CoroutineMock(return_value=True)
+        service_outage_detector._get_outage_ticket_for_edge = CoroutineMock(return_value=outage_ticket)
+        service_outage_detector._add_edge_to_reporting = Mock()
 
-        current_datetime = datetime.now()
-        datetime_mock = Mock()
-        datetime_mock.fromtimestamp = datetime.fromtimestamp
+        await service_outage_detector._process_edge_from_quarantine(edge_full_id)
 
-        edge_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-            'addition_timestamp': datetime.timestamp(current_datetime - timedelta(minutes=39, seconds=59)),
-        }
-        datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
-            is_there_outage = detected_outages_observer._is_there_an_outage(edge_value)
-            assert is_there_outage is False
-
-        edge_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-            'addition_timestamp': datetime.timestamp(current_datetime - timedelta(minutes=40)),
-        }
-        datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
-            is_there_outage = detected_outages_observer._is_there_an_outage(edge_value)
-            assert is_there_outage is False
-
-        edge_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}, 'enterprise_name': 'EVIL-CORP|12345|'},
-            'addition_timestamp': datetime.timestamp(current_datetime - timedelta(minutes=40, seconds=1)),
-        }
-        datetime_mock.now = Mock(return_value=current_datetime)
-        with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
-            is_there_outage = detected_outages_observer._is_there_an_outage(edge_value)
-            assert is_there_outage is True
+        service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        service_outage_detector._is_there_an_outage.assert_called_once_with(edge_status)
+        service_outage_detector._get_outage_ticket_for_edge.assert_awaited_once_with(edge_full_id)
+        service_outage_detector._add_edge_to_reporting.assert_called_once_with(edge_full_id, edge_status)
 
     @pytest.mark.asyncio
     async def get_outage_ticket_for_edge_test(self):
@@ -737,6 +735,10 @@ class TestDetectedOutagesObserver:
         quarantine_edge_value = {
             'edge_status': {
                 'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number},
+                'links': [
+                    {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                    {'linkId': 5678, 'link': {'state': 'STABLE'}},
+                ],
                 'enterprise_name': enterprise_name,
             },
             'addition_timestamp': 123456789,
@@ -760,7 +762,6 @@ class TestDetectedOutagesObserver:
 
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
@@ -768,16 +769,16 @@ class TestDetectedOutagesObserver:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=outage_ticket)
 
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
-        detected_outages_observer._extract_client_id = Mock(return_value=client_id)
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
+        service_outage_detector._extract_client_id = Mock(return_value=client_id)
 
         uuid_ = uuid()
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
-            outage_ticket_result = await detected_outages_observer._get_outage_ticket_for_edge(quarantine_edge_value)
+            outage_ticket_result = await service_outage_detector._get_outage_ticket_for_edge(quarantine_edge_value)
 
-        detected_outages_observer._extract_client_id.assert_called_once_with(enterprise_name)
+        service_outage_detector._extract_client_id.assert_called_once_with(enterprise_name)
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.outage.details.by_edge_serial.request',
             json.dumps({
@@ -795,54 +796,158 @@ class TestDetectedOutagesObserver:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
 
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
 
-        result_client_id = detected_outages_observer._extract_client_id(enterprise_name)
+        result_client_id = service_outage_detector._extract_client_id(enterprise_name)
         assert result_client_id == str(client_id)
 
-    def move_edges_to_reporting_test(self):
-        edge_1_identifier = EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=123, edge_id=456)
-        edge_2_identifier = EdgeIdentifier(host='mettel.velocloud.net', enterprise_id=789, edge_id=321)
-        edge_1_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}},
-            'addition_timestamp': 123456789,
-            'ticketID': 12345,
-        }
-        edge_2_value = {
-            'edge_status': {'edges': {'edgeState': 'OFFLINE'}},
-            'addition_timestamp': 123456789,
-            'ticketID': 67890,
+    def add_edge_to_reporting_test(self):
+        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        client_id = 12345
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{client_id}|',
         }
 
-        edges_to_report = [
-            {edge_1_identifier: edge_1_value},
-            {edge_2_identifier: edge_2_value},
-        ]
+        addition_to_quarantine_timestamp = 123456789
+        edge_status_in_quarantine = {
+            'edge_status': {
+                'edges': {'edgeState': 'CONNECTED'},
+                'links': [
+                    {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+                    {'linkId': 5678, 'link': {'state': 'STABLE'}},
+                ],
+                'enterprise_name': 'EVIL-CORP|12345|',
+            },
+            'addition_timestamp': addition_to_quarantine_timestamp,
+        }
 
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        online_edge_repository = Mock()
+        reporting_edge_repository = Mock()
         config = testconfig
 
         quarantine_edge_repository = Mock()
-        quarantine_edge_repository.reset_root_key = Mock()
+        quarantine_edge_repository.get_edge = Mock(return_value=edge_status_in_quarantine)
 
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
+
+        service_outage_detector._add_edge_to_reporting(edge_full_id, edge_status)
+
+        quarantine_edge_repository.get_edge.assert_called_once_with(edge_full_id)
+        reporting_edge_repository.add_edge.assert_called_once_with(
+            edge_full_id,
+            {
+                'edge_status': edge_status,
+                'detection_timestamp': addition_to_quarantine_timestamp,
+            }
+        )
+        quarantine_edge_repository.remove_edge.assert_called_once_with(edge_full_id)
+
+    def add_edge_to_reporting_with_edge_missing_in_quarantine_test(self):
+        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        client_id = 12345
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{client_id}|',
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
         reporting_edge_repository = Mock()
-        reporting_edge_repository.add_edge_set = Mock()
+        config = testconfig
 
-        detected_outages_observer = DetectedOutagesObserver(event_bus, logger, scheduler,
-                                                            online_edge_repository, quarantine_edge_repository,
-                                                            reporting_edge_repository, config)
+        quarantine_edge_repository = Mock()
+        quarantine_edge_repository.get_edge = Mock(return_value=None)
 
-        detected_outages_observer._move_edges_to_reporting(edges_to_report)
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
 
-        quarantine_edge_repository.reset_root_key.assert_called_once()
-        reporting_edge_repository.add_edge_set.assert_called_once_with(edges_to_report)
+        current_datetime = datetime.now()
+        current_timestamp = datetime.timestamp(current_datetime)
+        datetime_mock = Mock()
+        datetime_mock.timestamp = Mock(return_value=current_timestamp)
+        with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
+            with patch.object(service_outage_detector_module, 'timezone', new=Mock()):
+                service_outage_detector._add_edge_to_reporting(edge_full_id, edge_status)
+
+        assumed_detection_timestamp = current_timestamp - config.MONITOR_CONFIG['jobs_intervals']['quarantine']
+        reporting_edge_repository.add_edge.assert_called_once_with(
+            edge_full_id,
+            {
+                'edge_status': edge_status,
+                'detection_timestamp': assumed_detection_timestamp,
+            }
+        )
+
+
+class TestServiceOutageReporterJob:
+    @pytest.mark.asyncio
+    async def start_service_outage_reporter_job_with_exec_on_start_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
+
+        next_run_time = datetime.now()
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=next_run_time)
+        with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
+            with patch.object(service_outage_detector_module, 'timezone', new=Mock()):
+                await service_outage_detector.start_service_outage_reporter_job(exec_on_start=True)
+
+        scheduler.add_job.assert_called_once_with(
+            service_outage_detector._service_outage_reporter_process, 'interval',
+            seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_reporter'],
+            next_run_time=next_run_time,
+            replace_existing=True,
+            id='_service_outage_reporter_process',
+        )
+
+    @pytest.mark.asyncio
+    async def start_service_outage_reporter_job_with_no_exec_on_start_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config)
+
+        await service_outage_detector.start_service_outage_reporter_job(exec_on_start=False)
+
+        scheduler.add_job.assert_called_once_with(
+            service_outage_detector._service_outage_reporter_process, 'interval',
+            seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_reporter'],
+            next_run_time=undefined,
+            replace_existing=True,
+            id='_service_outage_reporter_process',
+        )

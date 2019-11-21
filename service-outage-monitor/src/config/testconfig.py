@@ -13,14 +13,17 @@ NATS_CONFIG = {
     }
 }
 
+quarantine_time = 60 * 10
 MONITOR_CONFIG = {
     'recipient': "some.recipient@email.com",
     'environment': "dev",
     'timezone': "US/Eastern",
     'jobs_intervals': {
-        'outage_detector': 600,
-        'outage_observer': 300,
+        'outage_detector': 60 * 40,
+        'outage_reporter': 60 * 60,
+        'quarantine': quarantine_time,
     },
+    'quarantine_key_ttl': quarantine_time + 60 * 5,
 }
 
 LOG_CONFIG = {
