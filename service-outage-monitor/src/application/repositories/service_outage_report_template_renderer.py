@@ -5,6 +5,7 @@ import base64
 import pandas as pd
 import pytz
 import subprocess
+from pytz import timezone
 
 
 class ServiceOutageReportTemplateRenderer:
@@ -14,6 +15,7 @@ class ServiceOutageReportTemplateRenderer:
 
     def _compose_email_object(self, edges_to_report, **kwargs):
         template_vars = {}
+        # This path changes if you execute it from pycharm
         templateLoader = jinja2.FileSystemLoader(searchpath=".")
         template = "src/templates/{}".format(kwargs.get("template", "report_mail_template.html"))
         logo = "src/templates/images/{}".format(kwargs.get("logo", "logo.png"))
@@ -41,11 +43,12 @@ class ServiceOutageReportTemplateRenderer:
         edges_dataframe.index.name = 'idx'
         edges_dataframe.to_csv(self.csv, index=False)
         email_html = templ.render(**template_vars)
+        tz = timezone(self._config.MONITOR_CONFIG['timezone'])
 
         return {
             'request_id': uuid(),
             'email_data': {
-                'subject': f'Service Outage Report ({datetime.now().strftime("%Y-%m-%d")})',
+                'subject': f'Service Outage Report ({datetime.now(tz=tz).strftime("%Y-%m-%d %H:%M")})',
                 'recipient': self._config.MONITOR_CONFIG["recipient"],
                 'text': 'this is the accessible text for the email',
                 'html': email_html,

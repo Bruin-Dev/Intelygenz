@@ -15,19 +15,22 @@ from application.repositories.edge_repository import EdgeIdentifier
 class ServiceOutageDetector:
     __client_id_regex = re.compile(r'^.*\|(?P<client_id>\d+)\|$')
 
-    def __init__(self, event_bus, logger, scheduler, quarantine_edge_repository, reporting_edge_repository, config):
+    def __init__(self, event_bus, logger, scheduler, quarantine_edge_repository, reporting_edge_repository, config,
+                 email_template_renderer):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._reporting_edge_repository = reporting_edge_repository
         self._quarantine_edge_repository = quarantine_edge_repository
         self._config = config
+        self._email_template_renderer = email_template_renderer
 
     async def load_persisted_quarantine(self):
         quarantine_edges = self._quarantine_edge_repository.get_all_edges()
         for edge_identifier, edge_data in quarantine_edges.items():
             edge_full_id = edge_identifier._asdict()
-            detection_timestamp = edge_data['addition_timestamp']
+            edge_dict = json.loads(edge_data)
+            detection_timestamp = edge_dict['addition_timestamp']
 
             job_run_date = datetime.fromtimestamp(detection_timestamp) + timedelta(
                 seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
@@ -103,11 +106,11 @@ class ServiceOutageDetector:
         edge_ttl = self._config.MONITOR_CONFIG['quarantine_key_ttl']
         self._quarantine_edge_repository.add_edge(
             edge_full_id, edge_status,
-            replace_existing=False,  # Allows to preserve the timestamp of the first detection if the edge is already
-                                     # in quarantine
+            update_existing=False,  # Allows to preserve the timestamp of the first detection if the edge is already
+            # in quarantine
             time_to_live=edge_ttl)
 
-        self._logger(f'Edge {edge_identifier} sent to quarantine')
+        self._logger.info(f'Edge {edge_identifier} sent to quarantine')
 
     def _is_there_an_outage(self, edge_status):
         is_edge_offline = edge_status["edges"]["edgeState"] == 'OFFLINE'
@@ -118,12 +121,54 @@ class ServiceOutageDetector:
 
         return is_edge_offline or is_any_link_disconnected
 
+    def _generate_urls_from_edge(self, edge_data, host):
+        edge_info = edge_data["edges"]
+        edge_id = edge_info["id"]
+        enterprise_id = edge_info["enterpriseId"]
+
+        links = f'https://{host}/#!/operator/customer/{enterprise_id}/monitor/edge/{edge_id}/'
+
+        return links
+
+    def _unmarshall_edge_to_report(self, edge_json_string, host):
+        edge_to_report = {
+            "detection_time": None,
+            "serial_number": None,
+            "enterprise": None,
+            "links": None
+        }
+        edge = json.loads(edge_json_string)
+        edge_data = edge["edge_status"]["edge_status"]
+        detection_timestamp = edge["edge_status"]["detection_timestamp"]
+        tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+        edge_to_report["detection_time"] = datetime.fromtimestamp(detection_timestamp, tz=tz)
+        edge_to_report["serial_number"] = edge_data["edges"]["serialNumber"]
+        edge_to_report["enterprise"] = edge_data["enterprise_name"]
+        edge_to_report["links"] = self._generate_urls_from_edge(edge_data, host)
+        return edge_to_report
+
     async def _service_outage_reporter_process(self):
-        email_report = self._edge_repository_template_renderer._compose_email_object()
-        await self._event_bus.rpc_request("notification.email.request",
-                                          json.dumps(email_report),
-                                          timeout=10)
-        self._reporting_edge_repository.reset_root_key()
+        edges_to_report = self._reporting_edge_repository.get_all_edges()
+        sanitized_list = []
+        for field, value in edges_to_report.items():
+            host = str(field)
+            host = host.split("__")[1].split(',')[0].replace('\'', '')
+            edge_to_report = self._unmarshall_edge_to_report(value, host)
+            sanitized_list.append(edge_to_report)
+
+        if len(sanitized_list) > 0:
+            self._logger.info(f'Reporting {len(sanitized_list)} outages without ticket...')
+            fields = ["Date of detection", "Serial Number", "Company", "Edge URL"]
+            fields_edge = ["detection_time", "serial_number", "enterprise", "links"]
+            email_report = self._email_template_renderer._compose_email_object(sanitized_list, fields=fields,
+                                                                               fields_edge=fields_edge)
+            await self._event_bus.rpc_request("notification.email.request",
+                                              json.dumps(email_report),
+                                              timeout=10)
+            self._reporting_edge_repository.reset_root_key()
+
+        else:
+            self._logger.info(f'Nothing to report!')
 
     async def _get_all_edges(self):
         edge_list_request_dict = {
@@ -147,12 +192,12 @@ class ServiceOutageDetector:
         edge_status = await self._get_edge_status_by_id(edge_full_id)
 
         if self._is_there_an_outage(edge_status):
-            outage_ticket = await self._get_outage_ticket_for_edge(edge_full_id)
+            outage_ticket = await self._get_outage_ticket_for_edge(edge_status)
 
             if outage_ticket is None:
                 self._add_edge_to_reporting(edge_full_id, edge_status)
             else:
-                self._logger(
+                self._logger.info(
                     f'Edge {edge_identifier} has an outage but there is already '
                     'an outage ticket created for it. This edge will not be reported.'
                 )
@@ -171,16 +216,20 @@ class ServiceOutageDetector:
         return edge_status_response['edge_info']
 
     async def _get_outage_ticket_for_edge(self, edge_value: dict):
-        edge_serial = edge_value['edge_status']['edges']['serialNumber']
-        enterprise_name = edge_value['edge_status']['enterprise_name']
+        edge_serial = edge_value['edges']['serialNumber']
+        enterprise_name = edge_value['enterprise_name']
         client_id = self._extract_client_id(enterprise_name)
+
+        # In case is a test edge, they don't have |BruinId| in the company name
+        if client_id is None:
+            # This will make the code believe there's already a ticket for it
+            return {}
 
         outage_ticket_request = {'request_id': uuid(), 'edge_serial': edge_serial, 'client_id': client_id}
         outage_ticket = await self._event_bus.rpc_request(
             'bruin.ticket.outage.details.by_edge_serial.request',
             json.dumps(outage_ticket_request),
         )
-
         return outage_ticket
 
     def _extract_client_id(self, enterprise_name):
@@ -189,10 +238,12 @@ class ServiceOutageDetector:
         if client_id_match:
             client_id = client_id_match.group('client_id')
             return client_id
+        else:
+            return None
 
     def _add_edge_to_reporting(self, edge_full_id, edge_status):
         edge_identifier = EdgeIdentifier(**edge_full_id)
-        edge_from_quarantine = self._quarantine_edge_repository.get_edge(edge_full_id)
+        edge_from_quarantine = json.loads(self._quarantine_edge_repository.get_edge(edge_full_id))
 
         if edge_from_quarantine is None:
             tz = timezone(self._config.MONITOR_CONFIG['timezone'])

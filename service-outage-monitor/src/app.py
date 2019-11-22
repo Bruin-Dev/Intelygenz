@@ -1,8 +1,7 @@
 import asyncio
 from application.actions.service_outage_detector import ServiceOutageDetector
 from application.repositories.edge_repository import EdgeRepository
-from application.repositories.template_management import TemplateRenderer
-from apscheduler.jobstores.redis import RedisJobStore
+from application.repositories.service_outage_report_template_renderer import ServiceOutageReportTemplateRenderer
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from redis import Redis
 
@@ -31,9 +30,9 @@ class Container:
 
         # REPOSITORIES
         self._quarantine_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
-                                                          root_key='EDGES_QUARANTINE')
+                                                          keys_prefix='EDGES_QUARANTINE')
         self._reporting_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
-                                                         root_key='EDGES_TO_REPORT')
+                                                         keys_prefix='EDGES_TO_REPORT')
 
         # EVENT BUS
         self._publisher = NATSClient(config, logger=self._logger)
@@ -41,18 +40,18 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         # EMAIL TEMPLATE
-        self._template_renderer = TemplateRenderer(config)
+        self._template_renderer = ServiceOutageReportTemplateRenderer(config)
 
         # ACTIONS
         self._service_outage_detector = ServiceOutageDetector(self._event_bus, self._logger, self._scheduler,
                                                               self._quarantine_edge_repository,
                                                               self._reporting_edge_repository,
-                                                              config)
+                                                              config, self._template_renderer)
 
     async def _start(self):
         await self._event_bus.connect()
 
-        self._service_outage_detector.load_persisted_quarantine()
+        await self._service_outage_detector.load_persisted_quarantine()
 
         await self._service_outage_detector.start_service_outage_detector_job(exec_on_start=True)
         await self._service_outage_detector.start_service_outage_reporter_job(exec_on_start=False)
