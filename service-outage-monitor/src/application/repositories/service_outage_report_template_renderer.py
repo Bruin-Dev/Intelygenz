@@ -71,5 +71,3 @@ class ServiceOutageReportTemplateRenderer:
     def _remove_csv_file(self):
         args = ('rm', '-rf', self.csv)
         subprocess.call(f"{' '.join(args)}", shell=True)
-
-

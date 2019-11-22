@@ -6,6 +6,7 @@ import base64
 from config import testconfig
 import subprocess
 
+
 class TestServiceOutageReportTemplateRenderer:
 
     def instantiation_test(self):
@@ -64,7 +65,4 @@ class TestServiceOutageReportTemplateRenderer:
         email = template_renderer._compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
         template_renderer._remove_csv_file()
         a = subprocess.check_output(["find", "-name", "*.csv"]).decode()
-        assert "report_mail_template" not  in a
-
-
-
+        assert "report_mail_template" not in a
