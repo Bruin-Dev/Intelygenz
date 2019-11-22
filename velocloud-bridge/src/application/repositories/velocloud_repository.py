@@ -52,8 +52,8 @@ class VelocloudRepository:
 
     def get_enterprise_information(self, edge):
         enterprise_info = self._velocloud_client.get_enterprise_information(edge)
-        if isinstance(enterprise_info, Exception) is False:
-            return self._velocloud_client.get_enterprise_information(edge)['name']
+        if isinstance(enterprise_info, Exception) is False and enterprise_info is not None:
+            return enterprise_info['name']
         else:
             return enterprise_info
 

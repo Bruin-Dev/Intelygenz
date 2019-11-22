@@ -1,12 +1,12 @@
-import pytest
-from unittest.mock import Mock
-from asynctest import CoroutineMock
-from application.actions.edge_list_response import ReportEdgeList
-from igz.packages.eventbus.eventbus import EventBus
-from config import testconfig as config
-from application.repositories.velocloud_repository import VelocloudRepository
-from velocloud_client.client.velocloud_client import VelocloudClient
 import json
+from unittest.mock import Mock
+
+import pytest
+from application.actions.edge_list_response import ReportEdgeList
+from asynctest import CoroutineMock
+
+from config import testconfig as config
+from igz.packages.eventbus.eventbus import EventBus
 
 
 class TestEdgeListResponse:
@@ -14,14 +14,12 @@ class TestEdgeListResponse:
     def instance_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
-        test_velocloud_client = VelocloudClient(config)
-        velocloud_repo = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        velocloud_repo = Mock()
         actions = ReportEdgeList(config, test_bus, velocloud_repo, mock_logger)
         assert actions._configs is config
         assert actions._logger is mock_logger
         assert test_bus._logger is mock_logger
         assert actions._event_bus is test_bus
-        assert velocloud_repo._logger is mock_logger
         assert actions._velocloud_repository is velocloud_repo
 
     @pytest.mark.asyncio

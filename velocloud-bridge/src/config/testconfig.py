@@ -23,11 +23,9 @@ VELOCLOUD_CONFIG = {
 
         }
     ],
-    'multiplier': 5,
-    'min': 5,
-    'max': 300,
-    'total': 8,
-    'backoff_factor': 2
+    'multiplier': 0.1,
+    'min': 0,
+    'stop_delay': 0.4
 
 }
 

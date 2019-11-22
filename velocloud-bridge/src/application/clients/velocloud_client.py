@@ -121,12 +121,13 @@ class VelocloudClient:
                                      min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
         def get_enterprise_information():
+            print('here')
             target_host_client = self._get_header_by_host(edge["host"])
             body = {"enterpriseId": edge["enterprise_id"]}
             response = requests.post(f"https://{edge['host']}/portal/rest/enterprise/getEnterprise",
                                      data=json.dumps(body),
                                      headers=target_host_client['headers'],
-                                     verify=False)
+                                     verify=self._config['verify_ssl'])
 
             return self._json_return(response.json())
 
@@ -206,12 +207,12 @@ class VelocloudClient:
         return get_all_enterprises_edges_by_id()
 
     def _json_return(self, response):
-        if 'error' in response.keys():
-            if 'tokenError [expired session cookie]' in response['error']['message']:
-                self._logger.info(response)
-                self.instantiate_and_connect_clients()
-                raise Exception
-            else:
-                self._logger.error(response)
-        else:
-            return response
+        if isinstance(response, dict):
+            if 'error' in response.keys():
+                if 'tokenError [expired session cookie]' in response['error']['message']:
+                    self._logger.info(response)
+                    self.instantiate_and_connect_clients()
+                    raise Exception
+                else:
+                    self._logger.error(response)
+        return response
