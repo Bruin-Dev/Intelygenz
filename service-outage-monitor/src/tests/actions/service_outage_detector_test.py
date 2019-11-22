@@ -176,8 +176,7 @@ class TestServiceOutageDetectorJob:
 
         try:
             await service_outage_detector.start_service_outage_detector_job()
-            pytest.fail('Call to function did not raise the expected exception')
-        except Exception as e:
+        except ConflictingIdError as e:
             scheduler.add_job.assert_called_once_with(
                 service_outage_detector._service_outage_detector_process, 'interval',
                 seconds=config.MONITOR_CONFIG['jobs_intervals']['outage_detector'],
@@ -380,7 +379,7 @@ class TestServiceOutageDetectorJob:
                     {'host': 'metvco04.mettel.net', 'enterprise_ids': []},
                 ]
             }),
-            timeout=60,
+            timeout=600,
         )
         assert result == edge_list
 
@@ -597,8 +596,7 @@ class TestQuarantineJob:
             with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
                 with patch.object(service_outage_detector_module, 'timezone', new=Mock()):
                     await service_outage_detector._start_quarantine_job(edge_full_id)
-            pytest.fail('Call to function did not raise the expected exception')
-        except Exception as e:
+        except ConflictingIdError as e:
             job_run_date = current_datetime + timedelta(seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
             scheduler.add_job.assert_called_once_with(
                 service_outage_detector._process_edge_from_quarantine, 'date',
