@@ -17,9 +17,10 @@ class TestProductionAction:
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = Mock()
 
-        production_action = ProductionAction(logger, event_bus, config)
+        production_action = ProductionAction(logger, event_bus, template_renderer, config)
 
         assert production_action._logger == logger
         assert production_action._event_bus == event_bus
@@ -31,6 +32,7 @@ class TestProductionAction:
         event_bus.rpc_request = CoroutineMock(side_effect=[{'ticketIds': {'ticketIds': [123]}}, 'Note Posted',
                                                            'Slack Sent'])
         logger = Mock()
+        template_renderer = Mock()
 
         device = {
             "serial": 'VC05200033383',
@@ -88,7 +90,7 @@ class TestProductionAction:
         }
         ticket_dict = {'test': 'dict'}
 
-        production_action = ProductionAction(logger, event_bus, config)
+        production_action = ProductionAction(logger, event_bus, template_renderer, config)
         production_action._ticket_existence = CoroutineMock(return_value=True)
         production_action._ticket_object_to_string = Mock(return_value='Some string object')
 
@@ -107,6 +109,7 @@ class TestProductionAction:
         event_bus.rpc_request = CoroutineMock(side_effect=[ticket_creation, 'Note Posted',
                                                            'Slack Sent'])
         logger = Mock()
+        template_renderer = Mock()
         config = testconfig
         environment = 'production'
 
@@ -168,7 +171,7 @@ class TestProductionAction:
         }
         ticket_dict = {'test': 'dict'}
         ticket_str = 'Some string object'
-        production_action = ProductionAction(logger, event_bus, config)
+        production_action = ProductionAction(logger, event_bus, template_renderer, config)
         production_action._ticket_existence = CoroutineMock(return_value=False)
         production_action._ticket_object_to_string = Mock(return_value=ticket_str)
 
@@ -235,8 +238,9 @@ class TestProductionAction:
     async def ticket_existence_ok_test(self):
         event_bus = Mock()
         logger = Mock()
+        template_renderer = Mock()
         config = testconfig
-        production_action = ProductionAction(logger, event_bus, config)
+        production_action = ProductionAction(logger, event_bus, template_renderer, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -252,8 +256,9 @@ class TestProductionAction:
     async def ticket_existence_wrong_trouble_test(self):
         event_bus = Mock()
         logger = Mock()
+        template_renderer = Mock()
         config = testconfig
-        production_action = ProductionAction(logger, event_bus, config)
+        production_action = ProductionAction(logger, event_bus, template_renderer, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -269,8 +274,9 @@ class TestProductionAction:
     async def ticket_existence_wrong_serial_test(self):
         event_bus = Mock()
         logger = Mock()
+        template_renderer = Mock()
         config = testconfig
-        production_action = ProductionAction(logger, event_bus, config)
+        production_action = ProductionAction(logger, event_bus, template_renderer, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026137'}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -286,8 +292,9 @@ class TestProductionAction:
     async def ticket_existence_no_details_test(self):
         event_bus = Mock()
         logger = Mock()
+        template_renderer = Mock()
         config = testconfig
-        production_action = ProductionAction(logger, event_bus, config)
+        production_action = ProductionAction(logger, event_bus, template_renderer, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{'otherDetails': None}],
                                              "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
@@ -303,8 +310,9 @@ class TestProductionAction:
     async def ticket_existence_no_notes_test(self):
         event_bus = Mock()
         logger = Mock()
+        template_renderer = Mock()
         config = testconfig
-        production_action = ProductionAction(logger, event_bus, config)
+        production_action = ProductionAction(logger, event_bus, template_renderer, config)
         tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
         ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
                                              "ticketNotes": [{"noteValue": None}]}}
@@ -316,8 +324,9 @@ class TestProductionAction:
     def ticket_object_to_string_test(self):
         event_bus = Mock()
         logger = Mock()
+        template_renderer = Mock()
         config = testconfig
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
-        production_action = ProductionAction(logger, event_bus, config)
+        production_action = ProductionAction(logger, event_bus, template_renderer, config)
         ticket_note = production_action._ticket_object_to_string(test_dict)
         assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'

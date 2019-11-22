@@ -5,9 +5,10 @@ from shortuuid import uuid
 
 class ProductionAction:
 
-    def __init__(self, logger, event_bus, config):
+    def __init__(self, logger, event_bus, template_renderer, config):
         self._logger = logger
         self._event_bus = event_bus
+        self._template_renderer = template_renderer
         self._config = config
 
     async def run_triage_action(self, ticket_dict, ticket_id):

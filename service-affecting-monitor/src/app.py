@@ -27,7 +27,7 @@ class Container:
         self._event_bus.set_producer(self._publisher)
         self._template_renderer = TemplateRenderer(config)
 
-        self.notifier_action = NotifierAction(self._logger, self._event_bus, config,
+        self.notifier_action = NotifierAction(self._logger, self._event_bus, config, self._template_renderer,
                                               ProductionAction, DevelopmentAction)
         self._service_affecting_monitor = ServiceAffectingMonitor(self._event_bus, self._logger, self._scheduler,
                                                                   config, self.notifier_action, self._template_renderer)

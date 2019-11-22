@@ -13,14 +13,15 @@ from application.actions import development as development_module
 from config import testconfig
 
 
-class TestProductionAction:
+class TestDevelopmentAction:
 
     def instance_test(self):
         logger = Mock()
         event_bus = Mock()
+        template_renderer = Mock()
         config = Mock()
 
-        development_action = DevelopmentAction(logger, event_bus, config)
+        development_action = DevelopmentAction(logger, event_bus, template_renderer, config)
 
         assert development_action._logger == logger
         assert development_action._event_bus == event_bus
@@ -29,11 +30,11 @@ class TestProductionAction:
     @pytest.mark.asyncio
     async def run_triage_action_test(self):
         logger = Mock()
-
+        template_renderer = Mock()
         config = testconfig
 
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
-        ticket_note_as_email_object = {'email_object': "Something happened"}
+        ticket_note_as_email = {'email_object': "Something happened"}
         send_to_slack = {'slack_sent': 'Success'}
 
         environment = 'dev'
@@ -42,10 +43,10 @@ class TestProductionAction:
         uuid_1 = uuid()
 
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_note_as_email_object, send_to_slack])
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_note_as_email, send_to_slack])
 
-        development_action = DevelopmentAction(logger, event_bus, config)
-        development_action._ticket_object_to_email_obj = Mock(return_value=ticket_note_as_email_object)
+        development_action = DevelopmentAction(logger, event_bus, template_renderer, config)
+        development_action._template_renderer._ticket_object_to_email_obj = Mock(return_value=ticket_note_as_email)
 
         with patch.object(development_module, 'uuid', return_value=uuid_1):
             await development_action.run_triage_action(test_dict, ticket_id)
@@ -69,33 +70,3 @@ class TestProductionAction:
             )
         ], any_order=False
         )
-
-    def ticket_object_to_email_obj_test(self):
-        logger = Mock()
-        event_bus = Mock()
-        config = testconfig
-        ticket_dict = OrderedDict()
-        ticket_dict['EdgeName'] = 'Test'
-        ticket_dict['Edge Status'] = 'ok'
-        ticket_dict["Last Edge Online"] = 'test time'
-        ticket_dict['Events URL'] = 'event.com'
-        development_action = DevelopmentAction(logger, event_bus, config)
-        email = development_action._ticket_object_to_email_obj(ticket_dict)
-
-        assert 'Service outage triage' in email["email_data"]["subject"]
-        assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
-        assert "<!DOCTYPE html" in email["email_data"]["html"]
-
-    def ticket_object_to_email_obj_no_events_test(self):
-        logger = Mock()
-        event_bus = Mock()
-        config = testconfig
-        ticket_dict = OrderedDict()
-        ticket_dict['EdgeName'] = 'Test'
-        ticket_dict['Edge Status'] = 'ok'
-        development_action = DevelopmentAction(logger, event_bus, config)
-        email = development_action._ticket_object_to_email_obj(ticket_dict)
-
-        assert 'Service outage triage' in email["email_data"]["subject"]
-        assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
-        assert "<!DOCTYPE html" in email["email_data"]["html"]
