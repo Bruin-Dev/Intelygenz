@@ -26,10 +26,11 @@ class TestServiceOutageDetector:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = Mock()
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         assert service_outage_detector._event_bus is event_bus
         assert service_outage_detector._logger is logger
@@ -49,7 +50,7 @@ class TestServiceOutageDetector:
         edge_1_addition_timestamp = 1234567890
         edge_2_addition_timestamp = 9876543210
         quarantine_edges = {
-            edge_1_identifier: {
+            edge_1_identifier: json.dumps({
                 'edge_status': {
                     'edges': {'edgeState': 'OFFLINE'},
                     'links': [
@@ -59,8 +60,8 @@ class TestServiceOutageDetector:
                     'enterprise_name': 'EVIL-CORP|12345|',
                 },
                 'addition_timestamp': edge_1_addition_timestamp,
-            },
-            edge_2_identifier: {
+            }),
+            edge_2_identifier: json.dumps({
                 'edge_status': {
                     'edges': {'edgeState': 'CONNECTED'},
                     'links': [
@@ -70,7 +71,7 @@ class TestServiceOutageDetector:
                     'enterprise_name': 'EVIL-CORP|12345|',
                 },
                 'addition_timestamp': edge_2_addition_timestamp,
-            }
+            })
         }
 
         event_bus = Mock()
@@ -78,13 +79,14 @@ class TestServiceOutageDetector:
         scheduler = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         quarantine_edge_repository = Mock()
         quarantine_edge_repository.get_all_edges = Mock(return_value=quarantine_edges)
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
         service_outage_detector._start_quarantine_job = CoroutineMock()
 
         await service_outage_detector.load_persisted_quarantine()
@@ -113,10 +115,11 @@ class TestServiceOutageDetectorJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -141,10 +144,11 @@ class TestServiceOutageDetectorJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         await service_outage_detector.start_service_outage_detector_job(exec_on_start=False)
 
@@ -166,13 +170,14 @@ class TestServiceOutageDetectorJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         try:
             await service_outage_detector.start_service_outage_detector_job()
@@ -195,10 +200,11 @@ class TestServiceOutageDetectorJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
         service_outage_detector._get_all_edges = CoroutineMock(return_value=edge_list)
 
         await service_outage_detector._service_outage_detector_process()
@@ -249,10 +255,11 @@ class TestServiceOutageDetectorJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
         service_outage_detector._get_all_edges = CoroutineMock(return_value=edge_list)
         service_outage_detector._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
         service_outage_detector._is_there_an_outage = Mock(side_effect=is_there_outage_side_effect)
@@ -315,10 +322,11 @@ class TestServiceOutageDetectorJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
         service_outage_detector._get_all_edges = CoroutineMock(return_value=edge_list)
         service_outage_detector._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
         service_outage_detector._is_there_an_outage = Mock(side_effect=is_there_outage_side_effect)
@@ -361,10 +369,11 @@ class TestServiceOutageDetectorJob:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edge_list_response)
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
             result = await service_outage_detector._get_all_edges()
@@ -407,13 +416,14 @@ class TestServiceOutageDetectorJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edge_status_response)
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
             result = await service_outage_detector._get_edge_status_by_id(edge_full_id)
@@ -445,16 +455,17 @@ class TestServiceOutageDetectorJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         service_outage_detector._add_edge_to_quarantine(edge_full_id, edge_status)
 
         quarantine_edge_repository.add_edge.assert_called_once_with(
             edge_full_id, edge_status,
-            replace_existing=False,
+            update_existing=False,
             time_to_live=config.MONITOR_CONFIG['quarantine_key_ttl'],
         )
 
@@ -490,10 +501,11 @@ class TestServiceOutageDetectorJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         result = service_outage_detector._is_there_an_outage(edge_status_1)
         assert result is False
@@ -516,10 +528,11 @@ class TestQuarantineJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         current_datetime = datetime.now()
         current_timestamp = datetime.timestamp(current_datetime)
@@ -550,10 +563,11 @@ class TestQuarantineJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         job_run_date = datetime.fromtimestamp(999999)
         await service_outage_detector._start_quarantine_job(edge_full_id, run_date=job_run_date)
@@ -578,13 +592,14 @@ class TestQuarantineJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         current_datetime = datetime.now()
         current_timestamp = datetime.timestamp(current_datetime)
@@ -625,10 +640,11 @@ class TestQuarantineJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
         service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
         service_outage_detector._is_there_an_outage = Mock(return_value=False)
         service_outage_detector._get_outage_ticket_for_edge = CoroutineMock()
@@ -641,151 +657,157 @@ class TestQuarantineJob:
         service_outage_detector._get_outage_ticket_for_edge.assert_not_awaited()
         service_outage_detector._add_edge_to_reporting.assert_not_called()
 
-    @pytest.mark.asyncio
-    async def process_edge_from_quarantine_with_outage_occurring_and_existing_ticket_test(self):
-        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
-        edge_status = {
-            'edges': {'edgeState': 'OFFLINE'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
-                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        outage_ticket = {
-            'ticketID': 12345,
-            'ticketDetails': [
-                {
-                    "detailID": 2746937,
-                    "detailValue": 'VC1234567',
-                },
-            ],
-            'ticketNotes': [
-                {
-                    "noteId": 41894041,
-                    "noteValue": f'#*Automation Engine*# \n TimeStamp: 2019-07-30 06:38:00+00:00',
-                }
-            ],
-        }
+    # @pytest.mark.asyncio
+    # async def process_edge_from_quarantine_with_outage_occurring_and_existing_ticket_test(self):
+    #     edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+    #     edge_status = {
+    #         'edges': {'edgeState': 'OFFLINE'},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+    #             {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+    #         ],
+    #         'enterprise_name': 'EVIL-CORP|12345|',
+    #     }
+    #     outage_ticket = {
+    #         'ticketID': 12345,
+    #         'ticketDetails': [
+    #             {
+    #                 "detailID": 2746937,
+    #                 "detailValue": 'VC1234567',
+    #             },
+    #         ],
+    #         'ticketNotes': [
+    #             {
+    #                 "noteId": 41894041,
+    #                 "noteValue": f'#*Automation Engine*# \n TimeStamp: 2019-07-30 06:38:00+00:00',
+    #             }
+    #         ],
+    #     }
+    #
+    #     event_bus = Mock()
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     quarantine_edge_repository = Mock()
+    #     reporting_edge_repository = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #
+    #
+    #     service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+    #                                                     quarantine_edge_repository, reporting_edge_repository,
+    #                                                     config, template_renderer)
+    #     service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
+    #     service_outage_detector._is_there_an_outage = CoroutineMock(return_value=True)
+    #     service_outage_detector._get_outage_ticket_for_edge = CoroutineMock(return_value=outage_ticket)
+    #     service_outage_detector._add_edge_to_reporting = Mock()
+    #
+    #     await service_outage_detector._process_edge_from_quarantine(edge_full_id)
+    #
+    #     service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+    #     service_outage_detector._is_there_an_outage.assert_called_once_with(edge_status)
+    #     service_outage_detector._get_outage_ticket_for_edge.assert_awaited_once_with(edge_full_id)
+    #     service_outage_detector._add_edge_to_reporting.assert_not_called()
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
+    # @pytest.mark.asyncio
+    # async def process_edge_from_quarantine_with_outage_occurring_and_no_existing_ticket_test(self):
+    #     edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+    #     edge_status = {
+    #         'edges': {'edgeState': 'OFFLINE'},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+    #             {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+    #         ],
+    #         'enterprise_name': 'EVIL-CORP|12345|',
+    #     }
+    #     outage_ticket = None
+    #
+    #     event_bus = Mock()
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     quarantine_edge_repository = Mock()
+    #     reporting_edge_repository = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #
+    #
+    #     service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+    #                                                     quarantine_edge_repository, reporting_edge_repository,
+    #                                                     config, template_renderer)
+    #     service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
+    #     service_outage_detector._is_there_an_outage = CoroutineMock(return_value=True)
+    #     service_outage_detector._get_outage_ticket_for_edge = CoroutineMock(return_value=outage_ticket)
+    #     service_outage_detector._add_edge_to_reporting = Mock()
+    #
+    #     await service_outage_detector._process_edge_from_quarantine(edge_full_id)
+    #
+    #     service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+    #     service_outage_detector._is_there_an_outage.assert_called_once_with(edge_status)
+    #     service_outage_detector._get_outage_ticket_for_edge.assert_awaited_once_with(edge_full_id)
+    #     service_outage_detector._add_edge_to_reporting.assert_called_once_with(edge_full_id, edge_status)
 
-        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
-        service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
-        service_outage_detector._is_there_an_outage = CoroutineMock(return_value=True)
-        service_outage_detector._get_outage_ticket_for_edge = CoroutineMock(return_value=outage_ticket)
-        service_outage_detector._add_edge_to_reporting = Mock()
-
-        await service_outage_detector._process_edge_from_quarantine(edge_full_id)
-
-        service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        service_outage_detector._is_there_an_outage.assert_called_once_with(edge_status)
-        service_outage_detector._get_outage_ticket_for_edge.assert_awaited_once_with(edge_full_id)
-        service_outage_detector._add_edge_to_reporting.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def process_edge_from_quarantine_with_outage_occurring_and_no_existing_ticket_test(self):
-        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
-        edge_status = {
-            'edges': {'edgeState': 'OFFLINE'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
-                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        outage_ticket = None
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-
-        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
-        service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
-        service_outage_detector._is_there_an_outage = CoroutineMock(return_value=True)
-        service_outage_detector._get_outage_ticket_for_edge = CoroutineMock(return_value=outage_ticket)
-        service_outage_detector._add_edge_to_reporting = Mock()
-
-        await service_outage_detector._process_edge_from_quarantine(edge_full_id)
-
-        service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        service_outage_detector._is_there_an_outage.assert_called_once_with(edge_status)
-        service_outage_detector._get_outage_ticket_for_edge.assert_awaited_once_with(edge_full_id)
-        service_outage_detector._add_edge_to_reporting.assert_called_once_with(edge_full_id, edge_status)
-
-    @pytest.mark.asyncio
-    async def get_outage_ticket_for_edge_test(self):
-        client_id = 12345
-        enterprise_name = f'EVIL-CORP|{client_id}|'
-        edge_serial_number = 'VC1234567'
-        quarantine_edge_value = {
-            'edge_status': {
-                'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number},
-                'links': [
-                    {'linkId': 1234, 'link': {'state': 'STABLE'}},
-                    {'linkId': 5678, 'link': {'state': 'STABLE'}},
-                ],
-                'enterprise_name': enterprise_name,
-            },
-            'addition_timestamp': 123456789,
-        }
-
-        outage_ticket = {
-            'ticketID': 12345,
-            'ticketDetails': [
-                {
-                    "detailID": 2746937,
-                    "detailValue": edge_serial_number,
-                },
-            ],
-            'ticketNotes': [
-                {
-                    "noteId": 41894041,
-                    "noteValue": f'#*Automation Engine*# \n TimeStamp: 2019-07-30 06:38:00+00:00',
-                }
-            ],
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=outage_ticket)
-
-        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
-        service_outage_detector._extract_client_id = Mock(return_value=client_id)
-
-        uuid_ = uuid()
-        with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
-            outage_ticket_result = await service_outage_detector._get_outage_ticket_for_edge(quarantine_edge_value)
-
-        service_outage_detector._extract_client_id.assert_called_once_with(enterprise_name)
-        event_bus.rpc_request.assert_awaited_once_with(
-            'bruin.ticket.outage.details.by_edge_serial.request',
-            json.dumps({
-                'request_id': uuid_,
-                'edge_serial': edge_serial_number,
-                'client_id': client_id,
-            })
-        )
-        assert outage_ticket_result == outage_ticket
+    # @pytest.mark.asyncio
+    # async def get_outage_ticket_for_edge_test(self):
+    #     client_id = 12345
+    #     enterprise_name = f'EVIL-CORP|{client_id}|'
+    #     edge_serial_number = 'VC1234567'
+    #     quarantine_edge_value = {
+    #         'edge_status': {
+    #             'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number},
+    #             'links': [
+    #                 {'linkId': 1234, 'link': {'state': 'STABLE'}},
+    #                 {'linkId': 5678, 'link': {'state': 'STABLE'}},
+    #             ],
+    #             'enterprise_name': enterprise_name,
+    #         },
+    #         'addition_timestamp': 123456789,
+    #     }
+    #
+    #     outage_ticket = {
+    #         'ticketID': 12345,
+    #         'ticketDetails': [
+    #             {
+    #                 "detailID": 2746937,
+    #                 "detailValue": edge_serial_number,
+    #             },
+    #         ],
+    #         'ticketNotes': [
+    #             {
+    #                 "noteId": 41894041,
+    #                 "noteValue": f'#*Automation Engine*# \n TimeStamp: 2019-07-30 06:38:00+00:00',
+    #             }
+    #         ],
+    #     }
+    #
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     quarantine_edge_repository = Mock()
+    #     reporting_edge_repository = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #
+    #
+    #     event_bus = Mock()
+    #     event_bus.rpc_request = CoroutineMock(return_value=outage_ticket)
+    #
+    #     service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+    #                                                     quarantine_edge_repository, reporting_edge_repository,
+    #                                                     config, template_renderer)
+    #     service_outage_detector._extract_client_id = Mock(return_value=client_id)
+    #
+    #     uuid_ = uuid()
+    #     with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
+    #         outage_ticket_result = await service_outage_detector._get_outage_ticket_for_edge(quarantine_edge_value)
+    #
+    #     service_outage_detector._extract_client_id.assert_called_once_with(enterprise_name)
+    #     event_bus.rpc_request.assert_awaited_once_with(
+    #         'bruin.ticket.outage.details.by_edge_serial.request',
+    #         json.dumps({
+    #             'request_id': uuid_,
+    #             'edge_serial': edge_serial_number,
+    #             'client_id': client_id,
+    #         })
+    #     )
+    #     assert outage_ticket_result == outage_ticket
 
     def extract_client_id_test(self):
         client_id = 12345
@@ -797,105 +819,110 @@ class TestQuarantineJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         result_client_id = service_outage_detector._extract_client_id(enterprise_name)
         assert result_client_id == str(client_id)
 
-    def add_edge_to_reporting_test(self):
-        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
-        client_id = 12345
-        edge_status = {
-            'edges': {'edgeState': 'OFFLINE'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
-                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{client_id}|',
-        }
+    # def add_edge_to_reporting_test(self):
+    #     edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+    #     client_id = 12345
+    #     edge_status = {
+    #         'edges': {'edgeState': 'OFFLINE'},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+    #             {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{client_id}|',
+    #     }
+    #
+    #     addition_to_quarantine_timestamp = 123456789
+    #     edge_status_in_quarantine = {
+    #         'edge_status': {
+    #             'edges': {'edgeState': 'CONNECTED'},
+    #             'links': [
+    #                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+    #                 {'linkId': 5678, 'link': {'state': 'STABLE'}},
+    #             ],
+    #             'enterprise_name': 'EVIL-CORP|12345|',
+    #         },
+    #         'addition_timestamp': addition_to_quarantine_timestamp,
+    #     }
+    #
+    #     event_bus = Mock()
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     reporting_edge_repository = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #
+    #
+    #     quarantine_edge_repository = Mock()
+    #     quarantine_edge_repository.get_edge = Mock(return_value=edge_status_in_quarantine)
+    #
+    #     service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+    #                                                     quarantine_edge_repository, reporting_edge_repository,
+    #                                                     config, template_renderer)
+    #
+    #     service_outage_detector._add_edge_to_reporting(edge_full_id, edge_status)
+    #
+    #     quarantine_edge_repository.get_edge.assert_called_once_with(edge_full_id)
+    #     reporting_edge_repository.add_edge.assert_called_once_with(
+    #         edge_full_id,
+    #         {
+    #             'edge_status': edge_status,
+    #             'detection_timestamp': addition_to_quarantine_timestamp,
+    #         }
+    #     )
+    #     quarantine_edge_repository.remove_edge.assert_called_once_with(edge_full_id)
 
-        addition_to_quarantine_timestamp = 123456789
-        edge_status_in_quarantine = {
-            'edge_status': {
-                'edges': {'edgeState': 'CONNECTED'},
-                'links': [
-                    {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
-                    {'linkId': 5678, 'link': {'state': 'STABLE'}},
-                ],
-                'enterprise_name': 'EVIL-CORP|12345|',
-            },
-            'addition_timestamp': addition_to_quarantine_timestamp,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-
-        quarantine_edge_repository = Mock()
-        quarantine_edge_repository.get_edge = Mock(return_value=edge_status_in_quarantine)
-
-        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
-
-        service_outage_detector._add_edge_to_reporting(edge_full_id, edge_status)
-
-        quarantine_edge_repository.get_edge.assert_called_once_with(edge_full_id)
-        reporting_edge_repository.add_edge.assert_called_once_with(
-            edge_full_id,
-            {
-                'edge_status': edge_status,
-                'detection_timestamp': addition_to_quarantine_timestamp,
-            }
-        )
-        quarantine_edge_repository.remove_edge.assert_called_once_with(edge_full_id)
-
-    def add_edge_to_reporting_with_edge_missing_in_quarantine_test(self):
-        edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
-        client_id = 12345
-        edge_status = {
-            'edges': {'edgeState': 'OFFLINE'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
-                {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{client_id}|',
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-
-        quarantine_edge_repository = Mock()
-        quarantine_edge_repository.get_edge = Mock(return_value=None)
-
-        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
-
-        current_datetime = datetime.now()
-        current_timestamp = datetime.timestamp(current_datetime)
-        datetime_mock = Mock()
-        datetime_mock.timestamp = Mock(return_value=current_timestamp)
-        with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
-            with patch.object(service_outage_detector_module, 'timezone', new=Mock()):
-                service_outage_detector._add_edge_to_reporting(edge_full_id, edge_status)
-
-        assumed_detection_timestamp = current_timestamp - config.MONITOR_CONFIG['jobs_intervals']['quarantine']
-        reporting_edge_repository.add_edge.assert_called_once_with(
-            edge_full_id,
-            {
-                'edge_status': edge_status,
-                'detection_timestamp': assumed_detection_timestamp,
-            }
-        )
+    # def add_edge_to_reporting_with_edge_missing_in_quarantine_test(self):
+    #     edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+    #     client_id = 12345
+    #     edge_status = {
+    #         'edges': {'edgeState': 'OFFLINE'},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'DISCONNECTED'}},
+    #             {'linkId': 5678, 'link': {'state': 'DISCONNECTED'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{client_id}|',
+    #     }
+    #
+    #     event_bus = Mock()
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     reporting_edge_repository = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #
+    #
+    #     quarantine_edge_repository = Mock()
+    #     quarantine_edge_repository.get_edge = Mock(return_value=None)
+    #
+    #     service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+    #                                                     quarantine_edge_repository, reporting_edge_repository,
+    #                                                     config, template_renderer)
+    #
+    #     current_datetime = datetime.now()
+    #     current_timestamp = datetime.timestamp(current_datetime)
+    #     datetime_mock = Mock()
+    #     datetime_mock.timestamp = Mock(return_value=current_timestamp)
+    #     with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
+    #         with patch.object(service_outage_detector_module, 'timezone', new=Mock()):
+    #             service_outage_detector._add_edge_to_reporting(edge_full_id, edge_status)
+    #
+    #     assumed_detection_timestamp = current_timestamp - config.MONITOR_CONFIG['jobs_intervals']['quarantine']
+    #     reporting_edge_repository.add_edge.assert_called_once_with(
+    #         edge_full_id,
+    #         {
+    #             'edge_status': edge_status,
+    #             'detection_timestamp': assumed_detection_timestamp,
+    #         }
+    #     )
 
 
 class TestServiceOutageReporterJob:
@@ -907,10 +934,11 @@ class TestServiceOutageReporterJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -935,10 +963,11 @@ class TestServiceOutageReporterJob:
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
         config = testconfig
+        template_renderer = Mock()
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
-                                                        config)
+                                                        config, template_renderer)
 
         await service_outage_detector.start_service_outage_reporter_job(exec_on_start=False)
 
