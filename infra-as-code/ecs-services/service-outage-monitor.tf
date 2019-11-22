@@ -14,6 +14,7 @@ data "template_file" "automation-service-outage-monitor" {
     NATS_SERVER1 = local.nats_server1
     CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
     LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
+    REDIS_HOSTNAME = data.terraform_remote_state.tfstate-dev-resources.outputs.redis_hostname
 
   }
 }
