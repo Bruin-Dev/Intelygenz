@@ -418,31 +418,26 @@ devices_by_id = [
         "phone": "843-546-5122",
         "name": "John Graham"
     },
-    # Lack of Contacts
-    # VC05200016715  -  TA FL - CORKSCREW (FORT MYERS) - AGG
-    # # TODO Two contacts
-    # {
-    #     # CORKSCREW (FORT MYERS)
-    #     "serial": 'VC05200016715',
-    #     "host": "mettel.velocloud.net",
-    #     "enterprise_id": 137,
-    #     "edge_id": 887,
-    #     "email": "",
-    #     "phone": "",
-    #     "name": ""
-    # },
-    # VC05200028729  -  TA FL - Blue Origin / Cape Canaveral - RM (SITE DROPS NIGHTLY)
-    # TODO No contact
-    # {
-    #     # Blue Origin / Cape Canaveral
-    #     "serial": 'VC05200028729',
-    #     "host": "mettel.velocloud.net",
-    #     "enterprise_id": 137,
-    #     "edge_id": 1602,
-    #     "email": "",
-    #     "phone": "",
-    #     "name": ""
-    # },
+    {
+        # CORKSCREW (FORT MYERS)
+        "serial": 'VC05200016715',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 887,
+        "email": "MetTel_Alerts@titanamerica.com",
+        "phone": "757-858-6600",
+        "name": "Titan America Service Desk"
+    },
+    {
+        # Blue Origin / Cape Canaveral
+        "serial": 'VC05200028729',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 1602,
+        "email": "MetTel_Alerts@titanamerica.com",
+        "phone": "757-858-6600",
+        "name": "Titan America Service Desk"
+    },
     {
         # Kinston
         "serial": 'VC05200029227',
@@ -1003,26 +998,26 @@ devices_by_id = [
         "phone": "757-858-6597",
         "name": "Jeff Mack"
     },
-    # { # LACK OF CONTACT
-    #     # TA FL - Industrial Lane (Tampa)
-    #     "serial": 'VC05200045077',
-    #     "host": "mettel.velocloud.net",
-    #     "enterprise_id": 137,
-    #     "edge_id": 2412,
-    #     "email": "Jmack@titanamerica.com",
-    #     "phone": "757-858-6597",
-    #     "name": "Jeff Mack"
-    # },
-    # {  # LACK OF CONTACT
-    #     # TA VA - Hampton (Truck Shop)
-    #     "serial": 'VC05200042079',
-    #     "host": "mettel.velocloud.net",
-    #     "enterprise_id": 137,
-    #     "edge_id": 2472,
-    #     "email": "Jmack@titanamerica.com",
-    #     "phone": "757-858-6597",
-    #     "name": "Jeff Mack"
-    # },
+    {
+        # TA FL - Industrial Lane (Tampa)
+        "serial": 'VC05200045077',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2412,
+        "email": "Jmack@titanamerica.com",
+        "phone": "757-858-6597",
+        "name": "Jeffrey Mack"
+    },
+    {
+        # TA VA - Hampton (Truck Shop)
+        "serial": 'VC05200042079',
+        "host": "mettel.velocloud.net",
+        "enterprise_id": 137,
+        "edge_id": 2472,
+        "email": "ASHENOY@TITANAMERICA.COM",
+        "phone": "954-425-4185",
+        "name": "Ashlesh Shenoy"
+    },
     {
         # SnW - P-05 New Bern
         "serial": 'VC05200043154',
