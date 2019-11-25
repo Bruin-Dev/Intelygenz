@@ -22,7 +22,7 @@ class TestTemplateRenderer:
         edges_to_report = [
             {"edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z"},
              "enterprise": "Fake Corp"}]
-        email = template_renderer._compose_email_object(edges_to_report)
+        email = template_renderer.compose_email_object(edges_to_report)
 
         assert 'Last contact edges' in email["email_data"]["subject"]
         assert config["last_contact"]["recipient"] in email["email_data"]["recipient"]
@@ -38,7 +38,7 @@ class TestTemplateRenderer:
         edges_to_report = [
             dict(edge={"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z"},
                  enterprise="Fake Corp")]
-        email = test_repo._compose_email_object(edges_to_report, **kwargs)
+        email = test_repo.compose_email_object(edges_to_report, **kwargs)
         assert email["email_data"]["images"][0]["data"] == base64.b64encode(open(base.format(kwargs["logo"]), 'rb')
                                                                             .read()).decode('utf-8')
         assert email["email_data"]["images"][1]["data"] == base64.b64encode(open(base.format(kwargs["header"]), 'rb')
@@ -57,7 +57,7 @@ class TestTemplateRenderer:
         edges_to_report = [
             {"edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z"},
              "enterprise": "Fake Corp"}]
-        email = template_renderer._compose_email_object(edges_to_report)
+        email = template_renderer.compose_email_object(edges_to_report)
         assert 'Last contact edges' in email["email_data"]["subject"]
         assert config["last_contact"]["recipient"] in email["email_data"]["recipient"]
         assert "<!DOCTYPE html" in email["email_data"]["html"]

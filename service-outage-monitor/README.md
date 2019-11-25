@@ -47,7 +47,7 @@ edges_to_report = [{
 fields = ["Date of detection", "Serial Number", "Company", "LINKS", "Has ticket created?"]\
 fields_edge = ["detection_time", "serial_number", "enterprise", "links", "tickets"]
 
-_compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
+compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
 ```
 ----
 This code generates a table like:

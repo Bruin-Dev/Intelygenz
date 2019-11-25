@@ -11,7 +11,7 @@ class TemplateRenderer:
     def __init__(self, config):
         self._config = config
 
-    def _compose_email_object(self, edges_status_to_report, trouble, ticket_dict, **kwargs):
+    def compose_email_object(self, edges_status_to_report, trouble, ticket_dict, **kwargs):
         logo = "src/templates/images/{}".format(kwargs.get("logo", "logo.png"))
         header = "src/templates/images/{}".format(kwargs.get("header", "header.jpg"))
         template_vars = {}

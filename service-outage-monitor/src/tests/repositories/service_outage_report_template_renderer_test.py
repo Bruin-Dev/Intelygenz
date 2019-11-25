@@ -25,7 +25,7 @@ class TestServiceOutageReportTemplateRenderer:
         }]
         fields = ["Date of detection", "Serial Number", "Company", "LINKS", "Has ticket created?"]
         fields_edge = ["detection_time", "serial_number", "enterprise", "links"]
-        email = template_renderer._compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
+        email = template_renderer.compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
         template_renderer._remove_csv_file()
 
         assert 'Service Outage Report' in email["email_data"]["subject"]
@@ -44,7 +44,7 @@ class TestServiceOutageReportTemplateRenderer:
         }]
         fields = ["Date of detection", "Serial Number", "Company", "LINKS", "Has ticket created?"]
         fields_edge = ["detection_time", "serial_number", "enterprise", "links", "tickets"]
-        email = template_renderer._compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
+        email = template_renderer.compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
         template_renderer._remove_csv_file()
 
         assert all(f"{i}</th>" in email["email_data"]["html"] for i in fields) is True
@@ -62,7 +62,7 @@ class TestServiceOutageReportTemplateRenderer:
         }]
         fields = ["Date of detection", "Serial Number", "Company", "LINKS", "Has ticket created?"]
         fields_edge = ["detection_time", "serial_number", "enterprise", "links", "tickets"]
-        email = template_renderer._compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
+        email = template_renderer.compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
         template_renderer._remove_csv_file()
         a = subprocess.check_output(["find", "-name", "*.csv"]).decode()
         assert "report_mail_template" not in a

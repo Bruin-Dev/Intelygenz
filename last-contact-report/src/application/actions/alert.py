@@ -57,5 +57,5 @@ class Alert:
                                             f'/monitor/edge/{edge_info["edge_id"]["edge_id"]}/'
 
                     edges_to_report.append(edge_for_alert)
-        email_obj = self._template_renderer._compose_email_object(edges_to_report)
+        email_obj = self._template_renderer.compose_email_object(edges_to_report)
         await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))

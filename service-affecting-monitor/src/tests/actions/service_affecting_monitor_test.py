@@ -1272,13 +1272,13 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
-        service_affecting_monitor._template_renderer._compose_email_object = Mock(return_value='Some email object')
+        service_affecting_monitor._template_renderer.compose_email_object = Mock(return_value='Some email object')
 
         await service_affecting_monitor._notify_trouble(device, 'Some Edge Status', 'Some Link Info', 'Input results',
                                                         'Output results', 'LATENCY', 120)
 
         service_affecting_monitor._compose_ticket_dict.assert_called_once()
-        service_affecting_monitor._template_renderer._compose_email_object.assert_called_once()
+        service_affecting_monitor._template_renderer.compose_email_object.assert_called_once()
         event_bus.rpc_request.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -1454,13 +1454,13 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
-        service_affecting_monitor._template_renderer._compose_email_object = Mock(return_value='Some email object')
+        service_affecting_monitor._template_renderer.compose_email_object = Mock(return_value='Some email object')
 
         await service_affecting_monitor._notify_trouble(device, 'Some Edge Status', 'Some Link Info', 'Input results',
                                                         'Output results', 'LATENCY', 120)
 
         service_affecting_monitor._compose_ticket_dict.assert_called_once()
-        service_affecting_monitor._template_renderer._compose_email_object.assert_not_called()
+        service_affecting_monitor._template_renderer.compose_email_object.assert_not_called()
         event_bus.rpc_request.assert_not_awaited()
 
     @pytest.mark.asyncio

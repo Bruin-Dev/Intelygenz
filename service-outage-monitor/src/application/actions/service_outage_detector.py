@@ -160,8 +160,8 @@ class ServiceOutageDetector:
             self._logger.info(f'Reporting {len(sanitized_list)} outages without ticket...')
             fields = ["Date of detection", "Serial Number", "Company", "Edge URL"]
             fields_edge = ["detection_time", "serial_number", "enterprise", "links"]
-            email_report = self._email_template_renderer._compose_email_object(sanitized_list, fields=fields,
-                                                                               fields_edge=fields_edge)
+            email_report = self._email_template_renderer.compose_email_object(sanitized_list, fields=fields,
+                                                                              fields_edge=fields_edge)
             await self._event_bus.rpc_request("notification.email.request",
                                               json.dumps(email_report),
                                               timeout=10)

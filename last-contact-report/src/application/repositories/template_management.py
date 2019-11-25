@@ -10,7 +10,7 @@ class TemplateRenderer:
     def __init__(self, config):
         self._config = config
 
-    def _compose_email_object(self, edges_to_report, **kwargs):
+    def compose_email_object(self, edges_to_report, **kwargs):
         templateLoader = jinja2.FileSystemLoader(searchpath=".")
         templateEnv = jinja2.Environment(loader=templateLoader)
         template = "src/templates/{}".format(kwargs.get("template", "last_contact.html"))
@@ -35,8 +35,9 @@ class TemplateRenderer:
             })
         template_vars["list_row"] = list_rows
         edges_dataframe = pd.DataFrame(edges_to_report)
-        edges_dataframe.index.name = 'idx'
-        edges_dataframe.to_csv(csv, index=False)
+        edges_dataframe.to_csv(index=False)
+        file_csv = edges_dataframe.to_csv(index=False)
+        file_csv = base64.b64encode(file_csv.encode("utf-8"))
         email_html = templ.render(**template_vars)
 
         return {
@@ -59,7 +60,7 @@ class TemplateRenderer:
                 'attachments': [
                     {
                         'name': csv,
-                        'data': base64.b64encode(open(csv, 'rb').read()).decode('utf-8')
+                        'data': file_csv.decode('utf-8')
                     }
                 ]
             }

@@ -88,7 +88,7 @@ class ServiceAffectingMonitor:
         ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
 
         if self._config.MONITOR_CONFIG['environment'] == 'dev':
-            email_obj = self._template_renderer._compose_email_object(edge_status, trouble, ticket_dict)
+            email_obj = self._template_renderer.compose_email_object(edge_status, trouble, ticket_dict)
             await self._event_bus.rpc_request("notification.email.request", json.dumps(email_obj), timeout=10)
         elif self._config.MONITOR_CONFIG['environment'] == 'production':
             client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]

@@ -58,7 +58,7 @@ class TestTemplateRenderer:
         }
         test_dict = {'test_key': 'test_value'}
 
-        email = template_renderer._compose_email_object(edges_to_report, 'Latency', test_dict)
+        email = template_renderer.compose_email_object(edges_to_report, 'Latency', test_dict)
 
         assert 'Service affecting trouble detected: ' in email["email_data"]["subject"]
         assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]
@@ -108,7 +108,7 @@ class TestTemplateRenderer:
         }
         test_dict = {'test_key': 'test_value'}
 
-        email = template_renderer._compose_email_object(edges_to_report, 'LATENCY', test_dict)
+        email = template_renderer.compose_email_object(edges_to_report, 'LATENCY', test_dict)
 
         assert email["email_data"]["images"][0]["data"] == base64.b64encode(open(base.format(kwargs["logo"]), 'rb')
                                                                             .read()).decode('utf-8')
@@ -161,7 +161,7 @@ class TestTemplateRenderer:
         }
         test_dict = {'test_key': 'test_value'}
 
-        email = template_renderer._compose_email_object(edges_to_report, 'LATENCY', test_dict)
+        email = template_renderer.compose_email_object(edges_to_report, 'LATENCY', test_dict)
 
         assert 'Service affecting trouble detected: ' in email["email_data"]["subject"]
         assert config.MONITOR_CONFIG["recipient"] in email["email_data"]["recipient"]

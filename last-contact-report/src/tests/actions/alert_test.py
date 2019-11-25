@@ -130,12 +130,12 @@ class TestAlert:
         email_contents = {'email': "<div>Some email</div>"}
         event_bus.rpc_request = CoroutineMock(return_value=event)
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer._compose_email_object = Mock(return_value=email_contents)
+        alert._template_renderer.compose_email_object = Mock(return_value=email_contents)
 
         with patch.object(alert_module, 'uuid', return_value=test_uuid):
             await alert._alert_process()
 
-        reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
+        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
         assert len(reported_edges) == 3
         alert._event_bus.rpc_request.assert_awaited_once_with(
             'alert.request.all.edges',
@@ -201,7 +201,7 @@ class TestAlert:
         email_contents = {'email': "<div>Some email</div>"}
         event_bus.rpc_request = CoroutineMock(return_value=event)
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer._compose_email_object = Mock(return_value="<div>Some email</div>")
+        alert._template_renderer.compose_email_object = Mock(return_value="<div>Some email</div>")
         event = json.dumps({"request_id": 123, "edges": [
             {"edge_id": {"host": "some.host", "enterprise_id": "123", "edge_id": "123"},
              "edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z",
@@ -215,7 +215,7 @@ class TestAlert:
         assert "notification.email.request" in event_bus.publish_message.call_args[0][0]
         assert "<div>Some email</div>" in event_bus.publish_message.call_args[0][1]
 
-        reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
+        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
         assert len(reported_edges) == 1
         alert._event_bus.rpc_request.assert_awaited_once_with(
             'alert.request.all.edges',
@@ -282,7 +282,7 @@ class TestAlert:
         event_bus.rpc_request = CoroutineMock(return_value=event)
 
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer._compose_email_object = Mock(return_value=email_contents)
+        alert._template_renderer.compose_email_object = Mock(return_value=email_contents)
 
         current_timestamp = "2018-07-27T20:27:44.000Z"
         current_datetime = datetime.strptime(current_timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -292,7 +292,7 @@ class TestAlert:
             with patch.object(alert_module, 'uuid', return_value=test_uuid):
                 await alert._alert_process()
 
-        reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
+        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
         assert len(reported_edges) == 2
         alert._event_bus.rpc_request.assert_awaited_once_with(
             'alert.request.all.edges',

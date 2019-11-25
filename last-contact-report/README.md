@@ -20,7 +20,7 @@ Once we've determined its been more than 30 days we append this edge information
 enterprise name, serial number, model number, last contact date, amount of month its been since last contact, how much
 more months are left until its been 3 years, and the url to the edge.
  
-Next using the ` _compose_email_object` function we format this ordered dict for the csv file to be sent with the email.
+Next using the ` compose_email_object` function we format this ordered dict for the csv file to be sent with the email.
 At the same time we are counting the number of edges that were last contacted per enterprise for the template of the email.
 Should look something like this.
 ![last-contact-image](readme-resources/last_contact.png)

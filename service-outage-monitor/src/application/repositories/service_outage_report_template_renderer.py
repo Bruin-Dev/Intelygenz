@@ -14,7 +14,7 @@ class ServiceOutageReportTemplateRenderer:
     def __init__(self, config):
         self._config = config
 
-    def _compose_email_object(self, edges_to_report, **kwargs):
+    def compose_email_object(self, edges_to_report, **kwargs):
         template_vars = {}
         # This path changes if you execute it from pycharm
         templateLoader = jinja2.FileSystemLoader(searchpath=".")

@@ -19,7 +19,7 @@ Here we check the type of link whether its wireless with `serviceGroups` value o
  `bestLatencyMsTx` exceeds the threshold for wireless (120) or wired (50).
  
  If it does exceed then we make a call to `_notify_trouble` which should determine whether we're in development or 
- production. Based on the environment it should either call `_compose_email_object` and send an email if in dev or create a ticket if in
+ production. Based on the environment it should either call `compose_email_object` and send an email if in dev or create a ticket if in
  production. 
  
 # Behaviour in development and in production
