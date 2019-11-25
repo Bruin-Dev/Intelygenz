@@ -30,11 +30,12 @@ class TestDevelopmentAction:
     @pytest.mark.asyncio
     async def run_triage_action_test(self):
         logger = Mock()
-        template_renderer = Mock()
+
         config = testconfig
 
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
         ticket_note_as_email = {'email_object': "Something happened"}
+        email_sent = 'Email sent'
         send_to_slack = {'slack_sent': 'Success'}
 
         environment = 'dev'
@@ -43,10 +44,12 @@ class TestDevelopmentAction:
         uuid_1 = uuid()
 
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_note_as_email, send_to_slack])
+        event_bus.rpc_request = CoroutineMock(side_effect=[email_sent, send_to_slack])
+
+        template_renderer = Mock()
+        template_renderer._ticket_object_to_email_obj = Mock(return_value=ticket_note_as_email)
 
         development_action = DevelopmentAction(logger, event_bus, template_renderer, config)
-        development_action._template_renderer._ticket_object_to_email_obj = Mock(return_value=ticket_note_as_email)
 
         with patch.object(development_module, 'uuid', return_value=uuid_1):
             await development_action.run_triage_action(test_dict, ticket_id)
@@ -54,7 +57,7 @@ class TestDevelopmentAction:
         event_bus.rpc_request.assert_has_awaits([
             call(
                 'notification.email.request',
-                json.dumps(ticket_note_as_email_object),
+                json.dumps(ticket_note_as_email),
                 timeout=10,
             ),
             call(

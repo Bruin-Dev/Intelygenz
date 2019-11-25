@@ -12,10 +12,12 @@ class TestNotifierAction:
         logger = Mock()
         event_bus = Mock()
         config = testconfig
+        template_renderer = Mock()
         production_action = Mock()
         development_action = Mock()
 
-        notifier_action = NotifierAction(logger, event_bus, config, production_action, development_action)
+        notifier_action = NotifierAction(logger, event_bus, config, template_renderer,
+                                         production_action, development_action)
 
         assert notifier_action == development_action()
 
@@ -23,6 +25,7 @@ class TestNotifierAction:
         logger = Mock()
         event_bus = Mock()
         config = testconfig
+        template_renderer = Mock()
         production_action = Mock()
         development_action = Mock()
 
@@ -30,7 +33,8 @@ class TestNotifierAction:
         custom_triage_config['environment'] = "production"
 
         with patch.dict(config.ENV_CONFIG, custom_triage_config):
-            notifier_action = NotifierAction(logger, event_bus, config, production_action, development_action)
+            notifier_action = NotifierAction(logger, event_bus, config, template_renderer,
+                                             production_action, development_action)
 
         assert notifier_action == production_action()
 
@@ -38,6 +42,7 @@ class TestNotifierAction:
         logger = Mock()
         event_bus = Mock()
         config = testconfig
+        template_renderer = Mock()
         production_action = Mock()
         development_action = Mock()
 
@@ -45,7 +50,8 @@ class TestNotifierAction:
         custom_triage_config['environment'] = "meaningless"
 
         with patch.dict(config.ENV_CONFIG, custom_triage_config):
-            notifier_action = NotifierAction(logger, event_bus, config, production_action, development_action)
+            notifier_action = NotifierAction(logger, event_bus, config, template_renderer,
+                                             production_action, development_action)
 
         assert notifier_action != development_action()
         assert notifier_action != production_action()
