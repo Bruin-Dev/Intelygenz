@@ -6,6 +6,7 @@ import pandas as pd
 import pytz
 import subprocess
 from pytz import timezone
+import io
 
 
 class ServiceOutageReportTemplateRenderer:
@@ -41,7 +42,9 @@ class ServiceOutageReportTemplateRenderer:
         template_vars["list_row"] = list_rows
         edges_dataframe = pd.DataFrame(edges_to_report)
         edges_dataframe.index.name = 'idx'
-        edges_dataframe.to_csv(self.csv, index=False)
+        file_csv = edges_dataframe.to_csv(index=False)
+        file_csv = base64.b64encode(file_csv.encode("utf-8"))
+        print(f"El fichero es {file_csv}")
         email_html = templ.render(**template_vars)
         tz = timezone(self._config.MONITOR_CONFIG['timezone'])
 
@@ -65,7 +68,7 @@ class ServiceOutageReportTemplateRenderer:
                 'attachments': [
                     {
                         'name': self.csv,
-                        'data': base64.b64encode(open(self.csv, 'rb').read()).decode('utf-8')
+                        'data': file_csv.decode('utf-8')
                     }
                 ]
             }
