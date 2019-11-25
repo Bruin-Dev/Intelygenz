@@ -10,14 +10,10 @@ import pandas as pd
 class TestTemplateRenderer:
 
     def instantiation_test(self):
-        mock_service_id = Mock()
         test_repo = TemplateRenderer(config)
         assert test_repo._config == config
 
     def compose_email_object_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
         config = testconfig.ALERTS_CONFIG
         template_renderer = TemplateRenderer(config)
         edges_to_report = [
@@ -52,8 +48,6 @@ class TestTemplateRenderer:
     def compose_email_test(self):
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
-        logger = Mock()
-        scheduler = Mock()
         config = testconfig.ALERTS_CONFIG
         template_renderer = TemplateRenderer(config)
 

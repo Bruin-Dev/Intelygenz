@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from config import testconfig
 from application.repositories.template_management import TemplateRenderer
 import base64
@@ -7,17 +6,12 @@ import base64
 class TestTemplateRenderer:
 
     def instantiation_test(self):
-        mock_service_id = Mock()
         config = testconfig
         test_repo = TemplateRenderer(config)
         assert test_repo._config == config
 
     def ticket_object_to_email_obj_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
         config = testconfig
-        service_id = 123
         template_renderer = TemplateRenderer(config)
 
         edges_to_report = {
@@ -116,9 +110,6 @@ class TestTemplateRenderer:
                                                                             .read()).decode('utf-8')
 
     def compose_email_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
         config = testconfig
 
         template_renderer = TemplateRenderer(config)

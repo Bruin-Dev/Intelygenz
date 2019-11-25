@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from config import testconfig as config
 from application.repositories.template_management import TemplateRenderer
 from collections import OrderedDict
@@ -54,9 +53,6 @@ class TestTemplateRenderer:
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 
     def ticket_object_to_email_obj_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
         config = testconfig
         template_renderer = TemplateRenderer(config)
         ticket_dict = OrderedDict()
@@ -71,9 +67,6 @@ class TestTemplateRenderer:
         assert "<!DOCTYPE html" in email["email_data"]["html"]
 
     def ticket_object_to_email_obj_no_events_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
         config = testconfig
         template_renderer = TemplateRenderer(config)
         ticket_dict = OrderedDict()

@@ -1,10 +1,6 @@
-from unittest.mock import Mock
 from config import testconfig as config
 from application.repositories.service_outage_report_template_renderer import ServiceOutageReportTemplateRenderer
-from asynctest import CoroutineMock
-import base64
 from config import testconfig
-import subprocess
 
 
 class TestServiceOutageReportTemplateRenderer:

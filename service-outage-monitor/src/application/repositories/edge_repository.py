@@ -1,9 +1,9 @@
 import json
+import re
 import time
 
 from collections import namedtuple
 from typing import Dict
-from typing import List
 from typing import Union
 
 
@@ -17,6 +17,7 @@ class EdgeRepository:
         self._keys_prefix = keys_prefix
 
         self.__edge_key_match_expression = f'{keys_prefix}*'
+        self.__complete_keys_prefix = f'{keys_prefix}__'
 
     def remove_all_stored_elements(self):
         self._logger.info(f'Clearing keys with prefix "{self._keys_prefix}"...')
@@ -24,7 +25,7 @@ class EdgeRepository:
         keys_to_remove = self._redis_client.scan_iter(match=self.__edge_key_match_expression)
         self._redis_client.delete(*keys_to_remove)
 
-    def add_edge(self, full_id: Union[EdgeIdentifier, dict], status: dict, update_existing=True, time_to_live=60):
+    def add_edge(self, full_id: Union[EdgeIdentifier, dict], value: dict, update_existing=True, time_to_live=60):
         if isinstance(full_id, EdgeIdentifier):
             full_id = dict(full_id._asdict())
 
@@ -37,8 +38,8 @@ class EdgeRepository:
 
         redis_key = f'{self._keys_prefix}__{full_id_str}'
         value_for_redis_key = {
-            'edge_status': status,
             'addition_timestamp': time.time(),
+            **value,
         }
         self._redis_client.set(
             redis_key,
@@ -57,11 +58,15 @@ class EdgeRepository:
         full_id_str = self.__full_id_dict_to_str(full_id)
         redis_key = f'{self._keys_prefix}__{full_id_str}'
 
-        return self._redis_client.get(redis_key)
+        edge_value = self._redis_client.get(redis_key)
+        if edge_value is not None:
+            return json.loads(edge_value)
+        else:
+            return None
 
     def get_all_edges(self) -> Dict[EdgeIdentifier, dict]:
         edges_redis_keys = sorted(list(self._redis_client.scan_iter(match=self.__edge_key_match_expression)))
-        values_from_redis = self._redis_client.mget(edges_redis_keys)
+        values_from_redis = [json.loads(value) for value in self._redis_client.mget(edges_redis_keys)]
 
         edge_identifiers = (self.__full_id_str_to_edge_identifier(full_id_str) for full_id_str in edges_redis_keys)
 
@@ -77,7 +82,7 @@ class EdgeRepository:
     def remove_edge(self, full_id: dict):
         edge_identifier = EdgeIdentifier(**full_id)
         full_id_str = self.__full_id_dict_to_str(full_id)
-        redis_key = f'{self._keys_prefix}__{full_id_str}'
+        redis_key = f'{self.__complete_keys_prefix}{full_id_str}'
 
         self._redis_client.delete(*[redis_key])
         self._logger.info(f'Edge {edge_identifier} with prefix {self._keys_prefix} was removed')
@@ -92,11 +97,12 @@ class EdgeRepository:
         return full_id_str
 
     def __full_id_str_to_edge_identifier(self, full_id: str) -> dict:
+        full_id = re.sub(pattern=fr'^{self.__complete_keys_prefix}', repl='', string=full_id)
         full_id_components = full_id.split('|')
         full_id_dict = {
             'host': full_id_components[0],
-            'enterprise_id': full_id_components[1],
-            'edge_id': full_id_components[2],
+            'enterprise_id': int(full_id_components[1]),
+            'edge_id': int(full_id_components[2]),
         }
 
         return EdgeIdentifier(**full_id_dict)
