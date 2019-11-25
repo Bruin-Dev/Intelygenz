@@ -35,7 +35,6 @@ class TemplateRenderer:
             })
         template_vars["list_row"] = list_rows
         edges_dataframe = pd.DataFrame(edges_to_report)
-        edges_dataframe.to_csv(index=False)
         file_csv = edges_dataframe.to_csv(index=False)
         file_csv = base64.b64encode(file_csv.encode("utf-8"))
         email_html = templ.render(**template_vars)
