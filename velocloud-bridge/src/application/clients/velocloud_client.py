@@ -121,7 +121,6 @@ class VelocloudClient:
                                      min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
         def get_enterprise_information():
-            print('here')
             target_host_client = self._get_header_by_host(edge["host"])
             body = {"enterpriseId": edge["enterprise_id"]}
             response = requests.post(f"https://{edge['host']}/portal/rest/enterprise/getEnterprise",
@@ -210,9 +209,9 @@ class VelocloudClient:
         if isinstance(response, dict):
             if 'error' in response.keys():
                 if 'tokenError [expired session cookie]' in response['error']['message']:
-                    self._logger.info(response)
+                    self._logger.info(f'Response returned: {response}. Attempting to relogin')
                     self.instantiate_and_connect_clients()
                     raise Exception
                 else:
-                    self._logger.error(response)
+                    self._logger.error(f'Error response returned: {response}')
         return response
