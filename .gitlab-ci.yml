@@ -24,6 +24,7 @@ include:
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-destroy-templates.yml'
   # Gitlab-CI jobs declaration for each microservice/module
   - local: 'bruin-bridge/.gitlab-ci.yml'
+  - local: 'ci-utils/.gitlab-ci.yml'
   - local: 'custompackages/.gitlab-ci.yml'
   - local: 'infra-as-code/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'

@@ -13,12 +13,11 @@
     - pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
-    refs:
-      - master
-      - /^*feature/.*$/
-      - /^*fix/.*$/
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - master
+    - /^*feature/.*$/
+    - /^*fix/.*$/
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
 
 .unittest_with_setup_template: &unittest_with_setup_template
   stage: unit_test
@@ -31,12 +30,11 @@
     - pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
-    refs:
-      - master
-      - /^*feature/.*$/
-      - /^*fix/.*$/
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - master
+    - /^*feature/.*$/
+    - /^*fix/.*$/
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
 
 .unittest_custom_package_template: &unittest_custom_package_template
   stage: unit_test
@@ -50,9 +48,8 @@
     - pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
-    refs:
-      - master
-      - /^*feature/.*$/
-      - /^*fix/.*$/
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - master
+    - /^*feature/.*$/
+    - /^*fix/.*$/
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/

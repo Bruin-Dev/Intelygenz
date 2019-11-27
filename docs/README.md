@@ -3,6 +3,7 @@
 </div>
 
 # Documentation directory
+
 1. [System overview](SYSTEM_OVERVIEW.md)
     + [System architecture](SYSTEM_OVERVIEW.md#system-architecture)
         + [Monorepo](MONOREPO.md)
@@ -10,10 +11,11 @@
             + [Environments](PIPELINES.md#environments)
             + [CI](PIPELINES.md#continuous-integration-ci)
             + [CD](PIPELINES.md#continuous-delivery-cd)
-            + [Semantic release](PIPELINES.md#semantic-release)
             + [Enviroment variables](PIPELINES.md#environment-variables)
         + [Infrastructure as code](INFRASTRUCTURE_AS_CODE.md)
     + [Infrastructure](SYSTEM_OVERVIEW.md#infrastructure)
+        + [Environment infrastructure](SYSTEM_OVERVIEW.md#environment-infrastructure)
+        + [Network infrastructure](SYSTEM_OVERVIEW.md#network-infrastructure)
 
 ---
 With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2019

@@ -11,10 +11,9 @@
   before_script:
     - terraform init -backend=true -get=true -input=false
   only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - master
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
 
 .terraform_validate_template: &terraform_validate_template
   image:
@@ -38,7 +37,6 @@
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - apk add gettext
   only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - master
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/

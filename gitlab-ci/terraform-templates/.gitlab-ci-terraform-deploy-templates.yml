@@ -31,10 +31,9 @@
     - terraform validate infra-as-code/ecs-services
     - terraform apply -auto-approve infra-as-code/ecs-services
   only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - master
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
 
 .terraform_template_deploy_network-resources: &terraform_template_deploy_network-resources
   image:
@@ -50,7 +49,6 @@
     - terraform validate infra-as-code/network-resources
     - terraform apply -auto-approve infra-as-code/network-resources
   only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - master
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/

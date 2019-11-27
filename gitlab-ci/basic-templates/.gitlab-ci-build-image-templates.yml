@@ -16,7 +16,6 @@
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
   only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - master
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/

@@ -1,0 +1,7 @@
+# ==========================================
+# Linter validation jobs for ci-utils module
+# ==========================================
+ci-utils-linter:
+  variables:
+    MODULE: ci-utils
+  extends: .lint_module

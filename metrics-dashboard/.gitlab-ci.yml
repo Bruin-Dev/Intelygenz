@@ -14,11 +14,6 @@ grafana-build:
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
 
 prometheus-build:
   stage: build
@@ -43,9 +38,8 @@ grafana_user_creation_branches:
   before_script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
   only:
-    refs:
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
   except:
     - master
 

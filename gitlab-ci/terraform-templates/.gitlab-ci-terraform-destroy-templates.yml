@@ -31,9 +31,8 @@
     - terraform refresh infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
   only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
+    - master
+    - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
 
 .terraform_template_destroy_network-resources: &terraform_template_destroy_network-resources
@@ -50,7 +49,6 @@
     - terraform refresh infra-as-code/network-resources
     - terraform destroy -auto-approve infra-as-code/network-resources
   only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
+    - master
+    - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
