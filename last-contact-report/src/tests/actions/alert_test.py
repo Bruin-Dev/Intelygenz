@@ -8,6 +8,7 @@ from application.actions import alert as alert_module
 from application.actions.alert import Alert
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
+from unittest.mock import call
 
 from config import testconfig
 
@@ -92,12 +93,14 @@ class TestAlert:
                 "enterprise_id": "123",
                 "edge_id": "123"
             },
-            "edge": {
-                "serialNumber": "some serial",
-                "lastContact": "2018-06-24T20:27:44.000Z",
-                "modelNumber": "edge123"
-            },
-            "enterprise": "Fake Corp"
+            'edge_info': {
+                "edges": {
+                    "serialNumber": "some serial",
+                    "lastContact": "2018-06-24T20:27:44.000Z",
+                    "modelNumber": "edge123"
+                },
+                "enterprise_name": "Fake Corp"
+            }
         }
         edge_2 = {
             "edge_id": {
@@ -105,12 +108,14 @@ class TestAlert:
                 "enterprise_id": "123",
                 "edge_id": "456"
             },
-            "edge": {
-                "serialNumber": "some serial",
-                "lastContact": "2018-09-24T20:27:44.000Z",
-                "modelNumber": "edge456"
+            'edge_info': {
+                "edges": {
+                    "serialNumber": "some serial",
+                    "lastContact": "2018-09-24T20:27:44.000Z",
+                    "modelNumber": "edge456"
+                },
+                "enterprise_name": "Fake Corp"
             },
-            "enterprise": "Fake Corp"
         }
         edge_3 = {
             "edge_id": {
@@ -118,30 +123,43 @@ class TestAlert:
                 "enterprise_id": "123",
                 "edge_id": "789"
             },
-            "edge": {
-                "serialNumber": "some serial",
-                "lastContact": "2018-10-24T20:27:44.000Z",
-                "modelNumber": "edge789"
-            },
-            "enterprise": "Fake Corp"
+            'edge_info': {
+                "edges": {
+                    "serialNumber": "some serial",
+                    "lastContact": "2018-10-24T20:27:44.000Z",
+                    "modelNumber": "edge789"
+                },
+                "enterprise_name": "Fake Corp"
+            }
         }
-        edges_list = [edge_1, edge_2, edge_3]
-        event = {"request_id": 123, "edges": edges_list}
+        edge_request = {"request_id": 123, "edges": ['Edge1', 'Edge2', 'Edge3']}
         email_contents = {'email': "<div>Some email</div>"}
-        event_bus.rpc_request = CoroutineMock(return_value=event)
+        event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer.compose_email_object = Mock(return_value=email_contents)
+        alert._template_renderer._compose_email_object = Mock(return_value=email_contents)
 
         with patch.object(alert_module, 'uuid', return_value=test_uuid):
             await alert._alert_process()
 
-        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
+        reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
         assert len(reported_edges) == 3
-        alert._event_bus.rpc_request.assert_awaited_once_with(
-            'alert.request.all.edges',
-            json.dumps(dict(request_id=test_uuid, filter=[])),
-            timeout=200
-        )
+        alert._event_bus.rpc_request.assert_has_awaits([
+            call('edge.list.request',
+                 json.dumps(dict(request_id=test_uuid, filter=[])),
+                 timeout=200),
+            call("edge.status.request",
+                 json.dumps({'request_id': 123, 'edge': 'Edge1'}),
+                 timeout=10
+                 ),
+            call("edge.status.request",
+                 json.dumps({'request_id': 123, 'edge': 'Edge2'}),
+                 timeout=10
+                 ),
+            call("edge.status.request",
+                 json.dumps({'request_id': 123, 'edge': 'Edge3'}),
+                 timeout=10
+                 ),
+        ])
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
             json.dumps(email_contents),
@@ -164,12 +182,14 @@ class TestAlert:
                 "enterprise_id": "123",
                 "edge_id": "123"
             },
-            "edge": {
-                "serialNumber": "some serial",
-                "lastContact": "0000-00-00 00:00:00.000Z",
-                "modelNumber": "edge123"
-            },
-            "enterprise": "Fake Corp"
+            'edge_info': {
+                "edges": {
+                    "serialNumber": "some serial",
+                    "lastContact": "0000-00-00 00:00:00.000Z",
+                    "modelNumber": "edge123"
+                },
+                "enterprise_name": "Fake Corp"
+            }
         }
         edge_2 = {
             "edge_id": {
@@ -177,12 +197,14 @@ class TestAlert:
                 "enterprise_id": "123",
                 "edge_id": "456"
             },
-            "edge": {
-                "serialNumber": "some serial",
-                "lastContact": "0000-00-00 00:00:00.000Z",
-                "modelNumber": "edge456"
-            },
-            "enterprise": "Fake Corp"
+            'edge_info': {
+                "edges": {
+                    "serialNumber": "some serial",
+                    "lastContact": "0000-00-00 00:00:00.000Z",
+                    "modelNumber": "edge456"
+                },
+                "enterprise_name": "Fake Corp"
+            }
         }
         edge_3 = {
             "edge_id": {
@@ -190,23 +212,20 @@ class TestAlert:
                 "enterprise_id": "123",
                 "edge_id": "789"
             },
-            "edge": {
-                "serialNumber": "some serial",
-                "lastContact": "2018-10-24T20:27:44.000Z",
-                "modelNumber": "edge789"
-            },
-            "enterprise": "Fake Corp"
+            'edge_info': {
+                "edges": {
+                    "serialNumber": "some serial",
+                    "lastContact": "2018-10-24T20:27:44.000Z",
+                    "modelNumber": "edge789"
+                },
+                "enterprise_name": "Fake Corp"
+            }
         }
-        event = {"request_id": 123, "edges": [edge_1, edge_2, edge_3]}
+        edge_request = {"request_id": 123, "edges": ['Edge1', 'Edge2', 'Edge3']}
         email_contents = {'email': "<div>Some email</div>"}
-        event_bus.rpc_request = CoroutineMock(return_value=event)
+        event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer.compose_email_object = Mock(return_value="<div>Some email</div>")
-        event = json.dumps({"request_id": 123, "edges": [
-            {"edge_id": {"host": "some.host", "enterprise_id": "123", "edge_id": "123"},
-             "edge": {"serialNumber": "some serial", "lastContact": "2018-06-24T20:27:44.000Z",
-                      'modelNumber': 'edge123'},
-             "enterprise": "Fake Corp"}]})
+        alert._template_renderer._compose_email_object = Mock(return_value="<div>Some email</div>")
 
         with patch.object(alert_module, 'uuid', return_value=test_uuid):
             await alert._alert_process()
@@ -215,13 +234,26 @@ class TestAlert:
         assert "notification.email.request" in event_bus.publish_message.call_args[0][0]
         assert "<div>Some email</div>" in event_bus.publish_message.call_args[0][1]
 
-        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
+        reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
         assert len(reported_edges) == 1
-        alert._event_bus.rpc_request.assert_awaited_once_with(
-            'alert.request.all.edges',
-            json.dumps(dict(request_id=test_uuid, filter=[])),
-            timeout=200
-        )
+        alert._event_bus.rpc_request.assert_has_awaits([
+            call('edge.list.request',
+                 json.dumps(dict(request_id=test_uuid, filter=[])),
+                 timeout=200
+                 ),
+            call("edge.status.request",
+                 json.dumps({'request_id': 123, 'edge': 'Edge1'}),
+                 timeout=10
+                 ),
+            call("edge.status.request",
+                 json.dumps({'request_id': 123, 'edge': 'Edge2'}),
+                 timeout=10
+                 ),
+            call("edge.status.request",
+                 json.dumps({'request_id': 123, 'edge': 'Edge3'}),
+                 timeout=10
+                 ),
+        ])
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
             json.dumps(email_contents["email"]),
@@ -243,12 +275,14 @@ class TestAlert:
                 "enterprise_id": "123",
                 "edge_id": "123"
             },
-            "edge": {
-                "serialNumber": "some serial",
-                "lastContact": "2018-06-20T20:27:44.000Z",
-                "modelNumber": "edge123"
-            },
-            "enterprise": "Fake Corp"
+            'edge_info': {
+                "edges": {
+                    "serialNumber": "some serial",
+                    "lastContact": "2018-06-20T20:27:44.000Z",
+                    "modelNumber": "edge123"
+                },
+                "enterprise_name": "Fake Corp"
+            }
         }
         edge_2 = {
             "edge_id": {
@@ -256,12 +290,14 @@ class TestAlert:
                 "enterprise_id": "123",
                 "edge_id": "456"
             },
-            "edge": {
-                "serialNumber": "some serial",
-                "lastContact": "2018-06-25T20:27:44.000Z",
-                "modelNumber": "edge456"
-            },
-            "enterprise": "Fake Corp"
+            'edge_info': {
+                "edges": {
+                    "serialNumber": "some serial",
+                    "lastContact": "2018-06-25T20:27:44.000Z",
+                    "modelNumber": "edge456"
+                },
+                "enterprise_name": "Fake Corp"
+            }
         }
         edge_3 = {
             "edge_id": {
@@ -269,20 +305,21 @@ class TestAlert:
                 "enterprise_id": "123",
                 "edge_id": "789"
             },
-            "edge": {
-                "serialNumber": "some serial",
-                "lastContact": "2018-06-30T20:27:44.000Z",
-                "modelNumber": "edge789"
-            },
-            "enterprise": "Fake Corp"
+            'edge_info': {
+                "edges": {
+                    "serialNumber": "some serial",
+                    "lastContact": "2018-06-30T20:27:44.000Z",
+                    "modelNumber": "edge789"
+                },
+                "enterprise_name": "Fake Corp"
+            }
         }
-        edges_list = [edge_1, edge_2, edge_3]
-        event = {"request_id": 123, "edges": edges_list}
+        edge_request = {"request_id": 123, "edges": ['Edge1', 'Edge2', 'Edge3']}
         email_contents = {'email': "<div>Some email</div>"}
-        event_bus.rpc_request = CoroutineMock(return_value=event)
+        event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
 
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer.compose_email_object = Mock(return_value=email_contents)
+        alert._template_renderer._compose_email_object = Mock(return_value=email_contents)
 
         current_timestamp = "2018-07-27T20:27:44.000Z"
         current_datetime = datetime.strptime(current_timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -292,13 +329,26 @@ class TestAlert:
             with patch.object(alert_module, 'uuid', return_value=test_uuid):
                 await alert._alert_process()
 
-        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
+        reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
         assert len(reported_edges) == 2
-        alert._event_bus.rpc_request.assert_awaited_once_with(
-            'alert.request.all.edges',
-            json.dumps(dict(request_id=test_uuid, filter=[])),
-            timeout=200
-        )
+        alert._event_bus.rpc_request.assert_has_awaits([
+            call('edge.list.request',
+                 json.dumps(dict(request_id=test_uuid, filter=[])),
+                 timeout=200
+                 ),
+            call("edge.status.request",
+                 json.dumps({'request_id': 123, 'edge': 'Edge1'}),
+                 timeout=10
+                 ),
+            call("edge.status.request",
+                 json.dumps({'request_id': 123, 'edge': 'Edge2'}),
+                 timeout=10
+                 ),
+            call("edge.status.request",
+                 json.dumps({'request_id': 123, 'edge': 'Edge3'}),
+                 timeout=10
+                 ),
+        ])
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
             json.dumps(email_contents),
