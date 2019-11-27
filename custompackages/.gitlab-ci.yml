@@ -6,10 +6,6 @@ igzpackages-linter:
     MODULE: custompackages/igzpackages/
   extends: .lint_module
 
-velocloud-linter:
-  variables:
-    MODULE: custompackages/velocloud/velocloud_client
-  extends: .lint_module
 
 # ======================================
 # Unit tests jobs for igzpackages module
@@ -18,10 +14,3 @@ igzpackages-test:
   variables:
     MODULE: custompackages/igzpackages
   extends: .unittest_with_setup_template
-
-velocloud-test:
-  variables:
-    MODULE: velocloud_client
-    CUSTOM_PACKAGE_DIR: custompackages/velocloud/
-  extends: .unittest_custom_package_template
-  coverage: '/^client\/velocloud_client.py.+?(\d{2,3}.\d+\%)$/'
