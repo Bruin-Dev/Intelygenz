@@ -136,12 +136,12 @@ class TestAlert:
         email_contents = {'email': "<div>Some email</div>"}
         event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer._compose_email_object = Mock(return_value=email_contents)
+        alert._template_renderer.compose_email_object = Mock(return_value=email_contents)
 
         with patch.object(alert_module, 'uuid', return_value=test_uuid):
             await alert._alert_process()
 
-        reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
+        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
         assert len(reported_edges) == 3
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
@@ -225,7 +225,7 @@ class TestAlert:
         email_contents = {'email': "<div>Some email</div>"}
         event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer._compose_email_object = Mock(return_value="<div>Some email</div>")
+        alert._template_renderer.compose_email_object = Mock(return_value="<div>Some email</div>")
 
         with patch.object(alert_module, 'uuid', return_value=test_uuid):
             await alert._alert_process()
@@ -234,7 +234,7 @@ class TestAlert:
         assert "notification.email.request" in event_bus.publish_message.call_args[0][0]
         assert "<div>Some email</div>" in event_bus.publish_message.call_args[0][1]
 
-        reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
+        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
         assert len(reported_edges) == 1
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
@@ -319,7 +319,7 @@ class TestAlert:
         event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
 
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
-        alert._template_renderer._compose_email_object = Mock(return_value=email_contents)
+        alert._template_renderer.compose_email_object = Mock(return_value=email_contents)
 
         current_timestamp = "2018-07-27T20:27:44.000Z"
         current_datetime = datetime.strptime(current_timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -329,7 +329,7 @@ class TestAlert:
             with patch.object(alert_module, 'uuid', return_value=test_uuid):
                 await alert._alert_process()
 
-        reported_edges = alert._template_renderer._compose_email_object.call_args[0][0]
+        reported_edges = alert._template_renderer.compose_email_object.call_args[0][0]
         assert len(reported_edges) == 2
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
