@@ -31,7 +31,7 @@
     - [Creation and testing](#creation-and-testing)
     - [Import and installation in microservices](#import-and-installation-in-microservices)
     - [Changes and debugging](#changes-and-debugging)
-- [Run the project](#run-the-project)
+- [Running the project](#running-the-project)
 - [Lists of projects READMEs](#lists-of-projects-readmes)
   - [Packages](#packages)
   - [Microservices](#microservices)
@@ -146,9 +146,60 @@ If any change it's performed in a custom package, it must be uninstalled from th
 
 To debug with PyCharm, you must put the breakpoint **in the copy in site-packages** of the custompackage. To find that files, cntrl + right click on the in a call in your code of the function you want to debug.
 
-# Run the project
+# Running the project
 
-`docker-compose up --build`
+This tutorial assumes Ubuntu 18.04 - it might work in other versions of Ubuntu though, but hasn't been tested.
+
+### Python 3.6
+
+Open a terminal and run:
+
+`$ python3 -V`
+
+Python 3.6 is pre-installed in Ubuntu 18.04 so the output should be something like:
+
+`Python 3.6.8`
+
+### Docker and Docker Compose
+
+Remove any old versions and install the latest one:
+
+```
+$ apt update
+$ apt -y upgrade
+$ apt remove docker docker-engine docker.io
+$ apt install docker.io
+```
+
+For Docker Compose there's a good tutorial in [the official docs](https://docs.docker.com/compose/install/). Summarizing it says:
+
+```
+$ curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+$ chmod +x /usr/local/bin/docker-compose
+$ docker-compose --version
+```
+
+Last command should output something like:
+
+`docker-compose version 1.24.1, build 4667896b`
+
+### Env files
+
+Ask a maintainer for a temp private token. Clone the mettel repo and run:
+
+```
+$ cd installation-utils
+$ python3 -m pip install -r requirements.txt
+$ python3 environment_files_generator.py <private_token>
+``` 
+
+That'll generate all env files needed.
+
+### Finish up
+
+Run:
+
+`$ docker-compose up --build`
 
 # Lists of projects READMEs
 
