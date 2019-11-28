@@ -302,7 +302,8 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
 
-        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, notifier_action,
+                                                            template_renderer)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
