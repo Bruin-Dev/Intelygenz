@@ -149,15 +149,15 @@ class TestAlert:
                  timeout=200),
             call("edge.status.request",
                  json.dumps({'request_id': 123, 'edge': 'Edge1'}),
-                 timeout=10
+                 timeout=60
                  ),
             call("edge.status.request",
                  json.dumps({'request_id': 123, 'edge': 'Edge2'}),
-                 timeout=10
+                 timeout=60
                  ),
             call("edge.status.request",
                  json.dumps({'request_id': 123, 'edge': 'Edge3'}),
-                 timeout=10
+                 timeout=60
                  ),
         ])
         alert._event_bus.publish_message.assert_awaited_once_with(
@@ -243,15 +243,15 @@ class TestAlert:
                  ),
             call("edge.status.request",
                  json.dumps({'request_id': 123, 'edge': 'Edge1'}),
-                 timeout=10
+                 timeout=60
                  ),
             call("edge.status.request",
                  json.dumps({'request_id': 123, 'edge': 'Edge2'}),
-                 timeout=10
+                 timeout=60
                  ),
             call("edge.status.request",
                  json.dumps({'request_id': 123, 'edge': 'Edge3'}),
-                 timeout=10
+                 timeout=60
                  ),
         ])
         alert._event_bus.publish_message.assert_awaited_once_with(
@@ -338,15 +338,15 @@ class TestAlert:
                  ),
             call("edge.status.request",
                  json.dumps({'request_id': 123, 'edge': 'Edge1'}),
-                 timeout=10
+                 timeout=60
                  ),
             call("edge.status.request",
                  json.dumps({'request_id': 123, 'edge': 'Edge2'}),
-                 timeout=10
+                 timeout=60
                  ),
             call("edge.status.request",
                  json.dumps({'request_id': 123, 'edge': 'Edge3'}),
-                 timeout=10
+                 timeout=60
                  ),
         ])
         alert._event_bus.publish_message.assert_awaited_once_with(
