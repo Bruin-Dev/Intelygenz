@@ -173,11 +173,7 @@ class ServiceOutageDetector:
     async def _get_all_edges(self):
         edge_list_request_dict = {
             'request_id': uuid(),
-            'filter': [
-                {'host': 'mettel.velocloud.net', 'enterprise_ids': []},
-                {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
-                {'host': 'metvco04.mettel.net', 'enterprise_ids': []},
-            ]
+            'filter': []
         }
         edge_list_response = await self._event_bus.rpc_request(
             'edge.list.request',

@@ -56,15 +56,11 @@ class EdgeMonitoring:
     async def _process_all_edges(self, request_id):
         msg = {
             'request_id': request_id,
-            'filter': [
-                {'host': 'mettel.velocloud.net', 'enterprise_ids': []},
-                {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
-                {'host': 'metvco04.mettel.net', 'enterprise_ids': []},
-            ]
+            'filter': []
         }
         self._status_repository.set_current_cycle_request_id(request_id)
 
-        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(msg), timeout=60)
+        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(msg), timeout=200)
         self._logger.info(f'Edge list received from event bus')
         edge_status_requests = [
             {'request_id': edge_list["request_id"], 'edge': edge} for edge in edge_list["edges"]]

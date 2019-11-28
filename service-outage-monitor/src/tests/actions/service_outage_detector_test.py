@@ -382,11 +382,7 @@ class TestServiceOutageDetectorJob:
             'edge.list.request',
             json.dumps({
                 'request_id': uuid_,
-                'filter': [
-                    {'host': 'mettel.velocloud.net', 'enterprise_ids': []},
-                    {'host': 'metvco03.mettel.net', 'enterprise_ids': []},
-                    {'host': 'metvco04.mettel.net', 'enterprise_ids': []},
-                ]
+                'filter': []
             }),
             timeout=600,
         )
