@@ -35,7 +35,7 @@ equivalent to `flask-RESTful` we can recieve a status code of `200` or `OK` when
 
 __Microservices' healthcheck endpoints (for local enviroments)__
 
-velocloud-orchestrator: `http://localhost:5000/_health` 
+sites-monitor: `http://localhost:5000/_health` 
 
 velocloud-bridge: `http://localhost:5001/_health`
 

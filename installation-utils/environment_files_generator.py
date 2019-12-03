@@ -121,7 +121,7 @@ env_dict = {
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'VELOCLOUD_CREDENTIALS={VELOCLOUD_CREDENTIALS}\n'
         f'VELOCLOUD_VERIFY_SSL={VELOCLOUD_VERIFY_SSL}',
-    os.path.join('velocloud-orchestrator', 'src', 'config', 'env'):
+    os.path.join('sites-monitor', 'src', 'config', 'env'):
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'MONITORING_SECONDS={MONITORING_SECONDS}\n'

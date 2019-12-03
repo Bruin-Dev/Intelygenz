@@ -48,7 +48,7 @@ There are two types of microservices showed in the diagram above depending on th
 
     * *service-outage-triage*
 
-    * *velocloud-orchestrator*
+    * *sites-monitor*
 
     * *last-contact-report*
 
@@ -109,13 +109,13 @@ The following flow is used to make this report:
 It is possible to see the relations between the mentioned services for the flow in the following [diagram](https://www.draw.io/#G1JzSwJw04goDcA_fEjySmMZ_Ol32TVSeB).
 ![IMAGE: last-contact-report_microservice_relationships](./img/system_overview/microservices_with_communications/last-contact-report_microservice_relationships.png)
 
-#### Velocloud-orchestrator microservice
+#### Sites monitor microservice
 
 This microservice requests data from the velocloud API via the velocloud-bridge microservice, using this information to enrich Prometheus. The prometheus data serves as a feed for Grafana.
 
 The following [diagram](https://www.draw.io/#G1xmdDJALLoK25VmO7-gSVITODfaTFIyT_) shows the relationship between this microservice and the others.
 
-![IMAGE: velocloud-orchestrator_microservice_relationships](./img/system_overview/microservices_with_communications/velocloud-orchestrator_microservice_relationships.png)
+![IMAGE: sites-monitor_microservice_relationships](./img/system_overview/microservices_with_communications/sites-monitor_microservice_relationships.png)
 
 #### T7-bridge microservice
 
