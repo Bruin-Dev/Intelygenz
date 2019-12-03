@@ -89,7 +89,7 @@ In these jobs services in the monorepo will be deployed to the selected environm
 
     * [velocloud-bridge](../velocloud-bridge)
 
-    * [velocloud-orchestrator](../velocloud-orchestrator)
+    * [sites-monitor](../sites-monitor)
 
   * A [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for each of the above *ECS Services*
 

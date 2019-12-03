@@ -36,4 +36,4 @@ include:
   - local: 'service-outage-triage/.gitlab-ci.yml'
   - local: 't7-bridge/.gitlab-ci.yml'
   - local: 'velocloud-bridge/.gitlab-ci.yml'
-  - local: 'velocloud-orchestrator/.gitlab-ci.yml'
+  - local: 'sites-monitor/.gitlab-ci.yml'

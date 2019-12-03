@@ -6,7 +6,7 @@ RUN pip install pandas==0.24.2
 
 ENV PYTHONUNBUFFERED 1
 
-COPY velocloud-orchestrator/ /service/app
+COPY sites-monitor/ /service/app
 # Add custom packages to the image in order to import them
 COPY custompackages/ /service/custompackages
 

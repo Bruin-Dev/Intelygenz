@@ -17,7 +17,7 @@
 | service-outage-triage|[![service-outage-triage-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-triage-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | t7-bridge|[![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | velocloud-bridge|[![velocloud-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| velocloud-orchestrator|[![velocloud-orchestrator-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-orchestrator-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| sites-monitor|[![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | velocloud|[![velocloud-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 
 # Table of Contents
@@ -211,7 +211,7 @@ Run:
 ## Microservices
 
 - [Base microservice](base-microservice/README.md)
-- [Velocloud orchestrator](velocloud-orchestrator/README.md)
+- [Sites monitor](sites-monitor/README.md)
 - [Velocloud bridge](velocloud-bridge/README.md)
 - [Notifier](notifier/README.md)
 
@@ -223,7 +223,7 @@ Run:
 
 ## Monitoring edge and link status
 
-Services involved: velocloud-orchestrator, velocloud-bridge, notifier.
+Services involved: sites-monitor, velocloud-bridge, notifier.
 
 ### Process goal
 
@@ -232,13 +232,13 @@ Services involved: velocloud-orchestrator, velocloud-bridge, notifier.
 
 ### Process flow
 
-    - Orchestrator send a message to the Bridge through to ask for all edges given a list of Velocloud clusters.
+    - Sites Monitor send a message to the Bridge through to ask for all edges given a list of Velocloud clusters.
     - For each edge it builds an event composed by the cluster's hostname, the edge ID and the company ID for that edge.
     - Publish events on NATS.
-    - Orchestrator consumes the events from NATS and then send each edge to the NATS to be consumed by the Bridge.
+    - Sites Monitor consumes the events from NATS and then send each edge to the NATS to be consumed by the Bridge.
     - For each event, it fetches the edge and link data related to the given IDs
     - Publishes edge and link data to NATS
-    - Depending on the state of the edge, the Orchestrator will put the result event in a different Message Queue (one Queue for faulty edges, other for ok edges)
+    - Depending on the state of the edge, the Sites Monitor will put the result event in a different Message Queue (one Queue for faulty edges, other for ok edges)
     - Notifier consumes the faulty edge queue and creates statistics. 
     - Notifier has an interval set. For each interval will send the statistics to a Slack channel and reset the statistics for the next cycle.
 

@@ -42,13 +42,13 @@ services:
     ports:
       - 9100:9100
   # ============================
-  velocloud-orchestrator:
+  sites-monitor:
     build:
       # Context must be the root of the monorepo since we need to copy custompackages
       context: .
-      dockerfile: velocloud-orchestrator/Dockerfile
+      dockerfile: sites-monitor/Dockerfile
     env_file:
-      - velocloud-orchestrator/src/config/env
+      - sites-monitor/src/config/env
     depends_on:
       - "nats-server"
     ports:

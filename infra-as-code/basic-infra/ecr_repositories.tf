@@ -2,8 +2,8 @@ resource "aws_ecr_repository" "automation-nats-server" {
   name = "automation-nats-server"
 }
 
-resource "aws_ecr_repository" "automation-velocloud-orchestrator" {
-  name = "automation-velocloud-orchestrator"
+resource "aws_ecr_repository" "automation-sites-monitor" {
+  name = "automation-sites-monitor"
 }
 
 resource "aws_ecr_repository" "automation-last-contact-report" {

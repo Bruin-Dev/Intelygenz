@@ -54,8 +54,8 @@ resource "aws_cloudwatch_metric_alarm" "error_messages_services_alarm" {
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-orchestrator_alarm" {
-  alarm_name                = local.running_task_count_velocloud-orchestator_alarm-name
+resource "aws_cloudwatch_metric_alarm" "running_task_count_sites-monitor_alarm" {
+  alarm_name                = local.running_task_count_sites-monitor_alarm-name
   comparison_operator       = "LessThanOrEqualToThreshold"
   evaluation_periods        = local.running_task_count_service-alarm-evaluation_periods
   metric_name               = local.running_task_count-metric_transformation-name
@@ -64,14 +64,14 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-orchestrato
   statistic                 = "Sum"
   threshold                 = local.running_task_count_service-alarm-threshold
   insufficient_data_actions = []
-  alarm_description         = "This metric monitors the number of running tasks of velocloud-orchestrator service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_description         = "This metric monitors the number of running tasks of sites-monitor service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
   dimensions = {
-    ServiceName = "${var.ENVIRONMENT}-velocloud-orchestrator"
+    ServiceName = "${var.ENVIRONMENT}-sites-monitor"
     ClusterName = var.ENVIRONMENT
   }
   tags = {
-    Name = local.running_task_count_velocloud-orchestator_alarm-tag-Name
+    Name = local.running_task_count_sites-monitor_alarm-tag-Name
     Environment = var.ENVIRONMENT
   }
 }

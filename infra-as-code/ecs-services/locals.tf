@@ -95,15 +95,15 @@ locals {
   automation-velocloud-bridge-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
   automation-velocloud-bridge-service_discovery_service-name = "velocloud-bridge-${var.ENVIRONMENT}"
 
-  // automation-velocloud-orchestrator local vars
-  automation-velocloud-orchestrator-image = "${data.aws_ecr_repository.automation-velocloud-orchestrator.repository_url}:${var.BUILD_NUMBER}"
-  automation-velocloud-orchestrator-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
-  automation-velocloud-orchestrator-ecs_task_definition-family = "${var.ENVIRONMENT}-velocloud-orchestrator"
-  automation-velocloud-orchestrator-service-security_group-name = "${var.ENVIRONMENT}-velocloud-orchestrator"
-  automation-velocloud-orchestrator-service-security_group-tag-Name = "${var.ENVIRONMENT}-velocloud-orchestrator"
-  automation-velocloud-orchestrator-ecs_service-name = "${var.ENVIRONMENT}-velocloud-orchestrator"
-  automation-velocloud-orchestrator-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-orchestrator.family}:${aws_ecs_task_definition.automation-velocloud-orchestrator.revision}"
-  automation-velocloud-orchestrator-service_discovery_service-name = "velocloud-orchestrator-${var.ENVIRONMENT}"
+  // automation-sites-monitor local vars
+  automation-sites-monitor-image = "${data.aws_ecr_repository.automation-sites-monitor.repository_url}:${var.BUILD_NUMBER}"
+  automation-sites-monitor-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-sites-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-sites-monitor"
+  automation-sites-monitor-service-security_group-name = "${var.ENVIRONMENT}-sites-monitor"
+  automation-sites-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-sites-monitor"
+  automation-sites-monitor-ecs_service-name = "${var.ENVIRONMENT}-sites-monitor"
+  automation-sites-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-sites-monitor.family}:${aws_ecs_task_definition.automation-sites-monitor.revision}"
+  automation-sites-monitor-service_discovery_service-name = "sites-monitor-${var.ENVIRONMENT}"
 
   // metrics local variables
   exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"
@@ -133,9 +133,9 @@ locals {
   error_messages_services_alarm-name = "Error messages detected in services of ECS cluster with name ${var.ENVIRONMENT}"
   error_messages_services_alarm-tag-Name = "${var.ENVIRONMENT}-error_messages_detected"
 
-  // alarm running_task_count_velocloud-orchestrator local variables
-  running_task_count_velocloud-orchestator_alarm-name = "Running tasks count of velocloud-orchestrator service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_velocloud-orchestator_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_velocloud-orchestrator"
+  // alarm running_task_count_sites-monitor local variables
+  running_task_count_sites-monitor_alarm-name = "Running tasks count of sites-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_sites-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_sites-monitor"
 
   // alarm running_task_count_bruin-bridge local variables
   running_task_count_bruin-bridge_alarm-name = "Running tasks count of bruin-bridge service in ECS cluster with name ${var.ENVIRONMENT}"

@@ -20,19 +20,19 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-ORCHESTRATOR_CONFIG = {
+SITES_MONITOR_CONFIG = {
     'monitoring_seconds': int(os.environ["MONITORING_SECONDS"])
 }
 
 LOG_CONFIG = {
-    'name': 'velocloud-orchestrator',
+    'name': 'sites-monitor',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
 QUART_CONFIG = {
-    'title': 'velocloud-orchestrator',
+    'title': 'sites-monitor',
     'port': 5000
 }
 

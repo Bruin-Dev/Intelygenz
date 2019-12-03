@@ -26,7 +26,7 @@ class EdgeMonitoring:
             edges_to_process = self._status_repository.get_edges_to_process()
             self._logger.error(f'There\'s still edges to be processed: {edges_processed} / {edges_to_process}')
 
-            cycle_seconds = self._config.ORCHESTRATOR_CONFIG['monitoring_seconds']
+            cycle_seconds = self._config.SITES_MONITOR_CONFIG['monitoring_seconds']
             current_cycle_timestamp = self._status_repository.get_current_cycle_timestamp()
 
             if datetime.timestamp(datetime.now()) - current_cycle_timestamp > cycle_seconds:
@@ -35,16 +35,16 @@ class EdgeMonitoring:
             else:
                 self._logger.error('Edge monitoring process won\'t be triggered again')
         if "IDLE" in self._status_repository.get_status():
-            self._logger.info("IDLE status: asking edge list. Orchestrator status = REQUESTING_VELOCLOUD_EDGES...")
+            self._logger.info("IDLE status: asking edge list. Sites Monitor status = REQUESTING_VELOCLOUD_EDGES...")
             self._status_repository.set_status("REQUESTING_VELOCLOUD_EDGES")
             self._status_repository.set_edges_processed(0)
             self._status_repository.set_current_cycle_timestamp(datetime.timestamp(datetime.now()))
             await self._process_all_edges(uuid())
-            self._logger.info("Sending edge status tasks. Orchestrator status = PROCESSING_VELOCLOUD_EDGES...")
+            self._logger.info("Sending edge status tasks. Sites Monitor status = PROCESSING_VELOCLOUD_EDGES...")
             self._status_repository.set_status("PROCESSING_VELOCLOUD_EDGES")
 
     async def start_edge_monitor_job(self, exec_on_start=False):
-        seconds = self._config.ORCHESTRATOR_CONFIG['monitoring_seconds']
+        seconds = self._config.SITES_MONITOR_CONFIG['monitoring_seconds']
         self._logger.info(f'Scheduled task: edge monitoring process configured to run each {seconds} seconds')
         next_run_time = undefined
         if exec_on_start:

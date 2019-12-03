@@ -17,7 +17,7 @@ class Container:
 
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info("Velocloud orchestrator starting...")
+        self._logger.info("Sites Monitor starting...")
         self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
 

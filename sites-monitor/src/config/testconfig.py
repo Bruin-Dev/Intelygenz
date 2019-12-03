@@ -25,11 +25,11 @@ GRAFANA_CONFIG = {
 }
 
 
-ORCHESTRATOR_CONFIG = {
+SITES_MONITOR_CONFIG = {
     'monitoring_seconds': 0.01
 }
 
 QUART_CONFIG = {
-    'title': 'velocloud-orchestrator',
+    'title': 'sites-monitor',
     'port': 5000
 }

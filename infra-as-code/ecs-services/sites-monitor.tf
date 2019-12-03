@@ -1,14 +1,14 @@
-data "aws_ecr_repository" "automation-velocloud-orchestrator" {
-  name = "automation-velocloud-orchestrator"
+data "aws_ecr_repository" "automation-sites-monitor" {
+  name = "automation-sites-monitor"
 }
 
-data "template_file" "automation-velocloud-orchestrator" {
-  template = file("${path.module}/task-definitions/velocloud_orchestrator.json")
+data "template_file" "automation-sites-monitor" {
+  template = file("${path.module}/task-definitions/sites_monitor.json")
 
   vars = {
-    image = local.automation-velocloud-orchestrator-image
+    image = local.automation-sites-monitor-image
     log_group = var.ENVIRONMENT
-    log_prefix = local.automation-velocloud-orchestrator-log_prefix
+    log_prefix = local.automation-sites-monitor-log_prefix
 
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
@@ -18,9 +18,9 @@ data "template_file" "automation-velocloud-orchestrator" {
   }
 }
 
-resource "aws_ecs_task_definition" "automation-velocloud-orchestrator" {
-  family = local.automation-velocloud-orchestrator-ecs_task_definition-family
-  container_definitions = data.template_file.automation-velocloud-orchestrator.rendered
+resource "aws_ecs_task_definition" "automation-sites-monitor" {
+  family = local.automation-sites-monitor-ecs_task_definition-family
+  container_definitions = data.template_file.automation-sites-monitor.rendered
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
@@ -30,9 +30,9 @@ resource "aws_ecs_task_definition" "automation-velocloud-orchestrator" {
   task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
 }
 
-resource "aws_security_group" "automation-velocloud-orchestrator_service" {
+resource "aws_security_group" "automation-sites-monitor_service" {
   vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
-  name = local.automation-velocloud-orchestrator-service-security_group-name
+  name = local.automation-sites-monitor-service-security_group-name
   description = "Allow egress from container"
 
   egress {
@@ -70,13 +70,13 @@ resource "aws_security_group" "automation-velocloud-orchestrator_service" {
   }
 
   tags = {
-    Name = local.automation-velocloud-orchestrator-service-security_group-tag-Name
+    Name = local.automation-sites-monitor-service-security_group-tag-Name
     Environment = var.ENVIRONMENT
   }
 }
 
-resource "aws_service_discovery_service" "velocloud-orchestrator" {
-  name = local.automation-velocloud-orchestrator-service_discovery_service-name
+resource "aws_service_discovery_service" "sites-monitor" {
+  name = local.automation-sites-monitor-service_discovery_service-name
 
   dns_config {
     namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
@@ -94,16 +94,16 @@ resource "aws_service_discovery_service" "velocloud-orchestrator" {
   }
 }
 
-resource "aws_ecs_service" "automation-velocloud-orchestrator" {
-  name = local.automation-velocloud-orchestrator-ecs_service-name
-  task_definition = local.automation-velocloud-orchestrator-ecs_service-task_definition
+resource "aws_ecs_service" "automation-sites-monitor" {
+  name = local.automation-sites-monitor-ecs_service-name
+  task_definition = local.automation-sites-monitor-ecs_service-task_definition
   desired_count = 1
   launch_type = "FARGATE"
   cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
 
   network_configuration {
     security_groups = [
-      aws_security_group.automation-velocloud-orchestrator_service.id]
+      aws_security_group.automation-sites-monitor_service.id]
     subnets = [
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
@@ -111,6 +111,6 @@ resource "aws_ecs_service" "automation-velocloud-orchestrator" {
   }
 
   service_registries {
-    registry_arn = aws_service_discovery_service.velocloud-orchestrator.arn
+    registry_arn = aws_service_discovery_service.sites-monitor.arn
   }
 }

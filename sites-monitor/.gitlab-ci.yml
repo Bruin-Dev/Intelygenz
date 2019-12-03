@@ -1,25 +1,25 @@
 # ========================================================
-# Linter validation jobs for velocloud-orchestrator module
+# Linter validation jobs for sites-monitor module
 # ========================================================
-velocloud-orchestrator-linter:
+sites-monitor-linter:
   variables:
-    MODULE: velocloud-orchestrator
+    MODULE: sites-monitor
   extends: .lint_module
 
 # =================================================
-# Unit tests jobs for velocloud-orchestrator module
+# Unit tests jobs for sites-monitor module
 # =================================================
-velocloud-orchestrator-test:
+sites-monitor-test:
   variables:
-    MODULE: velocloud-orchestrator
+    MODULE: sites-monitor
   extends: .unittest_module
 
 # ====================================================
-# Images builds jobs for velocloud-orchestrator module
+# Images builds jobs for sites-monitor module
 # ====================================================
-velocloud-orchestrator-build:
+sites-monitor-build:
   stage: build
   variables:
-    MODULE_NAME: velocloud-orchestrator
+    MODULE_NAME: sites-monitor
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image

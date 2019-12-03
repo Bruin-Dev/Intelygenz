@@ -633,7 +633,7 @@ class TestEdgeMonitoring:
 
         scheduler.add_job.assert_called_once_with(
             edge_monitoring._edge_monitoring_process, 'interval',
-            seconds=testconfig.ORCHESTRATOR_CONFIG['monitoring_seconds'],
+            seconds=testconfig.SITES_MONITOR_CONFIG['monitoring_seconds'],
             next_run_time=next_run_time,
             replace_existing=True,
             id='_edge_monitoring_process',
@@ -658,7 +658,7 @@ class TestEdgeMonitoring:
 
         scheduler.add_job.assert_called_once_with(
             edge_monitoring._edge_monitoring_process, 'interval',
-            seconds=testconfig.ORCHESTRATOR_CONFIG['monitoring_seconds'],
+            seconds=testconfig.SITES_MONITOR_CONFIG['monitoring_seconds'],
             next_run_time=apscheduler_undefined,
             replace_existing=True,
             id='_edge_monitoring_process',

@@ -132,7 +132,7 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-velocloud-orchestrator",
+                        "${ENVIRONMENT}-sites-monitor",
                         ".",
                         ".",
                         {
@@ -214,7 +214,7 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-velocloud-orchestrator",
+                        "${ENVIRONMENT}-sites-monitor",
                         ".",
                         "."
                     ],
@@ -293,7 +293,7 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-velocloud-orchestrator",
+                        "${ENVIRONMENT}-sites-monitor",
                         ".",
                         "."
                     ],

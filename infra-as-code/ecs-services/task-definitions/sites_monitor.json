@@ -1,6 +1,6 @@
 [
   {
-    "name": "velocloud-orchestrator",
+    "name": "sites-monitor",
     "image": "${image}",
     "portMappings": [
       {

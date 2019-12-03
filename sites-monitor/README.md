@@ -38,12 +38,12 @@ The way to generate tasks is generate an event like this one
 }
 ````
 
-Then the Orchestrator will publish that task to the topic `edge.status.task`.
+Then the Sites Monitor will publish that task to the topic `edge.status.task`.
 
 This action will be performed in cycles. The interval between them is defined in the config file, in a snippet like this:
 
 ````
-ORCHESTRATOR_CONFIG = {
+SITES_MONITOR_CONFIG = {
     'interval_time': 600
 }
 ````
@@ -51,7 +51,7 @@ ORCHESTRATOR_CONFIG = {
 ````$
 docker-compose up --build nats-server velocloud-bridge prometheus grafana 
 # Wait until everything is up and running
-docker-compose up --build velocloud-orchestrator
+docker-compose up --build sites-monitor
 ````
 
 You can access to the metrics dashboards in localhost:3000 using the credentials in [here](../metrics-dashboard/grafana/Dockerfile)
