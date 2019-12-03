@@ -40,7 +40,7 @@ class Alert:
         edges_to_report = []
         for request in edge_status_requests:
 
-            edge_info = await self._event_bus.rpc_request("edge.status.request", json.dumps(request), timeout=60)
+            edge_info = await self._event_bus.rpc_request("edge.status.request", json.dumps(request), timeout=120)
             self._logger.info(f"Processing edge: {edge_info['edge_id']}")
             raw_last_contact = edge_info["edge_info"]["edges"]["lastContact"]
             if '0000-00-00 00:00:00' not in raw_last_contact:

@@ -25,7 +25,7 @@ In the `config.py`script, there's a way to split this into an array of dictionar
 ````
 
 ## Service logic
-The bridge will subscribe to `edge.list.request`, `edge.status.request`, `alert.request.all.edges`, and `alert.request.event.edge`.
+The bridge will subscribe to `edge.list.request`, `edge.status.request`, and `alert.request.event.edge`.
 
 When a message is received from `edge.list.request` the bridge will call upon velocloud and publish a 
 list of edge ids to a response topic that was built by NATS under the hood:
@@ -67,27 +67,6 @@ __edge.status.response.{some service id} schema__
  "edge_id":{"host": "some.host", "enterprise_id":19, "edge_id":99},
  "edge_info": {....},
  "status": 200
-}
-```
-
-
-When a message is received by `alert.request.all.edges`, the bridge will get a list of edge statuses along with
-associated edge ids and enterprise name for each edge status and send to a response topic that was built by NATS
-under the hood:
-
-__alert.request.all.edges schema__
-```
-{
-    'request_id': uuid(), 
-    'filter': []
-}
-```
-__alert.response.all.edges.{some service id} schema__
-```
-{
-    'request_id': request_id,
-    'edges': edges_data,
-    'status': status
 }
 ```
 

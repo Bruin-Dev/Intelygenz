@@ -4,7 +4,6 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 from application.actions.edge_list_response import ReportEdgeList
 from application.actions.edge_status_response import ReportEdgeStatus
-from application.actions.edges_for_alert import EdgesForAlert
 from application.actions.edge_events_for_alert import EventEdgesForAlert
 from application.repositories.velocloud_repository import VelocloudRepository
 from application.clients.velocloud_client import VelocloudClient
@@ -37,15 +36,13 @@ class Container:
 
         self._actions_list = ReportEdgeList(config, self._event_bus, self._velocloud_repository, self._logger)
         self._actions_status = ReportEdgeStatus(config, self._event_bus, self._velocloud_repository, self._logger)
-        self._edges_for_alert = EdgesForAlert(self._event_bus, self._velocloud_repository, self._logger)
         self._edge_events_for_alert = EventEdgesForAlert(self._event_bus, self._velocloud_repository, self._logger)
 
         self._report_edge_list = ActionWrapper(self._actions_list, "report_edge_list",
                                                is_async=True, logger=self._logger)
         self._report_edge_status = ActionWrapper(self._actions_status, "report_edge_status",
                                                  is_async=True, logger=self._logger)
-        self._alert_edge_list = ActionWrapper(self._edges_for_alert, "report_edge_list",
-                                              is_async=True, logger=self._logger)
+
         self._alert_edge_event = ActionWrapper(self._edge_events_for_alert, "report_edge_event",
                                                is_async=True, logger=self._logger)
 
@@ -59,9 +56,6 @@ class Container:
                                                  queue="velocloud_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="status", topic="edge.status.request",
                                                  action_wrapper=self._report_edge_status,
-                                                 queue="velocloud_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="alert", topic="alert.request.all.edges",
-                                                 action_wrapper=self._alert_edge_list,
                                                  queue="velocloud_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="event_alert", topic="alert.request.event.edge",
                                                  action_wrapper=self._alert_edge_event,
