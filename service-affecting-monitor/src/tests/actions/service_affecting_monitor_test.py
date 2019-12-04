@@ -1257,6 +1257,7 @@ class TestServiceAffectingMonitor:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value="Email Sent")
         logger = Mock()
+        logger.info = Mock()
         scheduler = Mock()
         template_renderer = Mock()
         device = {
@@ -1277,9 +1278,7 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._notify_trouble(device, 'Some Edge Status', 'Some Link Info', 'Input results',
                                                         'Output results', 'LATENCY', 120)
 
-        service_affecting_monitor._compose_ticket_dict.assert_called_once()
-        service_affecting_monitor._template_renderer.compose_email_object.assert_called_once()
-        event_bus.rpc_request.assert_awaited_once()
+        service_affecting_monitor._logger.info.assert_called_once()
 
     @pytest.mark.asyncio
     async def notify_trouble_with_production_environment_exists_test(self):
