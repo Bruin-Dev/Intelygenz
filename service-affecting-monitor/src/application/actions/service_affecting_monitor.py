@@ -88,15 +88,13 @@ class ServiceAffectingMonitor:
         ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
 
         if self._config.MONITOR_CONFIG['environment'] == 'dev':
-            email_obj = self._template_renderer.compose_email_object(edge_status, trouble, ticket_dict)
-            await self._event_bus.rpc_request("notification.email.request", json.dumps(email_obj), timeout=10)
+            self._logger.info(f'Service affecting trouble {trouble} detected in edge with data {edge_status}')
         elif self._config.MONITOR_CONFIG['environment'] == 'production':
             client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]
             ticket_exists = await self._ticket_existence(client_id, edge_status['edge_info']['edges']['serialNumber'],
                                                          trouble)
             if ticket_exists is False:
-                # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact
-                # TODO for each site, we should change this hardcode
+                # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact change here
                 ticket_note = self._ticket_object_to_string(ticket_dict)
                 ticket_details = {
                     "request_id": uuid(),
