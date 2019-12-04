@@ -1,58 +1,80 @@
-# **ALGORITHM**
-##### *OUTAGE_DETECTOR* (t = 40 min \[Time needed to get the list of all edges\])
-- Restore all jobs from _EDGES_QUARANTINE_ (just at the beginning)
-- Claim all the edges
-- For each edge:
-	- Claim status
-	- Check status
-		- If is OFFLINE, or any of its links are DISCONNECTED:
-		    - Add a new QUARANTINE_JOB in APScheduler to check if the edge is still in outage situation after 10 minutes
-		    - Add outage candidate to _EDGES_QUARANTINE_ with expire = quarantine_time + 5 minutes
+# Table of contents
+  * [Description](#description)
+  * [Work Flow](#work-flow)
+  * [Capabilities used](#capabilities-used) 
+  * [Running in docker-compose](#running-in-docker-compose)
 
-##### *QUARANTINE_JOB* (t= 10 min from outage detection)
-- Check edge status:
-	- If the edge or any of the links is still in an outage condition and there is no ticket for it:
-	    - Add it to _EDGES_TO_REPORT_
+# Description
+The objective of `service-outage-monitor` is to detect faulty edges which are not linked in any way to an open
+Bruin ticket and send a report with all those edges via e-mail. Note that edges targeted at testing purposes are not included.
 
-##### *OUTAGE_REPORT* (t = 60 min)
-- Compose an email with all the edges from _EDGES_TO_REPORT_ at the moment of time defined
-- Send the email
-- Clear _EDGES_TO_REPORT_
+> At this moment, this microservice is disabled in production environment because edges in `decomissioned` and
+`maintenance` state should not be monitored.
 
-#### Additional info
-Stores of Redis:
-- _EDGES_QUARANTINE_
-- _EDGES_TO_REPORT_
+This report is sent **every hour** and contains the list of faulty edges represented as a table like:
 
-# **INTERNAL WORKING**
-##### *TEMPLATE RENDERER SERVICE OUTAGE REPORT* 
+| Date of detection | Serial Number |   Company   |                                     Edge URL                                 |   Outage causes  |
+|:-----------------:|:-------------:|:-----------:|:----------------------------------------------------------------------------:|:----------------:|
+|     <detection_date_1>    |   <serial_number_1>  | <company_1> | <edge_url_1> | <outage_causes_list_1> |
+|     <detection_date_2>    |   <serial_number_2>  | <company_2> | <edge_url_2> | <outage_causes_list_2> |
+|     <detection_date_N>    |   <serial_number_N>  | <company_N> | <edge_url_N> | <outage_causes_list_N> |
 
-In the module **service_outage_report_template_renderer** the function *_compose_email* receives a list composed of the 
-dicts with the info of the edges which have to be reported.
-The function has optional arguments:
-- **fields** is a list with the names of the fields which are in the table with the results
-- **fields_edge** is the list with the name of key of the dict sent in the list of edges. The order must be the same in
-the argument **fields** to stablish the correlation with the columns of the table.
-----
--- Example -- 
+where:
+- **Date of detection**. Points out when the outage in an edge was first detected. It's a datetime represented with format `YYYY-MM-DD HH:mm:ss`.
+- **Serial number**. The serial number of the faulty edge.
+- **Company**. The company this edge belongs to.
+- **Edge URL**. The URL of this edge in the Velocloud system.
+- **Outage causes**. The reasons why the edge became faulty. It's a list containing a network element (either a link or the edge itself) and
+  the state that caused the outage (as of now, this state is `OFFLINE` for edges and `DISCONNECTED` for links).
+
+Besides this table, the e-mail has a CSV file like the following one attached to it:
 ```
-edges_to_report = [{
-    "detection_time": "01-01-2019",
-    "serial_number": "TX124533",
-    "enterprise": "Intelygenz",
-    "links": "http://example1.es - http://example2.com - http://example3.net",
-    "tickets": "No"
-    }]
-
-fields = ["Date of detection", "Serial Number", "Company", "LINKS", "Has ticket created?"]\
-fields_edge = ["detection_time", "serial_number", "enterprise", "links", "tickets"]
-
-compose_email_object(edges_to_report, fields=fields, fields_edge=fields_edge)
+detection_time,enterprise,links,serial_number,outage_causes
+<detection_date_1>,<company_1>,<edge_url_1>,<serial_number_1>,<comma_separated_causes_1>
+<detection_date_2>,<company_2>,<edge_url_2>,<serial_number_2>,<comma_separated_causes_2>
+<detection_date_N>,<company_N>,<edge_url_N>,<serial_number_N>,<comma_separated_causes_N>
 ```
-----
-This code generates a table like:
 
+# Work Flow
 
-| Date of detection | Serial Number |   Company   |                                     LINKS                                    | Has ticket created? |
-|:-----------------:|:-------------:|:-----------:|:----------------------------------------------------------------------------:|:-------------------:|
-|     01-01-2019    |   TX124533  | Intelygenz | http://example1.es<br>http://example2.com<br>http://example3.net |          No         |
+### Considerations
+The outage report process is divided into three APScheduler jobs that communicate through a Redis instance. Bear in mind these two
+terms to understand the role of every job:
+- **Quarantine**. The quarantine is a subset of Redis keys that start with the prefix `EDGES_QUARANTINE`.
+- **Reporting queue**. The reporting queue is a subset of Redis keys that start with the prefix `EDGES_TO_REPORT`.
+
+## Outage detector job
+This job runs **every 40 minutes** and is in charge of claiming the status of all the edges from the Velocloud API that belong to
+the enterprises under monitoring.
+- If an edge is in `DISCONNECTED` state or any of its links is `OFFLINE`, its status is put into quarantine.
+- If that is not the case, then the edge is just ignored as there is no interest in healthy edges for this report.
+
+## Quarantine job
+This one runs **every 10 minutes**. Its duty is to pull all the edges statuses from the Redis quarantine
+and check if they are still in an outage state.
+- If the edge from quarantine is still in an outage condition and there is no outage ticket open in the Bruin service, then the edge
+  is moved from quarantine to the reporting queue.
+- Otherwise, no action is applied to this edge. It is just kept into quarantine for the next quarantine job.
+
+> In case of a crash of the `service-outage-monitor` microservice, there is a mechanism implemented that triggers one
+job per edge stored in quarantine as soon as the microservice is restarted. This way the quarantine is processed before
+pulling edges statuses from the Velocloud API.
+
+## Reporter job
+This job is executed **every hour** and it simply:
+- Builds an HTML-formatted text containing a table with all the edges stored in the reporting queue,
+- Embeds the text (along with a CSV containing all the info of the faulty edges) into an e-mail, and
+- Sends it to the proper recipients.
+
+After that sequence of steps, the reporting queue is cleared up so it does not pollute subsequent reports.
+
+> In case of a crash of the `service-outage-monitor` microservice, edges stored in the reporting queue are sent via e-mail as soon
+as the microservice restarts.
+
+# Capabilities used
+- [Velocloud bridge](../velocloud-bridge/README.md)
+- [Bruin bridge](../bruin-bridge/README.md)
+- [Notifier](../notifier/README.md)
+
+# Running in docker-compose
+`docker-compose up --build redis velocloud-bridge bruin-bridge notifier nats-server service-outage-monitor`
