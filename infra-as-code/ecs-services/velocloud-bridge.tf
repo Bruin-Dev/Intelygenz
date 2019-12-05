@@ -23,8 +23,8 @@ resource "aws_ecs_task_definition" "automation-velocloud-bridge" {
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
-  cpu = "256"
-  memory = "512"
+  cpu = "1024"
+  memory = "4096"
   execution_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
   task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
 }
