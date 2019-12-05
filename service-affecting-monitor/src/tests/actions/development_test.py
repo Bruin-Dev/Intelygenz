@@ -22,13 +22,12 @@ class TestDevelopmentAction:
     @pytest.mark.asyncio
     async def run_action_test(self):
         logger = Mock()
+        logger.info = Mock()
         config = Mock()
 
         template_renderer = Mock()
-        template_renderer._compose_email_object = Mock(return_value='Some email object')
 
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value="Email Sent")
 
         device = Mock()
         edge_status = 'Some Edge Status'
@@ -39,5 +38,4 @@ class TestDevelopmentAction:
 
         await development_action.run_action(device, edge_status, trouble, ticket_dict)
 
-        template_renderer._compose_email_object.assert_called_once_with(edge_status, trouble, ticket_dict)
-        event_bus.rpc_request.assert_awaited_once()
+        logger.info.assert_called_once()
