@@ -98,7 +98,7 @@ resource "aws_service_discovery_service" "service-outage-monitor" {
 resource "aws_ecs_service" "automation-service-outage-monitor" {
   name = local.automation-service-outage-monitor-ecs_service-name
   task_definition = local.automation-service-outage-monitor-ecs_service-task_definition
-  desired_count = 1
+  desired_count = 0
   launch_type = "FARGATE"
   cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
 
