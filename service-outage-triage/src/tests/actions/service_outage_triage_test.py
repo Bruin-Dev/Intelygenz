@@ -1,22 +1,20 @@
 import json
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from unittest.mock import call
 from unittest.mock import Mock
+from unittest.mock import call
 from unittest.mock import patch
 
-from shortuuid import uuid
-
 import pytest
-from application.actions import service_outage_triage as service_outage_triage_module
 from application.actions.service_outage_triage import ServiceOutageTriage
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
 from dateutil.parser import parse
 from pytz import timezone
+from shortuuid import uuid
 
+from application.actions import service_outage_triage as service_outage_triage_module
 from config import testconfig
-from application.repositories.template_management import TemplateRenderer
 
 
 class TestServiceOutageTriage:
@@ -351,7 +349,7 @@ class TestServiceOutageTriage:
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
                 }, default=str),
-                timeout=10,
+                timeout=180,
             ),
             call(
                 'notification.email.request',
@@ -466,7 +464,7 @@ class TestServiceOutageTriage:
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
                 }, default=str),
-                timeout=10,
+                timeout=180,
             ),
             call(
                 'bruin.ticket.note.append.request',
@@ -953,9 +951,7 @@ class TestServiceOutageTriage:
         timestamp = '2019-07-30 00:26:00-04:00'
         ticket = {"ticketID": 123, "serial": "VC05200026138"}
         events_to_report = {
-            'events': {
-                'data': []
-            }
+            'events': []
         }
 
         event_bus = Mock()
@@ -984,73 +980,8 @@ class TestServiceOutageTriage:
                 'start_date': timestamp,
                 'end_date': current_datetime,
             }, default=str),
-            timeout=10,
+            timeout=180,
         )
-
-    @pytest.mark.asyncio
-    async def check_for_new_events_with_meaningless_events_test(self):
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-
-        timestamp = '2019-07-30 00:26:00-04:00'
-        ticket = {"ticketID": 123, "serial": "VC05200026138"}
-        events_to_report = {
-            'events': {
-                'data': [
-                    {
-                        'event': 'MEANINGLESS_EVENT',
-                        'category': 'NETWORK',
-                        'eventTime': '2019-07-30 06:38:00+00:00',
-                        'message': 'GE2 alive'
-                    },
-                    {
-                        'event': 'MEANINGLESS_EVENT',
-                        'category': 'NETWORK',
-                        'eventTime': '2019-07-30 07:38:00+00:00',
-                        'message': 'GE2 alive'
-                    },
-                    {
-                        'event': 'MEANINGLESS_EVENT',
-                        'category': 'NETWORK',
-                        'eventTime': '2019-07-30 08:38:00+00:00',
-                        'message': 'GE2 alive'
-                    },
-                ]
-            }
-        }
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
-
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
-        service_outage_triage._compose_event_note_object = Mock()
-
-        current_datetime = datetime.now()
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_datetime)
-
-        uuid_ = uuid()
-        with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
-            with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
-                await service_outage_triage._check_for_new_events(timestamp, ticket)
-
-        event_bus.rpc_request.assert_awaited_once_with(
-            'alert.request.event.edge',
-            json.dumps({
-                'request_id': uuid_,
-                'edge': {
-                    "host": "mettel.velocloud.net",
-                    "enterprise_id": 137,
-                    "edge_id": 958
-                },
-                'start_date': timestamp,
-                'end_date': current_datetime,
-            }, default=str),
-            timeout=10,
-        )
-        service_outage_triage._compose_event_note_object.assert_not_called()
 
     @pytest.mark.asyncio
     async def check_for_new_events_with_meaningful_events_and_check_they_are_sorted_test(self):
@@ -1082,7 +1013,7 @@ class TestServiceOutageTriage:
         }
         events_data = [event_1_data, event_2_data, event_3_data]
         events_data_sorted_by_timestamp = [event_2_data, event_3_data, event_1_data]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
 
         event_note = 'X' * 1500
 
@@ -1125,7 +1056,7 @@ class TestServiceOutageTriage:
             'message': 'GE2 alive'
         }
         events_data = [event_1_data, event_2_data, event_3_data]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
 
         event_note = 'X' * 500
 
@@ -1171,7 +1102,7 @@ class TestServiceOutageTriage:
             'message': 'GE2 alive'
         }
         events_data = [event_1_data, event_2_data, event_3_data]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
 
         event_note = 'X' * 1500
 
@@ -1225,7 +1156,7 @@ class TestServiceOutageTriage:
             'message': 'GE2 alive'
         }
         events_data = [event_1_data, event_2_data, event_3_data, event_4_data]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
 
         event_note = 'X' * 2500
 
@@ -1291,7 +1222,7 @@ class TestServiceOutageTriage:
             'message': 'GE2 alive'
         }
         events_data = [event_1_data, event_2_data, event_3_data, event_4_data, event_5_data, event_6_data]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
 
         event_note = 'X' * 3000
 
@@ -1325,7 +1256,7 @@ class TestServiceOutageTriage:
             event_1_data, event_2_data, event_3_data, event_4_data,
             event_5_data, event_6_data, event_7_data, event_8_data,
         ]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
         event_note = 'X' * 4000
@@ -1358,7 +1289,7 @@ class TestServiceOutageTriage:
             event_5_data, event_6_data, event_7_data, event_8_data,
             event_9_data, event_10_data,
         ]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
         event_note = 'X' * 5000
@@ -1423,7 +1354,7 @@ class TestServiceOutageTriage:
             'message': 'GE2 alive'
         }
         events_data = [event_1_data, event_2_data, event_3_data, event_4_data, event_5_data, event_6_data]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
 
         event_note = 'X' * 3001
 
@@ -1458,7 +1389,7 @@ class TestServiceOutageTriage:
             event_1_data, event_2_data, event_3_data, event_4_data,
             event_5_data, event_6_data, event_7_data, event_8_data,
         ]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
         event_note = 'X' * 4001
@@ -1491,7 +1422,7 @@ class TestServiceOutageTriage:
             event_5_data, event_6_data, event_7_data, event_8_data,
             event_9_data, event_10_data,
         ]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
         event_note = 'X' * 5001
@@ -1536,7 +1467,7 @@ class TestServiceOutageTriage:
             'message': 'GE2 alive'
         }
         events_data = [event_1_data, event_2_data]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
 
         events_note = 'This is the note for all these events\n'
         events_note_timestamp = parse(event_2_timestamp).astimezone(timezone('US/Eastern')) + timedelta(seconds=1)
@@ -1589,7 +1520,7 @@ class TestServiceOutageTriage:
                     'start_date': timestamp,
                     'end_date': current_datetime,
                 }, default=str),
-                timeout=10,
+                timeout=180,
             ),
             call(
                 'bruin.ticket.note.append.request',
@@ -1639,7 +1570,7 @@ class TestServiceOutageTriage:
             'message': 'GE2 alive'
         }
         events_data = [event_1_data, event_2_data]
-        events_to_report = {'events': {'data': events_data}}
+        events_to_report = {'events': events_data}
 
         events_note = 'This is the note for all these events\n'
 
@@ -1680,7 +1611,7 @@ class TestServiceOutageTriage:
                 'start_date': timestamp,
                 'end_date': current_datetime,
             }, default=str),
-            timeout=10,
+            timeout=180,
         )
 
     @pytest.mark.asyncio
@@ -1779,7 +1710,7 @@ class TestServiceOutageTriage:
                 ]
             }
         }
-        events_to_report = {'events': {'data': 'Some Event Info'}}
+        events_to_report = {'events': 'Some Event Info'}
 
         ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
 
@@ -1825,7 +1756,7 @@ class TestServiceOutageTriage:
                 ]
             }
         }
-        events_to_report = {'events': {'data': 'Some Event Info'}}
+        events_to_report = {'events': 'Some Event Info'}
 
         ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
 
@@ -1872,7 +1803,7 @@ class TestServiceOutageTriage:
                 ]
             }
         }
-        events_to_report = {'events': {'data': 'Some Event Info'}}
+        events_to_report = {'events': 'Some Event Info'}
 
         ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
 
@@ -1911,7 +1842,7 @@ class TestServiceOutageTriage:
                 "links": []
             }
         }
-        events_to_report = {'events': {'data': 'Some Event Info'}}
+        events_to_report = {'events': 'Some Event Info'}
 
         ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
 
@@ -1950,7 +1881,7 @@ class TestServiceOutageTriage:
                 "links": [{"link": None}]
             }
         }
-        events_to_report = {'events': {'data': 'Some Event Info'}}
+        events_to_report = {'events': 'Some Event Info'}
 
         ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
 

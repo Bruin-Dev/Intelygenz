@@ -63,7 +63,7 @@ class ServiceOutageTriage:
             edge_status = await self._event_bus.rpc_request("edge.status.request",
                                                             json.dumps(status_msg, default=str), timeout=10)
             edge_events = await self._event_bus.rpc_request("alert.request.event.edge",
-                                                            json.dumps(events_msg, default=str), timeout=10)
+                                                            json.dumps(events_msg, default=str), timeout=180)
             ticket_dict = self._compose_ticket_note_object(edge_status, edge_events)
             if self._config.TRIAGE_CONFIG['environment'] == 'production':
                 ticket_note = self._ticket_object_to_string(ticket_dict)
@@ -145,10 +145,9 @@ class ServiceOutageTriage:
                       'start_date': timestamp,
                       'end_date': datetime.now(timezone('US/Eastern'))}
         edge_events = await self._event_bus.rpc_request("alert.request.event.edge", json.dumps(
-            events_msg, default=str), timeout=10)
-        filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+            events_msg, default=str), timeout=180)
 
-        event_list = [event for event in edge_events["events"]["data"] if event['event'] in filter_events_status_list]
+        event_list = edge_events['events']
 
         if len(event_list) > 0:
             sorted_event_list = sorted(event_list, key=lambda event: event['eventTime'])
@@ -254,26 +253,26 @@ class ServiceOutageTriage:
             edge_triage_dict["Interface GE2 Status"] = f'{link_data["GE2"][0]["link"]["state"]}\n'
             edge_triage_dict["Label LABELMARK4"] = link_data["GE2"][0]["link"]['displayName']
 
-        edge_triage_dict["Last Edge Online"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
-                                                                                    ["data"], 'EDGE_UP')
-        edge_triage_dict["Last Edge Offline"] = self._find_recent_occurence_of_event(edges_events_to_report["events"]
-                                                                                     ["data"], 'EDGE_DOWN')
+        edge_triage_dict["Last Edge Online"] = self._find_recent_occurence_of_event(edges_events_to_report["events"],
+                                                                                    'EDGE_UP')
+        edge_triage_dict["Last Edge Offline"] = self._find_recent_occurence_of_event(edges_events_to_report["events"],
+                                                                                     'EDGE_DOWN')
         edge_triage_dict["Last GE1 Interface Online"] = self._find_recent_occurence_of_event(edges_events_to_report
-                                                                                             ["events"]["data"],
+                                                                                             ["events"],
                                                                                              'LINK_ALIVE',
                                                                                              'Link GE1 is no'
                                                                                              ' longer DEAD')
         edge_triage_dict["Last GE1 Interface Offline"] = self._find_recent_occurence_of_event(edges_events_to_report
-                                                                                              ["events"]["data"],
+                                                                                              ["events"],
                                                                                               'LINK_DEAD',
                                                                                               'Link GE1 is now DEAD')
         edge_triage_dict["Last GE2 Interface Online"] = self._find_recent_occurence_of_event(edges_events_to_report
-                                                                                             ["events"]["data"],
+                                                                                             ["events"],
                                                                                              'LINK_ALIVE',
                                                                                              'Link GE2 is no'
                                                                                              ' longer DEAD')
         edge_triage_dict["Last GE2 Interface Offline"] = self._find_recent_occurence_of_event(edges_events_to_report
-                                                                                              ["events"]["data"],
+                                                                                              ["events"],
                                                                                               'LINK_DEAD',
                                                                                               'Link GE2 is now DEAD')
         edge_triage_dict["TimeStamp"] = datetime.now(timezone('US/Eastern'))
