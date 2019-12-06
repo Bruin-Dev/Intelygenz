@@ -30,7 +30,8 @@ class TestEventEdgesForAlert:
                     "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
                     "start_date": "2019-07-26 14:19:45.334427",
                     "end_date": "now",
-                    "limit": 200}
+                    "limit": 200,
+                    "filter": ['EDGE_UP']}
         await edges_for_alert.report_edge_event(json.dumps(edge_msg, default=str))
         assert velocloud_repo.get_all_edge_events.called
         assert velocloud_repo.get_all_edge_events.call_args[0][0] == edge_msg["edge"]
@@ -38,6 +39,7 @@ class TestEventEdgesForAlert:
 
         assert velocloud_repo.get_all_edge_events.call_args[0][2] == edge_msg["end_date"]
         assert velocloud_repo.get_all_edge_events.call_args[0][3] == edge_msg["limit"]
+        assert velocloud_repo.get_all_edge_events.call_args[0][4] == edge_msg["filter"]
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
@@ -46,7 +48,7 @@ class TestEventEdgesForAlert:
         assert edges_for_alert._logger.info.called
 
     @pytest.mark.asyncio
-    async def report_edge_event_ok_no_limit_test(self):
+    async def report_edge_event_ok_no_limit_no_filter_test(self):
         mock_logger = Mock()
         test_bus = EventBus(logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
@@ -65,6 +67,7 @@ class TestEventEdgesForAlert:
 
         assert velocloud_repo.get_all_edge_events.call_args[0][2] == edge_msg["end_date"]
         assert velocloud_repo.get_all_edge_events.call_args[0][3] is None
+        assert velocloud_repo.get_all_edge_events.call_args[0][4] is None
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",

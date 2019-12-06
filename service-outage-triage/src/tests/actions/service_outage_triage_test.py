@@ -348,6 +348,7 @@ class TestServiceOutageTriage:
                     'edge': edge_id_by_serial,
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
+                    'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
                 }, default=str),
                 timeout=180,
             ),
@@ -463,6 +464,7 @@ class TestServiceOutageTriage:
                     'edge': edge_id_by_serial,
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
+                    'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
                 }, default=str),
                 timeout=180,
             ),
@@ -979,6 +981,7 @@ class TestServiceOutageTriage:
                 },
                 'start_date': timestamp,
                 'end_date': current_datetime,
+                'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
             }, default=str),
             timeout=180,
         )
@@ -1519,6 +1522,7 @@ class TestServiceOutageTriage:
                     },
                     'start_date': timestamp,
                     'end_date': current_datetime,
+                    'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
                 }, default=str),
                 timeout=180,
             ),
@@ -1610,6 +1614,7 @@ class TestServiceOutageTriage:
                 },
                 'start_date': timestamp,
                 'end_date': current_datetime,
+                'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
             }, default=str),
             timeout=180,
         )

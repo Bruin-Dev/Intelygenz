@@ -15,11 +15,16 @@ class EventEdgesForAlert:
         start = msg["start_date"]
         end = msg["end_date"]
         limit = None
+        filter = None
+
+        if "filter" in msg.keys():
+            filter = msg["filter"]
+
         if "limit" in msg.keys():
             limit = msg["limit"]
 
         self._logger.info(f'Sending events for edge with data {edgeids} for alerts')
-        events_by_edge = self._velocloud_repository.get_all_edge_events(edgeids, start, end, limit)
+        events_by_edge = self._velocloud_repository.get_all_edge_events(edgeids, start, end, limit, filter)
 
         status = 200
         if events_by_edge is None:

@@ -56,10 +56,13 @@ class ServiceOutageTriage:
             status_msg = {'request_id': uuid(),
                           'edge': edge_id}
 
+            filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
             events_msg = {'request_id': uuid(),
                           'edge': edge_id,
                           'start_date': (datetime.now(utc) - timedelta(days=7)),
-                          'end_date': datetime.now(utc)}
+                          'end_date': datetime.now(utc),
+                          'filter': filter_events_status_list}
+
             edge_status = await self._event_bus.rpc_request("edge.status.request",
                                                             json.dumps(status_msg, default=str), timeout=10)
             edge_events = await self._event_bus.rpc_request("alert.request.event.edge",
@@ -140,10 +143,12 @@ class ServiceOutageTriage:
     async def _check_for_new_events(self, timestamp, ticket_id):
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
         edge_id = id_by_serial[ticket_id["serial"]]
+        filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
         events_msg = {'request_id': uuid(),
                       'edge': edge_id,
                       'start_date': timestamp,
-                      'end_date': datetime.now(timezone('US/Eastern'))}
+                      'end_date': datetime.now(timezone('US/Eastern')),
+                      'filter': filter_events_status_list}
         edge_events = await self._event_bus.rpc_request("alert.request.event.edge", json.dumps(
             events_msg, default=str), timeout=180)
 

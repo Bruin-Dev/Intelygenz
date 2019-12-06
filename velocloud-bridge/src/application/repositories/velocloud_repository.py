@@ -57,11 +57,12 @@ class VelocloudRepository:
         else:
             return enterprise_info
 
-    def get_all_edge_events(self, edge, start, end, limit):
+    def get_all_edge_events(self, edge, start, end, limit, filter_events_status_list):
         self._logger.info(f'Getting events from edge:{edge["edge_id"]} from time:{start} to time:{end}')
 
         full_events = self._velocloud_client.get_all_edge_events(edge, start, end, limit)
-        filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-        event_list = [event for event in full_events["data"] if event['event'] in filter_events_status_list]
-
-        return event_list
+        if filter_events_status_list is None:
+            return full_events["data"]
+        else:
+            event_list = [event for event in full_events["data"] if event['event'] in filter_events_status_list]
+            return event_list
