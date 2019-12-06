@@ -25,8 +25,8 @@ resource "aws_ecs_task_definition" "automation-bruin-bridge" {
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
-  cpu = "256"
-  memory = "512"
+  cpu = "1024"
+  memory = "2048"
   execution_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
   task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
 }
@@ -97,7 +97,7 @@ resource "aws_service_discovery_service" "bruin-bridge" {
 resource "aws_ecs_service" "automation-bruin-bridge" {
   name = local.automation-bruin-bridge-resource-name
   task_definition = local.automation-bruin-bridge-task_definition
-  desired_count = 1
+  desired_count = 2
   launch_type = "FARGATE"
   cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
 
