@@ -29,8 +29,6 @@ class Alert:
                                 next_run_time=next_run_time,
                                 id='_alert_process')
 
-    # base 3 mins
-    # remove link status 1 min
     async def _alert_process(self):
         self._logger.info("Requesting all edges with details for alert report")
         list_request = dict(request_id=uuid(), filter=[])

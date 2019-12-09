@@ -21,18 +21,18 @@ class ReportEdgeStatus:
 
         edge_status = self._velocloud_repository.get_edge_information(edgeids)
 
-        # interval = {
-        #             "start": (datetime.now() - timedelta(hours=8)).replace(tzinfo=timezone.utc).isoformat()
-        #            }
-        # if "interval" in msg.keys():
-        #     interval = msg["interval"]
-        # link_status = self._velocloud_repository.get_link_information(edgeids, interval)
+        interval = {
+                    "start": (datetime.now() - timedelta(hours=8)).replace(tzinfo=timezone.utc).isoformat()
+                   }
+        if "interval" in msg.keys():
+            interval = msg["interval"]
+        link_status = self._velocloud_repository.get_link_information(edgeids, interval)
         status = 200
-        # if enterprise_name is None or edge_status is None or link_status is None:
-        #     status = 204
-        # if isinstance(enterprise_name, Exception) or isinstance(edge_status, Exception) or isinstance(link_status,
-        #                                                                                               Exception):
-        #     status = 500
-        edge_status = {"enterprise_name": enterprise_name, "edges": edge_status}
+        if enterprise_name is None or edge_status is None or link_status is None:
+            status = 204
+        if isinstance(enterprise_name, Exception) or isinstance(edge_status, Exception) or isinstance(link_status,
+                                                                                                      Exception):
+            status = 500
+        edge_status = {"enterprise_name": enterprise_name, "edges": edge_status, "links": link_status}
         edge_response = {"request_id": request_id, "edge_id": edgeids, "edge_info": edge_status, "status": status}
         await self._event_bus.publish_message(msg['response_topic'], json.dumps(edge_response, default=str))
