@@ -32,7 +32,7 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
 
-        await self._alert.start_alert_job(exec_on_start=False)
+        await self._alert.start_alert_job(exec_on_start=True)
         self._scheduler.start()
 
     async def start_server(self):
