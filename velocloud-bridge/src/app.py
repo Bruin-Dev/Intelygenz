@@ -49,7 +49,7 @@ class Container:
         self._alert_edge_event = ActionWrapper(self._edge_events_for_alert, "report_edge_event",
                                                is_async=True, logger=self._logger)
         self._list_enterprise_name = ActionWrapper(self._enterprise_name_list, "enterprise_name_list",
-                                               is_async=True, logger=self._logger)
+                                                   is_async=True, logger=self._logger)
 
         self._server = QuartServer(config)
 
