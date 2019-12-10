@@ -20,11 +20,8 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-ENV_CONFIG = {
-    'environment': os.environ["CURRENT_ENVIRONMENT"]
-}
-
 TRIAGE_CONFIG = {
+    'environment': os.environ["CURRENT_ENVIRONMENT"],
     'polling_minutes': 10,
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'timezone': 'US/Eastern',

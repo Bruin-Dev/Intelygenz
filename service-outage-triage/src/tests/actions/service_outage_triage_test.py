@@ -253,14 +253,150 @@ class TestServiceOutageTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            tickets, edge_status, edge_event,
+            append_ticket, send_to_slack
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
         service_outage_triage._filtered_ticket_details = CoroutineMock()
+        ])
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
+        service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
+        service_outage_triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
+        service_outage_triage._template_renderer._ticket_object_to_email_obj = \
+            Mock(return_value=ticket_note_as_email_object)
 
         uuid_1 = uuid()
         uuid_2 = uuid()
         uuid_3 = uuid()
         uuid_side_effect = [uuid_1, uuid_2, uuid_3]
+        uuid_4 = uuid()
+        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4]
+
+        current_datetime = datetime.now()
+        current_datetime_previous_week = current_datetime - timedelta(days=7)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+
+        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config['environment'] = environment
+        with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
+            with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
+                with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+                    await service_outage_triage._poll_tickets()
+
+        event_bus.rpc_request.assert_has_awaits([
+            call(
+                'bruin.ticket.request',
+                json.dumps({
+                    'request_id': uuid_1,
+                    'client_id': 85940,
+                    'ticket_status': ['New', 'InProgress', 'Draft'],
+                    'category': 'SD-WAN',
+                    'ticket_topic': 'VOO'
+                }),
+                timeout=200,
+            ),
+            call(
+                'edge.status.request',
+                json.dumps({
+                    'request_id': uuid_2,
+                    'edge': edge_id_by_serial,
+                }),
+                timeout=10,
+            ),
+            call(
+                'alert.request.event.edge',
+                json.dumps({
+                    'request_id': uuid_3,
+                    'edge': edge_id_by_serial,
+                    'start_date': current_datetime_previous_week,
+                    'end_date': current_datetime,
+                    'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+                }, default=str),
+                timeout=180,
+            ),
+            call(
+                'notification.email.request',
+                json.dumps(ticket_note_as_email_object),
+                timeout=10,
+            ),
+            call(
+                'notification.slack.request',
+                json.dumps({
+                    'request_id': uuid_4,
+                    'message': (
+                        'Triage appended to ticket: '
+                        f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id}, in {environment}'
+                    )
+                }),
+                timeout=10,
+            ),
+        ], any_order=False)
+        service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
+        service_outage_triage._compose_ticket_note_object.assert_called_once_with(edge_status, edge_event)
+        service_outage_triage._template_renderer._ticket_object_to_email_obj.assert_called_once_with(ticket_note_object)
+
+    @pytest.mark.asyncio
+    async def poll_tickets_with_filtered_tickets_and_production_environment_test(self):
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+
+        environment = 'production'
+        ticket_id = 3521039
+
+        ticket_details = {'ticketID': ticket_id}
+        tickets_list = [ticket_details]
+        tickets = {'tickets': tickets_list}
+
+        edge_id_by_serial = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        }
+        edge_serial = 'VC05200026138'
+        filtered_ticket_details = {'ticketID': ticket_id, 'serial': edge_serial}
+        filtered_tickets_list = [filtered_ticket_details]
+
+        ticket_note_object = {"Ticket return object": "Ticket Note"}
+        ticket_note_as_string = "Something happened"
+
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+        edge_event = {'edge_events': 'Some event info'}
+        append_ticket = {'ticket_appended': 'Success'}
+        send_to_slack = {'slack_sent': 'Success'}
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            tickets, edge_status, edge_event,
+            append_ticket, send_to_slack
+        ])
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
+        service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
+        service_outage_triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
+        service_outage_triage._ticket_object_to_string = Mock(return_value=ticket_note_as_string)
+
+        uuid_1 = uuid()
+        uuid_2 = uuid()
+        uuid_3 = uuid()
+        uuid_4 = uuid()
+        uuid_5 = uuid()
+        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4, uuid_5]
+
+        current_datetime = datetime.now()
+        current_datetime_previous_week = current_datetime - timedelta(days=7)
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+
+        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config['environment'] = environment
         with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
             await service_outage_triage._poll_tickets()
 
@@ -298,6 +434,34 @@ class TestServiceOutageTriage:
                 }),
                 timeout=10,
             ),
+                    'edge': edge_id_by_serial,
+                    'start_date': current_datetime_previous_week,
+                    'end_date': current_datetime,
+                    'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+                }, default=str),
+                timeout=180,
+            ),
+            call(
+                'bruin.ticket.note.append.request',
+                json.dumps({
+                    'request_id': uuid_4,
+                    'ticket_id': ticket_id,
+                    'note': ticket_note_as_string,
+                }),
+                timeout=15,
+            ),
+            call(
+                'notification.slack.request',
+                json.dumps({
+                    'request_id': uuid_5,
+                    'message': (
+                        'Triage appended to ticket: '
+                        f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id}, in {environment}'
+                    )
+                }),
+                timeout=10,
+            ),
+
         ], any_order=False)
         service_outage_triage._filtered_ticket_details.assert_not_awaited()
         logger.error.assert_called_once()
@@ -675,6 +839,7 @@ class TestServiceOutageTriage:
     async def filtered_ticket_details_with_existing_details_and_invalid_serial_test(self):
         logger = Mock()
         scheduler = Mock()
+
         config = testconfig
         template_renderer = Mock()
 
@@ -1498,6 +1663,7 @@ class TestServiceOutageTriage:
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
         event_note = 'X' * 5001
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
 
         await service_outage_triage._check_for_new_events(timestamp, ticket)

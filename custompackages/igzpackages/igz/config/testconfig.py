@@ -17,9 +17,6 @@ NATS_CONFIG = {
     'reconnects': 0
 }
 
-ENV_CONFIG = {
-    'environment': 'dev'
-}
 LOG_CONFIG = {
     'name': 'test-name',
     'level': logging.DEBUG,
