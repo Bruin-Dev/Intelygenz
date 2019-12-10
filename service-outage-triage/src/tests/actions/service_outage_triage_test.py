@@ -153,7 +153,7 @@ class TestServiceOutageTriage:
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
                 }),
-                timeout=90,
+                timeout=200,
             ),
             call(
                 'bruin.ticket.request',
@@ -213,7 +213,7 @@ class TestServiceOutageTriage:
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
                 }),
-                timeout=90,
+                timeout=200,
             ),
             call(
                 'bruin.ticket.request',
@@ -224,7 +224,7 @@ class TestServiceOutageTriage:
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
                 }),
-                timeout=90,
+                timeout=200,
             ),
             call(
                 'notification.slack.request',
@@ -274,7 +274,7 @@ class TestServiceOutageTriage:
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
                 }),
-                timeout=90,
+                timeout=200,
             ),
             call(
                 'bruin.ticket.request',

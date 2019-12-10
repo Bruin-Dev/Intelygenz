@@ -68,7 +68,7 @@ class ProductionAction:
                               'category': 'SD-WAN', 'ticket_topic': 'VAS'}
         all_tickets = await  self._event_bus.rpc_request("bruin.ticket.request",
                                                          json.dumps(ticket_request_msg, default=str),
-                                                         timeout=15)
+                                                         timeout=200)
         for ticket in all_tickets['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'ticket_id': ticket['ticketID']}
