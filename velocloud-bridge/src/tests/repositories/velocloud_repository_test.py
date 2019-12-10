@@ -182,3 +182,16 @@ class TestVelocloudRepository:
         test_velocloud_client.instantiate_and_connect_clients = Mock()
         vr.connect_to_all_servers()
         assert test_velocloud_client.instantiate_and_connect_clients.called
+
+    def get_all_enterprise_names_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        enterprises = [{"enterprise_id": 19, "name": "The Name"}]
+        msg = {"request_id": "123", "filter": []}
+        test_velocloud_client.get_all_enterprise_names = Mock(
+            return_value=enterprises
+        )
+        enterprise_names = vr.get_all_enterprise_names(msg)
+        assert test_velocloud_client.get_all_enterprise_names.called
+        assert enterprise_names == [{"enterprise_name": "The Name"}]

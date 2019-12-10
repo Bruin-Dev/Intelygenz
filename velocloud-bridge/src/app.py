@@ -6,6 +6,7 @@ from application.actions.edge_list_response import ReportEdgeList
 from application.actions.edge_status_response import ReportEdgeStatus
 from application.actions.edge_events_for_alert import EventEdgesForAlert
 from application.repositories.velocloud_repository import VelocloudRepository
+from application.actions.enterprise_name_list_response import EnterpriseNameList
 from application.clients.velocloud_client import VelocloudClient
 
 from igz.packages.Logger.logger_client import LoggerClient
@@ -26,24 +27,28 @@ class Container:
         self._subscriber_stat = NATSClient(config, logger=self._logger)
         self._subscriber_alert = NATSClient(config, logger=self._logger)
         self._subscriber_event_alert = NATSClient(config, logger=self._logger)
+        self._subscriber_enterprise_name_list = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_list, consumer_name="list")
         self._event_bus.add_consumer(self._subscriber_stat, consumer_name="status")
         self._event_bus.add_consumer(self._subscriber_alert, consumer_name="alert")
         self._event_bus.add_consumer(self._subscriber_event_alert, consumer_name="event_alert")
+        self._event_bus.add_consumer(self._subscriber_enterprise_name_list, consumer_name="enterprise_name_list")
         self._event_bus.set_producer(self._publisher)
 
         self._actions_list = ReportEdgeList(config, self._event_bus, self._velocloud_repository, self._logger)
         self._actions_status = ReportEdgeStatus(config, self._event_bus, self._velocloud_repository, self._logger)
         self._edge_events_for_alert = EventEdgesForAlert(self._event_bus, self._velocloud_repository, self._logger)
+        self._enterprise_name_list = EnterpriseNameList(self._event_bus, self._velocloud_repository, self._logger)
 
         self._report_edge_list = ActionWrapper(self._actions_list, "report_edge_list",
                                                is_async=True, logger=self._logger)
         self._report_edge_status = ActionWrapper(self._actions_status, "report_edge_status",
                                                  is_async=True, logger=self._logger)
-
         self._alert_edge_event = ActionWrapper(self._edge_events_for_alert, "report_edge_event",
+                                               is_async=True, logger=self._logger)
+        self._list_enterprise_name = ActionWrapper(self._enterprise_name_list, "enterprise_name_list",
                                                is_async=True, logger=self._logger)
 
         self._server = QuartServer(config)
@@ -59,6 +64,10 @@ class Container:
                                                  queue="velocloud_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="event_alert", topic="alert.request.event.edge",
                                                  action_wrapper=self._alert_edge_event,
+                                                 queue="velocloud_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="enterprise_name_list",
+                                                 topic="request.enterprises.names",
+                                                 action_wrapper=self._list_enterprise_name,
                                                  queue="velocloud_bridge")
 
     async def start_server(self):

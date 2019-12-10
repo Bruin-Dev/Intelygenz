@@ -53,7 +53,7 @@ class Container:
 
     def __init__(self):
         self._my_scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
-        self.redis_connection = redis.Redis(host="redis", port=6379, decode_responses=True)
+        #self.redis_connection = redis.Redis(host="redis", port=6379, decode_responses=True)
 
         self.client1 = NATSClient(config, logger=logger)
         self.client2 = NATSClient(config, logger=logger)
@@ -102,9 +102,10 @@ class Container:
         rpc_request_msg = {
             "request_id": uuid(),
             "some_field_1": "Sending data related to request here",
-            "some_field_2": "Sending data related to request here"
+            "some_field_2": "Sending data related to request here",
+            "filter": []
         }
-        response = await self.event_bus.rpc_request("rpc.request", json.dumps(rpc_request_msg), timeout=1)
+        response = await self.event_bus.rpc_request("request.enterprises.names", json.dumps(rpc_request_msg), timeout=20)
         print(f'Got RPC response with value: {json.dumps(response, indent=2)}')
 
     async def start(self):
@@ -130,12 +131,12 @@ class Container:
                                                 action_wrapper=self.rpc_action,
                                                 queue="queue")
 
-        await self.start_publish_job(exec_on_start=True)
-        self._my_scheduler.start()
+        #await self.start_publish_job(exec_on_start=True)
+        #self._my_scheduler.start()
 
-        self.redis_connection.hset("foo", "key", datetime.now().isoformat())
-        redis_data = self.redis_connection.hgetall("foo")
-        logger.info(f'Data retrieved from Redis: {redis_data["key"]}')
+        #self.redis_connection.hset("foo", "key", datetime.now().isoformat())
+        #redis_data = self.redis_connection.hgetall("foo")
+        #logger.info(f'Data retrieved from Redis: {redis_data["key"]}')
 
         await self._make_rpc_request()
 

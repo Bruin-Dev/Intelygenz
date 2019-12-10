@@ -476,6 +476,22 @@ class TestVelocloudClient:
                 mock_post.assert_called()
                 assert list_of_enterprise_edges == ''
 
+    def get_all_enterprise_names_test(self):
+        configs = Mock()
+        logger = Mock()
+
+        clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
+        monitoring_aggregates_return = {'enterprises': [{'id': 1, 'name': 'A name'}]}
+
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
+        velocloud_client._clients = clients
+
+        enterprise_names = velocloud_client.get_all_enterprise_names()
+
+        velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
+        assert enterprise_names == [{'enterprise_name': 'A name'}]
+
     def json_return_ok_test(self):
         configs = testconfig
         logger = Mock()

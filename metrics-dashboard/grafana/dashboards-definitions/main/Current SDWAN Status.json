@@ -138,7 +138,7 @@
       "strokeWidth": 1,
       "targets": [
         {
-          "expr": " sum by (state) ((edge_state_gauge)) ",
+          "expr": "sum by (state) ((edge_state_gauge))",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -189,7 +189,7 @@
       "strokeWidth": 1,
       "targets": [
         {
-          "expr": "sum by (state) ((link_state_gauge)) ",
+          "expr": "sum by (state) ((link_state_gauge))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -246,7 +246,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": " sum by (state) ((edge_state_gauge)) ",
+          "expr": "sum by (state) ((edge_state_gauge))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{state}}",
@@ -634,7 +634,7 @@
           "refId": "C"
         },
         {
-          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='NEVER_ACTIVATED'})) ",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='NEVER_ACTIVATED'}))",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -642,7 +642,7 @@
           "refId": "D"
         },
         {
-          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='DEGRADED'})) ",
+          "expr": "sum by (enterprise_name) ((edge_state_gauge{state='DEGRADED'}))",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
@@ -864,7 +864,7 @@
       ],
       "targets": [
         {
-          "expr": "sum by (enterprise_name) ((link_state_gauge{state='STABLE'})) ",
+          "expr": "sum by (enterprise_name) ((link_state_gauge{state='STABLE'}))",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
@@ -878,14 +878,14 @@
           "refId": "C"
         },
         {
-          "expr": "sum by (enterprise_name) ((link_state_gauge{state='DISCONNECTED'})) ",
+          "expr": "sum by (enterprise_name) ((link_state_gauge{state='DISCONNECTED'}))",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
           "refId": "D"
         },
         {
-          "expr": "sum by (enterprise_name) ((link_state_gauge)) ",
+          "expr": "sum by (enterprise_name) ((link_state_gauge))",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,

@@ -31,87 +31,215 @@ class TestPrometheusRepository:
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
         test_link_status = [{"link": {"state": "OK"}}]
-        test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
-                                   "links": test_link_status}}
+        test_edge = {
+            "edge_info":
+            {
+                "edges":
+                {
+                    "edgeState": test_edge_state,
+                    "name": test_edge_name
+                },
+                "enterprise_name": test_enterprise_name,
+                "links": test_link_status
+            }
+        }
         self.test_pro_repo.inc(test_edge["edge_info"])
         self.test_pro_repo.inc(test_edge["edge_info"])
-        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
-                                                                     'state': test_edge_state}) == 2
-
-        assert REGISTRY.get_sample_value('link_state_gauge', labels={'enterprise_name': test_enterprise_name,
-                                                                     'state': 'OK'}) == 2
+        assert REGISTRY.get_sample_value(
+            'edge_state_gauge',
+            labels={
+                'enterprise_name': test_enterprise_name,
+                'state': test_edge_state,
+                'name': test_edge_name
+            }
+        ) == 2
+        assert REGISTRY.get_sample_value(
+            'link_state_gauge',
+            labels={
+                'enterprise_name': test_enterprise_name,
+                'state': 'OK'
+            }
+        ) == 2
 
     def dec_test(self):
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
         test_link_status = [{"link": {"state": "OK"}}]
-        test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
-                                   "links": test_link_status}}
+        test_edge = {
+            "edge_info":
+            {
+                "edges":
+                {
+                    "edgeState": test_edge_state,
+                    "name": test_edge_name
+                },
+                "enterprise_name": test_enterprise_name,
+                "links": test_link_status
+            }
+        }
         self.test_pro_repo.reset_counter()
         self.test_pro_repo.inc(test_edge["edge_info"])
         self.test_pro_repo.inc(test_edge["edge_info"])
         self.test_pro_repo.dec(test_edge["edge_info"])
-        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
-                                                                     'state': test_edge_state}) == 1
-
-        assert REGISTRY.get_sample_value('link_state_gauge', labels={'enterprise_name': test_enterprise_name,
-                                                                     'state': 'OK'}) == 1
+        assert REGISTRY.get_sample_value(
+            'edge_state_gauge',
+            labels={
+                'enterprise_name': test_enterprise_name,
+                'state': test_edge_state,
+                'name': test_edge_name
+            }
+        ) == 1
+        assert REGISTRY.get_sample_value(
+            'link_state_gauge',
+            labels={
+                'enterprise_name': test_enterprise_name,
+                'state': 'OK'
+            }
+        ) == 1
 
     def update_edge_test(self):
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
         test_link_status = [{"link": {"state": "OK"}}]
-        test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
-                                   "links": test_link_status}}
+        test_edge = {
+            "edge_info":
+            {
+                "edges":
+                {
+                    "edgeState": test_edge_state,
+                    "name": test_edge_name
+                },
+                "enterprise_name": test_enterprise_name,
+                "links": test_link_status
+            }
+        }
         cache_test_enterprise_name = 'Test'
         cache_edge_state = 'Edge_KO'
         cache_link_status = [{"link": {"state": "KO"}}]
-        cache_edge = {"edge_info": {"edges": {"edgeState": cache_edge_state},
-                                    "enterprise_name": cache_test_enterprise_name,
-                                    "links": cache_link_status}}
+        cache_edge = {
+            "edge_info":
+            {
+                "edges":
+                {
+                    "edgeState": cache_edge_state,
+                    "name": cache_edge_name
+                },
+                "enterprise_name": cache_test_enterprise_name,
+                "links": cache_link_status
+            }
+        }
         self.test_pro_repo.reset_counter()
         self.test_pro_repo.inc(cache_edge["edge_info"])
-        self.test_pro_repo.update_edge(test_edge["edge_info"], cache_edge["edge_info"])
+        self.test_pro_repo.update_edge(
+            test_edge["edge_info"],
+            cache_edge["edge_info"]
+        )
 
-        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
-                                                                     'state': test_edge_state}) == 1
-        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': cache_test_enterprise_name,
-                                                                     'state': cache_edge_state}) == 0
+        assert REGISTRY.get_sample_value(
+            'edge_state_gauge',
+            labels={
+                'enterprise_name': test_enterprise_name,
+                'state': test_edge_state,
+                'name': test_edge_name
+            }
+        ) == 1
+        assert REGISTRY.get_sample_value(
+            'edge_state_gauge',
+            labels={
+                'enterprise_name': cache_test_enterprise_name,
+                'state': cache_edge_state,
+                'name': cache_edge_name
+            }
+        ) == 0
 
     def update_link_test(self):
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
         test_link_status = [{"link": {"state": "OK"}}]
-        test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
-                                   "links": test_link_status}}
+        test_edge = {
+            "edge_info":
+            {
+                "edges":
+                {
+                    "edgeState": test_edge_state,
+                    "name": test_edge_name
+                },
+                "enterprise_name": test_enterprise_name,
+                "links": test_link_status
+            }
+        }
         cache_test_enterprise_name = 'Test'
         cache_edge_state = 'Edge_OK'
         cache_link_status = [{"link": {"state": "KO"}}]
-        cache_edge = {"edge_info": {"edges": {"edgeState": cache_edge_state},
-                                    "enterprise_name": cache_test_enterprise_name,
-                                    "links": cache_link_status}}
+        cache_edge = {
+            "edge_info":
+            {
+                "edges":
+                {
+                    "edgeState": cache_edge_state,
+                    "name": cache_edge_name
+                },
+                "enterprise_name": cache_test_enterprise_name,
+                "links": cache_link_status
+            }
+        }
         self.test_pro_repo.reset_counter()
         self.test_pro_repo.inc(cache_edge["edge_info"])
-        self.test_pro_repo.update_link(test_edge["edge_info"], test_link_status[0],
-                                       cache_edge["edge_info"], cache_link_status[0])
-        assert REGISTRY.get_sample_value('link_state_gauge', labels={'enterprise_name': test_enterprise_name,
-                                                                     'state': 'OK'}) == 1
-        assert REGISTRY.get_sample_value('link_state_gauge', labels={'enterprise_name': cache_test_enterprise_name,
-                                                                     'state': 'KO'}) == 0
+        self.test_pro_repo.update_link(
+            test_edge["edge_info"],
+            test_link_status[0],
+            cache_edge["edge_info"],
+            cache_link_status[0]
+        )
+        assert REGISTRY.get_sample_value(
+            'link_state_gauge',
+            labels={
+                'enterprise_name': test_enterprise_name,
+                'state': 'OK'
+            }
+        ) == 1
+        assert REGISTRY.get_sample_value(
+            'link_state_gauge',
+            labels={
+                'enterprise_name': cache_test_enterprise_name,
+                'state': 'KO'
+            }
+        ) == 0
 
     def reset_counter_test(self):
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
         test_link_status = [{"link": {"state": "OK"}}]
-        test_edge = {"edge_info": {"edges": {"edgeState": test_edge_state}, "enterprise_name": test_enterprise_name,
-                                   "links": test_link_status}}
+        test_edge = {
+            "edge_info":
+            {
+                "edges":
+                {
+                    "edgeState": test_edge_state,
+                    "name": test_edge_name
+                },
+                "enterprise_name": test_enterprise_name,
+                "links": test_link_status
+            }
+        }
         self.test_pro_repo.inc(test_edge["edge_info"])
         self.test_pro_repo.inc(test_edge["edge_info"])
         self.test_pro_repo.reset_counter()
-        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
-                                                                     'state': test_edge_state}) is None
-        assert REGISTRY.get_sample_value('edge_state_gauge', labels={'enterprise_name': test_enterprise_name,
-                                                                     'state': 'OK'}) is None
+        assert REGISTRY.get_sample_value(
+            'edge_state_gauge',
+            labels={
+                'enterprise_name': test_enterprise_name,
+                'state': test_edge_state,
+                'name': test_edge_name
+            }
+        ) is None
+        assert REGISTRY.get_sample_value(
+            'edge_state_gauge',
+            labels={
+                'enterprise_name': test_enterprise_name,
+                'state': 'OK'
+            }
+        ) is None
 
     def start_prometheus_metrics_server_test(self):
         mock_server = application.repositories.prometheus_repository.start_http_server = Mock()

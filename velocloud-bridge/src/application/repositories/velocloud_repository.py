@@ -66,3 +66,14 @@ class VelocloudRepository:
         else:
             event_list = [event for event in full_events["data"] if event['event'] in filter_events_status_list]
             return event_list
+
+    def get_all_enterprise_names(self, msg):
+        self._logger.info('Getting all enterprise names')
+        enterprise_names = self._velocloud_client.get_all_enterprise_names()
+        if len(msg['filter']) > 0:
+            enterprise_names = [
+                e_name for e_name in enterprise_names
+                if e_name == filter_enterprise['name']
+            ]
+
+        return enterprise_names

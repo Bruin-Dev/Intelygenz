@@ -205,6 +205,17 @@ class VelocloudClient:
 
         return get_all_enterprises_edges_by_id()
 
+    def get_all_enterprise_names(self):
+        enterprise_names = list()
+        for client in self._clients:
+            res = self.get_monitoring_aggregates(client)
+            for enterprise in res["enterprises"]:
+                enterprise_names.append({
+                    "enterprise_name": enterprise["name"]
+                })
+
+        return enterprise_names
+
     def _json_return(self, response):
         if isinstance(response, dict):
             if 'error' in response.keys():
