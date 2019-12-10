@@ -187,7 +187,7 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        enterprises = [{"enterprise_id": 19, "name": "The Name"}]
+        enterprises = [{"enterprise_name": "The Name"}]
         msg = {"request_id": "123", "filter": []}
         test_velocloud_client.get_all_enterprise_names = Mock(
             return_value=enterprises

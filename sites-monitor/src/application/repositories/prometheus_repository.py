@@ -43,8 +43,8 @@ class PrometheusRepository:
         ).inc()
         self._edge_status_gauge.labels(
             state=cache_data["edges"]["edgeState"],
-            enterprise_name=edge_info["enterprise_name"],
-            name=edge_info["edges"]["name"]
+            enterprise_name=cache_data["enterprise_name"],
+            name=cache_data["edges"]["name"]
         ).dec()
 
     def update_link(self, edge_info, link_info, cache_edge, cache_link):

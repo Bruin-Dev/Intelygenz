@@ -30,6 +30,7 @@ class TestPrometheusRepository:
     def inc_test(self):
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
+        test_edge_name = 'Test Edge Name'
         test_link_status = [{"link": {"state": "OK"}}]
         test_edge = {
             "edge_info":
@@ -64,6 +65,7 @@ class TestPrometheusRepository:
     def dec_test(self):
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
+        test_edge_name = 'Test Edge Name'
         test_link_status = [{"link": {"state": "OK"}}]
         test_edge = {
             "edge_info":
@@ -100,6 +102,7 @@ class TestPrometheusRepository:
     def update_edge_test(self):
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
+        test_edge_name = 'Test Edge Name'
         test_link_status = [{"link": {"state": "OK"}}]
         test_edge = {
             "edge_info":
@@ -115,6 +118,7 @@ class TestPrometheusRepository:
         }
         cache_test_enterprise_name = 'Test'
         cache_edge_state = 'Edge_KO'
+        cache_edge_name = 'Cached Test Edge Name'
         cache_link_status = [{"link": {"state": "KO"}}]
         cache_edge = {
             "edge_info":
@@ -155,6 +159,7 @@ class TestPrometheusRepository:
     def update_link_test(self):
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
+        test_edge_name = 'Test Edge Name'
         test_link_status = [{"link": {"state": "OK"}}]
         test_edge = {
             "edge_info":
@@ -170,6 +175,7 @@ class TestPrometheusRepository:
         }
         cache_test_enterprise_name = 'Test'
         cache_edge_state = 'Edge_OK'
+        cache_edge_name = 'Cached Test Edge Name'
         cache_link_status = [{"link": {"state": "KO"}}]
         cache_edge = {
             "edge_info":
@@ -209,6 +215,7 @@ class TestPrometheusRepository:
     def reset_counter_test(self):
         test_enterprise_name = 'Test'
         test_edge_state = 'Edge_OK'
+        test_edge_name = 'Test Edge Name'
         test_link_status = [{"link": {"state": "OK"}}]
         test_edge = {
             "edge_info":
