@@ -104,7 +104,7 @@ class Container:
             "some_field_1": "Sending data related to request here",
             "some_field_2": "Sending data related to request here"
         }
-        response = await self.event_bus.rpc_request("rpc.request", json.dumps(rpc_request_msg), timeout=20)
+        response = await self.event_bus.rpc_request("rpc.request", json.dumps(rpc_request_msg), timeout=1)
         print(f'Got RPC response with value: {json.dumps(response, indent=2)}')
 
     async def start(self):
