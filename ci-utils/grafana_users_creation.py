@@ -144,7 +144,7 @@ def assign_editor_permissions(user, user_id):
     try:
         response = requests.patch(
             f'https://admin:admin@{ENV_SLUG}.'
-            f'mettel-automation.net/api/org/users/{user_uid}',
+            f'mettel-automation.net/api/org/users/{user_id}',
             json=user_data,
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
