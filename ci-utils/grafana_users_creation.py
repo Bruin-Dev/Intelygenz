@@ -79,7 +79,7 @@ def create_user(user):
     try:
         response = requests.post(
             f'https://admin:admin@{ENV_SLUG}.'
-            f'.mettel-automation.net/api/admin/users',
+            f'mettel-automation.net/api/admin/users',
             data=user_data,
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
@@ -122,7 +122,7 @@ def assign_viewer_permissions(user, user_id):
         try:
             response = requests.post(
                 f'https://admin:admin@{ENV_SLUG}.'
-                f'.mettel-automation.net/api/folders/'
+                f'mettel-automation.net/api/folders/'
                 f'{folder_uid}/permissions',
                 json=user_data,
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
@@ -144,7 +144,7 @@ def assign_editor_permissions(user, user_id):
     try:
         response = requests.patch(
             f'https://admin:admin@{ENV_SLUG}.'
-            f'.mettel-automation.net/api/org/users/{user_uid}',
+            f'mettel-automation.net/api/org/users/{user_uid}',
             json=user_data,
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
@@ -170,7 +170,7 @@ def get_folder_uid(user_company, main_folder=False):
     try:
         response = requests.get(
             f'https://admin:admin@{ENV_SLUG}.'
-            f'.mettel-automation.net/api/folders',
+            f'mettel-automation.net/api/folders',
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
 
@@ -209,7 +209,7 @@ def update_main_folder_permissions():
         try:
             response = requests.post(
                 f'https://admin:admin@{ENV_SLUG}.'
-                f'.mettel-automation.net/api/folders/'
+                f'mettel-automation.net/api/folders/'
                 f'{main_folder_uid}/permissions',
                 json=main_data,
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
