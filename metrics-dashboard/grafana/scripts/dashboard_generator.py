@@ -3,36 +3,8 @@ import yaml
 import os
 import re
 
-# llamada a velocloud; cogemos enterprise_name (mockeado)
+
 COMPANY_LIST = ['Titan America|85940|']
-
-
-def get_new_panels(panels):
-
-    # First step - removing Edges processed panel
-    panels = [p for p in panels if p["id"] != 8]
-
-    # Second step - modifying queries. This is obviously not ideal
-    # but is safer than just using a regex. All queries have one of the
-    # following formats:
-    # sum by (whatever) ((edge_state_gauge))
-    # sum by (whatever) ((edge_state_gauge{state='CONNECTED'}))
-    # Which should become:
-    # sum by (whatever) ((edge_state_gauge{enterprise_name='$enterprise'}))
-    # sum by (whatever)
-    # ((edge_state_gauge{state='CONNECTED', enterprise_name='$enterprise'}))
-    for p in panels:
-        for t in p["targets"]:
-            if "_gauge))" in t["expr"]:
-                q = re.split(re.escape("_gauge"), t["expr"])
-                t["expr"] = f"{q[0]}{{enterprise_name='$enterprise'}}{q[1]}"
-            elif "}))" in t["expr"]:
-                q = re.split(re.escape("}))"), t["expr"])
-                t["expr"] = f"{q[0]}, enterprise_name='$enterprise'{q[1]}"
-            else:
-                raise("Unknown query")
-
-    return panels
 
 
 def get_new_templating(templating, company):
@@ -93,6 +65,7 @@ def build_new_dashboard(dummy, company, id):
 
 
 def main():
+
     main_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     dashboards_path = os.path.join(main_path, 'dashboards-definitions')
     parent_dashboard_path = os.path.join(dashboards_path,

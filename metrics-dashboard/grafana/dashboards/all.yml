@@ -1,6 +1,14 @@
-- name: 'default'       # name of this dashboard configuration (not dashboard itself)
-  org_id: 1             # id of the org to hold the dashboard
-  folder: ''            # name of the folder to put the dashboard (http://docs.grafana.org/v5.0/reference/dashboard_folders/)
-  type: 'file'          # type of dashboard description (json files)
+apiVersion: 1
+providers:
+- folder: main
+  name: default
   options:
-    path: '/var/lib/grafana/dashboards'       # where dashboards are
+    path: /var/lib/grafana/dashboards/main
+  org_id: 1
+  type: file
+- folder: titan-america
+  name: titan-america-dashboard
+  options:
+    path: /var/lib/grafana/dashboards/titan-america
+  org_id: 1
+  type: file

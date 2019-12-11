@@ -9,7 +9,7 @@ grafana-build:
   extends: .build_app_image
   script:
     - apk --upgrade --no-cache add python3 py-pip
-    - pip3 install requests
+    - pip3 install --upgrade pyyaml shortuuid
     - source ci-utils/environment_assign.sh
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/grafana/configs/prometheus-dev.yml
     - cp metrics-dashboard/grafana/configs/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml

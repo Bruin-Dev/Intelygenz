@@ -1,91 +1,235 @@
 #!/bin/python
 
-
 import os
+import json
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectionError
 from sys import exit
 
-_list = ["ENVIRONMENT_SLUG", "GRAFANA_ADMIN_PASSWORD", "GRAFANA_ADMIN_USER", "GRAFANA_USER_EMAIL",
-         "GRAFANA_USER_LOGIN", "GRAFANA_USER_NAME", "GRAFANA_USER_PASSWORD"]
+ENV_SLUG = os.environ.get("ENVIRONMENT_SLUG")
+GF_ADMIN = os.environ.get("GRAFANA_ADMIN_USER")
+GF_PASS = os.environ.get("GRAFANA_ADMIN_PASSWORD")
+
+MOCK_URL = 'http://admin:admin@localhost:3000'
 
 
-def get_necessary_vars(args):
-    result = {"users": {}, "credentials": {}}
-    environment_vars = os.environ
-    result["credentials"] = {"ENVIRONMENT_SLUG": environment_vars.get("ENVIRONMENT_SLUG"),
-                             "GRAFANA_ADMIN_USER": environment_vars.get("GRAFANA_ADMIN_USER"),
-                             "GRAFANA_ADMIN_PASSWORD": environment_vars.get("GRAFANA_ADMIN_PASSWORD")}
-    for i in args:
-        if i not in ["GRAFANA_ADMIN_PASSWORD", "GRAFANA_ADMIN_USER", "ENVIRONMENT_SLUG"]:
-            result["users"][i] = environment_vars.get(i)
-            result["users"][i] = result["users"][i].split(",")
-            result["users"][i] = [i.strip() for i in result["users"][i]]
-    return result
+def get_users():
+    u_mails = os.environ.get("GRAFANA_USER_EMAIL").split(',')
+    u_logins = os.environ.get("GRAFANA_USER_LOGIN").split(',')
+    u_names = os.environ.get("GRAFANA_USER_NAME").split(',')
+    u_passwords = os.environ.get("GRAFANA_USER_PASSWORD").split(',')
+    u_roles = os.environ.get("GRAFANA_USER_ROLE").split(',')
+    u_companies = os.environ.get("GRAFANA_USER_COMPANY").split(',')
+
+    if not len(u_mails) == len(u_logins) == len(u_names) == len(u_passwords):
+        print('User variables have different length; aborting process.')
+        exit(1)
+
+    users = []
+    for i in range(len(u_names)):
+        users.append(
+            {
+                'company': u_companies[i],
+                'name': u_names[i],
+                'email': u_mails[i],
+                'login': u_logins[i],
+                'password': u_passwords[i],
+                'role': u_roles[i]
+            }
+        )
+    return users
 
 
-def check_users_length(users):
-    n = []
-    for k, v in users.items():
-        n.append(len(v))
-    check_in = True
-    for i in n[1:]:
-        if n[0] != i:
-            check_in = False
-        if not check_in:
-            break
-    return check_in
+def check_users_existance():
+    for u in get_users():
+        try:
+            response = requests.get(
+                # f'https://admin:admin@{ENV_SLUG}.'
+                # f'mettel-automation.net/api/users/search?'
+                f'{MOCK_URL}/api/users/search?'
+                f'query={u["login"]}',
+                auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
+            )
+
+            if response.json().get("totalCount") == 0:
+                print(f'User {u["login"]} does not exist yet.')
+                create_user(u)
+            elif response.json().get("totalCount") >= 1:
+                print(
+                    f'User {u["login"]} already exists. '
+                    f'ID: {response.json().get("users")[0]["id"]}'
+                )
+            else:
+                print(f'Error searching for user {u["login"]}.')
+
+        except ConnectionError as e:
+            print(e)
+            exit(1)
+
+    update_main_folder_permissions()
 
 
-def check_if_user_exists_in_grafana(_list):
-    result = get_necessary_vars(_list)
-    url_api_check_user = "https://admin:admin@{environment_slug}.mettel-automation.net/api/users/search?query={" \
-                         "grafana_user_login} "
-    environment_slug, grafana_admin_user, grafana_admin_password = result.get("credentials").values()
-    users = result.get("users")
-    if check_users_length(users):
-        for i in users.get("GRAFANA_USER_LOGIN"):
-            try:
-                response = requests.get(
-                    url_api_check_user.format(environment_slug=environment_slug, grafana_user_login=i),
-                    auth=HTTPBasicAuth(grafana_admin_user, grafana_admin_password))
-                if response.json().get("totalCount") == 0:
-                    print("User {} doesn't exists yet in Grafana".format(i))
-                    pos = users.get("GRAFANA_USER_LOGIN").index(i)
-                    user = {k: v[pos] for k, v in users.items()}
-                    user.update(result.get("credentials"))
-                    user_creation_in_grafana(user)
-                elif response.json().get("totalCount") >= 1:
-                    print("User {} already exists in Grafana".format(i))
-                else:
-                    print("Error searching user {} in Grafana".format(i))
-            except ConnectionError as e:
-                print(e)
-                exit(1)
-    else:
-        print("Not all the attributes necessary for the creation of users in Grafana are available")
+def create_user(user):
+    print(f'Creating user {user["login"]}.')
+    user_data = {
+        'name': user["name"],
+        'email': user["email"],
+        'login': user["login"],
+        'password': user["password"]
+    }
 
-
-def user_creation_in_grafana(user):
-    url_api_create_user = "https://admin:admin@{environment_slug}.mettel-automation.net/api/admin/users"
-    mapping = {"name": "GRAFANA_USER_NAME",
-               "email": "GRAFANA_USER_EMAIL",
-               "login": "GRAFANA_USER_LOGIN",
-               "password": "GRAFANA_USER_PASSWORD"}
-    data = {k: user.get(v) for k, v in mapping.items()}
-    print("Creating user {} in Grafana".format(user.get("GRAFANA_USER_LOGIN")))
     try:
-        response = requests.post(url_api_create_user.format(environment_slug=user.get("ENVIRONMENT_SLUG")), data=data,
-                                 auth=HTTPBasicAuth(user.get("GRAFANA_ADMIN_USER"), user.get("GRAFANA_ADMIN_PASSWORD")))
+        response = requests.post(
+            # f'https://admin:admin@{ENV_SLUG}.'
+            # f'.mettel-automation.net/api/admin/users',
+            f'{MOCK_URL}/api/admin/users',
+            data=user_data,
+            auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
+        )
         if response.status_code == 200:
-            print("User {} successfully created in Grafana".format(user.get("GRAFANA_USER_LOGIN")))
+            print(f'Successfully created user {user["login"]}.')
+            user_id = response.json().get("id")
+
+            if user["role"] == 'editor':
+                assign_editor_permissions(user, user_id)
+            # user is a viewer
+            else:
+                assign_viewer_permissions(user, user_id)
         else:
-            print("User {} not created in Grafana".format(user.get("GRAFANA_USER_LOGIN")))
+            print(f'Error creating user {user["login"]}.')
     except ConnectionError as e:
         print(e)
         exit(1)
 
 
+def assign_viewer_permissions(user, user_id):
+
+    user_data = {
+        "items":
+        [
+            {
+                "userId": user_id,
+                "permission": 1
+            },
+            {
+                "role": "Editor",
+                "permission": 2
+            }
+        ]
+    }
+    folder_uid = get_folder_uid(user["company"])
+
+    if folder_uid is None:
+        print(f'Error updating permissions for user {user["login"]}.')
+    else:
+        try:
+            response = requests.post(
+                # f'https://admin:admin@{ENV_SLUG}.'
+                # f'.mettel-automation.net/api/folders/'
+                # f'{folder_uid}/permissions',
+                f'{MOCK_URL}/api/folders/{folder_uid}/permissions',
+                json=user_data,
+                auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
+            )
+
+            if response.status_code == 200:
+                print(f'Updated permissions for user {user["login"]}.')
+            else:
+                print(f'Error updating permissions for user {user["login"]}.')
+        except ConnectionError as e:
+            print(e)
+            exit(1)
+
+
+def assign_editor_permissions(user, user_id):
+
+    user_data = {"role": "Editor"}
+
+    try:
+        response = requests.patch(
+            # f'https://admin:admin@{ENV_SLUG}.'
+            # f'.mettel-automation.net/api/org/users/{user_uid}',
+            f'{MOCK_URL}/api/org/users/{user_id}',
+            json=user_data,
+            auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
+        )
+
+        if response.status_code == 200:
+            print(f'Updated permissions for user {user["login"]}.')
+        else:
+            print(response.text)
+            print(f'Error updating permissions for user {user["login"]}.')
+    except ConnectionError as e:
+        print(e)
+        exit(1)
+
+
+def get_folder_uid(user_company, main_folder=False):
+
+    # Getting folder name
+    if main_folder:
+        folder_name = 'main'
+    else:
+        folder_name = user_company.split("|")[0].replace(" ", "-").lower()
+
+    try:
+        response = requests.get(
+            # f'https://admin:admin@{ENV_SLUG}.'
+            # f'.mettel-automation.net/api/folders/{folder_uid}/permissions',
+            f'{MOCK_URL}/api/folders',
+            auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
+        )
+
+        if response.status_code == 200:
+            folders = response.json()
+            for f in folders:
+                if f["title"] == folder_name:
+                    return f["uid"]
+            return None
+        else:
+            return None
+
+    except ConnectionError as e:
+        print(e)
+        exit(1)
+
+
+def update_main_folder_permissions():
+    """
+    Removes all permissions from main folder,
+    meaning just admins or editors will see it.
+    """
+    main_data = {
+        "items": [
+            {
+                "role": "Editor",
+                "permission": 2
+            }
+        ]
+    }
+    main_folder_uid = get_folder_uid(None, True)
+
+    if main_folder_uid is None:
+        print(f'Error updating permissions of the main folder.')
+    else:
+        try:
+            response = requests.post(
+                # f'https://admin:admin@{ENV_SLUG}.'
+                # f'.mettel-automation.net/api/folders/'
+                # f'{folder_uid}/permissions',
+                f'{MOCK_URL}/api/folders/{main_folder_uid}/permissions',
+                json=main_data,
+                auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
+            )
+            if response.status_code == 200:
+                print(f'Updated permissions of the main folder.')
+            else:
+                print(f'Error updating permissions of the main folder.')
+        except ConnectionError as e:
+            print(e)
+            exit(1)
+
+
 if __name__ == "__main__":
-    check_if_user_exists_in_grafana(_list)
+    check_users_existance()
