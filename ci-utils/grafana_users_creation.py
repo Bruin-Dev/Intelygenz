@@ -11,8 +11,6 @@ ENV_SLUG = os.environ.get("ENVIRONMENT_SLUG")
 GF_ADMIN = os.environ.get("GRAFANA_ADMIN_USER")
 GF_PASS = os.environ.get("GRAFANA_ADMIN_PASSWORD")
 
-MOCK_URL = 'http://admin:admin@localhost:3000'
-
 
 def get_users():
     u_mails = os.environ.get("GRAFANA_USER_EMAIL").split(',')
@@ -45,9 +43,8 @@ def check_users_existance():
     for u in get_users():
         try:
             response = requests.get(
-                # f'https://admin:admin@{ENV_SLUG}.'
-                # f'mettel-automation.net/api/users/search?'
-                f'{MOCK_URL}/api/users/search?'
+                f'https://admin:admin@{ENV_SLUG}.'
+                f'mettel-automation.net/api/users/search?'
                 f'query={u["login"]}',
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
             )
@@ -81,9 +78,8 @@ def create_user(user):
 
     try:
         response = requests.post(
-            # f'https://admin:admin@{ENV_SLUG}.'
-            # f'.mettel-automation.net/api/admin/users',
-            f'{MOCK_URL}/api/admin/users',
+            f'https://admin:admin@{ENV_SLUG}.'
+            f'.mettel-automation.net/api/admin/users',
             data=user_data,
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
@@ -125,10 +121,9 @@ def assign_viewer_permissions(user, user_id):
     else:
         try:
             response = requests.post(
-                # f'https://admin:admin@{ENV_SLUG}.'
-                # f'.mettel-automation.net/api/folders/'
-                # f'{folder_uid}/permissions',
-                f'{MOCK_URL}/api/folders/{folder_uid}/permissions',
+                f'https://admin:admin@{ENV_SLUG}.'
+                f'.mettel-automation.net/api/folders/'
+                f'{folder_uid}/permissions',
                 json=user_data,
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
             )
@@ -148,9 +143,8 @@ def assign_editor_permissions(user, user_id):
 
     try:
         response = requests.patch(
-            # f'https://admin:admin@{ENV_SLUG}.'
-            # f'.mettel-automation.net/api/org/users/{user_uid}',
-            f'{MOCK_URL}/api/org/users/{user_id}',
+            f'https://admin:admin@{ENV_SLUG}.'
+            f'.mettel-automation.net/api/org/users/{user_uid}',
             json=user_data,
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
@@ -175,9 +169,8 @@ def get_folder_uid(user_company, main_folder=False):
 
     try:
         response = requests.get(
-            # f'https://admin:admin@{ENV_SLUG}.'
-            # f'.mettel-automation.net/api/folders/{folder_uid}/permissions',
-            f'{MOCK_URL}/api/folders',
+            f'https://admin:admin@{ENV_SLUG}.'
+            f'.mettel-automation.net/api/folders',
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
 
@@ -215,10 +208,9 @@ def update_main_folder_permissions():
     else:
         try:
             response = requests.post(
-                # f'https://admin:admin@{ENV_SLUG}.'
-                # f'.mettel-automation.net/api/folders/'
-                # f'{folder_uid}/permissions',
-                f'{MOCK_URL}/api/folders/{main_folder_uid}/permissions',
+                f'https://admin:admin@{ENV_SLUG}.'
+                f'.mettel-automation.net/api/folders/'
+                f'{main_folder_uid}/permissions',
                 json=main_data,
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
             )
