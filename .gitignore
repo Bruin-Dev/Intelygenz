@@ -141,3 +141,6 @@ dmypy.json
 .terraform
 
 last_contact.csv
+
+# Grafana dashboards
+*-dashboard.json

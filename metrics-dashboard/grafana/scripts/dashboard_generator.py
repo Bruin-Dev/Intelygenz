@@ -78,23 +78,20 @@ def main():
     for c in COMPANY_LIST:
         company_name = get_company_name(c).replace(' ', '-').lower()
 
-        # Creating the new dashboard
+        print(f'Creating dashboard for company {company_name}')
         d = build_new_dashboard(dashboard, c, id)
 
-        # Creating a new folder under dashboards-definitions
-        # if it does not exist yet
         folder_path = os.path.join(dashboards_path, company_name)
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        # Storing the dashboard in the folder
+        print(f'Saving dashboard to folder {folder_path}')
         file_name = os.path.join(dashboards_path, company_name,
                                  f'{company_name}-dashboard.json')
         with open(file_name, 'w', encoding='utf-8') as f:
             json.dump(d, f, ensure_ascii=False, indent=2)
 
-        # Adding new provider in yaml file if it does not exist yet
-        # Note that maximum uid length is 40 as per the grafana docs
+        print(f'Adding provider to .yaml file')
         yaml_path = os.path.join(main_path, 'dashboards', 'all.yml')
         new_provider = {
             "name": f'{company_name}-dashboard',
@@ -111,7 +108,6 @@ def main():
         with open(yaml_path, 'w') as f:
             yaml.dump(y, f)
 
-        # Increasing id by one
         id += 1
 
 
