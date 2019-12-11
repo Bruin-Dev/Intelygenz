@@ -120,6 +120,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
+        service_affecting_monitor._jitter_check = CoroutineMock()
 
         await service_affecting_monitor._service_affecting_monitor_process(device)
 
@@ -129,6 +130,10 @@ class TestServiceAffectingMonitor:
             call(device, edges_to_report, link_2)
         ], any_order=True)
         service_affecting_monitor._packet_loss_check.assert_has_awaits([
+            call(device, edges_to_report, link_1),
+            call(device, edges_to_report, link_2)
+        ], any_order=True)
+        service_affecting_monitor._jitter_check.assert_has_awaits([
             call(device, edges_to_report, link_1),
             call(device, edges_to_report, link_2)
         ], any_order=True)
@@ -1270,6 +1275,150 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
 
         service_affecting_monitor._notify_trouble.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def jitter_check_with_below_threshold_test(self):
+        scheduler = Mock()
+        event_bus = Mock()
+        template_renderer = Mock()
+        config = testconfig
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1_best_jitter_ms_rx = 14
+        link_1_best_jitter_ms_tx = 15
+        link_2_best_jitter_ms_rx = 10
+        link_2_best_jitter_ms_tx = 20
+
+        link_1 = {
+            'bestJitterMsRx': link_1_best_jitter_ms_rx,
+            'bestJitterMsTx': link_1_best_jitter_ms_tx,
+            'serviceGroups': ['PUBLIC_WIRELESS']
+        }
+        link_2 = {
+            'bestJitterMsRx': link_2_best_jitter_ms_rx,
+            'bestJitterMsTx': link_2_best_jitter_ms_tx,
+            'serviceGroups': ['PUBLIC_WIRED']
+        }
+
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": [link_1, link_2]
+            }
+        }
+        logger = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_affecting_monitor._notify_trouble = CoroutineMock()
+
+        await service_affecting_monitor._jitter_check(device=device, edge_status=edges_to_report, link=link_1)
+        await service_affecting_monitor._jitter_check(device=device, edge_status=edges_to_report, link=link_2)
+
+        service_affecting_monitor._notify_trouble.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def jitter_check_with_above_threshold_test(self):
+        scheduler = Mock()
+        event_bus = Mock()
+        template_renderer = Mock()
+        config = testconfig
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        trouble_text = 'Jitter'
+        rx_threshold = 30
+
+        link_1_best_jitter_ms_rx = 32
+        link_1_best_jitter_ms_tx = 15
+        link_2_best_jitter_ms_rx = 10
+        link_2_best_jitter_ms_tx = 20
+
+        link_1 = {
+            'bestJitterMsRx': link_1_best_jitter_ms_rx,
+            'bestJitterMsTx': link_1_best_jitter_ms_tx,
+            'serviceGroups': ['PUBLIC_WIRELESS']
+        }
+        link_2 = {
+            'bestJitterMsRx': link_2_best_jitter_ms_rx,
+            'bestJitterMsTx': link_2_best_jitter_ms_tx,
+            'serviceGroups': ['PUBLIC_WIRED']
+        }
+
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": [link_1, link_2]
+            }
+        }
+        logger = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_affecting_monitor._notify_trouble = CoroutineMock()
+
+        await service_affecting_monitor._jitter_check(device=device, edge_status=edges_to_report, link=link_1)
+        await service_affecting_monitor._jitter_check(device=device, edge_status=edges_to_report, link=link_2)
+
+        service_affecting_monitor._notify_trouble.assert_awaited_once_with(
+            device, edges_to_report, link_1, link_1_best_jitter_ms_rx,
+            link_1_best_jitter_ms_tx, trouble_text, rx_threshold,
+        )
+
+    @pytest.mark.asyncio
+    async def notify_trouble_with_dev_environment_test(self):
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value="Email Sent")
+        logger = Mock()
+        logger.info = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        device = {
+            "serial": 'VC05200033383',
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1651,
+            "email": "fake@gmail.com",
+            "phone": "111-111-1111",
+            "name": "Fake Guy"
+        }
+        config = testconfig
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
+        service_affecting_monitor._template_renderer.compose_email_object = Mock(return_value='Some email object')
+
+        await service_affecting_monitor._notify_trouble(device, 'Some Edge Status', 'Some Link Info', 'Input results',
+                                                        'Output results', 'LATENCY', 120)
+
+        service_affecting_monitor._logger.info.assert_called_once()
 
     @pytest.mark.asyncio
     async def notify_trouble_with_production_environment_exists_test(self):

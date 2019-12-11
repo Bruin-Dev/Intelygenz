@@ -61,6 +61,7 @@ class ServiceAffectingMonitor:
             if 'serviceGroups' in link.keys():
                 await self._latency_check(device, edge_status, link)
                 await self._packet_loss_check(device, edge_status, link)
+                await self._jitter_check(device, edge_status, link)
         self._logger.info("End of service affecting monitor job")
 
     async def _latency_check(self, device, edge_status, link):
@@ -86,6 +87,11 @@ class ServiceAffectingMonitor:
                link['bestLossPctTx'] > self._config.MONITOR_CONFIG["packet_loss_wired"]:
                 await self._notify_trouble(device, edge_status, link, link['bestLossPctRx'], link['bestLossPctTx'],
                                            'Packet Loss', self._config.MONITOR_CONFIG["packet_loss_wired"])
+
+    async def _jitter_check(self, device, edge_status, link):
+        if link['bestJitterMsRx'] > 30 or link['bestJitterMsTx'] > 30:
+            await self._notify_trouble(device, edge_status, link, link['bestJitterMsRx'], link['bestJitterMsTx'],
+                                       'Jitter', 30)
 
     async def _notify_trouble(self, device, edge_status, link, input, output, trouble, threshold):
         ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
