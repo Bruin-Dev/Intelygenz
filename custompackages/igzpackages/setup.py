@@ -16,7 +16,7 @@ REQUIRES = [
     "pytest-asyncio==0.10.0",
     "pytest-cov==2.7.1",
     "coverage == 4.5.4",
-    "Quart==0.6.12",
+    "Quart==0.6.15",
     "quart-openapi==1.4.3",
     "behave == 1.2.6",
     "tenacity == 5.0.4",
