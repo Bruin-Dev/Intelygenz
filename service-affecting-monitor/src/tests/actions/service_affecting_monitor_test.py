@@ -139,6 +139,128 @@ class TestServiceAffectingMonitor:
         ], any_order=True)
 
     @pytest.mark.asyncio
+    async def service_affecting_monitor_process_no_edge_test(self):
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1 = {
+            'bestLatencyMsRx': 14,
+            'bestLatencyMsTx': 121,
+            'serviceGroups': ['PUBLIC_WIRELESS']
+        }
+        link_2 = {
+            'bestLatencyMsRx': 60,
+            'bestLatencyMsTx': 20,
+            'serviceGroups': ['PUBLIC_WIRED']
+        }
+        edges_to_report = None
+        slack_sent = 'Slack sent'
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[edges_to_report, slack_sent])
+        template_renderer = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler,
+                                                            config, template_renderer)
+        service_affecting_monitor._latency_check = CoroutineMock()
+        service_affecting_monitor._packet_loss_check = CoroutineMock()
+        service_affecting_monitor._jitter_check = CoroutineMock()
+
+        uuid_1 = uuid()
+        uuid_2 = uuid()
+        uuid_side_effect = [uuid_1, uuid_2]
+
+        current_datetime = datetime.now()
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+
+        with patch.object(service_affecting_monitor_module, 'uuid', side_effect=uuid_side_effect):
+            with patch.object(service_affecting_monitor_module, 'datetime', new=datetime_mock):
+                await service_affecting_monitor._service_affecting_monitor_process(device)
+
+        event_bus.rpc_request.assert_has_awaits(
+            [
+             call("edge.status.request",
+                  json.dumps({
+                              'request_id': uuid_1,
+                              'edge': device,
+                              'interval': {
+                                  'end': current_datetime,
+                                  'start': current_datetime - timedelta(minutes=10)
+                              }
+                  }, default=str),
+                  timeout=60,),
+
+             call('notification.slack.request',
+                  json.dumps({
+                              'request_id': uuid_2,
+                              'message': f'Error while monitoring edge for service affecting trouble, seems like data '
+                              f'is corrupted: \n {json.dumps(edges_to_report, indent=2)} \n'
+                              f'The environment is dev'}),
+                  timeout=10,)
+            ], any_order=False
+        )
+
+    @pytest.mark.asyncio
+    async def service_affecting_monitor_process_no_service_group_test(self):
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1 = {
+            'bestLatencyMsRx': 14,
+            'bestLatencyMsTx': 121,
+        }
+        link_2 = {
+            'bestLatencyMsRx': 60,
+            'bestLatencyMsTx': 20,
+        }
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": [link_1, link_2]
+            }
+        }
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=edges_to_report)
+        template_renderer = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler,
+                                                            config, template_renderer)
+        service_affecting_monitor._latency_check = CoroutineMock()
+        service_affecting_monitor._packet_loss_check = CoroutineMock()
+        service_affecting_monitor._jitter_check = CoroutineMock()
+
+        await service_affecting_monitor._service_affecting_monitor_process(device)
+
+        event_bus.rpc_request.assert_awaited_once()
+        service_affecting_monitor._latency_check.assert_not_awaited()
+        service_affecting_monitor._packet_loss_check.assert_not_awaited()
+        service_affecting_monitor._jitter_check.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def latency_check_with_no_troubles_test(self):
         scheduler = Mock()
         event_bus = Mock()
