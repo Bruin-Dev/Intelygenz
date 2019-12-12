@@ -1718,7 +1718,7 @@ class TestServiceAffectingMonitor:
                 },
                 "links": [
                     {
-                        'bestLatencyMsRx': 14,
+                        'bestLatencyMsRx': 121,
                         'bestLatencyMsTx': 20,
                         "link": {
                             "interface": "GE1",
@@ -1728,10 +1728,19 @@ class TestServiceAffectingMonitor:
                     },
                     {
                         'bestLatencyMsRx': 14,
-                        'bestLatencyMsTx': 20,
+                        'bestLatencyMsTx': 121,
                         "link": {
                             "interface": "GE2",
                             "displayName": "Test2",
+                            "state": "DISCONNECTED",
+                        }
+                    },
+                    {
+                        'bestLatencyMsRx': 123,
+                        'bestLatencyMsTx': 124,
+                        "link": {
+                            "interface": "GE3",
+                            "displayName": "Test3",
                             "state": "DISCONNECTED",
                         }
                     }
@@ -1739,15 +1748,41 @@ class TestServiceAffectingMonitor:
             }
         }
 
-        ticket_dict = service_affecting_monitor._compose_ticket_dict(edges_to_report,
-                                                                     edges_to_report['edge_info']['links'][0],
-                                                                     edges_to_report['edge_info']['links']
-                                                                     [0]['bestLatencyMsRx'],
-                                                                     edges_to_report['edge_info']['links']
-                                                                     [0]['bestLatencyMsTx'],
-                                                                     'LATENCY', 120)
+        ticket_dict_1 = service_affecting_monitor._compose_ticket_dict(edges_to_report,
+                                                                       edges_to_report['edge_info']['links'][0],
+                                                                       edges_to_report['edge_info']['links']
+                                                                       [0]['bestLatencyMsRx'],
+                                                                       edges_to_report['edge_info']['links']
+                                                                       [0]['bestLatencyMsTx'],
+                                                                       'LATENCY', 120)
 
-        assert isinstance(ticket_dict, OrderedDict)
+        assert 'Receive' in ticket_dict_1.keys()
+        assert 'Transfer' not in ticket_dict_1.keys()
+        assert isinstance(ticket_dict_1, OrderedDict)
+
+        ticket_dict_2 = service_affecting_monitor._compose_ticket_dict(edges_to_report,
+                                                                       edges_to_report['edge_info']['links'][0],
+                                                                       edges_to_report['edge_info']['links']
+                                                                       [1]['bestLatencyMsRx'],
+                                                                       edges_to_report['edge_info']['links']
+                                                                       [1]['bestLatencyMsTx'],
+                                                                       'LATENCY', 120)
+
+        assert 'Receive' not in ticket_dict_2.keys()
+        assert 'Transfer' in ticket_dict_2.keys()
+        assert isinstance(ticket_dict_2, OrderedDict)
+
+        ticket_dict_3 = service_affecting_monitor._compose_ticket_dict(edges_to_report,
+                                                                       edges_to_report['edge_info']['links'][0],
+                                                                       edges_to_report['edge_info']['links']
+                                                                       [2]['bestLatencyMsRx'],
+                                                                       edges_to_report['edge_info']['links']
+                                                                       [2]['bestLatencyMsTx'],
+                                                                       'LATENCY', 120)
+
+        assert 'Receive' in ticket_dict_3.keys()
+        assert 'Transfer' in ticket_dict_3.keys()
+        assert isinstance(ticket_dict_3, OrderedDict)
 
     def ticket_object_to_string_test(self):
         event_bus = Mock()

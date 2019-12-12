@@ -174,8 +174,10 @@ class ServiceAffectingMonitor:
         edge_overview["Threshold"] = threshold
         edge_overview['Interval for Scan'] = f'{self._monitoring_minutes} Minutes'
         edge_overview['Scan Time'] = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-        edge_overview["Input"] = input
-        edge_overview["Output"] = output
+        if input > threshold:
+            edge_overview["Receive"] = input
+        if output > threshold:
+            edge_overview["Transfer"] = output
         edge_overview["Links"] = \
             f'[Edge|https://{edges_status_to_report["edge_id"]["host"]}/#!/operator/customer/' \
             f'{edges_status_to_report["edge_id"]["enterprise_id"]}' \
