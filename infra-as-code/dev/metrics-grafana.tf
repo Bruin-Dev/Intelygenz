@@ -21,15 +21,15 @@ resource "aws_ecs_task_definition" "automation-metrics-grafana" {
   network_mode = "awsvpc"
   cpu = "512"
   memory = "1024"
-  execution_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
-  task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
+  execution_role_arn = data.aws_iam_role.ecs_execution_role.arn
+  task_role_arn = data.aws_iam_role.ecs_execution_role.arn
 }
 
 resource "aws_lb_listener" "automation-grafana" {
-  load_balancer_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_alb_arn
+  load_balancer_arn = aws_lb.automation-alb.arn
   port = "443"
   protocol = "HTTPS"
-  certificate_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.cert_mettel
+  certificate_arn = data.aws_acm_certificate.automation.arn
 
   default_action {
     target_group_arn = aws_lb_target_group.automation-metrics-grafana.arn
@@ -110,7 +110,7 @@ resource "aws_ecs_service" "automation-metrics-grafana" {
   task_definition = local.automation-metrics-grafana-ecs_task_definition
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
+  cluster = aws_ecs_cluster.automation.id
 
   network_configuration {
     security_groups = [
@@ -126,4 +126,6 @@ resource "aws_ecs_service" "automation-metrics-grafana" {
     container_name = "grafana"
     container_port = 3000
   }
+
+  depends_on = [ null_resource.nats-server-healtcheck ]
 }

@@ -26,8 +26,8 @@ resource "aws_ecs_task_definition" "automation-notifier" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
-  task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
+  execution_role_arn = data.aws_iam_role.ecs_execution_role.arn
+  task_role_arn = data.aws_iam_role.ecs_execution_role.arn
 }
 
 resource "aws_security_group" "automation-notifier_service" {
@@ -71,7 +71,7 @@ resource "aws_ecs_service" "automation-notifier" {
   task_definition = local.automation-notifier-ecs_service-task_definition
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
+  cluster = aws_ecs_cluster.automation.id
 
   network_configuration {
     security_groups = [
@@ -81,4 +81,6 @@ resource "aws_ecs_service" "automation-notifier" {
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
     assign_public_ip = false
   }
+
+  depends_on = [ null_resource.nats-server-healtcheck ]
 }

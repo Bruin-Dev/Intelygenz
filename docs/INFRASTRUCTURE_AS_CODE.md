@@ -30,19 +30,17 @@ the infrastructure.
 ````
 infra-as-code/
 ├── basic-infra             # basic infrastructure in AWS
-└── dev                     # ECS cluster and NATS master node infrastructure in AWS
-└── ecs-services            # ECS services infrastructure in AWS
+└── dev                     # AWS resources for each environment (ECS Cluster, ElastiCache Cluster, etc.)
 └── network-resources       # network resources infrastructure in AWS
-
 ````
 
 Al terraform files are located inside `./infra-as-code`, in this folder there are four additional folders, `basic-infra`, `dev`, `ecs-services` and `network-resources`.
 
 1. `basic-infra`: there are the necessary terraform files to create the Docker images repositories in ECS, and the roles and policies necessary for use these.
 
-2. `dev`: there are the necessary terraform files to create the [ECS cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html), the [ECS Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) and its [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for NATS root node in this ECS cluster created for the environment that is being used for the deployment.
+2. `dev`: there are the necessary terraform files for create the resources used for each environment in AWS, these are as follows
 
-    In this folder are also the terraform files for create the following resources in AWS for the environment that is being used for the deployment:
+    * An [ECS Cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html), the [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) and its [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for all the microservices present in the project
 
     * An [ElastiCache Redis Cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html)
 
@@ -53,12 +51,6 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
     * A [CloudWatch Log Group](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html)
 
     * An [Service Discovery Service](https://aws.amazon.com/blogs/aws/amazon-ecs-service-discovery/) for each ECS Service of the ECS Cluster created for this environment and a [Service Discovery Namespace](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html) to logically group these *Service Discovery Services*.
-
-    * A set of [Security Groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html) for all the resources created by the terraform files present in this folder
-
-3. `ecs-services`: there are the necessary terraform files for create the [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) and its [Tasks Definitions](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for all the modules present in the project except NATS root node.
-
-    In this folder there are the terraform files to create the following in addition to the mentioned resources for the environment that is being used for the deployment:
 
     * A set of resources related to the metrics of the environment:
 
@@ -72,7 +64,7 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
 
     * A set of [Security Groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html) for all the resources created by the terraform files present in this folder
 
-4. `network-resources`: there are the necessary files for create the [VPC](https://aws.amazon.com/vpc/) and all related resources in the environment used for deployment, these being the following:
+3. `network-resources`: there are the necessary files for create the [VPC](https://aws.amazon.com/vpc/) and all related resources in the environment used for deployment, these being the following:
 
     * [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html)
 

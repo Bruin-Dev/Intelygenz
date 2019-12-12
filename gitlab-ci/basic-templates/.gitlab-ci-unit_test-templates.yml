@@ -1,5 +1,5 @@
 #
-# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
+# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
 #
 
 .unittest_module: &unittest_module

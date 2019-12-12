@@ -1,7 +1,5 @@
 ##
-# Using Gitlab-CI extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
-#
-# Using Gitlab-CI extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
+# Using Gitlab-CI extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
 #
 
 .terraform_template_destroy_environment: &terraform_template_destroy_environment
@@ -12,15 +10,6 @@
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
     - apk add gettext
-    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
-    - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
-    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
-    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
-    - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
-    - terraform init infra-as-code/ecs-services
-    - terraform refresh infra-as-code/ecs-services
-    - terraform destroy -auto-approve infra-as-code/ecs-services
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
@@ -33,7 +22,7 @@
   only:
     - master
     - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - /^*dev/fix/.*$/
 
 .terraform_template_destroy_network-resources: &terraform_template_destroy_network-resources
   image:
@@ -51,4 +40,4 @@
   only:
     - master
     - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
+    - /^*dev/fix/.*$/

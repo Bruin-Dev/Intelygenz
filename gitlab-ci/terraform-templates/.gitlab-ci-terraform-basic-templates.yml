@@ -1,5 +1,5 @@
 #
-# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
+# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
 #
 
 .terraform_basic_template: &terraform_basic_template

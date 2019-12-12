@@ -27,24 +27,6 @@ terraform-validate-network-resources:
     - /^*dev/feature/.*$/
     - /^*dev/fix/.*$/
 
-terraform-validate-ecs-services:
-  stage: validation
-  extends: .terraform_validate_template
-  script:
-    - apk add gettext
-    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
-    - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
-    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
-    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
-    - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
-    - terraform init infra-as-code/ecs-services
-    - terraform validate infra-as-code/ecs-services
-  only:
-    - master
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
-
 terraform-validate-dev:
   stage: validation
   extends: .terraform_validate_template

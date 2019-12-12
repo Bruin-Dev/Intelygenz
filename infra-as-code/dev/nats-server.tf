@@ -122,4 +122,19 @@ resource "aws_ecs_service" "automation-nats-server" {
   service_registries {
     registry_arn = aws_service_discovery_service.nats-server.arn
   }
+
+
+}
+
+resource "null_resource" "nats-server-healtcheck" {
+
+  depends_on = [aws_ecs_service.automation-nats-server]
+
+  provisioner "local-exec" {
+    command = "python3 ci-utils/task_healthcheck.py -t nats-server"
+  }
+
+  triggers = {
+    always_run = timestamp()
+  }
 }

@@ -109,7 +109,7 @@ The following flow is used to make this report:
 It is possible to see the relations between the mentioned services for the flow in the following [diagram](https://www.draw.io/#G1JzSwJw04goDcA_fEjySmMZ_Ol32TVSeB).
 ![IMAGE: last-contact-report_microservice_relationships](./img/system_overview/microservices_with_communications/last-contact-report_microservice_relationships.png)
 
-#### Sites monitor microservice
+#### Sites-monitor microservice
 
 This microservice requests data from the velocloud API via the velocloud-bridge microservice, using this information to enrich Prometheus. The prometheus data serves as a feed for Grafana.
 

@@ -348,7 +348,7 @@
             "width":24,
             "height":6,
             "properties":{
-                "query":"SOURCE '${ENVIRONMENT}' | fields @timestamp, @message | filter @message like /Exception/",
+                "query":"SOURCE '${ENVIRONMENT}' | fields @timestamp, @message as exception_msg | filter @message like /Exception/ | parse @logStream /(?<service_id>^${ENVIRONMENT}-\\d+)\\/(?<microservice_name>[\\w-]+)\\/(?<task_id>.*$)/",
                 "region":"us-east-1",
                 "stacked":false,
                 "view":"table",
@@ -362,7 +362,7 @@
             "width":24,
             "height":6,
             "properties":{
-                "query":"SOURCE '${ENVIRONMENT}' | fields @timestamp, @message as msg_error | filter @message like \": ERROR\"",
+                "query":"SOURCE '${ENVIRONMENT}' | fields @timestamp, @message as error_msg | filter @message like \": ERROR\" | parse @logStream /(?<service_id>^${ENVIRONMENT}-\\d+)\\/(?<microservice_name>[\\w-]+)\\/(?<task_id>.*$)/",
                 "region":"us-east-1",
                 "title":"Error messages detected in services",
                 "view":"table"

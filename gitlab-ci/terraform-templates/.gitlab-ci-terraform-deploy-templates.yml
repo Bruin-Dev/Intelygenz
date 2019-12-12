@@ -1,5 +1,5 @@
 #
-# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#anchors)
+# Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
 #
 
 .terraform_template_deploy_environment: &terraform_template_deploy_environment
@@ -9,9 +9,9 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
-    - apk --upgrade --no-cache add curl bash gettext
-    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
-    - chmod +x /usr/local/bin/ecs-cli
+    - apk --upgrade --no-cache add python3 py-pip curl bash gettext
+    - pip3 install awscli
+    - python3 ci-utils/check_ecs_resources.py
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
@@ -20,16 +20,6 @@
     - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
-    - /bin/bash ci-utils/task_healthcheck.sh -t nats-server
-    - envsubst < infra-as-code/ecs-services/init.tf > temp_ecs_services.tf
-    - envsubst < infra-as-code/ecs-services/variables.tf > temp_ecs_services_vars.tf
-    - envsubst < infra-as-code/ecs-services/references.tf > temp_references_ecs_services.tf
-    - mv temp_ecs_services.tf infra-as-code/ecs-services/init.tf
-    - mv temp_ecs_services_vars.tf infra-as-code/ecs-services/variables.tf
-    - mv temp_references_ecs_services.tf infra-as-code/ecs-services/references.tf
-    - terraform init infra-as-code/ecs-services
-    - terraform validate infra-as-code/ecs-services
-    - terraform apply -auto-approve infra-as-code/ecs-services
   only:
     - master
     - /^*dev/feature/.*$/

@@ -14,7 +14,7 @@ data "template_file" "automation-sites-monitor" {
     NATS_SERVER1 = local.nats_server1
     MONITORING_SECONDS = var.MONITORING_SECONDS
     LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
-    REDIS_HOSTNAME = data.terraform_remote_state.tfstate-dev-resources.outputs.redis_hostname
+    REDIS_HOSTNAME = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
   }
 }
 
@@ -26,8 +26,8 @@ resource "aws_ecs_task_definition" "automation-sites-monitor" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
-  task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
+  execution_role_arn = data.aws_iam_role.ecs_execution_role.arn
+  task_role_arn = data.aws_iam_role.ecs_execution_role.arn
 }
 
 resource "aws_security_group" "automation-sites-monitor_service" {
@@ -79,7 +79,7 @@ resource "aws_service_discovery_service" "sites-monitor" {
   name = local.automation-sites-monitor-service_discovery_service-name
 
   dns_config {
-    namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
+    namespace_id = aws_service_discovery_private_dns_namespace.automation-zone.id
 
     dns_records {
       ttl = 10
@@ -99,7 +99,7 @@ resource "aws_ecs_service" "automation-sites-monitor" {
   task_definition = local.automation-sites-monitor-ecs_service-task_definition
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
+  cluster = aws_ecs_cluster.automation.id
 
   network_configuration {
     security_groups = [
@@ -113,4 +113,6 @@ resource "aws_ecs_service" "automation-sites-monitor" {
   service_registries {
     registry_arn = aws_service_discovery_service.sites-monitor.arn
   }
+
+  depends_on = [ null_resource.nats-server-healtcheck ]
 }

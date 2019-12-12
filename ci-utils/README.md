@@ -17,18 +17,19 @@ In this folder are stored a series of scripts implemented in bash and python use
 + [Aws_nuke_conf_generator](#aws_nuke_conf_generator)
     - [Description](#aws_nuke_conf_generator_description)
     - [Usage](#aws_nuke_conf_generator_usage)
++ [Script check_ecs_resources](#script_check_ecs_resources)
+    - [Description](#check_ecs_resources_description)
+    - [Usage](#check_ecs_resources_usage)
 
 ## Script task_healtheck<a name="task_healthcheck"></a>
 
 ### Description <a name="task_healthcheck_description"></a>
 
-This [script](./task_healthcheck.sh) has been implemented in *shell scripting*, it is used to check if for a service of a given ECS cluster the last task definition relative to a service provided as parameter is being executed, as well as if it has a `HEALTHY` state.
-
-This script loads the content of [another script](./common_functions.sh), where a series of util functions are declared being able to use them during its execution.
+This [script](./task_healthcheck.sh) has been implemented in *Python*, it is used to check if for a service of a given ECS cluster the last task definition relative to a service provided as parameter is being executed, as well as if it has a `HEALTHY` state.
 
 ### Usage <a name="task_healthcheck_usage"></a>
 
-In order to use this [script](./task_healthcheck.sh) it is necessary to perform the following steps previously:
+In order to use this [script](./task_healthcheck.py) it is necessary to perform the following steps previously:
 
 * Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
 
@@ -48,7 +49,7 @@ In order to use this [script](./task_healthcheck.sh) it is necessary to perform 
 Once the previous steps have been carried out, it is possible to use this [script](./task_healthcheck.sh) providing as parameter `-t` the name of the service on which you want to perform the check performed by the script explained above, as shown below:
 
 ```sh
-$ /bin/bash ci-utils/task_healthcheck.sh -t <service_name>
+$ python3 ci-utils/task_healthcheck.py -t <service_name>
 ```
 
 ## Script grafana_users_creation<a name="grafana_users_creation"></a>
@@ -184,3 +185,34 @@ $ python ci-utils/aws-nuke/aws_nuke_conf_generator.py -e <environment_name>
 ```
 
 >It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment.
+
+## Script check_ecs_resources <a name="script_check_ecs_resources"></a>
+
+### Description <a name="check_ecs_resources_description"></a>
+
+This [script](./check_ecs_resources.py) has been implemented in *Python*, it is used for check if there are enough free tasks to create the environment in an AWS ECS cluster before creating infrastructure using Terraform.
+
+### Usage <a name="check_ecs_resources_usage"></a>
+
+In order to use this [script](./check_ecs_resources.py) it is necessary to perform the following steps previously:
+
+* Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
+
+    ```sh
+    $ export AWS_ACCESS_KEY_ID=<access_key>
+    $ export AWS_SECRET_ACCESS_KEY=<secret_key>
+    ```
+
+* Declare the variable `TF_VAR_ENVIRONMENT` with the value of the ECS cluster on which you it is going to to used in the following way:
+
+    ```sh
+    $ export TF_VAR_ENVIRONMENT=<environment_name>
+    ```
+
+    >It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment.
+
+Once the previous steps have been carried out, it is possible to use this [script](./check_ecs_resources.py) as shown below:
+
+```sh
+$ python3 ci-utils/check_ecs_resources.py
+```

@@ -2,7 +2,7 @@ data "template_file" "automation-nats-server-2" {
   template = file("${path.module}/task-definitions/nats_server.json")
 
   vars = {
-    image = local.automation-nats-server-1-image
+    image = local.automation-nats-server-image
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
 
@@ -23,8 +23,8 @@ resource "aws_ecs_task_definition" "automation-nats-server-2" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "1024"
-  execution_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
-  task_role_arn = data.terraform_remote_state.tfstate-dev-resources.outputs.ecs_execution_role
+  execution_role_arn = data.aws_iam_role.ecs_execution_role.arn
+  task_role_arn = data.aws_iam_role.ecs_execution_role.arn
 }
 
 resource "aws_security_group" "automation-nats_service-2" {
@@ -85,7 +85,7 @@ resource "aws_service_discovery_service" "nats-server-2" {
   name = "nats-server-2-${var.ENVIRONMENT}"
 
   dns_config {
-    namespace_id = data.terraform_remote_state.tfstate-dev-resources.outputs.aws_service_discovery_automation-zone_id
+    namespace_id = aws_service_discovery_private_dns_namespace.automation-zone.id
 
     dns_records {
       ttl = 10
@@ -105,7 +105,7 @@ resource "aws_ecs_service" "automation-nats-server-2" {
   task_definition = local.automation-nats-server-2-ecs_service-task_definition
   desired_count = 1
   launch_type = "FARGATE"
-  cluster = data.terraform_remote_state.tfstate-dev-resources.outputs.automation_cluster_id
+  cluster = aws_ecs_cluster.automation.id
 
   network_configuration {
     security_groups = [
@@ -119,4 +119,6 @@ resource "aws_ecs_service" "automation-nats-server-2" {
   service_registries {
     registry_arn = aws_service_discovery_service.nats-server-2.arn
   }
+
+  depends_on = [ null_resource.nats-server-healtcheck ]
 }
