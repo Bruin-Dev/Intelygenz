@@ -55,7 +55,7 @@ $ /bin/bash ci-utils/task_healthcheck.sh -t <service_name>
 
 ### Description <a name="grafana_users_creation_description"></a>
 
-[This script](./grafana_users_creation.py) has been implemented in *Python*, it is used for the creation of users in the Grafana service running in a cluster of ECS provided relative to a previously deployed environment.
+[This script](./grafana_users_creation.py) has been implemented in *Python*, it is used for the creation of users in the Grafana service running in a cluster of ECS provided relative to a previously deployed environment. Apart from creating users, the script will assign each one different permissions based on Gitlab's environment variables.
 
 To create users, a series of https calls will be made to the endpoint exposed by the Route53 service of AWS for the backend service in the given environment.
 
@@ -75,11 +75,15 @@ To use this script it is necessary to declare a series of variables, exposed bel
 
 * `GRAFANA_USER_LOGIN`: List of user logins separated by commas to use as a login field in the process of creating them in the Grafana service related to the environment
 
-* `GRAFANA_USER_NAME`: List of user names separated by commas to use as an user name field in the process of creating them in the Grafana service related to the environment
+* `GRAFANA_USER_NAME`: List of user names separated by commas to use as a user name field in the process of creating them in the Grafana service related to the environment
 
-* `GRAFANA_USER_PASSWORD`: List of user password separated by commas to use as an user name field in the process of creating them in the Grafana service related to the environment
+* `GRAFANA_USER_PASSWORD`: List of user password separated by commas to use as a user password field in the process of creating them in the Grafana service related to the environment
 
->The number of elements that must have the variables `GRAFANA_USER_EMAIL`, `GRAFANA_USER_LOGIN`, `GRAFANA_USER_NAME` and `GRAFANA_USER_PASSWORD` must be the same, since it is necessary to have all the fields related to the users to be created to be able to do it.
+* `GRAFANA_USER_ROLE`: List of user roles separated by commas to use as a user role field in the process of creating them in the Grafana service related to the environment. Valid values are `viewer`, `editor` and `admin`
+
+* `GRAFANA_USER_COMPANY`: List of user companies separated by commas to use as a user company field in the process of creating them in the Grafana service related to the environment
+
+>The number of elements that must have the variables `GRAFANA_USER_EMAIL`, `GRAFANA_USER_LOGIN`, `GRAFANA_USER_NAME`, `GRAFANA_USER_PASSWORD`, `GRAFANA_USER_ROLE` and `GRAFANA_USER_COMPANY` must be the same, since it is necessary to have all the fields related to the users to be created to be able to do it.
 
 ## Script utils delete_environments_aws_resources <a name="script_utils-delete_environments_aws_resources"></a>
 
