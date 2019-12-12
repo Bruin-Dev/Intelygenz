@@ -725,6 +725,62 @@ class TestServiceOutageDetectorJob:
         result = service_outage_detector._is_faulty_link(link_state_2)
         assert result is True
 
+    def get_outage_cases_test(self):
+        edge_1_state = 'CONNECTED'
+        edge_1_link_ge1_state = edge_1_link_ge2_state = 'STABLE'
+        edge_status_1 = {
+            'edges': {'edgeState': edge_1_state, 'serialNumber': 'VC1234567'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': edge_1_link_ge1_state, 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': edge_1_link_ge2_state, 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        edge_2_state = 'OFFLINE'
+        edge_2_link_ge1_state = edge_2_link_ge2_state = 'DISCONNECTED'
+        edge_status_2 = {
+            'edges': {'edgeState': edge_2_state, 'serialNumber': 'VC7654321'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': edge_2_link_ge1_state, 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': edge_2_link_ge2_state, 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        edge_3_state = 'OFFLINE'
+        edge_3_link_ge1_state = 'STABLE'
+        edge_3_link_ge2_state = 'DISCONNECTED'
+        edge_status_3 = {
+            'edges': {'edgeState': edge_3_state, 'serialNumber': 'VC1112223'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': edge_3_link_ge1_state, 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': edge_3_link_ge2_state, 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        event_bus = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config, template_renderer)
+
+        result = service_outage_detector._get_outage_causes(edge_status_1)
+        assert result is None
+
+        result = service_outage_detector._get_outage_causes(edge_status_2)
+        assert result == {'edge': 'OFFLINE', 'links': {'GE1': edge_2_link_ge1_state, 'GE2': edge_2_link_ge2_state}}
+
+        result = service_outage_detector._get_outage_causes(edge_status_3)
+        assert result == {'edge': 'OFFLINE', 'links': {'GE2': edge_2_link_ge2_state}}
+
 
 class TestQuarantineJob:
     @pytest.mark.asyncio
@@ -1415,11 +1471,13 @@ class TestServiceOutageReporterJob:
                                                         quarantine_edge_repository, reporting_edge_repository,
                                                         config, template_renderer)
         service_outage_detector._refresh_reporting_queue = CoroutineMock()
+        service_outage_detector._attach_outage_causes_to_edges = Mock()
         service_outage_detector._unmarshall_edge_to_report = Mock(side_effect=unmarshalling_result)
 
         await service_outage_detector._service_outage_reporter_process()
 
         # service_outage_detector._refresh_reporting_queue.assert_awaited_once()
+        service_outage_detector._attach_outage_causes_to_edges.assert_called_once_with(edges_to_report)
         reporting_edge_repository.get_all_edges.assert_called_once()
         service_outage_detector._unmarshall_edge_to_report.assert_has_calls([
             call(edge_1_identifier, edge_1_value),
@@ -1427,8 +1485,8 @@ class TestServiceOutageReporterJob:
         ])
         template_renderer.compose_email_object.assert_called_once_with(
             unmarshalling_result,
-            fields=["Date of detection", "Serial Number", "Company", "Edge URL"],
-            fields_edge=["detection_time", "serial_number", "enterprise", "links"],
+            fields=["Date of detection", "Serial Number", "Company", "Edge URL", "Outage causes"],
+            fields_edge=["detection_time", "serial_number", "enterprise", "edge_url", "outage_causes"],
         )
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.email.request",
@@ -1457,11 +1515,13 @@ class TestServiceOutageReporterJob:
                                                         quarantine_edge_repository, reporting_edge_repository,
                                                         config, template_renderer)
         service_outage_detector._refresh_reporting_queue = CoroutineMock()
+        service_outage_detector._attach_outage_causes_to_edges = Mock()
         service_outage_detector._unmarshall_edge_to_report = Mock()
 
         await service_outage_detector._service_outage_reporter_process()
 
         # service_outage_detector._refresh_reporting_queue.assert_awaited_once()
+        service_outage_detector._attach_outage_causes_to_edges.assert_not_called()
         reporting_edge_repository.get_all_edges.assert_called_once()
         service_outage_detector._unmarshall_edge_to_report.assert_not_called()
         template_renderer.compose_email_object.assert_not_called()
@@ -1627,6 +1687,89 @@ class TestServiceOutageReporterJob:
             call(edge_1_full_id), call(edge_3_full_id)
         ])
 
+    def attach_outage_causes_to_edges_test(self):
+        edge_1_full_id = {'host': 'metvc04.mettel.net', 'enterprise_id': 12345, 'edge_id': 67890}
+        edge_2_full_id = {'host': 'metvc04.mettel.net', 'enterprise_id': 54321, 'edge_id': 98765}
+        edge_3_full_id = {'host': 'metvc04.mettel.net', 'enterprise_id': 11111, 'edge_id': 22222}
+
+        edge_1_identifier = EdgeIdentifier(**edge_1_full_id)
+        edge_2_identifier = EdgeIdentifier(**edge_2_full_id)
+        edge_3_identifier = EdgeIdentifier(**edge_3_full_id)
+
+        edge_1_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC123456789'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_2_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC987654321'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_3_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC111122223'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        edge_1_value = {
+            'edge_status': edge_1_status,
+            'detection_timestamp': 123456789,
+            'addition_timestamp': 11112222,
+        }
+        edge_2_value = {
+            'edge_status': edge_2_status,
+            'detection_timestamp': 987654321,
+            'addition_timestamp': 22223333,
+        }
+        edge_3_value = {
+            'edge_status': edge_3_status,
+            'detection_timestamp': 123459876,
+            'addition_timestamp': 22223333,
+        }
+
+        edges_to_report = {
+            edge_1_identifier: edge_1_value,
+            edge_2_identifier: edge_2_value,
+            edge_3_identifier: edge_3_value,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config, template_renderer)
+
+        service_outage_detector._attach_outage_causes_to_edges(edges_to_report)
+
+        assert edges_to_report[edge_1_identifier] == {
+            **edge_1_value,
+            'outage_causes': {'edge': 'OFFLINE', 'links': {'GE1': 'DISCONNECTED', 'GE2': 'DISCONNECTED'}}
+        }
+        assert edges_to_report[edge_2_identifier] == {
+            **edge_2_value,
+            'outage_causes': {'links': {'GE1': 'DISCONNECTED', 'GE2': 'DISCONNECTED'}}
+        }
+        assert edges_to_report[edge_3_identifier] == {
+            **edge_3_value,
+            'outage_causes': {'edge': 'OFFLINE'}
+        }
+
     def generate_edge_url_test(self):
         host = 'metvco04.mettel.net'
         enterprise_id = 12345
@@ -1659,7 +1802,7 @@ class TestServiceOutageReporterJob:
         detection_timestamp = 123456789
         edge_serial_number = 'V123456789'
         enterprise_name = 'EVIL-CORP|12345|'
-        edge_value = {
+        edge_1_value = {
             'edge_status': {
                 'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number},
                 'links': [
@@ -1670,6 +1813,20 @@ class TestServiceOutageReporterJob:
             },
             'detection_timestamp': detection_timestamp,
             'addition_timestamp': 987654321,
+            'outage_causes': {'edge': 'OFFLINE', 'links': {'GE1': 'DISCONNECTED', 'GE2': 'DISCONNECTED'}}
+        }
+        edge_2_value = {
+            'edge_status': {
+                'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number},
+                'links': [
+                    {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                    {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
+                ],
+                'enterprise_name': enterprise_name,
+            },
+            'detection_timestamp': detection_timestamp,
+            'addition_timestamp': 987654321,
+            'outage_causes': {'links': {'GE2': 'DISCONNECTED'}}
         }
 
         event_bus = Mock()
@@ -1684,15 +1841,32 @@ class TestServiceOutageReporterJob:
                                                         quarantine_edge_repository, reporting_edge_repository,
                                                         config, template_renderer)
 
-        result = service_outage_detector._unmarshall_edge_to_report(edge_identifier, edge_value)
-
         tz = timezone(config.MONITOR_CONFIG['timezone'])
         expected_detection_time = datetime.fromtimestamp(detection_timestamp, tz=tz)
         expected_edge_url = f'https://{host}/#!/operator/customer/{enterprise_id}/monitor/edge/{edge_id}/'
+
+        result = service_outage_detector._unmarshall_edge_to_report(edge_identifier, edge_1_value)
         expected = {
             'detection_time': expected_detection_time,
             'serial_number': edge_serial_number,
             'enterprise': enterprise_name,
-            'links': expected_edge_url,
+            'edge_url': expected_edge_url,
+            'outage_causes': [
+                'Edge was OFFLINE',
+                'Link GE1 was DISCONNECTED',
+                'Link GE2 was DISCONNECTED',
+            ]
+        }
+        assert result == expected
+
+        result = service_outage_detector._unmarshall_edge_to_report(edge_identifier, edge_2_value)
+        expected = {
+            'detection_time': expected_detection_time,
+            'serial_number': edge_serial_number,
+            'enterprise': enterprise_name,
+            'edge_url': expected_edge_url,
+            'outage_causes': [
+                'Link GE2 was DISCONNECTED',
+            ]
         }
         assert result == expected

@@ -3,6 +3,7 @@ import re
 
 from datetime import datetime
 from datetime import timedelta
+from typing import NoReturn
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -248,6 +249,23 @@ class ServiceOutageDetector:
     def _is_faulty_link(self, link_state: str):
         return link_state == 'DISCONNECTED'
 
+    def _get_outage_causes(self, edge_status):
+        outage_causes = {}
+
+        edge_state = edge_status["edges"]["edgeState"]
+        if self._is_faulty_edge(edge_state):
+            outage_causes['edge'] = edge_state
+
+        for link in edge_status['links']:
+            link_data = link['link']
+            link_state = link_data['state']
+
+            if self._is_faulty_link(link_state):
+                outage_links_states = outage_causes.setdefault('links', {})
+                outage_links_states[link_data['interface']] = link_state
+
+        return outage_causes or None
+
     def _generate_edge_url(self, edge_full_id):
         url = 'https://{host}/#!/operator/customer/{enterprise_id}/monitor/edge/{edge_id}/'
         return url.format(**edge_full_id)
@@ -266,11 +284,21 @@ class ServiceOutageDetector:
         tz = timezone(self._config.MONITOR_CONFIG['timezone'])
         outage_detection_datetime = datetime.fromtimestamp(outage_detection_timestamp, tz=tz)
 
+        outage_causes = []
+        edge_state = edge_value['outage_causes'].get('edge')
+        if edge_state is not None:
+            outage_causes.append(f"Edge was {edge_state}")
+
+        links_states: dict = edge_value['outage_causes'].get('links', {})
+        for interface, state in links_states.items():
+            outage_causes.append(f"Link {interface} was {state}")
+
         return {
             'detection_time': outage_detection_datetime,
             'serial_number': edge_serial,
             'enterprise': enterprise_name,
-            'links': edge_url,
+            'edge_url': edge_url,
+            'outage_causes': outage_causes,
         }
 
     async def _service_outage_reporter_process(self):
@@ -282,6 +310,8 @@ class ServiceOutageDetector:
             self._logger.info(f'Nothing to report!')
             return
 
+        self._attach_outage_causes_to_edges(edges_to_report)
+
         edges_for_email_template = [
             self._unmarshall_edge_to_report(edge_identifier, edge_value)
             for edge_identifier, edge_value in edges_to_report.items()
@@ -289,8 +319,8 @@ class ServiceOutageDetector:
         self._logger.info(f'Reporting {len(edges_for_email_template)} outages without ticket...')
 
         # TODO: Move these fields to a proper place as they will always be the same in every outage report
-        fields = ["Date of detection", "Serial Number", "Company", "Edge URL"]
-        fields_edge = ["detection_time", "serial_number", "enterprise", "links"]
+        fields = ["Date of detection", "Serial Number", "Company", "Edge URL", "Outage causes"]
+        fields_edge = ["detection_time", "serial_number", "enterprise", "edge_url", "outage_causes"]
         email_report = self._email_template_renderer.compose_email_object(edges_for_email_template, fields=fields,
                                                                           fields_edge=fields_edge)
         await self._event_bus.rpc_request("notification.email.request",
@@ -300,7 +330,7 @@ class ServiceOutageDetector:
         self._logger.info(f'Outage report sent via e-mail! Clearing up the reporting queue...')
         self._reporting_edge_repository.remove_all_stored_elements()
 
-    async def _refresh_reporting_queue(self):
+    async def _refresh_reporting_queue(self) -> NoReturn:
         edges_to_report = self._reporting_edge_repository.get_all_edges()
 
         for edge_identifier, edge_value in edges_to_report.items():
@@ -322,6 +352,11 @@ class ServiceOutageDetector:
                     )
                 else:
                     self._reporting_edge_repository.remove_edge(edge_full_id)
+
+    def _attach_outage_causes_to_edges(self, edges_to_report) -> NoReturn:
+        for edge_identifier, edge_value in edges_to_report.items():
+            edge_status = edge_value['edge_status']
+            edges_to_report[edge_identifier]['outage_causes'] = self._get_outage_causes(edge_status)
 
     async def _get_all_edges(self):
         edge_list_request_dict = {

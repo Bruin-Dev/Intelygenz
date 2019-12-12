@@ -30,15 +30,22 @@ class ServiceOutageReportTemplateRenderer:
         template_vars["__FIELDS__"] = kwargs.get("fields", list(edges_to_report[0].keys()))
         template_vars["__FIELDS_REL__"] = {field: field_related for field, field_related in
                                            zip(template_vars["__FIELDS__"], kwargs.get("fields_edge"))}
-        list_rows = []
-        for idx, edge in enumerate(edges_to_report):
-            list_rows.append({
+        template_vars["list_row"] = []
+        for idx, edge_data in enumerate(edges_to_report):
+            row = {
                 "type": "even" if idx % 2 == 0 else "odd",
-                **edge
-            })
-            list_rows[-1]["links"] = "<br/>".join(f"<a href=\"{i}\">{i}</a>" for i in
-                                                  list_rows[-1]["links"].split(" - "))
-        template_vars["list_row"] = list_rows
+                **edge_data
+            }
+            row['links'] = '<a href="{edge_url}">{edge_url}</a>'.format(edge_url=edge_data["edge_url"])
+
+            outage_causes_elements = map(lambda cause: f'<li>{cause}</li>', edge_data["outage_causes"])
+            row['outage_causes'] = f"<ul>{''.join(outage_causes_elements)}</ul>"
+
+            template_vars["list_row"].append(row)
+
+        for edge in edges_to_report:
+            edge['outage_causes'] = ', '.join(edge['outage_causes'])
+
         edges_dataframe = pd.DataFrame(edges_to_report)
         file_csv = edges_dataframe.to_csv(index=False)
         file_csv = base64.b64encode(file_csv.encode("utf-8"))
