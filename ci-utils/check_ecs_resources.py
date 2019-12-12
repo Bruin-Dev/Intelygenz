@@ -81,8 +81,8 @@ class CheckECSResources:
                          f"{total_tasks['total_task_ecs_clusters']}")
             return total_tasks
         else:
-            logging.error("There aren't ECS clusters used by MetTel Automation project in AWS")
-            sys.exit(1)
+            logging.info("There aren't ECS clusters used by MetTel Automation project in AWS")
+            sys.exit(0)
 
     @staticmethod
     def _get_ecs_clusters_arns():
