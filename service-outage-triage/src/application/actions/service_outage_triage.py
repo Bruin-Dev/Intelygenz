@@ -49,7 +49,10 @@ class ServiceOutageTriage:
                                                                json.dumps(ticket_request_msg_mettel, default=str),
                                                                timeout=90)
         all_tickets = all_tickets_titan
-        all_tickets["tickets"] = all_tickets["tickets"] + all_tickets_mettel["tickets"]
+        if all_tickets and all_tickets_mettel and "tickets" in all_tickets.keys() and \
+                "tickets" in all_tickets_mettel and \
+                all_tickets_mettel["tickets"] and all_tickets["tickets"]:
+            all_tickets["tickets"] = all_tickets["tickets"] + all_tickets_mettel["tickets"]
 
         filtered_ticket_ids = []
         if all_tickets is not None and "tickets" in all_tickets.keys() and all_tickets["tickets"] is not None:
@@ -153,11 +156,13 @@ class ServiceOutageTriage:
         return dict_as_string[dict_as_string.find(key1) + len(key1): dict_as_string.find(key2)]
 
     def _client_id_from_edge_status(self, edge_status):
-        client_id = edge_status['edge_info']['enterprise_name'].split('|')
-        if len(client_id) < 2:
-            # If after the split, the length of the array is lesser than 2 it means is a mettel edge
-            # So we hardcode mettel's bruin client ID
-            client_id = 9994
+        # If there's no Bruin enterprise ID hardcoded in velocloud name we use Mettel's ID instead
+        client_id = 9994
+        if "edge_info" in edge_status.keys() and "enterprise_name" in edge_status['edge_info'].keys():
+            if len(edge_status['edge_info']['enterprise_name'].split('|')) is 3:
+                # If there's a Bruin client ID in velocloud it will look like 'enterprise |112|'
+                # 112 would be Bruin enterprise ID in this case.
+                client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]
         return client_id
 
     async def _check_for_new_events(self, timestamp, ticket_id):
