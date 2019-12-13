@@ -221,14 +221,13 @@ class ServiceOutageDetector:
         self._logger.info(f'Edge {edge_identifier} sent to quarantine')
 
     def _is_there_an_outage(self, edge_status):
-        # is_edge_offline = edge_status["edges"]["edgeState"] == 'OFFLINE'
-        # is_any_link_disconnected = any(
-        #     link_status['link']['state'] == 'DISCONNECTED'
-        #     for link_status in edge_status['links']
-        # )
-        #
-        # return is_edge_offline or is_any_link_disconnected
-        return True
+        is_edge_offline = edge_status["edges"]["edgeState"] == 'OFFLINE'
+        is_any_link_disconnected = any(
+            link_status['link']['state'] == 'DISCONNECTED'
+            for link_status in edge_status['links']
+        )
+
+        return is_edge_offline or is_any_link_disconnected
 
     def _generate_urls_from_edge(self, edge_data, host):
         edge_info = edge_data["edges"]
