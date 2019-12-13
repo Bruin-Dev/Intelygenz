@@ -53,6 +53,114 @@ class ServiceOutageDetector:
         except ConflictingIdError as conflict:
             self._logger.info(f'Skipping start of Service Outage Detector job. Reason: {conflict}')
 
+    async def start_service_outage_monitoring(self, exec_on_start):
+        self._logger.info('Scheduling Service Outage Monitor job...')
+        next_run_time = undefined
+
+        if exec_on_start:
+            tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+            next_run_time = datetime.now(tz)
+            self._logger.info('Service Outage Monitor job is going to be executed immediately')
+
+        try:
+            self._scheduler.add_job(self._outage_monitoring_process, 'interval',
+                                    seconds=self._config.MONITOR_CONFIG['jobs_intervals']['outage_monitor'],
+                                    next_run_time=next_run_time, replace_existing=False,
+                                    id='_service_outage_monitor_process')
+        except ConflictingIdError as conflict:
+            self._logger.info(f'Skipping start of Service Outage Detector job. Reason: {conflict}')
+
+    async def _outage_monitoring_process(self):
+        edge_id = {
+            "host": "metvco02.mettel.net",
+            "enterprise_id": 1,
+            "edge_id": 4784
+        }
+        self._logger.info(f'Checking status of {edge_id}.')
+        edge_status_request_dict = {
+            'request_id': uuid(),
+            'edge': edge_id,
+        }
+        edge_status_response = await self._event_bus.rpc_request(
+            'edge.status.request',
+            json.dumps(edge_status_request_dict),
+            timeout=45,
+        )
+        self._logger.info(f'Got status for edge: {edge_id}.')
+        edge_info = edge_status_response['edge_info']
+
+        is_outage = self._is_there_an_outage(edge_info)
+
+        if is_outage:
+            self._logger.info(f'Outage detected for {edge_id}. Scheduling edge for quarantine')
+            try:
+                self._scheduler.add_job(self._ticket_creation_quarantine, 'interval',
+                                        seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'],
+                                        replace_existing=False,
+                                        id='_ticket_creation_quarantine',
+                                        kwargs={'edge_id': edge_id})
+                self._logger.info(f'{edge_id} scheduled for quarantine!')
+            except ConflictingIdError as conflict:
+                self._logger.info(f'Not rescheduling quarantine for ticket creation. Reason: {conflict}')
+
+    async def _ticket_creation_quarantine(self, edge_id):
+        edge_status_request_dict = {
+            'request_id': uuid(),
+            'edge': edge_id,
+        }
+        self._logger.info(f'Quarantine: Checking status of {edge_id}.')
+
+        edge_status_response = await self._event_bus.rpc_request(
+            'edge.status.request',
+            json.dumps(edge_status_request_dict),
+            timeout=45,
+        )
+        self._logger.info(f'Quarantine: Got status for edge {edge_id}.')
+        edge_info = edge_status_response['edge_info']
+
+        is_outage = self._is_there_an_outage(edge_info)
+        if is_outage:
+            self._logger.info(f'Quarantine: Edge {edge_id} is still in outage state. Creating ticket.')
+            await self._create_outage_ticket(edge_id)
+
+    async def _create_outage_ticket(self, edge_id):
+        ticket_details = {
+            "request_id": uuid(),
+            "clientId": 9994,
+            "category": "VOO",
+            "services": [
+                {
+                    "serviceNumber": "VC05400002265"
+                }
+            ],
+            "contacts": [
+                {
+                    "email": "ndimuro@mettel.net",
+                    "phone": "732-837-9570",
+                    "name": "Nicholas Di Muro",
+                    "type": "site"
+                },
+                {
+                    "email": "ndimuro@mettel.net",
+                    "phone": "732-837-9570",
+                    "name": "Nicholas Di Muro",
+                    "type": "ticket"
+                }
+            ]
+        }
+        ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
+                                                      json.dumps(ticket_details), timeout=30)
+        self._logger.info(
+            f'Ticket creation: Edge {edge_id} is still in outage state. Ticket created with id {ticket_id}')
+
+        slack_message = {'request_id': uuid(),
+                         'message': f'Outage ticket created: https://app.bruin.com'
+                                    f'/helpdesk?clientId=9994&ticketId={ticket_id["ticketIds"]["ticketIds"][0]}'}
+        await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
+        # Change hardcoded URL generation in service-outage-triage
+        # Check and print errors from Bruin (Like, shit already exists)
+        # Check the environment and avoid ticket creation when not in production environment
+
     async def start_service_outage_reporter_job(self, exec_on_start=False):
         self._logger.info('Scheduling Service Outage Reporter job...')
         next_run_time = undefined
@@ -113,13 +221,14 @@ class ServiceOutageDetector:
         self._logger.info(f'Edge {edge_identifier} sent to quarantine')
 
     def _is_there_an_outage(self, edge_status):
-        is_edge_offline = edge_status["edges"]["edgeState"] == 'OFFLINE'
-        is_any_link_disconnected = any(
-            link_status['link']['state'] == 'DISCONNECTED'
-            for link_status in edge_status['links']
-        )
-
-        return is_edge_offline or is_any_link_disconnected
+        # is_edge_offline = edge_status["edges"]["edgeState"] == 'OFFLINE'
+        # is_any_link_disconnected = any(
+        #     link_status['link']['state'] == 'DISCONNECTED'
+        #     for link_status in edge_status['links']
+        # )
+        #
+        # return is_edge_offline or is_any_link_disconnected
+        return True
 
     def _generate_urls_from_edge(self, edge_data, host):
         edge_info = edge_data["edges"]
