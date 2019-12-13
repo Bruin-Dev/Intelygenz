@@ -1,18 +1,17 @@
 # Table of contents
-- [Velocloud SDK integration](#velocloud-sdk-integration)
+- [Velocloud integration](#velocloud-integration)
   * [Connecting to several clusters](#connecting-to-several-clusters)
   * [Service logic](#service-logic)
-  * [Parallel bridges](#parallel-bridges)
 
-# Velocloud SDK integration
+# Velocloud integration
 
 ## Connecting to several clusters
-Velocloud provided us with an SDK. The SDK is currently located in the `custompackages` folder, so we use a locked
-and customized (for large amounts of requests) version of it.
+Velocloud provided us with endpoints to make request calls to. The client that makes the request calls is located 
+in the `client` folder of the `velocloud-bridge`.
 
-The service's Velocloud client will create a Velocloud's SDK client for each cluster the service must connect to.
+The service's Velocloud client will create a client in a list for each host the service must connect to.
 
-Credentials are put inside an enviroment variable with the next schema:
+Credentials are put inside an environment variable with the next schema:
 `some.host.name+hostusername+hostpassword;other.host.name+otherusername+otherpassword`
 
 In the `config.py`script, there's a way to split this into an array of dictionaries like this one:
@@ -78,10 +77,18 @@ __alert.request.event.edge schema__
 {
     'request_id': 123,
     'edge': {"host": "some.host", "enterprise_id":19, "edge_id":99},
-    'start_date': Some start time,
-    'end_date': Some end time
+    'start_date': '2019-07-19 14:19:45',  # Seven days before end_date
+    'end_date': '2019-07-26 14:19:45',
+    'filter': ['EDGE_UP']
+    'limit':  200
 }
 ```
+The `filter` field is used to request from the bridge only events that have event names in the list. If no filter is provided
+all events are returned.
+
+The `limit` field is used to limit how many events do we actually want to be returned. If no limit is provided then 
+all events are returned.
+
 __alert.response.event.edge.{some service id} schema__
 ```
 {
@@ -90,3 +97,4 @@ __alert.response.event.edge.{some service id} schema__
     'status': 200
 }
 ```
+

@@ -1,18 +1,18 @@
 # Table of contents
-- [Velocloud SDK integration](#velocloud-sdk-integration)
+- [Velocloud integration](#velocloud-integration)
   * [Connecting to several clusters](#connecting-to-several-clusters)
   * [Service logic](#service-logic) 
   * [How to run it](#how-to-run-it) 
 
-# Velocloud SDK integration
+# Velocloud integration
 
 ## Connecting to several clusters
-Velocloud provided us with an SDK. The SDK is currently located in the `custompackages` folder, so we use a locked
-and customized (for large amounts of requests) version of it.
+Velocloud provided us with endpoints to make request calls to. The client that makes the request calls is located 
+in the `client` folder of the `velocloud-bridge`.
 
-The service's Velocloud client will create a Velocloud's SDK client for each cluster the service must connect to.
+The service's Velocloud client will create a client in a list for each host the service must connect to.
 
-Credentials are put inside an enviroment variable with the next schema:
+Credentials are put inside an environment variable with the next schema:
 `some.host.name+hostusername+hostpassword;other.host.name+otherusername+otherpassword`
 
 In the `config.py`script, there's a way to split this into an array of dictionaries like this one:
@@ -25,7 +25,7 @@ In the `config.py`script, there's a way to split this into an array of dictionar
 ````
 
 ## Service logic
-The service must ask, for each cluster, for a list of each edge, paired with it's enterprise. Once it has collected
+The service must ask for the list of edges of each host; each edge data will be paired with its enterprise and the host itself. Once it has collected
 all the edges with it's enterprises, it must create a single task for each one.
 
 The way to generate tasks is generate an event like this one

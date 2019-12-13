@@ -6,7 +6,7 @@
   * [Running in docker-compose](#running-in-docker-compose)
 
 # Description
-The service outage triage's job is to search through the bruin tickets and append our triage as a note to any
+The service outage triage's job is to search through the bruin tickets and append our triage or events as a note to any
 tickets that match the filter we have set.
 
 # Work Flow
@@ -17,7 +17,13 @@ that we provide to the bridge.
 Once all tickets are received we run that through another filter with the function `_filtered_ticket_details`.
 Which makes another rpc request to the bruin bridge to receive the ticket details for each ticket. With
 the details we can see if the ticket matches the serial number of the edge we're currently looking to append 
-tickets to. Then once we find a ticket that matches that we check if the triage has already been appended and will do nothing in the case the ticket has a triage already.
+tickets to. Then once we find a ticket that matches that we check if the triage has already been appended. We
+can tell if a triage already exists if the most recent note has the watermark `#*Automation Engine*#`.
+This note could be triage or an event note that we posted.
+ 
+In the case of a triage already existing we would first check the timestamp of the note with the watermark. If that timestamp
+occurred at least 30 mins ago then we check to see if any new events have past in that time-frame. If there are any new
+events then we post those events as a note to the ticket.
 
 `_Filtered_ticket_details` function should return a list of ticket ids that needs the triage appended.
 So now we create an ordered dict using the function ` _compose_ticket_note_object` with parameters of the edge status
