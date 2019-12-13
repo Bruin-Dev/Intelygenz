@@ -20,7 +20,7 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-quarantine_time = 60 * 1
+quarantine_time = 60 * 10
 MONITOR_CONFIG = {
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'environment': os.environ["CURRENT_ENVIRONMENT"],
