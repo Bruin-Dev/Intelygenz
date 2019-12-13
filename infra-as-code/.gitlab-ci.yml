@@ -80,13 +80,26 @@ network-resources-infra-master:
   only:
     - master
 
+check-ecs-resources-branches:
+  extends: .check_ecs_resources_template
+  before_script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+  only:
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
+  except:
+    - master
+
+check-ecs-resources-master:
+  extends: .check_ecs_resources_template
+  before_script:
+    - export ENVIRONMENT_SLUG=master
+  only:
+    - master
+
 deploy-branches:
   stage: deploy
   extends: .terraform_template_deploy_environment
-  variables:
-    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
@@ -119,10 +132,6 @@ deploy-branches:
 deploy-master:
   stage: deploy
   extends: .terraform_template_deploy_environment
-  variables:
-    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=master
