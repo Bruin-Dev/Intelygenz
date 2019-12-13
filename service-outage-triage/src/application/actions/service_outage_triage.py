@@ -34,12 +34,23 @@ class ServiceOutageTriage:
 
     async def _poll_tickets(self):
         self._logger.info("Requesting tickets from Bruin")
-        ticket_request_msg = {'request_id': uuid(), 'client_id': 85940, 'ticket_status': ['New', 'InProgress', 'Draft'],
-                              'category': 'SD-WAN',
-                              'ticket_topic': 'VOO'}
-        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
-                                                        json.dumps(ticket_request_msg, default=str),
-                                                        timeout=90)
+        ticket_request_msg_titan = {'request_id': uuid(), 'client_id': 85940,
+                                    'ticket_status': ['New', 'InProgress', 'Draft'],
+                                    'category': 'SD-WAN',
+                                    'ticket_topic': 'VOO'}
+        ticket_request_msg_mettel = {'request_id': uuid(), 'client_id': 9994,
+                                     'ticket_status': ['New', 'InProgress', 'Draft'],
+                                     'category': 'SD-WAN',
+                                     'ticket_topic': 'VOO'}
+        all_tickets_titan = await self._event_bus.rpc_request("bruin.ticket.request",
+                                                              json.dumps(ticket_request_msg_titan, default=str),
+                                                              timeout=90)
+        all_tickets_mettel = await self._event_bus.rpc_request("bruin.ticket.request",
+                                                               json.dumps(ticket_request_msg_mettel, default=str),
+                                                               timeout=90)
+        all_tickets = all_tickets_titan
+        all_tickets["tickets"] = all_tickets["tickets"] + all_tickets_mettel["tickets"]
+
         filtered_ticket_ids = []
         if all_tickets is not None and "tickets" in all_tickets.keys() and all_tickets["tickets"] is not None:
             filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
@@ -65,6 +76,7 @@ class ServiceOutageTriage:
 
             edge_status = await self._event_bus.rpc_request("edge.status.request",
                                                             json.dumps(status_msg, default=str), timeout=10)
+            client_id = self._client_id_from_edge_status(edge_status)
             edge_events = await self._event_bus.rpc_request("alert.request.event.edge",
                                                             json.dumps(events_msg, default=str), timeout=180)
             ticket_dict = self._compose_ticket_note_object(edge_status, edge_events)
@@ -83,7 +95,7 @@ class ServiceOutageTriage:
                                                   timeout=10)
             slack_message = {'request_id': uuid(),
                              'message': f'Triage appended to ticket: '
-                                        f'https://app.bruin.com/helpdesk?clientId=85940&ticketId='
+                                        f'https://app.bruin.com/helpdesk?clientId={client_id}&ticketId='
                                         f'{ticket_id["ticketID"]}, in '
                                         f'{self._config.TRIAGE_CONFIG["environment"]}'}
             await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
@@ -140,6 +152,14 @@ class ServiceOutageTriage:
     def _extract_field_from_string(self, dict_as_string, key1, key2='#DEFAULT_END#'):
         return dict_as_string[dict_as_string.find(key1) + len(key1): dict_as_string.find(key2)]
 
+    def _client_id_from_edge_status(self, edge_status):
+        client_id = edge_status['edge_info']['enterprise_name'].split('|')
+        if len(client_id) < 2:
+            # If after the split, the length of the array is lesser than 2 it means is a mettel edge
+            # So we hardcode mettel's bruin client ID
+            client_id = 9994
+        return client_id
+
     async def _check_for_new_events(self, timestamp, ticket_id):
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
         edge_id = id_by_serial[ticket_id["serial"]]
@@ -149,6 +169,16 @@ class ServiceOutageTriage:
                       'start_date': timestamp,
                       'end_date': datetime.now(timezone('US/Eastern')),
                       'filter': filter_events_status_list}
+        edge_status_request = {
+            'request_id': uuid(),
+            'edge': edge_id,
+        }
+        edge_status = await self._event_bus.rpc_request(
+            'edge.status.request',
+            json.dumps(edge_status_request),
+            timeout=45,
+        )
+        client_id = self._client_id_from_edge_status(edge_status)
         edge_events = await self._event_bus.rpc_request("alert.request.event.edge", json.dumps(
             events_msg, default=str), timeout=180)
 
@@ -187,7 +217,7 @@ class ServiceOutageTriage:
                                                       timeout=15)
                     slack_message = {'request_id': uuid(),
                                      'message': f'Events appended to ticket: '
-                                                f'https://app.bruin.com/helpdesk?clientId=85940&'
+                                                f'https://app.bruin.com/helpdesk?clientId={client_id}&'
                                                 f'ticketId={ticket_id["ticketID"]}, in '
                                                 f'{self._config.TRIAGE_CONFIG["environment"]}'}
                     await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
