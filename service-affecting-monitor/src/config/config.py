@@ -30,6 +30,7 @@ MONITOR_CONFIG = {
     "latency_wired": 50,
     "packet_loss_wireless": 8,
     "packet_loss_wired": 5,
+    "jitter": 30,
     'monitoring_minutes': 10
 }
 LOG_CONFIG = {
