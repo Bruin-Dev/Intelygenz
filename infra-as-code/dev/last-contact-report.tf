@@ -95,7 +95,7 @@ resource "aws_service_discovery_service" "last-contact-report" {
 resource "aws_ecs_service" "automation-last-contact-report" {
   name = local.automation-last-contact-report-resource-name
   task_definition = local.automation-last-contact-report-task_definition
-  desired_count = 1
+  desired_count = var.last_contact_report_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 

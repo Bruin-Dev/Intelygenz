@@ -97,7 +97,7 @@ resource "aws_service_discovery_service" "service-outage-triage" {
 resource "aws_ecs_service" "automation-service-outage-triage" {
   name = local.automation-service-outage-triage-ecs_service-name
   task_definition = local.automation-service-outage-triage-ecs_service-task_definition
-  desired_count = 1
+  desired_count = var.service_outage_triage_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 

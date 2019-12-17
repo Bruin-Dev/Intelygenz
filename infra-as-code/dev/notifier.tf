@@ -69,7 +69,7 @@ resource "aws_security_group" "automation-notifier_service" {
 resource "aws_ecs_service" "automation-notifier" {
   name = local.automation-notifier-ecs_service-name
   task_definition = local.automation-notifier-ecs_service-task_definition
-  desired_count = 1
+  desired_count = var.notifier_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 

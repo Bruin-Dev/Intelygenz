@@ -15,6 +15,20 @@ ENVIRONMENT = os.environ['TF_VAR_ENVIRONMENT']
 
 class CheckECSResources:
     _total_ecs_tasks_allowed = 50
+    _ecs_services_tasks = [os.environ['TF_VAR_bruin_bridge_desired_tasks'],
+                           os.environ['TF_VAR_last_contact_report_desired_tasks'],
+                           os.environ['TF_VAR_metrics_grafana_desired_tasks'],
+                           os.environ['TF_VAR_metrics_prometheus_desired_tasks'],
+                           os.environ['TF_VAR_nats_server_desired_tasks'],
+                           os.environ['TF_VAR_nats_server_1_desired_tasks'],
+                           os.environ['TF_VAR_nats_server_2_desired_tasks'],
+                           os.environ['TF_VAR_notifier_desired_tasks'],
+                           os.environ['TF_VAR_service_affecting_monitor_desired_tasks'],
+                           os.environ['TF_VAR_service_outage_monitor_desired_tasks'],
+                           os.environ['TF_VAR_service_outage_triage_desired_tasks'],
+                           os.environ['TF_VAR_sites_monitor_desired_tasks'],
+                           os.environ['TF_VAR_t7_bridge_desired_tasks'],
+                           os.environ['TF_VAR_velocloud_bridge_desired_tasks']]
 
     def check_ecs_task_conditions(self):
         actual_tasks_deployed = self._check_ecs_clusters_tasks()
@@ -39,31 +53,20 @@ class CheckECSResources:
                          f"{actual_tasks_deployed['tasks_deployed_for_environment']} tasks")
             total_ecs_tasks = (
                     actual_tasks_deployed['total_task_ecs_clusters'] +
-                    tasks_to_be_deployed -
-                    actual_tasks_deployed['tasks_deployed_for_environment']
+                    + tasks_to_be_deployed +
+                    - actual_tasks_deployed['tasks_deployed_for_environment']
             )
         else:
             total_ecs_tasks = actual_tasks_deployed['total_task_ecs_clusters'] + tasks_to_be_deployed
         return total_ecs_tasks
 
-    @staticmethod
-    def _get_tasks_to_deploy():
-        rootdir = os.getcwd()
-        count_tasks = 0
-        for folder, dirs, file in os.walk(rootdir):
-            for files in file:
-                if files.endswith('.tf'):
-                    fullpath = open(os.path.join(folder, files), 'r')
-                    count_services_file = 0
-                    count_tasks_file = 0
-                    for line in fullpath:
-                        if "\"aws_ecs_service\"" in line:
-                            count_services_file += 1
-                        elif "desired_count" in line:
-                            count_tasks_match = re.match(r'.*desired_count \= (?P<counter>\d+)$', line)
-                            count_tasks_file = int(count_tasks_match.group('counter'))
-                    count_tasks += count_tasks_file * count_services_file
-        return count_tasks
+    def _get_tasks_to_deploy(self):
+        desired_tasks = 0
+        for desired_tasks_element in self._ecs_services_tasks:
+            int_desired_tasks_element = int(desired_tasks_element)
+            if int_desired_tasks_element > 0:
+                desired_tasks += int_desired_tasks_element
+        return desired_tasks
 
     def _check_ecs_clusters_tasks(self):
         logging.info("It's going to be checked if there are enough resources to deploy a new ECS cluster in AWS")
@@ -104,8 +107,8 @@ class CheckECSResources:
         environment_already_deployed = False
         total_task_ecs_clusters = 0
         tasks_deployed_for_environment = 0
-        describe_clusters_command = ("aws ecs describe-clusters --cluster " + " ".join(list_clusters_arn) + " --region"
-                                     + " us-east-1").split(" ")
+        cmd = f"aws ecs describe-clusters --cluster {' '.join(list_clusters_arn)} --region us-east-1"
+        describe_clusters_command = (cmd.split(" "))
         get_clusters_information_call = subprocess.Popen(describe_clusters_command, stdout=subprocess.PIPE)
         try:
             clusters_information = json.loads(get_clusters_information_call.stdout.read())

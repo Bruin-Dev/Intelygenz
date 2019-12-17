@@ -97,7 +97,7 @@ resource "aws_service_discovery_service" "service-affecting-monitor" {
 resource "aws_ecs_service" "automation-service-affecting-monitor" {
   name = local.automation-service-affecting-monitor-ecs_service-name
   task_definition = local.automation-service-affecting-monitor-ecs_service-task_definition
-  desired_count = 1
+  desired_count = var.service_affecting_monitor_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 

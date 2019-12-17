@@ -97,7 +97,7 @@ resource "aws_service_discovery_service" "bruin-bridge" {
 resource "aws_ecs_service" "automation-bruin-bridge" {
   name = local.automation-bruin-bridge-resource-name
   task_definition = local.automation-bruin-bridge-task_definition
-  desired_count = 2
+  desired_count = var.bruin_bridge_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 

@@ -95,7 +95,7 @@ resource "aws_service_discovery_service" "velocloud-bridge" {
 resource "aws_ecs_service" "automation-velocloud-bridge" {
   name = local.automation-velocloud-bridge-ecs_service-name
   task_definition = local.automation-velocloud-bridge-ecs_service-task_definition
-  desired_count = 5
+  desired_count = var.velocloud_bridge_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 

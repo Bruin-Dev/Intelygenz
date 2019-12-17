@@ -149,3 +149,87 @@ variable "NATS_SERVER_1_CLUSTER_MODE" {
   type = string
   description = "NATS server 1 node cluster mode"
 }
+
+variable "bruin_bridge_desired_tasks" {
+  default = 2
+  type = number
+  description = "Number of desired tasks of microservice bruin-bridge"
+}
+
+variable "last_contact_report_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice last-contact-report"
+}
+
+variable "metrics_grafana_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice metrics-grafana"
+}
+
+variable "metrics_prometheus_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice metrics-prometheus"
+}
+
+variable "nats_server_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice nats-server"
+}
+
+variable "nats_server_1_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice nats-server-1"
+}
+
+variable "nats_server_2_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice nats-server-2"
+}
+
+variable "notifier_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice notifier"
+}
+
+variable "service_affecting_monitor_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice service-affecting-monitor"
+}
+
+variable "service_outage_monitor_desired_tasks" {
+  default = 0
+  type = number
+  description = "Number of desired tasks of microservice service-outage-monitor"
+}
+
+variable "service_outage_triage_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice service-outage-triage"
+}
+
+variable "sites_monitor_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice sites-monitor"
+}
+
+variable "t7_bridge_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice t7-bridge"
+}
+
+variable "velocloud_bridge_desired_tasks" {
+  default = 5
+  type = number
+  description = "Number of desired tasks of microservice velocloud-bridge"
+}

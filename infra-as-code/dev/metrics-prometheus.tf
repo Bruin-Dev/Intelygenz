@@ -82,7 +82,7 @@ resource "aws_service_discovery_service" "metrics-prometheus" {
 resource "aws_ecs_service" "automation-metrics-prometheus" {
   name = local.automation-metrics-prometheus-ecs_service-name
   task_definition = local.automation-metrics-prometheus-ecs_service-task_definition
-  desired_count = 1
+  desired_count = var.metrics_prometheus_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 

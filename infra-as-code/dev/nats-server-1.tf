@@ -103,7 +103,7 @@ resource "aws_service_discovery_service" "nats-server-1" {
 resource "aws_ecs_service" "automation-nats-server-1" {
   name = "${var.ENVIRONMENT}-nats-server-1"
   task_definition = local.automation-nats-server-1-ecs_service-task_definition
-  desired_count = 1
+  desired_count = var.nats_server_1_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 

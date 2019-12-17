@@ -108,7 +108,7 @@ resource "aws_security_group" "automation-grafana_service" {
 resource "aws_ecs_service" "automation-metrics-grafana" {
   name = local.automation-metrics-grafana-ecs_service-name
   task_definition = local.automation-metrics-grafana-ecs_task_definition
-  desired_count = 1
+  desired_count = var.metrics_grafana_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 

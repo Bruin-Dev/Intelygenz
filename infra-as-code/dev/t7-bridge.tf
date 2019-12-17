@@ -96,7 +96,7 @@ resource "aws_service_discovery_service" "t7-bridge" {
 resource "aws_ecs_service" "automation-t7-bridge" {
   name = local.automation-t7-bridge-resource-name
   task_definition = local.automation-t7-bridge-task_definition
-  desired_count = 1
+  desired_count = var.t7_bridge_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 

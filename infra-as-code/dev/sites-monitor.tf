@@ -97,7 +97,7 @@ resource "aws_service_discovery_service" "sites-monitor" {
 resource "aws_ecs_service" "automation-sites-monitor" {
   name = local.automation-sites-monitor-ecs_service-name
   task_definition = local.automation-sites-monitor-ecs_service-task_definition
-  desired_count = 1
+  desired_count = var.sites_monitor_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
 
