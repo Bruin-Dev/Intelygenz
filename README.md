@@ -25,12 +25,17 @@
   - [Naming conventions](#naming-conventions)
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
+  - [Deploy only specific microservices](#deploy-only-specific-microservices)
   - [DOD(Definition of Done)](#doddefinition-of-done)
   - [Custom packages](#custom-packages)
     - [Creation and testing](#creation-and-testing)
     - [Import and installation in microservices](#import-and-installation-in-microservices)
     - [Changes and debugging](#changes-and-debugging)
 - [Running the project](#running-the-project)
+  - [Python 3.6](#python-3.6)
+  - [Docker and Docker Compose](#docker-and-docker-compose)
+  - [Env files](#env-files)
+  - [Finish up](#finish-up)
 - [Lists of projects READMEs](#lists-of-projects-readmes)
   - [Packages](#packages)
   - [Microservices](#microservices)
@@ -93,6 +98,67 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 - When a new branch is created, it will be deployed in a new Fargate cluster. When a branch is deleted that cluster is deleted. **So every merge request should have "delete branch after merge"**
 - You can also check in gitlab's project view, inside Operations>Environments, to see current running environments
 
+## Deploy only specific microservices
+
+Due to the limited number of tasks per account in AWS, it is highly recommended that developers configure the tasks to be created in the ephemeral environments used. To do this, they must perform the following steps:
+
+1. In the `infra-as-code/.gitlab-ci.yml` and there are two jobs called `deploy-branches` and `check-ecs-resources-branches` respectively, where a series of variables are declared for the number of tasks per microservice, following the convention TF_VAR_<service_name>_desired_tasks.
+
+2. It will be enough to adapt the variable used for the number of tasks to be created in each microservice according to those that a programmer wants to create for each one of them
+    >In case the task number for a microservice is set to 0, this microservice will not be deployed.
+
+3. In the folder of each microservice it shows which microservices depend on it, this allows to know the microservices to which it will be necessary to assign at least one task for its deployment.
+
+4. Once the development is finished, these variables must be left with the value they have in the master branch
+
+Below is an example of jobs mentioned previously configured for deploy only the `service-affecting-monitor` microservice and the microservices with which it has dependencies, showing the declaration of necessary variables for it.
+
+```sh
+check-ecs-resources-branches:
+  extends: .check_ecs_resources_template
+  before_script:
+    . . .
+    - export TF_VAR_bruin_bridge_desired_tasks=0
+    - export TF_VAR_last_contact_report_desired_tasks=1
+    - export TF_VAR_metrics_grafana_desired_tasks=0
+    - export TF_VAR_metrics_prometheus_desired_tasks=0
+    - export TF_VAR_nats_server_desired_tasks=1
+    - export TF_VAR_nats_server_1_desired_tasks=1
+    - export TF_VAR_nats_server_2_desired_tasks=1
+    - export TF_VAR_notifier_desired_tasks=1
+    - export TF_VAR_service_affecting_monitor_desired_tasks=1
+    - export TF_VAR_service_outage_monitor_desired_tasks=0
+    - export TF_VAR_service_outage_triage_desired_tasks=0
+    - export TF_VAR_sites_monitor_desired_tasks=0
+    - export TF_VAR_t7_bridge_desired_tasks=0
+    - export TF_VAR_velocloud_bridge_desired_tasks=5
+    . . .
+```
+
+```sh
+deploy-branches:
+  stage: deploy
+  extends: .terraform_template_deploy_environment
+  before_script:
+    . . .
+    - export TF_VAR_bruin_bridge_desired_tasks=0
+    - export TF_VAR_last_contact_report_desired_tasks=1
+    - export TF_VAR_metrics_grafana_desired_tasks=0
+    - export TF_VAR_metrics_prometheus_desired_tasks=0
+    - export TF_VAR_nats_server_desired_tasks=1
+    - export TF_VAR_nats_server_1_desired_tasks=1
+    - export TF_VAR_nats_server_2_desired_tasks=1
+    - export TF_VAR_notifier_desired_tasks=1
+    - export TF_VAR_service_affecting_monitor_desired_tasks=1
+    - export TF_VAR_service_outage_monitor_desired_tasks=0
+    - export TF_VAR_service_outage_triage_desired_tasks=0
+    - export TF_VAR_sites_monitor_desired_tasks=0
+    - export TF_VAR_t7_bridge_desired_tasks=0
+    - export TF_VAR_velocloud_bridge_desired_tasks=5
+    . . .
+```
+>It is important to bear in mind that the declaration of the variables must be exactly the same in the two jobs, so that the check with the tasks necessary to create in the job `check-ecs-resources-branches` is carried out is the same one that is going to be created in the job `deploy-branches`.
+
 ## DOD(Definition of Done)
 
 If any of the next requirements is not fulfilled in a merge request, merge request can't be merged. 
@@ -149,7 +215,7 @@ To debug with PyCharm, you must put the breakpoint **in the copy in site-package
 
 This tutorial assumes Ubuntu 18.04 - it might work in other versions of Ubuntu though, but hasn't been tested.
 
-### Python 3.6
+## Python 3.6
 
 Open a terminal and run:
 
@@ -159,7 +225,7 @@ Python 3.6 is pre-installed in Ubuntu 18.04 so the output should be something li
 
 `Python 3.6.8`
 
-### Docker and Docker Compose
+## Docker and Docker Compose
 
 Remove any old versions and install the latest one:
 
@@ -182,7 +248,7 @@ Last command should output something like:
 
 `docker-compose version 1.24.1, build 4667896b`
 
-### Env files
+## Env files
 
 Ask a maintainer for a temp private token. Clone the mettel repo and run:
 
@@ -194,7 +260,7 @@ $ python3 environment_files_generator.py <private_token>
 
 That'll generate all env files needed.
 
-### Finish up
+## Finish up
 
 Run:
 
