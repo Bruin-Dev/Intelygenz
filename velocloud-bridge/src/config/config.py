@@ -37,8 +37,9 @@ VELOCLOUD_CONFIG = {
     'servers': parse_velocloud_config(),
     'multiplier': 5,
     'min': 5,
-    'stop_delay': 18000
-
+    'stop_delay': 18000,
+    'timezone': 'US/Eastern',
+    'days_to_create_dict': 1
 }
 
 LOG_CONFIG = {
