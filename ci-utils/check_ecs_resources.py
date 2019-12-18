@@ -5,7 +5,6 @@ import subprocess
 import json
 import logging
 import sys
-import re
 
 logging.basicConfig(level=logging.INFO)
 
@@ -51,30 +50,20 @@ class CheckECSResources:
         if actual_tasks_deployed['environment_already_deployed']:
             logging.info(f"The environment {ENVIRONMENT} was previously deployed in ECS with "
                          f"{actual_tasks_deployed['tasks_deployed_for_environment']} tasks")
-            total_ecs_tasks = (
-                    actual_tasks_deployed['total_task_ecs_clusters'] +
-                    + tasks_to_be_deployed +
-                    - actual_tasks_deployed['tasks_deployed_for_environment']
-            )
+            num_total_task_ecs_clusters = actual_tasks_deployed['total_task_ecs_clusters']
+            num_tasks_deployed_for_environment = actual_tasks_deployed['tasks_deployed_for_environment']
+            total_ecs_tasks = num_total_task_ecs_clusters + tasks_to_be_deployed - num_tasks_deployed_for_environment
         else:
             total_ecs_tasks = actual_tasks_deployed['total_task_ecs_clusters'] + tasks_to_be_deployed
         return total_ecs_tasks
 
     def _get_tasks_to_deploy(self):
-        desired_tasks = 0
-        for desired_tasks_element in self._ecs_services_tasks:
-            int_desired_tasks_element = int(desired_tasks_element)
-            if int_desired_tasks_element > 0:
-                desired_tasks += int_desired_tasks_element
-        return desired_tasks
+        return sum([int(t) for t in self._ecs_services_tasks if t is not None])
 
     def _check_ecs_clusters_tasks(self):
         logging.info("It's going to be checked if there are enough resources to deploy a new ECS cluster in AWS")
         actual_clusters_arns = self._get_ecs_clusters_arns()
         if len(actual_clusters_arns) > 0:
-            cluster_already_deployed = False
-            if any(cluster_arn.split('/')[0] == ENVIRONMENT for cluster_arn in actual_clusters_arns):
-                cluster_already_deployed = True
             logging.info(f"There are {len(actual_clusters_arns)} ECS cluster/s used by MetTel "
                          "Automation project in AWS")
             logging.info("The number of total tasks (pending and active) for the obtained ECS cluster/s will be "
