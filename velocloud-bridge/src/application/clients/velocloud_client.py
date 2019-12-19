@@ -167,6 +167,23 @@ class VelocloudClient:
 
         return edges_by_enterprise_and_host
 
+    def get_all_enterprises_edges_with_host_by_serial(self):
+        serial_to_edge_id = dict()
+        for client in self._clients:
+            res = self.get_monitoring_aggregates(client)
+            for enterprise in res["enterprises"]:
+                edges_by_enterprise = self.get_all_enterprises_edges_by_id(client, enterprise["id"])
+                for edge in edges_by_enterprise:
+                    if edge["haSerialNumber"] is not None:
+                        serial_to_edge_id[edge["haSerialNumber"]] = {"host": client["host"],
+                                                                     "enterprise_id": enterprise["id"],
+                                                                     "edge_id": edge["id"]}
+                    serial_to_edge_id[edge["serialNumber"]] = {"host": client["host"],
+                                                               "enterprise_id": enterprise["id"],
+                                                               "edge_id": edge["id"]}
+
+        return serial_to_edge_id
+
     def get_all_hosts_edge_count(self):
         sum = 0
         for client in self._clients:

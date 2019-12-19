@@ -69,7 +69,7 @@ class Container:
                                                is_async=True, logger=self._logger)
         self._list_enterprise_name = ActionWrapper(self._enterprise_name_list, "enterprise_name_list",
                                                    is_async=True, logger=self._logger)
-        self._search_for_edge_id = ActionWrapper(self._actions_list, "search_for_edge_id",
+        self._search_for_edge_id = ActionWrapper(self._edge_ids_by_serial, "search_for_edge_id",
                                                  is_async=True, logger=self._logger)
         self._server = QuartServer(config)
 
@@ -77,6 +77,7 @@ class Container:
         self._velocloud_repository.connect_to_all_servers()
         self._ids_by_serial_repository.start_ids_by_serial_storage_job(exec_on_start=True)
         await self._event_bus.connect()
+        self._scheduler.start()
         await self._event_bus.subscribe_consumer(consumer_name="list", topic="edge.list.request",
                                                  action_wrapper=self._report_edge_list,
                                                  queue="velocloud_bridge")

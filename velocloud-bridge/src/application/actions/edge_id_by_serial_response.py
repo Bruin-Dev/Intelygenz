@@ -4,10 +4,10 @@ from igz.packages.eventbus.eventbus import EventBus
 
 class SearchForIDsBySerial:
 
-    def __init__(self, config, logger, event_bus: EventBus, ids_by_serial_repository):
+    def __init__(self, config, event_bus: EventBus, logger, ids_by_serial_repository):
         self._config = config
-        self._logger = logger
         self._event_bus = event_bus
+        self._logger = logger
         self._ids_by_serial_repository = ids_by_serial_repository
 
     async def search_for_edge_id(self, msg):

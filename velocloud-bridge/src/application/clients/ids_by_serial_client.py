@@ -10,10 +10,8 @@ class IDsBySerialClient:
         self._id_by_serial_dict = {}
 
     def create_id_by_serial_dict(self):
-        edge_list = self._velocloud_client.get_all_enterprises_edges_with_host()
-        for edge in edge_list:
-            serial_id = self._velocloud_client.get_edge_information(edge)['serialNumber']
-            self._id_by_serial_dict[serial_id] = edge
+        self._id_by_serial_dict = {}
+        self._id_by_serial_dict = self._velocloud_client.get_all_enterprises_edges_with_host_by_serial()
 
     def search_for_edge_id_by_serial(self, serial):
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'],
@@ -25,3 +23,4 @@ class IDsBySerialClient:
             else:
                 self._logger.error('Error 404, serial not found. Retrying call again')
                 raise Exception
+        return search_for_edge_id_by_serial()
