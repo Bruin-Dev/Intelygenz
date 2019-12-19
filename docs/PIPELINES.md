@@ -53,7 +53,7 @@ In cases in which a module does not reach the minimum coverage mentioned above, 
 
 This area covers the checking and creation, if necessary, of all the basic resources for the subsequent deployment, these being the specific image repositories in [ECR Docker Container Registry](https://aws.amazon.com/ecr), as well as the roles necessary in AWS to be able to display these images in [ECS Container Orchestrator](https://aws.amazon.com/ecs/).
 
-In this stage is also checked whether there are sufficient free resources in ECS to carry out the deployment.
+In this stage is also checked whether there are enough free resources in ECS to carry out the deployment with success or not.
 
 ## Build steps
 

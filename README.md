@@ -25,7 +25,7 @@
   - [Naming conventions](#naming-conventions)
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
-  - [Deploy only specific microservices](#deploy-only-specific-microservices)
+  - [Deploying just a subset of microservices](#deploying-just-a-subset-of-microservices)
   - [DOD(Definition of Done)](#doddefinition-of-done)
   - [Custom packages](#custom-packages)
     - [Creation and testing](#creation-and-testing)
@@ -98,20 +98,21 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 - When a new branch is created, it will be deployed in a new Fargate cluster. When a branch is deleted that cluster is deleted. **So every merge request should have "delete branch after merge"**
 - You can also check in gitlab's project view, inside Operations>Environments, to see current running environments
 
-## Deploy only specific microservices
+## Deploying just a subset of microservices
 
-Due to the limited number of tasks per account in AWS, it is highly recommended that developers configure the tasks to be created in the ephemeral environments used. To do this, they must perform the following steps:
+Due to the limited number of task instances available per account in AWS (50 instances at the time of this writing), it is highly recommended that developers configure just the tasks they need to use for their deployments so ephemeral environments do not consume more AWS resources (task instances) than needed. To do so, they must perform the following steps:
 
-1. In the `infra-as-code/.gitlab-ci.yml` and there are two jobs called `deploy-branches` and `check-ecs-resources-branches` respectively, where a series of variables are declared for the number of tasks per microservice, following the convention TF_VAR_<service_name>_desired_tasks.
+1. There are two jobs defined in the `infra-as-code/.gitlab-ci.yml` file: `deploy-branches` and `check-ecs-resources-branches`. A set of variables are declared within them to configure the number of tasks per microservice. The naming of these variables follows the convention `TF_VAR_<service_name>_desired_tasks`, where `service_name` is the name of the microservice declared in AWS.
 
-2. It will be enough to adapt the variable used for the number of tasks to be created in each microservice according to those that a programmer wants to create for each one of them
-    >In case the task number for a microservice is set to 0, this microservice will not be deployed.
+NOTE: Make sure that the set of variables is exactly the same in each of these jobs. This duplication can't be avoided because Terraform variables can't be shared between GitlabCI jobs of different stages.
+    Developers must modify the desired `TF_VAR_<service_name>_desired_tasks` variable to spawn as much tasks instances as they need for their ephemeral environments.
+    > If the variable is set to 0, no tasks instances will be created for that microservice. The task definition will be deployed anyway, though.
 
-3. In the folder of each microservice it shows which microservices depend on it, this allows to know the microservices to which it will be necessary to assign at least one task for its deployment.
+3. If the developer has doubts about what microservices should be taken into account for an ephemeral environment, they should take a look at the README file of that microservice. After guessing that, the corresponding `TF_VAR_<service_name>_desired_tasks` must be set with a minimal value of 1 in order to get the task instances created when the deployment finishes.
 
-4. Once the development is finished, these variables must be left with the value they have in the master branch
+4. Once the development has finished, the value of `TF_VAR_<service_name>_desired_tasks` variables that were modified must be reverted to the value they hold in the `master` branch.
 
-Below is an example of jobs mentioned previously configured for deploy only the `service-affecting-monitor` microservice and the microservices with which it has dependencies, showing the declaration of necessary variables for it.
+The following example shows how to configure `TF_VAR_<service_name>_desired_tasks` variables strictly needed to have the `service-affecting-monitor` microservice working in an ephemeral environment, including microservices it depends on.
 
 ```sh
 check-ecs-resources-branches:
@@ -157,7 +158,7 @@ deploy-branches:
     - export TF_VAR_velocloud_bridge_desired_tasks=5
     . . .
 ```
->It is important to bear in mind that the declaration of the variables must be exactly the same in the two jobs, so that the check with the tasks necessary to create in the job `check-ecs-resources-branches` is carried out is the same one that is going to be created in the job `deploy-branches`.
+> As pointed out earlier, make sure that the set of `TF_VAR_<service_name>_desired_tasks` variables is exactly the same in both `check-ecs-resources-branches` and `deploy-branches` jobs.
 
 ## DOD(Definition of Done)
 
