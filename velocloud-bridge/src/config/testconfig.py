@@ -25,7 +25,9 @@ VELOCLOUD_CONFIG = {
     ],
     'multiplier': 0.1,
     'min': 0,
-    'stop_delay': 0.4
+    'stop_delay': 0.4,
+    'timezone': 'US/Eastern',
+    'days_to_create_dict': 1
 
 }
 
