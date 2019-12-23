@@ -144,3 +144,6 @@ last_contact.csv
 
 # Grafana dashboards
 *-dashboard.json
+
+#Local thanos storage files
+metrics-dashboard/thanos/storage

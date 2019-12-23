@@ -10,7 +10,7 @@ deleteDatasources:
 # what's available in the database
 datasources:
   # <string, required> name of the datasource. Required
-- name: Prometheus
+- name: thanos-querier
   # <string, required> datasource type. Required
   type: prometheus
   # <string, required> access mode. proxy or direct (Server or Browser in the UI). Required
@@ -18,7 +18,7 @@ datasources:
   # <int> org id. will default to orgId 1 if not specified
   orgId: 1
   # <string> url
-  url: http://prometheus:9090
+  url: http://thanos-querier:19091
   # <string> database password, if used
   password:
   # <string> database user, if used

@@ -2,11 +2,16 @@ data "aws_ecr_repository" "automation-metrics-prometheus" {
   name = "automation-metrics-dashboard/prometheus"
 }
 
+data "aws_ecr_repository" "automation-metrics-thanos" {
+  name = "automation-metrics-dashboard/thanos"
+}
+
 data "template_file" "automation-metrics-prometheus" {
   template = file("${path.module}/task-definitions/prometheus.json")
 
   vars = {
-    image = local.automation-metrics-prometheus-image
+    prometheus_image = local.automation-metrics-prometheus-image
+    thanos_image = local.automation-metrics-thanos-image
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
   }
@@ -20,8 +25,11 @@ resource "aws_ecs_task_definition" "automation-metrics-prometheus" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  execution_role_arn = data.aws_iam_role.ecs_execution_role.arn
-  task_role_arn = data.aws_iam_role.ecs_execution_role.arn
+  execution_role_arn = data.aws_iam_role.ecs_execution_role_with_s3.arn
+  task_role_arn = data.aws_iam_role.ecs_execution_role_with_s3.arn
+  volume {
+    name      = "prometheus_storage"
+  }
 }
 
 resource "aws_security_group" "automation-metrics-prometheus_service" {
@@ -48,6 +56,24 @@ resource "aws_security_group" "automation-metrics-prometheus_service" {
   ingress {
     from_port = 9090
     to_port = 9090
+    protocol = "TCP"
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+  }
+
+  ingress {
+    from_port = 10091
+    to_port = 10091
+    protocol = "TCP"
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+  }
+
+  ingress {
+    from_port = 10902
+    to_port = 10902
     protocol = "TCP"
     cidr_blocks = [
       "0.0.0.0/0"
@@ -99,5 +125,17 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
     registry_arn = aws_service_discovery_service.metrics-prometheus.arn
   }
 
-  depends_on = [ null_resource.nats-server-healtcheck ]
+  depends_on = [ null_resource.nats-server-healtcheck, aws_s3_bucket.prometheus-storage]
+}
+
+resource "aws_s3_bucket" "prometheus-storage" {
+  bucket = local.automation-metrics-prometheus-s3-storage-name
+  acl    = "private"
+
+  tags = {
+    Name        = local.automation-metrics-prometheus-s3-storage-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+
+  force_destroy = true
 }

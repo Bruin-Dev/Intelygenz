@@ -1,7 +1,7 @@
 [
   {
     "name": "metrics-prometheus",
-    "image": "${image}",
+    "image": "${prometheus_image}",
     "portMappings": [
       {
         "containerPort": 9090,
@@ -27,6 +27,61 @@
       "startPeriod": 30,
       "timeout": 5
     },
+    "mountPoints": [
+        {
+          "sourceVolume": "prometheus_storage",
+          "containerPath": "/prometheus"
+        }
+    ],
+    "command": ["--config.file=/etc/prometheus/prometheus.yml",
+                "--storage.tsdb.path=/prometheus",
+                "--storage.tsdb.min-block-duration=2m",
+                "--storage.tsdb.max-block-duration=2m"],
     "environment": []
+  },
+  {
+    "name": "metrics-thanos-sidecar",
+    "image": "${thanos_image}",
+    "portMappings": [
+      {
+        "containerPort": 10091,
+        "hostPort": 10091
+      },
+      {
+        "containerPort": 10902,
+        "hostPort": 10902
+      }
+    ],
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "wget http://localhost:10902/-/ready -O index || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
+    "mountPoints": [
+        {
+          "sourceVolume": "prometheus_storage",
+          "containerPath": "/prometheus"
+        }
+    ],
+    "command": ["sidecar",
+                "--tsdb.path=/prometheus",
+                "--prometheus.url=http://localhost:9090",
+                "--objstore.config-file=/tmp/bucket_config.yaml",
+                "--grpc-address=localhost:10091",
+                "--http-address=localhost:10902"]
   }
 ]

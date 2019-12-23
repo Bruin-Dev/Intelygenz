@@ -1,0 +1,14 @@
+type: S3
+config:
+  bucket: "prometheus-poc-storage"
+  endpoint: "s3.us-east-1.amazonaws.com"
+  region: "us-east-1"
+  insecure: false
+  signature_version2: false
+  encrypt_sse: false
+  put_user_metadata: {}
+  http_config:
+    idle_conn_timeout: 0s
+    insecure_skip_verify: false
+  trace:
+    enable: false

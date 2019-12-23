@@ -45,3 +45,7 @@ resource "aws_ecr_repository" "automation-metrics-prometheus" {
 resource "aws_ecr_repository" "automation-metrics-grafana" {
   name = "automation-metrics-dashboard/grafana"
 }
+
+resource "aws_ecr_repository" "automation-metrics-thanos" {
+  name = "automation-metrics-dashboard/thanos"
+}

@@ -386,7 +386,7 @@
     },
     {
       "columns": [],
-      "datasource": "Prometheus",
+      "datasource": "thanos-querier",
       "fontSize": "100%",
       "gridPos": {
         "h": 4,
