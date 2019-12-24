@@ -49,3 +49,7 @@ resource "aws_ecr_repository" "automation-metrics-grafana" {
 resource "aws_ecr_repository" "automation-metrics-thanos" {
   name = "automation-metrics-dashboard/thanos"
 }
+
+resource "aws_ecr_repository" "automation-metrics-thanos-store-gateway" {
+  name = "automation-metrics-dashboard/thanos-store-gateway"
+}

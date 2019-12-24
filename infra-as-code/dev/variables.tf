@@ -174,6 +174,12 @@ variable "metrics_prometheus_desired_tasks" {
   description = "Number of desired tasks of microservice metrics-prometheus"
 }
 
+variable "metrics_thanos_store_gateway_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice metrics-thanos-store-gateway"
+}
+
 variable "nats_server_desired_tasks" {
   default = 1
   type = number

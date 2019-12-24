@@ -48,6 +48,26 @@ thanos-sidecar-build:
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
 
+thanos-store-gateway-build:
+  stage: build
+  variables:
+    MODULE_NAME: metrics-dashboard/thanos
+    REPOSITORY_NAME: metrics-dashboard/thanos-store-gateway
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+    GRPC_ADDRESS_PORT: 10901
+    HTTP_ADDRESS_PORT: 19191
+  extends: .build_app_image
+  script:
+    - source ci-utils/environment_assign.sh
+    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/thanos/config/bucket_config.yaml
+    - cp metrics-dashboard/thanos/config/bucket_config.yaml metrics-dashboard/thanos/bucket_config.yaml
+    - docker build --build-arg GRPC_ADDRESS=${GRPC_ADDRESS_PORT} --build-arg HTTP_ADDRESS=${HTTP_ADDRESS_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest
+    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${MODULE_VERSION}
+  after_script:
+    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest
+    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${MODULE_VERSION}
+
 # =======================================================
 # Grafana user creation jobs for metrics-dashboard module
 # =======================================================

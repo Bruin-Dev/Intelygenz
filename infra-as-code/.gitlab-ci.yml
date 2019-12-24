@@ -88,6 +88,7 @@ check-ecs-resources-branches:
     - export TF_VAR_last_contact_report_desired_tasks=0
     - export TF_VAR_metrics_grafana_desired_tasks=1
     - export TF_VAR_metrics_prometheus_desired_tasks=1
+    - export TF_VAR_metrics_thanos_store_gateway_desired_tasks=1
     - export TF_VAR_nats_server_desired_tasks=1
     - export TF_VAR_nats_server_1_desired_tasks=1
     - export TF_VAR_nats_server_2_desired_tasks=1
@@ -112,6 +113,7 @@ check-ecs-resources-master:
     - export TF_VAR_last_contact_report_desired_tasks=1
     - export TF_VAR_metrics_grafana_desired_tasks=1
     - export TF_VAR_metrics_prometheus_desired_tasks=1
+    - export TF_VAR_metrics_thanos_store_gateway_desired_tasks=1
     - export TF_VAR_nats_server_desired_tasks=1
     - export TF_VAR_nats_server_1_desired_tasks=1
     - export TF_VAR_nats_server_2_desired_tasks=1
@@ -151,6 +153,7 @@ deploy-branches:
     - export TF_VAR_last_contact_report_desired_tasks=0
     - export TF_VAR_metrics_grafana_desired_tasks=1
     - export TF_VAR_metrics_prometheus_desired_tasks=1
+    - export TF_VAR_metrics_thanos_store_gateway_desired_tasks=1
     - export TF_VAR_nats_server_desired_tasks=1
     - export TF_VAR_nats_server_1_desired_tasks=1
     - export TF_VAR_nats_server_2_desired_tasks=1
@@ -197,6 +200,7 @@ deploy-master:
     - export TF_VAR_last_contact_report_desired_tasks=1
     - export TF_VAR_metrics_grafana_desired_tasks=1
     - export TF_VAR_metrics_prometheus_desired_tasks=1
+    - export TF_VAR_metrics_thanos_store_gateway_desired_tasks=1
     - export TF_VAR_nats_server_desired_tasks=1
     - export TF_VAR_nats_server_1_desired_tasks=1
     - export TF_VAR_nats_server_2_desired_tasks=1
