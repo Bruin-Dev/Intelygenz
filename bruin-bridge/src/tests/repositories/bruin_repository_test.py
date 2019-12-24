@@ -586,3 +586,35 @@ class TestBruinRepository:
         create_ticket = bruin_repository.post_ticket(client_id, category, services, notes, contacts)
         bruin_client.post_ticket.assert_called_once_with(client_id, category, services, notes, contacts)
         assert create_ticket == expected_post_response
+
+    def open_ticket_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        detail_id = 321
+        ticket_status = 'O'
+        successful_status_change = 'Success'
+
+        bruin_client = Mock()
+        bruin_client.update_ticket_status = Mock(return_value=successful_status_change)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        change_status = bruin_repository.open_ticket(ticket_id, detail_id)
+        bruin_client.update_ticket_status.assert_called_once_with(ticket_id, detail_id, ticket_status)
+        assert change_status == successful_status_change
+
+    def resolve_ticket_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        detail_id = 321
+        ticket_status = 'R'
+        successful_status_change = 'Success'
+
+        bruin_client = Mock()
+        bruin_client.update_ticket_status = Mock(return_value=successful_status_change)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        change_status = bruin_repository.resolve_ticket(ticket_id, detail_id)
+        bruin_client.update_ticket_status.assert_called_once_with(ticket_id, detail_id, ticket_status)
+        assert change_status == successful_status_change

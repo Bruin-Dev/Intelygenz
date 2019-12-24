@@ -138,3 +138,25 @@ class BruinClient:
                 self.login()
                 raise Exception
         return post_ticket()
+
+    def update_ticket_status(self, ticket_id, detail_id, ticket_status):
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
+        def update_ticket_status():
+            self._logger.info(f'Updating ticket status for ticket id: {ticket_id}')
+
+            payload = {
+                "Status": ticket_status
+            }
+            response = requests.put(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details'
+                                    f'/{detail_id}/status',
+                                    headers=self._get_request_headers(),
+                                    json=payload,
+                                    verify=False)
+            if response.status_code in range(200, 299):
+                return response.json()
+            else:
+                self.login()
+                raise Exception
+        return update_ticket_status()

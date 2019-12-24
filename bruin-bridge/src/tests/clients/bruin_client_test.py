@@ -1,12 +1,11 @@
-from unittest.mock import patch
 from unittest.mock import Mock
-import requests
+from unittest.mock import patch
+
+from application.clients.bruin_client import BruinClient
+from pytest import raises
 
 from application.clients import bruin_client as bruin_client_module
-from application.clients.bruin_client import BruinClient
 from config import testconfig as config
-from pytest import raises
-from tenacity import RetryError
 
 
 class TestBruinClient:
@@ -232,4 +231,44 @@ class TestBruinClient:
             with raises(Exception):
                 post_ticket = bruin_client.post_ticket(client_id, category, services, notes, contacts)
                 assert post_ticket is None
+            bruin_client.login.assert_called()
+
+    def update_ticket__status_ok_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        detail_id = 321
+        ticket_status = 'O'
+        successful_status_change = 'Success'
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=successful_status_change)
+        response_mock.status_code = 200
+        with patch.object(bruin_client_module.requests, 'put', return_value=response_mock) as mock_put:
+            bruin_client = BruinClient(logger, config)
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            update_ticket_status = bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
+            mock_put.assert_called_once()
+            assert update_ticket_status == successful_status_change
+
+    def update_ticket_status_ko_test(self):
+        logger = Mock()
+
+        ticket_id = 123
+        detail_id = 321
+        ticket_status = 'X'
+        failure_status_change = 'failed'
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=failure_status_change)
+        response_mock.status_code = 500
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = Mock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'put', return_value=response_mock):
+            with raises(Exception):
+                update_ticket_status = bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
+                assert update_ticket_status is None
             bruin_client.login.assert_called()

@@ -14,6 +14,18 @@
     * [Description](#description-3)
     * [Request message](#request-message-2)
     * [Response message](#response-message-2)
+  * [Post Ticket](#post-ticket)
+    * [Description](#description-4)
+    * [Request message](#request-message-3)
+    * [Response message](#response-message-3)
+  * [Open Ticket](#open-ticket)
+    * [Description](#description-5)
+    * [Request message](#request-message-4)
+    * [Response message](#response-message-4)
+  * [Resolve Ticket](#resolve-ticket)
+    * [Description](#description-6)
+    * [Request message](#request-message-5)
+    * [Response message](#response-message-5)   
 - [Running in docker-compose](#running-in-docker-compose)
 
 # Bruin API
@@ -98,7 +110,7 @@ to function `post_note`. From the request message, we need the `ticket_id` to kn
 we need the `note` field for what note to append.
 
 We call the bruin repository with these fields so that it can call the bruin client to post the note to the ticket.
-The bruin client should return some success message indicating that our note was successfuly posted to the ticket of `ticket_id`.
+The bruin client should return some success message indicating that our note was successfully posted to the ticket of `ticket_id`.
 And then a response message is published to the response topic that was built by NATS under the hood.
 
 ### Request message
@@ -113,6 +125,133 @@ And then a response message is published to the response topic that was built by
 ```
 {
     'request_id': msg_dict['request_id'],
+    'status': 200
+}
+```
+
+# Post Ticket
+### Description
+When the bruin bridge receives a request with a request message from topic `bruin.ticket.creation.request` it makes a callback
+to the function `post_ticket`. From the request message, we need the `clientId` to know what client we're creating the ticket for, 
+the `category` field for whether its a service affecting ticket (`VAS`) or service outage ticket (`VOO`), `services` field which
+is essential the serial number of the edge we're creating the ticket for, and the `contact` field
+which is the `email`, `phone number`, and `name` of the ticket's contact.  
+
+We call the bruin repository with these fields so that it can call the bruin client to create the ticket status.
+The bruin client should return some success message indicating that our ticket status was successfully changed along with
+the ticket id of the newly created ticket.And then a response message is published to the response topic that was built by NATS under the
+hood
+### Request message
+Service Affecting
+```
+{
+    "request_id": 123,
+    "clientId": 321,
+    "category": "VAS",
+    "services": [
+        {
+            "serviceNumber": Serial Number
+        }
+    ],
+    "contacts": [
+        {
+            "email": "Email@email.com",
+            "phone": "5108324567",
+            "name": "Sample name",
+            "type": "site"
+        },
+        {
+           "email": "Email@email.com",
+           "phone": "5108324567",
+           "name": "Sample name",
+           "type": "ticket"
+        }
+    ]
+}
+```
+Service Outage
+```
+{
+    "request_id": 123,
+    "clientId": 321,
+    "category": "VOO",
+    "services": [
+        {
+            "serviceNumber": Serial Number
+        }
+    ],
+    "contacts": [
+        {
+            "email": "Email@email.com",
+            "phone": "5108324567",
+            "name": "Sample name",
+            "type": "site"
+        },
+        {
+           "email": "Email@email.com",
+           "phone": "5108324567",
+           "name": "Sample name",
+           "type": "ticket"
+        }
+    ]
+}
+```
+### Response message
+```
+{
+    'request_id': 123,
+    'ticketIds': 321,
+    'status': 200
+}
+```
+
+# Open Ticket 
+### Description
+When the bruin bridge receives a request with a request message from topic `bruin.ticket.status.open` it makes a callback
+to the function `open_ticket`. From the request message, we need the `ticket_id` to know what ticket status we need to update, 
+aswell as the `detail_id` field.
+
+We call the bruin repository with these fields so that it can call the bruin client to set the ticket status to `open`.
+The bruin client should return some success message indicating that our ticket status was successfully changed.
+And then a response message is published to the response topic that was built by NATS under the hood.
+### Request message
+```
+{
+    'request_id': 123,
+    'ticket_id': 321,
+    'detail_id': 123
+
+}
+```
+### Response message
+```
+{
+    'request_id': 123,
+    'status': 200
+}
+```
+# Resolve Ticket 
+### Description
+When the bruin bridge receives a request with a request message from topic `bruin.ticket.status.resolve` it makes a callback
+to the function `resolve_ticket`. From the request message, we need the `ticket_id` to know what ticket status we need to update, 
+aswell as the `detail_id` field.
+
+We call the bruin repository with these fields so that it can call the bruin client to set the ticket status to `resolve`.
+The bruin client should return some success message indicating that our ticket status was successfully changed.
+And then a response message is published to the response topic that was built by NATS under the hood.
+### Request message
+```
+{
+    'request_id': 123,
+    'ticket_id': 321,
+    'detail_id': 123
+
+}
+```
+### Response message
+```
+{
+    'request_id': 123,
     'status': 200
 }
 ```

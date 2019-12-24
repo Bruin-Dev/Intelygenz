@@ -80,3 +80,9 @@ class BruinRepository:
 
     def post_ticket(self, client_id, category, services, notes, contacts):
         return self._bruin_client.post_ticket(client_id, category, services, notes, contacts)
+
+    def open_ticket(self, ticket_id, detail_id):
+        return self._bruin_client.update_ticket_status(ticket_id, detail_id, 'O')
+
+    def resolve_ticket(self, ticket_id, detail_id):
+        return self._bruin_client.update_ticket_status(ticket_id, detail_id, 'R')
