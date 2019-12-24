@@ -48,18 +48,9 @@ resource "aws_security_group" "automation-metrics-thanos-store-gateway_service" 
   }
 
   ingress {
-    from_port = local.automation-metrics-thanos-store-gateway-GRPC_PORT
-    to_port = local.automation-metrics-thanos-store-gateway-GRPC_PORT
-    protocol = "TCP"
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-  }
-
-  ingress {
-    from_port = local.automation-metrics-thanos-store-gateway-HTTP_PORT
-    to_port = local.automation-metrics-thanos-store-gateway-HTTP_PORT
-    protocol = "TCP"
+    from_port = "0"
+    to_port = "0"
+    protocol = "-1"
     cidr_blocks = [
       "0.0.0.0/0"
     ]
@@ -103,11 +94,17 @@ resource "aws_ecs_service" "automation-metrics-thanos-store-gateway" {
     subnets = [
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
-  service_registries {
-    registry_arn = aws_service_discovery_service.metrics-thanos-store-gateway.arn
+//  service_registries {
+//    registry_arn = aws_service_discovery_service.metrics-thanos-store-gateway.arn
+//  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.automation-thanos-store-gateway.arn
+    container_name = "metrics-thanos-store-gateway"
+    container_port = 10901
   }
 
   depends_on = [ null_resource.nats-server-healtcheck ]

@@ -54,27 +54,9 @@ resource "aws_security_group" "automation-metrics-prometheus_service" {
   }
 
   ingress {
-    from_port = 9090
-    to_port = 9090
-    protocol = "TCP"
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-  }
-
-  ingress {
-    from_port = 10091
-    to_port = 10091
-    protocol = "TCP"
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-  }
-
-  ingress {
-    from_port = 10902
-    to_port = 10902
-    protocol = "TCP"
+    from_port = "0"
+    to_port = "0"
+    protocol = "-1"
     cidr_blocks = [
       "0.0.0.0/0"
     ]

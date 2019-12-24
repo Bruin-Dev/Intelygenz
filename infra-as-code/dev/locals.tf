@@ -98,12 +98,14 @@ locals {
   automation-metrics-thanos-store-gateway-service_discovery_service-name = "thanos-store-gateway-${var.ENVIRONMENT}"
   automation-metrics-thanos-store-gateway-ecs_service-name = "${var.ENVIRONMENT}-metrics-thanos-store-gateway"
   automation-metrics-thanos-store-gateway-ecs_service-task_definition = "${aws_ecs_task_definition.automation-metrics-thanos-store-gateway.family}:${aws_ecs_task_definition.automation-metrics-thanos-store-gateway.revision}"
+  automation-metrics-thanos-store-gateway-target_group-tag-Name = "${var.ENVIRONMENT}-metrics-thanos-store-gateway"
+  automation-metrics-thanos-store-gateway-target_group-name = "${var.ENVIRONMENT}-th-store"
 
   // automation-metrics-thanos-querier local vars
   automation-metrics-thanos-querier-image = "${data.aws_ecr_repository.automation-metrics-thanos-querier.repository_url}:${var.BUILD_NUMBER}"
   automation-metrics-thanos-querier-HTTP_PORT = 19091
-  automation-metrics-thanos-sidecar-url = "prometheus-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:10091"
-  automation-metrics-thanos-store-gateway-url = "thanos-store-gateway-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:10901"
+  automation-metrics-thanos-sidecar-url = "prometheus-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:10902"
+  automation-metrics-thanos-store-gateway-url = "thanos-store-gateway-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:19191"
   automation-metrics-thanos-querier-ecs_task_definition-family = "${var.ENVIRONMENT}-thanos-querier"
   automation-metrics-thanos-querier-security_group-name = "${var.ENVIRONMENT}-metrics-thanos-querier"
   automation-metrics-thanos-querier-security_group-tag-Name = "${var.ENVIRONMENT}-metrics-thanos-querier"
@@ -265,4 +267,8 @@ locals {
   automation-nats-server-1-task_definition_template-container_name = "nats-server-1"
   automation-nats-server-1-task_definition_template-natscluster = "nats://localhost:${var.NATS_SERVER_1_CLUSTER_PORT}"
   automation-nats-server-1-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
+
+  // automation-nlb local vars
+  automation-nlb-name = "${var.ENVIRONMENT}-nlb"
+  automation-nlb-tag-Name = "${var.ENVIRONMENT}-nlb"
 }

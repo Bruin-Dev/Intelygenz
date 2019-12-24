@@ -29,8 +29,7 @@ class S3Buckets:
 
     def _check_s3buckets_exists(self, environment):
         has_s3_buckets = {'s3_buckets': False}
-        s3_buckets_list_to_check = [f's3://{self._s3_bucket_backend}/terraform-{environment}-dev-resources.tfstate',
-                                    f's3://{self._s3_bucket_backend}/terraform-{environment}-ecs-services.tfstate']
+        s3_buckets_list_to_check = [f's3://{self._s3_bucket_backend}/terraform-{environment}-dev-resources.tfstate']
         s3_buckets_list_exists = []
         for element in s3_buckets_list_to_check:
             logging.info("Checking if directory {} exists in s3 bucket".format(element))

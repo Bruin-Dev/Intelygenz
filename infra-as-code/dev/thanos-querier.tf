@@ -11,7 +11,7 @@ data "template_file" "automation-metrics-thanos-querier" {
     log_prefix = local.log_prefix
     HTTP_PORT = local.automation-metrics-thanos-querier-HTTP_PORT
     thanos_sidecar_url = local.automation-metrics-thanos-sidecar-url
-    thanos_store_gateway_url = local.automation-metrics-thanos-store-gateway-url
+    thanos_store_gateway_url = aws_lb.automation-nlb.dns_name
   }
 }
 
@@ -49,9 +49,9 @@ resource "aws_security_group" "automation-metrics-thanos-querier_service" {
   }
 
   ingress {
-    from_port = local.automation-metrics-thanos-querier-HTTP_PORT
-    to_port = local.automation-metrics-thanos-querier-HTTP_PORT
-    protocol = "TCP"
+    from_port = "0"
+    to_port = "0"
+    protocol = "-1"
     cidr_blocks = [
       "0.0.0.0/0"
     ]

@@ -29,7 +29,6 @@
     },
     "command": ["query",
                 "--http-address=localhost:${HTTP_PORT}",
-                "--store=${thanos_sidecar_url}",
-                "--store=${thanos_store_gateway_url}"]
+                "--store=${thanos_store_gateway_url}:10901"]
   }
 ]
