@@ -53,3 +53,7 @@ resource "aws_ecr_repository" "automation-metrics-thanos" {
 resource "aws_ecr_repository" "automation-metrics-thanos-store-gateway" {
   name = "automation-metrics-dashboard/thanos-store-gateway"
 }
+
+resource "aws_ecr_repository" "automation-metrics-thanos-querier" {
+  name = "automation-metrics-dashboard/thanos-querier"
+}

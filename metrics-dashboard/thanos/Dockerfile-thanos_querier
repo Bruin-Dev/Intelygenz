@@ -1,0 +1,5 @@
+FROM thanosio/thanos:v0.9.0
+
+ARG HTTP_ADDRESS
+
+EXPOSE $HTTP_ADDRESS

@@ -35,8 +35,9 @@
     ],
     "command": ["--config.file=/etc/prometheus/prometheus.yml",
                 "--storage.tsdb.path=/prometheus",
-                "--storage.tsdb.min-block-duration=2m",
-                "--storage.tsdb.max-block-duration=2m"],
+                "--storage.tsdb.retention.time=1d",
+                "--storage.tsdb.min-block-duration=2h",
+                "--storage.tsdb.max-block-duration=2h"],
     "environment": []
   },
   {

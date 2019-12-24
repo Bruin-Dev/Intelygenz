@@ -99,6 +99,18 @@ locals {
   automation-metrics-thanos-store-gateway-ecs_service-name = "${var.ENVIRONMENT}-metrics-thanos-store-gateway"
   automation-metrics-thanos-store-gateway-ecs_service-task_definition = "${aws_ecs_task_definition.automation-metrics-thanos-store-gateway.family}:${aws_ecs_task_definition.automation-metrics-thanos-store-gateway.revision}"
 
+  // automation-metrics-thanos-querier local vars
+  automation-metrics-thanos-querier-image = "${data.aws_ecr_repository.automation-metrics-thanos-querier.repository_url}:${var.BUILD_NUMBER}"
+  automation-metrics-thanos-querier-HTTP_PORT = 19091
+  automation-metrics-thanos-sidecar-url = "prometheus-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:10091"
+  automation-metrics-thanos-store-gateway-url = "thanos-store-gateway-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:10901"
+  automation-metrics-thanos-querier-ecs_task_definition-family = "${var.ENVIRONMENT}-thanos-querier"
+  automation-metrics-thanos-querier-security_group-name = "${var.ENVIRONMENT}-metrics-thanos-querier"
+  automation-metrics-thanos-querier-security_group-tag-Name = "${var.ENVIRONMENT}-metrics-thanos-querier"
+  automation-metrics-thanos-querier-service_discovery_service-name = "thanos-querier-${var.ENVIRONMENT}"
+  automation-metrics-thanos-querier-ecs_service-name = "${var.ENVIRONMENT}-metrics-thanos-querier"
+  automation-metrics-thanos-querier-ecs_service-task_definition = "${aws_ecs_task_definition.automation-metrics-thanos-querier.family}:${aws_ecs_task_definition.automation-metrics-thanos-querier.revision}"
+
   // automation-notifier local vars
   automation-notifier-image = "${data.aws_ecr_repository.automation-notifier.repository_url}:${var.BUILD_NUMBER}"
   automation-notifier-ecs_task_definition-family = "${var.ENVIRONMENT}-notifier"

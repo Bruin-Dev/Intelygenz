@@ -180,6 +180,12 @@ variable "metrics_thanos_store_gateway_desired_tasks" {
   description = "Number of desired tasks of microservice metrics-thanos-store-gateway"
 }
 
+variable "metrics_thanos_querier_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice metrics-thanos-querier"
+}
+
 variable "nats_server_desired_tasks" {
   default = 1
   type = number
