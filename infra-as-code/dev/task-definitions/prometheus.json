@@ -4,8 +4,8 @@
     "image": "${prometheus_image}",
     "portMappings": [
       {
-        "containerPort": 9090,
-        "hostPort": 9090
+        "containerPort": ${prometheus_HTTP_PORT},
+        "hostPort": ${prometheus_HTTP_PORT}
       }
     ],
     "networkMode": "awsvpc",
@@ -20,7 +20,7 @@
     "healthCheck": {
       "command": [
         "CMD-SHELL",
-        "wget http://localhost:9090/-/healthy -O index || exit 1"
+        "wget http://localhost:${prometheus_HTTP_PORT}/-/healthy -O index || exit 1"
       ],
       "interval": 30,
       "retries": 3,
@@ -29,28 +29,28 @@
     },
     "mountPoints": [
         {
-          "sourceVolume": "prometheus_storage",
-          "containerPath": "/prometheus"
+          "sourceVolume": "${prometheus_storage_volume_name}",
+          "containerPath": "${prometheus_storage_container_path}"
         }
     ],
     "command": ["--config.file=/etc/prometheus/prometheus.yml",
-                "--storage.tsdb.path=/prometheus",
-                "--storage.tsdb.retention.time=6m",
-                "--storage.tsdb.min-block-duration=2m",
-                "--storage.tsdb.max-block-duration=2m"],
+                "--storage.tsdb.path=${prometheus_storage_container_path}",
+                "--storage.tsdb.retention.time=${prometheus_tsdb_retention_time}",
+                "--storage.tsdb.min-block-duration=${prometheus_tsdb_block_duration}",
+                "--storage.tsdb.max-block-duration=${prometheus_tsdb_block_duration}"],
     "environment": []
   },
   {
     "name": "metrics-thanos-sidecar",
-    "image": "${thanos_image}",
+    "image": "${thanos_sidecar_image}",
     "portMappings": [
       {
-        "containerPort": 10091,
-        "hostPort": 10091
+        "containerPort": ${thanos_sidecar_GRPC_PORT},
+        "hostPort": ${thanos_sidecar_GRPC_PORT}
       },
       {
-        "containerPort": 10902,
-        "hostPort": 10902
+        "containerPort": ${thanos_sidecar_HTTP_PORT},
+        "hostPort": ${thanos_sidecar_HTTP_PORT}
       }
     ],
     "networkMode": "awsvpc",
@@ -65,7 +65,7 @@
     "healthCheck": {
       "command": [
         "CMD-SHELL",
-        "wget http://localhost:10902/-/ready -O index || exit 1"
+        "wget http://localhost:${thanos_sidecar_HTTP_PORT}/-/ready -O index || exit 1"
       ],
       "interval": 30,
       "retries": 3,
@@ -74,16 +74,60 @@
     },
     "mountPoints": [
         {
-          "sourceVolume": "prometheus_storage",
-          "containerPath": "/prometheus"
+          "sourceVolume": "${prometheus_storage_volume_name}",
+          "containerPath": "${prometheus_storage_container_path}"
         }
     ],
     "command": ["sidecar",
                 "--tsdb.path=/prometheus",
-                "--prometheus.url=http://localhost:9090",
+                "--prometheus.url=http://localhost:${prometheus_HTTP_PORT}",
                 "--objstore.config-file=/tmp/bucket_config.yaml",
-                "--grpc-address=localhost:10091",
-                "--http-address=localhost:10902"],
+                "--grpc-address=localhost:${thanos_sidecar_GRPC_PORT}",
+                "--http-address=localhost:${thanos_sidecar_HTTP_PORT}"],
+    "dependsOn": [
+      {
+          "containerName": "metrics-prometheus",
+          "condition": "HEALTHY"
+      }
+    ]
+  },
+  {
+    "name": "metrics-thanos-store-gateway",
+    "image": "${thanos_store_gateway_image}",
+    "portMappings": [
+      {
+        "containerPort": ${thanos_store_gateway_GRPC_PORT},
+        "hostPort": ${thanos_store_gateway_GRPC_PORT}
+      },
+      {
+        "containerPort": ${thanos_store_gateway_HTTP_PORT},
+        "hostPort": ${thanos_store_gateway_HTTP_PORT}
+      }
+    ],
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "wget http://localhost:${thanos_store_gateway_HTTP_PORT}/-/ready -O index || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
+    "command": ["store",
+                "--data-dir=/thanos/store",
+                "--objstore.config-file=/tmp/bucket_config.yaml",
+                "--http-address=localhost:${thanos_store_gateway_HTTP_PORT}",
+                "--grpc-address=localhost:${thanos_store_gateway_GRPC_PORT}"],
     "dependsOn": [
       {
           "containerName": "metrics-prometheus",
@@ -95,6 +139,10 @@
     "name": "metrics-thanos-querier",
     "image": "${thanos_querier_image}",
     "portMappings": [
+      {
+        "containerPort": ${thanos_querier_GRPC_PORT},
+        "hostPort": ${thanos_querier_GRPC_PORT}
+      },
       {
         "containerPort": ${thanos_querier_HTTP_PORT},
         "hostPort": ${thanos_querier_HTTP_PORT}
@@ -121,7 +169,9 @@
     },
     "command": ["query",
                 "--http-address=localhost:${thanos_querier_HTTP_PORT}",
-                "--store=localhost:10091"],
+                "--grpc-address=localhost:${thanos_querier_GRPC_PORT}",
+                "--store=localhost:${thanos_sidecar_GRPC_PORT}",
+                "--store=localhost:${thanos_store_gateway_GRPC_PORT}"],
     "dependsOn": [
       {
           "containerName": "metrics-prometheus",
@@ -129,6 +179,10 @@
       },
       {
           "containerName": "metrics-thanos-sidecar",
+          "condition": "HEALTHY"
+      },
+      {
+          "containerName": "metrics-thanos-store-gateway",
           "condition": "HEALTHY"
       }
     ]
@@ -163,6 +217,10 @@
       },
       {
           "containerName": "metrics-thanos-sidecar",
+          "condition": "HEALTHY"
+      },
+      {
+          "containerName": "metrics-thanos-store-gateway",
           "condition": "HEALTHY"
       },
       {

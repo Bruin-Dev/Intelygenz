@@ -74,10 +74,11 @@ thanos-querier-build:
     MODULE_NAME: metrics-dashboard/thanos
     REPOSITORY_NAME: metrics-dashboard/thanos-querier
     MODULE_VERSION: ${CI_PIPELINE_ID}
+    GRPC_ADDRESS_PORT: 10999
     HTTP_ADDRESS_PORT: 19091
   extends: .build_app_image
   script:
-    - docker build -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile-thanos_querier .
+    - docker build --build-arg GRPC_ADDRESS=${GRPC_ADDRESS_PORT} --build-arg HTTP_ADDRESS=${HTTP_ADDRESS_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile-thanos_querier .
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${MODULE_VERSION}
   after_script:

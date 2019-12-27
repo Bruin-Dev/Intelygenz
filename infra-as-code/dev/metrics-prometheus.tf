@@ -2,7 +2,7 @@ data "aws_ecr_repository" "automation-metrics-prometheus" {
   name = "automation-metrics-dashboard/prometheus"
 }
 
-data "aws_ecr_repository" "automation-metrics-thanos" {
+data "aws_ecr_repository" "automation-metrics-thanos-sidecar" {
   name = "automation-metrics-dashboard/thanos"
 }
 
@@ -14,18 +14,33 @@ data "aws_ecr_repository" "automation-metrics-grafana" {
   name = "automation-metrics-dashboard/grafana"
 }
 
+data "aws_ecr_repository" "automation-metrics-thanos-store-gateway" {
+  name = "automation-metrics-dashboard/thanos-store-gateway"
+}
+
 data "template_file" "automation-metrics-prometheus" {
   template = file("${path.module}/task-definitions/prometheus.json")
 
   vars = {
     prometheus_image = local.automation-metrics-prometheus-image
-    thanos_image = local.automation-metrics-thanos-image
-    log_group = var.ENVIRONMENT
-    log_prefix = local.log_prefix
+    prometheus_HTTP_PORT = local.automation-metrics-prometheus-HTTP_PORT
+    prometheus_storage_volume_name = local.automation-metrics-prometheus-volume-name
+    prometheus_storage_container_path = local.automation-metrics-prometheus-volume-container_path
+    prometheus_tsdb_retention_time = local.automation-metrics-prometheus-tsdb_retention_time
+    prometheus_tsdb_block_duration = local.automation-metrics-prometheus-tsdb_block_duration
+    thanos_sidecar_image = local.automation-metrics-thanos-sidecar-image
+    thanos_sidecar_GRPC_PORT = local.automation-metrics-thanos-sidecar-GRPC_PORT
+    thanos_sidecar_HTTP_PORT = local.automation-metrics-thanos-sidecar-HTTP_PORT
+    thanos_store_gateway_image = local.automation-metrics-thanos-store-gateway-image
+    thanos_store_gateway_GRPC_PORT = local.automation-metrics-thanos-store-gateway-GRPC_PORT
+    thanos_store_gateway_HTTP_PORT = local.automation-metrics-thanos-store-gateway-HTTP_PORT
     thanos_querier_image = local.automation-metrics-thanos-querier-image
+    thanos_querier_GRPC_PORT = local.automation-metrics-thanos-querier-GRPC_PORT
     thanos_querier_HTTP_PORT = local.automation-metrics-thanos-querier-HTTP_PORT
     grafana_image = local.automation-metrics-grafana-image
     GF_SECURITY_ADMIN_PASSWORD = "q1w2e3r4"
+    log_group = var.ENVIRONMENT
+    log_prefix = local.log_prefix
   }
 }
 
@@ -35,12 +50,12 @@ resource "aws_ecs_task_definition" "automation-metrics-prometheus" {
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
-  cpu = "1024"
-  memory = "2048"
+  cpu = "2048"
+  memory = "4096"
   execution_role_arn = data.aws_iam_role.ecs_execution_role_with_s3.arn
   task_role_arn = data.aws_iam_role.ecs_execution_role_with_s3.arn
   volume {
-    name      = "prometheus_storage"
+    name      = local.automation-metrics-prometheus-volume-name
   }
 }
 
@@ -143,12 +158,29 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
 
 resource "aws_s3_bucket" "prometheus-storage" {
   bucket = local.automation-metrics-prometheus-s3-storage-name
-  acl    = "private"
 
   tags = {
     Name        = local.automation-metrics-prometheus-s3-storage-tag-Name
     Environment = var.ENVIRONMENT
   }
 
+  lifecycle_rule {
+    enabled = true
+
+    expiration {
+      days = 1
+    }
+  }
+
   force_destroy = true
+}
+
+resource "aws_s3_bucket_public_access_block" "prometheus-storage-block" {
+  bucket = aws_s3_bucket.prometheus-storage.id
+
+  ignore_public_acls = true
+  block_public_acls   = true
+  block_public_policy = true
+  restrict_public_buckets = true
+
 }

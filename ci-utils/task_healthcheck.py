@@ -35,9 +35,10 @@ class TaskHealthcheck:
                 time.sleep(30)
                 actual_time = time.time()
                 i += 1
-        if timeout > actual_time and not correct_exit:
+        if actual_time > timeout and not correct_exit:
             logging.error(f"The maximum waiting time for {task_definition_arn} to be be RUNNING "
                           f"and with HEALTHY state has been reached")
+            sys.exit(1)
         return correct_exit
 
     @staticmethod
@@ -94,9 +95,11 @@ class TaskHealthcheck:
                                                      ENVIRONMENT, '--tasks', element, '--region', 'us-east-1'],
                                                     stdout=subprocess.PIPE, stderr=FNULL)
             get_task_detail_call_output = json.loads(get_task_detail_call.stdout.read())['tasks']
-            if get_task_detail_call_output[0]["containers"][0]["name"] == task_name_param:
-                container_arns.append({'task_arn': element,
-                                       'task_definition_arn': get_task_detail_call_output[0]["taskDefinitionArn"]})
+            for i in range(len(get_task_detail_call_output[0]["containers"])):
+                if task_name_param == get_task_detail_call_output[0]["containers"][i]["name"]:
+                    container_arns.append({'task_arn': element,
+                                           'task_definition_arn': get_task_detail_call_output[0]["taskDefinitionArn"]})
+                    break
         return container_arns
 
     @staticmethod
