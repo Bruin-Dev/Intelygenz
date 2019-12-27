@@ -89,7 +89,6 @@ locals {
   automation-metrics-prometheus-s3-storage-tag-Name = "${var.ENVIRONMENT}-metrics-prometheus-storage"
 
   // automation-metrics-thanos-store-gateway local vars
-  automation-metrics-thanos-store-gateway-image = "${data.aws_ecr_repository.automation-metrics-thanos-store-gateway.repository_url}:${var.BUILD_NUMBER}"
   automation-metrics-thanos-store-gateway-GRPC_PORT = 10901
   automation-metrics-thanos-store-gateway-HTTP_PORT = 19191
   automation-metrics-thanos-store-gateway-ecs_task_definition-family = "${var.ENVIRONMENT}-thanos-store-gateway"
@@ -97,7 +96,6 @@ locals {
   automation-metrics-thanos-store-gateway-service-security_group-tag-Name = "${var.ENVIRONMENT}-metrics-thanos-store-gateway"
   automation-metrics-thanos-store-gateway-service_discovery_service-name = "thanos-store-gateway-${var.ENVIRONMENT}"
   automation-metrics-thanos-store-gateway-ecs_service-name = "${var.ENVIRONMENT}-metrics-thanos-store-gateway"
-  automation-metrics-thanos-store-gateway-ecs_service-task_definition = "${aws_ecs_task_definition.automation-metrics-thanos-store-gateway.family}:${aws_ecs_task_definition.automation-metrics-thanos-store-gateway.revision}"
   automation-metrics-thanos-store-gateway-target_group-tag-Name = "${var.ENVIRONMENT}-metrics-thanos-store-gateway"
   automation-metrics-thanos-store-gateway-target_group-name = "${var.ENVIRONMENT}-th-store"
 
@@ -111,7 +109,6 @@ locals {
   automation-metrics-thanos-querier-security_group-tag-Name = "${var.ENVIRONMENT}-metrics-thanos-querier"
   automation-metrics-thanos-querier-service_discovery_service-name = "thanos-querier-${var.ENVIRONMENT}"
   automation-metrics-thanos-querier-ecs_service-name = "${var.ENVIRONMENT}-metrics-thanos-querier"
-  automation-metrics-thanos-querier-ecs_service-task_definition = "${aws_ecs_task_definition.automation-metrics-thanos-querier.family}:${aws_ecs_task_definition.automation-metrics-thanos-querier.revision}"
 
   // automation-notifier local vars
   automation-notifier-image = "${data.aws_ecr_repository.automation-notifier.repository_url}:${var.BUILD_NUMBER}"
@@ -268,7 +265,4 @@ locals {
   automation-nats-server-1-task_definition_template-natscluster = "nats://localhost:${var.NATS_SERVER_1_CLUSTER_PORT}"
   automation-nats-server-1-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
 
-  // automation-nlb local vars
-  automation-nlb-name = "${var.ENVIRONMENT}-nlb"
-  automation-nlb-tag-Name = "${var.ENVIRONMENT}-nlb"
 }

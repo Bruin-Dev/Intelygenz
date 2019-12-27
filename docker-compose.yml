@@ -179,6 +179,10 @@ services:
       context: .
       dockerfile: metrics-dashboard/prometheus/Dockerfile
     restart: unless-stopped
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
+      - "curl -kv http://prometheus-automation-92a00834.automation-92a00834.local:19091"
     volumes:
       - ./metrics-dashboard/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./metrics-dashboard/thanos/storage/:/prometheus
@@ -187,6 +191,7 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.min-block-duration=2m'
       - '--storage.tsdb.max-block-duration=2m'
+      - '--storage.tsdb.retention.time=6m'
     ports:
       - 9090:9090
     

@@ -35,7 +35,7 @@
     ],
     "command": ["--config.file=/etc/prometheus/prometheus.yml",
                 "--storage.tsdb.path=/prometheus",
-                "--storage.tsdb.retention.time=1d",
+                "--storage.tsdb.retention.time=6m",
                 "--storage.tsdb.min-block-duration=2m",
                 "--storage.tsdb.max-block-duration=2m"],
     "environment": []
@@ -87,6 +87,48 @@
     "dependsOn": [
       {
           "containerName": "metrics-prometheus",
+          "condition": "HEALTHY"
+      }
+    ]
+  },
+  {
+    "name": "metrics-thanos-querier",
+    "image": "${thanos_querier_image}",
+    "portMappings": [
+      {
+        "containerPort": ${thanos_querier_HTTP_PORT},
+        "hostPort": ${thanos_querier_HTTP_PORT}
+      }
+    ],
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "wget http://localhost:${thanos_querier_HTTP_PORT}/-/ready -O index || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
+    "command": ["query",
+                "--http-address=localhost:${thanos_querier_HTTP_PORT}",
+                "--store=localhost:10091"],
+    "dependsOn": [
+      {
+          "containerName": "metrics-prometheus",
+          "condition": "HEALTHY"
+      },
+      {
+          "containerName": "metrics-thanos-sidecar",
           "condition": "HEALTHY"
       }
     ]

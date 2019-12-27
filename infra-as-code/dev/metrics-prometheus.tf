@@ -6,6 +6,11 @@ data "aws_ecr_repository" "automation-metrics-thanos" {
   name = "automation-metrics-dashboard/thanos"
 }
 
+data "aws_ecr_repository" "automation-metrics-thanos-querier" {
+  name = "automation-metrics-dashboard/thanos-querier"
+}
+
+
 data "template_file" "automation-metrics-prometheus" {
   template = file("${path.module}/task-definitions/prometheus.json")
 
@@ -14,6 +19,8 @@ data "template_file" "automation-metrics-prometheus" {
     thanos_image = local.automation-metrics-thanos-image
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
+    thanos_querier_image = local.automation-metrics-thanos-querier-image
+    thanos_querier_HTTP_PORT = local.automation-metrics-thanos-querier-HTTP_PORT
   }
 }
 
@@ -23,8 +30,8 @@ resource "aws_ecs_task_definition" "automation-metrics-prometheus" {
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
-  cpu = "256"
-  memory = "512"
+  cpu = "1024"
+  memory = "2048"
   execution_role_arn = data.aws_iam_role.ecs_execution_role_with_s3.arn
   task_role_arn = data.aws_iam_role.ecs_execution_role_with_s3.arn
   volume {
@@ -46,20 +53,10 @@ resource "aws_security_group" "automation-metrics-prometheus_service" {
   }
 
   ingress {
-    from_port = 8
-    to_port = 0
-    protocol = "icmp"
-    cidr_blocks = [
-      "0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port = "0"
-    to_port = "0"
-    protocol = "-1"
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
