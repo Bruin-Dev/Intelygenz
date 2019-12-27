@@ -10,6 +10,9 @@ data "aws_ecr_repository" "automation-metrics-thanos-querier" {
   name = "automation-metrics-dashboard/thanos-querier"
 }
 
+data "aws_ecr_repository" "automation-metrics-grafana" {
+  name = "automation-metrics-dashboard/grafana"
+}
 
 data "template_file" "automation-metrics-prometheus" {
   template = file("${path.module}/task-definitions/prometheus.json")
@@ -21,6 +24,8 @@ data "template_file" "automation-metrics-prometheus" {
     log_prefix = local.log_prefix
     thanos_querier_image = local.automation-metrics-thanos-querier-image
     thanos_querier_HTTP_PORT = local.automation-metrics-thanos-querier-HTTP_PORT
+    grafana_image = local.automation-metrics-grafana-image
+    GF_SECURITY_ADMIN_PASSWORD = "q1w2e3r4"
   }
 }
 
@@ -53,10 +58,12 @@ resource "aws_security_group" "automation-metrics-prometheus_service" {
   }
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port = 3000
+    to_port = 3000
+    protocol = "TCP"
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
   }
 
   tags = {
@@ -65,22 +72,47 @@ resource "aws_security_group" "automation-metrics-prometheus_service" {
   }
 }
 
-resource "aws_service_discovery_service" "metrics-prometheus" {
-  name = local.automation-metrics-prometheus-service_discovery_service-name
+resource "aws_lb_listener" "automation-grafana" {
+  load_balancer_arn = aws_lb.automation-alb.arn
+  port = "443"
+  protocol = "HTTPS"
+  certificate_arn = data.aws_acm_certificate.automation.arn
 
-  dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.automation-zone.id
+  default_action {
+    target_group_arn = aws_lb_target_group.automation-metrics-grafana.arn
+    type = "forward"
+  }
+}
 
-    dns_records {
-      ttl = 10
-      type = "A"
-    }
-
-    routing_policy = "MULTIVALUE"
+resource "aws_lb_target_group" "automation-metrics-grafana" {
+  name = local.automation-metrics-grafana-target_group-name
+  port = 3000
+  protocol = "HTTP"
+  vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
+  target_type = "ip"
+  stickiness {
+    type = "lb_cookie"
+    enabled = false
   }
 
-  health_check_custom_config {
-    failure_threshold = 1
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    interval            = 30
+    port                = 3000
+    matcher             = 200
+    protocol            = "HTTP"
+    path                = "/api/health"
+  }
+
+  tags = {
+    Name = local.automation-metrics-grafana-target_group-tag-Name
+    Environment = var.ENVIRONMENT
   }
 }
 
@@ -100,8 +132,10 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
     assign_public_ip = false
   }
 
-  service_registries {
-    registry_arn = aws_service_discovery_service.metrics-prometheus.arn
+  load_balancer {
+    target_group_arn = aws_lb_target_group.automation-metrics-grafana.arn
+    container_name = "grafana"
+    container_port = 3000
   }
 
   depends_on = [ null_resource.nats-server-healtcheck, aws_s3_bucket.prometheus-storage]

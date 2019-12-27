@@ -132,5 +132,43 @@
           "condition": "HEALTHY"
       }
     ]
+  },
+  {
+    "name": "grafana",
+    "image": "${grafana_image}",
+    "portMappings": [
+      {
+        "containerPort": 3000,
+        "hostPort": 3000
+      }
+    ],
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "environment": [
+      {
+        "name": "GF_SECURITY_ADMIN_PASSWORD",
+        "value": "${GF_SECURITY_ADMIN_PASSWORD}"
+      }],
+    "dependsOn": [
+      {
+          "containerName": "metrics-prometheus",
+          "condition": "HEALTHY"
+      },
+      {
+          "containerName": "metrics-thanos-sidecar",
+          "condition": "HEALTHY"
+      },
+      {
+          "containerName": "metrics-thanos-querier",
+          "condition": "HEALTHY"
+      }
+    ]
   }
 ]
