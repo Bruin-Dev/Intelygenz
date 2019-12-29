@@ -26,19 +26,21 @@ data "template_file" "automation-metrics-prometheus" {
     prometheus_HTTP_PORT = local.automation-metrics-prometheus-HTTP_PORT
     prometheus_storage_volume_name = local.automation-metrics-prometheus-volume-name
     prometheus_storage_container_path = local.automation-metrics-prometheus-volume-container_path
+    prometheus_tsdb_path = local.automation-metrics-prometheus-tsdb_path
     prometheus_tsdb_retention_time = local.automation-metrics-prometheus-tsdb_retention_time
     prometheus_tsdb_block_duration = local.automation-metrics-prometheus-tsdb_block_duration
     thanos_sidecar_image = local.automation-metrics-thanos-sidecar-image
     thanos_sidecar_GRPC_PORT = local.automation-metrics-thanos-sidecar-GRPC_PORT
     thanos_sidecar_HTTP_PORT = local.automation-metrics-thanos-sidecar-HTTP_PORT
+    thanos_sidecar_objstore_config_file = local.automation-metrics-thanos-sidecar-objstore-config_file
     thanos_store_gateway_image = local.automation-metrics-thanos-store-gateway-image
     thanos_store_gateway_GRPC_PORT = local.automation-metrics-thanos-store-gateway-GRPC_PORT
     thanos_store_gateway_HTTP_PORT = local.automation-metrics-thanos-store-gateway-HTTP_PORT
+    thanos_store_gateway_objstore_config_file = local.automation-metrics-thanos-store-gateway-config_file
     thanos_querier_image = local.automation-metrics-thanos-querier-image
     thanos_querier_GRPC_PORT = local.automation-metrics-thanos-querier-GRPC_PORT
     thanos_querier_HTTP_PORT = local.automation-metrics-thanos-querier-HTTP_PORT
     grafana_image = local.automation-metrics-grafana-image
-    GF_SECURITY_ADMIN_PASSWORD = "q1w2e3r4"
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
   }

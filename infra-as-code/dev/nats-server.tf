@@ -109,6 +109,7 @@ resource "aws_ecs_service" "automation-nats-server" {
   desired_count = var.nats_server_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
+  count = var.nats_server_desired_tasks != 0 ? 1 : 0
 
   network_configuration {
     security_groups = [

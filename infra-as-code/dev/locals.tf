@@ -84,10 +84,11 @@ locals {
   automation-metrics-prometheus-ecs_service-task_definition = "${aws_ecs_task_definition.automation-metrics-prometheus.family}:${aws_ecs_task_definition.automation-metrics-prometheus.revision}"
   automation-metrics-prometheus-service_discovery_service-name = "prometheus-${var.ENVIRONMENT}"
   automation-metrics-prometheus-HTTP_PORT = 9090
+  automation-metrics-prometheus-tsdb_path = "/prometheus"
+  automation-metrics-prometheus-volume-container_path = "/prometheus"
   automation-metrics-prometheus-tsdb_retention_time = "8h"
   automation-metrics-prometheus-tsdb_block_duration = "1h"
   automation-metrics-prometheus-volume-name = "prometheus_storage-${var.ENVIRONMENT}"
-  automation-metrics-prometheus-volume-container_path = "/prometheus"
   automation-metrics-prometheus-s3-storage-name = "prometheus-storage-${var.ENVIRONMENT}"
   automation-metrics-prometheus-s3-storage-tag-Name = "${var.ENVIRONMENT}-metrics-prometheus-storage"
 
@@ -95,11 +96,13 @@ locals {
   automation-metrics-thanos-sidecar-image = "${data.aws_ecr_repository.automation-metrics-thanos-sidecar.repository_url}:${var.BUILD_NUMBER}"
   automation-metrics-thanos-sidecar-GRPC_PORT = 10091
   automation-metrics-thanos-sidecar-HTTP_PORT = 10902
+  automation-metrics-thanos-sidecar-objstore-config_file = "/tmp/bucket_config.yaml"
 
   // automation-metrics-thanos-store-gateway local vars
   automation-metrics-thanos-store-gateway-image = "${data.aws_ecr_repository.automation-metrics-thanos-store-gateway.repository_url}:${var.BUILD_NUMBER}"
   automation-metrics-thanos-store-gateway-GRPC_PORT = 10901
   automation-metrics-thanos-store-gateway-HTTP_PORT = 19191
+  automation-metrics-thanos-store-gateway-config_file = "/tmp/bucket_config.yaml"
 
   // automation-metrics-thanos-querier local vars
   automation-metrics-thanos-querier-image = "${data.aws_ecr_repository.automation-metrics-thanos-querier.repository_url}:${var.BUILD_NUMBER}"

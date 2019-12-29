@@ -100,7 +100,7 @@ resource "aws_ecs_service" "automation-bruin-bridge" {
   desired_count = var.bruin_bridge_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
-  count = var.bruin_bridge_desired_tasks != 0 ? var.bruin_bridge_desired_tasks : 0
+  count = var.bruin_bridge_desired_tasks != 0 ? 1 : 0
 
   network_configuration {
     security_groups = [

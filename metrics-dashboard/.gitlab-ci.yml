@@ -14,7 +14,7 @@ grafana-build:
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/grafana/configs/prometheus-dev.yml
     - cp metrics-dashboard/grafana/configs/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
     - python3 metrics-dashboard/grafana/scripts/dashboard_generator.py
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
+    - docker build --build-arg GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
 

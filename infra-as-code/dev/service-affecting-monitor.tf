@@ -100,6 +100,7 @@ resource "aws_ecs_service" "automation-service-affecting-monitor" {
   desired_count = var.service_affecting_monitor_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
+  count = var.service_affecting_monitor_desired_tasks != 0 ? 1 : 0
 
   network_configuration {
     security_groups = [

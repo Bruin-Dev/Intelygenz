@@ -79,9 +79,9 @@
         }
     ],
     "command": ["sidecar",
-                "--tsdb.path=/prometheus",
+                "--tsdb.path=${prometheus_tsdb_path}",
                 "--prometheus.url=http://localhost:${prometheus_HTTP_PORT}",
-                "--objstore.config-file=/tmp/bucket_config.yaml",
+                "--objstore.config-file=${thanos_sidecar_objstore_config_file}",
                 "--grpc-address=localhost:${thanos_sidecar_GRPC_PORT}",
                 "--http-address=localhost:${thanos_sidecar_HTTP_PORT}"],
     "dependsOn": [
@@ -125,7 +125,7 @@
     },
     "command": ["store",
                 "--data-dir=/thanos/store",
-                "--objstore.config-file=/tmp/bucket_config.yaml",
+                "--objstore.config-file=${thanos_store_gateway_objstore_config_file}",
                 "--http-address=localhost:${thanos_store_gateway_HTTP_PORT}",
                 "--grpc-address=localhost:${thanos_store_gateway_GRPC_PORT}"],
     "dependsOn": [
@@ -205,11 +205,16 @@
         "awslogs-stream-prefix": "${log_prefix}"
       }
     },
-    "environment": [
-      {
-        "name": "GF_SECURITY_ADMIN_PASSWORD",
-        "value": "${GF_SECURITY_ADMIN_PASSWORD}"
-      }],
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:3000/api/health || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
     "dependsOn": [
       {
           "containerName": "metrics-prometheus",

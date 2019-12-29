@@ -99,6 +99,7 @@ resource "aws_ecs_service" "automation-t7-bridge" {
   desired_count = var.t7_bridge_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
+  count = var.t7_bridge_desired_tasks != 0 ? 1 : 0
 
   network_configuration {
     security_groups = [

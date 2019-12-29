@@ -16,7 +16,6 @@ class CheckECSResources:
     _total_ecs_tasks_allowed = 50
     _ecs_services_tasks = [os.environ['TF_VAR_bruin_bridge_desired_tasks'],
                            os.environ['TF_VAR_last_contact_report_desired_tasks'],
-                           os.environ['TF_VAR_metrics_grafana_desired_tasks'],
                            os.environ['TF_VAR_metrics_prometheus_desired_tasks'],
                            os.environ['TF_VAR_nats_server_desired_tasks'],
                            os.environ['TF_VAR_nats_server_1_desired_tasks'],
