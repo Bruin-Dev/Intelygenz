@@ -106,7 +106,7 @@ Due to the limited number of task instances available per account in AWS (50 ins
 
    NOTE: Make sure that the set of variables is exactly the same in each of these jobs. This duplication can't be avoided because Terraform variables can't be shared between GitlabCI jobs of different stages.
     Developers must modify the desired `TF_VAR_<service_name>_desired_tasks` variable to spawn as much tasks instances as they need for their ephemeral environments.
-    > If the variable is set to 0, no tasks instances will be created for that microservice. The task definition will be deployed anyway, though.
+    > If the variable is set to 0, no tasks instances will be created for that microservice nor a service at ECS.
 
 3. If the developer has doubts about what microservices should be taken into account for an ephemeral environment, they should take a look at the README file of that microservice. After guessing that, the corresponding `TF_VAR_<service_name>_desired_tasks` must be set with a minimal value of 1 in order to get the task instances created when the deployment finishes.
 

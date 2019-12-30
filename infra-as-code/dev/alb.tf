@@ -42,7 +42,9 @@ resource "aws_security_group" "automation-dev-inbound" {
       "87.219.160.222/32", // XOAN HOME GALICIA
       "54.73.0.183/32", // IGZ GITLAB RUNNERS
       "216.194.50.82/32", // Brian Sullivan's IP
-      "216.194.28.12/32" // Joseph Degeorge's IP
+      "216.194.28.12/32", // Joseph Degeorge's IP
+      "216.194.50.83/32",  // MetTel Office IP
+      "216.194.28.132/32" // MetTel Office IP
     ]
   }
 
@@ -63,7 +65,9 @@ resource "aws_security_group" "automation-dev-inbound" {
       "87.219.160.222/32", // XOAN HOME GALICIA
       "54.73.0.183/32", // IGZ GITLAB RUNNERS
       "216.194.50.82/32", // Brian Sullivan's IP
-      "216.194.28.12/32" // Joseph Degeorge's IP
+      "216.194.28.12/32", // Joseph Degeorge's IP
+      "216.194.50.83/32",  // MetTel Office IP
+      "216.194.28.132/32" // MetTel Office IP
     ]
   }
 
