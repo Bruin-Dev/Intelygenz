@@ -72,16 +72,6 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-metrics-grafana",
-                        ".",
-                        ".",
-                        {
-                            "period":300,
-                            "stat":"Sum"
-                        }
-                    ],
-                    [
-                        "...",
                         "${ENVIRONMENT}-nats-server-1",
                         ".",
                         ".",
@@ -184,12 +174,6 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-metrics-grafana",
-                        ".",
-                        "."
-                    ],
-                    [
-                        "...",
                         "${ENVIRONMENT}-last-contact-report",
                         ".",
                         "."
@@ -260,18 +244,12 @@
                         "ECS/ContainerInsights",
                         "MemoryUtilized",
                         "ServiceName",
-                        "${ENVIRONMENT}-metrics-grafana",
+                        "${ENVIRONMENT}-bruin-bridge",
                         "ClusterName",
                         "${ENVIRONMENT}",
                         {
                             "stat":"Average"
                         }
-                    ],
-                    [
-                        "...",
-                        "${ENVIRONMENT}-bruin-bridge",
-                        ".",
-                        "."
                     ],
                     [
                         "...",

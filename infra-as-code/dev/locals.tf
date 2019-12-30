@@ -68,10 +68,6 @@ locals {
 
   // automation-metrics-grafana local vars
   automation-metrics-grafana-image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.BUILD_NUMBER}"
-  automation-metrics-grafana-ecs_task_definition-family = "${var.ENVIRONMENT}-metrics-grafana"
-  automation-metrics-grafana-service-security_group-name = "${var.ENVIRONMENT}-metrics-grafana"
-  automation-metrics-grafana-service-security_group-tag-Name = "${var.ENVIRONMENT}-metrics-grafana"
-  automation-metrics-grafana-ecs_service-name = "${var.ENVIRONMENT}-metrics-grafana"
   automation-metrics-grafana-target_group-name = "${var.ENVIRONMENT}-mts-grafana"
   automation-metrics-grafana-target_group-tag-Name = "${var.ENVIRONMENT}-metrics-grafana"
 
@@ -90,6 +86,7 @@ locals {
   automation-metrics-prometheus-tsdb_block_duration = "1h"
   automation-metrics-prometheus-volume-name = "prometheus_storage-${var.ENVIRONMENT}"
   automation-metrics-prometheus-s3-storage-name = "prometheus-storage-${var.ENVIRONMENT}"
+  automation-metrics-prometheus-s3-expiration-days = 14
   automation-metrics-prometheus-s3-storage-tag-Name = "${var.ENVIRONMENT}-metrics-prometheus-storage"
 
   // automation-metrics-thanos-sidecar local vars

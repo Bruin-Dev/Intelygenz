@@ -53,8 +53,6 @@ There are two types of microservices showed in the diagram above depending on th
     * *last-contact-report*
 
 * Microservices that doesn't communicate with NATS
-  
-  * *metrics-grafana*
 
   * *metrics-prometheus*
 

@@ -162,12 +162,6 @@ variable "last_contact_report_desired_tasks" {
   description = "Number of desired tasks of microservice last-contact-report"
 }
 
-variable "metrics_grafana_desired_tasks" {
-  default = 1
-  type = number
-  description = "Number of desired tasks of microservice metrics-grafana"
-}
-
 variable "metrics_prometheus_desired_tasks" {
   default = 1
   type = number

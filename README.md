@@ -104,7 +104,7 @@ Due to the limited number of task instances available per account in AWS (50 ins
 
 1. There are two jobs defined in the `infra-as-code/.gitlab-ci.yml` file: `deploy-branches` and `check-ecs-resources-branches`. A set of variables are declared within them to configure the number of tasks per microservice. The naming of these variables follows the convention `TF_VAR_<service_name>_desired_tasks`, where `service_name` is the name of the microservice declared in AWS.
 
-NOTE: Make sure that the set of variables is exactly the same in each of these jobs. This duplication can't be avoided because Terraform variables can't be shared between GitlabCI jobs of different stages.
+   NOTE: Make sure that the set of variables is exactly the same in each of these jobs. This duplication can't be avoided because Terraform variables can't be shared between GitlabCI jobs of different stages.
     Developers must modify the desired `TF_VAR_<service_name>_desired_tasks` variable to spawn as much tasks instances as they need for their ephemeral environments.
     > If the variable is set to 0, no tasks instances will be created for that microservice. The task definition will be deployed anyway, though.
 
