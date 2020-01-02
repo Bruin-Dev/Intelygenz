@@ -40,13 +40,12 @@ class RPCAction:
         self._event_bus = event_bus
 
     async def rpc_response(self, msg):
-        msg_data = json.loads(msg)
         response_msg = {
-            "request_id": msg_data["request_id"],
+            "request_id": msg["request_id"],
             "some_field_1": "Sending data related to request here",
             "some_field_2": "Sending data related to request here"
         }
-        await self._event_bus.publish_message(msg_data["response_topic"], json.dumps(response_msg))
+        await self._event_bus.publish_message(msg["response_topic"], response_msg)
 
 
 class Container:
@@ -84,9 +83,9 @@ class Container:
         msg = {
             "data": "Some message"
         }
-        await self.event_bus.publish_message(f'topic1', json.dumps(msg))
-        await self.event_bus.publish_message(f'topic2', json.dumps(msg))
-        await self.event_bus.publish_message(f'topic3', json.dumps(msg))
+        await self.event_bus.publish_message(f'topic1', msg)
+        await self.event_bus.publish_message(f'topic2', msg)
+        await self.event_bus.publish_message(f'topic3', msg)
 
     async def start_publish_job(self, exec_on_start=False):
         logger.info(f'Starting publish job')
@@ -104,7 +103,7 @@ class Container:
             "some_field_1": "Sending data related to request here",
             "some_field_2": "Sending data related to request here"
         }
-        response = await self.event_bus.rpc_request("rpc.request", json.dumps(rpc_request_msg), timeout=1)
+        response = await self.event_bus.rpc_request("rpc.request", rpc_request_msg, timeout=1)
         print(f'Got RPC response with value: {json.dumps(response, indent=2)}')
 
     async def start(self):

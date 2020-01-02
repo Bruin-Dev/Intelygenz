@@ -1,5 +1,4 @@
 from igz.packages.eventbus.eventbus import EventBus
-import json
 
 
 class EnterpriseNameList:
@@ -10,7 +9,6 @@ class EnterpriseNameList:
         self._logger = logger
 
     async def enterprise_name_list(self, msg):
-        msg = json.loads(msg)
         self._logger.info("Sending enterprise name list")
         enterprise_names = self._velocloud_repository.get_all_enterprise_names(msg)
 
@@ -25,8 +23,5 @@ class EnterpriseNameList:
             "enterprise_names": enterprise_names,
             "status": status
         }
-        await self._event_bus.publish_message(
-            msg['response_topic'],
-            json.dumps(enterprise_name_list_response, default=str)
-        )
+        await self._event_bus.publish_message(msg['response_topic'], enterprise_name_list_response)
         self._logger.info("Enterprise name list sent")

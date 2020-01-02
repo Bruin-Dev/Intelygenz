@@ -44,16 +44,16 @@ class TestGetPrediction:
         t7_repository.get_prediction = Mock(return_value=expected_predictions)
 
         prediction_action = GetPrediction(logger, config, event_bus, t7_repository)
-        await prediction_action.get_prediction(json.dumps(msg_published_in_topic))
+        await prediction_action.get_prediction(msg_published_in_topic)
 
         prediction_action._t7_repository.get_prediction.assert_called_once_with(ticket_id)
         prediction_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
-            json.dumps({
+            {
                 'request_id': request_id,
                 'prediction': expected_predictions,
                 'status': 200,
-            })
+            }
         )
         logger.info.assert_called_once()
 
@@ -80,15 +80,15 @@ class TestGetPrediction:
         t7_repository.get_prediction = Mock(return_value=expected_predictions)
 
         prediction_action = GetPrediction(logger, config, event_bus, t7_repository)
-        await prediction_action.get_prediction(json.dumps(msg_published_in_topic))
+        await prediction_action.get_prediction(msg_published_in_topic)
 
         prediction_action._t7_repository.get_prediction.assert_called_once_with(ticket_id)
         prediction_action._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
-            json.dumps({
+            {
                 'request_id': request_id,
                 'prediction': expected_predictions,
                 'status': 500,
-            })
+            }
         )
         logger.info.assert_called_once()

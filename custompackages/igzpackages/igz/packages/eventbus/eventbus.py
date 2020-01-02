@@ -2,6 +2,7 @@ from igz.packages.nats.clients import NATSClient
 from igz.packages.eventbus.action import ActionWrapper
 import logging
 import sys
+import json
 
 
 class EventBus:
@@ -21,6 +22,7 @@ class EventBus:
         self._logger = logger
 
     async def rpc_request(self, topic, message, timeout=10):
+        message = json.dumps(message, default=str, separators=(',', ':'))
         return await self._producer.rpc_request(topic, message, timeout)
 
     def add_consumer(self, consumer: NATSClient, consumer_name: str):
@@ -42,6 +44,7 @@ class EventBus:
         await self._consumers.get(consumer_name).subscribe_action(topic, action_wrapper, queue)
 
     async def publish_message(self, topic, msg):
+        msg = json.dumps(msg, default=str, separators=(',', ':'))
         await self._producer.publish(topic, msg)
 
     async def close_connections(self):

@@ -41,8 +41,7 @@ class ServiceAffectingMonitor:
                                'edge': edge_id,
                                'interval': {"end": datetime.now(utc),
                                             "start": (datetime.now(utc) - timedelta(minutes=self._monitoring_minutes))}}
-        edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(edge_status_request,
-                                                                                          default=str), timeout=60)
+        edge_status = await self._event_bus.rpc_request("edge.status.request", edge_status_request, timeout=60)
         self._logger.info(f'Edge received from event bus')
 
         if edge_status is None or \
@@ -53,8 +52,7 @@ class ServiceAffectingMonitor:
                              'message': f'Error while monitoring edge for service affecting trouble, seems like data '
                                         f'is corrupted: \n {json.dumps(edge_status, indent=2)} \n'
                                         f'The environment is {self._config.MONITOR_CONFIG["environment"]}'}
-            await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
-                                              timeout=10)
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             return
 
         self._logger.info(f'{edge_status}')
@@ -125,12 +123,12 @@ class ServiceAffectingMonitor:
                     ]
                 }
                 ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
-                                                              json.dumps(ticket_details), timeout=30)
+                                                              ticket_details, timeout=30)
                 ticket_append_note_msg = {'request_id': uuid(),
                                           'ticket_id': ticket_id["ticketIds"]["ticketIds"][0],
                                           'note': ticket_note}
                 await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                  json.dumps(ticket_append_note_msg),
+                                                  ticket_append_note_msg,
                                                   timeout=15)
 
                 slack_message = {'request_id': uuid(),
@@ -138,8 +136,7 @@ class ServiceAffectingMonitor:
                                             f'https://app.bruin.com/helpdesk?clientId={client_id}&'
                                             f'ticketId={ticket_id["ticketIds"]["ticketIds"][0]} , in '
                                             f'{self._config.MONITOR_CONFIG["environment"]}'}
-                await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
-                                                  timeout=10)
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
                 self._logger.info(f'Ticket created with ticket id: {ticket_id["ticketIds"]["ticketIds"][0]}')
 
@@ -147,14 +144,11 @@ class ServiceAffectingMonitor:
         ticket_request_msg = {'request_id': uuid(), 'client_id': client_id,
                               'ticket_status': ['New', 'InProgress', 'Draft'],
                               'category': 'SD-WAN', 'ticket_topic': 'VAS'}
-        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
-                                                        json.dumps(ticket_request_msg, default=str),
-                                                        timeout=200)
+        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg, timeout=200)
         for ticket in all_tickets['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'ticket_id': ticket['ticketID']}
-            ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
-                                                               json.dumps(ticket_detail_msg, default=str),
+            ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request", ticket_detail_msg,
                                                                timeout=15)
             for ticket_detail in ticket_details['ticket_details']['ticketDetails']:
                 if 'detailValue' in ticket_detail.keys():

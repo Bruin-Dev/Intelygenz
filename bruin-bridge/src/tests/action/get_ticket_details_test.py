@@ -44,11 +44,11 @@ class TestGetTicketDetails:
         bruin_repository.get_ticket_details = Mock(return_value=ticket_details)
 
         ticket_details = GetTicketDetails(logger, event_bus, bruin_repository)
-        await ticket_details.send_ticket_details(json.dumps(msg))
+        await ticket_details.send_ticket_details(msg)
 
         ticket_details._bruin_repository.get_ticket_details.assert_called_once_with(ticket_id)
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(send_details_response)
+            response_topic, send_details_response
         )
 
     @pytest.mark.asyncio
@@ -76,9 +76,9 @@ class TestGetTicketDetails:
         bruin_repository.get_ticket_details = Mock(return_value=ticket_details)
 
         ticket_details = GetTicketDetails(logger, event_bus, bruin_repository)
-        await ticket_details.send_ticket_details(json.dumps(msg))
+        await ticket_details.send_ticket_details(msg)
 
         ticket_details._bruin_repository.get_ticket_details.assert_called_once_with(ticket_id)
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(send_details_response)
+            response_topic, send_details_response
         )

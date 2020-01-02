@@ -42,10 +42,10 @@ class ServiceOutageTriage:
                                      'category': 'SD-WAN',
                                      'ticket_topic': 'VOO'}
         all_tickets_titan = await self._event_bus.rpc_request("bruin.ticket.request",
-                                                              json.dumps(ticket_request_msg_titan, default=str),
+                                                              ticket_request_msg_titan,
                                                               timeout=90)
         all_tickets_mettel = await self._event_bus.rpc_request("bruin.ticket.request",
-                                                               json.dumps(ticket_request_msg_mettel, default=str),
+                                                               ticket_request_msg_mettel,
                                                                timeout=90)
         all_tickets = all_tickets_titan
 
@@ -63,7 +63,7 @@ class ServiceOutageTriage:
                              'message': f'Service outage triage: Error in ticket list. '
                                         f'Ticket list: {json.dumps(all_tickets)}. '
                                         f'Environment: {self._config.TRIAGE_CONFIG["environment"]}'}
-            await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
         for ticket_id in filtered_ticket_ids:
             id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
             edge_id = id_by_serial[ticket_id["serial"]]
@@ -77,11 +77,9 @@ class ServiceOutageTriage:
                           'end_date': datetime.now(utc),
                           'filter': filter_events_status_list}
 
-            edge_status = await self._event_bus.rpc_request("edge.status.request",
-                                                            json.dumps(status_msg, default=str), timeout=10)
+            edge_status = await self._event_bus.rpc_request("edge.status.request", status_msg, timeout=10)
             client_id = self._client_id_from_edge_status(edge_status)
-            edge_events = await self._event_bus.rpc_request("alert.request.event.edge",
-                                                            json.dumps(events_msg, default=str), timeout=180)
+            edge_events = await self._event_bus.rpc_request("alert.request.event.edge", events_msg, timeout=180)
             ticket_dict = self._compose_ticket_note_object(edge_status, edge_events)
             if self._config.TRIAGE_CONFIG['environment'] == 'production':
                 ticket_note = self._ticket_object_to_string(ticket_dict)
@@ -89,19 +87,17 @@ class ServiceOutageTriage:
                                           'ticket_id': ticket_id["ticketID"],
                                           'note': ticket_note}
                 await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                  json.dumps(ticket_append_note_msg),
+                                                  ticket_append_note_msg,
                                                   timeout=15)
             elif self._config.TRIAGE_CONFIG['environment'] == 'dev':
                 ticket_note = self._template_renderer._ticket_object_to_email_obj(ticket_dict)
-                await self._event_bus.rpc_request("notification.email.request",
-                                                  json.dumps(ticket_note),
-                                                  timeout=10)
+                await self._event_bus.rpc_request("notification.email.request", ticket_note, timeout=10)
             slack_message = {'request_id': uuid(),
                              'message': f'Triage appended to ticket: '
                                         f'https://app.bruin.com/helpdesk?clientId={client_id}&ticketId='
                                         f'{ticket_id["ticketID"]}, in '
                                         f'{self._config.TRIAGE_CONFIG["environment"]}'}
-            await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
         self._logger.info("End of ticket polling job")
 
     async def _filtered_ticket_details(self, ticket_list):
@@ -111,7 +107,7 @@ class ServiceOutageTriage:
             ticket_detail_msg = {'request_id': uuid(),
                                  'ticket_id': ticket['ticketID']}
             ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
-                                                               json.dumps(ticket_detail_msg, default=str),
+                                                               ticket_detail_msg,
                                                                timeout=15)
             for ticket_detail in ticket_details['ticket_details']['ticketDetails']:
                 triage_exists = False
@@ -180,13 +176,10 @@ class ServiceOutageTriage:
             'edge': edge_id,
         }
         edge_status = await self._event_bus.rpc_request(
-            'edge.status.request',
-            json.dumps(edge_status_request),
-            timeout=45,
+            'edge.status.request', edge_status_request, timeout=45,
         )
         client_id = self._client_id_from_edge_status(edge_status)
-        edge_events = await self._event_bus.rpc_request("alert.request.event.edge", json.dumps(
-            events_msg, default=str), timeout=180)
+        edge_events = await self._event_bus.rpc_request("alert.request.event.edge", events_msg, timeout=180)
 
         event_list = edge_events['events']
 
@@ -206,15 +199,14 @@ class ServiceOutageTriage:
                                               'ticket_id': ticket_id["ticketID"],
                                               'note': event_ticket_note}
                     await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                      json.dumps(ticket_append_note_msg),
+                                                      ticket_append_note_msg,
                                                       timeout=15)
                     slack_message = {'request_id': uuid(),
                                      'message': f'Events appended to ticket: '
                                                 f'https://app.bruin.com/helpdesk?clientId={client_id}&'
                                                 f'ticketId={ticket_id["ticketID"]}, in '
                                                 f'{self._config.TRIAGE_CONFIG["environment"]}'}
-                    await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message),
-                                                      timeout=10)
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
                 self._logger.info(event_ticket_note)
 
     def _compose_event_note_object(self, event_list):

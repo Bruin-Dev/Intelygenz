@@ -540,10 +540,7 @@ class TestServiceOutageDetectorJob:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'edge.list.request',
-            json.dumps({
-                'request_id': uuid_,
-                'filter': []
-            }),
+            {'request_id': uuid_, 'filter': []},
             timeout=600,
         )
         assert result == edge_list
@@ -586,10 +583,7 @@ class TestServiceOutageDetectorJob:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'edge.status.request',
-            json.dumps({
-                'request_id': uuid_,
-                'edge': edge_full_id,
-            }),
+            {'request_id': uuid_, 'edge': edge_full_id},
             timeout=120,
         )
         assert result == edge_status
@@ -1181,11 +1175,11 @@ class TestQuarantineJob:
         service_outage_detector._extract_client_id.assert_called_once_with(enterprise_name)
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.outage.details.by_edge_serial.request',
-            json.dumps({
+            {
                 'request_id': uuid_,
                 'edge_serial': edge_serial_number,
                 'client_id': client_id,
-            }),
+            },
             timeout=60,
         )
         assert outage_ticket_result == outage_ticket
@@ -1490,7 +1484,7 @@ class TestServiceOutageReporterJob:
         )
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.email.request",
-            json.dumps(email_object),
+            email_object,
             timeout=10,
         )
         reporting_edge_repository.remove_all_stored_elements.assert_called_once()

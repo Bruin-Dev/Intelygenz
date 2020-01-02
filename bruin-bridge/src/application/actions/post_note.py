@@ -1,6 +1,3 @@
-import json
-
-
 class PostNote:
 
     def __init__(self, logger, event_bus, bruin_repository):
@@ -8,10 +5,9 @@ class PostNote:
         self._event_bus = event_bus
         self._bruin_repository = bruin_repository
 
-    async def post_note(self, msg):
-        msg_dict = json.loads(msg)
-        ticket_id = msg_dict["ticket_id"]
-        note = msg_dict["note"]
+    async def post_note(self, msg: dict):
+        ticket_id = msg["ticket_id"]
+        note = msg["note"]
         self._logger.info(f'Putting note in: {ticket_id}...')
         status = 500
         result = None
@@ -26,8 +22,7 @@ class PostNote:
             self._logger.info(f'Note put in: {ticket_id}!')
             status = 200
         response = {
-            'request_id': msg_dict['request_id'],
+            'request_id': msg['request_id'],
             'status': status
         }
-        await self._event_bus.publish_message(msg_dict['response_topic'],
-                                              json.dumps(response, default=str))
+        await self._event_bus.publish_message(msg['response_topic'], response)

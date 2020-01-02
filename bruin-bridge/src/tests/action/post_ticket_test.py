@@ -52,13 +52,13 @@ class TestPostTicket:
         bruin_repository.post_ticket = Mock(return_value=post_ticket_response)
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
-        await post_ticket.post_ticket(json.dumps(msg))
+        await post_ticket.post_ticket(msg)
 
         post_ticket._bruin_repository.post_ticket.assert_called_once_with(
             client_id, category, services, notes, contacts
         )
         post_ticket._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(msg_published_in_topic)
+            response_topic, msg_published_in_topic
         )
 
     @pytest.mark.asyncio
@@ -95,10 +95,10 @@ class TestPostTicket:
         bruin_repository.post_ticket = Mock(return_value=post_ticket_response)
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
-        await post_ticket.post_ticket(json.dumps(msg))
+        await post_ticket.post_ticket(msg)
         post_ticket._bruin_repository.post_ticket.assert_called_once_with(
             client_id, category, services, notes, contacts
         )
         post_ticket._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(msg_published_in_topic)
+            response_topic, msg_published_in_topic
         )

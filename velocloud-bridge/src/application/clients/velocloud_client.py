@@ -36,7 +36,7 @@ class VelocloudClient:
             }
             response = requests.post(f"https://{host}/portal/rest/login/operatorLogin",
                                      headers={"Content-Type": "application/json"},
-                                     data=credentials,
+                                     json=credentials,
                                      allow_redirects=False,
                                      verify=self._config['verify_ssl'])
             if response.status_code in range(200, 299):
@@ -73,7 +73,7 @@ class VelocloudClient:
             target_host_client = self._get_header_by_host(edge["host"])
             edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"]}
             response = requests.post(f"https://{edge['host']}/portal/rest/edge/getEdge",
-                                     data=json.dumps(edgeids),
+                                     json=edgeids,
                                      headers=target_host_client['headers'],
                                      verify=self._config['verify_ssl'])
 
@@ -90,7 +90,7 @@ class VelocloudClient:
             target_host_client = self._get_header_by_host(edge["host"])
             edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"], "interval": interval}
             response = requests.post(f"https://{edge['host']}/portal/rest/metrics/getEdgeLinkMetrics",
-                                     data=json.dumps(edgeids),
+                                     json=edgeids,
                                      headers=target_host_client['headers'],
                                      verify=self._config['verify_ssl'])
 
@@ -107,7 +107,7 @@ class VelocloudClient:
             target_host_client = self._get_header_by_host(edge["host"])
             edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"], "interval": interval}
             response = requests.post(f"https://{edge['host']}/portal/rest/metrics/getEdgeAppLinkMetrics",
-                                     data=json.dumps(edgeids),
+                                     json=edgeids,
                                      headers=target_host_client['headers'],
                                      verify=self._config['verify_ssl'])
 
@@ -124,7 +124,7 @@ class VelocloudClient:
             target_host_client = self._get_header_by_host(edge["host"])
             body = {"enterpriseId": edge["enterprise_id"]}
             response = requests.post(f"https://{edge['host']}/portal/rest/enterprise/getEnterprise",
-                                     data=json.dumps(body),
+                                     json=body,
                                      headers=target_host_client['headers'],
                                      verify=self._config['verify_ssl'])
 
@@ -145,7 +145,7 @@ class VelocloudClient:
                     "edgeId": [edge["edge_id"]]}
 
             response = requests.post(f"https://{edge['host']}/portal/rest/event/getEnterpriseEvents",
-                                     data=json.dumps(body),
+                                     json=body,
                                      headers=target_host_client['headers'],
                                      verify=False)
 
@@ -182,7 +182,7 @@ class VelocloudClient:
                stop=stop_after_delay(self._config['stop_delay']))
         def get_monitoring_aggregates():
             response = requests.post(f"https://{client['host']}/portal/rest/monitoring/getAggregates",
-                                     data={},
+                                     json={},
                                      headers=client['headers'],
                                      verify=False)
             return self._json_return(response.json())
@@ -198,7 +198,7 @@ class VelocloudClient:
             body = {"enterpriseId": enterprise_id}
 
             response = requests.post(f"https://{client['host']}/portal/rest/enterprise/getEnterpriseEdges",
-                                     data=json.dumps(body),
+                                     json=body,
                                      headers=client['headers'],
                                      verify=False)
             return self._json_return(response.json())

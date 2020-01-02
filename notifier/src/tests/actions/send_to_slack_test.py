@@ -40,10 +40,10 @@ class TestSlackNotifier:
         test_actions = SendToSlack(config, test_bus, mock_slack_repository, mock_logger)
         test_actions._slack_repository.send_to_slack = Mock(return_value=msg_delivery_status)
 
-        await test_actions.send_to_slack(msg=json.dumps(msg_dict))
+        await test_actions.send_to_slack(msg=msg_dict)
 
         test_actions._slack_repository.send_to_slack.assert_called_once_with(msg_body)
         test_bus.publish_message.assert_awaited_once_with(
             response_topic,
-            json.dumps({'request_id': request_id, 'status': msg_delivery_status}),
+            {'request_id': request_id, 'status': msg_delivery_status},
         )

@@ -36,7 +36,7 @@ class TestSlackClient:
 
             post_mock.assert_called_once_with(
                 test_client._url,
-                data=json.dumps(test_msg)
+                data=test_msg
             )
             test_client._logger.info.assert_called_once()
             assert response == test_response
@@ -57,7 +57,7 @@ class TestSlackClient:
 
             post_mock.assert_called_once_with(
                 test_client._url,
-                data=json.dumps(test_msg)
+                data=test_msg
             )
             test_client._logger.error.assert_called_once()
             assert response == test_response

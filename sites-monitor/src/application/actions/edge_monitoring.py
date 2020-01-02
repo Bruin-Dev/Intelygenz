@@ -60,7 +60,7 @@ class EdgeMonitoring:
         }
         self._status_repository.set_current_cycle_request_id(request_id)
 
-        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(msg), timeout=200)
+        edge_list = await self._event_bus.rpc_request("edge.list.request", msg, timeout=200)
         self._logger.info(f'Edge list received from event bus')
         edge_status_requests = [
             {'request_id': edge_list["request_id"], 'edge': edge} for edge in edge_list["edges"]]
@@ -81,7 +81,7 @@ class EdgeMonitoring:
         self._logger.info(f'Splitting and sending edges to the event bus')
 
         for request in edge_status_requests:
-            edge = await self._event_bus.rpc_request("edge.status.request", json.dumps(request), timeout=10)
+            edge = await self._event_bus.rpc_request("edge.status.request", request, timeout=10)
             await self._process_edge(edge)
         self._logger.info(f'Requests sent')
 

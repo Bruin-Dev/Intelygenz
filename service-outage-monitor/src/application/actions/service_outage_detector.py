@@ -89,9 +89,7 @@ class ServiceOutageDetector:
             'edge': edge_id,
         }
         edge_status_response = await self._event_bus.rpc_request(
-            'edge.status.request',
-            json.dumps(edge_status_request_dict),
-            timeout=45,
+            'edge.status.request', edge_status_request_dict, timeout=45,
         )
         self._logger.info(f'Got status for edge: {edge_id}.')
         edge_info = edge_status_response['edge_info']
@@ -118,9 +116,7 @@ class ServiceOutageDetector:
         self._logger.info(f'Quarantine: Checking status of {edge_id}.')
 
         edge_status_response = await self._event_bus.rpc_request(
-            'edge.status.request',
-            json.dumps(edge_status_request_dict),
-            timeout=45,
+            'edge.status.request', edge_status_request_dict, timeout=45,
         )
         self._logger.info(f'Quarantine: Got status for edge {edge_id}.')
         edge_info = edge_status_response['edge_info']
@@ -155,15 +151,14 @@ class ServiceOutageDetector:
                 }
             ]
         }
-        ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
-                                                      json.dumps(ticket_details), timeout=30)
+        ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request", ticket_details, timeout=30)
         self._logger.info(
             f'Ticket creation: Edge {edge_id} is still in outage state. Ticket created with id {ticket_id}')
 
         slack_message = {'request_id': uuid(),
                          'message': f'Outage ticket created: https://app.bruin.com'
                                     f'/helpdesk?clientId=9994&ticketId={ticket_id["ticketIds"]["ticketIds"][0]}'}
-        await self._event_bus.rpc_request("notification.slack.request", json.dumps(slack_message), timeout=10)
+        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
         # Change hardcoded URL generation in service-outage-triage
         # Check and print errors from Bruin (Like, shit already exists)
         # Check the environment and avoid ticket creation when not in production environment
@@ -323,9 +318,7 @@ class ServiceOutageDetector:
         fields_edge = ["detection_time", "serial_number", "enterprise", "edge_url", "outage_causes"]
         email_report = self._email_template_renderer.compose_email_object(edges_for_email_template, fields=fields,
                                                                           fields_edge=fields_edge)
-        await self._event_bus.rpc_request("notification.email.request",
-                                          json.dumps(email_report),
-                                          timeout=10)
+        await self._event_bus.rpc_request("notification.email.request", email_report, timeout=10)
 
         self._logger.info(f'Outage report sent via e-mail! Clearing up the reporting queue...')
         self._reporting_edge_repository.remove_all_stored_elements()
@@ -364,9 +357,7 @@ class ServiceOutageDetector:
             'filter': []
         }
         edge_list_response = await self._event_bus.rpc_request(
-            'edge.list.request',
-            json.dumps(edge_list_request_dict),
-            timeout=600,
+            'edge.list.request', edge_list_request_dict, timeout=600,
         )
 
         return edge_list_response['edges']
@@ -413,9 +404,7 @@ class ServiceOutageDetector:
             'edge': edge_full_id,
         }
         edge_status_response = await self._event_bus.rpc_request(
-            'edge.status.request',
-            json.dumps(edge_status_request_dict),
-            timeout=120,
+            'edge.status.request', edge_status_request_dict, timeout=120,
         )
 
         return edge_status_response['edge_info']
@@ -427,9 +416,7 @@ class ServiceOutageDetector:
 
         outage_ticket_request = {'request_id': uuid(), 'edge_serial': edge_serial, 'client_id': client_id}
         outage_ticket = await self._event_bus.rpc_request(
-            'bruin.ticket.outage.details.by_edge_serial.request',
-            json.dumps(outage_ticket_request),
-            timeout=60,
+            'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=60,
         )
         return outage_ticket
 

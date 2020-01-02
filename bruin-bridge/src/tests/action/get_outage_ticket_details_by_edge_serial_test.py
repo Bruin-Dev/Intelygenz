@@ -62,13 +62,13 @@ class TestGetOutageTicketDetailsByEdgeSerial:
         bruin_repository.get_outage_ticket_details_by_edge_serial = Mock(return_value=ticket_details)
 
         outage_ticket_details = GetOutageTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
-        await outage_ticket_details.send_outage_ticket_details_by_edge_serial(json.dumps(msg))
+        await outage_ticket_details.send_outage_ticket_details_by_edge_serial(msg)
 
         outage_ticket_details._bruin_repository.get_outage_ticket_details_by_edge_serial.assert_called_once_with(
             edge_serial=edge_serial, client_id=client_id,
         )
         outage_ticket_details._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(get_ticket_details_response)
+            response_topic, get_ticket_details_response
         )
 
     @pytest.mark.asyncio
@@ -100,11 +100,11 @@ class TestGetOutageTicketDetailsByEdgeSerial:
         bruin_repository.get_outage_ticket_details_by_edge_serial = Mock(return_value=ticket_details)
 
         outage_ticket_details = GetOutageTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
-        await outage_ticket_details.send_outage_ticket_details_by_edge_serial(json.dumps(msg))
+        await outage_ticket_details.send_outage_ticket_details_by_edge_serial(msg)
 
         outage_ticket_details._bruin_repository.get_outage_ticket_details_by_edge_serial.assert_called_once_with(
             edge_serial=edge_serial, client_id=client_id,
         )
         outage_ticket_details._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(get_ticket_details_response)
+            response_topic, get_ticket_details_response
         )

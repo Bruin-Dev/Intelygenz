@@ -32,7 +32,7 @@ class Alert:
     async def _alert_process(self):
         self._logger.info("Requesting all edges with details for alert report")
         list_request = dict(request_id=uuid(), filter=[])
-        edge_list = await self._event_bus.rpc_request("edge.list.request", json.dumps(list_request), timeout=200)
+        edge_list = await self._event_bus.rpc_request("edge.list.request", list_request, timeout=200)
         self._logger.info(f'Edge list received from event bus')
         edge_status_requests = [
             {'request_id': edge_list["request_id"], 'edge': edge} for edge in edge_list["edges"]]
@@ -40,7 +40,7 @@ class Alert:
         edges_to_report = []
         for request in edge_status_requests:
 
-            edge_info = await self._event_bus.rpc_request("edge.status.request", json.dumps(request), timeout=120)
+            edge_info = await self._event_bus.rpc_request("edge.status.request", request, timeout=120)
             self._logger.info(f"Processing edge: {edge_info['edge_id']}")
             raw_last_contact = edge_info["edge_info"]["edges"]["lastContact"]
             if '0000-00-00 00:00:00' not in raw_last_contact:
@@ -62,5 +62,5 @@ class Alert:
 
                     edges_to_report.append(edge_for_alert)
         email_obj = self._template_renderer.compose_email_object(edges_to_report)
-        await self._event_bus.publish_message("notification.email.request", json.dumps(email_obj))
+        await self._event_bus.publish_message("notification.email.request", email_obj)
         self._logger.info("Last Contact Report sent")

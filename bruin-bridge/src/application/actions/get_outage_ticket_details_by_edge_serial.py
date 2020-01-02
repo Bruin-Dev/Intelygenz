@@ -1,6 +1,3 @@
-import json
-
-
 class GetOutageTicketDetailsByEdgeSerial:
 
     def __init__(self, logger, event_bus, bruin_repository):
@@ -8,12 +5,11 @@ class GetOutageTicketDetailsByEdgeSerial:
         self._event_bus = event_bus
         self._bruin_repository = bruin_repository
 
-    async def send_outage_ticket_details_by_edge_serial(self, msg):
-        msg_dict = json.loads(msg)
-        request_id = msg_dict['request_id']
-        response_topic = msg_dict['response_topic']
-        edge_serial = msg_dict["edge_serial"]
-        client_id = msg_dict["client_id"]
+    async def send_outage_ticket_details_by_edge_serial(self, msg: dict):
+        request_id = msg['request_id']
+        response_topic = msg['response_topic']
+        edge_serial = msg['edge_serial']
+        client_id = msg['client_id']
 
         self._logger.info(
             f'Looking for an outage ticket for edge with serial {edge_serial} '
@@ -38,7 +34,7 @@ class GetOutageTicketDetailsByEdgeSerial:
             'ticket_details': ticket_details,
             'status': status
         }
-        await self._event_bus.publish_message(response_topic, json.dumps(response))
+        await self._event_bus.publish_message(response_topic, response)
 
         self._logger.info(
             f'Publishing response to outage ticket details request for edge with serial {edge_serial} '

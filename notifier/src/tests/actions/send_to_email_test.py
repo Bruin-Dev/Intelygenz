@@ -40,12 +40,12 @@ class TestEmailNotifier:
         test_actions = SendToEmail(config, test_bus, mock_logger, mock_email_repository)
         test_actions._email_repository.send_to_email = Mock(return_value=msg_delivery_status)
 
-        await test_actions.send_to_email(msg=json.dumps(msg_dict))
+        await test_actions.send_to_email(msg=msg_dict)
 
         test_actions._email_repository.send_to_email.assert_called_once_with(msg_body)
         test_actions._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
-            json.dumps({'request_id': request_id, 'status': msg_delivery_status})
+            {'request_id': request_id, 'status': msg_delivery_status}
         )
 
     @pytest.mark.asyncio
@@ -67,10 +67,10 @@ class TestEmailNotifier:
         test_actions = SendToEmail(config, test_bus, mock_logger, mock_email_repository)
         test_actions._email_repository.send_to_email = Mock()
 
-        await test_actions.send_to_email(msg=json.dumps(msg_dict))
+        await test_actions.send_to_email(msg=msg_dict)
 
         test_actions._email_repository.send_to_email.assert_not_called()
         test_actions._event_bus.publish_message.assert_awaited_once_with(
             response_topic,
-            json.dumps({'request_id': request_id, 'status': 500})
+            {'request_id': request_id, 'status': 500}
         )

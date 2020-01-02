@@ -101,22 +101,22 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_has_awaits([
             call('bruin.ticket.request',
-                 json.dumps({
+                 {
                      'request_id': uuid_,
                      'client_id': 85940,
                      'ticket_status': ['New', 'InProgress', 'Draft'],
                      'category': 'SD-WAN',
                      'ticket_topic': 'VOO'
-                 }),
+                 },
                  timeout=90, ),
             call('bruin.ticket.request',
-                 json.dumps({
+                 {
                      'request_id': uuid_,
                      'client_id': 9994,
                      'ticket_status': ['New', 'InProgress', 'Draft'],
                      'category': 'SD-WAN',
                      'ticket_topic': 'VOO'
-                 }),
+                 },
                  timeout=90, )
         ])
         service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
@@ -146,35 +146,35 @@ class TestServiceOutageTriage:
         event_bus.rpc_request.assert_has_awaits([
             call(
                 'bruin.ticket.request',
-                json.dumps({
+                {
                     'request_id': uuid_1,
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
-                }),
+                },
                 timeout=90,
             ),
             call(
                 'bruin.ticket.request',
-                json.dumps({
+                {
                     'request_id': uuid_2,
                     'client_id': 9994,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
-                }),
+                },
                 timeout=90,
             ),
             call(
                 'notification.slack.request',
-                json.dumps({
+                {
                     'request_id': uuid_3,
                     'message': (
                         f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
                         'Environment: dev'
                     ),
-                }),
+                },
                 timeout=10,
             ),
         ])
@@ -206,35 +206,35 @@ class TestServiceOutageTriage:
         event_bus.rpc_request.assert_has_awaits([
             call(
                 'bruin.ticket.request',
-                json.dumps({
+                {
                     'request_id': uuid_1,
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
-                }),
+                },
                 timeout=90,
             ),
             call(
                 'bruin.ticket.request',
-                json.dumps({
+                {
                     'request_id': uuid_2,
                     'client_id': 9994,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
-                }),
+                },
                 timeout=90,
             ),
             call(
                 'notification.slack.request',
-                json.dumps({
+                {
                     'request_id': uuid_3,
                     'message': (
                         f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
                         'Environment: dev'
                     )
-                }),
+                },
                 timeout=10,
             ),
         ], any_order=False)
@@ -267,35 +267,35 @@ class TestServiceOutageTriage:
         event_bus.rpc_request.assert_has_awaits([
             call(
                 'bruin.ticket.request',
-                json.dumps({
+                {
                     'request_id': uuid_1,
                     'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
-                }),
+                },
                 timeout=90,
             ),
             call(
                 'bruin.ticket.request',
-                json.dumps({
+                {
                     'request_id': uuid_2,
                     'client_id': 9994,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
-                }),
+                },
                 timeout=90,
             ),
             call(
                 'notification.slack.request',
-                json.dumps({
+                {
                     'request_id': uuid_3,
                     'message': (
                         f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
                         'Environment: dev'
                     )
-                }),
+                },
                 timeout=10,
             ),
         ], any_order=False)
@@ -371,59 +371,56 @@ class TestServiceOutageTriage:
     #     event_bus.rpc_request.assert_has_awaits([
     #         call(
     #             'bruin.ticket.request',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_1,
     #                 'client_id': 85940,
     #                 'ticket_status': ['New', 'InProgress', 'Draft'],
     #                 'category': 'SD-WAN',
     #                 'ticket_topic': 'VOO'
-    #             }),
+    #             },
     #             timeout=90,
     #         ),
     #         call(
     #             'bruin.ticket.request',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_2,
     #                 'client_id': 9994,
     #                 'ticket_status': ['New', 'InProgress', 'Draft'],
     #                 'category': 'SD-WAN',
     #                 'ticket_topic': 'VOO'
-    #             }),
+    #             },
     #             timeout=90,
     #         ),
     #         call(
     #             'edge.status.request',
-    #             json.dumps({
-    #                 'request_id': uuid_3,
-    #                 'edge': edge_id_by_serial,
-    #             }),
+    #             {'request_id': uuid_3, 'edge': edge_id_by_serial},
     #             timeout=10,
     #         ),
     #         call(
     #             'alert.request.event.edge',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_4,
     #                 'edge': edge_id_by_serial,
     #                 'start_date': current_datetime_previous_week,
     #                 'end_date': current_datetime,
     #                 'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-    #             }, default=str),
+    #             },
     #             timeout=180,
     #         ),
     #         call(
     #             'notification.email.request',
-    #             json.dumps(ticket_note_as_email_object),
+    #             ticket_note_as_email_object,
     #             timeout=10,
     #         ),
     #         call(
     #             'notification.slack.request',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_5,
     #                 'message': (
     #                     'Triage appended to ticket: '
     #                     f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id}, in {environment}'
     #                 )
-    #             }),
+    #             },
     #             timeout=10,
     #         ),
     #     ], any_order=False)
@@ -499,63 +496,60 @@ class TestServiceOutageTriage:
     #     event_bus.rpc_request.assert_has_awaits([
     #         call(
     #             'bruin.ticket.request',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_1,
     #                 'client_id': 85940,
     #                 'ticket_status': ['New', 'InProgress', 'Draft'],
     #                 'category': 'SD-WAN',
     #                 'ticket_topic': 'VOO'
-    #             }),
+    #             },
     #             timeout=90,
     #         ),
     #         call(
     #             'bruin.ticket.request',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_2,
     #                 'client_id': 9994,
     #                 'ticket_status': ['New', 'InProgress', 'Draft'],
     #                 'category': 'SD-WAN',
     #                 'ticket_topic': 'VOO'
-    #             }),
+    #             },
     #             timeout=90,
     #         ),
     #         call(
     #             'edge.status.request',
-    #             json.dumps({
-    #                 'request_id': uuid_3,
-    #                 'edge': edge_id_by_serial,
-    #             }),
+    #             {'request_id': uuid_3, 'edge': edge_id_by_serial},
     #             timeout=10,
     #         ),
     #         call(
     #             'alert.request.event.edge',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_4,
     #                 'edge': edge_id_by_serial,
     #                 'start_date': current_datetime_previous_week,
     #                 'end_date': current_datetime,
     #                 'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-    #             }, default=str),
+    #             },
     #             timeout=180,
     #         ),
     #         call(
     #             'bruin.ticket.note.append.request',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_5,
     #                 'ticket_id': ticket_id,
     #                 'note': ticket_note_as_string,
-    #             }),
+    #             },
     #             timeout=15,
     #         ),
     #         call(
     #             'notification.slack.request',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_6,
     #                 'message': (
     #                     'Triage appended to ticket: '
     #                     f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id}, in {environment}'
     #                 )
-    #             }),
+    #             },
     #             timeout=10,
     #         ),
     #     ], any_order=False)
@@ -664,10 +658,7 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            json.dumps({
-                'request_id': uuid_,
-                'ticket_id': ticket_id,
-            }),
+            {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
         assert filtered_tickets == []
@@ -707,10 +698,7 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            json.dumps({
-                'request_id': uuid_,
-                'ticket_id': ticket_id,
-            }),
+            {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
         assert filtered_tickets == []
@@ -750,10 +738,7 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            json.dumps({
-                'request_id': uuid_,
-                'ticket_id': ticket_id,
-            }),
+            {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
         assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial}]
@@ -793,10 +778,7 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            json.dumps({
-                'request_id': uuid_,
-                'ticket_id': ticket_id,
-            }),
+            {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
         assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial}]
@@ -836,10 +818,7 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            json.dumps({
-                'request_id': uuid_,
-                'ticket_id': ticket_id,
-            }),
+            {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
         assert filtered_tickets == []
@@ -890,10 +869,10 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            json.dumps({
+            {
                 'request_id': uuid_,
                 'ticket_id': ticket_id,
-            }),
+            },
             timeout=15,
         )
         service_outage_triage._extract_field_from_string.assert_called_once_with(
@@ -948,10 +927,10 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            json.dumps({
+            {
                 'request_id': uuid_,
                 'ticket_id': ticket_id,
-            }),
+            },
             timeout=15,
         )
         service_outage_triage._extract_field_from_string.assert_called_once_with(
@@ -991,11 +970,11 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
 
         edge_online_time = service_outage_triage._find_recent_occurence_of_event(event_list, 'EDGE_ALIVE')
-        assert json.dumps(edge_online_time, default=str) == json.dumps('2019-07-30 02:38:00-04:00')
+        assert str(edge_online_time) == '2019-07-30 02:38:00-04:00'
 
         link_online_time = service_outage_triage._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
                                                                                  'Link GE2 is no longer DEAD')
-        assert json.dumps(link_online_time, default=str) == json.dumps('2019-07-30 00:26:00-04:00')
+        assert str(link_online_time) == '2019-07-30 00:26:00-04:00'
         link_dead_time = service_outage_triage._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
                                                                                'Link GE1 is no longer DEAD')
         assert link_dead_time is None
@@ -1043,7 +1022,7 @@ class TestServiceOutageTriage:
     #
     #     event_bus.rpc_request.assert_awaited_once_with(
     #         'alert.request.event.edge',
-    #         json.dumps({
+    #         {
     #             'request_id': uuid_,
     #             'edge': {
     #                 "host": "mettel.velocloud.net",
@@ -1053,7 +1032,7 @@ class TestServiceOutageTriage:
     #             'start_date': timestamp,
     #             'end_date': current_datetime,
     #             'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-    #         }, default=str),
+    #         },
     #         timeout=180,
     #     )
 
@@ -1268,7 +1247,7 @@ class TestServiceOutageTriage:
     #     event_bus.rpc_request.assert_has_awaits([
     #         call(
     #             'alert.request.event.edge',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_1,
     #                 'edge': {
     #                     "host": "mettel.velocloud.net",
@@ -1278,27 +1257,27 @@ class TestServiceOutageTriage:
     #                 'start_date': timestamp,
     #                 'end_date': current_datetime,
     #                 'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-    #             }, default=str),
+    #             },
     #             timeout=180,
     #         ),
     #         call(
     #             'bruin.ticket.note.append.request',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_2,
     #                 'ticket_id': ticket_id,
     #                 'note': events_ticket_note,
-    #             }),
+    #             },
     #             timeout=15,
     #         ),
     #         call(
     #             'notification.slack.request',
-    #             json.dumps({
+    #             {
     #                 'request_id': uuid_3,
     #                 'message': (
     #                     'Events appended to ticket: https://app.bruin.com/helpdesk?clientId=85940&'
     #                     f'ticketId={ticket_id}, in production'
     #                 )
-    #             }),
+    #             },
     #             timeout=10,
     #         ),
     #     ], any_order=False)
@@ -1360,7 +1339,7 @@ class TestServiceOutageTriage:
     #     ])
     #     event_bus.rpc_request.assert_awaited_once_with(
     #         'alert.request.event.edge',
-    #         json.dumps({
+    #         {
     #             'request_id': uuid_,
     #             'edge': {
     #                 "host": "mettel.velocloud.net",
@@ -1370,7 +1349,7 @@ class TestServiceOutageTriage:
     #             'start_date': timestamp,
     #             'end_date': current_datetime,
     #             'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-    #         }, default=str),
+    #         },
     #         timeout=180,
     #     )
 

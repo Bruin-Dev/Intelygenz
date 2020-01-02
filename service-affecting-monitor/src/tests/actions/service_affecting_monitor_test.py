@@ -1420,7 +1420,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_object_to_string.assert_called_with('Some ordered dict object')
 
         assert event_bus.rpc_request.called
-        assert 'Some string object' in event_bus.rpc_request.mock_calls[1][1][1]
+        assert 'Some string object' == event_bus.rpc_request.mock_calls[1][1][1]['note']
 
     @pytest.mark.asyncio
     async def notify_trouble_with_unknown_config_test(self):

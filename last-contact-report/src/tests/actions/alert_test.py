@@ -145,24 +145,24 @@ class TestAlert:
         assert len(reported_edges) == 3
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
-                 json.dumps(dict(request_id=test_uuid, filter=[])),
+                 {'request_id': test_uuid, 'filter': []},
                  timeout=200),
             call("edge.status.request",
-                 json.dumps({'request_id': 123, 'edge': 'Edge1'}),
+                 {'request_id': 123, 'edge': 'Edge1'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 json.dumps({'request_id': 123, 'edge': 'Edge2'}),
+                 {'request_id': 123, 'edge': 'Edge2'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 json.dumps({'request_id': 123, 'edge': 'Edge3'}),
+                 {'request_id': 123, 'edge': 'Edge3'},
                  timeout=120
                  ),
         ])
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
-            json.dumps(email_contents),
+            email_contents,
         )
 
     @pytest.mark.asyncio
@@ -238,25 +238,25 @@ class TestAlert:
         assert len(reported_edges) == 1
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
-                 json.dumps(dict(request_id=test_uuid, filter=[])),
+                 {'request_id': test_uuid, 'filter': []},
                  timeout=200
                  ),
             call("edge.status.request",
-                 json.dumps({'request_id': 123, 'edge': 'Edge1'}),
+                 {'request_id': 123, 'edge': 'Edge1'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 json.dumps({'request_id': 123, 'edge': 'Edge2'}),
+                 {'request_id': 123, 'edge': 'Edge2'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 json.dumps({'request_id': 123, 'edge': 'Edge3'}),
+                 {'request_id': 123, 'edge': 'Edge3'},
                  timeout=120
                  ),
         ])
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
-            json.dumps(email_contents["email"]),
+            email_contents["email"],
         )
 
     @pytest.mark.asyncio
@@ -333,23 +333,23 @@ class TestAlert:
         assert len(reported_edges) == 2
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
-                 json.dumps(dict(request_id=test_uuid, filter=[])),
+                 {'request_id': test_uuid, 'filter': []},
                  timeout=200
                  ),
             call("edge.status.request",
-                 json.dumps({'request_id': 123, 'edge': 'Edge1'}),
+                 {'request_id': 123, 'edge': 'Edge1'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 json.dumps({'request_id': 123, 'edge': 'Edge2'}),
+                 {'request_id': 123, 'edge': 'Edge2'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 json.dumps({'request_id': 123, 'edge': 'Edge3'}),
+                 {'request_id': 123, 'edge': 'Edge3'},
                  timeout=120
                  ),
         ])
         alert._event_bus.publish_message.assert_awaited_once_with(
             'notification.email.request',
-            json.dumps(email_contents),
+            email_contents,
         )

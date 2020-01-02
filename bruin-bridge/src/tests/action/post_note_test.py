@@ -47,13 +47,13 @@ class TestPostNote:
         bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
 
         post_note = PostNote(logger, event_bus, bruin_repository)
-        await post_note.post_note(json.dumps(msg))
+        await post_note.post_note(msg)
 
         post_note._bruin_repository.post_ticket_note.assert_called_once_with(
             ticket_id, note_contents
         )
         post_note._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(msg_published_in_topic)
+            response_topic, msg_published_in_topic
         )
 
     @pytest.mark.asyncio
@@ -82,11 +82,11 @@ class TestPostNote:
         bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
 
         post_note = PostNote(logger, event_bus, bruin_repository)
-        await post_note.post_note(json.dumps(msg))
+        await post_note.post_note(msg)
 
         post_note._bruin_repository.post_ticket_note.assert_not_called()
         post_note._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(msg_published_in_topic)
+            response_topic, msg_published_in_topic
         )
 
     @pytest.mark.asyncio
@@ -115,11 +115,11 @@ class TestPostNote:
         bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
 
         post_note = PostNote(logger, event_bus, bruin_repository)
-        await post_note.post_note(json.dumps(msg))
+        await post_note.post_note(msg)
 
         post_note._bruin_repository.post_ticket_note.assert_called_once_with(
             ticket_id, note_contents
         )
         post_note._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(msg_published_in_topic)
+            response_topic, msg_published_in_topic
         )

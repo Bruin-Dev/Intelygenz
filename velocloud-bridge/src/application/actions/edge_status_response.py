@@ -1,6 +1,5 @@
 from igz.packages.eventbus.eventbus import EventBus
 from datetime import datetime, timedelta, timezone
-import json
 
 
 class ReportEdgeStatus:
@@ -11,8 +10,7 @@ class ReportEdgeStatus:
         self._velocloud_repository = velocloud_repository
         self._logger = logger
 
-    async def report_edge_status(self, msg):
-        msg = json.loads(msg)
+    async def report_edge_status(self, msg: dict):
         request_id = msg["request_id"]
         edgeids = msg["edge"]
         self._logger.info(f'Processing edge with data {msg}')
@@ -35,4 +33,4 @@ class ReportEdgeStatus:
             status = 500
         edge_status = {"enterprise_name": enterprise_name, "edges": edge_status, "links": link_status}
         edge_response = {"request_id": request_id, "edge_id": edgeids, "edge_info": edge_status, "status": status}
-        await self._event_bus.publish_message(msg['response_topic'], json.dumps(edge_response, default=str))
+        await self._event_bus.publish_message(msg['response_topic'], edge_response)

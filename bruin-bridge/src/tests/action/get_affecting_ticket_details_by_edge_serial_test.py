@@ -79,13 +79,13 @@ class TestGetAffectingTicketDetailsByEdgeSerial:
         bruin_repository.get_affecting_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
 
         ticket_details = GetAffectingTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
-        await ticket_details.send_affecting_ticket_details_by_edge_serial(json.dumps(msg))
+        await ticket_details.send_affecting_ticket_details_by_edge_serial(msg)
 
         ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_called_once_with(
             edge_serial=edge_serial, client_id=client_id,
         )
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(get_ticket_details_response)
+            response_topic, get_ticket_details_response
         )
 
     @pytest.mark.asyncio
@@ -116,11 +116,11 @@ class TestGetAffectingTicketDetailsByEdgeSerial:
         bruin_repository.get_affecting_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
 
         ticket_details = GetAffectingTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
-        await ticket_details.send_affecting_ticket_details_by_edge_serial(json.dumps(msg))
+        await ticket_details.send_affecting_ticket_details_by_edge_serial(msg)
 
         ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_called_once_with(
             edge_serial=edge_serial, client_id=client_id,
         )
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
-            response_topic, json.dumps(get_ticket_details_response)
+            response_topic, get_ticket_details_response
         )

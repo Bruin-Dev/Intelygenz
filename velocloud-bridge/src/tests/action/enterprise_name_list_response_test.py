@@ -30,14 +30,13 @@ class TestEnterpriseNameListResponse:
         actions = EnterpriseNameList(test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
         msg_dict = {"request_id": "123", "response_topic": "request.enterprises.names.123", "filter": []}
-        msg = json.dumps(msg_dict)
         enterprises = [{"enterprise_name": "A Name"}, {"enterprise_name": "Another Name"}]
         velocloud_repo.get_all_enterprise_names = Mock(return_value=enterprises)
-        await actions.enterprise_name_list(msg)
+        await actions.enterprise_name_list(msg_dict)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprise_names.called
         assert velocloud_repo.get_all_enterprise_names.call_args[0][0] == msg_dict
         assert test_bus.publish_message.call_args[0][0] == msg_dict["response_topic"]
-        assert test_bus.publish_message.call_args[0][1] == json.dumps({"request_id": "123",
-                                                                       "enterprise_names": enterprises,
-                                                                       "status": 200})
+        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
+                                                            "enterprise_names": enterprises,
+                                                            "status": 200}

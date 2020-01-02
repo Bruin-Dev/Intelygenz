@@ -72,7 +72,7 @@ class TestVelocloudClient:
 
             mock_post.assert_called_once()
             assert host in mock_post.call_args[0][0]
-            assert mock_post.call_args[1]['data'] == dict(username=username, password=password)
+            assert mock_post.call_args[1]['json'] == dict(username=username, password=password)
             assert header == {"Cookie": 'velocloud.session=secret',
                               "Content-Type": "application/json-patch+json",
                               "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached"
@@ -131,8 +131,8 @@ class TestVelocloudClient:
 
             mock_post.assert_called_once()
             assert edge_id['host'] in mock_post.call_args[0][0]
-            assert mock_post.call_args[1]['data'] == json.dumps(dict(enterpriseId=edge_id['enterprise_id'],
-                                                                     id=edge_id['edge_id']))
+            assert mock_post.call_args[1]['json'] == {"enterpriseId": edge_id['enterprise_id'],
+                                                      "id": edge_id['edge_id']}
             assert mock_post.call_args[1]['headers'] == header['headers']
             assert edge_info == edge_status
 
@@ -177,9 +177,9 @@ class TestVelocloudClient:
 
             mock_post.assert_called_once()
             assert edge_id['host'] in mock_post.call_args[0][0]
-            assert mock_post.call_args[1]['data'] == json.dumps(dict(enterpriseId=edge_id['enterprise_id'],
-                                                                     id=edge_id['edge_id'],
-                                                                     interval=interval))
+            assert mock_post.call_args[1]['json'] == {'enterpriseId': edge_id['enterprise_id'],
+                                                      'id': edge_id['edge_id'],
+                                                      'interval': interval}
             assert mock_post.call_args[1]['headers'] == header['headers']
             assert link_info == link_status
 
@@ -225,9 +225,9 @@ class TestVelocloudClient:
 
             mock_post.assert_called_once()
             assert edge_id['host'] in mock_post.call_args[0][0]
-            assert mock_post.call_args[1]['data'] == json.dumps(dict(enterpriseId=edge_id['enterprise_id'],
-                                                                     id=edge_id['edge_id'],
-                                                                     interval=interval))
+            assert mock_post.call_args[1]['json'] == {'enterpriseId': edge_id['enterprise_id'],
+                                                      'id': edge_id['edge_id'],
+                                                      'interval': interval}
             assert mock_post.call_args[1]['headers'] == header['headers']
             assert link_service_group_info == link_service_groups
 
@@ -273,7 +273,7 @@ class TestVelocloudClient:
 
             mock_post.assert_called_once()
             assert edge_id['host'] in mock_post.call_args[0][0]
-            assert mock_post.call_args[1]['data'] == json.dumps(dict(enterpriseId=edge_id['enterprise_id']))
+            assert mock_post.call_args[1]['json'] == {'enterpriseId': edge_id['enterprise_id']}
             assert mock_post.call_args[1]['headers'] == header['headers']
             assert enterprise_info == enterprise_status
 
@@ -321,11 +321,10 @@ class TestVelocloudClient:
 
             mock_post.assert_called_once()
             assert edge_id['host'] in mock_post.call_args[0][0]
-            assert mock_post.call_args[1]['data'] == json.dumps(dict(enterpriseId=edge_id['enterprise_id'],
-                                                                     interval=dict(start=interval_start,
-                                                                                   end=interval_end),
-                                                                     filter=dict(limit=limit),
-                                                                     edgeId=[edge_id['edge_id']]))
+            assert mock_post.call_args[1]['json'] == {'enterpriseId': edge_id['enterprise_id'],
+                                                      'interval': {'start': interval_start, 'end': interval_end},
+                                                      'filter': {'limit': limit},
+                                                      'edgeId': [edge_id['edge_id']]}
             assert mock_post.call_args[1]['headers'] == header['headers']
             assert events == events_status
 
@@ -451,7 +450,7 @@ class TestVelocloudClient:
             list_of_enterprise_edges = velocloud_client.get_all_enterprises_edges_by_id(clients, enterprise_id)
 
             mock_post.assert_called_once()
-            assert mock_post.call_args[1]["data"] == json.dumps(dict(enterpriseId=enterprise_id))
+            assert mock_post.call_args[1]["json"] == {'enterpriseId': enterprise_id}
             assert clients['host'] in mock_post.call_args[0][0]
             assert mock_post.call_args[1]['headers'] == clients['headers']
             assert list_of_enterprise_edges == enterprise_edge_return
