@@ -34,8 +34,18 @@ TRIAGE_CONFIG = {
     #   "VC05200033420", "VC05200029665", "VC05200030367", "VC05200033602"
     #   "VC05200037434", "VC05200051358", "VC05200037311", "VC05200033505",
     #   "VC05200037577", "VC05200036898", "VC05200037154", "VC05200037223",
-    #   "VC05200037433", "VC05200051251", "VC05200048970"," VC05200038689",
-    #   "VC05200037059"]
+    #   "VC05200037433", "VC05200051251", "VC05200048970", "VC05200038689",
+    #   "VC05200037059", "VC05200037159", "VC05200037124", "VC05200036905",
+    #   "VC05200037060", "VC05200036933", "VC05200050849", "VC05200016715,
+    #   "VC05200028729", "VC05200029227", "VC05200028614", "VC05200027456",
+    #   "VC05200032234", "VC05200033462", "VC05200037333", "VC05200032322",
+    #   "VC05200034112", "VC05200032818", "VC05200039301", "VC05200038733",
+    #   "VC05200037536", "VC05200037410", "VC05200034046", "VC05200037423",
+    #   "VC05200036924", "VC05200037063", "VC05200016367", "VC05200014851",
+    #   "VC05200036927", "VC05200037064", "VC05200039098", "VC05200033092",
+    #   "VC05200037714", "VC05200037160", "VC05200037698", "VC05200037178",
+    #   "VC05200037301", "VC05200039051", "VC05200036910", "VC05200039330",
+    #   "VC05200037141",]
     #  ['VCE20000000895', 'VC05400001548'] are backup devices for the ones the share velocloud ids with
     'id_by_serial': {
         # Titan America Edges
@@ -303,6 +313,106 @@ TRIAGE_CONFIG = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
             "edge_id": 1777
+        },
+        'VC05200037410': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1780
+        },
+        'VC05200034046': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1782
+        },
+        'VC05200037423': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1785
+        },
+        'VC05200036924': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1792
+        },
+        'VC05200037063': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1804
+        },
+        'VC05200016367': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1844
+        },
+        'VC05200014851': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1846
+        },
+        'VC05200036927': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1853
+        },
+        'VC05200037064': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1876
+        },
+        'VC05200039098': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1896
+        },
+        'VC05200033092': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1942
+        },
+        'VC05200037714': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1943
+        },
+        'VC05200037160': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1946
+        },
+        'VC05200037698': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1947
+        },
+        'VC05200037178': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1948
+        },
+        'VC05200037301': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1965
+        },
+        'VC05200039051': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1994
+        },
+        'VC05200036910': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1995
+        },
+        'VC05200039330': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1998
+        },
+        'VC05200037141': {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 2007
         },
         # Other Edges
         "VC05400002265": {

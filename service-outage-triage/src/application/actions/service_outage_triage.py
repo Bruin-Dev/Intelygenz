@@ -43,10 +43,10 @@ class ServiceOutageTriage:
                                      'ticket_topic': 'VOO'}
         all_tickets_titan = await self._event_bus.rpc_request("bruin.ticket.request",
                                                               json.dumps(ticket_request_msg_titan, default=str),
-                                                              timeout=200)
+                                                              timeout=90)
         all_tickets_mettel = await self._event_bus.rpc_request("bruin.ticket.request",
                                                                json.dumps(ticket_request_msg_mettel, default=str),
-                                                               timeout=200)
+                                                               timeout=90)
         all_tickets = all_tickets_titan
 
         if all_tickets and all_tickets_mettel and "tickets" in all_tickets.keys() and \
