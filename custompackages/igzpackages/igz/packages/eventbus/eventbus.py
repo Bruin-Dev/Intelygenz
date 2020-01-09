@@ -21,7 +21,13 @@ class EventBus:
             logger.addHandler(log_handler)
         self._logger = logger
 
+    def __wrap_non_dict_message(self, msg):
+        return {"message": msg}
+
     async def rpc_request(self, topic, message, timeout=10):
+        if not isinstance(message, dict):
+            message = self.__wrap_non_dict_message(message)
+
         message = json.dumps(message, default=str, separators=(',', ':'))
         return await self._producer.rpc_request(topic, message, timeout)
 
@@ -44,6 +50,9 @@ class EventBus:
         await self._consumers.get(consumer_name).subscribe_action(topic, action_wrapper, queue)
 
     async def publish_message(self, topic, msg):
+        if not isinstance(msg, dict):
+            msg = self.__wrap_non_dict_message(msg)
+
         msg = json.dumps(msg, default=str, separators=(',', ':'))
         await self._producer.publish(topic, msg)
 

@@ -81,6 +81,47 @@ class TestEventBus:
             "some_topic", '{"epoch_time":"1970-01-01 00:00:00"}', 10,
         )
 
+    @pytest.mark.asyncio
+    async def rpc_request_with_non_dict_payload_test(self):
+        mock_logger = Mock()
+        event_bus = EventBus(logger=mock_logger)
+        publisher = NATSClient(config, logger=mock_logger)
+        publisher.rpc_request = CoroutineMock()
+
+        event_bus.set_producer(publisher)
+
+        await event_bus.rpc_request(
+            topic="some_topic",
+            message="some_str_message",
+            timeout=10
+        )
+
+        publisher.rpc_request.assert_awaited_once_with(
+            "some_topic", '{"message":"some_str_message"}', 10,
+        )
+
+        publisher.rpc_request.reset_mock()
+        await event_bus.rpc_request(
+            topic="some_topic",
+            message=9999,
+            timeout=10
+        )
+
+        publisher.rpc_request.assert_awaited_once_with(
+            "some_topic", '{"message":9999}', 10,
+        )
+
+        publisher.rpc_request.reset_mock()
+        await event_bus.rpc_request(
+            topic="some_topic",
+            message=datetime(1970, 1, 1, 0, 0, 0),
+            timeout=10
+        )
+
+        publisher.rpc_request.assert_awaited_once_with(
+            "some_topic", '{"message":"1970-01-01 00:00:00"}', 10,
+        )
+
     def add_consumer_OK_test(self):
         mock_logger = Mock()
         event_bus = EventBus(logger=mock_logger)
@@ -167,6 +208,26 @@ class TestEventBus:
         )
 
         publisher.publish.assert_awaited_once_with("some_topic", '{"epoch_time":"1970-01-01 00:00:00"}')
+
+    @pytest.mark.asyncio
+    async def publish_message_with_non_dict_payload_test(self):
+        mock_logger = Mock()
+        event_bus = EventBus(logger=mock_logger)
+        publisher = NATSClient(config, logger=mock_logger)
+        publisher.publish = CoroutineMock()
+
+        event_bus.set_producer(publisher)
+
+        await event_bus.publish_message(topic="some_topic", msg="some_str_message")
+        publisher.publish.assert_awaited_once_with("some_topic", '{"message":"some_str_message"}')
+
+        publisher.publish.reset_mock()
+        await event_bus.publish_message(topic="some_topic", msg=9999)
+        publisher.publish.assert_awaited_once_with("some_topic", '{"message":9999}')
+
+        publisher.publish.reset_mock()
+        await event_bus.publish_message(topic="some_topic", msg=datetime(1970, 1, 1, 0, 0, 0))
+        publisher.publish.assert_awaited_once_with("some_topic", '{"message":"1970-01-01 00:00:00"}')
 
     @pytest.mark.asyncio
     async def close_connections_OK_test(self):
