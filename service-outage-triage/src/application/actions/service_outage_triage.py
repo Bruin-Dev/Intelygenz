@@ -119,10 +119,6 @@ class ServiceOutageTriage:
                         sorted_ticket_notes = sorted(ticket_details['ticket_details']['ticketNotes'],
                                                      key=lambda note: note['createdDate'], reverse=True)
 
-                        creation_date = parse(ticket_details['ticket_details']['ticketNotes'][0]['createdDate'])
-
-                        await self._auto_resolve_tickets(creation_date, ticket_item, ticket_detail['detailID'])
-
                         for ticket_note in sorted_ticket_notes:
                             if ticket_note['noteValue'] is not None:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
@@ -139,6 +135,11 @@ class ServiceOutageTriage:
                                     break
                         if not triage_exists:
                             filtered_ticket_ids.append(ticket_item)
+
+                        # auto-resolve after events have been appended
+                        # creation_date = parse(ticket_details['ticket_details']['ticketNotes'][0]['createdDate'])
+                        # await self._auto_resolve_tickets(creation_date, ticket_item, ticket_detail['detailID'])
+
                         break
         return filtered_ticket_ids
 
@@ -315,6 +316,7 @@ class ServiceOutageTriage:
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
         edge_id = id_by_serial[ticket_id["serial"]]
         # Check if autoresolve is possible i.e  has it been autoresloved less than 3 times
+        # TODO grab David code for checking ticket can be autoresolved
         if self.is_so_ticket_auto_resolved():
             status_msg = {'request_id': uuid(),
                           'edge': edge_id}
@@ -326,7 +328,28 @@ class ServiceOutageTriage:
             time_from_creation = datetime.now() - creation_date
             # time_from_last_down = datetime.now() - redis_edge
             # Function to first check if outage still exists
+            # TODO check if an outage does not exist anymore
             if self._is_there_an_outage(edge_status) is False:
                 # then check when the last time it was down or when it was created
                 if time_from_creation < timedelta(minutes=45) or time_from_last_down < timedelta(minutes=45):
-                    # if either or are less than 45 mins then autoresolve and post note
+                    if self._config.TRIAGE_CONFIG['environment'] == 'production':
+                        resolve_ticket_msg = {'request_id': uuid(),
+                                              'ticket_id': ticket_id['ticket_id'],
+                                              'detail_id': detail_id
+                                              }
+
+                        resolve_note_msg = "#*Automation Engine*# \n Auto-resolving ticket.\n" + 'TimeStamp: ' + str(
+                                            datetime.now() + timedelta(seconds=1))
+                        ticket_append_note_msg = {'request_id': uuid(),
+                                                  'ticket_id': ticket_id["ticketID"],
+                                                  'note': resolve_note_msg}
+
+                        # if either or are less than 45 mins then autoresolve and post note
+                        await self._event_bus.rpc_request("bruin.ticket.status.resolve",
+                                                          json.dumps(resolve_ticket_msg),
+                                                          timeout=15)
+
+                        await self._event_bus.rpc_request("bruin.ticket.note.append.request",
+                                                          json.dumps(ticket_append_note_msg),
+                                                          timeout=15)
+                    self._logger(f"Ticket of ticketID:{ticket_id['ticket_id']} auto-resolved")
