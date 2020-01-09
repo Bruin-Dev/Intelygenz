@@ -317,7 +317,6 @@ class ServiceOutageTriage:
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
         edge_id = id_by_serial[ticket_id["serial"]]
         # Check if autoresolve is possible i.e  has it been autoresloved less than 3 times
-        # TODO grab David code for checking ticket can be autoresolved
         if self.is_so_ticket_auto_resolved():
             status_msg = {'request_id': uuid(),
                           'edge': edge_id}
