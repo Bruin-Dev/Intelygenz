@@ -118,6 +118,11 @@ class ServiceOutageTriage:
                         ticket_item["serial"] = ticket_detail['detailValue']
                         sorted_ticket_notes = sorted(ticket_details['ticket_details']['ticketNotes'],
                                                      key=lambda note: note['createdDate'], reverse=True)
+
+                        creation_date = parse(ticket_details['ticket_details']['ticketNotes'][0]['createdDate'])
+
+                        await self._auto_resolve_tickets(creation_date, ticket_item, ticket_detail['detailID'])
+
                         for ticket_note in sorted_ticket_notes:
                             if ticket_note['noteValue'] is not None:
                                 if '#*Automation Engine*#' in ticket_note['noteValue']:
@@ -305,3 +310,23 @@ class ServiceOutageTriage:
             parsed_key = re.sub(r" LABELMARK(.)*", "", key)
             edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]} \n'
         return edge_triage_str
+
+    async def _auto_resolve_tickets(self, creation_date, ticket_id, detail_id):
+        id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
+        edge_id = id_by_serial[ticket_id["serial"]]
+        # Check if autoresolve is possible i.e  has it been autoresloved less than 3 times
+        if self.is_so_ticket_auto_resolved():
+            status_msg = {'request_id': uuid(),
+                          'edge': edge_id}
+            edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(status_msg, default=str),
+                                                            timeout=10)
+            # TODO grab data from redis
+            #   check redis with edge_id
+            # redis_edge = grab from redis
+            time_from_creation = datetime.now() - creation_date
+            # time_from_last_down = datetime.now() - redis_edge
+            # Function to first check if outage still exists
+            if self._is_there_an_outage(edge_status) is False:
+                # then check when the last time it was down or when it was created
+                if time_from_creation < timedelta(minutes=45) or time_from_last_down < timedelta(minutes=45):
+                    # if either or are less than 45 mins then autoresolve and post note
