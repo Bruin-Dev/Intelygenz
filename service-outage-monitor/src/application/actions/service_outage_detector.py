@@ -10,7 +10,7 @@ from apscheduler.util import undefined
 from pytz import timezone
 from shortuuid import uuid
 
-from application.repositories.edge_repository import EdgeIdentifier
+from igz.packages.edge_repo.edge_repository import EdgeIdentifier
 
 
 class ServiceOutageDetector:

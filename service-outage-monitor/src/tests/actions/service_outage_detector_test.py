@@ -15,7 +15,7 @@ from shortuuid import uuid
 
 from application.actions import service_outage_detector as service_outage_detector_module
 from application.actions.service_outage_detector import ServiceOutageDetector
-from application.repositories.edge_repository import EdgeIdentifier
+from igz.packages.edge_repo.edge_repository import EdgeIdentifier
 from config import testconfig
 
 

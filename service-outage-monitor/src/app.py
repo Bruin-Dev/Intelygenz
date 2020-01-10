@@ -1,6 +1,5 @@
 import asyncio
 from application.actions.service_outage_detector import ServiceOutageDetector
-from application.repositories.edge_repository import EdgeRepository
 from application.repositories.service_outage_report_template_renderer import ServiceOutageReportTemplateRenderer
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from redis import Redis
@@ -10,6 +9,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
+from igz.packages.edge_repo.edge_repository import EdgeRepository
 from igz.packages.repositories.outageutils import OutageUtils
 
 

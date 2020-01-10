@@ -4,9 +4,9 @@ import time
 from unittest.mock import Mock
 from unittest.mock import patch
 
-from application.repositories import edge_repository as edge_repository_module
-from application.repositories.edge_repository import EdgeIdentifier
-from application.repositories.edge_repository import EdgeRepository
+from igz.packages.edge_repo import edge_repository as edge_repository_module
+from igz.packages.edge_repo.edge_repository import EdgeIdentifier
+from igz.packages.edge_repo.edge_repository import EdgeRepository
 
 
 class TestEdgeRepository:

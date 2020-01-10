@@ -1,6 +1,7 @@
 import json
 import re
 import time
+import logging
 
 from collections import namedtuple
 from typing import Dict
@@ -12,6 +13,13 @@ EdgeIdentifier = namedtuple(typename='EdgeIdentifier', field_names=['host', 'ent
 
 class EdgeRepository:
     def __init__(self, logger, redis_client, keys_prefix):
+        if logger is None:
+            logger = logging.getLogger('event-bus')
+            logger.setLevel(logging.DEBUG)
+            log_handler = logging.StreamHandler(sys.stdout)
+            formatter = logging.Formatter('%(asctime)s: %(module)s: %(levelname)s: %(message)s')
+            log_handler.setFormatter(formatter)
+            logger.addHandler(log_handler)
         self._logger = logger
         self._redis_client = redis_client
         self._keys_prefix = keys_prefix
