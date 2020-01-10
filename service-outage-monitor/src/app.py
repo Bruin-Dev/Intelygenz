@@ -10,6 +10,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
+from igz.packages.autoresolve.autoresolve import AutoResolve
 
 
 class Container:
@@ -42,11 +43,15 @@ class Container:
         # EMAIL TEMPLATE
         self._template_renderer = ServiceOutageReportTemplateRenderer(config)
 
+        # AUTORESOLVE
+        self._autoresolve = AutoResolve(self._logger)
+
         # ACTIONS
         self._service_outage_detector = ServiceOutageDetector(self._event_bus, self._logger, self._scheduler,
                                                               self._quarantine_edge_repository,
                                                               self._reporting_edge_repository,
-                                                              config, self._template_renderer)
+                                                              config, self._template_renderer,
+                                                              self._autoresolve)
 
     async def _start(self):
         await self._event_bus.connect()
