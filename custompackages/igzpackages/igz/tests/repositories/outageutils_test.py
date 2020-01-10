@@ -3,10 +3,10 @@ import pytest
 
 from unittest.mock import Mock
 
-from igz.packages.autoresolve import AutoResolve
+from igz.packages.repositories.outageutils import OutageUtils
 
 
-class TestAutoResolve:
+class TestOutageUtils:
 
     def is_there_an_outage_edge_test(self):
         edge_1_state = 'CONNECTED'
@@ -45,15 +45,15 @@ class TestAutoResolve:
 
         logger = Mock()
 
-        auto_resolve = AutoResolve(logger=logger)
+        outage_utils = OutageUtils(logger=logger)
 
-        result = auto_resolve._is_there_an_outage(edge_status_1)
+        result = outage_utils.is_there_an_outage(edge_status_1)
         assert result is False
 
-        result = auto_resolve._is_there_an_outage(edge_status_2)
+        result = outage_utils.is_there_an_outage(edge_status_2)
         assert result is True
 
-        result = auto_resolve._is_there_an_outage(edge_status_3)
+        result = outage_utils.is_there_an_outage(edge_status_3)
         assert result is True
 
     def is_faulty_edge_test(self):
@@ -62,12 +62,12 @@ class TestAutoResolve:
 
         logger = Mock()
 
-        auto_resolve = AutoResolve(logger=logger)
+        outage_utils = OutageUtils(logger=logger)
 
-        result = auto_resolve._is_faulty_edge(edge_state_1)
+        result = outage_utils.is_faulty_edge(edge_state_1)
         assert result is False
 
-        result = auto_resolve._is_faulty_edge(edge_state_2)
+        result = outage_utils.is_faulty_edge(edge_state_2)
         assert result is True
 
     def is_faulty_link_test(self):
@@ -76,10 +76,10 @@ class TestAutoResolve:
 
         logger = Mock()
 
-        auto_resolve = AutoResolve(logger=logger)
+        outage_utils = OutageUtils(logger=logger)
 
-        result = auto_resolve._is_faulty_link(link_state_1)
+        result = outage_utils.is_faulty_link(link_state_1)
         assert result is False
 
-        result = auto_resolve._is_faulty_link(link_state_2)
+        result = outage_utils.is_faulty_link(link_state_2)
         assert result is True
