@@ -164,6 +164,8 @@ services:
     build:
       context: .
       dockerfile: metrics-dashboard/grafana/Dockerfile
+    env_file:
+      - metrics-dashboard/grafana/config/env
     depends_on:
       - prometheus
     restart: unless-stopped
@@ -208,36 +210,11 @@ services:
       - '--objstore.config-file=/tmp/bucket_config.yaml'
       - '--grpc-address=0.0.0.0:10091'
       - '--http-address=0.0.0.0:10902'
-#    env_file:
-#      - metrics-dashboard/thanos/env
     volumes:
       - ./metrics-dashboard/thanos/storage/:/prometheus
     ports:
       - 10091:10091
       - 10902:10902
-
-  thanos-store-gateway:
-    build:
-      context: .
-      dockerfile: metrics-dashboard/thanos/Dockerfile
-      args:
-        GRPC_ADDRESS: 10901
-        HTTP_ADDRESS: 19191
-    depends_on:
-      - prometheus
-    restart: unless-stopped
-    command:
-      - 'store'
-      - '--data-dir=/thanos/store'
-      - '--objstore.config-file=/tmp/bucket_config.yaml'
-      - '--http-address=0.0.0.0:19191' 
-      - '--grpc-address=0.0.0.0:10901'
-#    env_file:
-#      - metrics-dashboard/thanos/env
-    ports:
-      - 19191:19191
-      - 10901:10901
-
 
   thanos-querier:
     build:
@@ -247,12 +224,10 @@ services:
         HTTP_ADDRESS: 19091
     depends_on:
       - thanos-sidecar
-      - thanos-store-gateway
     restart: unless-stopped
     command:
       - 'query'
       - '--http-address=0.0.0.0:19091'
       - '--store=thanos-sidecar:10091'
-      - '--store=thanos-store-gateway:10901'
     ports:
       - 19091:19091

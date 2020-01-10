@@ -74,6 +74,8 @@ env_dict = {
         f'BRUIN_CLIENT_SECRET={BRUIN_CLIENT_SECRET}\n'
         f'BRUIN_LOGIN_URL={BRUIN_LOGIN_URL}\n'
         f'BRUIN_BASE_URL={BRUIN_BASE_URL}',
+    os.path.join('metrics-dashboard', 'grafana', 'config', 'env'):
+        f'NATS_SERVER1={NATS_SERVER1}\n',
     os.path.join('last-contact-report', 'src', 'config', 'env'):
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
