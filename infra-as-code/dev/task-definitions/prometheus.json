@@ -208,13 +208,19 @@
     "healthCheck": {
       "command": [
         "CMD-SHELL",
-        "curl -f http://localhost:3000/api/health || exit 1"
+        "wget http://localhost:3000/api/health -O index || exit 1"
       ],
       "interval": 30,
       "retries": 3,
       "startPeriod": 30,
       "timeout": 5
     },
+    "environment": [
+      {
+        "name": "NATS_SERVER1",
+        "value": "${NATS_SERVER1}"
+      }
+    ],
     "dependsOn": [
       {
           "containerName": "metrics-prometheus",

@@ -58,6 +58,7 @@ def check_users_existance():
                     f'ID: {response.json().get("users")[0]["id"]}'
                 )
             else:
+                print(response.text)
                 print(f'Error searching for user {u["login"]}.')
 
         except ConnectionError as e:
@@ -93,6 +94,7 @@ def create_user(user):
             else:
                 assign_viewer_permissions(user, user_id)
         else:
+            print(response.text)
             print(f'Error creating user {user["login"]}.')
     except ConnectionError as e:
         print(e)
@@ -131,6 +133,7 @@ def assign_viewer_permissions(user, user_id):
             if response.status_code == 200:
                 print(f'Updated permissions for user {user["login"]}.')
             else:
+                print(response.text)
                 print(f'Error updating permissions for user {user["login"]}.')
         except ConnectionError as e:
             print(e)
@@ -217,6 +220,7 @@ def update_main_folder_permissions():
             if response.status_code == 200:
                 print(f'Updated permissions of the main folder.')
             else:
+                print(response.text)
                 print(f'Error updating permissions of the main folder.')
         except ConnectionError as e:
             print(e)

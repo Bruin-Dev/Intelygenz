@@ -8,12 +8,9 @@ grafana-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
   script:
-    - apk --upgrade --no-cache add python3 py-pip
-    - pip3 install --upgrade pyyaml shortuuid
     - source ci-utils/environment_assign.sh
-    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/grafana/configs/prometheus-dev.yml
-    - cp metrics-dashboard/grafana/configs/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
-    - python3 metrics-dashboard/grafana/scripts/dashboard_generator.py
+    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/grafana/config/prometheus-dev.yml
+    - cp metrics-dashboard/grafana/config/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
     - docker build --build-arg GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
@@ -26,8 +23,8 @@ prometheus-build:
   extends: .build_app_image
   script:
     - source ci-utils/environment_assign.sh
-    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/prometheus/configs/prometheus-dev.yml
-    - cp metrics-dashboard/prometheus/configs/prometheus-dev.yml metrics-dashboard/prometheus/prometheus.yml
+    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/prometheus/config/prometheus-dev.yml
+    - cp metrics-dashboard/prometheus/config/prometheus-dev.yml metrics-dashboard/prometheus/prometheus.yml
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}

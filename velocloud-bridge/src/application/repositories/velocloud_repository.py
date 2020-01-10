@@ -69,11 +69,14 @@ class VelocloudRepository:
 
     def get_all_enterprise_names(self, msg):
         self._logger.info('Getting all enterprise names')
-        enterprise_names = self._velocloud_client.get_all_enterprise_names()
+        enterprises = self._velocloud_client.get_all_enterprise_names()
+        enterprise_names = [e["enterprise_name"] for e in enterprises]
+
         if len(msg['filter']) > 0:
             enterprise_names = [
                 e_name for e_name in enterprise_names
-                if e_name == filter_enterprise['name']
+                for filter_enterprise in msg['filter']
+                if e_name == filter_enterprise
             ]
 
         return enterprise_names

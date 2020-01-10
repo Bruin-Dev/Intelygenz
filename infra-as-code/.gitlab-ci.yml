@@ -90,12 +90,12 @@ check-ecs-resources-branches:
     - export TF_VAR_nats_server_desired_tasks=1
     - export TF_VAR_nats_server_1_desired_tasks=1
     - export TF_VAR_nats_server_2_desired_tasks=1
-    - export TF_VAR_notifier_desired_tasks=1
-    - export TF_VAR_service_affecting_monitor_desired_tasks=1
+    - export TF_VAR_notifier_desired_tasks=0
+    - export TF_VAR_service_affecting_monitor_desired_tasks=0
     - export TF_VAR_service_outage_monitor_desired_tasks=0
-    - export TF_VAR_service_outage_triage_desired_tasks=1
+    - export TF_VAR_service_outage_triage_desired_tasks=0
     - export TF_VAR_sites_monitor_desired_tasks=1
-    - export TF_VAR_t7_bridge_desired_tasks=1
+    - export TF_VAR_t7_bridge_desired_tasks=0
     - export TF_VAR_velocloud_bridge_desired_tasks=5
   only:
     - /^*dev/feature/.*$/
@@ -151,12 +151,12 @@ deploy-branches:
     - export TF_VAR_nats_server_desired_tasks=1
     - export TF_VAR_nats_server_1_desired_tasks=1
     - export TF_VAR_nats_server_2_desired_tasks=1
-    - export TF_VAR_notifier_desired_tasks=1
-    - export TF_VAR_service_affecting_monitor_desired_tasks=1
+    - export TF_VAR_notifier_desired_tasks=0
+    - export TF_VAR_service_affecting_monitor_desired_tasks=0
     - export TF_VAR_service_outage_monitor_desired_tasks=0
-    - export TF_VAR_service_outage_triage_desired_tasks=1
+    - export TF_VAR_service_outage_triage_desired_tasks=0
     - export TF_VAR_sites_monitor_desired_tasks=1
-    - export TF_VAR_t7_bridge_desired_tasks=1
+    - export TF_VAR_t7_bridge_desired_tasks=0
     - export TF_VAR_velocloud_bridge_desired_tasks=5
   environment:
     name: $CI_COMMIT_REF_NAME

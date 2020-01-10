@@ -208,8 +208,8 @@ services:
       - '--objstore.config-file=/tmp/bucket_config.yaml'
       - '--grpc-address=0.0.0.0:10091'
       - '--http-address=0.0.0.0:10902'
-    env_file:
-      - metrics-dashboard/thanos/env
+#    env_file:
+#      - metrics-dashboard/thanos/env
     volumes:
       - ./metrics-dashboard/thanos/storage/:/prometheus
     ports:
@@ -232,8 +232,8 @@ services:
       - '--objstore.config-file=/tmp/bucket_config.yaml'
       - '--http-address=0.0.0.0:19191' 
       - '--grpc-address=0.0.0.0:10901'
-    env_file:
-      - metrics-dashboard/thanos/env
+#    env_file:
+#      - metrics-dashboard/thanos/env
     ports:
       - 19191:19191
       - 10901:10901

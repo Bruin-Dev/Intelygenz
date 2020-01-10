@@ -184,4 +184,4 @@ class TestVelocloudRepository:
         )
         enterprise_names = vr.get_all_enterprise_names(msg)
         assert test_velocloud_client.get_all_enterprise_names.called
-        assert enterprise_names == [{"enterprise_name": "The Name"}]
+        assert enterprise_names == ["The Name"]

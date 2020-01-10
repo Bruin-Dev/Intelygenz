@@ -14,4 +14,4 @@
 
 ### Usage <a name="dashboard_generator_usage"></a>
 
-The usage is pretty straightforward: `python3 scripts/dashboard_generator.py` will do.
+The script is automatically executed when a Docker image of Grafana is built.
