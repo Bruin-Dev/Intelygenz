@@ -92,7 +92,7 @@ class ServiceOutageDetector:
             if outage_happened:
                 self._logger.info(
                     f'[outage-monitoring] Outage detected for {edge_identifier}. '
-                    'Scheduling edge to re-check it in a few moments.'
+                    'Scheduling edge to re-check it again in a few moments.'
                 )
 
                 try:
@@ -152,6 +152,7 @@ class ServiceOutageDetector:
 
         ticket_data = self._generate_outage_ticket(edge_status)
 
+        # TODO: Check and print errors from Bruin (Like, shit already exists)
         self._logger.info(f'[outage-ticket-creation] Creating outage ticket for edge {edge_identifier}...')
         ticket_creation_response = await self._event_bus.rpc_request(
             "bruin.ticket.creation.request", {'request_id': uuid(), **ticket_data}, timeout=30
