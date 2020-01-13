@@ -16,7 +16,7 @@ class SlackClient:
         header = 'https://'
         response = None
         if header in self._url:
-            response = requests.post(self._url, data=msg)
+            response = requests.post(self._url, json=msg)
         else:
             self._logger.error("Invalid URL")
             return response
