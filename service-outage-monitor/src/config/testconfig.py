@@ -20,6 +20,7 @@ MONITOR_CONFIG = {
     'timezone': "US/Eastern",
     'jobs_intervals': {
         'outage_detector': 60 * 40,
+        'outage_monitor': 60 * 3,
         'outage_reporter': 60 * 60,
         'quarantine': quarantine_time,
     },
@@ -37,3 +38,20 @@ QUART_CONFIG = {
     'title': 'service-outage-monitor',
     'port': 5000
 }
+
+OUTAGE_CONTACTS = [
+    {
+        "email": "dummy@dummy.com",
+        "phone": "123-456-7890",
+        "name": "John Doe",
+        "type": "ticket"
+    },
+]
+
+MONITORING_EDGES = [
+    {
+        'host': 'dummy.host.com',
+        'enterprise_id': 123,
+        'edge_id': 456,
+    }
+]

@@ -76,93 +76,120 @@ class ServiceOutageDetector:
                                     next_run_time=next_run_time, replace_existing=False,
                                     id='_service_outage_monitor_process')
         except ConflictingIdError as conflict:
-            self._logger.info(f'Skipping start of Service Outage Detector job. Reason: {conflict}')
+            self._logger.info(f'Skipping start of Service Outage Monitoring job. Reason: {conflict}')
 
     async def _outage_monitoring_process(self):
-        edge_id = {
-            "host": "metvco02.mettel.net",
-            "enterprise_id": 1,
-            "edge_id": 4784
-        }
-        self._logger.info(f'Checking status of {edge_id}.')
-        edge_status_request_dict = {
-            'request_id': uuid(),
-            'edge': edge_id,
-        }
-        edge_status_response = await self._event_bus.rpc_request(
-            'edge.status.request', edge_status_request_dict, timeout=45,
-        )
-        self._logger.info(f'Got status for edge: {edge_id}.')
-        edge_info = edge_status_response['edge_info']
+        edges_to_monitor = self._get_edges_for_monitoring()
 
-        is_outage = self._outage_utils.is_there_an_outage(edge_info)
+        for edge_full_id in edges_to_monitor:
+            edge_identifier = EdgeIdentifier(**edge_full_id)
 
+            self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}.')
+            edge_status = await self._get_edge_status_by_id(edge_full_id)
+            self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
+
+            outage_happened = self._outage_utils.is_there_an_outage(edge_status)
+            if outage_happened:
+                self._logger.info(
+                    f'[outage-monitoring] Outage detected for {edge_identifier}. '
+                    'Scheduling edge to re-check it in a few moments.'
+                )
+
+                try:
+                    self._scheduler.add_job(self._recheck_edge_for_ticket_creation, 'interval',
+                                            seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'],
+                                            replace_existing=False,
+                                            id=f'_ticket_creation_recheck_{json.dumps(edge_full_id)}',
+                                            kwargs={'edge_full_id': edge_full_id})
+                    self._logger.info(f'[outage-monitoring] {edge_identifier} successfully scheduled for re-check.')
+                except ConflictingIdError:
+                    self._logger.info(f'There is a recheck job scheduled for {edge_identifier} already. No new job '
+                                      'is going to be scheduled.')
+            else:
+                self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state. Skipping...')
+
+    def _get_edges_for_monitoring(self):
+        return self._config.MONITORING_EDGES
+
+    async def _recheck_edge_for_ticket_creation(self, edge_full_id):
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+
+        self._logger.info(
+            f"[outage-recheck] Checking status of {edge_identifier} to ensure it's still in outage state...")
+        edge_status = await self._get_edge_status_by_id(edge_full_id)
+        self._logger.info(f'[outage-recheck] Got status for edge {edge_identifier}.')
+
+        is_outage = self._outage_utils.is_there_an_outage(edge_status)
         if is_outage:
-            self._logger.info(f'Outage detected for {edge_id}. Scheduling edge for quarantine')
-            try:
-                self._scheduler.add_job(self._ticket_creation_quarantine, 'interval',
-                                        seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'],
-                                        replace_existing=False,
-                                        id='_ticket_creation_quarantine',
-                                        kwargs={'edge_id': edge_id})
-                self._logger.info(f'{edge_id} scheduled for quarantine!')
-            except ConflictingIdError as conflict:
-                self._logger.info(f'Not rescheduling quarantine for ticket creation. Reason: {conflict}')
+            self._logger.info(f'[outage-recheck] Edge {edge_identifier} is still in outage state.')
 
-    async def _ticket_creation_quarantine(self, edge_id):
-        edge_status_request_dict = {
-            'request_id': uuid(),
-            'edge': edge_id,
-        }
-        self._logger.info(f'Quarantine: Checking status of {edge_id}.')
+            working_environment = self._config.MONITOR_CONFIG['environment']
+            if working_environment == 'production':
+                outage_ticket = await self._get_outage_ticket_for_edge(edge_status)
+                outage_ticket_details = outage_ticket['ticket_details']
+                ticket_exists = outage_ticket_details is not None
 
-        edge_status_response = await self._event_bus.rpc_request(
-            'edge.status.request', edge_status_request_dict, timeout=45,
+                # CAVEAT: This check should be performed by Bruin on their side. In the meanwhile...
+                if ticket_exists:
+                    self._logger.info(
+                        f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket with '
+                        f'ID = {outage_ticket_details["ticketID"]}. Skipping ticket creation for this edge...')
+                else:
+                    self._logger.info(
+                        f'[outage-recheck] Starting outage ticket creation for faulty edge {edge_identifier}.')
+                    await self._create_outage_ticket(edge_full_id, edge_status)
+            else:
+                self._logger.info(
+                    f'[outage-recheck] Not starting outage ticket creation for faulty edge {edge_identifier} because '
+                    f'the current working environment is {working_environment.upper()}.'
+                )
+        else:
+            self._logger.info(
+                f'[outage-recheck] {edge_identifier} seems to be healthy again! No ticket will be created.')
+
+    async def _create_outage_ticket(self, edge_full_id, edge_status):
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+
+        ticket_data = self._generate_outage_ticket(edge_status)
+
+        self._logger.info(f'[outage-ticket-creation] Creating outage ticket for edge {edge_identifier}...')
+        ticket_creation_response = await self._event_bus.rpc_request(
+            "bruin.ticket.creation.request", {'request_id': uuid(), **ticket_data}, timeout=30
         )
-        self._logger.info(f'Quarantine: Got status for edge {edge_id}.')
-        edge_info = edge_status_response['edge_info']
 
-        is_outage = self._outage_utils.is_there_an_outage(edge_info)
-        if is_outage:
-            self._logger.info(f'Quarantine: Edge {edge_id} is still in outage state. Creating ticket.')
-            await self._create_outage_ticket(edge_id)
+        ticket_id_data = ticket_creation_response['ticketIds']
+        if ticket_id_data is not None:
+            ticket_id = ticket_id_data['ticketIds'][0]
+            self._logger.info(
+                f'[outage-ticket-creation] Outage ticket (ID = {ticket_id}) created successfully '
+                f'for faulty edge {edge_identifier}')
 
-    async def _create_outage_ticket(self, edge_id):
-        ticket_details = {
-            "request_id": uuid(),
-            "clientId": 9994,
+            enterprise_name = edge_status['enterprise_name']
+            bruin_client_id = self._extract_client_id(enterprise_name)
+            slack_message = {
+                'request_id': uuid(),
+                'message': f'Outage ticket created for faulty edge {edge_identifier}. Ticket '
+                           f'details at https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}.'
+            }
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+        else:
+            self._logger.error(
+                f'[outage-ticket-creation] Outage ticket creation failed for edge {edge_identifier}.'
+            )
+
+    def _generate_outage_ticket(self, edge_status):
+        serial_number = edge_status['edges']['serialNumber']
+        enterprise_name = edge_status['enterprise_name']
+        bruin_client_id = self._extract_client_id(enterprise_name)
+
+        return {
+            "clientId": bruin_client_id,
             "category": "VOO",
             "services": [
-                {
-                    "serviceNumber": "VC05400002265"
-                }
+                {"serviceNumber": serial_number}
             ],
-            "contacts": [
-                {
-                    "email": "ndimuro@mettel.net",
-                    "phone": "732-837-9570",
-                    "name": "Nicholas Di Muro",
-                    "type": "site"
-                },
-                {
-                    "email": "ndimuro@mettel.net",
-                    "phone": "732-837-9570",
-                    "name": "Nicholas Di Muro",
-                    "type": "ticket"
-                }
-            ]
+            "contacts": self._config.OUTAGE_CONTACTS,
         }
-        ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request", ticket_details, timeout=30)
-        self._logger.info(
-            f'Ticket creation: Edge {edge_id} is still in outage state. Ticket created with id {ticket_id}')
-
-        slack_message = {'request_id': uuid(),
-                         'message': f'Outage ticket created: https://app.bruin.com'
-                                    f'/helpdesk?clientId=9994&ticketId={ticket_id["ticketIds"]["ticketIds"][0]}'}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-        # Change hardcoded URL generation in service-outage-triage
-        # Check and print errors from Bruin (Like, shit already exists)
-        # Check the environment and avoid ticket creation when not in production environment
 
     async def start_service_outage_reporter_job(self, exec_on_start=False):
         self._logger.info('Scheduling Service Outage Reporter job...')
@@ -189,9 +216,8 @@ class ServiceOutageDetector:
             edge_status = await self._get_edge_status_by_id(edge_full_id)
             enterprise_name = edge_status['enterprise_name']
 
-            if not self._is_edge_for_testing_purposes(enterprise_name) and self._outage_utils.is_there_an_outage(
-                edge_status
-            ):
+            if not self._is_edge_for_testing_purposes(enterprise_name) and \
+                    self._outage_utils.is_there_an_outage(edge_status):
                 await self._start_quarantine_job(edge_full_id)
                 self._add_edge_to_quarantine(edge_full_id, edge_status)
 
