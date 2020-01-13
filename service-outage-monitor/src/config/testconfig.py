@@ -48,10 +48,10 @@ OUTAGE_CONTACTS = [
     },
 ]
 
-MONITORING_EDGES = [
-    {
+MONITORING_EDGES = {
+    'VC0123456789': {
         'host': 'dummy.host.com',
         'enterprise_id': 123,
         'edge_id': 456,
     }
-]
+}

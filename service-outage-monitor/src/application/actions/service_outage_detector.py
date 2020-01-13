@@ -109,7 +109,7 @@ class ServiceOutageDetector:
                 self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state. Skipping...')
 
     def _get_edges_for_monitoring(self):
-        return self._config.MONITORING_EDGES
+        return list(self._config.MONITORING_EDGES.values())
 
     async def _recheck_edge_for_ticket_creation(self, edge_full_id):
         edge_identifier = EdgeIdentifier(**edge_full_id)
