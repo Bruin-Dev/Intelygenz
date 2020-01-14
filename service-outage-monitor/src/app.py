@@ -9,7 +9,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
-from igz.packages.edge_repo.edge_repository import EdgeRepository
+from igz.packages.repositories.edge_repository import EdgeRepository
 from igz.packages.repositories.outageutils import OutageUtils
 
 
@@ -30,10 +30,10 @@ class Container:
         self._server = QuartServer(config)
 
         # REPOSITORIES
-        self._quarantine_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
-                                                          keys_prefix='EDGES_QUARANTINE')
-        self._reporting_edge_repository = EdgeRepository(logger=self._logger, redis_client=self._redis_client,
-                                                         keys_prefix='EDGES_TO_REPORT')
+        self._quarantine_edge_repository = EdgeRepository(redis_client=self._redis_client,
+                                                          keys_prefix='EDGES_QUARANTINE', logger=self._logger)
+        self._reporting_edge_repository = EdgeRepository(redis_client=self._redis_client,
+                                                         keys_prefix='EDGES_TO_REPORT', logger=self._logger)
 
         # EVENT BUS
         self._publisher = NATSClient(config, logger=self._logger)

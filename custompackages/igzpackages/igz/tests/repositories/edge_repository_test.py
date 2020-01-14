@@ -4,9 +4,9 @@ import time
 from unittest.mock import Mock
 from unittest.mock import patch
 
-from igz.packages.edge_repo import edge_repository as edge_repository_module
-from igz.packages.edge_repo.edge_repository import EdgeIdentifier
-from igz.packages.edge_repo.edge_repository import EdgeRepository
+from igz.packages.repositories import edge_repository as edge_repository_module
+from igz.packages.repositories.edge_repository import EdgeIdentifier
+from igz.packages.repositories.edge_repository import EdgeRepository
 
 
 class TestEdgeRepository:
@@ -16,7 +16,7 @@ class TestEdgeRepository:
         logger = Mock()
         redis_client = Mock()
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
 
         assert edge_repository._logger is logger
         assert edge_repository._redis_client is redis_client
@@ -35,7 +35,7 @@ class TestEdgeRepository:
         redis_client = Mock()
         redis_client.scan_iter = Mock(return_value=current_redis_keys)
 
-        edge_repository = EdgeRepository(logger, redis_client, key_prefix)
+        edge_repository = EdgeRepository(redis_client, key_prefix, logger)
 
         edge_repository.remove_all_stored_elements()
 
@@ -60,7 +60,7 @@ class TestEdgeRepository:
         logger = Mock()
         redis_client = Mock()
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
         edge_repository.get_all_edges = Mock(return_value=currently_stored_edges)
 
         current_timestamp = time.time()
@@ -99,7 +99,7 @@ class TestEdgeRepository:
         logger = Mock()
         redis_client = Mock()
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
         edge_repository.get_all_edges = Mock(return_value=currently_stored_edges)
 
         current_timestamp = time.time()
@@ -137,7 +137,7 @@ class TestEdgeRepository:
         logger = Mock()
         redis_client = Mock()
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
         edge_repository.exists_edge = Mock(return_value=True)
         edge_repository.get_all_edges = Mock(return_value=currently_stored_edges)
 
@@ -179,7 +179,7 @@ class TestEdgeRepository:
         logger = Mock()
         redis_client = Mock()
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
         edge_repository.exists_edge = Mock(return_value=False)
         edge_repository.get_all_edges = Mock(return_value=currently_stored_edges)
 
@@ -219,7 +219,7 @@ class TestEdgeRepository:
         logger = Mock()
         redis_client = Mock()
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
         edge_repository.exists_edge = Mock(return_value=True)
         edge_repository.get_all_edges = Mock(return_value=currently_stored_edges)
 
@@ -246,7 +246,7 @@ class TestEdgeRepository:
         logger = Mock()
         redis_client = Mock()
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
         edge_repository.get_all_edges = Mock(return_value=currently_stored_edges)
 
         current_timestamp = time.time()
@@ -279,7 +279,7 @@ class TestEdgeRepository:
         redis_client = Mock()
         redis_client.get = Mock(return_value=edge_value_str)
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
 
         edge = edge_repository.get_edge(edge_full_id)
 
@@ -307,7 +307,7 @@ class TestEdgeRepository:
         redis_client = Mock()
         redis_client.get = Mock(return_value=edge_value_str)
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
 
         edge = edge_repository.get_edge(edge_identifier)
 
@@ -328,7 +328,7 @@ class TestEdgeRepository:
         redis_client = Mock()
         redis_client.get = Mock(return_value=None)
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
 
         edge = edge_repository.get_edge(edge_full_id)
 
@@ -374,7 +374,7 @@ class TestEdgeRepository:
         redis_client.scan_iter = Mock(return_value=current_redis_keys)
         redis_client.mget = Mock(return_value=[edge_1_value_str, edge_2_value_str])
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
 
         edges = edge_repository.get_all_edges()
 
@@ -396,7 +396,7 @@ class TestEdgeRepository:
         logger = Mock()
         redis_client = Mock()
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
 
         edge_repository.exists_edge(edge_full_id)
 
@@ -414,7 +414,7 @@ class TestEdgeRepository:
         logger = Mock()
         redis_client = Mock()
 
-        edge_repository = EdgeRepository(logger, redis_client, keys_prefix)
+        edge_repository = EdgeRepository(redis_client, keys_prefix, logger)
 
         edge_repository.remove_edge(edge_full_id)
 
