@@ -333,7 +333,7 @@ to the prometheus app can be found at `http://localhost:9090/targets`.
       - targets: [' <the microservice thats hosting you server>:<that server's port>']
     ```
 
-- [Grafana](http://localhost:3000) admin/q1w2e3r4
+- [Grafana](http://localhost:3000) admin/password
 
   - Grafana allows us to create graphs, tables, charts, and etc with the metrics created using Prometheus and other 
     default metrics.

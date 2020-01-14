@@ -130,7 +130,7 @@ class Container:
         logger.info('Requesting...')
         response = await self.event_bus.rpc_request(
             "request.enterprises.names",
-            json.dumps(rpc_request_msg),
+            rpc_request_msg,
             timeout=20
         )
         self.enterprise_names = response["enterprise_names"]

@@ -164,6 +164,8 @@ services:
     build:
       context: .
       dockerfile: metrics-dashboard/grafana/Dockerfile
+      args:
+        GRAFANA_ADMIN_PASSWORD: password
     env_file:
       - metrics-dashboard/grafana/config/env
     depends_on:
@@ -207,7 +209,6 @@ services:
       - 'sidecar'
       - '--tsdb.path=/prometheus'
       - '--prometheus.url=http://prometheus:9090'
-      - '--objstore.config-file=/tmp/bucket_config.yaml'
       - '--grpc-address=0.0.0.0:10091'
       - '--http-address=0.0.0.0:10902'
     volumes:
