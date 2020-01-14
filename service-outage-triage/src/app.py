@@ -1,5 +1,6 @@
 import asyncio
 from application.actions.service_outage_triage import ServiceOutageTriage
+from application.repositories.template_management import TemplateRenderer
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
 
@@ -7,8 +8,8 @@ from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
+from igz.packages.repositories.outageutils import OutageUtils
 from igz.packages.server.api import QuartServer
-from application.repositories.template_management import TemplateRenderer
 
 
 class Container:
@@ -23,6 +24,7 @@ class Container:
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.set_producer(self._publisher)
         self._template_renderer = TemplateRenderer(config)
+        self._outage_utils = OutageUtils(self._logger)
 
         self._service_outage_triage = ServiceOutageTriage(self._event_bus, self._logger, self._scheduler,
                                                           config, self._template_renderer)

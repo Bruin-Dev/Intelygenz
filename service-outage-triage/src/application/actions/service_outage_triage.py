@@ -13,12 +13,13 @@ from igz.packages.eventbus.eventbus import EventBus
 
 class ServiceOutageTriage:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer):
+    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, outage_utils):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._template_renderer = template_renderer
+        self._outage_utils = outage_utils
 
     async def start_service_outage_triage_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service outage triage configured to run every '
@@ -328,8 +329,7 @@ class ServiceOutageTriage:
             time_from_creation = datetime.now() - creation_date
             # time_from_last_down = datetime.now() - redis_edge
             # Function to first check if outage still exists
-            # TODO check if an outage does not exist anymore
-            if self._is_there_an_outage(edge_status) is False:
+            if self._outage_utils.is_faulty_edge(edge_status) is False:
                 # then check when the last time it was down or when it was created
                 if time_from_creation < timedelta(minutes=45) or time_from_last_down < timedelta(minutes=45):
                     if self._config.TRIAGE_CONFIG['environment'] == 'production':
@@ -353,3 +353,8 @@ class ServiceOutageTriage:
                                                           json.dumps(ticket_append_note_msg),
                                                           timeout=15)
                     self._logger(f"Ticket of ticketID:{ticket_id['ticket_id']} auto-resolved")
+            else:
+                # check if for outage in redis edge
+                # if outage exists then update existing redis edge is False
+                # update redis update existing redis edge is determenent on the current redis edge
+                pass
