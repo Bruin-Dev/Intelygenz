@@ -32,21 +32,21 @@ class OutageUtils:
     def is_faulty_link(self, link_state: str):
         return link_state == 'DISCONNECTED'
 
-    def is_so_ticket_auto_resolved(self, ticket_id, ticket_notes: list, limit_resolv) -> bool:
+    def is_so_ticket_auto_resolved(self, ticket_id, ticket_notes: list, amount_times) -> bool:
         regex = r"#\*Automation Engine\*#\s*Auto-resolving ticket."
-        limit = 0
+        internal_amount_times = 0
 
         for ticket_note in ticket_notes:
             note_value = ticket_note['noteValue']
             matches = re.findall(regex, note_value)
             count_matches = len(matches)
-            if count_matches <= limit_resolv:
-                limit += count_matches
+            if count_matches <= amount_times:
+                internal_amount_times += count_matches
             else:
                 self.logger.info(f'ticket {ticket_id} can\'t be be auto-resolved)')
                 return False
 
-            if limit > limit_resolv:
+            if internal_amount_times >= amount_times:
                 self.logger.info(f'ticket {ticket_id} can\'t be be auto-resolved')
                 return False
 
