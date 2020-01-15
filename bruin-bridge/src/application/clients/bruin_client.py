@@ -1,7 +1,9 @@
 import base64
-from tenacity import retry, wait_exponential, stop_after_delay
+import json
 
+import humps
 import requests
+from tenacity import retry, wait_exponential, stop_after_delay
 
 
 class BruinClient:
@@ -160,3 +162,23 @@ class BruinClient:
                 self.login()
                 raise Exception
         return update_ticket_status()
+
+    def get_management_status(self, filters):
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
+        def get_management_status():
+            self._logger.info(f'Getting management status for client ID: {filters["client_id"]}')
+            parsed_filters = humps.pascalize(filters)
+            self._logger.info(f'Filters that will be applied (parsed to PascalCase): {json.dumps(parsed_filters)}')
+
+            response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+                                    headers=self._get_request_headers(),
+                                    params=parsed_filters,
+                                    verify=False)
+            if response.status_code in range(200, 299):
+                return response.json()
+            else:
+                self.login()
+                raise Exception
+        return get_management_status()

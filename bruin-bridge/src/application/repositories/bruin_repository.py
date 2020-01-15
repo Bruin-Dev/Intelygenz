@@ -87,3 +87,10 @@ class BruinRepository:
 
     def resolve_ticket(self, ticket_id, detail_id):
         return self._bruin_client.update_ticket_status(ticket_id, detail_id, 'R')
+
+    def get_management_status(self, filters):
+        response = self._bruin_client.get_management_status(filters)
+        if "documents" in response.keys():
+            return response["documents"]
+
+        return response
