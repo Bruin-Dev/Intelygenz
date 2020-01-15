@@ -47,6 +47,10 @@
       {
         "name": "LAST_CONTACT_RECIPIENT",
         "value": "${LAST_CONTACT_RECIPIENT}"
+      },
+      {
+        "name": "REDIS_HOSTNAME",
+        "value": "${REDIS_HOSTNAME}"
       }
     ]
   }
