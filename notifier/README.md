@@ -1,23 +1,28 @@
-# Table of contents
+**Table of contents**
+
 - [Notifier](#notifier)
-  * [Desciption](#description)
+  - [Description](#notifier-description)
 - [Send to Email](#send-to-email)
-  * [Description](#description-1)
-  * [Request message](#request-message)
-  * [Response message](#response-message)
+  - [Description](#send-to-email_description)
+  - [Request message](#send-to-email_request_message)
+  - [Response message](#send-to-email_response_message)
 - [Send to Slack](#send-to-slack)
-  * [Description](#description-2)
-  * [Request message](#request-message-1)
-  * [Response message](#response-message-1)
+  - [Description](#send-to-slack_description)
+  - [Request message](#send-to-slack_request_message)
+  - [Response message](#send-to-slack_response_message)
 - [Running in docker-compose](#running-in-docker-compose)
 
-# Notifier 
-###Description
+# Notifier
+
+## Description <a name="notifier-description"></a>
+
 The notifier receives requests messages, and based on the topic that it received the message from, it can either send an email
 or send a message to our slack channel.
 
 ## Send to Email
-### Description
+
+### Description <a name="send-to-email_description"></a>
+
 The notifier receives a request message from topic `notification_email_request`, and then makes a callback to the 
 `send_to_email` function. It then extracts the `email_data` dictionary from the request message if it exists and is not empty.
 Then it sends the email data to the email repository which sends it to the email client.
@@ -31,8 +36,9 @@ the send_to_email function will put this in a dictionary and publish it to the t
 the hood. If any error occurs during the process then an error message is printed out and a status code of
 500 is returned and published instead. 
 
-### Request message
- ```
+### Request message <a name="send-to-email_request_message"></a>
+
+ ```json
 {
     'request_id': 123,
     'email_data': {
@@ -45,15 +51,26 @@ the hood. If any error occurs during the process then an error message is printe
     }
 }
 ```
-### Response message
-```
+
+### Response message <a name="send-to-email_response_message"></a>
+
+```json
 {
    'request_id': msg_dict['request_id'], 
    'status': 200
 }
 ```
-##Send to Slack
-### Description
+
+## Send to Slack
+
+### Description <a name="send-to-slack_description"></a>
+
+There are two slack channels used for sending notifications:
+
+- *mettel-notifications-dev*: Used for sending notifications to slack from development environments.
+
+- *mettel-notifications*: Used for sending notifications to slack from the production environment, that is, from the `master` branch
+
 The notifier receives a request message from topic `notification_slack_request`, and then makes a callback to the 
 `send_to_slack` function. Which extracts the `message` field from the request message and sends it to slack_repository. 
 
@@ -70,19 +87,25 @@ code of the request call. 200 is a success and anything else is a failure.
 
 This returned message goes back to the `send_to_slack` function to publish it to the topic that was built by NATS under
 the hood.
-### Request message
-```
+
+### Request message <a name="send-to-slack_request_message"></a>
+
+```json
 {
     'request_id': 123,
     'message':'Some message',
 }
 ```
-### Response message
-```
+
+### Response message <a name="send-to-slack_response_message"></a>
+
+```json
 {
    'request_id': msg_dict['request_id'], 
    'status': 200
 }
 ```
-# Running in docker-compose 
-`docker-compose up --build nats-server notifier `
+
+# Running in docker-compose
+
+`docker-compose up --build nats-server notifier`

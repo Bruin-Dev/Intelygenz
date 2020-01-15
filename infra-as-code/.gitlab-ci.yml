@@ -84,19 +84,19 @@ check-ecs-resources-branches:
   extends: .check_ecs_resources_template
   before_script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-    - export TF_VAR_bruin_bridge_desired_tasks=0
-    - export TF_VAR_last_contact_report_desired_tasks=0
-    - export TF_VAR_metrics_prometheus_desired_tasks=0
+    - export TF_VAR_bruin_bridge_desired_tasks=2
+    - export TF_VAR_last_contact_report_desired_tasks=1
+    - export TF_VAR_metrics_prometheus_desired_tasks=1
     - export TF_VAR_nats_server_desired_tasks=1
     - export TF_VAR_nats_server_1_desired_tasks=1
     - export TF_VAR_nats_server_2_desired_tasks=1
     - export TF_VAR_notifier_desired_tasks=1
     - export TF_VAR_service_affecting_monitor_desired_tasks=1
     - export TF_VAR_service_outage_monitor_desired_tasks=0
-    - export TF_VAR_service_outage_triage_desired_tasks=0
-    - export TF_VAR_sites_monitor_desired_tasks=0
-    - export TF_VAR_t7_bridge_desired_tasks=0
-    - export TF_VAR_velocloud_bridge_desired_tasks=0
+    - export TF_VAR_service_outage_triage_desired_tasks=1
+    - export TF_VAR_sites_monitor_desired_tasks=1
+    - export TF_VAR_t7_bridge_desired_tasks=1
+    - export TF_VAR_velocloud_bridge_desired_tasks=5
   only:
     - /^*dev/feature/.*$/
     - /^*dev/fix/.*$/
@@ -146,19 +146,19 @@ deploy-branches:
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - export TF_VAR_SLACK_URL=${SLACK_URL_DEV}
     - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
-    - export TF_VAR_bruin_bridge_desired_tasks=0
-    - export TF_VAR_last_contact_report_desired_tasks=0
-    - export TF_VAR_metrics_prometheus_desired_tasks=0
+    - export TF_VAR_bruin_bridge_desired_tasks=2
+    - export TF_VAR_last_contact_report_desired_tasks=1
+    - export TF_VAR_metrics_prometheus_desired_tasks=1
     - export TF_VAR_nats_server_desired_tasks=1
     - export TF_VAR_nats_server_1_desired_tasks=1
     - export TF_VAR_nats_server_2_desired_tasks=1
     - export TF_VAR_notifier_desired_tasks=1
     - export TF_VAR_service_affecting_monitor_desired_tasks=1
     - export TF_VAR_service_outage_monitor_desired_tasks=0
-    - export TF_VAR_service_outage_triage_desired_tasks=0
-    - export TF_VAR_sites_monitor_desired_tasks=0
-    - export TF_VAR_t7_bridge_desired_tasks=0
-    - export TF_VAR_velocloud_bridge_desired_tasks=0
+    - export TF_VAR_service_outage_triage_desired_tasks=1
+    - export TF_VAR_sites_monitor_desired_tasks=1
+    - export TF_VAR_t7_bridge_desired_tasks=1
+    - export TF_VAR_velocloud_bridge_desired_tasks=5
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/

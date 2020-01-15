@@ -45,7 +45,7 @@ NATS_CLUSTER_MODE3 = 'n'
 REDIS_HOSTNAME = 'redis'
 
 # Slack variables
-SLACK_URL = var_dict["SLACK_URL"]
+SLACK_URL = var_dict["SLACK_URL_DEV"]
 
 # T7 variables
 T7_BASE_URL = var_dict["T7_BASE_URL_DEV"]
