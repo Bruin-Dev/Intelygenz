@@ -1,4 +1,9 @@
 variable "ENVIRONMENT" {
+  description = "Name of current environment"
+}
+
+variable "SLACK_URL" {
+  description = "webhook url of slack for current environment"
 }
 
 variable "domain" {

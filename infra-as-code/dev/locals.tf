@@ -2,7 +2,6 @@ locals {
   // common vars for dev project
   log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   nats_server1 = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:4222"
-  slack_url = "https://hooks.slack.com/services/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"
 
   // automation-alb local vars
   automation-dev-inbound-security_group-name = "${var.ENVIRONMENT}-inbound"
