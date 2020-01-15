@@ -113,5 +113,9 @@ resource "aws_ecs_service" "automation-last-contact-report" {
     registry_arn = aws_service_discovery_service.last-contact-report.arn
   }
 
-  depends_on = [ null_resource.nats-server-healtcheck ]
+  depends_on = [ null_resource.bruin-bridge-healthcheck,
+                 null_resource.velocloud-bridge-healthcheck,
+                 null_resource.t7-bridge-healthcheck,
+                 null_resource.notifier-healthcheck,
+                 null_resource.metrics-prometheus-healthcheck ]
 }

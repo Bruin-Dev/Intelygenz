@@ -121,5 +121,5 @@ resource "aws_ecs_service" "automation-nats-server-1" {
     registry_arn = aws_service_discovery_service.nats-server-1.arn
   }
 
-  depends_on = [ null_resource.nats-server-healtcheck ]
+  depends_on = [ null_resource.nats-server-healthcheck ]
 }

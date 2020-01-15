@@ -4,7 +4,6 @@ import json
 import logging
 import time
 import sys
-import re
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,30 +13,32 @@ ENVIRONMENT = os.environ['TF_VAR_ENVIRONMENT']
 
 class TaskHealthcheck:
     def check_task_is_ready(self, task_name_param):
-        major_task_info = self._get_major_task(task_name_param)
-        self._wait_until_task_is_ready(major_task_info, time.time())
+        major_task_info = self._get_major_tasks(task_name_param)
+        self._wait_until_tasks_is_ready(major_task_info, task_name_param, time.time())
 
-    def _wait_until_task_is_ready(self, task_info, start_time):
+    def _wait_until_tasks_is_ready(self, tasks_info, task_name_param, start_time):
         timeout = start_time + 60 * 6
         correct_exit = False
         actual_time = time.time()
         i = 1
-        task_definition_arn = task_info['task_definition_arn']
         while timeout > actual_time:
-            task_status = self._check_task_status(task_info)
-            if task_status['task_is_running'] and task_status['task_is_healthy']:
-                logging.info(f"Task {task_definition_arn} is RUNNING and with HEALTHY state")
+            if all(self._check_task_status(item)['task_is_running'] and
+                   self._check_task_status(item)['task_is_healthy'] for item in tasks_info):
+                logging.info(f"The following tasks with name {task_name_param} are RUNNING and with HEALTHY state")
+                self._print_actual_tasks(tasks_info)
                 correct_exit = True
                 break
             else:
-                logging.info(f"Try {i}. Waiting for task {task_definition_arn}"
-                             f" to be RUNNING and with HEALTHY state")
+                logging.info(f"Try {i}. Waiting for the following tasks with name {task_name_param} "
+                             f"to be RUNNING and with HEALTHY state")
+                self._print_actual_tasks(tasks_info)
                 time.sleep(30)
                 actual_time = time.time()
                 i += 1
         if actual_time > timeout and not correct_exit:
-            logging.error(f"The maximum waiting time for {task_definition_arn} to be be RUNNING "
-                          f"and with HEALTHY state has been reached")
+            logging.error(f"The maximum waiting time for the following tasks with name {task_name_param} "
+                          f"to be RUNNING and with HEALTHY state has been reached")
+            self._print_actual_tasks(tasks_info)
             sys.exit(1)
         return correct_exit
 
@@ -61,23 +62,23 @@ class TaskHealthcheck:
             logging.info(f"The task {task_info['task_arn']} doesn't exists")
             sys.exit(1)
 
-    def _get_major_task(self, task_name_param):
+    def _get_major_tasks(self, task_name_param):
         logging.info(f"Searching task with name {task_name_param} in the cluster ECS {ENVIRONMENT}")
         time.sleep(30)
         tasks_arn_with_task_name = self._get_tasks_arn_for_clusters(task_name_param)
         if tasks_arn_with_task_name is None:
             logging.error(f"No task running for specified task {task_name_param}")
             sys.exit(1)
-        self._print_actual_tasks(task_name_param, tasks_arn_with_task_name)
+        logging.info(f"Actual tasks with name {task_name_param} are the following")
+        self._print_actual_tasks(tasks_arn_with_task_name)
         if len(tasks_arn_with_task_name) == 1:
-            return tasks_arn_with_task_name[0]
+            return tasks_arn_with_task_name
         elif len(tasks_arn_with_task_name) > 1:
             tasks_arn_with_task_name.sort(key=lambda i: i['task_definition_arn'], reverse=True)
-            return tasks_arn_with_task_name[0]
+            return tasks_arn_with_task_name
 
     @staticmethod
-    def _print_actual_tasks(task_name_param, tasks_arn_with_task_name):
-        logging.info(f"Actual tasks with name {task_name_param} are the following")
+    def _print_actual_tasks(tasks_arn_with_task_name):
         for element in tasks_arn_with_task_name:
             logging.info(f"task_arn: {element['task_arn']}")
             logging.info(f"task_definition_arn: {element['task_definition_arn']}")

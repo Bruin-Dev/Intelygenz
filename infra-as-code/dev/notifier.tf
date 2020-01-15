@@ -72,7 +72,7 @@ resource "aws_ecs_service" "automation-notifier" {
   desired_count = var.notifier_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
-  count = var.notifier_desired_tasks != 0 ? 1 : 0
+  count = var.notifier_desired_tasks > 0 ? 1 : 0
 
   network_configuration {
     security_groups = [
@@ -83,5 +83,19 @@ resource "aws_ecs_service" "automation-notifier" {
     assign_public_ip = false
   }
 
-  depends_on = [ null_resource.nats-server-healtcheck ]
+  depends_on = [ null_resource.nats-server-healthcheck ]
+}
+
+resource "null_resource" "notifier-healthcheck" {
+  count = var.notifier_desired_tasks > 0 ? 1 : 0
+
+  depends_on = [aws_ecs_service.automation-notifier]
+
+  provisioner "local-exec" {
+    command = "python3 ci-utils/task_healthcheck.py -t notifier"
+  }
+
+  triggers = {
+    always_run = timestamp()
+  }
 }

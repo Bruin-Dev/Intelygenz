@@ -98,7 +98,7 @@ resource "aws_ecs_service" "automation-velocloud-bridge" {
   desired_count = var.velocloud_bridge_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
-  count = var.velocloud_bridge_desired_tasks != 0 ? 1 : 0
+  count = var.velocloud_bridge_desired_tasks > 0 ? 1 : 0
 
   network_configuration {
     security_groups = [
@@ -113,5 +113,19 @@ resource "aws_ecs_service" "automation-velocloud-bridge" {
     registry_arn = aws_service_discovery_service.velocloud-bridge.arn
   }
 
-  depends_on = [ null_resource.nats-server-healtcheck ]
+  depends_on = [ null_resource.nats-server-healthcheck ]
+}
+
+resource "null_resource" "velocloud-bridge-healthcheck" {
+  count = var.velocloud_bridge_desired_tasks > 0 ? 1 : 0
+
+  depends_on = [aws_ecs_service.automation-velocloud-bridge]
+
+  provisioner "local-exec" {
+    command = "python3 ci-utils/task_healthcheck.py -t velocloud-bridge"
+  }
+
+  triggers = {
+    always_run = timestamp()
+  }
 }

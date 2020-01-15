@@ -100,7 +100,7 @@ resource "aws_ecs_service" "automation-bruin-bridge" {
   desired_count = var.bruin_bridge_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
-  count = var.bruin_bridge_desired_tasks != 0 ? 1 : 0
+  count = var.bruin_bridge_desired_tasks > 0 ? 1 : 0
 
   network_configuration {
     security_groups = [
@@ -115,5 +115,19 @@ resource "aws_ecs_service" "automation-bruin-bridge" {
     registry_arn = aws_service_discovery_service.bruin-bridge.arn
   }
 
-  depends_on = [ null_resource.nats-server-healtcheck ]
+  depends_on = [ null_resource.nats-server-healthcheck ]
+}
+
+resource "null_resource" "bruin-bridge-healthcheck" {
+  count = var.bruin_bridge_desired_tasks > 0 ? 1 : 0
+
+  depends_on = [aws_ecs_service.automation-bruin-bridge]
+
+  provisioner "local-exec" {
+    command = "python3 ci-utils/task_healthcheck.py -t bruin-bridge"
+  }
+
+  triggers = {
+    always_run = timestamp()
+  }
 }

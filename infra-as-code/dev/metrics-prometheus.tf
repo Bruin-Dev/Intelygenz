@@ -140,6 +140,7 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
   desired_count = var.metrics_prometheus_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
+  count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
 
   network_configuration {
     security_groups = [
@@ -156,10 +157,41 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
     container_port = 3000
   }
 
-  depends_on = [ null_resource.nats-server-healtcheck, aws_s3_bucket.prometheus-storage]
+  depends_on = [ null_resource.nats-server-healthcheck, aws_s3_bucket.prometheus-storage]
+}
+
+resource "null_resource" "metrics-prometheus-healthcheck" {
+  count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
+
+  depends_on = [aws_ecs_service.automation-metrics-prometheus]
+
+  provisioner "local-exec" {
+    command = "python3 ci-utils/task_healthcheck.py -t metrics-prometheus"
+  }
+
+  triggers = {
+    always_run = timestamp()
+  }
+}
+
+resource "null_resource" "grafana-user-creation" {
+  count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
+
+  depends_on = [null_resource.metrics-prometheus-healthcheck]
+
+  provisioner "local-exec" {
+    command = "python3 ci-utils/grafana_users_creation.py"
+  }
+
+  triggers = {
+    always_run = timestamp()
+  }
+
 }
 
 resource "aws_s3_bucket" "prometheus-storage" {
+  count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
+
   bucket = local.automation-metrics-prometheus-s3-storage-name
 
   tags = {
@@ -179,7 +211,9 @@ resource "aws_s3_bucket" "prometheus-storage" {
 }
 
 resource "aws_s3_bucket_public_access_block" "prometheus-storage-block" {
-  bucket = aws_s3_bucket.prometheus-storage.id
+  count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
+
+  bucket = aws_s3_bucket.prometheus-storage[0].id
 
   ignore_public_acls = true
   block_public_acls   = true
