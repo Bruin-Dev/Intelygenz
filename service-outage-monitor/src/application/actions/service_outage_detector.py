@@ -125,7 +125,7 @@ class ServiceOutageDetector:
 
             working_environment = self._config.MONITOR_CONFIG['environment']
             if working_environment == 'production':
-                outage_ticket = await self._get_outage_ticket_for_edge(edge_status)
+                outage_ticket = await self._get_outage_ticket_for_edge(edge_status, ticket_statuses=None)
                 outage_ticket_details = outage_ticket['ticket_details']
                 ticket_exists = outage_ticket_details is not None
 
@@ -424,12 +424,16 @@ class ServiceOutageDetector:
 
         return edge_status_response['edge_info']
 
-    async def _get_outage_ticket_for_edge(self, edge_status: dict):
+    async def _get_outage_ticket_for_edge(self, edge_status: dict, ticket_statuses=None):
         edge_serial = edge_status['edges']['serialNumber']
         enterprise_name = edge_status['enterprise_name']
         client_id = self._extract_client_id(enterprise_name)
 
         outage_ticket_request = {'request_id': uuid(), 'edge_serial': edge_serial, 'client_id': client_id}
+
+        if ticket_statuses is not None:
+            outage_ticket_request['ticket_statuses'] = ticket_statuses
+
         outage_ticket = await self._event_bus.rpc_request(
             'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=60,
         )

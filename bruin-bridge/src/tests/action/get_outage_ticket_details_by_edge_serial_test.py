@@ -65,7 +65,7 @@ class TestGetOutageTicketDetailsByEdgeSerial:
         await outage_ticket_details.send_outage_ticket_details_by_edge_serial(msg)
 
         outage_ticket_details._bruin_repository.get_outage_ticket_details_by_edge_serial.assert_called_once_with(
-            edge_serial=edge_serial, client_id=client_id,
+            edge_serial=edge_serial, client_id=client_id, ticket_statuses=None,
         )
         outage_ticket_details._event_bus.publish_message.assert_awaited_once_with(
             response_topic, get_ticket_details_response
@@ -103,7 +103,7 @@ class TestGetOutageTicketDetailsByEdgeSerial:
         await outage_ticket_details.send_outage_ticket_details_by_edge_serial(msg)
 
         outage_ticket_details._bruin_repository.get_outage_ticket_details_by_edge_serial.assert_called_once_with(
-            edge_serial=edge_serial, client_id=client_id,
+            edge_serial=edge_serial, client_id=client_id, ticket_statuses=None,
         )
         outage_ticket_details._event_bus.publish_message.assert_awaited_once_with(
             response_topic, get_ticket_details_response

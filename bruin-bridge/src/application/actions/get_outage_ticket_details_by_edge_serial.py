@@ -10,6 +10,7 @@ class GetOutageTicketDetailsByEdgeSerial:
         response_topic = msg['response_topic']
         edge_serial = msg['edge_serial']
         client_id = msg['client_id']
+        ticket_statuses = msg.get('ticket_statuses')
 
         self._logger.info(
             f'Looking for an outage ticket for edge with serial {edge_serial} '
@@ -17,7 +18,7 @@ class GetOutageTicketDetailsByEdgeSerial:
         )
 
         ticket_details = self._bruin_repository.get_outage_ticket_details_by_edge_serial(
-            edge_serial=edge_serial, client_id=client_id,
+            edge_serial=edge_serial, client_id=client_id, ticket_statuses=ticket_statuses,
         )
         if ticket_details:
             status = 200
