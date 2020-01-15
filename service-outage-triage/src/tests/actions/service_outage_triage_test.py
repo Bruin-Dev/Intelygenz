@@ -1745,3 +1745,22 @@ class TestServiceOutageTriage:
                                                     outage_utils, edge_repo)
         ticket_note = service_outage_triage._ticket_object_to_string(test_dict)
         assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'
+
+    # def auto_resolve_ticket_ok_test(self):
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     template_renderer = Mock()
+    #
+    #     event_bus = Mock(side_effect=[])
+    #
+    #     config = testconfig
+    #     custom_triage_config = config.TRIAGE_CONFIG.copy()
+    #     custom_triage_config['environment'] = 'production'
+    #
+    #     outage_utils = Mock()
+    #     outage_utils.is_so_ticket_auto_resolved = Mock(return_value=True)
+    #     outage_utils.is_faulty_edge = Mock(return_value=True)
+    #
+    #     edge_repo = Mock()
+    #     edge_repo.get_edge = Mock()
+    #     edge.repo.add_edge = Mock()

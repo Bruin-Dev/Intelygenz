@@ -44,3 +44,7 @@ QUART_CONFIG = {
     'title': 'service-outage-triage',
     'port': 5000
 }
+
+REDIS = {
+    "host": 'redis'
+}

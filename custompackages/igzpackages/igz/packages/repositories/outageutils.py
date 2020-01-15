@@ -46,5 +46,5 @@ class OutageUtils:
                 self.logger.info(f'ticket {ticket_id} can\'t be be auto-resolved')
                 return False
 
-        self.logger.info(f'ticket {ticket_id} for autoresolving')
+        self.logger.info(f'ticket {ticket_id} is ready for autoresolving')
         return True
