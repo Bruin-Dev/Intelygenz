@@ -9,17 +9,19 @@ from pytz import timezone, utc
 from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.repositories.edge_repository import EdgeIdentifier
 
 
 class ServiceOutageTriage:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, outage_utils):
+    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, outage_utils, edge_repo):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._template_renderer = template_renderer
         self._outage_utils = outage_utils
+        self._edge_repository = edge_repo
 
     async def start_service_outage_triage_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service outage triage configured to run every '
@@ -322,11 +324,11 @@ class ServiceOutageTriage:
                           'edge': edge_id}
             edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(status_msg, default=str),
                                                             timeout=10)
-            # TODO grab data from redis
-            #   check redis with edge_id
-            # redis_edge = grab from redis
+
+            redis_edge = self._edge_repository.get_edge(edge_id)
             time_from_creation = datetime.now() - creation_date
-            # time_from_last_down = datetime.now() - redis_edge
+            time_from_last_down = datetime.now() - redis_edge['addition_timestamp']
+
             # Function to first check if outage still exists
             if self._outage_utils.is_faulty_edge(edge_status) is False:
                 # then check when the last time it was down or when it was created
@@ -337,7 +339,7 @@ class ServiceOutageTriage:
                                               'detail_id': detail_id
                                               }
 
-                        resolve_note_msg = "#*Automation Engine*# \n Auto-resolving ticket.\n" + 'TimeStamp: ' + str(
+                        resolve_note_msg = "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + str(
                                             datetime.now() + timedelta(seconds=1))
                         ticket_append_note_msg = {'request_id': uuid(),
                                                   'ticket_id': ticket_id["ticketID"],
@@ -352,8 +354,15 @@ class ServiceOutageTriage:
                                                           json.dumps(ticket_append_note_msg),
                                                           timeout=15)
                     self._logger(f"Ticket of ticketID:{ticket_id['ticket_id']} auto-resolved")
+                    # update redis
+                    edge_identifier = EdgeIdentifier(edge_id._asdict())
+                    self._edge_repository.add_edge(edge_identifier, edge_status, update_existing=True)
             else:
                 # check if for outage in redis edge
                 # if outage exists then update existing redis edge is False
                 # update redis update existing redis edge is determenent on the current redis edge
-                pass
+                curr_update_existing = True
+                if self._outage_utils.is_faulty_edge(redis_edge['edge_status']):
+                    curr_update_existing = False
+                edge_identifier = EdgeIdentifier(edge_id._asdict())
+                self._edge_repository.add_edge(edge_identifier, edge_status, update_existing=curr_update_existing)
