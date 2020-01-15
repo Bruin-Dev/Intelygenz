@@ -247,6 +247,7 @@ destroy-branches:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
+    - export TF_VAR_SLACK_URL=${SLACK_URL_DEV}
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
@@ -278,6 +279,7 @@ destroy-master:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=production
+    - export TF_VAR_SLACK_URL=${SLACK_URL_PRO}
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
