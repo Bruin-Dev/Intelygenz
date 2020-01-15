@@ -84,7 +84,7 @@ class TestOutageUtils:
         result = outage_utils.is_faulty_link(link_state_2)
         assert result is True
 
-    def is_so_ticket_auto_resolved_test(self):
+    def is_outage_ticket_auto_resolvable_test(self):
         text_identifier = "#*Automation Engine*#\n" \
                           "Auto-resolving ticket.\n"
 
@@ -141,23 +141,13 @@ class TestOutageUtils:
             }
         ]
 
-        ticket_id4 = 4
-        ticket_notes4 = [
-            {
-                "noteId": 41894048,
-                "noteValue": text_identifier*4,
-            },
-        ]
-
         logger = Mock()
         outage_utils = OutageUtils(logger=logger)
         limit_resolv = 3
-        ticket_bool1 = outage_utils.is_so_ticket_auto_resolved(ticket_id1, ticket_notes1, limit_resolv)
-        ticket_bool2 = outage_utils.is_so_ticket_auto_resolved(ticket_id2, ticket_notes2, limit_resolv)
-        ticket_bool3 = outage_utils.is_so_ticket_auto_resolved(ticket_id3, ticket_notes3, limit_resolv)
-        ticket_bool4 = outage_utils.is_so_ticket_auto_resolved(ticket_id4, ticket_notes4, limit_resolv)
+        ticket_bool1 = outage_utils.is_outage_ticket_auto_resolvable(ticket_id1, ticket_notes1, limit_resolv)
+        ticket_bool2 = outage_utils.is_outage_ticket_auto_resolvable(ticket_id2, ticket_notes2, limit_resolv)
+        ticket_bool3 = outage_utils.is_outage_ticket_auto_resolvable(ticket_id3, ticket_notes3, limit_resolv)
 
         assert ticket_bool1 is False
         assert ticket_bool2 is True
         assert ticket_bool3 is False
-        assert ticket_bool4 is False
