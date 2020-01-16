@@ -88,7 +88,7 @@ class ServiceOutageDetector:
             edge_status = await self._get_edge_status_by_id(edge_full_id)
             self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
 
-            outage_happened = self._outage_utils.is_there_an_outage(edge_status)
+            outage_happened = True #self._outage_utils.is_there_an_outage(edge_status)
             if outage_happened:
                 self._logger.info(
                     f'[outage-monitoring] Outage detected for {edge_identifier}. '
@@ -119,25 +119,37 @@ class ServiceOutageDetector:
         edge_status = await self._get_edge_status_by_id(edge_full_id)
         self._logger.info(f'[outage-recheck] Got status for edge {edge_identifier}.')
 
-        is_outage = self._outage_utils.is_there_an_outage(edge_status)
+        is_outage = True #self._outage_utils.is_there_an_outage(edge_status)
         if is_outage:
+            print('rromero recheckin')
             self._logger.info(f'[outage-recheck] Edge {edge_identifier} is still in outage state.')
 
             working_environment = self._config.MONITOR_CONFIG['environment']
-            if working_environment == 'production':
-                outage_ticket = await self._get_outage_ticket_for_edge(edge_status, ticket_statuses=None)
-                outage_ticket_details = outage_ticket['ticket_details']
-                ticket_exists = outage_ticket_details is not None
+            if working_environment == 'dev':#'production':
+                print('rromero getting open tickets')
+                open_outage_ticket = await self._get_outage_ticket_for_edge(edge_status, ticket_statuses=['Open'])
+                open_outage_ticket_details = open_outage_ticket['ticket_details']
+                open_ticket_exists = open_outage_ticket_details is not None
 
                 # CAVEAT: This check should be performed by Bruin on their side. In the meanwhile...
-                if ticket_exists:
+                if open_ticket_exists:
                     self._logger.info(
                         f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket with '
                         f'ID = {outage_ticket_details["ticketID"]}. Skipping ticket creation for this edge...')
                 else:
-                    self._logger.info(
-                        f'[outage-recheck] Starting outage ticket creation for faulty edge {edge_identifier}.')
-                    await self._create_outage_ticket(edge_full_id, edge_status)
+                    resolved_outage_ticket = await self._get_outage_ticket_for_edge(
+                        edge_status, ticket_statuses=['Resolved']
+                    )
+                    resolved_outage_ticket_details = resolved_outage_ticket['ticket_details']
+                    resolved_ticket_exists = resolved_outage_ticket_details is not None                    
+                    
+                    if resolved_ticket_exists:
+                        # My code here
+                        print('rromero lol x3')
+                    else:
+                        self._logger.info(
+                            f'[outage-recheck] Starting outage ticket creation for faulty edge {edge_identifier}.')
+                        #await self._create_outage_ticket(edge_full_id, edge_status)
             else:
                 self._logger.info(
                     f'[outage-recheck] Not starting outage ticket creation for faulty edge {edge_identifier} because '
@@ -152,7 +164,6 @@ class ServiceOutageDetector:
 
         ticket_data = self._generate_outage_ticket(edge_status)
 
-        # TODO: Check and print errors from Bruin (Like, shit already exists)
         self._logger.info(f'[outage-ticket-creation] Creating outage ticket for edge {edge_identifier}...')
         ticket_creation_response = await self._event_bus.rpc_request(
             "bruin.ticket.creation.request", {'request_id': uuid(), **ticket_data}, timeout=30
