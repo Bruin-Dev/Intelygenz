@@ -1,21 +1,6 @@
 #
 # Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
 #
-.grafana_user_creation_template: &grafana_user_creation_template
-  tags:
-    - docker
-    - dind
-  variables:
-    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-    AWS_DEFAULT_REGION: $AWS_REGION
-  script:
-    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - apk --upgrade --no-cache add curl python3 bash py-pip
-    - pip3 install requests awscli
-    - python3 ci-utils/task_healthcheck.py -t grafana
-    - python3 ci-utils/grafana_users_creation.py
-
 .check_ecs_resources_template: &check_ecs_resources_template
   stage: basic_infra
   variables:

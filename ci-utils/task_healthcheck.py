@@ -9,12 +9,14 @@ logging.basicConfig(level=logging.INFO)
 
 FNULL = open(os.devnull, 'w')
 ENVIRONMENT = os.environ['TF_VAR_ENVIRONMENT']
+BRUIN_BRIDGE_TASKS = os.environ['TF_VAR_bruin_bridge_desired_tasks']
+VELOCLOUD_BRIDGE_TASKS = os.environ['TF_VAR_velocloud_bridge_desired_tasks']
 
 
 class TaskHealthcheck:
     def check_task_is_ready(self, task_name_param):
-        major_task_info = self._get_major_tasks(task_name_param)
-        self._wait_until_tasks_is_ready(major_task_info, task_name_param, time.time())
+        major_tasks_info = self._get_major_tasks(task_name_param)
+        self._wait_until_tasks_is_ready(major_tasks_info, task_name_param, time.time())
 
     def _wait_until_tasks_is_ready(self, tasks_info, task_name_param, start_time):
         timeout = start_time + 60 * 6
@@ -72,10 +74,23 @@ class TaskHealthcheck:
         logging.info(f"Actual tasks with name {task_name_param} are the following")
         self._print_actual_tasks(tasks_arn_with_task_name)
         if len(tasks_arn_with_task_name) == 1:
-            return tasks_arn_with_task_name
+            return tasks_arn_with_task_name[0:1]
         elif len(tasks_arn_with_task_name) > 1:
             tasks_arn_with_task_name.sort(key=lambda i: i['task_definition_arn'], reverse=True)
-            return tasks_arn_with_task_name
+            num_of_tasks_return = self._get_number_of_task_to_check(task_name_param)
+            if num_of_tasks_return > 0:
+                return tasks_arn_with_task_name[0:num_of_tasks_return]
+            else:
+                return tasks_arn_with_task_name[0:1]
+
+    @staticmethod
+    def _get_number_of_task_to_check(task_name_param):
+        num_of_tasks = 0
+        if task_name_param == 'velocloud-bridge':
+            num_of_tasks = int(VELOCLOUD_BRIDGE_TASKS)
+        elif task_name_param == 'bruin-bridge':
+            num_of_tasks = int(BRUIN_BRIDGE_TASKS)
+        return num_of_tasks
 
     @staticmethod
     def _print_actual_tasks(tasks_arn_with_task_name):

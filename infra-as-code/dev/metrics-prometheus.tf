@@ -177,7 +177,7 @@ resource "null_resource" "metrics-prometheus-healthcheck" {
 resource "null_resource" "grafana-user-creation" {
   count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
 
-  depends_on = [null_resource.metrics-prometheus-healthcheck]
+  depends_on = [null_resource.metrics-prometheus-healthcheck, aws_ecs_service.automation-metrics-prometheus]
 
   provisioner "local-exec" {
     command = "python3 ci-utils/grafana_users_creation.py"

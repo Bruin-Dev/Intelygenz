@@ -14,7 +14,7 @@
     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
     - apk --upgrade --no-cache add bash gettext python3 py-pip
-    - pip3 install awscli
+    - pip3 install awscli requests
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf
