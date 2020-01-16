@@ -20,13 +20,13 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-quarantine_time = 60 * 1
+quarantine_time = 60 * 10
 MONITOR_CONFIG = {
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
     'jobs_intervals': {
-        'outage_detector': 60 * 1,
+        'outage_detector': 60 * 40,
         'outage_monitor': 60 * 3,
         'outage_reporter': 60 * 60,
         'quarantine': quarantine_time,

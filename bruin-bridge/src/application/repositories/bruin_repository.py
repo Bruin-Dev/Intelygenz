@@ -65,6 +65,7 @@ class BruinRepository:
                                                  category='SD-WAN', ticket_statuses=None):
         if ticket_statuses is None:
             ticket_statuses = ['New', 'InProgress', 'Draft']
+
         ticket_details_list = self.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id, ticket_topic='VOO',
             category=category, ticket_statuses=ticket_statuses,

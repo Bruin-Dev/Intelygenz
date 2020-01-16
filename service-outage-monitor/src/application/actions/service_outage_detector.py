@@ -88,7 +88,7 @@ class ServiceOutageDetector:
             edge_status = await self._get_edge_status_by_id(edge_full_id)
             self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
 
-            outage_happened = True #self._outage_utils.is_there_an_outage(edge_status)
+            outage_happened = self._outage_utils.is_there_an_outage(edge_status)
             if outage_happened:
                 self._logger.info(
                     f'[outage-monitoring] Outage detected for {edge_identifier}. '
@@ -119,15 +119,13 @@ class ServiceOutageDetector:
         edge_status = await self._get_edge_status_by_id(edge_full_id)
         self._logger.info(f'[outage-recheck] Got status for edge {edge_identifier}.')
 
-        is_outage = True #self._outage_utils.is_there_an_outage(edge_status)
+        is_outage = self._outage_utils.is_there_an_outage(edge_status)
         if is_outage:
-            print('rromero recheckin')
             self._logger.info(f'[outage-recheck] Edge {edge_identifier} is still in outage state.')
 
             working_environment = self._config.MONITOR_CONFIG['environment']
-            if working_environment == 'dev':#'production':
-                print('rromero getting open tickets')
-                open_outage_ticket = await self._get_outage_ticket_for_edge(edge_status, ticket_statuses=['Open'])
+            if working_environment == 'production':
+                open_outage_ticket = await self._get_outage_ticket_for_edge(edge_status, ticket_statuses=None)
                 open_outage_ticket_details = open_outage_ticket['ticket_details']
                 open_ticket_exists = open_outage_ticket_details is not None
 
@@ -135,21 +133,26 @@ class ServiceOutageDetector:
                 if open_ticket_exists:
                     self._logger.info(
                         f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket with '
-                        f'ID = {outage_ticket_details["ticketID"]}. Skipping ticket creation for this edge...')
+                        f'ID = {open_outage_ticket_details["ticketID"]}. Skipping ticket creation for this edge...')
                 else:
                     resolved_outage_ticket = await self._get_outage_ticket_for_edge(
                         edge_status, ticket_statuses=['Resolved']
                     )
                     resolved_outage_ticket_details = resolved_outage_ticket['ticket_details']
-                    resolved_ticket_exists = resolved_outage_ticket_details is not None                    
-                    
+                    resolved_ticket_exists = resolved_outage_ticket_details is not None
+
                     if resolved_ticket_exists:
-                        # My code here
-                        print('rromero lol x3')
+                        self._logger.info(
+                            f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket with '
+                            f'ID = {resolved_outage_ticket_details["ticketID"]}. Re-opening...')
+                        await self._reopen_outage_ticket(
+                            resolved_outage_ticket_details["ticketID"],
+                            resolved_outage_ticket_details["ticketDetails"][0]["detailID"],
+                            edge_status)
                     else:
                         self._logger.info(
                             f'[outage-recheck] Starting outage ticket creation for faulty edge {edge_identifier}.')
-                        #await self._create_outage_ticket(edge_full_id, edge_status)
+                        await self._create_outage_ticket(edge_full_id, edge_status)
             else:
                 self._logger.info(
                     f'[outage-recheck] Not starting outage ticket creation for faulty edge {edge_identifier} because '
@@ -187,6 +190,66 @@ class ServiceOutageDetector:
         else:
             self._logger.error(
                 f'[outage-ticket-creation] Outage ticket creation failed for edge {edge_identifier}.'
+            )
+
+    async def _reopen_outage_ticket(self, ticket_id, detail_id, edge_status):
+        self._logger.info(f'[outage-ticket-reopening] Reopening outage ticket {ticket_id}...')
+        ticket_reopening_msg = {'request_id': uuid(), 'ticket_id': ticket_id, 'detail_id': detail_id}
+        ticket_reopening_response = await self._event_bus.rpc_request(
+            "bruin.ticket.status.open", ticket_reopening_msg, timeout=30
+        )
+
+        if ticket_reopening_response['status'] == 200:
+            self._logger.info(
+                f'[outage-ticket-reopening] Outage ticket {ticket_id} reopening succeeded.'
+            )
+            enterprise_name = edge_status['enterprise_name']
+            bruin_client_id = self._extract_client_id(enterprise_name)
+            slack_message = {
+                'request_id': uuid(),
+                'message': f'Outage ticket {ticket_id} reopened. Ticket details at '
+                           f'https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}.'
+            }
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+            await self._post_note_in_outage_ticket(ticket_id, edge_status)
+        else:
+            self._logger.error(
+                f'[outage-ticket-creation] Outage ticket {ticket_id} reopening failed.'
+            )
+
+    async def _post_note_in_outage_ticket(self, ticket_id, edge_status):
+        ticket_note_timestamp = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+
+        outage_causes = self._get_outage_causes(edge_status)
+        ticket_note_outage_causes = 'Outage causes:'
+        if outage_causes is not None:
+            if outage_causes.get('edge') is not None:
+                ticket_note_outage_causes += ' Offline edge.'
+            if outage_causes.get('links') is not None:
+                ticket_note_outage_causes += ' Disconnected link(s).'
+
+        ticket_note = (
+            f'#*Automation Engine*#\n'
+            f'Re-opening ticket.\n'
+            f'{ticket_note_outage_causes}\n'
+            f'TimeStamp: {str(ticket_note_timestamp)}'
+        )
+
+        ticket_append_note_msg = {'request_id': uuid(), 'ticket_id': ticket_id, 'note': ticket_note}
+
+        self._logger.info(f'[outage-ticket-reopening] Posting reopening note in ticket {ticket_id}...')
+        post_note_response = await self._event_bus.rpc_request(
+            "bruin.ticket.note.append.request", ticket_append_note_msg, timeout=15)
+        post_note_response = {}
+        post_note_response['status'] = 200
+
+        if post_note_response['status'] == 200:
+            self._logger.info(
+                f'[outage-ticket-reopening] Posting reopening note succeeded for ticket {ticket_id}.'
+            )
+        else:
+            self._logger.error(
+                f'[outage-ticket-reopening] Posting reopening note failed for ticket {ticket_id}.'
             )
 
     def _generate_outage_ticket(self, edge_status):
@@ -446,7 +509,7 @@ class ServiceOutageDetector:
             outage_ticket_request['ticket_statuses'] = ticket_statuses
 
         outage_ticket = await self._event_bus.rpc_request(
-            'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=60,
+            'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=6000,
         )
         return outage_ticket
 
