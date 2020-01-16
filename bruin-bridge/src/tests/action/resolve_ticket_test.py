@@ -35,7 +35,7 @@ class TestResolveTicket:
         bruin_repo.resolve_ticket = Mock(return_value='Success')
 
         resolve_ticket = ResolveTicket(mock_logger, event_bus, bruin_repo)
-        await resolve_ticket.resolve_ticket(json.dumps(msg))
+        await resolve_ticket.resolve_ticket(msg)
 
         bruin_repo.resolve_ticket.assert_called_once_with(ticket_id, detail_id)
         event_bus.publish_message.assert_awaited_once_with(response_topic,
@@ -60,7 +60,7 @@ class TestResolveTicket:
         bruin_repo.resolve_ticket = Mock(return_value=None)
 
         resolve_ticket = ResolveTicket(mock_logger, event_bus, bruin_repo)
-        await resolve_ticket.resolve_ticket(json.dumps(msg))
+        await resolve_ticket.resolve_ticket(msg)
 
         bruin_repo.resolve_ticket.assert_called_once_with(ticket_id, detail_id)
         event_bus.publish_message.assert_awaited_once_with(response_topic,

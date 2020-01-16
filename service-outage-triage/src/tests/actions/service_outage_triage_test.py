@@ -15,6 +15,7 @@ from shortuuid import uuid
 
 from application.actions import service_outage_triage as service_outage_triage_module
 from config import testconfig
+from igz.packages.repositories.edge_repository import EdgeIdentifier
 
 
 class TestServiceOutageTriage:
@@ -750,8 +751,10 @@ class TestServiceOutageTriage:
         template_renderer = Mock()
 
         ticket_id = 3521039
+        detail_id = 123
         edge_serial = 'VC05200026138'
         ticket_notes = None
+        created_date = '2019-09-10 10:34:00-04:00'
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
@@ -759,9 +762,9 @@ class TestServiceOutageTriage:
 
         ticket_details = {
             'ticket_details': {
-                "ticketDetails": [{"detailValue": edge_serial}],
+                "ticketDetails": [{"detailValue": edge_serial, "detailID": detail_id}],
                 "ticketNotes": [
-                    {"noteValue": ticket_notes, 'createdDate': '2019-09-10 10:34:00-04:00'}
+                    {"noteValue": ticket_notes, 'createdDate': created_date}
                 ]
             }
         }
@@ -774,6 +777,7 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils, edge_repo)
+        service_outage_triage._auto_resolve_tickets = CoroutineMock()
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
@@ -784,7 +788,17 @@ class TestServiceOutageTriage:
             {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
-        assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial}]
+        service_outage_triage._auto_resolve_tickets.assert_called_once_with(parse(created_date), dict(
+                                                                                               ticketID=ticket_id,
+                                                                                               serial=edge_serial,
+                                                                                               notes=ticket_details[
+                                                                                                   'ticket_details'][
+                                                                                                   'ticketNotes']),
+                                                                            detail_id)
+
+        assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details[
+                                                                                                   'ticket_details'][
+                                                                                                   'ticketNotes']}]
 
     @pytest.mark.asyncio
     async def filtered_ticket_details_with_no_existing_triage_test(self):
@@ -794,8 +808,10 @@ class TestServiceOutageTriage:
         template_renderer = Mock()
 
         ticket_id = 3521039
+        detail_id = 123
         edge_serial = 'VC05200026138'
         ticket_notes = 'test info'
+        created_date = '2019-09-10 10:34:00-04:00'
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
@@ -803,9 +819,9 @@ class TestServiceOutageTriage:
 
         ticket_details = {
             'ticket_details': {
-                "ticketDetails": [{"detailValue": edge_serial}],
+                "ticketDetails": [{"detailValue": edge_serial, "detailID": detail_id}],
                 "ticketNotes": [
-                    {"noteValue": ticket_notes, 'createdDate': '2019-09-10 10:34:00-04:00'}
+                    {"noteValue": ticket_notes, 'createdDate': created_date}
                 ]
             }
         }
@@ -818,6 +834,7 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils, edge_repo)
+        service_outage_triage._auto_resolve_tickets = CoroutineMock()
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
@@ -828,7 +845,17 @@ class TestServiceOutageTriage:
             {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
-        assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial}]
+        service_outage_triage._auto_resolve_tickets.assert_called_once_with(parse(created_date), dict(
+                                                                                                ticketID=ticket_id,
+                                                                                                serial=edge_serial,
+                                                                                                notes=ticket_details[
+                                                                                                    'ticket_details'][
+                                                                                                    'ticketNotes']),
+                                                                            detail_id)
+
+        assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details[
+            'ticket_details'][
+            'ticketNotes']}]
 
     @pytest.mark.asyncio
     async def filtered_ticket_details_with_existing_triage_and_no_timestamp_for_ticket_notes_test(self):
@@ -837,9 +864,11 @@ class TestServiceOutageTriage:
         config = testconfig
         template_renderer = Mock()
 
+        detail_id = 123
         ticket_id = 3521039
         edge_serial = 'VC05200026138'
         ticket_notes = '#*Automation Engine*#'
+        created_date = '2019-09-10 10:34:00-04:00'
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
@@ -847,9 +876,9 @@ class TestServiceOutageTriage:
 
         ticket_details = {
             'ticket_details': {
-                "ticketDetails": [{"detailValue": edge_serial}],
+                "ticketDetails": [{"detailValue": edge_serial, "detailID": detail_id}],
                 "ticketNotes": [
-                    {"noteValue": ticket_notes, 'createdDate': '2019-09-10 10:34:00-04:00'}
+                    {"noteValue": ticket_notes, 'createdDate': created_date}
                 ]
             }
         }
@@ -862,6 +891,7 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils, edge_repo)
+        service_outage_triage._auto_resolve_tickets = CoroutineMock()
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
@@ -872,6 +902,13 @@ class TestServiceOutageTriage:
             {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
+        service_outage_triage._auto_resolve_tickets.assert_called_once_with(parse(created_date), dict(
+                                                                                                ticketID=ticket_id,
+                                                                                                serial=edge_serial,
+                                                                                                notes=ticket_details[
+                                                                                                    'ticket_details'][
+                                                                                                    'ticketNotes']),
+                                                                            detail_id)
         assert filtered_tickets == []
 
     @pytest.mark.asyncio
@@ -881,6 +918,7 @@ class TestServiceOutageTriage:
         config = testconfig
         template_renderer = Mock()
 
+        detail_id = 123
         current_timestamp = '2019-09-10 10:45:00'
         ticket_notes_timestamp = '2019-09-10 10:34:00-04:00'
         ticket_notes_timestamp_naive = '2019-09-10 10:34:00'
@@ -895,7 +933,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {
             'ticket_details': {
-                "ticketDetails": [{"detailValue": edge_serial}],
+                "ticketDetails": [{"detailValue": edge_serial, "detailID": detail_id}],
                 "ticketNotes": [
                     {"noteValue": ticket_notes, 'createdDate': ticket_notes_timestamp}
                 ]
@@ -911,6 +949,7 @@ class TestServiceOutageTriage:
                                                     outage_utils, edge_repo)
         service_outage_triage._extract_field_from_string = Mock(return_value=ticket_notes_timestamp_naive)
         service_outage_triage._check_for_new_events = CoroutineMock()
+        service_outage_triage._auto_resolve_tickets = CoroutineMock()
 
         current_datetime = datetime.strptime(current_timestamp, '%Y-%m-%d %H:%M:%S')
         datetime_mock = Mock()
@@ -933,6 +972,13 @@ class TestServiceOutageTriage:
             ticket_notes, 'TimeStamp: '
         )
         service_outage_triage._check_for_new_events.assert_not_awaited()
+        service_outage_triage._auto_resolve_tickets.assert_called_once_with(parse(ticket_notes_timestamp), dict(
+                                                                                                ticketID=ticket_id,
+                                                                                                serial=edge_serial,
+                                                                                                notes=ticket_details[
+                                                                                                    'ticket_details'][
+                                                                                                    'ticketNotes']),
+                                                                            detail_id)
         assert filtered_tickets == []
 
     @pytest.mark.asyncio
@@ -946,6 +992,7 @@ class TestServiceOutageTriage:
         ticket_notes_timestamp = '2019-09-10 10:34:00-04:00'
         ticket_notes_timestamp_naive = '2019-09-10 10:34:00'
 
+        detail_id = 123
         ticket_id = 3521039
         edge_serial = 'VC05200026138'
         ticket_notes = f'#*Automation Engine*# \n TimeStamp: {ticket_notes_timestamp}'
@@ -956,7 +1003,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {
             'ticket_details': {
-                "ticketDetails": [{"detailValue": edge_serial}],
+                "ticketDetails": [{"detailValue": edge_serial, "detailID": detail_id}],
                 "ticketNotes": [
                     {"noteValue": ticket_notes, 'createdDate': ticket_notes_timestamp}
                 ]
@@ -973,6 +1020,7 @@ class TestServiceOutageTriage:
                                                     outage_utils, edge_repo)
         service_outage_triage._extract_field_from_string = Mock(return_value=ticket_notes_timestamp_naive)
         service_outage_triage._check_for_new_events = CoroutineMock()
+        service_outage_triage._auto_resolve_tickets = CoroutineMock()
 
         current_datetime = datetime.strptime(current_timestamp, '%Y-%m-%d %H:%M:%S')
         datetime_mock = Mock()
@@ -996,8 +1044,15 @@ class TestServiceOutageTriage:
         )
         service_outage_triage._check_for_new_events.assert_awaited_once_with(
             ticket_notes_timestamp_naive,
-            {'ticketID': ticket_id, 'serial': edge_serial},
+            {'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details['ticket_details']['ticketNotes']},
         )
+        service_outage_triage._auto_resolve_tickets.assert_called_once_with(parse(ticket_notes_timestamp), dict(
+                                                                                                ticketID=ticket_id,
+                                                                                                serial=edge_serial,
+                                                                                                notes=ticket_details[
+                                                                                                    'ticket_details'][
+                                                                                                    'ticketNotes']),
+                                                                            detail_id)
         assert filtered_tickets == []
 
     def find_recent_occurence_of_event_test(self):
@@ -1746,21 +1801,103 @@ class TestServiceOutageTriage:
         ticket_note = service_outage_triage._ticket_object_to_string(test_dict)
         assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'
 
-    # def auto_resolve_ticket_ok_test(self):
-    #     logger = Mock()
-    #     scheduler = Mock()
-    #     template_renderer = Mock()
-    #
-    #     event_bus = Mock(side_effect=[])
-    #
-    #     config = testconfig
-    #     custom_triage_config = config.TRIAGE_CONFIG.copy()
-    #     custom_triage_config['environment'] = 'production'
-    #
-    #     outage_utils = Mock()
-    #     outage_utils.is_so_ticket_auto_resolved = Mock(return_value=True)
-    #     outage_utils.is_faulty_edge = Mock(return_value=True)
-    #
-    #     edge_repo = Mock()
-    #     edge_repo.get_edge = Mock()
-    #     edge.repo.add_edge = Mock()
+    @pytest.mark.asyncio
+    async def auto_resolve_ticket_ok_no_redis_production_test(self):
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+
+        host = "mettel.velocloud.net"
+        enterprise_id = 137
+        edge_id = 958
+        serial = "VC05200026138"
+
+        edge_identifier = EdgeIdentifier(host=host, enterprise_id=enterprise_id, edge_id=edge_id)
+
+        edge_status = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": host,
+                "enterprise_id": enterprise_id,
+                "edge_id": edge_id
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": serial,
+                },
+                "links": [{"link": None}]
+            }
+        }
+        bruin_resolved = "Resolved"
+        bruin_note_appended = "Appended"
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[edge_status, bruin_resolved, bruin_note_appended])
+
+        config = testconfig
+        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config['environment'] = 'production'
+
+        outage_utils = Mock()
+        outage_utils.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_utils.is_there_an_outage = Mock(return_value=False)
+
+        edge_repo = Mock()
+        edge_repo.get_edge = Mock(return_value=None)
+        edge_repo.add_edge = Mock()
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
+                                                    outage_utils, edge_repo)
+
+        ticket_id = "123"
+        ticket_notes = ['list of notes']
+        ticket_item = {"ticketID": ticket_id, "serial": serial, "notes": ticket_notes}
+
+        detail_id = "321"
+
+        current_timestamp = '2019-09-10 10:45:00'
+        current_datetime = datetime.strptime(current_timestamp, '%Y-%m-%d %H:%M:%S')
+        note_timestamp = '2019-09-10 10:45:01'
+        creation_date = '2019-09-10 10:34:00'
+        creation_datetime = datetime.strptime(creation_date, '%Y-%m-%d %H:%M:%S')
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        uuid_ = uuid()
+        with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
+            with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
+                with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+                    await service_outage_triage._auto_resolve_tickets(creation_datetime, ticket_item, detail_id)
+
+        outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
+
+        edge_repo.add_edge.assert_called_once_with(edge_identifier._asdict(),
+                                                   dict(edge_status=edge_status['edge_info']),
+                                                   update_existing=True)
+
+        event_bus.rpc_request.assert_has_awaits([
+                call("edge.status.request",
+                     {
+                      "request_id": uuid_,
+                      "edge": config.TRIAGE_CONFIG['id_by_serial'][serial]
+                     },
+                     timeout=45),
+                call("bruin.ticket.status.resolve",
+                     {
+                       "request_id": uuid_,
+                       "ticket_id": ticket_id,
+                       "detail_id": detail_id
+                     },
+                     timeout=15),
+                call("bruin.ticket.note.append.request",
+                     {
+                       "request_id": uuid_,
+                       "ticket_id": ticket_id,
+                       "note": "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + note_timestamp
+                     },
+                     timeout=15)
+            ])

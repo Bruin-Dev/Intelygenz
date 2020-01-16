@@ -9,9 +9,8 @@ class ResolveTicket:
         self._bruin_repository = bruin_repository
 
     async def resolve_ticket(self, msg):
-        msg_dict = json.loads(msg)
-        ticket_id = msg_dict["ticket_id"]
-        detail_id = msg_dict["detail_id"]
+        ticket_id = msg["ticket_id"]
+        detail_id = msg["detail_id"]
 
         self._logger.info(f'Updating the ticket status for ticket id: {ticket_id} to RESOLVED')
         status = 500
@@ -20,8 +19,8 @@ class ResolveTicket:
             self._logger.info(f'Status: RESOLVED')
             status = 200
         response = {
-            'request_id': msg_dict['request_id'],
+            'request_id': msg['request_id'],
             'status': status
         }
-        await self._event_bus.publish_message(msg_dict['response_topic'],
+        await self._event_bus.publish_message(msg['response_topic'],
                                               json.dumps(response, default=str))

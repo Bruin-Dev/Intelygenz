@@ -119,6 +119,7 @@ class ServiceOutageTriage:
                         ticket_item = dict()
                         ticket_item["ticketID"] = ticket['ticketID']
                         ticket_item["serial"] = ticket_detail['detailValue']
+                        ticket_item['notes'] = ticket_details['ticket_details']['ticketNotes']
                         sorted_ticket_notes = sorted(ticket_details['ticket_details']['ticketNotes'],
                                                      key=lambda note: note['createdDate'], reverse=True)
 
@@ -139,9 +140,8 @@ class ServiceOutageTriage:
                         if not triage_exists:
                             filtered_ticket_ids.append(ticket_item)
 
-                        # auto-resolve after events have been appended
-                        # creation_date = parse(ticket_details['ticket_details']['ticketNotes'][0]['createdDate'])
-                        # await self._auto_resolve_tickets(creation_date, ticket_item, ticket_detail['detailID'])
+                        creation_date = parse(ticket_details['ticket_details']['ticketNotes'][0]['createdDate'])
+                        await self._auto_resolve_tickets(creation_date, ticket_item, ticket_detail['detailID'])
 
                         break
         return filtered_ticket_ids
@@ -318,25 +318,32 @@ class ServiceOutageTriage:
     async def _auto_resolve_tickets(self, creation_date, ticket_id, detail_id):
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
         edge_id = id_by_serial[ticket_id["serial"]]
-        # Check if autoresolve is possible i.e  has it been autoresloved less than 3 times
-        if self.is_so_ticket_auto_resolved():
-        if self._outage_utils.is_so_ticket_auto_resolvable():
+        if self._outage_utils.is_outage_ticket_auto_resolvable(ticket_id['ticketID'], ticket_id['notes'], 3):
             status_msg = {'request_id': uuid(),
                           'edge': edge_id}
-            edge_status = await self._event_bus.rpc_request("edge.status.request", json.dumps(status_msg, default=str),
-                                                            timeout=10)
+            edge_status = await self._event_bus.rpc_request("edge.status.request", status_msg,
+                                                            timeout=45)
+            edge_info = edge_status['edge_info']
 
-            redis_edge = self._edge_repository.get_edge(edge_id)
-            time_from_creation = datetime.now() - creation_date
-            time_from_last_down = datetime.now() - redis_edge['addition_timestamp']
+            edge_identifier = EdgeIdentifier(**edge_id)
 
-            # Function to first check if outage still exists
-            if self._outage_utils.is_there_an_outage(edge_status) is False:
-                # then check when the last time it was down or when it was created
-                if time_from_creation < timedelta(minutes=45) or time_from_last_down < timedelta(minutes=45):
+            redis_edge = self._edge_repository.get_edge(edge_identifier)
+
+            time_from_creation = datetime.now(timezone(
+                                            self._config.TRIAGE_CONFIG['timezone'])) - creation_date
+            is_forty_five_mins_from_last_down = False
+
+            if redis_edge is not None:
+                time_from_last_down = datetime.now(timezone(
+                                            self._config.TRIAGE_CONFIG['timezone'])) - parse(
+                    redis_edge['addition_timestamp'])
+                is_forty_five_mins_from_last_down = time_from_last_down < timedelta(minutes=45)
+
+            if self._outage_utils.is_there_an_outage(edge_info) is False:
+                if time_from_creation < timedelta(minutes=45) or is_forty_five_mins_from_last_down is True:
                     if self._config.TRIAGE_CONFIG['environment'] == 'production':
                         resolve_ticket_msg = {'request_id': uuid(),
-                                              'ticket_id': ticket_id['ticket_id'],
+                                              'ticket_id': ticket_id['ticketID'],
                                               'detail_id': detail_id
                                               }
 
@@ -346,24 +353,23 @@ class ServiceOutageTriage:
                                                   'ticket_id': ticket_id["ticketID"],
                                                   'note': resolve_note_msg}
 
-                        # if either or are less than 45 mins then autoresolve and post note
                         await self._event_bus.rpc_request("bruin.ticket.status.resolve",
-                                                          json.dumps(resolve_ticket_msg),
+                                                          resolve_ticket_msg,
                                                           timeout=15)
 
                         await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                          json.dumps(ticket_append_note_msg),
+                                                          ticket_append_note_msg,
                                                           timeout=15)
-                    self._logger(f"Ticket of ticketID:{ticket_id['ticket_id']} auto-resolved")
-                    # update redis
-                    edge_identifier = EdgeIdentifier(edge_id._asdict())
-                    self._edge_repository.add_edge(edge_identifier, edge_status, update_existing=True)
+                    self._logger.info(f"Ticket of ticketID:{ticket_id['ticketID']} auto-resolved")
+                    edge_identifier = EdgeIdentifier(**edge_id)
+                    edge_value = {'edge_status': edge_info}
+                    self._edge_repository.add_edge(edge_identifier._asdict(), edge_value, update_existing=True)
             else:
-                # check if for outage in redis edge
-                # if outage exists then update existing redis edge is False
-                # update redis update existing redis edge is determenent on the current redis edge
                 curr_update_existing = True
-                if self._outage_utils.is_there_an_outage(redis_edge['edge_status']):
-                    curr_update_existing = False
-                edge_identifier = EdgeIdentifier(edge_id._asdict())
-                self._edge_repository.add_edge(edge_identifier, edge_status, update_existing=curr_update_existing)
+                if redis_edge is not None:
+                    if self._outage_utils.is_there_an_outage(redis_edge['edge_status']):
+                        curr_update_existing = False
+                edge_identifier = EdgeIdentifier(**edge_id)
+                edge_value = {'edge_status': edge_info}
+                self._edge_repository.add_edge(edge_identifier._asdict(), edge_value,
+                                               update_existing=curr_update_existing)
