@@ -76,7 +76,7 @@ class ServiceOutageDetector:
                                     next_run_time=next_run_time, replace_existing=False,
                                     id='_service_outage_monitor_process')
         except ConflictingIdError as conflict:
-            self._logger.info(f'Skipping start of Service Outage Detector job. Reason: {conflict}')
+            self._logger.info(f'Skipping start of Service Outage Monitoring job. Reason: {conflict}')
 
     async def _outage_monitoring_process(self):
         edges_to_monitor = self._get_edges_for_monitoring()
@@ -95,12 +95,16 @@ class ServiceOutageDetector:
                     'Scheduling edge to re-check it in a few moments.'
                 )
 
-                self._scheduler.add_job(self._recheck_edge_for_ticket_creation, 'interval',
-                                        seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'],
-                                        replace_existing=False,
-                                        id=f'_ticket_creation_recheck_{json.dumps(edge_full_id)}',
-                                        kwargs={'edge_full_id': edge_full_id})
-                self._logger.info(f'[outage-monitoring] {edge_identifier} successfully scheduled for re-check.')
+                try:
+                    self._scheduler.add_job(self._recheck_edge_for_ticket_creation, 'interval',
+                                            seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'],
+                                            replace_existing=False,
+                                            id=f'_ticket_creation_recheck_{json.dumps(edge_full_id)}',
+                                            kwargs={'edge_full_id': edge_full_id})
+                    self._logger.info(f'[outage-monitoring] {edge_identifier} successfully scheduled for re-check.')
+                except ConflictingIdError:
+                    self._logger.info(f'There is a recheck job scheduled for {edge_identifier} already. No new job '
+                                      'is going to be scheduled.')
             else:
                 self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state. Skipping...')
 

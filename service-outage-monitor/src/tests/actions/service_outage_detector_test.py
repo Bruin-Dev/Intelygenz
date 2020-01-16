@@ -1988,7 +1988,60 @@ class TestServiceOutageMonitor:
         scheduler.add_job.assert_not_called()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_edges_and_some_outages_detected_test(self):
+    async def outage_monitoring_process_with_edges_and_some_outages_detected_and_recheck_job_not_scheduled_test(self):
+        job_id = 'some-duplicated-id'
+        exception_instance = ConflictingIdError(job_id)
+
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        is_there_an_outage = True
+
+        event_bus = Mock()
+        logger = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+
+        scheduler = Mock()
+        scheduler.add_job = Mock(side_effect=exception_instance)
+
+        outage_utils = Mock()
+        outage_utils.is_there_an_outage = Mock(return_value=is_there_an_outage)
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config, template_renderer, outage_utils)
+        service_outage_detector._get_edges_for_monitoring = Mock(return_value=[edge_full_id])
+        service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
+
+        try:
+            await service_outage_detector._outage_monitoring_process()
+            # TODO: The test should fail at this point if no exception was raised
+        except ConflictingIdError:
+            scheduler.add_job.assert_called_once_with(
+                service_outage_detector._recheck_edge_for_ticket_creation, 'interval',
+                seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'],
+                replace_existing=False,
+                id=f'_ticket_creation_recheck_{json.dumps(edge_full_id)}',
+                kwargs={'edge_full_id': edge_full_id}
+            )
+
+        service_outage_detector._get_edges_for_monitoring.assert_called_once()
+        service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status)
+
+    @pytest.mark.asyncio
+    async def outage_monitoring_process_with_edges_and_some_outages_detected_and_recheck_job_scheduled_test(self):
         edge_1_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
         edge_2_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 5678}
         edge_3_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 9012}
