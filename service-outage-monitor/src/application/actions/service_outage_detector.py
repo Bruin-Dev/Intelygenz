@@ -352,6 +352,7 @@ class ServiceOutageDetector:
         edge_status = edge_value['edge_status']
         edge_status_device_info = edge_status['edges']
 
+        edge_name = edge_status_device_info['name']
         edge_serial = edge_status_device_info['serialNumber']
         enterprise_name = edge_status['enterprise_name']
 
@@ -373,6 +374,7 @@ class ServiceOutageDetector:
 
         return {
             'detection_time': outage_detection_datetime,
+            'edge_name': edge_name,
             'serial_number': edge_serial,
             'enterprise': enterprise_name,
             'edge_url': edge_url,
@@ -397,8 +399,8 @@ class ServiceOutageDetector:
         self._logger.info(f'Reporting {len(edges_for_email_template)} outages without ticket...')
 
         # TODO: Move these fields to a proper place as they will always be the same in every outage report
-        fields = ["Date of detection", "Serial Number", "Company", "Edge URL", "Outage causes"]
-        fields_edge = ["detection_time", "serial_number", "enterprise", "edge_url", "outage_causes"]
+        fields = ["Date of detection", "Company", "Edge name", "Serial Number", "Edge URL", "Outage causes"]
+        fields_edge = ["detection_time", "enterprise", "edge_name", "serial_number", "edge_url", "outage_causes"]
         email_report = self._email_template_renderer.compose_email_object(edges_for_email_template, fields=fields,
                                                                           fields_edge=fields_edge)
         await self._event_bus.rpc_request("notification.email.request", email_report, timeout=10)
@@ -461,8 +463,8 @@ class ServiceOutageDetector:
                 self._add_edge_to_reporting(edge_full_id, edge_status)
             else:
                 self._logger.info(
-                    f'Edge {edge_identifier} either has an outage or there is already '
-                    'an outage ticket created for it (or both). This edge will not be reported for now.'
+                    f'Edge {edge_identifier} may be healthy again or there may be an outage ticket '
+                    'created for it already (or both). This edge will not be reported for now.'
                 )
                 # TODO: Remove edge from quarantine at this precise point
 

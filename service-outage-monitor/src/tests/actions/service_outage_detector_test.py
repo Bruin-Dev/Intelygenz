@@ -75,7 +75,7 @@ class TestServiceOutageDetector:
         quarantine_edges = {
             edge_1_identifier: {
                 'edge_status': {
-                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
                     'links': [
                         {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                         {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -86,7 +86,7 @@ class TestServiceOutageDetector:
             },
             edge_2_identifier: {
                 'edge_status': {
-                    'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC7654321'},
+                    'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC7654321', 'name': 'Menardi'},
                     'links': [
                         {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                         {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -257,7 +257,7 @@ class TestServiceOutageDetectorJob:
         edge_1_state = 'CONNECTED'
         edge_1_link_ge1_state = edge_1_link_ge2_state = 'STABLE'
         edge_1_status = {
-            'edges': {'edgeState': edge_1_state, 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': edge_1_state, 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_1_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_1_link_ge2_state, 'interface': 'GE2'}},
@@ -268,7 +268,7 @@ class TestServiceOutageDetectorJob:
         edge_2_state = 'CONNECTED'
         edge_2_link_ge1_state = edge_2_link_ge2_state = 'STABLE'
         edge_2_status = {
-            'edges': {'edgeState': edge_2_state, 'serialNumber': 'VC7654321'},
+            'edges': {'edgeState': edge_2_state, 'serialNumber': 'VC7654321', 'name': 'Menardi'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_2_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_2_link_ge2_state, 'interface': 'GE2'}},
@@ -279,7 +279,7 @@ class TestServiceOutageDetectorJob:
         edge_3_state = 'CONNECTED'
         edge_3_link_ge1_state = edge_3_link_ge2_state = 'STABLE'
         edge_3_status = {
-            'edges': {'edgeState': edge_3_state, 'serialNumber': 'VC1112223'},
+            'edges': {'edgeState': edge_3_state, 'serialNumber': 'VC1112223', 'name': 'Isaac'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_3_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_3_link_ge2_state, 'interface': 'GE2'}},
@@ -338,7 +338,7 @@ class TestServiceOutageDetectorJob:
         edge_1_state = 'CONNECTED'
         edge_1_link_ge1_state = edge_1_link_ge2_state = 'STABLE'
         edge_1_status = {
-            'edges': {'edgeState': edge_1_state, 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': edge_1_state, 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_1_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_1_link_ge2_state, 'interface': 'GE2'}},
@@ -349,7 +349,7 @@ class TestServiceOutageDetectorJob:
         edge_2_state = 'CONNECTED'
         edge_2_link_ge1_state = edge_2_link_ge2_state = 'STABLE'
         edge_2_status = {
-            'edges': {'edgeState': edge_2_state, 'serialNumber': 'VC7654321'},
+            'edges': {'edgeState': edge_2_state, 'serialNumber': 'VC7654321', 'name': 'Menardi'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_2_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_2_link_ge2_state, 'interface': 'GE2'}},
@@ -360,7 +360,7 @@ class TestServiceOutageDetectorJob:
         edge_3_state = 'CONNECTED'
         edge_3_link_ge1_state = edge_3_link_ge2_state = 'STABLE'
         edge_3_status = {
-            'edges': {'edgeState': edge_3_state, 'serialNumber': 'VC1112223'},
+            'edges': {'edgeState': edge_3_state, 'serialNumber': 'VC1112223', 'name': 'Isaac'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_3_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_3_link_ge2_state, 'interface': 'GE2'}},
@@ -420,7 +420,7 @@ class TestServiceOutageDetectorJob:
         edge_1_state = 'OFFLINE'
         edge_1_link_ge1_state = edge_1_link_ge2_state = 'STABLE'
         edge_1_status = {
-            'edges': {'edgeState': edge_1_state, 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': edge_1_state, 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_1_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_1_link_ge2_state, 'interface': 'GE2'}},
@@ -431,7 +431,7 @@ class TestServiceOutageDetectorJob:
         edge_2_state = 'CONNECTED'
         edge_2_link_ge1_state = edge_2_link_ge2_state = 'STABLE'
         edge_2_status = {
-            'edges': {'edgeState': edge_2_state, 'serialNumber': 'VC7654321'},
+            'edges': {'edgeState': edge_2_state, 'serialNumber': 'VC7654321', 'name': 'Menardi'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_2_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_2_link_ge2_state, 'interface': 'GE2'}},
@@ -443,7 +443,7 @@ class TestServiceOutageDetectorJob:
         edge_3_link_ge1_state = 'STABLE'
         edge_3_link_ge2_state = 'DISCONNECTED'
         edge_3_status = {
-            'edges': {'edgeState': edge_3_state, 'serialNumber': 'VC1112223'},
+            'edges': {'edgeState': edge_3_state, 'serialNumber': 'VC1112223', 'name': 'Isaac'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_3_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_3_link_ge2_state, 'interface': 'GE2'}},
@@ -557,7 +557,7 @@ class TestServiceOutageDetectorJob:
         uuid_ = uuid()
         edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -599,7 +599,7 @@ class TestServiceOutageDetectorJob:
     def add_edge_to_quarantine_test(self):
         edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -632,7 +632,7 @@ class TestServiceOutageDetectorJob:
         edge_1_state = 'CONNECTED'
         edge_1_link_ge1_state = edge_1_link_ge2_state = 'STABLE'
         edge_status_1 = {
-            'edges': {'edgeState': edge_1_state, 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': edge_1_state, 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_1_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_1_link_ge2_state, 'interface': 'GE2'}},
@@ -643,7 +643,7 @@ class TestServiceOutageDetectorJob:
         edge_2_state = 'OFFLINE'
         edge_2_link_ge1_state = edge_2_link_ge2_state = 'DISCONNECTED'
         edge_status_2 = {
-            'edges': {'edgeState': edge_2_state, 'serialNumber': 'VC7654321'},
+            'edges': {'edgeState': edge_2_state, 'serialNumber': 'VC7654321', 'name': 'Menardi'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_2_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_2_link_ge2_state, 'interface': 'GE2'}},
@@ -655,7 +655,7 @@ class TestServiceOutageDetectorJob:
         edge_3_link_ge1_state = 'STABLE'
         edge_3_link_ge2_state = 'DISCONNECTED'
         edge_status_3 = {
-            'edges': {'edgeState': edge_3_state, 'serialNumber': 'VC1112223'},
+            'edges': {'edgeState': edge_3_state, 'serialNumber': 'VC1112223', 'name': 'Isaac'},
             'links': [
                 {'linkId': 1234, 'link': {'state': edge_3_link_ge1_state, 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': edge_3_link_ge2_state, 'interface': 'GE2'}},
@@ -801,7 +801,7 @@ class TestQuarantineJob:
     async def process_edge_from_quarantine_with_no_reportable_edge_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -833,7 +833,7 @@ class TestQuarantineJob:
     async def process_edge_from_quarantine_with_reportable_edge_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -865,7 +865,7 @@ class TestQuarantineJob:
     async def process_edge_from_quarantine_with_exception_raised_while_determining_reportability_of_edge_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -896,7 +896,7 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def is_reportable_edge_with_healthy_status_test(self):
         edge_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -927,7 +927,7 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def is_reportable_edge_with_faulty_status_and_outage_ticket_found_test(self):
         edge_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -979,7 +979,7 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def is_reportable_edge_with_faulty_status_and_outage_ticket_not_found_test(self):
         edge_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1017,7 +1017,7 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def is_reportable_edge_with_faulty_status_and_unexpected_outage_ticket_format_test(self):
         edge_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1050,7 +1050,7 @@ class TestQuarantineJob:
         enterprise_name = f'EVIL-CORP|{client_id}|'
         edge_serial_number = 'VC1234567'
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number, 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE'}},
@@ -1216,7 +1216,7 @@ class TestQuarantineJob:
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
         client_id = 12345
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1227,7 +1227,7 @@ class TestQuarantineJob:
         addition_to_quarantine_timestamp = 123456789
         edge_status_in_quarantine = {
             'edge_status': {
-                'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC7654321'},
+                'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC7654321', 'name': 'Saturos'},
                 'links': [
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -1269,7 +1269,7 @@ class TestQuarantineJob:
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
         client_id = 12345
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1387,7 +1387,7 @@ class TestServiceOutageReporterJob:
 
         edge_1_value = {
             'edge_status': {
-                'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial_number},
+                'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial_number, 'name': 'Saturos'},
                 'links': [
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1399,7 +1399,7 @@ class TestServiceOutageReporterJob:
         }
         edge_2_value = {
             'edge_status': {
-                'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial_number},
+                'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial_number, 'name': 'Menardi'},
                 'links': [
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1475,8 +1475,8 @@ class TestServiceOutageReporterJob:
         ])
         template_renderer.compose_email_object.assert_called_once_with(
             unmarshalling_result,
-            fields=["Date of detection", "Serial Number", "Company", "Edge URL", "Outage causes"],
-            fields_edge=["detection_time", "serial_number", "enterprise", "edge_url", "outage_causes"],
+            fields=["Date of detection", "Company", "Edge name", "Serial Number", "Edge URL", "Outage causes"],
+            fields_edge=["detection_time", "enterprise", "edge_name", "serial_number", "edge_url", "outage_causes"],
         )
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.email.request",
@@ -1533,7 +1533,7 @@ class TestServiceOutageReporterJob:
 
         edge_1_value = {
             'edge_status': {
-                'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC123456789'},
+                'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC123456789', 'name': 'Saturos'},
                 'links': [
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1545,7 +1545,7 @@ class TestServiceOutageReporterJob:
         }
         edge_2_value = {
             'edge_status': {
-                'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC987654321'},
+                'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC987654321', 'name': 'Menardi'},
                 'links': [
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1557,7 +1557,7 @@ class TestServiceOutageReporterJob:
         }
         edge_3_value = {
             'edge_status': {
-                'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC111122223'},
+                'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC111122223', 'name': 'Isaac'},
                 'links': [
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1569,7 +1569,7 @@ class TestServiceOutageReporterJob:
         }
         edge_4_value = {
             'edge_status': {
-                'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC111122223'},
+                'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC111122223', 'name': 'Nadia'},
                 'links': [
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1588,7 +1588,7 @@ class TestServiceOutageReporterJob:
         }
 
         edge_1_new_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC123456789'},
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC123456789', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -1596,7 +1596,7 @@ class TestServiceOutageReporterJob:
             'enterprise_name': 'EVIL-CORP|12345|',
         }
         edge_2_new_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC987654321'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC987654321', 'name': 'Menardi'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -1604,7 +1604,7 @@ class TestServiceOutageReporterJob:
             'enterprise_name': 'EVIL-CORP|12345|',
         }
         edge_3_new_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC111122223'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC111122223', 'name': 'Isaac'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1612,7 +1612,7 @@ class TestServiceOutageReporterJob:
             'enterprise_name': 'EVIL-CORP|12345|',
         }
         edge_4_new_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC111122223'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC111122223', 'name': 'Nadia'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1690,7 +1690,7 @@ class TestServiceOutageReporterJob:
         edge_3_identifier = EdgeIdentifier(**edge_3_full_id)
 
         edge_1_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC123456789'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC123456789', 'name': 'Saturos'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1698,7 +1698,7 @@ class TestServiceOutageReporterJob:
             'enterprise_name': 'EVIL-CORP|12345|',
         }
         edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC987654321'},
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC987654321', 'name': 'Menardi'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1706,7 +1706,7 @@ class TestServiceOutageReporterJob:
             'enterprise_name': 'EVIL-CORP|12345|',
         }
         edge_3_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC111122223'},
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC111122223', 'name': 'Isaac'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -1800,11 +1800,12 @@ class TestServiceOutageReporterJob:
         edge_identifier = EdgeIdentifier(host=host, enterprise_id=enterprise_id, edge_id=edge_id)
 
         detection_timestamp = 123456789
+        edge_name = 'Saturos'
         edge_serial_number = 'V123456789'
         enterprise_name = 'EVIL-CORP|12345|'
         edge_1_value = {
             'edge_status': {
-                'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number},
+                'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number, 'name': edge_name},
                 'links': [
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1817,7 +1818,7 @@ class TestServiceOutageReporterJob:
         }
         edge_2_value = {
             'edge_status': {
-                'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number},
+                'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number, 'name': edge_name},
                 'links': [
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
@@ -1849,6 +1850,7 @@ class TestServiceOutageReporterJob:
         result = service_outage_detector._unmarshall_edge_to_report(edge_identifier, edge_1_value)
         expected = {
             'detection_time': expected_detection_time,
+            'edge_name': edge_name,
             'serial_number': edge_serial_number,
             'enterprise': enterprise_name,
             'edge_url': expected_edge_url,
@@ -1863,6 +1865,7 @@ class TestServiceOutageReporterJob:
         result = service_outage_detector._unmarshall_edge_to_report(edge_identifier, edge_2_value)
         expected = {
             'detection_time': expected_detection_time,
+            'edge_name': edge_name,
             'serial_number': edge_serial_number,
             'enterprise': enterprise_name,
             'edge_url': expected_edge_url,
