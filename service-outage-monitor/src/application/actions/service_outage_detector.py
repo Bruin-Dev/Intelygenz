@@ -509,7 +509,7 @@ class ServiceOutageDetector:
             outage_ticket_request['ticket_statuses'] = ticket_statuses
 
         outage_ticket = await self._event_bus.rpc_request(
-            'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=6000,
+            'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=60,
         )
         return outage_ticket
 

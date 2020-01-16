@@ -35,12 +35,11 @@ class TestOpenTicket:
         bruin_repo.open_ticket = Mock(return_value='Success')
 
         open_ticket = OpenTicket(mock_logger, event_bus, bruin_repo)
-        await open_ticket.open_ticket(json.dumps(msg))
+        await open_ticket.open_ticket(msg)
 
         bruin_repo.open_ticket.assert_called_once_with(ticket_id, detail_id)
         event_bus.publish_message.assert_awaited_once_with(response_topic,
-                                                           json.dumps(dict(request_id=request_id, status=200),
-                                                                      default=str))
+                                                           dict(request_id=request_id, status=200))
 
     @pytest.mark.asyncio
     async def open_ticket_ko_test(self):
@@ -60,9 +59,8 @@ class TestOpenTicket:
         bruin_repo.open_ticket = Mock(return_value=None)
 
         open_ticket = OpenTicket(mock_logger, event_bus, bruin_repo)
-        await open_ticket.open_ticket(json.dumps(msg))
+        await open_ticket.open_ticket(msg)
 
         bruin_repo.open_ticket.assert_called_once_with(ticket_id, detail_id)
         event_bus.publish_message.assert_awaited_once_with(response_topic,
-                                                           json.dumps(dict(request_id=request_id, status=500),
-                                                                      default=str))
+                                                           dict(request_id=request_id, status=500))
