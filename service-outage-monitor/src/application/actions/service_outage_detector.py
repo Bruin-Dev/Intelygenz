@@ -92,7 +92,7 @@ class ServiceOutageDetector:
             if outage_happened:
                 self._logger.info(
                     f'[outage-monitoring] Outage detected for {edge_identifier}. '
-                    'Scheduling edge to re-check it again in a few moments.'
+                    'Scheduling edge to re-check it in a few moments.'
                 )
 
                 try:
