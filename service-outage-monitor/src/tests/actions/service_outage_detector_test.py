@@ -2977,6 +2977,7 @@ class TestServiceOutageMonitor:
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
+        calls = [call(edge_status, ticket_statuses=None), call(edge_status, ticket_statuses=['Resolved'])]
 
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
@@ -2988,11 +2989,10 @@ class TestServiceOutageMonitor:
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await service_outage_detector._recheck_edge_for_ticket_creation(edge_full_id)
 
-        # service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        # outage_utils.is_there_an_outage.assert_called_once_with(edge_status)
-        # service_outage_detector._get_outage_ticket_for_edge.assert_awaited_once_with(
-        # edge_status, ticket_statuses=None)
-        # service_outage_detector._create_outage_ticket.assert_awaited_once_with(edge_full_id, edge_status)
+        service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status)
+        service_outage_detector._get_outage_ticket_for_edge.assert_has_awaits(calls)
+        service_outage_detector._create_outage_ticket.assert_awaited_once_with(edge_full_id, edge_status)
 
     @pytest.mark.asyncio
     async def recheck_edge_for_ticket_creation_with_outage_detected_and_production_env_and_existing_ticket_test(self):
@@ -3210,6 +3210,184 @@ class TestServiceOutageMonitor:
                 timeout=10
             )
         ])
+
+    @pytest.mark.asyncio
+    async def reopen_outage_ticket_with_failing_reopening_test(self):
+        ticket_id = 1234567
+        detail_id = 9876543
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 1},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|00001|',
+        }
+        uuid_ = uuid()
+
+        ticket_reopening_msg = {
+            'request_id': uuid_,
+            'ticket_id': ticket_id,
+            'detail_id': detail_id
+        }
+
+        reopen_ticket_result = {
+            'request_id': uuid_,
+            'status': 500,
+        }
+
+        slack_message_post_result = None
+
+        scheduler = Mock()
+        logger = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_utils = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[reopen_ticket_result, slack_message_post_result])
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config, template_renderer, outage_utils)
+
+        with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
+            await service_outage_detector._reopen_outage_ticket(ticket_id, detail_id, edge_status)
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.status.open",
+            ticket_reopening_msg,
+            timeout=30
+        )
+        logger.error.assert_called()
+
+    @pytest.mark.asyncio
+    async def reopen_outage_ticket_with_successful_reopening_test(self):
+        ticket_id = 1234567
+        detail_id = 9876543
+        bruin_client_id = 12345
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 1},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_id}|',
+        }
+        uuid_ = uuid()
+
+        ticket_reopening_msg = {
+            'request_id': uuid_,
+            'ticket_id': ticket_id,
+            'detail_id': detail_id
+        }
+
+        reopen_ticket_result = {
+            'request_id': uuid_,
+            'status': 200,
+        }
+
+        slack_message_post_result = None
+
+        scheduler = Mock()
+        logger = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_utils = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[reopen_ticket_result, slack_message_post_result])
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config, template_renderer, outage_utils)
+
+        service_outage_detector._post_note_in_outage_ticket = CoroutineMock()
+
+        with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
+            await service_outage_detector._reopen_outage_ticket(ticket_id, detail_id, edge_status)
+
+        service_outage_detector._post_note_in_outage_ticket.assert_called_once_with(ticket_id, edge_status)
+        event_bus.rpc_request.assert_has_awaits([
+            call(
+                "bruin.ticket.status.open",
+                ticket_reopening_msg,
+                timeout=30
+            ),
+            call(
+                "notification.slack.request",
+                {
+                    'request_id': uuid_,
+                    'message': (
+                        f'Outage ticket {ticket_id} reopened. Ticket details at '
+                        f'https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}.')
+                },
+                timeout=10
+            )
+        ])
+
+    @pytest.mark.asyncio
+    async def _post_note_in_outage_ticket_test(self):
+        ticket_id = 1234567
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 1},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|00001|',
+        }
+        uuid_ = uuid()
+
+        config = testconfig
+
+        ticket_note_timestamp = str(datetime.now(timezone(config.MONITOR_CONFIG['timezone'])))
+        ticket_note_outage_causes = 'Outage causes: Offline edge. Disconnected link(s).'
+
+        ticket_note = (
+            f'#*Automation Engine*#\n'
+            f'Re-opening ticket.\n'
+            f'{ticket_note_outage_causes}\n'
+            f'TimeStamp: {ticket_note_timestamp}'
+        )
+
+        ticket_append_note_msg = {
+            'request_id': uuid_,
+            'ticket_id': ticket_id,
+            'note': ticket_note
+        }
+
+        scheduler = Mock()
+        logger = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        template_renderer = Mock()
+        outage_utils = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config, template_renderer, outage_utils)
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=ticket_note_timestamp)
+
+        with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
+            with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
+                await service_outage_detector._post_note_in_outage_ticket(ticket_id, edge_status)
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.note.append.request",
+            ticket_append_note_msg,
+            timeout=15
+        )
+        logger.info.assert_called()
 
     @pytest.mark.asyncio
     async def generate_outage_ticket_test(self):

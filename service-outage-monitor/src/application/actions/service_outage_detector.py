@@ -238,19 +238,7 @@ class ServiceOutageDetector:
         ticket_append_note_msg = {'request_id': uuid(), 'ticket_id': ticket_id, 'note': ticket_note}
 
         self._logger.info(f'[outage-ticket-reopening] Posting reopening note in ticket {ticket_id}...')
-        post_note_response = await self._event_bus.rpc_request(
-            "bruin.ticket.note.append.request", ticket_append_note_msg, timeout=15)
-        post_note_response = {}
-        post_note_response['status'] = 200
-
-        if post_note_response['status'] == 200:
-            self._logger.info(
-                f'[outage-ticket-reopening] Posting reopening note succeeded for ticket {ticket_id}.'
-            )
-        else:
-            self._logger.error(
-                f'[outage-ticket-reopening] Posting reopening note failed for ticket {ticket_id}.'
-            )
+        await self._event_bus.rpc_request("bruin.ticket.note.append.request", ticket_append_note_msg, timeout=15)
 
     def _generate_outage_ticket(self, edge_status):
         serial_number = edge_status['edges']['serialNumber']
