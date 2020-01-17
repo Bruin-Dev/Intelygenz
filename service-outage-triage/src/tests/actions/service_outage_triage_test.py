@@ -1810,7 +1810,7 @@ class TestServiceOutageTriage:
         host = "mettel.velocloud.net"
         enterprise_id = 137
         edge_id = 958
-        serial = "VC05200026138"
+        serial = "VC05400002265"
 
         edge_identifier = EdgeIdentifier(host=host, enterprise_id=enterprise_id, edge_id=edge_id)
 
@@ -1833,9 +1833,11 @@ class TestServiceOutageTriage:
         }
         bruin_resolved = "Resolved"
         bruin_note_appended = "Appended"
+        slack_sent = "Sent"
 
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[edge_status, bruin_resolved, bruin_note_appended])
+        event_bus.rpc_request = CoroutineMock(side_effect=[edge_status, bruin_resolved, bruin_note_appended,
+                                                           slack_sent])
 
         config = testconfig
         custom_triage_config = config.TRIAGE_CONFIG.copy()
@@ -1876,7 +1878,8 @@ class TestServiceOutageTriage:
         outage_utils.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
 
         edge_repo.add_edge.assert_called_once_with(edge_identifier._asdict(),
-                                                   dict(edge_status=edge_status['edge_info']),
+                                                   dict(edge_status=edge_status['edge_info'],
+                                                        timestamp=current_datetime),
                                                    update_existing=True)
 
         event_bus.rpc_request.assert_has_awaits([

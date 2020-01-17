@@ -316,6 +316,8 @@ class ServiceOutageTriage:
         return edge_triage_str
 
     async def _auto_resolve_tickets(self, creation_date, ticket_id, detail_id):
+        if ticket_id["serial"] is not "VC05400002265":
+            return
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
         edge_id = id_by_serial[ticket_id["serial"]]
         if self._outage_utils.is_outage_ticket_auto_resolvable(ticket_id['ticketID'], ticket_id['notes'], 3):
@@ -336,7 +338,7 @@ class ServiceOutageTriage:
             if redis_edge is not None:
                 time_from_last_down = datetime.now(timezone(
                                             self._config.TRIAGE_CONFIG['timezone'])) - parse(
-                    redis_edge['addition_timestamp'])
+                    redis_edge['timestamp'])
                 is_forty_five_mins_from_last_down = time_from_last_down < timedelta(minutes=45)
 
             if self._outage_utils.is_there_an_outage(edge_info) is False:
@@ -348,7 +350,8 @@ class ServiceOutageTriage:
                                               }
 
                         resolve_note_msg = "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + str(
-                                            datetime.now() + timedelta(seconds=1))
+                                            datetime.now(timezone(
+                                                self._config.TRIAGE_CONFIG['timezone'])) + timedelta(seconds=1))
                         ticket_append_note_msg = {'request_id': uuid(),
                                                   'ticket_id': ticket_id["ticketID"],
                                                   'note': resolve_note_msg}
@@ -360,16 +363,30 @@ class ServiceOutageTriage:
                         await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                           ticket_append_note_msg,
                                                           timeout=15)
+
+                        client_id = self._client_id_from_edge_status(edge_status)
+                        slack_message = {'request_id': uuid(),
+                                         'message': f'Ticket autoresolved '
+                                                    f'https://app.bruin.com/helpdesk?clientId={client_id}&'
+                                                    f'ticketId={ticket_id["ticketID"]}, in '
+                                                    f'{self._config.TRIAGE_CONFIG["environment"]}'}
+                        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
                     self._logger.info(f"Ticket of ticketID:{ticket_id['ticketID']} auto-resolved")
                     edge_identifier = EdgeIdentifier(**edge_id)
-                    edge_value = {'edge_status': edge_info}
+                    edge_value = {'edge_status': edge_info, 'timestamp': datetime.now(timezone(
+                                                self._config.TRIAGE_CONFIG['timezone']))}
                     self._edge_repository.add_edge(edge_identifier._asdict(), edge_value, update_existing=True)
+                else:
+                    self._logger.info("Too much time has passed for an autoresolve")
             else:
+                self._logger.info("Outage still exists for edge")
                 curr_update_existing = True
                 if redis_edge is not None:
                     if self._outage_utils.is_there_an_outage(redis_edge['edge_status']):
                         curr_update_existing = False
                 edge_identifier = EdgeIdentifier(**edge_id)
-                edge_value = {'edge_status': edge_info}
+                edge_value = {'edge_status': edge_info, 'timestamp': datetime.now(timezone(
+                                                                self._config.TRIAGE_CONFIG['timezone']))}
                 self._edge_repository.add_edge(edge_identifier._asdict(), edge_value,
                                                update_existing=curr_update_existing)

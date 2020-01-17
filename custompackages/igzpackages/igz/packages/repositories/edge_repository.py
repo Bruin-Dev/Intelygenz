@@ -52,7 +52,7 @@ class EdgeRepository:
         }
         self._redis_client.set(
             redis_key,
-            json.dumps(value_for_redis_key),
+            json.dumps(value_for_redis_key, default=str),
             ex=time_to_live,
         )
 

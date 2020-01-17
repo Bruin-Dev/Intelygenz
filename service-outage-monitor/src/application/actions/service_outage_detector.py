@@ -509,7 +509,7 @@ class ServiceOutageDetector:
             outage_ticket_request['ticket_statuses'] = ticket_statuses
 
         outage_ticket = await self._event_bus.rpc_request(
-            'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=60,
+            'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=180,
         )
         return outage_ticket
 
@@ -520,7 +520,7 @@ class ServiceOutageDetector:
             client_id = client_id_match.group('client_id')
             return int(client_id)
         else:
-            return None
+            return 9994
 
     def _add_edge_to_reporting(self, edge_full_id, edge_status):
         edge_identifier = EdgeIdentifier(**edge_full_id)
