@@ -15,6 +15,10 @@ data "aws_iam_role" "ecs_execution_role_with_s3" {
   name               = "ecs_task_execution_with_s3_role"
 }
 
+data "aws_iam_role" "ecs_task_execution_with_s3_and_alb_role" {
+  name               = "ecs_task_execution_with_s3_and_alb_role"
+}
+
 data "aws_iam_role" "ecs_role" {
   name               = "ecs_role"
 }

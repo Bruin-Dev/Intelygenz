@@ -2,7 +2,7 @@
 FROM python:3.6
 
 RUN pip install --upgrade pip
-RUN pip install pandas==0.24.2
+RUN pip install pandas==0.24.2 --timeout=30
 
 ENV PYTHONUNBUFFERED 1
 
@@ -12,6 +12,6 @@ COPY custompackages/ /service/custompackages
 
 WORKDIR /service/app
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --timeout=30
 
 CMD ["python3", "-u", "src/app.py"]

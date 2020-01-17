@@ -3,6 +3,7 @@ import os
 import json
 import logging
 import sys
+from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 
@@ -12,40 +13,55 @@ FNULL = open(os.devnull, 'w')
 class DeleteOlderDockerImage:
     def delete_oldest_image(self, repository_name_p):
         oldest_image_for_repository = self._get_oldest_image(repository_name_p)
-        oldest_image_for_repository_image_tag = oldest_image_for_repository['imageTag']
-        logging.info(f"Docker image for the ECR repository with name {repository_name_p} and imageTag "
-                     f"{oldest_image_for_repository_image_tag} it's going to be deleted")
+        oldest_image_for_repository_image_digest = oldest_image_for_repository['imageDigest']
+        oldest_image_for_repository_image_pushed_date = oldest_image_for_repository['imagePushedAt']
+        logging.info(f"Docker image for the ECR repository {repository_name_p} with imageDigest "
+                     f"{oldest_image_for_repository_image_digest} and pushed at "
+                     f"{oldest_image_for_repository_image_pushed_date} it's going to be deleted")
         delete_oldest_image_for_repository_exit_code = subprocess.call(
             ['aws', 'ecr', 'batch-delete-image', '--repository-name', repository_name_p,
-             '--image-ids', 'imageTag=' + oldest_image_for_repository_image_tag,
+             '--image-ids', 'imageDigest=' + oldest_image_for_repository_image_digest,
              '--region', 'us-east-1'], stdout=FNULL)
         if delete_oldest_image_for_repository_exit_code != 0:
-            logging.error(f"There were problems deleting docker image for the ECR repository with "
-                          f"name {repository_name_p} and imageTag {oldest_image_for_repository_image_tag}")
+            logging.error(f"There were problems deleting docker image for the ECR repository "
+                          f"{repository_name_p} with imageDigest {oldest_image_for_repository_image_digest}"
+                          f" and pushed at {oldest_image_for_repository_image_pushed_date}")
         else:
-            logging.info(f"Docker image for the ECR repository with "
-                         f"name {repository_name_p} and imageTag {oldest_image_for_repository_image_tag} "
-                         f"was successfully deleted")
+            logging.info(f"Docker image for the ECR repository {repository_name_p} with imageDigest "
+                         f"{oldest_image_for_repository_image_digest} and pushed at "
+                         f"{oldest_image_for_repository_image_pushed_date} was successfully deleted")
+
+    def _get_oldest_image(self, repository_name_p):
+        logging.info(f"Getting all docker images for the ECR repository {repository_name_p}")
+        get_all_images_for_repository = self._get_all_images_for_repository(repository_name_p)
+        num_of_images_for_repository = len(get_all_images_for_repository)
+        logging.info(f"ECR repository {repository_name_p} has {num_of_images_for_repository} docker images")
+        if num_of_images_for_repository > 0:
+            repository_oldest_image = get_all_images_for_repository[0]
+            repository_oldest_image_date = self._convert_timestamp_to_date(
+                repository_oldest_image['imagePushedAt'])
+            logging.info(f"The oldest docker image for the ECR repository {repository_name_p} "
+                         f"has imageDigest {repository_oldest_image['imageDigest']} and was pushed "
+                         f"at {repository_oldest_image_date}")
+            return {'imageDigest': repository_oldest_image['imageDigest'],
+                    'imagePushedAt': repository_oldest_image_date}
+        else:
+            logging.error(f"No docker images were found for the ECR repository {repository_name_p}")
+            sys.exit(1)
 
     @staticmethod
-    def _get_oldest_image(repository_name_p):
-        logging.info(f"Getting all docker images for the ECR repository with name {repository_name_p}")
-        get_all_images_for_repository = subprocess.Popen(['aws', 'ecr', 'list-images', '--repository-name',
-                                                          repository_name_p, '--region', 'us-east-1'],
-                                                         stdout=subprocess.PIPE)
-        get_all_images_for_repository_output = json.loads(
-            get_all_images_for_repository.stdout.read())['imageIds']
-        num_of_images_for_repository = len(get_all_images_for_repository_output)
-        logging.info(f"ECR repository with name {repository_name_p} has {num_of_images_for_repository} docker images")
-        if num_of_images_for_repository > 0:
-            get_all_images_for_repository_output.sort(key=lambda i: i['imageTag'])
-            repository_oldest_image = get_all_images_for_repository_output[0]
-            logging.info(f"The oldest docker image for the ECR repository with name {repository_name_p} "
-                         f"has the following attributes {repository_oldest_image}")
-            return repository_oldest_image
-        else:
-            logging.error(f"No docker images were found for the ECR repository with name {repository_name_p}")
-            sys.exit(1)
+    def _get_all_images_for_repository(repository_name_p):
+        get_all_images_for_repository_call = subprocess.Popen(["aws", "ecr", "describe-images", "--repository-name",
+                                                               repository_name_p, "--region", "us-east-1",
+                                                               "--query", "sort_by(imageDetails,& imagePushedAt)[*]"],
+                                                              stdout=subprocess.PIPE)
+        get_all_images_for_repository_call_output = json.loads(
+            get_all_images_for_repository_call.stdout.read())
+        return get_all_images_for_repository_call_output
+
+    @staticmethod
+    def _convert_timestamp_to_date(timestamp_p):
+        return datetime.utcfromtimestamp(timestamp_p).strftime('%Y-%m-%d %H:%M:%S')
 
     @staticmethod
     def print_usage():
