@@ -511,7 +511,7 @@ class TestServiceOutageDetectorJob:
 
         enterprise_name = 'EVIL-CORP'
         result = service_outage_detector._is_edge_for_testing_purposes(enterprise_name)
-        assert result is True
+        assert result is False
 
     @pytest.mark.asyncio
     async def get_all_edges_test(self):
@@ -1102,7 +1102,7 @@ class TestQuarantineJob:
                 'edge_serial': edge_serial_number,
                 'client_id': client_id,
             },
-            timeout=60,
+            timeout=180,
         )
         assert outage_ticket_result == outage_ticket
 
@@ -1143,7 +1143,7 @@ class TestQuarantineJob:
                                                         config, template_renderer, outage_utils)
 
         result_client_id = service_outage_detector._extract_client_id(enterprise_name)
-        assert result_client_id is None
+        assert result_client_id == 9994
 
     def add_edge_to_reporting_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
