@@ -25,16 +25,17 @@ not included.
 
 This report is sent **every hour** and contains the list of faulty edges represented as a table like:
 
-| Date of detection | Company | Edge name | Serial number   |                                     Edge URL                                 |   Outage causes  |
+| Date of detection | Company | Edge name | Last contact | Serial number   |                                     Edge URL                                 |   Outage causes  |
 |:-----------------:|:-------------:|:-----------:|:----------------------------------------------------------------------------:|:----------------:|
-|     <detection_date_1>    |   <company_1>  | <edge_name_1> | <serial_number_1> | <edge_url_1> | <outage_causes_list_1> |
-|     <detection_date_2>    |   <company_2>  | <edge_name_2> | <serial_number_2> | <edge_url_2> | <outage_causes_list_2> |
-|     <detection_date_N>    |   <company_N>  | <edge_name_N> | <serial_number_N> | <edge_url_N> | <outage_causes_list_N> |
+|     <detection_date_1>    |   <company_1>  | <edge_name_1> | <last_contact_1> | <serial_number_1> | <edge_url_1> | <outage_causes_list_1> |
+|     <detection_date_2>    |   <company_2>  | <edge_name_2> | <last_contact_2> | <serial_number_2> | <edge_url_2> | <outage_causes_list_2> |
+|     <detection_date_N>    |   <company_N>  | <edge_name_N> | <last_contact_N> | <serial_number_N> | <edge_url_N> | <outage_causes_list_N> |
 
 where:
 - **Date of detection**. Points out when the outage in an edge was first detected. It's a datetime represented with format `YYYY-MM-DD HH:mm:ss`.
 - **Company**. The company this edge belongs to.
 - **Edge name**. The name of the edge.
+- **Last contact**. The moment that the edge was contacted for the last time.
 - **Serial number**. The serial number of the faulty edge.
 - **Edge URL**. The URL of this edge in the Velocloud system.
 - **Outage causes**. The reasons why the edge became faulty. It's a list containing a network element (either a link or the edge itself) and
@@ -42,10 +43,10 @@ where:
 
 Besides this table, the e-mail has a CSV file like the following one attached to it:
 ```
-detection_time,edge_name,enterprise,links,serial_number,outage_causes
-<detection_date_1>,<edge_name_1>,<company_1>,<edge_url_1>,<serial_number_1>,<comma_separated_causes_1>
-<detection_date_2>,<edge_name_2>,<company_2>,<edge_url_2>,<serial_number_2>,<comma_separated_causes_2>
-<detection_date_N>,<edge_name_N>,<company_N>,<edge_url_N>,<serial_number_N>,<comma_separated_causes_N>
+detection_time,edge_name,enterprise,last_contact,links,serial_number,outage_causes
+<detection_date_1>,<edge_name_1>,<last_contact_1>,<company_1>,<edge_url_1>,<serial_number_1>,<comma_separated_causes_1>
+<detection_date_2>,<edge_name_2>,<last_contact_2>,<company_2>,<edge_url_2>,<serial_number_2>,<comma_separated_causes_2>
+<detection_date_N>,<edge_name_N>,<last_contact_N><company_N>,<edge_url_N>,<serial_number_N>,<comma_separated_causes_N>
 ```
 
 ### Work Flow

@@ -353,6 +353,7 @@ class ServiceOutageDetector:
         edge_status_device_info = edge_status['edges']
 
         edge_name = edge_status_device_info['name']
+        last_contact = edge_status_device_info['lastContact']
         edge_serial = edge_status_device_info['serialNumber']
         enterprise_name = edge_status['enterprise_name']
 
@@ -375,6 +376,7 @@ class ServiceOutageDetector:
         return {
             'detection_time': outage_detection_datetime,
             'edge_name': edge_name,
+            'last_contact': last_contact,
             'serial_number': edge_serial,
             'enterprise': enterprise_name,
             'edge_url': edge_url,
@@ -399,8 +401,10 @@ class ServiceOutageDetector:
         self._logger.info(f'Reporting {len(edges_for_email_template)} outages without ticket...')
 
         # TODO: Move these fields to a proper place as they will always be the same in every outage report
-        fields = ["Date of detection", "Company", "Edge name", "Serial Number", "Edge URL", "Outage causes"]
-        fields_edge = ["detection_time", "enterprise", "edge_name", "serial_number", "edge_url", "outage_causes"]
+        fields = ["Date of detection", "Company", "Edge name", "Last contact", "Serial Number", "Edge URL",
+                  "Outage causes"]
+        fields_edge = ["detection_time", "enterprise", "edge_name", "last_contact", "serial_number", "edge_url",
+                       "outage_causes"]
         email_report = self._email_template_renderer.compose_email_object(edges_for_email_template, fields=fields,
                                                                           fields_edge=fields_edge)
         await self._event_bus.rpc_request("notification.email.request", email_report, timeout=10)
