@@ -97,7 +97,8 @@ class TestAlert:
                 "edges": {
                     "serialNumber": "some serial",
                     "lastContact": "2018-06-24T20:27:44.000Z",
-                    "modelNumber": "edge123"
+                    "modelNumber": "edge123",
+                    "name": "Saturos",
                 },
                 "enterprise_name": "Fake Corp"
             }
@@ -112,7 +113,8 @@ class TestAlert:
                 "edges": {
                     "serialNumber": "some serial",
                     "lastContact": "2018-09-24T20:27:44.000Z",
-                    "modelNumber": "edge456"
+                    "modelNumber": "edge456",
+                    "name": "Menardi",
                 },
                 "enterprise_name": "Fake Corp"
             },
@@ -127,7 +129,8 @@ class TestAlert:
                 "edges": {
                     "serialNumber": "some serial",
                     "lastContact": "2018-10-24T20:27:44.000Z",
-                    "modelNumber": "edge789"
+                    "modelNumber": "edge789",
+                    "name": "Isaac",
                 },
                 "enterprise_name": "Fake Corp"
             }
@@ -186,7 +189,8 @@ class TestAlert:
                 "edges": {
                     "serialNumber": "some serial",
                     "lastContact": "0000-00-00 00:00:00.000Z",
-                    "modelNumber": "edge123"
+                    "modelNumber": "edge123",
+                    "name": "Saturos",
                 },
                 "enterprise_name": "Fake Corp"
             }
@@ -201,7 +205,8 @@ class TestAlert:
                 "edges": {
                     "serialNumber": "some serial",
                     "lastContact": "0000-00-00 00:00:00.000Z",
-                    "modelNumber": "edge456"
+                    "modelNumber": "edge456",
+                    "name": "Menardi",
                 },
                 "enterprise_name": "Fake Corp"
             }
@@ -216,7 +221,8 @@ class TestAlert:
                 "edges": {
                     "serialNumber": "some serial",
                     "lastContact": "2018-10-24T20:27:44.000Z",
-                    "modelNumber": "edge789"
+                    "modelNumber": "edge789",
+                    "name": "Isaac",
                 },
                 "enterprise_name": "Fake Corp"
             }
@@ -279,7 +285,8 @@ class TestAlert:
                 "edges": {
                     "serialNumber": "some serial",
                     "lastContact": "2018-06-20T20:27:44.000Z",
-                    "modelNumber": "edge123"
+                    "modelNumber": "edge123",
+                    "name": "Saturos",
                 },
                 "enterprise_name": "Fake Corp"
             }
@@ -294,7 +301,8 @@ class TestAlert:
                 "edges": {
                     "serialNumber": "some serial",
                     "lastContact": "2018-06-25T20:27:44.000Z",
-                    "modelNumber": "edge456"
+                    "modelNumber": "edge456",
+                    "name": "Menardi",
                 },
                 "enterprise_name": "Fake Corp"
             }
@@ -309,7 +317,8 @@ class TestAlert:
                 "edges": {
                     "serialNumber": "some serial",
                     "lastContact": "2018-06-30T20:27:44.000Z",
-                    "modelNumber": "edge789"
+                    "modelNumber": "edge789",
+                    "name": "Isaac",
                 },
                 "enterprise_name": "Fake Corp"
             }
