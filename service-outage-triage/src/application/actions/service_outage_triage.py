@@ -316,7 +316,7 @@ class ServiceOutageTriage:
         return edge_triage_str
 
     async def _auto_resolve_tickets(self, creation_date, ticket_id, detail_id):
-        if ticket_id["serial"] is not "VC05400002265":
+        if ticket_id["serial"] != "VC05400002265":
             return
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
         edge_id = id_by_serial[ticket_id["serial"]]
