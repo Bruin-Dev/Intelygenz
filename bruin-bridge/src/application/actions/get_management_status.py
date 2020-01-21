@@ -41,4 +41,4 @@ class GetManagementStatus:
         response["management_status"] = management_status
         await self._event_bus.publish_message(response_topic, response)
 
-        self._logger.info(f'Management status published in event bus')
+        self._logger.info(f'Management status published in event bus for request {json.dumps(msg)}')

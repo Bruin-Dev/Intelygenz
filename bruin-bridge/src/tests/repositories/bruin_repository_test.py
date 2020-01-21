@@ -68,8 +68,8 @@ class TestBruinRepository:
             call(client_id, ticket_id, ticket_status_1, category, ticket_topic),
             call(client_id, ticket_id, ticket_status_2, category, ticket_topic),
         ], any_order=False)
-        assert call(client_id, ticket_id, ticket_status_3, category) not in \
-            bruin_repository._bruin_client.get_all_tickets.mock_calls
+        assert call(client_id, ticket_id, ticket_status_3,
+                    category) not in bruin_repository._bruin_client.get_all_tickets.mock_calls
         assert filtered_tickets is None
 
     def get_filtered_tickets_with_bruin_returning_empty_lists_for_every_status_test(self):
@@ -618,3 +618,66 @@ class TestBruinRepository:
         change_status = bruin_repository.resolve_ticket(ticket_id, detail_id)
         bruin_client.update_ticket_status.assert_called_once_with(ticket_id, detail_id, ticket_status)
         assert change_status == successful_status_change
+
+    def get_management_status_ok_test(self):
+        logger = Mock()
+        filters = {
+            "client_id": 9994,
+            "service_number": "VC05400009999"
+        }
+        response = {
+            "documents": [
+                {
+                    "clientID": 9994,
+                    "clientName": "METTEL/NEW YORK",
+                    "vendor": "MetTel",
+                    "serviceNumber": "VC05400009999",
+                    "siteId": 2048,
+                    "siteLabel": "MetTel Network Services",
+                    "address": {
+                        "address": "Fake street",
+                        "city": "Fake city",
+                        "state": "Fake state",
+                        "zip": "9999",
+                        "country": "Fake Country"
+                    },
+                    "description": None,
+                    "installDate": "2019-08-21T05:00:00Z",
+                    "disconnectDate": None,
+                    "status": "A",
+                    "verified": "Y",
+                    "productCategory": "SD-WAN",
+                    "productType": "SD-WAN",
+                    "items": [
+                        {
+                            "itemName": "Licensed Software - SD-WAN 100M",
+                            "primaryIndicator": "SD-WAN"
+                        }
+                    ],
+                    "contractIdentifier": "0",
+                    "rateCardIdentifier": None,
+                    "lastInvoiceUsageDate": None,
+                    "lastUsageDate": None,
+                    "longitude": -74.009781,
+                    "latitude": 40.7035351
+                }
+            ]
+        }
+        bruin_client = Mock()
+        bruin_client.get_management_status = Mock(return_value=response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_management_status(filters)
+        bruin_client.get_management_status.assert_called_once_with(filters)
+
+    def get_management_status_ko_test(self):
+        logger = Mock()
+        filters = {
+            "client_id": 9994,
+            "service_number": "VC05400009999"
+        }
+        response = {}
+        bruin_client = Mock()
+        bruin_client.get_management_status = Mock(return_value=response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_management_status(filters)
+        bruin_client.get_management_status.assert_called_once_with(filters)
