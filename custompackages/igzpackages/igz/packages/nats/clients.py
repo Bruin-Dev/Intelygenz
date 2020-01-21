@@ -36,13 +36,11 @@ class NATSClient:
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
         async def publish():
-
-            if self._nc.is_connected:
-                await self._nc.publish(topic, message.encode())
-            else:
+            if not self._nc.is_connected:
                 await self.close_nats_connections()
                 await self.connect_to_nats()
-                await self._nc.publish(topic, message.encode())
+
+            await self._nc.publish(topic, message.encode())
 
         await publish()
 
@@ -50,14 +48,12 @@ class NATSClient:
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']))
         async def rpc_request():
-            if self._nc.is_connected:
-                rpc_request = await self._nc.timed_request(topic, message.encode(), timeout)
-                return json.loads(rpc_request.data)
-            else:
+            if not self._nc.is_connected:
                 await self.close_nats_connections()
                 await self.connect_to_nats()
-                rpc_request = await self._nc.timed_request(topic, message.encode(), timeout)
-                return json.loads(rpc_request.data)
+
+            rpc_request = await self._nc.timed_request(topic, message.encode(), timeout)
+            return json.loads(rpc_request.data)
 
         return await rpc_request()
 
@@ -84,23 +80,17 @@ class NATSClient:
                stop=stop_after_delay(self._config['stop_delay']))
         async def subscribe_action():
             self._topic_action[topic] = action
-            if self._nc.is_connected:
-                sub = await self._nc.subscribe(topic,
-                                               queue=queue,
-                                               is_async=True,
-                                               cb=self._cb_with_ack_and_action,
-                                               pending_msgs_limit=self._config["subscriber"][
-                                                   "pending_limits"])
 
-            else:
+            if not self._nc.is_connected:
                 await self.close_nats_connections()
                 await self.connect_to_nats()
-                sub = await self._nc.subscribe(topic,
-                                               queue=queue,
-                                               is_async=True,
-                                               cb=self._cb_with_ack_and_action,
-                                               pending_msgs_limit=self._config["subscriber"][
-                                                   "pending_limits"])
+
+            sub = await self._nc.subscribe(topic,
+                                           queue=queue,
+                                           is_async=True,
+                                           cb=self._cb_with_ack_and_action,
+                                           pending_msgs_limit=self._config["subscriber"][
+                                               "pending_limits"])
             self._subs.append(sub)
 
         await subscribe_action()
