@@ -1325,6 +1325,8 @@ class TestServiceOutageTriage:
         service_outage_triage._compose_event_note_object = Mock(side_effect=[
             events_note, events_note
         ])
+        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
+                                                                             edge_id=edge_id))
 
         current_datetime = datetime.now()
         datetime_mock = Mock()
@@ -1950,6 +1952,8 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils, edge_repo)
+        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
+                                                                             edge_id=edge_id))
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -2041,6 +2045,8 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils, edge_repo)
+        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
+                                                                             edge_id=edge_id))
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -2133,6 +2139,8 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils, edge_repo)
+        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
+                                                                             edge_id=edge_id))
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -2208,6 +2216,8 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils, edge_repo)
+        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
+                                                                             edge_id=edge_id))
 
         ticket_id = "123"
         ticket_notes = ['list of notes']
@@ -2287,6 +2297,8 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils, edge_repo)
+        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
+                                                                             edge_id=edge_id))
 
         ticket_id = "123"
         ticket_notes = ['list of notes']
@@ -2368,6 +2380,8 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils, edge_repo)
+        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
+                                                                             edge_id=edge_id))
 
         ticket_id = "123"
         ticket_notes = ['list of notes']
