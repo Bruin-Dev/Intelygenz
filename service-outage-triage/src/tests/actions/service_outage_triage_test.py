@@ -1142,7 +1142,7 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
-
+        service_outage_triage._get_edge_id = CoroutineMock()
         await service_outage_triage._check_for_new_events(timestamp, ticket)
 
         service_outage_triage._compose_event_note_object.assert_any_call(events_data_sorted_by_timestamp)
@@ -1188,6 +1188,7 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
+        service_outage_triage._get_edge_id = CoroutineMock()
 
         await service_outage_triage._check_for_new_events(timestamp, ticket)
 
@@ -1240,6 +1241,7 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
+        service_outage_triage._get_edge_id = CoroutineMock()
 
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             await service_outage_triage._check_for_new_events(timestamp, ticket)
@@ -1816,6 +1818,9 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
+                                                    outage_utils, edge_repo)
+        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
+                                                                             edge_id=edge_id))
 
         ticket_id = "123"
         ticket_notes = ['list of notes']

@@ -70,8 +70,7 @@ class ServiceOutageTriage:
         filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
 
         for ticket_id in filtered_ticket_ids:
-            id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
-            edge_id = id_by_serial[ticket_id["serial"]]
+            edge_id = await self._get_edge_id(ticket_id["serial"])
             status_msg = {'request_id': uuid(),
                           'edge': edge_id}
 
@@ -107,7 +106,7 @@ class ServiceOutageTriage:
 
     async def _filtered_ticket_details(self, ticket_list):
         filtered_ticket_ids = []
-        valid_serials = list(self._config.TRIAGE_CONFIG["id_by_serial"].keys())
+        valid_serials = self._config.TRIAGE_CONFIG["id_by_serial"]
         for ticket in ticket_list['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'ticket_id': ticket['ticketID']}
@@ -173,8 +172,7 @@ class ServiceOutageTriage:
         return client_id
 
     async def _check_for_new_events(self, timestamp, ticket_id):
-        id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
-        edge_id = id_by_serial[ticket_id["serial"]]
+        edge_id = await self._get_edge_id(ticket_id["serial"])
         filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
         events_msg = {'request_id': uuid(),
                       'edge': edge_id,
@@ -385,3 +383,8 @@ class ServiceOutageTriage:
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
             self._logger.info(f"Ticket of ticketID:{ticket_id['ticketID']} auto-resolved")
+
+    async def _get_edge_id(self, serial):
+        id_from_serial_msg = {"request_id": uuid(), "serial": serial}
+        edge_id = await self._event_bus.rpc_request("edge.ids.by.serial", id_from_serial_msg, timeout=45)
+        return edge_id["edge_id"]

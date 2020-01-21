@@ -43,11 +43,11 @@ class TestEdgeIdBySerialResponse:
 
         actions = SearchForIDsBySerial(config, test_bus, mock_logger, id_by_serial_repo)
 
-        await actions.search_for_edge_id(json.dumps(request_msg))
+        await actions.search_for_edge_id(request_msg)
 
         id_by_serial_repo.search_for_edge_id_by_serial.assert_called_once_with(serial)
 
-        test_bus.publish_message.assert_awaited_once_with(response_topic, json.dumps(response_msg, default=str))
+        test_bus.publish_message.assert_awaited_once_with(response_topic, response_msg)
 
     @pytest.mark.asyncio
     async def search_for_edge_id_ko_none_test(self):
@@ -70,11 +70,11 @@ class TestEdgeIdBySerialResponse:
 
         actions = SearchForIDsBySerial(config, test_bus, mock_logger, id_by_serial_repo)
 
-        await actions.search_for_edge_id(json.dumps(request_msg))
+        await actions.search_for_edge_id(request_msg)
 
         id_by_serial_repo.search_for_edge_id_by_serial.assert_called_once_with(serial)
 
-        test_bus.publish_message.assert_awaited_once_with(response_topic, json.dumps(response_msg, default=str))
+        test_bus.publish_message.assert_awaited_once_with(response_topic, response_msg)
 
     @pytest.mark.asyncio
     async def search_for_edge_id_ok_exception_test(self):
@@ -97,8 +97,8 @@ class TestEdgeIdBySerialResponse:
 
         actions = SearchForIDsBySerial(config, test_bus, mock_logger, id_by_serial_repo)
 
-        await actions.search_for_edge_id(json.dumps(request_msg))
+        await actions.search_for_edge_id(request_msg)
 
         id_by_serial_repo.search_for_edge_id_by_serial.assert_called_once_with(serial)
 
-        test_bus.publish_message.assert_awaited_once_with(response_topic, json.dumps(response_msg, default=str))
+        test_bus.publish_message.assert_awaited_once_with(response_topic, response_msg)
