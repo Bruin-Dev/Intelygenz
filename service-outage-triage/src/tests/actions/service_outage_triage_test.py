@@ -1249,112 +1249,149 @@ class TestServiceOutageTriage:
             call([event_3_data])
         ], any_order=False)
 
-    # @pytest.mark.asyncio
-    # async def check_for_new_events_with_meaningful_events_and_production_environment_test(self):
-    #     logger = Mock()
-    #     scheduler = Mock()
-    #     config = testconfig
-    #     template_renderer = Mock()
-    #
-    #     environment = 'production'
-    #
-    #     timestamp = '2019-07-30 00:26:00-04:00'
-    #     ticket_id = 123
-    #     ticket = {"ticketID": ticket_id, "serial": "VC05200026138"}
-    #
-    #     event_1_timestamp = '2019-07-30 06:38:00+00:00'
-    #     event_2_timestamp = '2019-07-30 07:38:00+00:00'
-    #     event_1_data = {
-    #         'event': 'LINK_ALIVE',
-    #         'category': 'NETWORK',
-    #         'eventTime': event_1_timestamp,
-    #         'message': 'GE2 alive'
-    #     }
-    #     event_2_data = {
-    #         'event': 'LINK_ALIVE',
-    #         'category': 'NETWORK',
-    #         'eventTime': event_2_timestamp,
-    #         'message': 'GE2 alive'
-    #     }
-    #     events_data = [event_1_data, event_2_data]
-    #     events_to_report = {'events': events_data}
-    #
-    #     events_note = 'This is the note for all these events\n'
-    #     events_note_timestamp = parse(event_2_timestamp).astimezone(timezone('US/Eastern')) + timedelta(seconds=1)
-    #     events_ticket_note = f'#*Automation Engine*#{events_note}TimeStamp: {events_note_timestamp}'
-    #
-    #     rpc_response_append_ticket = rpc_response_slack_msg = None
-    #
-    #     event_bus = Mock()
-    #     event_bus.rpc_request = CoroutineMock(side_effect=[
-    #         events_to_report,
-    #         rpc_response_append_ticket, rpc_response_slack_msg,
-    #         rpc_response_append_ticket, rpc_response_slack_msg,
-    #     ])
-    #
-    #     service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer)
-    #     service_outage_triage._compose_event_note_object = Mock(side_effect=[
-    #         events_note, events_note
-    #     ])
-    #
-    #     current_datetime = datetime.now()
-    #     datetime_mock = Mock()
-    #     datetime_mock.now = Mock(return_value=current_datetime)
-    #
-    #     uuid_1 = uuid()
-    #     uuid_2 = uuid()
-    #     uuid_3 = uuid()
-    #     uuid_side_effect = [uuid_1, uuid_2, uuid_3]
-    #
-    #     custom_triage_config = config.TRIAGE_CONFIG.copy()
-    #     custom_triage_config['environment'] = environment
-    #     with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
-    #         with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
-    #             with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-    #                 await service_outage_triage._check_for_new_events(timestamp, ticket)
-    #
-    #     service_outage_triage._compose_event_note_object.assert_has_calls([
-    #         call(events_data),
-    #         call(events_data),
-    #     ])
-    #     event_bus.rpc_request.assert_has_awaits([
-    #         call(
-    #             'alert.request.event.edge',
-    #             {
-    #                 'request_id': uuid_1,
-    #                 'edge': {
-    #                     "host": "mettel.velocloud.net",
-    #                     "enterprise_id": 137,
-    #                     "edge_id": 958
-    #                 },
-    #                 'start_date': timestamp,
-    #                 'end_date': current_datetime,
-    #                 'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-    #             },
-    #             timeout=180,
-    #         ),
-    #         call(
-    #             'bruin.ticket.note.append.request',
-    #             {
-    #                 'request_id': uuid_2,
-    #                 'ticket_id': ticket_id,
-    #                 'note': events_ticket_note,
-    #             },
-    #             timeout=15,
-    #         ),
-    #         call(
-    #             'notification.slack.request',
-    #             {
-    #                 'request_id': uuid_3,
-    #                 'message': (
-    #                     'Events appended to ticket: https://app.bruin.com/helpdesk?clientId=85940&'
-    #                     f'ticketId={ticket_id}, in production'
-    #                 )
-    #             },
-    #             timeout=10,
-    #         ),
-    #     ], any_order=False)
-    #
+    @pytest.mark.asyncio
+    async def check_for_new_events_with_meaningful_events_and_production_environment_test(self):
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+
+        environment = 'production'
+
+        timestamp = '2019-07-30 00:26:00-04:00'
+        ticket_id = 123
+        ticket = {"ticketID": ticket_id, "serial": "VC05200026138"}
+
+        event_1_timestamp = '2019-07-30 06:38:00+00:00'
+        event_2_timestamp = '2019-07-30 07:38:00+00:00'
+        event_1_data = {
+            'event': 'LINK_ALIVE',
+            'category': 'NETWORK',
+            'eventTime': event_1_timestamp,
+            'message': 'GE2 alive'
+        }
+        event_2_data = {
+            'event': 'LINK_ALIVE',
+            'category': 'NETWORK',
+            'eventTime': event_2_timestamp,
+            'message': 'GE2 alive'
+        }
+        events_data = [event_1_data, event_2_data]
+        events_to_report = {'events': events_data}
+
+        events_note = 'This is the note for all these events\n'
+        events_note_timestamp = parse(event_2_timestamp).astimezone(timezone('US/Eastern')) + timedelta(seconds=1)
+        events_ticket_note = f'#*Automation Engine*#{events_note}TimeStamp: {events_note_timestamp}'
+
+        rpc_response_append_ticket = rpc_response_slack_msg = None
+
+        host = "mettel.velocloud.net"
+        enterprise_id = 137
+        edge_id = 958
+        serial = "VC05400002265"
+
+        edge_status = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": host,
+                "enterprise_id": enterprise_id,
+                "edge_id": edge_id
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": serial,
+                },
+                "links": [{"link": None}]
+            }
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            edge_status,
+            events_to_report,
+            rpc_response_append_ticket, rpc_response_slack_msg
+        ])
+
+        outage_utils = Mock()
+        edge_repo = Mock()
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
+                                                    outage_utils, edge_repo)
+        service_outage_triage._compose_event_note_object = Mock(side_effect=[
+            events_note, events_note
+        ])
+
+        current_datetime = datetime.now()
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+
+        uuid_1 = uuid()
+        uuid_2 = uuid()
+        uuid_3 = uuid()
+        uuid_4 = uuid()
+        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4]
+
+        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config['environment'] = environment
+        with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
+            with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
+                with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+                    await service_outage_triage._check_for_new_events(timestamp, ticket)
+
+        service_outage_triage._compose_event_note_object.assert_called_once_with(events_data)
+        event_bus.rpc_request.assert_has_awaits([
+            call(
+                'edge.status.request',
+                {
+                    'request_id': uuid_2,
+                    'edge': {
+                        "host": host,
+                        "enterprise_id": enterprise_id,
+                        "edge_id": edge_id
+                    }
+                },
+                timeout=45,
+            ),
+            call(
+                'alert.request.event.edge',
+                {
+                    'request_id': uuid_1,
+                    'edge': {
+                        "host": "mettel.velocloud.net",
+                        "enterprise_id": 137,
+                        "edge_id": 958
+                    },
+                    'start_date': timestamp,
+                    'end_date': current_datetime,
+                    'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+                },
+                timeout=180,
+            ),
+            call(
+                'bruin.ticket.note.append.request',
+                {
+                    'request_id': uuid_3,
+                    'ticket_id': ticket_id,
+                    'note': events_ticket_note,
+                },
+                timeout=15,
+            ),
+            call(
+                'notification.slack.request',
+                {
+                    'request_id': uuid_4,
+                    'message': (
+                        'Events appended to ticket: https://app.bruin.com/helpdesk?clientId=85940&'
+                        f'ticketId={ticket_id}, in production'
+                    )
+                },
+                timeout=10,
+            ),
+        ], any_order=False)
+
     # @pytest.mark.asyncio
     # async def check_for_new_events_with_meaningful_events_and_unknown_environment_test(self):
     #     logger = Mock()
