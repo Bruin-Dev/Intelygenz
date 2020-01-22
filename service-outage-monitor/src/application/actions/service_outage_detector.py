@@ -223,10 +223,16 @@ class ServiceOutageDetector:
         outage_causes = self._get_outage_causes(edge_status)
         ticket_note_outage_causes = 'Outage causes:'
         if outage_causes is not None:
-            if outage_causes.get('edge') is not None:
-                ticket_note_outage_causes += ' Offline edge.'
-            if outage_causes.get('links') is not None:
-                ticket_note_outage_causes += ' Disconnected link(s).'
+            edge_state = outage_causes.get('edge')
+            if edge_state is not None:
+                ticket_note_outage_causes += f' Edge was {edge_state}.'
+
+            links_states = outage_causes.get('links')
+            if links_states is not None:
+                for interface, state in links_states.items():
+                    ticket_note_outage_causes += f' Link {interface} was {state}.'
+        else:
+            ticket_note_outage_causes += ' Could not determine causes.'
 
         ticket_note = (
             f'#*Automation Engine*#\n'
