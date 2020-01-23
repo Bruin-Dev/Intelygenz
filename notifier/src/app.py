@@ -1,6 +1,8 @@
 import asyncio
+import redis
 from config import config
 from igz.packages.nats.clients import NATSClient
+from igz.packages.nats.storage_managers import RedisStorageManager
 from application.clients.email_client import EmailClient
 from application.clients.slack_client import SlackClient
 from application.repositories.email_repository import EmailRepository
@@ -19,9 +21,13 @@ class Container:
 
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("Notifier starting...")
-        self._subscriber_email = NATSClient(config, logger=self._logger)
-        self._subscriber_slack = NATSClient(config, logger=self._logger)
-        self._publisher = NATSClient(config, logger=self._logger)
+
+        self._redis_client = redis.Redis(host="redis", port=6379, decode_responses=True)
+        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
+
+        self._subscriber_email = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._subscriber_slack = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._publisher = NATSClient(config, self._message_storage_manager, logger=self._logger)
 
         self._email_client = EmailClient(config, self._logger)
         self._email_repo = EmailRepository(config, self._email_client, self._logger)

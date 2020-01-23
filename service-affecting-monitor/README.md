@@ -46,4 +46,4 @@ Currently we only want to create tickets. So `_notify_trouble` will only send a 
 - [Velocloud bridge](../velocloud-bridge/README.md)
 - [Notifier](../notifier/README.md)
 # Running in docker-compose
-`docker-compose up --build nats-server velocloud-bridge notifier service-affecting-monitor`
+`docker-compose up --build redis nats-server velocloud-bridge notifier service-affecting-monitor`

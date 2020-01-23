@@ -108,4 +108,4 @@ the hood.
 
 # Running in docker-compose
 
-`docker-compose up --build nats-server notifier`
+`docker-compose up --build redis nats-server notifier`

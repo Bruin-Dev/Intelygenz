@@ -14,6 +14,7 @@ from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
+from igz.packages.nats.storage_managers import RedisStorageManager
 from igz.packages.server.api import QuartServer
 
 MESSAGES_PROCESSED = Summary('nats_processed_messages', 'Messages processed from NATS')
@@ -54,11 +55,13 @@ class Container:
         self._my_scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self.redis_connection = redis.Redis(host="redis", port=6379, decode_responses=True)
 
-        self.client1 = NATSClient(config, logger=logger)
-        self.client2 = NATSClient(config, logger=logger)
-        self.client3 = NATSClient(config, logger=logger)
-        self.client4 = NATSClient(config, logger=logger)
-        self.client5 = NATSClient(config, logger=logger)
+        self.message_storage_manager = RedisStorageManager(logger, self.redis_connection)
+
+        self.client1 = NATSClient(config, self.message_storage_manager, logger=logger)
+        self.client2 = NATSClient(config, self.message_storage_manager, logger=logger)
+        self.client3 = NATSClient(config, self.message_storage_manager, logger=logger)
+        self.client4 = NATSClient(config, self.message_storage_manager, logger=logger)
+        self.client5 = NATSClient(config, self.message_storage_manager, logger=logger)
 
         base_durable_action = DurableAction()
         base_from_first_action = FromFirstAction()

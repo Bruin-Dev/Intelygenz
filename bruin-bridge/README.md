@@ -288,4 +288,4 @@ a call to the endpoint `/api/Inventory/Attribute` in bruin, using as query param
 
 ```
 # Running in docker-compose 
-`docker-compose up --build nats-server bruin-bridge`
+`docker-compose up --build redis nats-server bruin-bridge`

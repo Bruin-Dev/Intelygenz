@@ -1,19 +1,16 @@
 import json
 import yaml
 import os
-import re
-
-from datetime import datetime
+import redis
 
 import asyncio
 from shortuuid import uuid
 
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
-from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
-from igz.packages.server.api import QuartServer
+from igz.packages.nats.storage_managers import RedisStorageManager
 
 
 logger = LoggerClient(config).get_logger()
@@ -22,7 +19,9 @@ logger = LoggerClient(config).get_logger()
 class Container:
 
     def __init__(self):
-        self.client1 = NATSClient(config, logger=logger)
+        self.redis_connection = redis.Redis(host="redis", port=6379, decode_responses=True)
+        self.message_storage_manager = RedisStorageManager(logger, self.redis_connection)
+        self.client1 = NATSClient(config, self.message_storage_manager, logger=logger)
         self.event_bus = EventBus(logger=logger)
         self.event_bus.set_producer(self.client1)
         self.enterprise_names = []

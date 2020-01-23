@@ -16,6 +16,7 @@ from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.nats.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 
@@ -31,6 +32,7 @@ class Container:
         self._velocloud_repository = VelocloudRepository(config, self._logger, self._velocloud_client)
 
         self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
         self._edge_dict_repository = EdgeDictRepository(self._redis_client, self._logger,
                                                         'VELOCLOUD_BRIDGE_IDS_BY_SERIAL')
 
@@ -40,12 +42,12 @@ class Container:
                                                                self._scheduler)
 
         self._publisher = NATSClient(config, logger=self._logger)
-        self._subscriber_list = NATSClient(config, logger=self._logger)
-        self._subscriber_stat = NATSClient(config, logger=self._logger)
-        self._subscriber_alert = NATSClient(config, logger=self._logger)
-        self._subscriber_event_alert = NATSClient(config, logger=self._logger)
-        self._subscriber_enterprise_name_list = NATSClient(config, logger=self._logger)
-        self._subscriber_id_by_serial = NATSClient(config, logger=self._logger)
+        self._subscriber_list = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._subscriber_stat = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._subscriber_alert = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._subscriber_event_alert = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._subscriber_enterprise_name_list = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._subscriber_id_by_serial = NATSClient(config, self._message_storage_manager, logger=self._logger)
 
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_list, consumer_name="list")

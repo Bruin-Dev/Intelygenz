@@ -26,9 +26,10 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def connect_OK_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        subscriber = NATSClient(config, logger=mock_logger)
-        publisher = NATSClient(config, logger=mock_logger)
+        subscriber = NATSClient(config, storage_manager, logger=mock_logger)
+        publisher = NATSClient(config, storage_manager, logger=mock_logger)
         sub_connect_mock = CoroutineMock()
         pub_connect_mock = CoroutineMock()
 
@@ -46,8 +47,9 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def rpc_request_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        publisher = NATSClient(config, logger=mock_logger)
+        publisher = NATSClient(config, storage_manager, logger=mock_logger)
         publisher.rpc_request = CoroutineMock()
 
         event_bus.set_producer(publisher)
@@ -65,8 +67,9 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def rpc_request_with_complex_datatypes_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        publisher = NATSClient(config, logger=mock_logger)
+        publisher = NATSClient(config, storage_manager, logger=mock_logger)
         publisher.rpc_request = CoroutineMock()
 
         event_bus.set_producer(publisher)
@@ -84,8 +87,9 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def rpc_request_with_non_dict_payload_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        publisher = NATSClient(config, logger=mock_logger)
+        publisher = NATSClient(config, storage_manager, logger=mock_logger)
         publisher.rpc_request = CoroutineMock()
 
         event_bus.set_producer(publisher)
@@ -124,8 +128,9 @@ class TestEventBus:
 
     def add_consumer_OK_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        subscriber = NATSClient(config, logger=mock_logger)
+        subscriber = NATSClient(config, storage_manager, logger=mock_logger)
 
         event_bus.add_consumer(subscriber, consumer_name="some-name")
 
@@ -133,9 +138,10 @@ class TestEventBus:
 
     def add_consumer_KO_repeated_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        first_subscriber = NATSClient(config, logger=mock_logger)
-        second_subscriber = NATSClient(config, logger=mock_logger)
+        first_subscriber = NATSClient(config, storage_manager, logger=mock_logger)
+        second_subscriber = NATSClient(config, storage_manager, logger=mock_logger)
         event_bus._logger.error = Mock()
 
         event_bus.add_consumer(first_subscriber, consumer_name="some-name")
@@ -147,8 +153,9 @@ class TestEventBus:
 
     def set_producer_OK_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        publisher = NATSClient(config, logger=mock_logger)
+        publisher = NATSClient(config, storage_manager, logger=mock_logger)
 
         event_bus.set_producer(publisher)
 
@@ -157,8 +164,9 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def subscribe_consumer_OK_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        subscriber = NATSClient(config, logger=mock_logger)
+        subscriber = NATSClient(config, storage_manager, logger=mock_logger)
         action_mock = ActionWrapper(
             state_instance=None,
             target_function="",
@@ -182,8 +190,9 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def publish_message_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        publisher = NATSClient(config, logger=mock_logger)
+        publisher = NATSClient(config, storage_manager, logger=mock_logger)
         publisher.publish = CoroutineMock()
 
         event_bus.set_producer(publisher)
@@ -197,8 +206,9 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def publish_message_with_complex_datatypes_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        publisher = NATSClient(config, logger=mock_logger)
+        publisher = NATSClient(config, storage_manager, logger=mock_logger)
         publisher.publish = CoroutineMock()
 
         event_bus.set_producer(publisher)
@@ -212,8 +222,9 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def publish_message_with_non_dict_payload_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        publisher = NATSClient(config, logger=mock_logger)
+        publisher = NATSClient(config, storage_manager, logger=mock_logger)
         publisher.publish = CoroutineMock()
 
         event_bus.set_producer(publisher)
@@ -232,9 +243,10 @@ class TestEventBus:
     @pytest.mark.asyncio
     async def close_connections_OK_test(self):
         mock_logger = Mock()
+        storage_manager = Mock()
         event_bus = EventBus(logger=mock_logger)
-        subscriber = NATSClient(config, logger=mock_logger)
-        publisher = NATSClient(config, logger=mock_logger)
+        subscriber = NATSClient(config, storage_manager, logger=mock_logger)
+        publisher = NATSClient(config, storage_manager, logger=mock_logger)
         sub_disconnect_mock = CoroutineMock()
         pub_disconnect_mock = CoroutineMock()
         subscriber.close_nats_connections = sub_disconnect_mock

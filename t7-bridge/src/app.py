@@ -1,8 +1,11 @@
+import redis
+
 from config import config
 from application.clients.t7_client import T7Client
 from application.repositories.t7_repository import T7Repository
 from application.actions.get_prediction import GetPrediction
 from igz.packages.nats.clients import NATSClient
+from igz.packages.nats.storage_managers import RedisStorageManager
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.action import ActionWrapper
 
@@ -18,8 +21,12 @@ class Container:
         self._logger.info("T7 bridge starting...")
         self._t7_client = T7Client(self._logger, config)
         self._t7_repository = T7Repository(self._logger, self._t7_client)
-        self._publisher = NATSClient(config, logger=self._logger)
-        self._subscriber_prediction = NATSClient(config, logger=self._logger)
+
+        self._redis_client = redis.Redis(host="redis", port=6379, decode_responses=True)
+        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
+
+        self._publisher = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._subscriber_prediction = NATSClient(config, self._message_storage_manager, logger=self._logger)
 
         self._event_bus = EventBus(logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_prediction, consumer_name="prediction")

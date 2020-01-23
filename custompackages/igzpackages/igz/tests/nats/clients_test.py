@@ -19,21 +19,25 @@ class TestNATSClient:
 
     def instantiation_test(self):
         mock_logger = Mock()
-        nats_client1 = NATSClient(config)
-        nats_client2 = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client1 = NATSClient(config, storage_manager)
+        nats_client2 = NATSClient(config, storage_manager, logger=mock_logger)
 
         assert nats_client1._config == config.NATS_CONFIG
+        assert nats_client1._messages_storage_manager is storage_manager
         assert isinstance(nats_client1._logger, logging._loggerClass)
         assert nats_client1._logger.hasHandlers()
         assert nats_client1._logger.getEffectiveLevel() == 10
         assert nats_client2._logger is mock_logger
+        assert nats_client2._messages_storage_manager is storage_manager
 
     @mock.patch("igz.packages.nats.clients.NATS.connect",
                 new=CoroutineMock())
     @pytest.mark.asyncio
     async def connect_to_nats_test(self, *args):
         mock_logger = Mock()
-        nats_client = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client.connect = CoroutineMock()
 
         await nats_client.connect_to_nats()
@@ -49,7 +53,8 @@ class TestNATSClient:
     @pytest.mark.asyncio
     async def connect_to_nats_retry_test(self):
         mock_logger = Mock()
-        nats_client = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
 
         # TODO: Improve this by using a context manager
         # Maybe unittest.TestCase.assertRaises could make this easier
@@ -64,7 +69,8 @@ class TestNATSClient:
     @pytest.mark.asyncio
     async def publish_message_test(self):
         mock_logger = Mock()
-        nats_client = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._nc = Mock()
         nats_client._nc.is_connected = True
         nats_client._nc.publish = CoroutineMock()
@@ -80,7 +86,8 @@ class TestNATSClient:
     @pytest.mark.asyncio
     async def publish_message_retry_test(self):
         mock_logger = Mock()
-        nats_client = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._nc = Mock()
         nats_client._nc.is_connected = True
         nats_client._nc.publish = CoroutineMock(side_effect=Exception)
@@ -100,7 +107,8 @@ class TestNATSClient:
     @pytest.mark.asyncio
     async def publish_message_disconnected_test(self):
         mock_logger = Mock()
-        nats_client = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._nc = Mock()
         nats_client._nc.is_connected = False
         nats_client._nc.publish = CoroutineMock()
@@ -120,7 +128,8 @@ class TestNATSClient:
     @pytest.mark.asyncio
     async def register_basic_consumer_with_sync_action_OK_test(self):
         mock_logger = Mock()
-        nats_client = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._subs.clear()
         nats_client._logger.error = Mock()
         nats_client._logger.info = Mock()
@@ -163,7 +172,8 @@ class TestNATSClient:
     @pytest.mark.asyncio
     async def register_basic_consumer_with_async_action_OK_test(self):
         mock_logger = Mock()
-        nats_client = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._subs.clear()
         nats_client._logger.error = Mock()
         nats_client._logger.info = Mock()
@@ -206,7 +216,8 @@ class TestNATSClient:
     @pytest.mark.asyncio
     async def register_basic_consumer_with_none_action_KO_test(self):
         mock_logger = Mock()
-        nats_client = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._subs.clear()
         nats_client.close_nats_connections = CoroutineMock()
         nats_client.connect_to_nats = CoroutineMock()
@@ -246,7 +257,8 @@ class TestNATSClient:
     @pytest.mark.asyncio
     async def close_nats_connection_test(self):
         mock_logger = Mock()
-        nats_client = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._subs = list()
         nats_client._nc = Mock()
         nats_client._nc.is_closed = False
@@ -270,7 +282,8 @@ class TestNATSClient:
     @pytest.mark.asyncio
     async def close_nats_connection_test(self):
         mock_logger = Mock()
-        nats_client = NATSClient(config, logger=mock_logger)
+        storage_manager = Mock()
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._subs = list()
         nats_client._nc = Mock()
         nats_client._nc.is_closed = True

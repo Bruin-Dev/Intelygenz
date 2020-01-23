@@ -10,8 +10,9 @@ from igz.packages.eventbus.action import ActionWrapper
 
 class NATSClient:
 
-    def __init__(self, config, logger=None):
+    def __init__(self, config, messages_storage_manager, logger=None):
         self._config = config.NATS_CONFIG
+        self._messages_storage_manager = messages_storage_manager
         self._topic_action = dict()
         self._subs = list()
         if logger is None:
