@@ -140,8 +140,7 @@ class ServiceOutageTriage:
                         if not triage_exists:
                             filtered_ticket_ids.append(ticket_item)
 
-                        creation_date = parse(ticket_details['ticket_details']['ticketNotes'][0]['createdDate'])
-                        await self._auto_resolve_tickets(creation_date, ticket_item, ticket_detail['detailID'])
+                        await self._auto_resolve_tickets(ticket_item, ticket_detail['detailID'])
 
                         break
         return filtered_ticket_ids
@@ -315,7 +314,7 @@ class ServiceOutageTriage:
             edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]} \n'
         return edge_triage_str
 
-    async def _auto_resolve_tickets(self, creation_date, ticket_id, detail_id):
+    async def _auto_resolve_tickets(self, ticket_id, detail_id):
         if ticket_id["serial"] != "VC05400002265":
             return
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]

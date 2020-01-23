@@ -788,14 +788,13 @@ class TestServiceOutageTriage:
             {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
-        # service_outage_triage._auto_resolve_tickets.assert_called_once_with(parse(created_date), dict(
-        #                                                                                        ticketID=ticket_id,
-        #                                                                                        serial=edge_serial,
-        #                                                                                        notes=ticket_details[
-        #                                                                                            'ticket_details'][
-        #                                                                                            'ticketNotes']),
-        #                                                                     detail_id)
-        assert not service_outage_triage._auto_resolve_tickets.called
+        service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
+            ticketID=ticket_id,
+            serial=edge_serial,
+            notes=ticket_details[
+                'ticket_details'][
+                'ticketNotes']),
+            detail_id)
 
         assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details[
             'ticket_details'][
@@ -846,14 +845,13 @@ class TestServiceOutageTriage:
             {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
-        # service_outage_triage._auto_resolve_tickets.assert_called_once_with(parse(created_date), dict(
-        #                                                                                         ticketID=ticket_id,
-        #                                                                                         serial=edge_serial,
-        #                                                                                         notes=ticket_details[
-        #                                                                                             'ticket_details'][
-        #                                                                                             'ticketNotes']),
-        #                                                                     detail_id)
-        assert not service_outage_triage._auto_resolve_tickets.called
+        service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
+            ticketID=ticket_id,
+            serial=edge_serial,
+            notes=ticket_details[
+                'ticket_details'][
+                'ticketNotes']),
+            detail_id)
 
         assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details[
             'ticket_details'][
@@ -904,14 +902,13 @@ class TestServiceOutageTriage:
             {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
-        # service_outage_triage._auto_resolve_tickets.assert_called_once_with(parse(created_date), dict(
-        #                                                                                         ticketID=ticket_id,
-        #                                                                                         serial=edge_serial,
-        #                                                                                         notes=ticket_details[
-        #                                                                                             'ticket_details'][
-        #                                                                                             'ticketNotes']),
-        #                                                                     detail_id)
-        assert not service_outage_triage._auto_resolve_tickets.called
+        service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
+            ticketID=ticket_id,
+            serial=edge_serial,
+            notes=ticket_details[
+                'ticket_details'][
+                'ticketNotes']),
+            detail_id)
 
         assert filtered_tickets == []
 
@@ -976,14 +973,13 @@ class TestServiceOutageTriage:
             ticket_notes, 'TimeStamp: '
         )
         service_outage_triage._check_for_new_events.assert_not_awaited()
-        # service_outage_triage._auto_resolve_tickets.assert_called_once_with(parse(ticket_notes_timestamp), dict(
-        #                                                                                         ticketID=ticket_id,
-        #                                                                                         serial=edge_serial,
-        #                                                                                         notes=ticket_details[
-        #                                                                                             'ticket_details'][
-        #                                                                                             'ticketNotes']),
-        #                                                                     detail_id)
-        assert not service_outage_triage._auto_resolve_tickets.called
+        service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
+            ticketID=ticket_id,
+            serial=edge_serial,
+            notes=ticket_details[
+                'ticket_details'][
+                'ticketNotes']),
+            detail_id)
 
         assert filtered_tickets == []
 
@@ -1052,15 +1048,14 @@ class TestServiceOutageTriage:
             ticket_notes_timestamp_naive,
             {'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details['ticket_details']['ticketNotes']},
         )
-        # service_outage_triage._auto_resolve_tickets.assert_called_once_with(parse(ticket_notes_timestamp), dict(
-        #                                                                                         ticketID=ticket_id,
-        #                                                                                         serial=edge_serial,
-        #                                                                                         notes=ticket_details[
-        #                                                                                             'ticket_details'][
-        #                                                                                             'ticketNotes']),
-        #                                                                     detail_id)
+        service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
+            ticketID=ticket_id,
+            serial=edge_serial,
+            notes=ticket_details[
+                'ticket_details'][
+                'ticketNotes']),
+            detail_id)
 
-        assert not service_outage_triage._auto_resolve_tickets.called
         assert filtered_tickets == []
 
     def find_recent_occurence_of_event_test(self):
@@ -1857,7 +1852,7 @@ class TestServiceOutageTriage:
         outage_utils.is_there_an_outage = Mock(return_value=False)
 
         edge_repo = Mock()
-        edge_repo.get_edge = Mock(return_value=None)
+        edge_repo.get_edge = Mock(return_value=dict(timestamp="2019-09-10 10:45:00"))
         edge_repo.add_edge = Mock()
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
@@ -1872,8 +1867,6 @@ class TestServiceOutageTriage:
         current_timestamp = '2019-09-10 10:45:00'
         current_datetime = datetime.strptime(current_timestamp, '%Y-%m-%d %H:%M:%S')
         note_timestamp = '2019-09-10 10:45:01'
-        creation_date = '2019-09-10 10:34:00'
-        creation_datetime = datetime.strptime(creation_date, '%Y-%m-%d %H:%M:%S')
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -1881,7 +1874,7 @@ class TestServiceOutageTriage:
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
             with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
                 with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-                    await service_outage_triage._auto_resolve_tickets(creation_datetime, ticket_item, detail_id)
+                    await service_outage_triage._auto_resolve_tickets(ticket_item, detail_id)
 
         outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
         outage_utils.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
