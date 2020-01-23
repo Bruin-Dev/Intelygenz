@@ -330,7 +330,7 @@ class ServiceOutageTriage:
 
             redis_edge = self._edge_repository.get_edge(edge_identifier)
 
-            is_forty_five_mins_from_last_down = False
+            is_forty_five_mins_from_last_down = True
 
             if redis_edge is not None:
                 time_from_last_down = datetime.now(timezone(
