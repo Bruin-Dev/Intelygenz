@@ -140,8 +140,8 @@ class ServiceOutageTriage:
                         if not triage_exists:
                             filtered_ticket_ids.append(ticket_item)
 
-                        # creation_date = parse(ticket_details['ticket_details']['ticketNotes'][0]['createdDate'])
-                        # await self._auto_resolve_tickets(creation_date, ticket_item, ticket_detail['detailID'])
+                        creation_date = parse(ticket_details['ticket_details']['ticketNotes'][0]['createdDate'])
+                        await self._auto_resolve_tickets(creation_date, ticket_item, ticket_detail['detailID'])
 
                         break
         return filtered_ticket_ids
@@ -331,8 +331,6 @@ class ServiceOutageTriage:
 
             redis_edge = self._edge_repository.get_edge(edge_identifier)
 
-            time_from_creation = datetime.now(timezone(
-                                            self._config.TRIAGE_CONFIG['timezone'])) - creation_date
             is_forty_five_mins_from_last_down = False
 
             if redis_edge is not None:
@@ -342,7 +340,7 @@ class ServiceOutageTriage:
                 is_forty_five_mins_from_last_down = time_from_last_down < timedelta(minutes=45)
 
             if self._outage_utils.is_there_an_outage(edge_info) is False:
-                if time_from_creation < timedelta(minutes=45) or is_forty_five_mins_from_last_down is True:
+                if is_forty_five_mins_from_last_down is True:
                     if self._config.TRIAGE_CONFIG['environment'] == 'production':
                         resolve_ticket_msg = {'request_id': uuid(),
                                               'ticket_id': ticket_id['ticketID'],
