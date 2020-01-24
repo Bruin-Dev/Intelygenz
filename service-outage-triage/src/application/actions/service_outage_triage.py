@@ -44,9 +44,19 @@ class ServiceOutageTriage:
                                      'ticket_status': ['New', 'InProgress', 'Draft'],
                                      'category': 'SD-WAN',
                                      'ticket_topic': 'VOO'}
+
+        ticket_request_msg_marwood = {'request_id': uuid(), 'client_id': 85100,
+                                      'ticket_status': ['New', 'InProgress', 'Draft'],
+                                      'category': 'SD-WAN',
+                                      'ticket_topic': 'VOO'}
+
         all_tickets_titan = await self._event_bus.rpc_request("bruin.ticket.request",
                                                               ticket_request_msg_titan,
                                                               timeout=90)
+        all_tickets_marwood = await self._event_bus.rpc_request("bruin.ticket.request",
+                                                                ticket_request_msg_marwood,
+                                                                timeout=90)
+
         all_tickets_mettel = await self._event_bus.rpc_request("bruin.ticket.request",
                                                                ticket_request_msg_mettel,
                                                                timeout=90)
@@ -55,7 +65,9 @@ class ServiceOutageTriage:
         if all_tickets and all_tickets_mettel and "tickets" in all_tickets.keys() and \
                 "tickets" in all_tickets_mettel and \
                 all_tickets_mettel["tickets"] and all_tickets["tickets"]:
-            all_tickets["tickets"] = all_tickets["tickets"] + all_tickets_mettel["tickets"]
+            all_tickets["tickets"] = all_tickets["tickets"] \
+                                     + all_tickets_mettel["tickets"] \
+                                     + all_tickets_marwood["tickets"]
 
         filtered_ticket_ids = []
         if all_tickets is not None and "tickets" in all_tickets.keys() and all_tickets["tickets"] is not None:
@@ -132,7 +144,7 @@ class ServiceOutageTriage:
                                                                                          "TimeStamp: ")
                                         timestamp_difference = datetime.now(timezone(
                                             self._config.TRIAGE_CONFIG['timezone'])
-                                                                            ) - parse(last_timestamp)
+                                        ) - parse(last_timestamp)
                                         if timestamp_difference > timedelta(minutes=30):
                                             await self._check_for_new_events(last_timestamp, ticket_item)
                                     triage_exists = True
@@ -199,7 +211,7 @@ class ServiceOutageTriage:
             for events in split_event_lists:
                 event_obj = self._compose_event_note_object(events)
                 event_timestamp = parse(events[len(events) - 1]["eventTime"]).astimezone(timezone(
-                                                                                self._config.TRIAGE_CONFIG['timezone']))
+                    self._config.TRIAGE_CONFIG['timezone']))
                 event_ticket_note = "#*Automation Engine*#" + event_obj + 'TimeStamp: ' + str(
                     event_timestamp + timedelta(seconds=1))
                 if self._config.TRIAGE_CONFIG['environment'] == 'production':
@@ -228,8 +240,8 @@ class ServiceOutageTriage:
                     event_str = event_str + f'Device: Interface GE1\n'
                 if 'GE2' in event['message']:
                     event_str = event_str + f'Device: Interface GE2\n'
-            event_str = event_str + \
-                f'eventTime: {parse(event["eventTime"]).astimezone(timezone(self._config.TRIAGE_CONFIG["timezone"]))}\n'
+            event_time = parse(event["eventTime"]).astimezone(timezone(self._config.TRIAGE_CONFIG["timezone"]))
+            event_str = event_str + f'eventTime: {event_time}\n'
             full_event_str = full_event_str + '\n' + event_str
         return full_event_str
 
@@ -334,7 +346,7 @@ class ServiceOutageTriage:
 
             if redis_edge is not None:
                 time_from_last_down = datetime.now(timezone(
-                                            self._config.TRIAGE_CONFIG['timezone'])) - parse(
+                    self._config.TRIAGE_CONFIG['timezone'])) - parse(
                     redis_edge['timestamp'])
                 is_forty_five_mins_from_last_down = time_from_last_down < timedelta(minutes=45)
 
@@ -347,8 +359,8 @@ class ServiceOutageTriage:
                                               }
 
                         resolve_note_msg = "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + str(
-                                            datetime.now(timezone(
-                                                self._config.TRIAGE_CONFIG['timezone'])) + timedelta(seconds=1))
+                            datetime.now(timezone(
+                                self._config.TRIAGE_CONFIG['timezone'])) + timedelta(seconds=1))
                         ticket_append_note_msg = {'request_id': uuid(),
                                                   'ticket_id': ticket_id["ticketID"],
                                                   'note': resolve_note_msg}
@@ -372,7 +384,7 @@ class ServiceOutageTriage:
                     self._logger.info(f"Ticket of ticketID:{ticket_id['ticketID']} auto-resolved")
                     edge_identifier = EdgeIdentifier(**edge_id)
                     edge_value = {'edge_status': edge_info, 'timestamp': datetime.now(timezone(
-                                                self._config.TRIAGE_CONFIG['timezone']))}
+                        self._config.TRIAGE_CONFIG['timezone']))}
                     self._edge_repository.add_edge(edge_identifier._asdict(), edge_value, update_existing=True)
                 else:
                     self._logger.info("Too much time has passed for an autoresolve")
@@ -384,6 +396,6 @@ class ServiceOutageTriage:
                         curr_update_existing = False
                 edge_identifier = EdgeIdentifier(**edge_id)
                 edge_value = {'edge_status': edge_info, 'timestamp': datetime.now(timezone(
-                                                                self._config.TRIAGE_CONFIG['timezone']))}
+                    self._config.TRIAGE_CONFIG['timezone']))}
                 self._edge_repository.add_edge(edge_identifier._asdict(), edge_value,
                                                update_existing=curr_update_existing)

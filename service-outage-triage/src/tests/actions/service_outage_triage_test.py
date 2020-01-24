@@ -128,12 +128,22 @@ class TestServiceOutageTriage:
             call('bruin.ticket.request',
                  {
                      'request_id': uuid_,
+                     'client_id': 85100,
+                     'ticket_status': ['New', 'InProgress', 'Draft'],
+                     'category': 'SD-WAN',
+                     'ticket_topic': 'VOO'
+                 },
+                 timeout=90, ),
+            call('bruin.ticket.request',
+                 {
+                     'request_id': uuid_,
                      'client_id': 9994,
                      'ticket_status': ['New', 'InProgress', 'Draft'],
                      'category': 'SD-WAN',
                      'ticket_topic': 'VOO'
                  },
-                 timeout=90, )
+                 timeout=90, ),
+
         ])
         service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
 
@@ -159,7 +169,8 @@ class TestServiceOutageTriage:
         uuid_1 = uuid()
         uuid_2 = uuid()
         uuid_3 = uuid()
-        uuid_side_effect = [uuid_1, uuid_2, uuid_3]
+        uuid_4 = uuid()
+        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4]
         with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
             await service_outage_triage._poll_tickets()
 
@@ -175,6 +186,15 @@ class TestServiceOutageTriage:
                 },
                 timeout=90,
             ),
+            call('bruin.ticket.request',
+                 {
+                     'request_id': uuid_3,
+                     'client_id': 85100,
+                     'ticket_status': ['New', 'InProgress', 'Draft'],
+                     'category': 'SD-WAN',
+                     'ticket_topic': 'VOO'
+                 },
+                 timeout=90, ),
             call(
                 'bruin.ticket.request',
                 {
@@ -189,7 +209,7 @@ class TestServiceOutageTriage:
             call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_3,
+                    'request_id': uuid_4,
                     'message': (
                         f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
                         'Environment: dev'
@@ -223,7 +243,8 @@ class TestServiceOutageTriage:
         uuid_1 = uuid()
         uuid_2 = uuid()
         uuid_3 = uuid()
-        uuid_side_effect = [uuid_1, uuid_2, uuid_3]
+        uuid_4 = uuid()
+        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4]
         with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
             await service_outage_triage._poll_tickets()
 
@@ -242,18 +263,27 @@ class TestServiceOutageTriage:
             call(
                 'bruin.ticket.request',
                 {
-                    'request_id': uuid_2,
-                    'client_id': 9994,
+                    'request_id': uuid_3,
+                    'client_id': 85100,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
                 },
                 timeout=90,
             ),
+            call('bruin.ticket.request',
+                 {
+                     'request_id': uuid_2,
+                     'client_id': 9994,
+                     'ticket_status': ['New', 'InProgress', 'Draft'],
+                     'category': 'SD-WAN',
+                     'ticket_topic': 'VOO'
+                 },
+                 timeout=90, ),
             call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_3,
+                    'request_id': uuid_4,
                     'message': (
                         f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
                         'Environment: dev'
@@ -288,7 +318,8 @@ class TestServiceOutageTriage:
         uuid_1 = uuid()
         uuid_2 = uuid()
         uuid_3 = uuid()
-        uuid_side_effect = [uuid_1, uuid_2, uuid_3]
+        uuid_4 = uuid()
+        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4]
         with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
             await service_outage_triage._poll_tickets()
 
@@ -298,6 +329,17 @@ class TestServiceOutageTriage:
                 {
                     'request_id': uuid_1,
                     'client_id': 85940,
+                    'ticket_status': ['New', 'InProgress', 'Draft'],
+                    'category': 'SD-WAN',
+                    'ticket_topic': 'VOO'
+                },
+                timeout=90,
+            ),
+            call(
+                'bruin.ticket.request',
+                {
+                    'request_id': uuid_3,
+                    'client_id': 85100,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
                     'category': 'SD-WAN',
                     'ticket_topic': 'VOO'
@@ -318,7 +360,7 @@ class TestServiceOutageTriage:
             call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_3,
+                    'request_id': uuid_4,
                     'message': (
                         f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
                         'Environment: dev'
