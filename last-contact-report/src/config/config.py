@@ -38,3 +38,7 @@ QUART_CONFIG = {
     'title': 'last-contact-report',
     'port': 5000
 }
+
+REDIS = {
+    "host": os.environ["REDIS_HOSTNAME"]
+}

@@ -42,3 +42,7 @@ QUART_CONFIG = {
     'title': 'notifier',
     'port': 5000
 }
+
+REDIS = {
+    "host": os.environ["REDIS_HOSTNAME"]
+}

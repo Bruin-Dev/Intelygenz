@@ -19,7 +19,7 @@ logger = LoggerClient(config).get_logger()
 class Container:
 
     def __init__(self):
-        self.redis_connection = redis.Redis(host="redis", port=6379, decode_responses=True)
+        self.redis_connection = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self.message_storage_manager = RedisStorageManager(logger, self.redis_connection)
         self.client1 = NATSClient(config, self.message_storage_manager, logger=logger)
         self.event_bus = EventBus(logger=logger)

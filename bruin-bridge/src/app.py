@@ -31,7 +31,7 @@ class Container:
         self._bruin_client = BruinClient(self._logger, config)
         self._bruin_repository = BruinRepository(self._logger, self._bruin_client)
 
-        self._redis_client = redis.Redis(host="redis", port=6379, decode_responses=True)
+        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
         self._publisher = NATSClient(config, self._message_storage_manager, logger=self._logger)

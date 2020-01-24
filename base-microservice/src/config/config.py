@@ -32,3 +32,7 @@ QUART_CONFIG = {
     'title': 'base-microservice',
     'port': 5000
 }
+
+REDIS = {
+    "host": os.environ["REDIS_HOSTNAME"]
+}

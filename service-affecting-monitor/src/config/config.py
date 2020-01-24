@@ -45,3 +45,7 @@ QUART_CONFIG = {
     'title': 'service-affecting-monitor',
     'port': 5000
 }
+
+REDIS = {
+    "host": os.environ["REDIS_HOSTNAME"]
+}

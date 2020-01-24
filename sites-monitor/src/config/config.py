@@ -40,3 +40,7 @@ QUART_CONFIG = {
 GRAFANA_CONFIG = {
     'port': 9090
 }
+
+REDIS = {
+    "host": os.environ["REDIS_HOSTNAME"]
+}

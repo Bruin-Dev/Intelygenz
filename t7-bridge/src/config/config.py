@@ -38,3 +38,7 @@ QUART_CONFIG = {
     'title': 't7-bridge',
     'port': 5000
 }
+
+REDIS = {
+    "host": os.environ["REDIS_HOSTNAME"]
+}
