@@ -12,6 +12,7 @@ data "template_file" "automation-velocloud-bridge" {
 
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
+    REDIS_HOSTNAME = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
     VELOCLOUD_CREDENTIALS = var.VELOCLOUD_CREDENTIALS
     VELOCLOUD_VERIFY_SSL = var.VELOCLOUD_VERIFY_SSL
     REDIS_HOSTNAME = aws_elasticache_cluster.automation-redis.cache_nodes[0].address

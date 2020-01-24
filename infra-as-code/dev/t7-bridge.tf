@@ -12,6 +12,7 @@ data "template_file" "automation-t7-bridge" {
 
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
+    REDIS_HOSTNAME = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
     T7_BASE_URL = var.T7_BASE_URL
     T7_TOKEN = var.T7_TOKEN
 

@@ -41,6 +41,10 @@
         "value": "${NATS_SERVER1}"
       },
       {
+        "name": "REDIS_HOSTNAME",
+        "value": "${REDIS_HOSTNAME}"
+      },
+      {
         "name": "BRUIN_CLIENT_ID",
         "value": "${BRUIN_CLIENT_ID}"
       },
