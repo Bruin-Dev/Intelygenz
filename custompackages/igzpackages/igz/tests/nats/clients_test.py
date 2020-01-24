@@ -2,16 +2,19 @@ import json
 import logging
 from unittest.mock import Mock
 from unittest.mock import call
+from unittest.mock import patch
 
 import pytest
 from asynctest import mock
 from asynctest import CoroutineMock
 from nats.aio.client import Client as NATS
+from shortuuid import uuid
 from tenacity import RetryError
 
 from igz.config import testconfig as config
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.nats.clients import NATSClient
+from igz.packages.nats import storage_managers as storage_managers_module
 
 
 class TestNATSClient:
@@ -68,25 +71,37 @@ class TestNATSClient:
 
     @pytest.mark.asyncio
     async def publish_message_test(self):
+        message = {'foo': 'bar'}
+        message_encoded = json.dumps(message)
+
         mock_logger = Mock()
+
         storage_manager = Mock()
+        storage_manager.is_message_larger_than_1mb = Mock(return_value=False)
+
         nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._nc = Mock()
         nats_client._nc.is_connected = True
         nats_client._nc.publish = CoroutineMock()
 
         await nats_client.publish(
-            topic="Test-topic", message="Test-message"
+            topic="Test-topic", message=message_encoded
         )
 
         nats_client._nc.publish.assert_awaited_once_with(
-            "Test-topic", b'Test-message'
+            "Test-topic", bytes(message_encoded, encoding='utf-8')
         )
 
     @pytest.mark.asyncio
     async def publish_message_retry_test(self):
+        message = {'foo': 'bar'}
+        message_encoded = json.dumps(message)
+
         mock_logger = Mock()
+
         storage_manager = Mock()
+        storage_manager.is_message_larger_than_1mb = Mock(return_value=False)
+
         nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._nc = Mock()
         nats_client._nc.is_connected = True
@@ -96,7 +111,7 @@ class TestNATSClient:
         # Maybe unittest.TestCase.assertRaises could make this easier
         try:
             await nats_client.publish(
-                topic="Test-topic", message="Test-message"
+                topic="Test-topic", message=message_encoded
             )
         except Exception as e:
             error = e
@@ -106,8 +121,14 @@ class TestNATSClient:
 
     @pytest.mark.asyncio
     async def publish_message_disconnected_test(self):
+        message = {'foo': 'bar'}
+        message_encoded = json.dumps(message)
+
         mock_logger = Mock()
+
         storage_manager = Mock()
+        storage_manager.is_message_larger_than_1mb = Mock(return_value=False)
+
         nats_client = NATSClient(config, storage_manager, logger=mock_logger)
         nats_client._nc = Mock()
         nats_client._nc.is_connected = False
@@ -116,13 +137,174 @@ class TestNATSClient:
         nats_client.connect_to_nats = CoroutineMock()
 
         await nats_client.publish(
-            topic="Test-topic", message="Test-message"
+            topic="Test-topic", message=message_encoded
         )
 
         nats_client.close_nats_connections.assert_awaited()
         nats_client.connect_to_nats.assert_awaited()
         nats_client._nc.publish.assert_awaited_once_with(
-            "Test-topic", b'Test-message'
+            "Test-topic", bytes(message_encoded, encoding='utf-8')
+        )
+
+    @pytest.mark.asyncio
+    async def publish_message_larger_than_1mb_test(self):
+        uuid_ = uuid()
+        bytes_in_1mb = 1048576
+        payload = {'foo': 'X' * (bytes_in_1mb + 100)}
+        encoded_payload = json.dumps(payload)
+
+        published_message = {'token': uuid_, 'is_stored': True}
+        encoded_published_message = json.dumps(published_message)
+
+        mock_logger = Mock()
+
+        storage_manager = Mock()
+        storage_manager.is_message_larger_than_1mb = Mock(return_value=True)
+        storage_manager.store_message = Mock(return_value=encoded_published_message)
+
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
+        nats_client._nc = Mock()
+        nats_client._nc.is_connected = False
+        nats_client._nc.publish = CoroutineMock()
+        nats_client.close_nats_connections = CoroutineMock()
+        nats_client.connect_to_nats = CoroutineMock()
+
+        with patch.object(storage_managers_module, 'uuid', return_value=uuid_):
+            await nats_client.publish(topic="Test-topic", message=encoded_payload)
+
+        nats_client._messages_storage_manager.is_message_larger_than_1mb.assert_called_once_with(encoded_payload)
+        nats_client._messages_storage_manager.store_message.assert_called_once_with(
+            encoded_payload, encode_result=True
+        )
+        nats_client._nc.publish.assert_awaited_once_with(
+            "Test-topic", bytes(encoded_published_message, encoding='utf-8')
+        )
+
+    @pytest.mark.asyncio
+    async def rpc_request_test(self):
+        message = {'foo': 'bar'}
+        message_encoded = json.dumps(message)
+
+        rpc_response_dict = {'response': 'some-data'}
+
+        rpc_response = Mock()
+        rpc_response.data = json.dumps(rpc_response_dict)
+
+        mock_logger = Mock()
+
+        storage_manager = Mock()
+        storage_manager.is_message_larger_than_1mb = Mock(return_value=False)
+
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
+        nats_client._nc = Mock()
+        nats_client._nc.is_connected = True
+        nats_client._nc.timed_request = CoroutineMock(return_value=rpc_response)
+
+        result = await nats_client.rpc_request(
+            topic="Test-topic", message=message_encoded
+        )
+
+        nats_client._nc.timed_request.assert_awaited_once_with(
+            "Test-topic", bytes(message_encoded, encoding='utf-8'), 10
+        )
+        assert result == rpc_response_dict
+
+    @pytest.mark.asyncio
+    async def rpc_request_retry_test(self):
+        message = {'foo': 'bar'}
+        message_encoded = json.dumps(message)
+
+        mock_logger = Mock()
+
+        storage_manager = Mock()
+        storage_manager.is_message_larger_than_1mb = Mock(return_value=False)
+
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
+        nats_client._nc = Mock()
+        nats_client._nc.is_connected = True
+        nats_client._nc.rpc_request = CoroutineMock(side_effect=Exception)
+
+        # TODO: Improve this by using a context manager
+        # Maybe unittest.TestCase.assertRaises could make this easier
+        try:
+            await nats_client.rpc_request(
+                topic="Test-topic", message=message_encoded
+            )
+        except Exception as e:
+            error = e
+
+        assert isinstance(error, RetryError)
+        assert nats_client._nc.timed_request.call_count > 1
+
+    @pytest.mark.asyncio
+    async def rpc_request_disconnected_test(self):
+        message = {'foo': 'bar'}
+        message_encoded = json.dumps(message)
+
+        rpc_response_dict = {'response': 'some-data'}
+
+        rpc_response = Mock()
+        rpc_response.data = json.dumps(rpc_response_dict)
+
+        mock_logger = Mock()
+
+        storage_manager = Mock()
+        storage_manager.is_message_larger_than_1mb = Mock(return_value=False)
+
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
+        nats_client._nc = Mock()
+        nats_client._nc.is_connected = False
+        nats_client._nc.timed_request = CoroutineMock(return_value=rpc_response)
+        nats_client.close_nats_connections = CoroutineMock()
+        nats_client.connect_to_nats = CoroutineMock()
+
+        await nats_client.rpc_request(
+            topic="Test-topic", message=message_encoded
+        )
+
+        nats_client.close_nats_connections.assert_awaited()
+        nats_client.connect_to_nats.assert_awaited()
+        nats_client._nc.timed_request.assert_awaited_once_with(
+            "Test-topic", bytes(message_encoded, encoding='utf-8'), 10
+        )
+
+    @pytest.mark.asyncio
+    async def rpc_request_larger_than_1mb_test(self):
+        uuid_ = uuid()
+        bytes_in_1mb = 1048576
+        payload = {'foo': 'X' * (bytes_in_1mb + 100)}
+        encoded_payload = json.dumps(payload)
+
+        published_message = {'token': uuid_, 'is_stored': True}
+        encoded_published_message = json.dumps(published_message)
+
+        rpc_response_dict = {'response': 'some-data'}
+
+        rpc_response = Mock()
+        rpc_response.data = json.dumps(rpc_response_dict)
+
+        mock_logger = Mock()
+
+        storage_manager = Mock()
+        storage_manager.is_message_larger_than_1mb = Mock(return_value=True)
+        storage_manager.store_message = Mock(return_value=encoded_published_message)
+
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
+        nats_client._nc = Mock()
+        nats_client._nc.is_connected = False
+        nats_client._nc.timed_request = CoroutineMock(return_value=rpc_response)
+        nats_client.close_nats_connections = CoroutineMock()
+        nats_client.connect_to_nats = CoroutineMock()
+
+        with patch.object(storage_managers_module, 'uuid', return_value=uuid_):
+            await nats_client.rpc_request(topic="Test-topic", message=encoded_payload)
+
+        nats_client._messages_storage_manager.is_message_larger_than_1mb.assert_called_once_with(encoded_payload)
+        nats_client._messages_storage_manager.store_message.assert_called_once_with(
+            encoded_payload, encode_result=True
+        )
+        nats_client._nc.timed_request.assert_awaited_once_with(
+            "Test-topic", bytes(encoded_published_message, encoding='utf-8'), 10
         )
 
     @pytest.mark.asyncio
@@ -148,7 +330,7 @@ class TestNATSClient:
             logger=mock_logger, is_async=False,
         )
         nats_client._nc.subscribe = CoroutineMock(
-            return_value=nats_client._cb_with_ack_and_action(message)
+            return_value=nats_client._cb_with_action(message)
         )
 
         await nats_client.subscribe_action(
@@ -163,7 +345,7 @@ class TestNATSClient:
             **{
                 'queue': "",
                 'is_async': True,
-                'cb': nats_client._cb_with_ack_and_action,
+                'cb': nats_client._cb_with_action,
                 'pending_msgs_limit': config.NATS_CONFIG["subscriber"]["pending_limits"],
             },
         )
@@ -192,7 +374,7 @@ class TestNATSClient:
             logger=mock_logger, is_async=True,
         )
         nats_client._nc.subscribe = CoroutineMock(
-            return_value=nats_client._cb_with_ack_and_action(message)
+            return_value=nats_client._cb_with_action(message)
         )
 
         await nats_client.subscribe_action(
@@ -207,7 +389,7 @@ class TestNATSClient:
             **{
                 'queue': "",
                 'is_async': True,
-                'cb': nats_client._cb_with_ack_and_action,
+                'cb': nats_client._cb_with_action,
                 'pending_msgs_limit': config.NATS_CONFIG["subscriber"]["pending_limits"],
             },
         )
@@ -232,7 +414,7 @@ class TestNATSClient:
         message.subject = "Test-topic"
 
         nats_client._nc.subscribe = CoroutineMock(
-            return_value=nats_client._cb_with_ack_and_action(message)
+            return_value=nats_client._cb_with_action(message)
         )
 
         await nats_client.subscribe_action(
@@ -249,13 +431,162 @@ class TestNATSClient:
             **{
                 'queue': "",
                 'is_async': True,
-                'cb': nats_client._cb_with_ack_and_action,
+                'cb': nats_client._cb_with_action,
                 'pending_msgs_limit': config.NATS_CONFIG["subscriber"]["pending_limits"],
             },
         )
 
     @pytest.mark.asyncio
-    async def close_nats_connection_test(self):
+    async def cb_with_action_with_no_action_linked_to_topic_registered_in_nats_client_test(self):
+        msg_data_dict = {'foo': 'bar'}
+        msg_subject = 'some-topic'
+
+        msg_object = Mock()
+        msg_object.data = json.dumps(msg_data_dict)
+        msg_object.reply = '_INBOX foo-bar-baz'
+        msg_object.subject = msg_subject
+
+        mock_logger = Mock()
+        storage_manager = Mock()
+
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
+        nats_client._topic_action = {msg_subject: None}
+
+        await nats_client._cb_with_action(msg_object)
+
+        mock_logger.error.assert_called()
+
+    @pytest.mark.asyncio
+    async def cb_with_action_with_improper_action_linked_to_topic_registered_in_nats_client_test(self):
+        msg_data_dict = {'foo': 'bar'}
+        msg_subject = 'some-topic'
+
+        class FakeActionWrapper:
+            pass
+
+        msg_object = Mock()
+        msg_object.data = json.dumps(msg_data_dict)
+        msg_object.reply = '_INBOX foo-bar-baz'
+        msg_object.subject = msg_subject
+
+        mock_logger = Mock()
+        storage_manager = Mock()
+
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
+        nats_client._topic_action = {msg_subject: FakeActionWrapper()}
+
+        await nats_client._cb_with_action(msg_object)
+
+        mock_logger.error.assert_called()
+
+    @pytest.mark.asyncio
+    async def cb_with_action_with_action_linked_to_topic_and_message_larger_than_1mb_recovered_test(self):
+        uuid_ = uuid()
+        bytes_in_1mb = 1048576
+        payload = {'foo': 'X' * (bytes_in_1mb + 100)}
+
+        msg_data_dict = {'token': uuid_, 'is_stored': True}
+        msg_subject = 'some-topic'
+        nats_reply_topic = '_INBOX foo-bar-baz'
+        action_message = {
+            **payload,
+            'response_topic': nats_reply_topic,
+        }
+
+        msg_object = Mock()
+        msg_object.data = json.dumps(msg_data_dict)
+        msg_object.reply = nats_reply_topic
+        msg_object.subject = msg_subject
+
+        mock_logger = Mock()
+
+        storage_manager = Mock()
+        storage_manager.recover_message = Mock(return_value=payload)
+
+        caller = Mock()
+        caller.action = Mock()
+        action_wrapped = ActionWrapper(
+            state_instance=caller, target_function="action",
+            logger=mock_logger, is_async=False,
+        )
+        action_wrapped.execute_stateful_action = Mock()
+
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
+        nats_client._topic_action = {msg_subject: action_wrapped}
+
+        await nats_client._cb_with_action(msg_object)
+
+        action_wrapped.execute_stateful_action.assert_called_once_with(action_message)
+
+    @pytest.mark.asyncio
+    async def cb_with_action_with_action_linked_to_topic_and_stateful_action_raising_exception_test(self):
+        msg_data_dict = {'foo': 'bar'}
+        msg_subject = 'some-topic'
+        nats_reply_topic = '_INBOX foo-bar-baz'
+        action_message = {
+            **msg_data_dict,
+            'response_topic': nats_reply_topic,
+        }
+
+        msg_object = Mock()
+        msg_object.data = json.dumps(msg_data_dict)
+        msg_object.reply = nats_reply_topic
+        msg_object.subject = msg_subject
+
+        mock_logger = Mock()
+        storage_manager = Mock()
+
+        caller = Mock()
+        caller.action = Mock()
+        action_wrapped = ActionWrapper(
+            state_instance=caller, target_function="action",
+            logger=mock_logger, is_async=False,
+        )
+        action_wrapped.execute_stateful_action = Mock(side_effect=Exception)
+
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
+        nats_client._topic_action = {msg_subject: action_wrapped}
+
+        await nats_client._cb_with_action(msg_object)
+
+        action_wrapped.execute_stateful_action.assert_called_once_with(action_message)
+        mock_logger.exception.assert_called()
+
+    @pytest.mark.asyncio
+    async def cb_with_action_with_action_linked_to_topic_and_stateful_action_running_successfully_test(self):
+        msg_data_dict = {'foo': 'bar'}
+        msg_subject = 'some-topic'
+        nats_reply_topic = '_INBOX foo-bar-baz'
+        action_message = {
+            **msg_data_dict,
+            'response_topic': nats_reply_topic,
+        }
+
+        msg_object = Mock()
+        msg_object.data = json.dumps(msg_data_dict)
+        msg_object.reply = nats_reply_topic
+        msg_object.subject = msg_subject
+
+        mock_logger = Mock()
+        storage_manager = Mock()
+
+        caller = Mock()
+        caller.action = Mock()
+        action_wrapped = ActionWrapper(
+            state_instance=caller, target_function="action",
+            logger=mock_logger, is_async=False,
+        )
+        action_wrapped.execute_stateful_action = Mock()
+
+        nats_client = NATSClient(config, storage_manager, logger=mock_logger)
+        nats_client._topic_action = {msg_subject: action_wrapped}
+
+        await nats_client._cb_with_action(msg_object)
+
+        action_wrapped.execute_stateful_action.assert_called_once_with(action_message)
+
+    @pytest.mark.asyncio
+    async def close_nats_connection_with_nats_client_connection_open_test(self):
         mock_logger = Mock()
         storage_manager = Mock()
         nats_client = NATSClient(config, storage_manager, logger=mock_logger)
@@ -280,7 +611,7 @@ class TestNATSClient:
         nats_client._nc.close.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def close_nats_connection_test(self):
+    async def close_nats_connection_with_nats_client_connection_closed_test(self):
         mock_logger = Mock()
         storage_manager = Mock()
         nats_client = NATSClient(config, storage_manager, logger=mock_logger)

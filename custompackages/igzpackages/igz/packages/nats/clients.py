@@ -43,6 +43,14 @@ class NATSClient:
 
             await self._nc.publish(topic, message.encode())
 
+        if self._messages_storage_manager.is_message_larger_than_1mb(message):
+            message = self._messages_storage_manager.store_message(message, encode_result=True)
+            self._logger.info(
+                'Message received in publish() was larger than 1MB so it was stored with '
+                f'{type(self._messages_storage_manager).__name__}. The token needed to recover it is '
+                f'{json.loads(message)["token"]}.'
+            )
+
         await publish()
 
     async def rpc_request(self, topic, message, timeout=10):
@@ -56,25 +64,46 @@ class NATSClient:
             rpc_request = await self._nc.timed_request(topic, message.encode(), timeout)
             return json.loads(rpc_request.data)
 
+        if self._messages_storage_manager.is_message_larger_than_1mb(message):
+            message = self._messages_storage_manager.store_message(message, encode_result=True)
+            self._logger.info(
+                'Message received in rpc_request() was larger than 1MB so it was stored with '
+                f'{type(self._messages_storage_manager).__name__}. The token needed to recover it is '
+                f'{json.loads(message)["token"]}.'
+            )
+
         return await rpc_request()
 
-    async def _cb_with_ack_and_action(self, msg):
-        self._logger.info(f'Message received from topic {msg.subject}')
-        event = json.loads(msg.data)
-        event["response_topic"] = msg.reply
-        if self._topic_action[msg.subject] is None or type(
-                self._topic_action[msg.subject]) is not ActionWrapper:
-            self._logger.error(f'No ActionWrapper defined for topic {msg.subject}. Message not marked with ACK')
+    async def _cb_with_action(self, msg):
+        msg_subject = msg.subject
+
+        self._logger.info(f'Message received from topic {msg_subject}')
+        if self._topic_action[msg_subject] is None or not isinstance(self._topic_action[msg_subject], ActionWrapper):
+            self._logger.error(f'No ActionWrapper defined for topic {msg_subject}.')
             return
+
+        event = json.loads(msg.data)
+        if event.get("is_stored") is True:
+            event = self._messages_storage_manager.recover_message(event, encode_result=False)
+            self._logger.info(
+                f'Message received from topic {msg_subject} indicates that the actual message was larger than 1MB and '
+                f'was stored with {type(self._messages_storage_manager).__name__}. '
+                f'The original message (truncated) is "{json.dumps(event)[:200]}..."'
+            )
+
+        event["response_topic"] = msg.reply
+
         try:
-            if self._topic_action[msg.subject].is_async:
-                await self._topic_action[msg.subject].execute_stateful_action(event)
+            if self._topic_action[msg_subject].is_async:
+                await self._topic_action[msg_subject].execute_stateful_action(event)
             else:
-                self._topic_action[msg.subject].execute_stateful_action(event)
+                self._topic_action[msg_subject].execute_stateful_action(event)
         except Exception:
-            self._logger.exception(f"NATS Client Exception in client happened")
-            self._logger.exception(f"Error executing {self._topic_action[msg.subject].execute_stateful_action} "f"")
-            self._logger.exception("Won't ACK message")
+            self._logger.exception(
+                "NATS Client Exception in client happened. "
+                f"Error executing action {self._topic_action[msg_subject].target_function} "
+                f"from {type(self._topic_action[msg_subject].state_instance).__name__} instance."
+            )
 
     async def subscribe_action(self, topic, action: ActionWrapper, queue=""):
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
@@ -89,7 +118,7 @@ class NATSClient:
             sub = await self._nc.subscribe(topic,
                                            queue=queue,
                                            is_async=True,
-                                           cb=self._cb_with_ack_and_action,
+                                           cb=self._cb_with_action,
                                            pending_msgs_limit=self._config["subscriber"][
                                                "pending_limits"])
             self._subs.append(sub)
