@@ -1,5 +1,5 @@
 import json
-
+import asyncio
 import requests
 from tenacity import retry, wait_exponential, stop_after_delay
 
@@ -167,19 +167,28 @@ class VelocloudClient:
 
         return edges_by_enterprise_and_host
 
-    def get_all_enterprises_edges_with_host_by_serial(self):
+    async def get_all_enterprises_edges_with_host_by_serial(self):
         serial_to_edge_id = dict()
+        loop = asyncio.get_event_loop()
         for client in self._clients:
             res = self.get_monitoring_aggregates(client)
-            for enterprise in res["enterprises"]:
-                edges_by_enterprise = self.get_all_enterprises_edges_by_id(client, enterprise["id"])
-                for edge in edges_by_enterprise:
+            futures = [
+                loop.run_in_executor(
+                    None,
+                    self.get_all_enterprises_edges_by_id,
+                    client,
+                    enterprise["id"]
+                )
+                for enterprise in res["enterprises"]
+            ]
+            for enterprise_info in await asyncio.gather(*futures):
+                for edge in enterprise_info:
                     if edge["haSerialNumber"] is not None:
                         serial_to_edge_id[edge["haSerialNumber"]] = {"host": client["host"],
-                                                                     "enterprise_id": enterprise["id"],
+                                                                     "enterprise_id": edge["enterpriseId"],
                                                                      "edge_id": edge["id"]}
                     serial_to_edge_id[edge["serialNumber"]] = {"host": client["host"],
-                                                               "enterprise_id": enterprise["id"],
+                                                               "enterprise_id": edge["enterpriseId"],
                                                                "edge_id": edge["id"]}
 
         return serial_to_edge_id
@@ -213,7 +222,6 @@ class VelocloudClient:
                stop=stop_after_delay(self._config['stop_delay']))
         def get_all_enterprises_edges_by_id():
             body = {"enterpriseId": enterprise_id}
-
             response = requests.post(f"https://{client['host']}/portal/rest/enterprise/getEnterpriseEdges",
                                      json=body,
                                      headers=client['headers'],

@@ -23,5 +23,5 @@ class IDsBySerialRepository:
                                 next_run_time=next_run_time, replace_existing=True,
                                 id='create_id_by_serial_dict')
 
-    def search_for_edge_id_by_serial(self, serial):
-        return self._ids_by_serial_client.search_for_edge_id_by_serial(serial)
+    async def search_for_edge_id_by_serial(self, serial):
+        return await self._ids_by_serial_client.search_for_edge_id_by_serial(serial)

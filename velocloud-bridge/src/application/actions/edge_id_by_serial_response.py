@@ -14,7 +14,7 @@ class SearchForIDsBySerial:
         serial = msg['serial']
 
         self._logger.info(f'Searching for edge_id for serial number {serial}')
-        edge_id = self._ids_by_serial_repository.search_for_edge_id_by_serial(serial)
+        edge_id = await self._ids_by_serial_repository.search_for_edge_id_by_serial(serial)
 
         status = 200
         if edge_id is None:
