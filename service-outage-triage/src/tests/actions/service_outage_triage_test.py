@@ -1924,7 +1924,7 @@ class TestServiceOutageTriage:
         edge_repo.add_edge.assert_called_once_with(edge_identifier._asdict(),
                                                    dict(edge_status=edge_status['edge_info'],
                                                         timestamp=current_datetime),
-                                                   update_existing=True)
+                                                   update_existing=True, time_to_live=86400)
 
         event_bus.rpc_request.assert_has_awaits([
             call("edge.status.request",

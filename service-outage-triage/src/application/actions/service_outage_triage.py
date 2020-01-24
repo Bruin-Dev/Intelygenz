@@ -385,7 +385,8 @@ class ServiceOutageTriage:
                     edge_identifier = EdgeIdentifier(**edge_id)
                     edge_value = {'edge_status': edge_info, 'timestamp': datetime.now(timezone(
                         self._config.TRIAGE_CONFIG['timezone']))}
-                    self._edge_repository.add_edge(edge_identifier._asdict(), edge_value, update_existing=True)
+                    self._edge_repository.add_edge(edge_identifier._asdict(), edge_value, update_existing=True,
+                                                   time_to_live=86400)
                 else:
                     self._logger.info("Too much time has passed for an autoresolve")
             else:
@@ -398,4 +399,4 @@ class ServiceOutageTriage:
                 edge_value = {'edge_status': edge_info, 'timestamp': datetime.now(timezone(
                     self._config.TRIAGE_CONFIG['timezone']))}
                 self._edge_repository.add_edge(edge_identifier._asdict(), edge_value,
-                                               update_existing=curr_update_existing)
+                                               update_existing=curr_update_existing, time_to_live=86400)
