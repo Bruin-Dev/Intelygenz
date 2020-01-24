@@ -48,7 +48,12 @@
       {
         "name": "VELOCLOUD_VERIFY_SSL",
         "value": "${VELOCLOUD_VERIFY_SSL}"
+      },
+      {
+        "name": "REDIS_HOSTNAME",
+        "value": "${REDIS_HOSTNAME}"
       }
+
     ]
   }
 ]

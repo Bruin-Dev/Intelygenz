@@ -1,25 +1,22 @@
-from config import config
-
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-
-from igz.packages.nats.clients import NATSClient
-from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.eventbus.action import ActionWrapper
-
-from application.actions.edge_list_response import ReportEdgeList
-from application.actions.edge_status_response import ReportEdgeStatus
+import asyncio
 from application.actions.edge_events_for_alert import EventEdgesForAlert
 from application.actions.edge_id_by_serial_response import SearchForIDsBySerial
+from application.actions.edge_list_response import ReportEdgeList
+from application.actions.edge_status_response import ReportEdgeStatus
 from application.actions.enterprise_name_list_response import EnterpriseNameList
-
-from application.repositories.velocloud_repository import VelocloudRepository
-from application.repositories.ids_by_serial_repository import IDsBySerialRepository
-
-from application.clients.velocloud_client import VelocloudClient
 from application.clients.ids_by_serial_client import IDsBySerialClient
+from application.clients.velocloud_client import VelocloudClient
+from application.repositories.ids_by_serial_repository import IDsBySerialRepository
+from application.repositories.velocloud_repository import VelocloudRepository
+from application.repositories.edge_dict_repository import EdgeDictRepository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from redis import Redis
 
+from config import config
 from igz.packages.Logger.logger_client import LoggerClient
-import asyncio
+from igz.packages.eventbus.action import ActionWrapper
+from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 
 
@@ -33,7 +30,11 @@ class Container:
         self._velocloud_client = VelocloudClient(config, self._logger)
         self._velocloud_repository = VelocloudRepository(config, self._logger, self._velocloud_client)
 
-        self._ids_by_serial_client = IDsBySerialClient(config, self._logger, self._velocloud_client)
+        self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._edge_dict_repository = EdgeDictRepository(self._redis_client, self._logger)
+
+        self._ids_by_serial_client = IDsBySerialClient(config, self._logger, self._velocloud_client,
+                                                       self._edge_dict_repository)
         self._ids_by_serial_repository = IDsBySerialRepository(config, self._logger, self._ids_by_serial_client,
                                                                self._scheduler)
 

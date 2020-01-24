@@ -14,6 +14,7 @@ data "template_file" "automation-velocloud-bridge" {
     NATS_SERVER1 = local.nats_server1
     VELOCLOUD_CREDENTIALS = var.VELOCLOUD_CREDENTIALS
     VELOCLOUD_VERIFY_SSL = var.VELOCLOUD_VERIFY_SSL
+    REDIS_HOSTNAME = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
   }
 }
 
