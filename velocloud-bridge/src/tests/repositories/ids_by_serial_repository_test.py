@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pytest
 from application.repositories.ids_by_serial_repository import IDsBySerialRepository
 from apscheduler.util import undefined
+from asynctest import CoroutineMock
 
 from application.repositories import ids_by_serial_repository as id_by_serial_repository_module
 from config import testconfig
@@ -66,18 +67,19 @@ class TestIdsBySerialRepository:
             id='create_id_by_serial_dict',
         )
 
-    def search_for_edge_id_by_serial_test(self):
+    @pytest.mark.asyncio
+    async def search_for_edge_id_by_serial_test(self):
         config = Mock()
         mock_logger = Mock()
 
         serial = 'VC05'
 
         ids_by_serial_client = Mock()
-        ids_by_serial_client.search_for_edge_id_by_serial = Mock()
+        ids_by_serial_client.search_for_edge_id_by_serial = CoroutineMock()
 
         scheduler = Mock()
         ids_by_serial_repo = IDsBySerialRepository(config, mock_logger, ids_by_serial_client, scheduler)
 
-        ids_by_serial_repo.search_for_edge_id_by_serial(serial)
+        await ids_by_serial_repo.search_for_edge_id_by_serial(serial)
 
         ids_by_serial_client.search_for_edge_id_by_serial.assert_called_once_with(serial)

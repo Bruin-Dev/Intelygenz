@@ -39,7 +39,7 @@ class TestEdgeIdBySerialResponse:
         response_msg = {'request_id': request_id, "edge_id": edge_id_return, "status": 200}
 
         id_by_serial_repo = Mock()
-        id_by_serial_repo.search_for_edge_id_by_serial = Mock(return_value=edge_id_return)
+        id_by_serial_repo.search_for_edge_id_by_serial = CoroutineMock(return_value=edge_id_return)
 
         actions = SearchForIDsBySerial(config, test_bus, mock_logger, id_by_serial_repo)
 
@@ -66,7 +66,7 @@ class TestEdgeIdBySerialResponse:
         response_msg = {'request_id': request_id, "edge_id": edge_id_return, "status": 204}
 
         id_by_serial_repo = Mock()
-        id_by_serial_repo.search_for_edge_id_by_serial = Mock(return_value=edge_id_return)
+        id_by_serial_repo.search_for_edge_id_by_serial = CoroutineMock(return_value=edge_id_return)
 
         actions = SearchForIDsBySerial(config, test_bus, mock_logger, id_by_serial_repo)
 
@@ -93,7 +93,7 @@ class TestEdgeIdBySerialResponse:
         response_msg = {'request_id': request_id, "edge_id": edge_id_return, "status": 500}
 
         id_by_serial_repo = Mock()
-        id_by_serial_repo.search_for_edge_id_by_serial = Mock(return_value=edge_id_return)
+        id_by_serial_repo.search_for_edge_id_by_serial = CoroutineMock(return_value=edge_id_return)
 
         actions = SearchForIDsBySerial(config, test_bus, mock_logger, id_by_serial_repo)
 

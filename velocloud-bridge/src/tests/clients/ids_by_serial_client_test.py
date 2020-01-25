@@ -1,6 +1,8 @@
 from unittest.mock import Mock
 
+import pytest
 from application.clients.ids_by_serial_client import IDsBySerialClient
+from asynctest import CoroutineMock
 from pytest import raises
 
 from config import testconfig
@@ -12,27 +14,33 @@ class TestIDsBySerialClient:
         config = testconfig
         mock_logger = Mock()
         velo_client = Mock()
-        id_by_serial_client = IDsBySerialClient(config, mock_logger, velo_client)
+        edge_dict_repo = Mock()
+        id_by_serial_client = IDsBySerialClient(config, mock_logger, velo_client, edge_dict_repo)
         assert id_by_serial_client._config == config.VELOCLOUD_CONFIG
         assert id_by_serial_client._logger == mock_logger
         assert id_by_serial_client._velocloud_client == velo_client
-        assert id_by_serial_client._id_by_serial_dict == {}
+        assert id_by_serial_client._edge_dict_repository == edge_dict_repo
 
-    def create_id_by_serial_dict_test(self):
+    @pytest.mark.asyncio
+    async def create_id_by_serial_dict_test(self):
         config = testconfig
         mock_logger = Mock()
 
         serial_dict = {'VC0123': {'host': 'some_host', 'edge_id': 123, 'enterprise_id': 432}}
         velo_client = Mock()
-        velo_client.get_all_enterprises_edges_with_host_by_serial = Mock(return_value=serial_dict)
+        velo_client.get_all_enterprises_edges_with_host_by_serial = CoroutineMock(return_value=serial_dict)
 
-        id_by_serial_client = IDsBySerialClient(config, mock_logger, velo_client)
+        edge_dict_repo = Mock()
+        edge_dict_repo.set_current_edge_dict = Mock()
 
-        id_by_serial_client.create_id_by_serial_dict()
+        id_by_serial_client = IDsBySerialClient(config, mock_logger, velo_client, edge_dict_repo)
 
-        assert id_by_serial_client._id_by_serial_dict == serial_dict
+        await id_by_serial_client.create_id_by_serial_dict()
 
-    def search_for_edge_id_by_serial_ok_test(self):
+        edge_dict_repo.set_current_edge_dict.called_once_with(serial_dict)
+
+    @pytest.mark.asyncio
+    async def search_for_edge_id_by_serial_ok_test(self):
         config = testconfig
         mock_logger = Mock()
         velo_client = Mock()
@@ -40,14 +48,17 @@ class TestIDsBySerialClient:
         serial = 'VC0123'
         edge_id = {'host': 'some_host', 'edge_id': 123, 'enterprise_id': 432}
 
-        id_by_serial_client = IDsBySerialClient(config, mock_logger, velo_client)
-        id_by_serial_client._id_by_serial_dict = {serial: edge_id}
+        edge_repo = Mock()
+        edge_repo.get_last_edge_dict = Mock(return_value={serial: edge_id})
 
-        found_edge_id = id_by_serial_client.search_for_edge_id_by_serial(serial)
+        id_by_serial_client = IDsBySerialClient(config, mock_logger, velo_client, edge_repo)
+
+        found_edge_id = await id_by_serial_client.search_for_edge_id_by_serial(serial)
 
         assert found_edge_id == edge_id
 
-    def search_for_edge_id_by_serial_ko_test(self):
+    @pytest.mark.asyncio
+    async def search_for_edge_id_by_serial_ko_test(self):
         config = testconfig
         mock_logger = Mock()
         mock_logger.error = Mock()
@@ -56,10 +67,32 @@ class TestIDsBySerialClient:
         serial = 'VC0123'
         edge_id = {'host': 'some_host', 'edge_id': 123, 'enterprise_id': 432}
 
-        id_by_serial_client = IDsBySerialClient(config, mock_logger, velo_client)
-        id_by_serial_client._id_by_serial_dict = {'VC0143': edge_id}
+        edge_repo = Mock()
+        edge_repo.get_last_edge_dict = Mock(return_value={'VC0143': edge_id})
+
+        id_by_serial_client = IDsBySerialClient(config, mock_logger, velo_client, edge_repo)
 
         with raises(Exception):
-            found_edge_id = id_by_serial_client.search_for_edge_id_by_serial(serial)
+            found_edge_id = await id_by_serial_client.search_for_edge_id_by_serial(serial)
+            mock_logger.error.called()
+            assert found_edge_id == ''
+
+    @pytest.mark.asyncio
+    async def search_for_edge_id_by_serial_ko_no_redis_test(self):
+        config = testconfig
+        mock_logger = Mock()
+        mock_logger.error = Mock()
+        velo_client = Mock()
+
+        serial = 'VC0123'
+        edge_id = {'host': 'some_host', 'edge_id': 123, 'enterprise_id': 432}
+
+        edge_repo = Mock()
+        edge_repo.get_last_edge_dict = Mock(return_value=None)
+
+        id_by_serial_client = IDsBySerialClient(config, mock_logger, velo_client, edge_repo)
+
+        with raises(Exception):
+            found_edge_id = await id_by_serial_client.search_for_edge_id_by_serial(serial)
             mock_logger.error.called()
             assert found_edge_id == ''

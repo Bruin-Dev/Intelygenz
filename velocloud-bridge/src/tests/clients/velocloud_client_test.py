@@ -1,8 +1,8 @@
-import json
 from unittest.mock import Mock
 from unittest.mock import call
 from unittest.mock import patch
 
+import pytest
 from application.clients.velocloud_client import VelocloudClient
 from pytest import raises
 
@@ -373,20 +373,22 @@ class TestVelocloudClient:
                              'enterprise_id': 1,
                              'edge_id': 25}]
 
-    def get_all_enterprise_edges_with_host_by_serial_haserial_test(self):
+    @pytest.mark.asyncio
+    async def get_all_enterprise_edges_with_host_by_serial_haserial_test(self):
         configs = Mock()
         logger = Mock()
 
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
         monitoring_aggregates_return = {'enterprises': [{'id': 1}]}
-        enterprise_edges_by_id_return = [{'id': 25, 'serialNumber': 'VC0123', 'haSerialNumber': 'VC0234'}]
+        enterprise_edges_by_id_return = [{'id': 25, 'enterpriseId': 1, 'serialNumber': 'VC0123',
+                                          'haSerialNumber': 'VC0234'}]
 
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
         velocloud_client.get_all_enterprises_edges_by_id = Mock(return_value=enterprise_edges_by_id_return)
         velocloud_client._clients = clients
 
-        edge_ids_by_serial = velocloud_client.get_all_enterprises_edges_with_host_by_serial()
+        edge_ids_by_serial = await velocloud_client.get_all_enterprises_edges_with_host_by_serial()
 
         velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
         velocloud_client.get_all_enterprises_edges_by_id.assert_called_once_with(clients[0], 1)
@@ -398,20 +400,22 @@ class TestVelocloudClient:
                                                  'edge_id': 25}
                                       }
 
-    def get_all_enterprise_edges_with_host_by_serial_none_haSerial_test(self):
+    @pytest.mark.asyncio
+    async def get_all_enterprise_edges_with_host_by_serial_none_haSerial_test(self):
         configs = Mock()
         logger = Mock()
 
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
         monitoring_aggregates_return = {'enterprises': [{'id': 1}]}
-        enterprise_edges_by_id_return = [{'id': 25, 'serialNumber': 'VC0123', 'haSerialNumber': None}]
+        enterprise_edges_by_id_return = [{'id': 25, 'enterpriseId': 1, 'serialNumber': 'VC0123',
+                                          'haSerialNumber': None}]
 
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
         velocloud_client.get_all_enterprises_edges_by_id = Mock(return_value=enterprise_edges_by_id_return)
         velocloud_client._clients = clients
 
-        edge_ids_by_serial = velocloud_client.get_all_enterprises_edges_with_host_by_serial()
+        edge_ids_by_serial = await velocloud_client.get_all_enterprises_edges_with_host_by_serial()
 
         velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
         velocloud_client.get_all_enterprises_edges_by_id.assert_called_once_with(clients[0], 1)
