@@ -283,18 +283,10 @@ class ServiceOutageDetector:
         edge_list = await self._get_all_edges()
         for edge_full_id in edge_list:
             edge_status = await self._get_edge_status_by_id(edge_full_id)
-            enterprise_name = edge_status['enterprise_name']
 
-            if not self._is_edge_for_testing_purposes(enterprise_name) and \
-                    self._outage_utils.is_there_an_outage(edge_status):
+            if self._outage_utils.is_there_an_outage(edge_status):
                 await self._start_quarantine_job(edge_full_id)
                 self._add_edge_to_quarantine(edge_full_id, edge_status)
-
-    def _is_edge_for_testing_purposes(self, enterprise_name):
-        has_client_id = bool(self._extract_client_id(enterprise_name))
-        is_edge_for_testing = not has_client_id
-
-        return is_edge_for_testing
 
     async def _start_quarantine_job(self, edge_full_id, run_date: datetime = None):
         edge_identifier = EdgeIdentifier(**edge_full_id)

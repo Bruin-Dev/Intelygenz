@@ -251,105 +251,7 @@ class TestServiceOutageDetectorJob:
         service_outage_detector._get_all_edges.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def service_outage_detector_process_with_edges_found_and_edges_for_testing_test(self):
-        edge_1_id = 5678
-        edge_2_id = 8765
-        edge_3_id = 3344
-        edge_1_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': edge_1_id}
-        edge_2_full_id = {'host': 'metvco03.mettel.net', 'enterprise_id': 4321, 'edge_id': edge_2_id}
-        edge_3_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1122, 'edge_id': edge_3_id}
-        edge_list = [edge_1_full_id, edge_2_full_id, edge_3_full_id]
-
-        edge_1_enterprise_name = 'EVIL-CORP|12345|'
-        edge_2_enterprise_name = 'EVIL-CORP-TEST'
-        edge_3_enterprise_name = 'EVIL-CORP-TEST-2'
-
-        edge_1_state = 'CONNECTED'
-        edge_1_link_ge1_state = edge_1_link_ge2_state = 'STABLE'
-        edge_1_status = {
-            'edges': {
-                'edgeState': edge_1_state,
-                'serialNumber': 'VC1234567',
-                'name': 'Saturos',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': edge_1_link_ge1_state, 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': edge_1_link_ge2_state, 'interface': 'GE2'}},
-            ],
-            'enterprise_name': edge_1_enterprise_name,
-        }
-
-        edge_2_state = 'CONNECTED'
-        edge_2_link_ge1_state = edge_2_link_ge2_state = 'STABLE'
-        edge_2_status = {
-            'edges': {
-                'edgeState': edge_2_state,
-                'serialNumber': 'VC7654321',
-                'name': 'Menardi',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': edge_2_link_ge1_state, 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': edge_2_link_ge2_state, 'interface': 'GE2'}},
-            ],
-            'enterprise_name': edge_2_enterprise_name,
-        }
-
-        edge_3_state = 'CONNECTED'
-        edge_3_link_ge1_state = edge_3_link_ge2_state = 'STABLE'
-        edge_3_status = {
-            'edges': {
-                'edgeState': edge_3_state,
-                'serialNumber': 'VC1112223',
-                'name': 'Isaac',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': edge_3_link_ge1_state, 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': edge_3_link_ge2_state, 'interface': 'GE2'}},
-            ],
-            'enterprise_name': edge_3_enterprise_name,
-        }
-        edge_statuses = [edge_1_status, edge_2_status, edge_3_status]
-
-        is_edge_for_testing_side_effect = [False, True, True]
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock(return_value=False)
-
-        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        quarantine_edge_repository, reporting_edge_repository,
-                                                        config, template_renderer, outage_utils)
-        service_outage_detector._get_all_edges = CoroutineMock(return_value=edge_list)
-        service_outage_detector._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
-        service_outage_detector._is_edge_for_testing_purposes = Mock(side_effect=is_edge_for_testing_side_effect)
-        service_outage_detector._start_quarantine_job = Mock()
-        service_outage_detector._add_edge_to_quarantine = Mock()
-
-        await service_outage_detector._service_outage_detector_process()
-
-        service_outage_detector._get_all_edges.assert_awaited_once()
-        service_outage_detector._get_edge_status_by_id.assert_has_awaits([
-            call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
-        ])
-        service_outage_detector._is_edge_for_testing_purposes.assert_has_calls([
-            call(edge_1_enterprise_name),
-            call(edge_2_enterprise_name),
-            call(edge_3_enterprise_name),
-        ])
-        service_outage_detector._start_quarantine_job.assert_not_called()
-        service_outage_detector._add_edge_to_quarantine.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def service_outage_detector_process_with_edges_found_and_no_edges_for_testing_and_healthy_edges_test(self):
+    async def service_outage_detector_process_with_edges_found_and_healthy_edges_test(self):
         edge_1_id = 5678
         edge_2_id = 8765
         edge_3_id = 3344
@@ -410,7 +312,6 @@ class TestServiceOutageDetectorJob:
         edge_statuses = [edge_1_status, edge_2_status, edge_3_status]
 
         is_there_outage_side_effect = [False, False, False]
-        is_edge_for_testing_side_effect = [False, False, False]
 
         event_bus = Mock()
         logger = Mock()
@@ -427,7 +328,6 @@ class TestServiceOutageDetectorJob:
                                                         config, template_renderer, outage_utils)
         service_outage_detector._get_all_edges = CoroutineMock(return_value=edge_list)
         service_outage_detector._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
-        service_outage_detector._is_edge_for_testing_purposes = Mock(side_effect=is_edge_for_testing_side_effect)
 
         service_outage_detector._start_quarantine_job = Mock()
         service_outage_detector._add_edge_to_quarantine = Mock()
@@ -438,15 +338,11 @@ class TestServiceOutageDetectorJob:
         service_outage_detector._get_edge_status_by_id.assert_has_awaits([
             call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
         ])
-        service_outage_detector._is_edge_for_testing_purposes.assert_has_calls([
-            call(edge_1_enterprise_name), call(edge_2_enterprise_name), call(edge_3_enterprise_name),
-        ])
         service_outage_detector._start_quarantine_job.assert_not_called()
         service_outage_detector._add_edge_to_quarantine.assert_not_called()
 
     @pytest.mark.asyncio
-    async def service_outage_detector_process_with_edges_found_and_no_edges_for_testing_and_edges_with_outages_test(
-            self):
+    async def service_outage_detector_process_with_edges_found_and_edges_with_outages_test(self):
         edge_1_id = 5678
         edge_2_id = 8765
         edge_3_id = 3344
@@ -508,7 +404,6 @@ class TestServiceOutageDetectorJob:
         edge_statuses = [edge_1_status, edge_2_status, edge_3_status]
 
         is_there_outage_side_effect = [True, False, True]
-        is_edge_for_testing_side_effect = [False, False, False]
 
         event_bus = Mock()
         logger = Mock()
@@ -525,7 +420,6 @@ class TestServiceOutageDetectorJob:
                                                         config, template_renderer, outage_utils)
         service_outage_detector._get_all_edges = CoroutineMock(return_value=edge_list)
         service_outage_detector._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
-        service_outage_detector._is_edge_for_testing_purposes = Mock(side_effect=is_edge_for_testing_side_effect)
         service_outage_detector._start_quarantine_job = CoroutineMock()
         service_outage_detector._add_edge_to_quarantine = Mock()
 
@@ -535,9 +429,6 @@ class TestServiceOutageDetectorJob:
         service_outage_detector._get_edge_status_by_id.assert_has_awaits([
             call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
         ])
-        service_outage_detector._is_edge_for_testing_purposes.assert_has_calls([
-            call(edge_1_enterprise_name), call(edge_2_enterprise_name), call(edge_3_enterprise_name),
-        ])
         service_outage_detector._start_quarantine_job.assert_has_awaits([
             call(edge_1_full_id), call(edge_3_full_id)
         ])
@@ -545,28 +436,6 @@ class TestServiceOutageDetectorJob:
             call(edge_1_full_id, edge_1_status),
             call(edge_3_full_id, edge_3_status),
         ])
-
-    def is_edge_for_testing_purposes_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_utils = Mock()
-
-        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        quarantine_edge_repository, reporting_edge_repository,
-                                                        config, template_renderer, outage_utils)
-
-        enterprise_name = 'EVIL-CORP|12345|'
-        result = service_outage_detector._is_edge_for_testing_purposes(enterprise_name)
-        assert result is False
-
-        enterprise_name = 'EVIL-CORP'
-        result = service_outage_detector._is_edge_for_testing_purposes(enterprise_name)
-        assert result is False
 
     @pytest.mark.asyncio
     async def get_all_edges_test(self):
