@@ -781,7 +781,7 @@ class TestQuarantineJob:
 
         await service_outage_detector._process_edge_from_quarantine(edge_full_id)
 
-        service_outage_detector._add_edge_to_reporting.assert_not_called()
+        quarantine_edge_repository.remove_edge.assert_called_once_with(edge_full_id)
 
     @pytest.mark.asyncio
     async def process_edge_from_quarantine_with_reportable_edge_test(self):

@@ -462,7 +462,7 @@ class ServiceOutageDetector:
                     f'Edge {edge_identifier} may be healthy again or there may be an outage ticket '
                     'created for it already (or both). This edge will not be reported for now.'
                 )
-                # TODO: Remove edge from quarantine at this precise point
+                self._quarantine_edge_repository.remove_edge(edge_full_id)
 
     async def _is_reportable_edge(self, edge_status):
         outage_happened = self._outage_utils.is_there_an_outage(edge_status)
