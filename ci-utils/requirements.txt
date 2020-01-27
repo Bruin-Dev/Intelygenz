@@ -1,0 +1,3 @@
+awscli==1.16.257
+requests==2.22.0
+tenacity==5.0.4

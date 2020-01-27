@@ -3,6 +3,7 @@
 import os
 import json
 import requests
+from tenacity import retry, wait_exponential, stop_after_delay
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectionError
 from sys import exit
@@ -88,7 +89,6 @@ def create_user(user):
         if response.status_code == 200:
             print(f'Successfully created user {user["login"]}.')
             user_id = response.json().get("id")
-
             if user["role"] == 'editor':
                 assign_editor_permissions(user, user_id)
             # user is a viewer
@@ -102,6 +102,9 @@ def create_user(user):
         exit(1)
 
 
+@retry(wait=wait_exponential(multiplier=5,
+                             min=5),
+       stop=stop_after_delay(300))
 def assign_viewer_permissions(user, user_id):
 
     user_data = {
@@ -136,17 +139,19 @@ def assign_viewer_permissions(user, user_id):
             else:
                 print(response.text)
                 print(f'Error updating permissions for user {user["login"]}.')
+                raise Exception
         except ConnectionError as e:
             print(e)
             exit(1)
 
 
+@retry(wait=wait_exponential(multiplier=5,
+                             min=5),
+       stop=stop_after_delay(300))
 def assign_editor_permissions(user, user_id):
-
     user_data = {"role": "Editor"}
 
     try:
-        time.sleep(2)
         response = requests.patch(
             f'https://admin:admin@{ENV_SLUG}.'
             f'mettel-automation.net/api/org/users/{user_id}',
@@ -159,6 +164,7 @@ def assign_editor_permissions(user, user_id):
         else:
             print(response.text)
             print(f'Error updating permissions for user {user["login"]}.')
+            raise Exception
     except ConnectionError as e:
         print(e)
         exit(1)
@@ -171,16 +177,12 @@ def get_folder_uid(user_company, main_folder=False):
         folder_name = 'main'
     else:
         folder_name = user_company.split("|")[0].replace(" ", "-").lower()
-
     try:
         response = requests.get(
             f'https://admin:admin@{ENV_SLUG}.'
             f'mettel-automation.net/api/folders',
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
-
-        print(f"response in get_folder_uid with main_folder {main_folder} "
-              f"is {response.text}")
         if response.status_code == 200:
             folders = response.json()
             for f in folders:
@@ -189,12 +191,14 @@ def get_folder_uid(user_company, main_folder=False):
             return None
         else:
             return None
-
     except ConnectionError as e:
         print(e)
         exit(1)
 
 
+@retry(wait=wait_exponential(multiplier=5,
+                             min=5),
+       stop=stop_after_delay(300))
 def update_main_folder_permissions():
     """
     Removes all permissions from main folder,
@@ -212,9 +216,9 @@ def update_main_folder_permissions():
 
     if main_folder_uid is None:
         print(f'Error updating permissions of the main folder because it doesn\'t exists.')
+        raise Exception
     else:
         try:
-            #time.sleep(5)
             response = requests.post(
                 f'https://admin:admin@{ENV_SLUG}.'
                 f'mettel-automation.net/api/folders/'
@@ -227,6 +231,7 @@ def update_main_folder_permissions():
             else:
                 print(response.text)
                 print(f'Error updating permissions of the main folder.')
+                raise Exception
         except ConnectionError as e:
             print(e)
             exit(1)
