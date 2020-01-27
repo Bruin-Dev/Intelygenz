@@ -14,6 +14,8 @@
     - master
     - /^*dev/feature/.*$/
     - /^*dev/fix/.*$/
+  tags:
+    - kubernetes
 
 .terraform_validate_template: &terraform_validate_template
   image:
@@ -40,3 +42,5 @@
     - master
     - /^*dev/feature/.*$/
     - /^*dev/fix/.*$/
+  tags:
+    - kubernetes

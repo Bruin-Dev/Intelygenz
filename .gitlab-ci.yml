@@ -9,9 +9,22 @@ stages:
 variables:
   NATS_SERVER1: "nats://nats-server:4222"
   NATS_MODULE_VERSION: 2.1.0
-  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_HOST: tcp://localhost:2375
   DOCKER_DRIVER: overlay2
   REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
+  bruin_bridge_desired_tasks: 2
+  last_contact_report_desired_tasks: 1
+  metrics_prometheus_desired_tasks: 1
+  nats_server_desired_tasks: 1
+  nats_server_1_desired_tasks: 1
+  nats_server_2_desired_tasks: 1
+  notifier_desired_tasks: 1
+  service_affecting_monitor_desired_tasks: 1
+  service_outage_monitor_desired_tasks: 1
+  service_outage_triage_desired_tasks: 1
+  sites_monitor_desired_tasks: 1
+  t7_bridge_desired_tasks: 1
+  velocloud_bridge_desired_tasks: 5
 
 include:
   # Templates used in Gitlab-CI jobs

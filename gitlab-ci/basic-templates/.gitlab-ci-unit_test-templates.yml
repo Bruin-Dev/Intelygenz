@@ -18,6 +18,8 @@
     - /^*fix/.*$/
     - /^*dev/feature/.*$/
     - /^*dev/fix/.*$/
+  tags:
+    - kubernetes
 
 .unittest_with_setup_template: &unittest_with_setup_template
   stage: unit_test
@@ -35,6 +37,8 @@
     - /^*fix/.*$/
     - /^*dev/feature/.*$/
     - /^*dev/fix/.*$/
+  tags:
+    - kubernetes
 
 .unittest_custom_package_template: &unittest_custom_package_template
   stage: unit_test
@@ -53,3 +57,5 @@
     - /^*fix/.*$/
     - /^*dev/feature/.*$/
     - /^*dev/fix/.*$/
+  tags:
+    - kubernetes

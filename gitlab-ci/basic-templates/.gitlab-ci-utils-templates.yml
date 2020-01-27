@@ -12,6 +12,8 @@
     - apk --upgrade --no-cache add python3 py-pip
     - pip3 install awscli
     - python3 ci-utils/check_ecs_resources.py
+  tags:
+    - kubernetes
 
 .destroy_environment_aws_nuke_template: &destroy_environment_aws_nuke_template
   stage: deploy
@@ -42,3 +44,5 @@
     - branches
   except:
     - master
+  tags:
+    - kubernetes

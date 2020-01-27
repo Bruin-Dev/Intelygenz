@@ -23,6 +23,8 @@
     - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform apply -auto-approve infra-as-code/dev
+  tags:
+    - kubernetes
 
 .terraform_template_deploy_network-resources: &terraform_template_deploy_network-resources
   image:
@@ -37,3 +39,5 @@
     - terraform init infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
     - terraform apply -auto-approve infra-as-code/network-resources
+  tags:
+    - kubernetes

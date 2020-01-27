@@ -19,3 +19,5 @@
     - master
     - /^*dev/feature/.*$/
     - /^*dev/fix/.*$/
+  tags:
+    - kubernetes

@@ -6,6 +6,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectionError
 from sys import exit
+import time
 
 ENV_SLUG = os.environ.get("ENVIRONMENT_SLUG")
 GF_ADMIN = os.environ.get("GRAFANA_ADMIN_USER")
@@ -145,6 +146,7 @@ def assign_editor_permissions(user, user_id):
     user_data = {"role": "Editor"}
 
     try:
+        time.sleep(2)
         response = requests.patch(
             f'https://admin:admin@{ENV_SLUG}.'
             f'mettel-automation.net/api/org/users/{user_id}',
@@ -177,6 +179,8 @@ def get_folder_uid(user_company, main_folder=False):
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
 
+        print(f"response in get_folder_uid with main_folder {main_folder} "
+              f"is {response.text}")
         if response.status_code == 200:
             folders = response.json()
             for f in folders:
@@ -207,9 +211,10 @@ def update_main_folder_permissions():
     main_folder_uid = get_folder_uid(None, True)
 
     if main_folder_uid is None:
-        print(f'Error updating permissions of the main folder.')
+        print(f'Error updating permissions of the main folder because it doesn\'t exists.')
     else:
         try:
+            #time.sleep(5)
             response = requests.post(
                 f'https://admin:admin@{ENV_SLUG}.'
                 f'mettel-automation.net/api/folders/'

@@ -16,3 +16,5 @@
     - /^*fix/.*$/
     - /^*dev/feature/.*$/
     - /^*dev/fix/.*$/
+  tags:
+    - kubernetes
