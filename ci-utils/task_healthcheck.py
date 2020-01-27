@@ -4,6 +4,7 @@ import json
 import logging
 import time
 import sys
+from tenacity import retry, wait_exponential, stop_after_delay
 
 logging.basicConfig(level=logging.INFO)
 
@@ -16,33 +17,27 @@ VELOCLOUD_BRIDGE_TASKS = os.environ['TF_VAR_velocloud_bridge_desired_tasks']
 class TaskHealthcheck:
     def check_task_is_ready(self, task_name_param):
         major_tasks_info = self._get_major_tasks(task_name_param)
-        self._wait_until_tasks_is_ready(major_tasks_info, task_name_param, time.time())
-
-    def _wait_until_tasks_is_ready(self, tasks_info, task_name_param, start_time):
-        timeout = start_time + 60 * 6
-        correct_exit = False
-        actual_time = time.time()
-        i = 1
-        while timeout > actual_time:
-            if all(self._check_task_status(item)['task_is_running'] and
-                   self._check_task_status(item)['task_is_healthy'] for item in tasks_info):
-                logging.info(f"The following tasks with name {task_name_param} are RUNNING and with HEALTHY state")
-                self._print_actual_tasks(tasks_info)
-                correct_exit = True
-                break
-            else:
-                logging.info(f"Try {i}. Waiting for the following tasks with name {task_name_param} "
-                             f"to be RUNNING and with HEALTHY state")
-                self._print_actual_tasks(tasks_info)
-                time.sleep(30)
-                actual_time = time.time()
-                i += 1
-        if actual_time > timeout and not correct_exit:
+        try:
+            self._wait_until_tasks_is_ready(major_tasks_info, task_name_param)
+        except Exception as e:
             logging.error(f"The maximum waiting time for the following tasks with name {task_name_param} "
                           f"to be RUNNING and with HEALTHY state has been reached")
-            self._print_actual_tasks(tasks_info)
+            self._print_actual_tasks(major_tasks_info)
             sys.exit(1)
-        return correct_exit
+
+    @retry(wait=wait_exponential(multiplier=5,
+                                 min=5),
+           stop=stop_after_delay(360))
+    def _wait_until_tasks_is_ready(self, tasks_info, task_name_param):
+        if all(self._check_task_status(item)['task_is_running'] and
+               self._check_task_status(item)['task_is_healthy'] for item in tasks_info):
+            logging.info(f"The following tasks with name {task_name_param} are RUNNING and with HEALTHY state")
+            self._print_actual_tasks(tasks_info)
+        else:
+            logging.info(f"Waiting for the following tasks with name {task_name_param} "
+                         f"to be RUNNING and with HEALTHY state")
+            self._print_actual_tasks(tasks_info)
+            raise Exception
 
     @staticmethod
     def _check_task_status(task_info):

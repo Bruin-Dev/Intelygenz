@@ -102,63 +102,33 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 
 Due to the limited number of task instances available per account in AWS (50 instances at the time of this writing), it is highly recommended that developers configure just the tasks they need to use for their deployments so ephemeral environments do not consume more AWS resources (task instances) than needed. To do so, they must perform the following steps:
 
-1. There are two jobs defined in the `infra-as-code/.gitlab-ci.yml` file: `deploy-branches` and `check-ecs-resources-branches`. A set of variables are declared within them to configure the number of tasks per microservice. The naming of these variables follows the convention `TF_VAR_<service_name>_desired_tasks`, where `service_name` is the name of the microservice declared in AWS.
-
-   NOTE: Make sure that the set of variables is exactly the same in each of these jobs. This duplication can't be avoided because Terraform variables can't be shared between GitlabCI jobs of different stages.
-    Developers must modify the desired `TF_VAR_<service_name>_desired_tasks` variable to spawn as much tasks instances as they need for their ephemeral environments.
+1. There are two jobs defined in the `infra-as-code/.gitlab-ci.yml` file: `deploy-branches` and `check-ecs-resources-branches`. A set of variables are used within them to configure the number of tasks per microservice. The naming of these variables follows the convention `<service_name>_desired_tasks`, where `service_name` is the name of the microservice declared in AWS. These variables are declared in the global variables section of the `.gitlab-ci.yml` file in the repository root.
     > If the variable is set to 0, no tasks instances will be created for that microservice. The corresponding service won't be created at ECS either.
 
-3. If the developer has doubts about what microservices should be taken into account for an ephemeral environment, they should take a look at the README file of that microservice. After guessing that, the corresponding `TF_VAR_<service_name>_desired_tasks` must be set with a minimal value of 1 in order to get the task instances created when the deployment finishes.
+2. If the developer has doubts about what microservices should be taken into account for an ephemeral environment, they should take a look at the README file of that microservice. After guessing that, the corresponding `<service_name>_desired_tasks` must be set with a minimal value of 1 in order to get the task instances created when the deployment finishes.
 
-4. Once the development has finished, the value of `TF_VAR_<service_name>_desired_tasks` variables that were modified must be reverted to the value they hold in the `master` branch.
+3. Once the development has finished, the value of `<service_name>_desired_tasks` variables that were modified must be reverted to the value they hold in the `master` branch.
 
-The following example shows how to configure `TF_VAR_<service_name>_desired_tasks` variables strictly needed to have the `service-affecting-monitor` microservice working in an ephemeral environment, including microservices it depends on.
-
-```sh
-check-ecs-resources-branches:
-  extends: .check_ecs_resources_template
-  before_script:
-    . . .
-    - export TF_VAR_bruin_bridge_desired_tasks=0
-    - export TF_VAR_last_contact_report_desired_tasks=1
-    - export TF_VAR_metrics_grafana_desired_tasks=0
-    - export TF_VAR_metrics_prometheus_desired_tasks=0
-    - export TF_VAR_nats_server_desired_tasks=1
-    - export TF_VAR_nats_server_1_desired_tasks=1
-    - export TF_VAR_nats_server_2_desired_tasks=1
-    - export TF_VAR_notifier_desired_tasks=1
-    - export TF_VAR_service_affecting_monitor_desired_tasks=1
-    - export TF_VAR_service_outage_monitor_desired_tasks=0
-    - export TF_VAR_service_outage_triage_desired_tasks=0
-    - export TF_VAR_sites_monitor_desired_tasks=0
-    - export TF_VAR_t7_bridge_desired_tasks=0
-    - export TF_VAR_velocloud_bridge_desired_tasks=5
-    . . .
-```
+The following example shows how to configure `<service_name>_desired_tasks` variables strictly needed to have the `service-affecting-monitor` microservice working in an ephemeral environment, including microservices it depends on.
 
 ```sh
-deploy-branches:
-  stage: deploy
-  extends: .terraform_template_deploy_environment
-  before_script:
-    . . .
-    - export TF_VAR_bruin_bridge_desired_tasks=0
-    - export TF_VAR_last_contact_report_desired_tasks=1
-    - export TF_VAR_metrics_grafana_desired_tasks=0
-    - export TF_VAR_metrics_prometheus_desired_tasks=0
-    - export TF_VAR_nats_server_desired_tasks=1
-    - export TF_VAR_nats_server_1_desired_tasks=1
-    - export TF_VAR_nats_server_2_desired_tasks=1
-    - export TF_VAR_notifier_desired_tasks=1
-    - export TF_VAR_service_affecting_monitor_desired_tasks=1
-    - export TF_VAR_service_outage_monitor_desired_tasks=0
-    - export TF_VAR_service_outage_triage_desired_tasks=0
-    - export TF_VAR_sites_monitor_desired_tasks=0
-    - export TF_VAR_t7_bridge_desired_tasks=0
-    - export TF_VAR_velocloud_bridge_desired_tasks=5
-    . . .
+variables:
+  . . .
+  bruin_bridge_desired_tasks: 0
+  last_contact_report_desired_tasks: 1
+  metrics_prometheus_desired_tasks: 0
+  nats_server_desired_tasks: 0
+  nats_server_1_desired_tasks: 1
+  nats_server_2_desired_tasks: 1
+  notifier_desired_tasks: 1
+  service_affecting_monitor_desired_tasks: 1
+  service_outage_monitor_desired_tasks: 0
+  service_outage_triage_desired_tasks: 0
+  sites_monitor_desired_tasks: 0
+  t7_bridge_desired_tasks: 0
+  velocloud_bridge_desired_tasks: 5
+  . . .
 ```
-> As pointed out earlier, make sure that the set of `TF_VAR_<service_name>_desired_tasks` variables is exactly the same in both `check-ecs-resources-branches` and `deploy-branches` jobs.
 
 ## DOD(Definition of Done)
 

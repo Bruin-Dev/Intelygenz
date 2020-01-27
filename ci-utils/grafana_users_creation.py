@@ -170,6 +170,9 @@ def assign_editor_permissions(user, user_id):
         exit(1)
 
 
+@retry(wait=wait_exponential(multiplier=5,
+                             min=5),
+       stop=stop_after_delay(300))
 def get_folder_uid(user_company, main_folder=False):
 
     # Getting folder name
@@ -190,7 +193,7 @@ def get_folder_uid(user_company, main_folder=False):
                     return f["uid"]
             return None
         else:
-            return None
+            raise Exception
     except ConnectionError as e:
         print(e)
         exit(1)
