@@ -4,7 +4,6 @@ import json
 class EdgeDictRepository:
 
     def __init__(self, redis_client, logger):
-        self._edge_cache = dict()
         self._redis_client = redis_client
         self._logger = logger
 
@@ -19,4 +18,7 @@ class EdgeDictRepository:
         self._logger.info(f'Getting edge dict from cache')
         edge_dict = self._redis_client.get("edge_dict")
         self._logger.info(f'edge_dict = {edge_dict}')
-        return json.loads(edge_dict)
+        if edge_dict is not None:
+            return json.loads(edge_dict)
+        else:
+            return None
