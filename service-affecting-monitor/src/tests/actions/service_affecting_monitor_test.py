@@ -83,10 +83,10 @@ class TestServiceAffectingMonitor:
         config = testconfig
 
         device = {
-                  "host": "mettel.velocloud.net",
-                  "enterprise_id": 137,
-                  "edge_id": 1602
-                }
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
 
         link_1 = {
             'bestLatencyMsRx': 14,
@@ -148,7 +148,7 @@ class TestServiceAffectingMonitor:
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
-            "edge_id": 1602
+            "edge_id": 1602,
         }
 
         link_1 = {
@@ -188,24 +188,24 @@ class TestServiceAffectingMonitor:
 
         event_bus.rpc_request.assert_has_awaits(
             [
-             call("edge.status.request",
-                  json.dumps({
-                              'request_id': uuid_1,
-                              'edge': device,
-                              'interval': {
-                                  'end': current_datetime,
-                                  'start': current_datetime - timedelta(minutes=10)
-                              }
-                  }, default=str),
-                  timeout=60,),
+                call("edge.status.request",
+                     {
+                         'request_id': uuid_1,
+                         'edge': device,
+                         'interval': {
+                             'end': current_datetime,
+                             'start': current_datetime - timedelta(minutes=10)
+                         }
+                     },
+                     timeout=60, ),
 
-             call('notification.slack.request',
-                  json.dumps({
-                              'request_id': uuid_2,
-                              'message': f'Error while monitoring edge for service affecting trouble, seems like data '
-                              f'is corrupted: \n {json.dumps(edges_to_report, indent=2)} \n'
-                              f'The environment is dev'}),
-                  timeout=10,)
+                call('notification.slack.request',
+                     {
+                         'request_id': uuid_2,
+                         'message': f'Error while monitoring edge for service affecting trouble, seems like data '
+                                    f'is corrupted: \n {json.dumps(edges_to_report, indent=2)} \n'
+                                    f'The environment is dev'},
+                     timeout=10, )
             ], any_order=False
         )
 
@@ -1363,7 +1363,8 @@ class TestServiceAffectingMonitor:
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
-            "edge_id": 1602
+            "edge_id": 1602,
+            "serial": "VC05200028729"
         }
 
         link_best_loss_packets_rx = 6
@@ -1409,7 +1410,8 @@ class TestServiceAffectingMonitor:
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
-            "edge_id": 1602
+            "edge_id": 1602,
+            "serial": "VC05200028729"
         }
 
         link_1_best_jitter_ms_rx = 14
@@ -1464,7 +1466,8 @@ class TestServiceAffectingMonitor:
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
-            "edge_id": 1602
+            "edge_id": 1602,
+            "serial": "VC05200028729"
         }
 
         trouble_text = 'Jitter'
