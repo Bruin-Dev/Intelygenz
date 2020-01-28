@@ -98,3 +98,24 @@ __alert.response.event.edge.{some service id} schema__
 }
 ```
 
+When a message is received by `edge.ids.by.serial`, the bridge will get the edge_id that corresponds to the given 
+serial number and send to a response topic that was built by NATS under the hood:
+__edge.ids.by.serial schema__
+```
+{
+    "request_id": 123, 
+    "serial": "VCO4"
+}
+```
+Velocloud-bridge will create a dictionary of serials to edge_ids and store it into redis. This dictionary gets 
+reset and made every day. The `serial` provided in the message is used to search to see if that key exists in
+the dictionary and then the corresponding edge_id will be returned. 
+
+__edge.ids.by.serial response schema__
+```
+{
+    "request_id": 123, 
+    "edge_id": {"host": "some.host", "enterprise_id":19, "edge_id":99}, 
+    "status": 200
+}
+```
