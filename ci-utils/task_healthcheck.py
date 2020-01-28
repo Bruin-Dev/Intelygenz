@@ -22,7 +22,7 @@ class TaskHealthcheck:
         except Exception as e:
             logging.error(f"The maximum waiting time for the following tasks with name {task_name_param} "
                           f"to be RUNNING and with HEALTHY state has been reached")
-            self._print_actual_tasks(major_tasks_info)
+            self._print_current_tasks(major_tasks_info)
             sys.exit(1)
 
     @retry(wait=wait_exponential(multiplier=5,
@@ -32,11 +32,11 @@ class TaskHealthcheck:
         if all(self._check_task_status(item)['task_is_running'] and
                self._check_task_status(item)['task_is_healthy'] for item in tasks_info):
             logging.info(f"The following tasks with name {task_name_param} are RUNNING and with HEALTHY state")
-            self._print_actual_tasks(tasks_info)
+            self._print_current_tasks(tasks_info)
         else:
             logging.info(f"Waiting for the following tasks with name {task_name_param} "
                          f"to be RUNNING and with HEALTHY state")
-            self._print_actual_tasks(tasks_info)
+            self._print_current_tasks(tasks_info)
             raise Exception
 
     @staticmethod
@@ -66,8 +66,8 @@ class TaskHealthcheck:
         if tasks_arn_with_task_name is None:
             logging.error(f"No task running for specified task {task_name_param}")
             sys.exit(1)
-        logging.info(f"Actual tasks with name {task_name_param} are the following")
-        self._print_actual_tasks(tasks_arn_with_task_name)
+        logging.info(f"Current tasks with name {task_name_param} are the following")
+        self._print_current_tasks(tasks_arn_with_task_name)
         if len(tasks_arn_with_task_name) == 1:
             return tasks_arn_with_task_name[0:1]
         elif len(tasks_arn_with_task_name) > 1:
@@ -88,7 +88,7 @@ class TaskHealthcheck:
         return num_of_tasks
 
     @staticmethod
-    def _print_actual_tasks(tasks_arn_with_task_name):
+    def _print_current_tasks(tasks_arn_with_task_name):
         for element in tasks_arn_with_task_name:
             logging.info(f"task_arn: {element['task_arn']}")
             logging.info(f"task_definition_arn: {element['task_definition_arn']}")

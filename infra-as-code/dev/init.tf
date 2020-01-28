@@ -11,3 +11,10 @@ provider "aws" {
   version = "=2.46.0"
 }
 
+provider "null" {
+  version = "= 2.1"
+}
+
+provider "template" {
+  version = "= 2.1"
+}
