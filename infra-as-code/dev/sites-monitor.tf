@@ -14,7 +14,7 @@ data "template_file" "automation-sites-monitor" {
     NATS_SERVER1 = local.nats_server1
     MONITORING_SECONDS = var.MONITORING_SECONDS
     LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
-    REDIS_HOSTNAME = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
+    REDIS_HOSTNAME = local.redis-hostname
   }
 }
 

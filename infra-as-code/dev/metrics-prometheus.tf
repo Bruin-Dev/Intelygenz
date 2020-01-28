@@ -42,7 +42,7 @@ data "template_file" "automation-metrics-prometheus" {
     thanos_querier_HTTP_PORT = local.automation-metrics-thanos-querier-HTTP_PORT
     grafana_image = local.automation-metrics-grafana-image
     NATS_SERVER1 = local.nats_server1
-    REDIS_HOSTNAME = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
+    REDIS_HOSTNAME = local.redis-hostname
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
   }

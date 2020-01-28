@@ -26,6 +26,7 @@ locals {
   automation-redis-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-redis"
   automation-redis-security_group-name = "${var.ENVIRONMENT}-redis-sg"
   automation-redis-security_group-tag-Name = "${var.ENVIRONMENT}-redis"
+  redis-hostname = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
 
   // automation-nats-server-2 local vars
   automation-nats-server-2-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"

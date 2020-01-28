@@ -12,7 +12,7 @@ data "template_file" "automation-bruin-bridge" {
     
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
-    REDIS_HOSTNAME = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
+    REDIS_HOSTNAME = local.redis-hostname
     BRUIN_CLIENT_ID = var.BRUIN_CLIENT_ID
     BRUIN_CLIENT_SECRET = var.BRUIN_CLIENT_SECRET
     BRUIN_LOGIN_URL = var.BRUIN_LOGIN_URL

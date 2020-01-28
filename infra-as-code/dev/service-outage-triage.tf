@@ -14,6 +14,7 @@ data "template_file" "automation-service-outage-triage" {
     NATS_SERVER1 = local.nats_server1
     CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
     LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
+    REDIS_HOSTNAME = local.redis-hostname
 
   }
 }
