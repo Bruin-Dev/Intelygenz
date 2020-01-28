@@ -9,19 +9,17 @@ from pytz import timezone, utc
 from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.repositories.edge_repository import EdgeIdentifier
 
 
 class ServiceOutageTriage:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, outage_utils, edge_repo):
+    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, outage_utils):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._template_renderer = template_renderer
         self._outage_utils = outage_utils
-        self._edge_repository = edge_repo
 
     async def start_service_outage_triage_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service outage triage configured to run every '
@@ -329,74 +327,69 @@ class ServiceOutageTriage:
     async def _auto_resolve_tickets(self, ticket_id, detail_id):
         if ticket_id["serial"] != "VC05400002265":
             return
+        self._logger.info(f'Checking autoresolve for ticket id {json.dumps(ticket_id, indent=2, default=str)}')
+
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
         edge_id = id_by_serial[ticket_id["serial"]]
-        if self._outage_utils.is_outage_ticket_auto_resolvable(ticket_id['ticketID'], ticket_id['notes'], 3):
-            status_msg = {'request_id': uuid(),
-                          'edge': edge_id}
-            edge_status = await self._event_bus.rpc_request("edge.status.request", status_msg,
-                                                            timeout=45)
-            edge_info = edge_status['edge_info']
 
-            edge_identifier = EdgeIdentifier(**edge_id)
+        if not self._outage_utils.is_outage_ticket_auto_resolvable(ticket_id['ticketID'], ticket_id['notes'], 3):
+            self._logger.info("Cannot autoresolved due to ticket being autoresolved more than 3 times")
+            return
 
-            redis_edge = self._edge_repository.get_edge(edge_identifier)
+        status_msg = {'request_id': uuid(),
+                      'edge': edge_id}
+        edge_status = await self._event_bus.rpc_request("edge.status.request", status_msg,
+                                                        timeout=45)
+        edge_info = edge_status['edge_info']
 
-            is_forty_five_mins_from_last_down = True
+        filter_events_status_list = ['EDGE_DOWN', 'LINK_DEAD']
 
-            if redis_edge is not None:
-                time_from_last_down = datetime.now(timezone(
-                    self._config.TRIAGE_CONFIG['timezone'])) - parse(
-                    redis_edge['timestamp'])
-                is_forty_five_mins_from_last_down = time_from_last_down < timedelta(minutes=45)
+        events_msg = {'request_id': uuid(),
+                      'edge': edge_id,
+                      'start_date': datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone'])) - timedelta(
+                                                                                                        minutes=45),
+                      'end_date': datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone'])),
+                      'filter': filter_events_status_list}
 
-            if self._outage_utils.is_there_an_outage(edge_info) is False:
-                if is_forty_five_mins_from_last_down is True:
-                    if self._config.TRIAGE_CONFIG['environment'] == 'production':
-                        resolve_ticket_msg = {'request_id': uuid(),
-                                              'ticket_id': ticket_id['ticketID'],
-                                              'detail_id': detail_id
-                                              }
+        edge_events = await self._event_bus.rpc_request("alert.request.event.edge", events_msg, timeout=180)
 
-                        resolve_note_msg = "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + str(
-                            datetime.now(timezone(
-                                self._config.TRIAGE_CONFIG['timezone'])) + timedelta(seconds=1))
-                        ticket_append_note_msg = {'request_id': uuid(),
-                                                  'ticket_id': ticket_id["ticketID"],
-                                                  'note': resolve_note_msg}
+        self._logger.info(f'Received event list of {json.dumps(edge_events, indent=2, default=str)} from velocloud')
 
-                        await self._event_bus.rpc_request("bruin.ticket.status.resolve",
-                                                          resolve_ticket_msg,
-                                                          timeout=15)
+        if len(edge_events["events"]) == 0:
+            self._logger.info("Too much time has passed for an auto-resolve. No down events have occurred in the "
+                              "last 45 minutes")
+            return
 
-                        await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                          ticket_append_note_msg,
-                                                          timeout=15)
+        if self._outage_utils.is_there_an_outage(edge_info) is False:
+            self._logger.info(f'Autoresolving ticket of ticket id: {json.dumps(ticket_id, indent=2, default=str)}')
 
-                        client_id = self._client_id_from_edge_status(edge_status)
-                        slack_message = {'request_id': uuid(),
-                                         'message': f'Ticket autoresolved '
-                                                    f'https://app.bruin.com/helpdesk?clientId={client_id}&'
-                                                    f'ticketId={ticket_id["ticketID"]}, in '
-                                                    f'{self._config.TRIAGE_CONFIG["environment"]}'}
-                        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+            if self._config.TRIAGE_CONFIG['environment'] == 'production':
+                resolve_ticket_msg = {'request_id': uuid(),
+                                      'ticket_id': ticket_id['ticketID'],
+                                      'detail_id': detail_id
+                                      }
 
-                    self._logger.info(f"Ticket of ticketID:{ticket_id['ticketID']} auto-resolved")
-                    edge_identifier = EdgeIdentifier(**edge_id)
-                    edge_value = {'edge_status': edge_info, 'timestamp': datetime.now(timezone(
-                        self._config.TRIAGE_CONFIG['timezone']))}
-                    self._edge_repository.add_edge(edge_identifier._asdict(), edge_value, update_existing=True,
-                                                   time_to_live=86400)
-                else:
-                    self._logger.info("Too much time has passed for an autoresolve")
-            else:
-                self._logger.info("Outage still exists for edge")
-                curr_update_existing = True
-                if redis_edge is not None:
-                    if self._outage_utils.is_there_an_outage(redis_edge['edge_status']):
-                        curr_update_existing = False
-                edge_identifier = EdgeIdentifier(**edge_id)
-                edge_value = {'edge_status': edge_info, 'timestamp': datetime.now(timezone(
-                    self._config.TRIAGE_CONFIG['timezone']))}
-                self._edge_repository.add_edge(edge_identifier._asdict(), edge_value,
-                                               update_existing=curr_update_existing, time_to_live=86400)
+                resolve_note_msg = "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + str(
+                    datetime.now(timezone(
+                        self._config.TRIAGE_CONFIG['timezone'])) + timedelta(seconds=1))
+                ticket_append_note_msg = {'request_id': uuid(),
+                                          'ticket_id': ticket_id["ticketID"],
+                                          'note': resolve_note_msg}
+
+                await self._event_bus.rpc_request("bruin.ticket.status.resolve",
+                                                  resolve_ticket_msg,
+                                                  timeout=15)
+
+                await self._event_bus.rpc_request("bruin.ticket.note.append.request",
+                                                  ticket_append_note_msg,
+                                                  timeout=15)
+
+                client_id = self._client_id_from_edge_status(edge_status)
+                slack_message = {'request_id': uuid(),
+                                 'message': f'Ticket autoresolved '
+                                            f'https://app.bruin.com/helpdesk?clientId={client_id}&'
+                                            f'ticketId={ticket_id["ticketID"]}, in '
+                                            f'{self._config.TRIAGE_CONFIG["environment"]}'}
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
+            self._logger.info(f"Ticket of ticketID:{ticket_id['ticketID']} auto-resolved")

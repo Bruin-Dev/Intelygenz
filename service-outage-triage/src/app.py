@@ -9,7 +9,6 @@ from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
-from igz.packages.repositories.edge_repository import EdgeRepository
 from igz.packages.repositories.outageutils import OutageUtils
 from igz.packages.server.api import QuartServer
 
@@ -28,12 +27,9 @@ class Container:
         self._event_bus.set_producer(self._publisher)
         self._template_renderer = TemplateRenderer(config)
         self._outage_utils = OutageUtils(self._logger)
-        self._reporting_edge_repository = EdgeRepository(redis_client=self._redis_client,
-                                                         keys_prefix='EDGES_TO_AUTORESOLVE', logger=self._logger)
 
         self._service_outage_triage = ServiceOutageTriage(self._event_bus, self._logger, self._scheduler,
-                                                          config, self._template_renderer, self._outage_utils,
-                                                          self._reporting_edge_repository)
+                                                          config, self._template_renderer, self._outage_utils)
 
     async def _start(self):
         await self._event_bus.connect()
