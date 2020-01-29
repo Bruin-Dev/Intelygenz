@@ -11,9 +11,9 @@ grafana-build:
     - source ci-utils/environment_assign.sh
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/grafana/config/prometheus-dev.yml
     - cp metrics-dashboard/grafana/config/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
-    - docker build --build-arg GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
+    - docker build --build-arg GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
 
 prometheus-build:
   stage: build
@@ -25,9 +25,9 @@ prometheus-build:
     - source ci-utils/environment_assign.sh
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/prometheus/config/prometheus-dev.yml
     - cp metrics-dashboard/prometheus/config/prometheus-dev.yml metrics-dashboard/prometheus/prometheus.yml
-    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
 
 thanos-sidecar-build:
   stage: build
@@ -41,9 +41,9 @@ thanos-sidecar-build:
     - source ci-utils/environment_assign.sh
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/thanos/config/bucket_config.yaml
     - cp metrics-dashboard/thanos/config/bucket_config.yaml metrics-dashboard/thanos/bucket_config.yaml
-    - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${MODULE_NAME}:latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:latest
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${MODULE_VERSION}
+    - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
 
 thanos-store-gateway-build:
   stage: build
@@ -58,12 +58,12 @@ thanos-store-gateway-build:
     - source ci-utils/environment_assign.sh
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/thanos/config/bucket_config.yaml
     - cp metrics-dashboard/thanos/config/bucket_config.yaml metrics-dashboard/thanos/bucket_config.yaml
-    - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest
-    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${MODULE_VERSION}
+    - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
+    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
+    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   after_script:
-    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest
-    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${MODULE_VERSION}
+    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
+    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
 
 thanos-querier-build:
   stage: build
@@ -75,9 +75,9 @@ thanos-querier-build:
     HTTP_PORT: 19091
   extends: .build_app_image
   script:
-    - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile-thanos_querier .
-    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest
-    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${MODULE_VERSION}
+    - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile-thanos_querier .
+    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
+    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   after_script:
-    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:latest
-    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${MODULE_VERSION}
+    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
+    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}

@@ -5,6 +5,8 @@ import logging
 import sys
 from datetime import datetime
 
+ENVIRONMENT = os.environ.get("ENVIRONMENT_VAR")
+
 logging.basicConfig(level=logging.INFO)
 
 FNULL = open(os.devnull, 'w')

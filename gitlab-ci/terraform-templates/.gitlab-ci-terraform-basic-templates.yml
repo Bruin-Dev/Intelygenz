@@ -27,7 +27,6 @@
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - export TF_VAR_BUILD_NUMBER=${CI_PIPELINE_ID}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_DEV}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}

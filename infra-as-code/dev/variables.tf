@@ -14,7 +14,7 @@ variable "SUBDOMAIN" {
 }
 
 variable "BUILD_NUMBER" {
-  default = ""
+  default = "latest"
 }
 
 variable "NATS_MODULE_VERSION" {

@@ -4,7 +4,6 @@ stages:
   - basic_infra
   - build
   - deploy
-  - grafana_user_creation
 
 variables:
   NATS_SERVER1: "nats://nats-server:4222"
