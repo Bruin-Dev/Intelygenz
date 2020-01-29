@@ -234,6 +234,16 @@ locals {
   automation-dispatch-portal-target_group-name = "${var.ENVIRONMENT}-disp-prtl"
   automation-dispatch-portal-target_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal"
 
+  // automation-tnba-monitor local vars
+  automation-tnba-monitor-image = "${data.aws_ecr_repository.automation-tnba-monitor.repository_url}:${var.BUILD_NUMBER}"
+  automation-tnba-monitor-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-tnba-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-tnba-monitor"
+  automation-tnba-monitor-service-security_group-name = "${var.ENVIRONMENT}-tnba-monitor"
+  automation-tnba-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-tnba-monitor"
+  automation-tnba-monitor-ecs_service-name = "${var.ENVIRONMENT}-tnba-monitor"
+  automation-tnba-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-tnba-monitor.family}:${aws_ecs_task_definition.automation-tnba-monitor.revision}"
+  automation-tnba-monitor-service_discovery_service-name = "tnba-monitor-${var.ENVIRONMENT}"
+
   // metrics local variables
   exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"
   errors_detected_metric-metric_transformation-name = "ErrorsMessagesDetectedInServices-${var.ENVIRONMENT}"

@@ -244,7 +244,11 @@ env_dict = {
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'MONITORING_SECONDS={MONITORING_SECONDS}\n'
         f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
+    os.path.join('tnba-monitor', 'src', 'config', 'env'):
+            f'NATS_SERVER1={NATS_SERVER1}\n'
+            f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
+            f'REDIS_HOSTNAME={REDIS_HOSTNAME}'
 }
 
 # Creating all files

@@ -145,6 +145,7 @@ deploy-branches:
     - export TF_VAR_service_outage_monitor_4_desired_tasks=${service_outage_monitor_4_desired_tasks}
     - export TF_VAR_service_outage_monitor_triage_desired_tasks=${service_outage_monitor_triage_desired_tasks}
     - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
+    - export TF_VAR_tnba_monitor_desired_tasks=${tnba_monitor_desired_tasks}
     - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
     - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
   environment:
@@ -211,6 +212,7 @@ deploy-master:
     - export TF_VAR_service_outage_monitor_4_desired_tasks=${service_outage_monitor_4_desired_tasks}
     - export TF_VAR_service_outage_monitor_triage_desired_tasks=${service_outage_monitor_triage_desired_tasks}
     - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
+    - export TF_VAR_tnba_monitor_desired_tasks=${tnba_monitor_desired_tasks}
     - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
     - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
   environment:

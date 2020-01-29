@@ -77,6 +77,30 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_sites-monitor_alarm" 
   }
 }
 
+resource "aws_cloudwatch_metric_alarm" "running_task_count_tnba-monitor_alarm" {
+  count = var.tnba_monitor_desired_tasks != 0 ? 1 : 0
+  alarm_name                = local.running_task_count_tnba-monitor_alarm-name
+  comparison_operator       = "LessThanOrEqualToThreshold"
+  evaluation_periods        = local.running_task_count_service-alarm-evaluation_periods
+  metric_name               = local.running_task_count-metric_transformation-name
+  namespace                 = "ECS/ContainerInsights"
+  period                    = local.running_task_count_service-alarm-period
+  statistic                 = "Sum"
+  threshold                 = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description         = "This metric monitors the number of running tasks of sites-monitor service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-tnba-monitor"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_tnba-monitor_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
+
+
 resource "aws_cloudwatch_metric_alarm" "running_task_count_bruin-bridge_alarm" {
   count = var.bruin_bridge_desired_tasks != 0 ? 1 : 0
   alarm_name                = local.running_task_count_bruin-bridge_alarm-name
