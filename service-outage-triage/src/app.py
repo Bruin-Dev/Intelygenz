@@ -3,7 +3,6 @@ from application.actions.service_outage_triage import ServiceOutageTriage
 from application.repositories.template_management import TemplateRenderer
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
-from redis import Redis
 
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
@@ -20,7 +19,6 @@ class Container:
         self._logger.info(f'Service outage triage starting in {config.TRIAGE_CONFIG["environment"]}...')
         self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
-        self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
 
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(logger=self._logger)

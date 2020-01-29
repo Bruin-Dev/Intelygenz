@@ -319,8 +319,7 @@ class ServiceOutageTriage:
             return
         self._logger.info(f'Checking autoresolve for ticket id {json.dumps(ticket_id, indent=2, default=str)}')
 
-        id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
-        edge_id = id_by_serial[ticket_id["serial"]]
+        edge_id = await self._get_edge_id(ticket_id["serial"])
 
         if not self._outage_utils.is_outage_ticket_auto_resolvable(ticket_id['ticketID'], ticket_id['notes'], 3):
             self._logger.info("Cannot autoresolved due to ticket being autoresolved more than 3 times")
