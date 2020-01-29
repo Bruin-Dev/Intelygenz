@@ -9,7 +9,7 @@ data "template_file" "automation-bruin-bridge" {
     image = local.automation-bruin-bridge-image
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
-
+    
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
     BRUIN_CLIENT_ID = var.BRUIN_CLIENT_ID

@@ -23,3 +23,11 @@ bruin-bridge-build:
     MODULE_NAME: bruin-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
+  only:
+    refs:
+      - master
+      - /^*dev/feature/.*$/
+      - /^*dev/fix/.*$/
+    changes:
+      - bruin-bridge/**/*
+      - infra-as-code/dev/bruin-bridge.tf
