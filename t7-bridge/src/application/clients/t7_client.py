@@ -1,4 +1,5 @@
 import requests
+import json
 from tenacity import retry, wait_exponential, stop_after_delay
 
 
@@ -28,6 +29,7 @@ class T7Client:
                                     headers=self._get_request_headers(),
                                     verify=True)
 
+            self._logger.info(f'Got response from T7: {json.dumps(response, indent=2, default=str)}')
             if response.status_code in range(200, 300):
                 return response.json()['assets']
             else:

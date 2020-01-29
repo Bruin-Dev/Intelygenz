@@ -1,11 +1,8 @@
 import asyncio
-from application.actions.edge_monitoring import EdgeMonitoring
-from application.repositories.edge_repository import EdgeRepository
-from application.repositories.prometheus_repository import PrometheusRepository
-from application.repositories.status_repository import StatusRepository
+from shortuuid import uuid
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
-
+import json
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
@@ -27,6 +24,13 @@ class Container:
 
     async def _start(self):
         await self._event_bus.connect()
+
+        test_message = {
+            "request_id": uuid(),
+            "ticket_id": 4467303
+        }
+        prediction = await self._event_bus.publish_message("t7.prediction.request", test_message)
+        self._logger.info(f'Got prediction from TNBA API: {json.dumps(prediction, indent=2, default= str)}')
         self._scheduler.start()
 
     async def start_server(self):

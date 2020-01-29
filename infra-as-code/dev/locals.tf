@@ -276,6 +276,10 @@ locals {
   running_task_count_sites-monitor_alarm-name = "Running tasks count of sites-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_sites-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_sites-monitor"
 
+  // alarm running_task_count_tnba-monitor local variables
+  running_task_count_tnba-monitor_alarm-name = "Running tasks count of tnba-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_tnba-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_tnba-monitor"
+
   // alarm running_task_count_bruin-bridge local variables
   running_task_count_bruin-bridge_alarm-name = "Running tasks count of bruin-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_bruin-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_bruin-bridge"
