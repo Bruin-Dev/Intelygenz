@@ -59,6 +59,7 @@ class ServiceOutageTriage:
                     await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
                     continue
                 all_tickets["tickets"] = all_tickets["tickets"] + ticket_response["tickets"]
+                self._logger.info(f'Tickets for company {company} retrieved correctly')
 
             except Exception:
                 self._logger.error(f'Error trying to get tickets for Bruin company: {company}')
