@@ -305,7 +305,7 @@ services:
     depends_on:
       - "nats-server"
     ports:
-      - 5009:5000
+      - 5012:5000
 
   t7-bridge:
     build:

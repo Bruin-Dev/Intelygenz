@@ -29,7 +29,7 @@ class Container:
             "request_id": uuid(),
             "ticket_id": 4467303
         }
-        prediction = await self._event_bus.publish_message("t7.prediction.request", test_message)
+        prediction = await self._event_bus.rpc_request("t7.prediction.request", test_message, timeout=60)
         self._logger.info(f'Got prediction from TNBA API: {json.dumps(prediction, indent=2, default= str)}')
         self._scheduler.start()
 
