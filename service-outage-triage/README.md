@@ -3,6 +3,8 @@
   * [Work Flow](#work-flow)
   * [Behaviour in dev and in pro](#behaviour-in-development-and-in-production)
   * [Capabilities used](#capabilities-used) 
+  * [Adding more edges and more companies](#adding-more-edges-and-more-companies)
+
   * [Running in docker-compose](#running-in-docker-compose)
 
 # Description
@@ -46,6 +48,11 @@ string. That string will be appended as a note using the bruin bridge for the ti
 The check for whether you're in development or production is needed so when we're making changes to the service outage
 triage and we're testing it we are not appending anything to real tickets. We only append the triage when we deploy in
 production. 
+
+# Adding more edges and more companies
+
+`service-outage-triage/src/config/config.py` --> Add Bruin client id to the array `bruin_company_ids`
+`service-outage-triage/src/config/config.py` --> Add edge serials and ids to `id_by_serial`
 
 # Capabilities used
 - [Bruin bridge](../bruin-bridge/README.md)

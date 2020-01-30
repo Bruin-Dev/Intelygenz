@@ -116,26 +116,7 @@ class TestServiceOutageTriage:
                      'category': 'SD-WAN',
                      'ticket_topic': 'VOO'
                  },
-                 timeout=90, ),
-            call('bruin.ticket.request',
-                 {
-                     'request_id': uuid_,
-                     'client_id': 85100,
-                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                     'category': 'SD-WAN',
-                     'ticket_topic': 'VOO'
-                 },
-                 timeout=90, ),
-            call('bruin.ticket.request',
-                 {
-                     'request_id': uuid_,
-                     'client_id': 9994,
-                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                     'category': 'SD-WAN',
-                     'ticket_topic': 'VOO'
-                 },
-                 timeout=90, ),
-
+                 timeout=90, )
         ])
         service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
 
@@ -159,9 +140,8 @@ class TestServiceOutageTriage:
 
         uuid_1 = uuid()
         uuid_2 = uuid()
-        uuid_3 = uuid()
-        uuid_4 = uuid()
-        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4]
+
+        uuid_side_effect = [uuid_1, uuid_2]
         with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
             await service_outage_triage._poll_tickets()
 
@@ -177,39 +157,20 @@ class TestServiceOutageTriage:
                 },
                 timeout=90,
             ),
-            call('bruin.ticket.request',
-                 {
-                     'request_id': uuid_3,
-                     'client_id': 85100,
-                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                     'category': 'SD-WAN',
-                     'ticket_topic': 'VOO'
-                 },
-                 timeout=90, ),
-            call(
-                'bruin.ticket.request',
-                {
-                    'request_id': uuid_2,
-                    'client_id': 9994,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
-                },
-                timeout=90,
-            ),
             call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_4,
+                    'request_id': uuid_2,
                     'message': (
-                        f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
-                        'Environment: dev'
+                        f'Service outage triage: Error: ticket list does not comply in format. '
+                        f'Ticket list: {json.dumps(tickets)}. '
+                        f'Company Bruin ID: 85940. '
+                        f'Environment: dev'
                     ),
                 },
                 timeout=10,
             ),
         ])
-        service_outage_triage._filtered_ticket_details.assert_not_awaited()
         logger.error.assert_called_once()
 
     @pytest.mark.asyncio
@@ -232,9 +193,8 @@ class TestServiceOutageTriage:
 
         uuid_1 = uuid()
         uuid_2 = uuid()
-        uuid_3 = uuid()
-        uuid_4 = uuid()
-        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4]
+
+        uuid_side_effect = [uuid_1, uuid_2]
         with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
             await service_outage_triage._poll_tickets()
 
@@ -251,38 +211,18 @@ class TestServiceOutageTriage:
                 timeout=90,
             ),
             call(
-                'bruin.ticket.request',
-                {
-                    'request_id': uuid_3,
-                    'client_id': 85100,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
-                },
-                timeout=90,
-            ),
-            call('bruin.ticket.request',
-                 {
-                     'request_id': uuid_2,
-                     'client_id': 9994,
-                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                     'category': 'SD-WAN',
-                     'ticket_topic': 'VOO'
-                 },
-                 timeout=90, ),
-            call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_4,
+                    'request_id': uuid_2,
                     'message': (
-                        f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
-                        'Environment: dev'
-                    )
+                        f'Service outage triage: Error: ticket list does not comply in format. '
+                        f'Ticket list: {json.dumps(tickets)}. '
+                        f'Company Bruin ID: 85940. '
+                        f'Environment: dev')
                 },
                 timeout=10,
             ),
         ], any_order=False)
-        service_outage_triage._filtered_ticket_details.assert_not_awaited()
         logger.error.assert_called_once()
 
     @pytest.mark.asyncio
@@ -306,9 +246,8 @@ class TestServiceOutageTriage:
 
         uuid_1 = uuid()
         uuid_2 = uuid()
-        uuid_3 = uuid()
-        uuid_4 = uuid()
-        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4]
+
+        uuid_side_effect = [uuid_1, uuid_2]
         with patch.object(service_outage_triage_module, 'uuid', side_effect=uuid_side_effect):
             await service_outage_triage._poll_tickets()
 
@@ -325,40 +264,19 @@ class TestServiceOutageTriage:
                 timeout=90,
             ),
             call(
-                'bruin.ticket.request',
-                {
-                    'request_id': uuid_3,
-                    'client_id': 85100,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
-                },
-                timeout=90,
-            ),
-            call(
-                'bruin.ticket.request',
-                {
-                    'request_id': uuid_2,
-                    'client_id': 9994,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
-                },
-                timeout=90,
-            ),
-            call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_4,
+                    'request_id': uuid_2,
                     'message': (
-                        f'Service outage triage: Error in ticket list. Ticket list: {json.dumps(tickets)}. '
-                        'Environment: dev'
+                        f'Service outage triage: Error: ticket list does not comply in format. '
+                        f'Ticket list: {json.dumps(tickets)}. '
+                        f'Company Bruin ID: 85940. '
+                        f'Environment: dev'
                     )
                 },
                 timeout=10,
             ),
         ], any_order=False)
-        service_outage_triage._filtered_ticket_details.assert_not_awaited()
         logger.error.assert_called_once()
 
     #

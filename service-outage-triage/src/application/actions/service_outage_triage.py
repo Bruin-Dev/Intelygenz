@@ -34,49 +34,41 @@ class ServiceOutageTriage:
 
     async def _poll_tickets(self):
         self._logger.info("Requesting tickets from Bruin")
-        ticket_request_msg_titan = {'request_id': uuid(), 'client_id': 85940,
-                                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                                    'category': 'SD-WAN',
-                                    'ticket_topic': 'VOO'}
-        ticket_request_msg_mettel = {'request_id': uuid(), 'client_id': 9994,
-                                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                                     'category': 'SD-WAN',
-                                     'ticket_topic': 'VOO'}
+        all_tickets = {"tickets": []}
+        request_tickets_message = {}
+        for company in self._config.TRIAGE_CONFIG["bruin_company_ids"]:
+            try:
+                self._logger.info(f'Requesting tickets for Bruin company {company}')
+                request_tickets_message = {'request_id': uuid(), 'client_id': company,
+                                           'ticket_status': ['New', 'InProgress', 'Draft'],
+                                           'category': 'SD-WAN',
+                                           'ticket_topic': 'VOO'}
+                ticket_response = await self._event_bus.rpc_request("bruin.ticket.request",
+                                                                    request_tickets_message,
+                                                                    timeout=90)
+                self._logger.info(f'Got response from event bus: {json.dumps(ticket_response, indent=2, default=str)}')
 
-        ticket_request_msg_marwood = {'request_id': uuid(), 'client_id': 85100,
-                                      'ticket_status': ['New', 'InProgress', 'Draft'],
-                                      'category': 'SD-WAN',
-                                      'ticket_topic': 'VOO'}
+                if ticket_response is None or "tickets" not in ticket_response.keys() or not ticket_response["tickets"]:
+                    self._logger.error(f'Ticket data doesn\'t comply with format in {json.dumps(ticket_response)}')
+                    slack_message = {'request_id': uuid(),
+                                     'message': f'Service outage triage: Error: ticket list does not comply in format. '
+                                                f'Ticket list: {json.dumps(ticket_response)}. '
+                                                f'Company Bruin ID: {company}. '
+                                                f'Environment: {self._config.TRIAGE_CONFIG["environment"]}'}
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                    continue
+                all_tickets["tickets"] = all_tickets["tickets"] + ticket_response["tickets"]
 
-        all_tickets_titan = await self._event_bus.rpc_request("bruin.ticket.request",
-                                                              ticket_request_msg_titan,
-                                                              timeout=90)
-        all_tickets_marwood = await self._event_bus.rpc_request("bruin.ticket.request",
-                                                                ticket_request_msg_marwood,
-                                                                timeout=90)
+            except Exception:
+                self._logger.error(f'Error trying to get tickets for Bruin company: {company}')
+                slack_message = {'request_id': uuid(),
+                                 'message': f'Service outage triage: Unknown error getting ticket list. '
+                                            f'Company Bruin ID: {company}. '
+                                            f'Environment: {self._config.TRIAGE_CONFIG["environment"]}'}
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
-        all_tickets_mettel = await self._event_bus.rpc_request("bruin.ticket.request",
-                                                               ticket_request_msg_mettel,
-                                                               timeout=90)
-        all_tickets = all_tickets_titan
+        filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
 
-        if all_tickets and all_tickets_mettel and "tickets" in all_tickets.keys() and \
-                "tickets" in all_tickets_mettel and \
-                all_tickets_mettel["tickets"] and all_tickets["tickets"]:
-            all_tickets["tickets"] = all_tickets["tickets"] \
-                                     + all_tickets_mettel["tickets"] \
-                                     + all_tickets_marwood["tickets"]
-
-        filtered_ticket_ids = []
-        if all_tickets is not None and "tickets" in all_tickets.keys() and all_tickets["tickets"] is not None:
-            filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
-        else:
-            self._logger.error(f'Tickets returned {json.dumps(all_tickets)}')
-            slack_message = {'request_id': uuid(),
-                             'message': f'Service outage triage: Error in ticket list. '
-                                        f'Ticket list: {json.dumps(all_tickets)}. '
-                                        f'Environment: {self._config.TRIAGE_CONFIG["environment"]}'}
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
         for ticket_id in filtered_ticket_ids:
             id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
             edge_id = id_by_serial[ticket_id["serial"]]
@@ -347,7 +339,7 @@ class ServiceOutageTriage:
         events_msg = {'request_id': uuid(),
                       'edge': edge_id,
                       'start_date': datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone'])) - timedelta(
-                                                                                                        minutes=45),
+                          minutes=45),
                       'end_date': datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone'])),
                       'filter': filter_events_status_list}
 
