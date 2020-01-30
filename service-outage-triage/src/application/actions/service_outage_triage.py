@@ -46,10 +46,8 @@ class ServiceOutageTriage:
                 ticket_response = await self._event_bus.rpc_request("bruin.ticket.request",
                                                                     request_tickets_message,
                                                                     timeout=90)
-                self._logger.info(f'Got response from event bus: {json.dumps(ticket_response, indent=2, default=str)}')
-
-                if ticket_response is None or "tickets" not in ticket_response.keys() \
-                        or type(ticket_response["tickets"]) is not list:
+                if ticket_response is None or "tickets" not in ticket_response.keys() or type(
+                        ticket_response["tickets"]) is not list:
                     self._logger.error(f'Ticket data doesn\'t comply with format in {json.dumps(ticket_response)}')
                     slack_message = {'request_id': uuid(),
                                      'message': f'Service outage triage: Error: ticket list does not comply in format. '
