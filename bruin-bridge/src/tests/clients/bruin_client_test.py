@@ -278,51 +278,26 @@ class TestBruinClient:
 
         filters = {
             "client_id": 9994,
+            "status": "A",
             "service_number": "VC05400009999"
         }
         pascalized_filter = {
             "ClientId": 9994,
+            "Status": "A",
             "ServiceNumber": "VC05400009999"
         }
 
         valid_management_status = {
-            "documents": [
+            "inventoryId": "12796795",
+            "serviceNumber": "VC05400002265",
+            "attributes": [
                 {
-                    "clientID": 9994,
-                    "clientName": "METTEL/NEW YORK",
-                    "vendor": "MetTel",
-                    "serviceNumber": "VC05400009999",
-                    "siteId": 2048,
-                    "siteLabel": "MetTel Network Services",
-                    "address": {
-                        "address": "Fake street",
-                        "city": "Fake city",
-                        "state": "Fake state",
-                        "zip": "9999",
-                        "country": "Fake Country"
-                    },
-                    "description": None,
-                    "installDate": "2019-08-21T05:00:00Z",
-                    "disconnectDate": None,
-                    "status": "A",
-                    "verified": "Y",
-                    "productCategory": "SD-WAN",
-                    "productType": "SD-WAN",
-                    "items": [
-                        {
-                            "itemName": "Licensed Software - SD-WAN 100M",
-                            "primaryIndicator": "SD-WAN"
-                        }
-                    ],
-                    "contractIdentifier": "0",
-                    "rateCardIdentifier": None,
-                    "lastInvoiceUsageDate": None,
-                    "lastUsageDate": None,
-                    "longitude": -74.009781,
-                    "latitude": 40.7035351
+                    "key": "Management Status",
+                    "value": "Active – Platinum Monitoring"
                 }
             ]
         }
+
         response_mock = Mock()
         response_mock.json = Mock(return_value=valid_management_status)
         response_mock.status_code = 200
@@ -333,14 +308,49 @@ class TestBruinClient:
             bruin_client._bearer_token = "Someverysecretaccesstoken"
             bruin_client.get_management_status(filters)
             bruin_client_module.requests.get.assert_called_once_with(
-                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
                 headers=bruin_client._get_request_headers(),
                 params=pascalized_filter,
                 verify=False
             )
             response_mock.json.assert_called_once()
 
-    def get_management_status_with_ko_test(self):
+    def get_management_status_with_ko_401_test(self):
+        logger = Mock()
+
+        filters = {
+            "client_id": 9994,
+            "status": "A",
+            "service_number": "VC05400009999"
+        }
+        pascalized_filter = {
+            "ClientId": 9994,
+            "Status": "A",
+            "ServiceNumber": "VC05400009999"
+        }
+
+        empty_response = {}
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=empty_response)
+        response_mock.status_code = 401
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            with raises(Exception):
+                bruin_client.get_management_status(filters)
+                bruin_client_module.requests.get.assert_called_once_with(
+                    f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
+                    headers=bruin_client._get_request_headers(),
+                    params=pascalized_filter,
+                    verify=False
+                )
+                self.assertRaises(Exception, bruin_client.get_management_status)
+                bruin_client.login.assert_called()
+
+    def get_management_status_with_ko_400_test(self):
         logger = Mock()
 
         filters = {
@@ -352,23 +362,26 @@ class TestBruinClient:
             "ServiceNumber": "VC05400009999"
         }
 
-        empty_response = {}
+        response_400 = {
+            "message": "Please provide valid ClientId, Status and ServiceNumber.",
+            "messageDetail": None,
+            "data": None,
+            "type": "ValidationException",
+            "code": 400
+        }
 
         response_mock = Mock()
-        response_mock.json = Mock(return_value=empty_response)
-        response_mock.status_code = 500
+        response_mock.json = Mock(return_value=response_400)
+        response_mock.status_code = 400
 
         with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
             bruin_client = BruinClient(logger, config)
             bruin_client.login = Mock()
             bruin_client._bearer_token = "Someverysecretaccesstoken"
-            with raises(Exception):
-                bruin_client.get_management_status(filters)
-                bruin_client_module.requests.get.assert_called_once_with(
-                    f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
-                    headers=bruin_client._get_request_headers(),
-                    params=pascalized_filter,
-                    verify=False
-                )
-                self.assertRaises(Exception, bruin_client.get_management_status)
-                bruin_client.login.assert_called()
+            bruin_client.get_management_status(filters)
+            bruin_client_module.requests.get.assert_called_once_with(
+                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
+                headers=bruin_client._get_request_headers(),
+                params=pascalized_filter,
+                verify=False
+            )

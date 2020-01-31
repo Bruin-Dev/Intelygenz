@@ -264,7 +264,7 @@ And then a response message is published to the response topic that was built by
 # Get Management Status 
 ### Description
 When the bruin bridge receives a request with a request message from topic `bruin.inventory.management.status` it will make
-a call to the endpoint `/api/Inventory` in bruin, using as query params the filters passed in the message.
+a call to the endpoint `/api/Inventory/Attribute` in bruin, using as query params the filters passed in the message.
 **NOTE: the filters are passed in snake_case and will be converted to PascalCase before being sent to Bruin's API. client_id filter is MANDATORY**
 
 ### Request message
@@ -272,8 +272,8 @@ a call to the endpoint `/api/Inventory` in bruin, using as query params the filt
 {
     'request_id': 123,
     'filters': {"client_id": 191919 # MANDATORY parameter,
-                "status": "A" # Optional Can be A(Active), D(Decomissined), S(Suspended),
-                "service_number": "VCO128739819" # Optional Is the serial number in velocloud
+                "status": "A" # MANDATORY Can be A(Active), D(Decomissined), S(Suspended),
+                "service_number": "VCO128739819" # MANDATORY Is the serial number in velocloud
     }
 
 }
@@ -282,48 +282,7 @@ a call to the endpoint `/api/Inventory` in bruin, using as query params the filt
 ```
 {
     'request_id': 123,
-    'management_status':[
-        {
-          "clientID": 191919,
-          "clientName": "Tet Corp",
-          "vendor": "MetTel",
-          "accountNumber": "019019",
-          "subAccountNumber": "9999",
-          "inventoryID": "11991199",
-          "serviceNumber": "VC0191919",
-          "siteId": 099,
-          "siteLabel": "Tet corp site label",
-          "address": {
-            "address": "Dag Hammarskjöld Plaza",
-            "city": "New York",
-            "state": "NY",
-            "zip": "10017",
-            "country": "USA"
-          },
-          "hierarchy": "|",
-          "costCenter": "9999",
-          "assignee": null,
-          "description": "Eqp Rental",
-          "installDate": "2018-05-25T05:00:00Z",
-          "disconnectDate": "2020-01-14T10:24:35.94Z",
-          "status": "D",
-          "verified": "N",
-          "productCategory": "SD-WAN",
-          "productType": "SD-WAN",
-          "items": [
-            {
-              "itemName": "Licensed Software - SD-WAN 30M",
-              "primaryIndicator": "SD-WAN"
-            }
-          ],
-          "contractIdentifier": "0",
-          "rateCardIdentifier": null,
-          "lastInvoiceUsageDate": "2018-06-23T05:00:00Z",
-          "lastUsageDate": null,
-          "longitude": -157.9135455,
-          "latitude": 21.3737128
-        }
-      ],
+    'management_status':"Active – Platinum Monitoring",
     'status': 200
 }
 

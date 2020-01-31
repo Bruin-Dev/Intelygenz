@@ -90,7 +90,13 @@ class BruinRepository:
 
     def get_management_status(self, filters):
         response = self._bruin_client.get_management_status(filters)
-        if "documents" in response.keys():
-            return response["documents"]
+        if response == 400:
+            return 400
+        if "attributes" in response.keys():
+            management_status = [attribute["value"] for attribute in response["attributes"] if
+                                 attribute["key"] == "Management Status"]
+            if len(management_status) > 0:
+                management_status = management_status[0]
+            return management_status
 
         return response

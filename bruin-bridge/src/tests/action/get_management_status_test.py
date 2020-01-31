@@ -27,46 +27,12 @@ class TestGetManagementStatus:
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        management_status = [
-            {
-                "clientID": 9994,
-                "clientName": "METTEL/NEW YORK",
-                "vendor": "MetTel",
-                "serviceNumber": "VC05400009999",
-                "siteId": 2048,
-                "siteLabel": "MetTel Network Services",
-                "address": {
-                    "address": "Fake street",
-                    "city": "Fake city",
-                    "state": "Fake state",
-                    "zip": "9999",
-                    "country": "Fake Country"
-                },
-                "description": None,
-                "installDate": "2019-08-21T05:00:00Z",
-                "disconnectDate": None,
-                "status": "A",
-                "verified": "Y",
-                "productCategory": "SD-WAN",
-                "productType": "SD-WAN",
-                "items": [
-                    {
-                        "itemName": "Licensed Software - SD-WAN 100M",
-                        "primaryIndicator": "SD-WAN"
-                    }
-                ],
-                "contractIdentifier": "0",
-                "rateCardIdentifier": None,
-                "lastInvoiceUsageDate": None,
-                "lastUsageDate": None,
-                "longitude": -74.009781,
-                "latitude": 40.7035351
-            }
-        ]
+        management_status = "Active – Platinum Monitoring"
         bruin_repository.get_management_status = Mock(return_value=management_status)
 
         filters = {
             "client_id": 9994,
+            "status": "A",
             "service_number": "VC05400009999"
         }
 
@@ -109,7 +75,7 @@ class TestGetManagementStatus:
         event_bus_response = {
             "request_id": 19,
             "management_status": management_status,
-            "error_message": "You must specify client_id in the filter",
+            "error_message": 'You must specify "client_id", "status", "service_number" in the filter',
             "status": 400
         }
 
@@ -117,21 +83,22 @@ class TestGetManagementStatus:
         await get_management_status.get_management_status(event_bus_request)
         bruin_repository.get_management_status.assert_not_called()
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
-        assert logger.error.called
+        assert logger.info.called
 
     @pytest.mark.asyncio
-    async def get_management_status_no_management_status_ko_test(self):
+    async def get_management_status_400_status_ko_test(self):
         logger = Mock()
         logger.info = Mock()
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        management_status = None
+        management_status = 400
         bruin_repository.get_management_status = Mock(return_value=management_status)
 
         filters = {
             "client_id": 9994,
+            "status": "A",
             "service_number": "VC05400009999"
         }
 
@@ -143,8 +110,9 @@ class TestGetManagementStatus:
 
         event_bus_response = {
             "request_id": 19,
-            'management_status': management_status,
-            'status': 500
+            'management_status': None,
+            'error_message': "Error in filters provided to get management status",
+            'status': 400
         }
 
         get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
@@ -152,3 +120,32 @@ class TestGetManagementStatus:
         bruin_repository.get_management_status.assert_called_once_with(filters)
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
         assert logger.info.called
+
+    @pytest.mark.asyncio
+    async def get_management_status_400_no_filter_status_ko_test(self):
+        logger = Mock()
+        logger.info = Mock()
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        bruin_repository = Mock()
+
+        management_status = 400
+        bruin_repository.get_management_status = Mock(return_value=management_status)
+
+        event_bus_request = {
+            "request_id": 19,
+            "response_topic": "some.topic"
+        }
+
+        event_bus_response = {
+            "request_id": 19,
+            'management_status': None,
+            'error_message': 'You must specify '
+                             '{.."filter":{"client_id", "status", "service_number"}...} in the request',
+            'status': 400
+        }
+
+        get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
+        await get_management_status.get_management_status(event_bus_request)
+        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
+        assert logger.error.called

@@ -623,61 +623,51 @@ class TestBruinRepository:
         logger = Mock()
         filters = {
             "client_id": 9994,
+            "status": "A",
             "service_number": "VC05400009999"
         }
         response = {
-            "documents": [
+            "inventoryId": "12796795",
+            "serviceNumber": "VC05400002265",
+            "attributes": [
                 {
-                    "clientID": 9994,
-                    "clientName": "METTEL/NEW YORK",
-                    "vendor": "MetTel",
-                    "serviceNumber": "VC05400009999",
-                    "siteId": 2048,
-                    "siteLabel": "MetTel Network Services",
-                    "address": {
-                        "address": "Fake street",
-                        "city": "Fake city",
-                        "state": "Fake state",
-                        "zip": "9999",
-                        "country": "Fake Country"
-                    },
-                    "description": None,
-                    "installDate": "2019-08-21T05:00:00Z",
-                    "disconnectDate": None,
-                    "status": "A",
-                    "verified": "Y",
-                    "productCategory": "SD-WAN",
-                    "productType": "SD-WAN",
-                    "items": [
-                        {
-                            "itemName": "Licensed Software - SD-WAN 100M",
-                            "primaryIndicator": "SD-WAN"
-                        }
-                    ],
-                    "contractIdentifier": "0",
-                    "rateCardIdentifier": None,
-                    "lastInvoiceUsageDate": None,
-                    "lastUsageDate": None,
-                    "longitude": -74.009781,
-                    "latitude": 40.7035351
+                    "key": "Management Status",
+                    "value": "Active – Platinum Monitoring"
                 }
             ]
         }
         bruin_client = Mock()
         bruin_client.get_management_status = Mock(return_value=response)
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_management_status(filters)
+        management_status = bruin_repository.get_management_status(filters)
         bruin_client.get_management_status.assert_called_once_with(filters)
+        assert "Active – Platinum Monitoring" in management_status
+
+    def get_management_status_400_test(self):
+        logger = Mock()
+        filters = {
+            "client_id": 9994,
+            "service_number": "VC05400009999"
+        }
+        response = 400
+        bruin_client = Mock()
+        bruin_client.get_management_status = Mock(return_value=response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        management_status = bruin_repository.get_management_status(filters)
+        bruin_client.get_management_status.assert_called_once_with(filters)
+        assert management_status == 400
 
     def get_management_status_ko_test(self):
         logger = Mock()
         filters = {
             "client_id": 9994,
+            "status": "A",
             "service_number": "VC05400009999"
         }
         response = {}
         bruin_client = Mock()
         bruin_client.get_management_status = Mock(return_value=response)
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_management_status(filters)
+        management_status = bruin_repository.get_management_status(filters)
         bruin_client.get_management_status.assert_called_once_with(filters)
+        assert management_status == {}

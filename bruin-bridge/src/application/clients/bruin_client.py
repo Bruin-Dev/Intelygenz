@@ -39,6 +39,7 @@ class BruinClient:
             except Exception as err:
                 self._logger.error("An error occurred while trying to login to Bruin")
                 self._logger.error(f"{err}")
+
         login()
 
     def _get_request_headers(self):
@@ -93,6 +94,7 @@ class BruinClient:
             else:
                 self.login()
                 raise Exception
+
         return get_ticket_details()
 
     def post_ticket_note(self, ticket_id, ticket_note):
@@ -114,6 +116,7 @@ class BruinClient:
             else:
                 self.login()
                 raise Exception
+
         return post_ticket_note()
 
     def post_ticket(self, client_id, category, services, notes, contacts):
@@ -123,11 +126,11 @@ class BruinClient:
         def post_ticket():
             self._logger.info(f'Posting note for client id:{client_id}')
             payload = {
-              "clientId": client_id,
-              "category": category,
-              "services": services,
-              "notes": notes,
-              "contacts": contacts
+                "clientId": client_id,
+                "category": category,
+                "services": services,
+                "notes": notes,
+                "contacts": contacts
             }
             response = requests.post(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/',
                                      headers=self._get_request_headers(),
@@ -139,6 +142,7 @@ class BruinClient:
             else:
                 self.login()
                 raise Exception
+
         return post_ticket()
 
     def update_ticket_status(self, ticket_id, detail_id, ticket_status):
@@ -161,6 +165,7 @@ class BruinClient:
             else:
                 self.login()
                 raise Exception
+
         return update_ticket_status()
 
     def get_management_status(self, filters):
@@ -172,13 +177,22 @@ class BruinClient:
             parsed_filters = humps.pascalize(filters)
             self._logger.info(f'Filters that will be applied (parsed to PascalCase): {json.dumps(parsed_filters)}')
 
-            response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+            response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
                                     headers=self._get_request_headers(),
                                     params=parsed_filters,
                                     verify=False)
+
             if response.status_code in range(200, 299):
                 return response.json()
-            else:
+
+            if response.status_code == 400:
+                return 400
+
+            if response.status_code == 401:
                 self.login()
                 raise Exception
+
+            if response.status_code in range(500, 511):
+                raise Exception
+
         return get_management_status()
