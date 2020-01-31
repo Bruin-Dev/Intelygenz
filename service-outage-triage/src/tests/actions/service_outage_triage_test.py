@@ -317,7 +317,7 @@ class TestServiceOutageTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            tickets, None, None, edge_status, edge_event,
+            tickets, edge_status, edge_event,
             append_ticket, send_to_slack
         ])
 
@@ -336,9 +336,8 @@ class TestServiceOutageTriage:
         uuid_2 = uuid()
         uuid_3 = uuid()
         uuid_4 = uuid()
-        uuid_5 = uuid()
-        uuid_6 = uuid()
-        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4, uuid_5, uuid_6]
+
+        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4]
 
         current_datetime = datetime.now()
         current_datetime_previous_week = current_datetime - timedelta(days=7)
@@ -365,36 +364,14 @@ class TestServiceOutageTriage:
                 timeout=90,
             ),
             call(
-                'bruin.ticket.request',
-                {
-                    'request_id': uuid_3,
-                    'client_id': 85100,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
-                },
-                timeout=90,
-            ),
-            call(
-                'bruin.ticket.request',
-                {
-                    'request_id': uuid_2,
-                    'client_id': 9994,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
-                },
-                timeout=90,
-            ),
-            call(
                 'edge.status.request',
-                {'request_id': uuid_4, 'edge': edge_id_by_serial},
+                {'request_id': uuid_2, 'edge': edge_id_by_serial},
                 timeout=10,
             ),
             call(
                 'alert.request.event.edge',
                 {
-                    'request_id': uuid_5,
+                    'request_id': uuid_3,
                     'edge': edge_id_by_serial,
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
@@ -410,7 +387,7 @@ class TestServiceOutageTriage:
             call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_6,
+                    'request_id': uuid_4,
                     'message': (
                         'Triage appended to ticket: '
                         f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id}, in {environment}'
@@ -459,7 +436,7 @@ class TestServiceOutageTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            tickets, None, None, edge_status, edge_event,
+            tickets, edge_status, edge_event,
             append_ticket, send_to_slack
         ])
         outage_utils = Mock()
@@ -477,9 +454,8 @@ class TestServiceOutageTriage:
         uuid_3 = uuid()
         uuid_4 = uuid()
         uuid_5 = uuid()
-        uuid_6 = uuid()
-        uuid_7 = uuid()
-        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4, uuid_5, uuid_6, uuid_7]
+
+        uuid_side_effect = [uuid_1, uuid_2, uuid_3, uuid_4, uuid_5]
 
         current_datetime = datetime.now()
         current_datetime_previous_week = current_datetime - timedelta(days=7)
@@ -506,36 +482,14 @@ class TestServiceOutageTriage:
                 timeout=90,
             ),
             call(
-                'bruin.ticket.request',
-                {
-                    'request_id': uuid_3,
-                    'client_id': 85100,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
-                },
-                timeout=90,
-            ),
-            call(
-                'bruin.ticket.request',
-                {
-                    'request_id': uuid_2,
-                    'client_id': 9994,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
-                },
-                timeout=90,
-            ),
-            call(
                 'edge.status.request',
-                {'request_id': uuid_4, 'edge': edge_id_by_serial},
+                {'request_id': uuid_2, 'edge': edge_id_by_serial},
                 timeout=10,
             ),
             call(
                 'alert.request.event.edge',
                 {
-                    'request_id': uuid_5,
+                    'request_id': uuid_3,
                     'edge': edge_id_by_serial,
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
@@ -546,7 +500,7 @@ class TestServiceOutageTriage:
             call(
                 'bruin.ticket.note.append.request',
                 {
-                    'request_id': uuid_6,
+                    'request_id': uuid_4,
                     'ticket_id': ticket_id,
                     'note': ticket_note_as_string,
                 },
@@ -555,7 +509,7 @@ class TestServiceOutageTriage:
             call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_7,
+                    'request_id': uuid_5,
                     'message': (
                         'Triage appended to ticket: '
                         f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id}, in {environment}'
@@ -601,7 +555,7 @@ class TestServiceOutageTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            tickets, None, None, edge_status, edge_event,
+            tickets, edge_status, edge_event,
             append_ticket, send_to_slack
         ])
         outage_utils = Mock()
