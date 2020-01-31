@@ -17,6 +17,81 @@ variable "BUILD_NUMBER" {
   default = "latest"
 }
 
+variable "BRUIN_BRIDGE_BUILD_NUMBER" {
+  description = "Docker build number of image for microservice bruin-bridge"
+  default = "automation-master-latest"
+}
+
+variable "LAST_CONTACT_REPORT_BUILD_NUMBER" {
+  description = "Docker build number of image for microservice last-contact-report"
+  default = "automation-master-latest"
+}
+
+variable "GRAFANA_BUILD_NUMBER" {
+  description = "Docker build number of image for grafana module"
+  default = "automation-master-latest"
+}
+
+variable "PROMETHEUS_BUILD_NUMBER" {
+  description = "Docker build number of image for prometheus module"
+  default = "automation-master-latest"
+}
+
+variable "THANOS_BUILD_NUMBER" {
+  description = "Docker build number of image for thanos module"
+  default = "automation-master-latest"
+}
+
+variable "THANOS_QUERIER_BUILD_NUMBER" {
+  description = "Docker build number of image for thanos-querier module"
+  default = "automation-master-latest"
+}
+
+variable "THANOS_STORE_GATEWAY_BUILD_NUMBER" {
+  description = "Docker build number of image for thanos-store-gateway module"
+  default = "automation-master-latest"
+}
+
+variable "NATS_SERVER_BUILD_NUMBER" {
+  description = "Docker build number of image for NATS modules"
+  default = "automation-master-2.1.0-latest"
+}
+
+variable "NOTIFIER_BUILD_NUMBER" {
+  description = "Docker build number of image for notifier microservice"
+  default = "automation-master-latest"
+}
+
+variable "SERVICE_AFFECTING_MONITOR_BUILD_NUMBER" {
+  description = "Docker build number of image for service-affecting-monitor microservice"
+  default = "automation-master-latest"
+}
+
+variable "SERVICE_OUTAGE_MONITOR_BUILD_NUMBER" {
+  description = "Docker build number of image for service-outage-monitor microservice"
+  default = "automation-master-latest"
+}
+
+variable "SERVICE_OUTAGE_TRIAGE_BUILD_NUMBER" {
+  description = "Docker build number of image for service-outage-triage microservice"
+  default = "automation-master-latest"
+}
+
+variable "SITES_MONITOR_BUILD_NUMBER" {
+  description = "Docker build number of image for sites-monitor microservice"
+  default = "automation-master-latest"
+}
+
+variable "T7_BRIDGE_BUILD_NUMBER" {
+  description = "Docker build number of image for t7-bridge microservice"
+  default = "automation-master-latest"
+}
+
+variable "VELOCLOUD_BRIDGE_BUILD_NUMBER" {
+  description = "Docker build number of image for velocloud-bridge microservice"
+  default = "automation-master-latest"
+}
+
 variable "NATS_MODULE_VERSION" {
   default = "latest"
 }

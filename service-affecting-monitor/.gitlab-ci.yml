@@ -28,7 +28,8 @@ service-affecting-monitor-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - service-affecting-monitor/**/*
-      - infra-as-code/dev/task-definitions/service_affecting_monitor.json
-      - infra-as-code/dev/service-affecting-monitor.tf
+#    changes:
+#      - service-affecting-monitor/**/*
+#      - infra-as-code/dev/task-definitions/service_affecting_monitor.json
+#      - infra-as-code/dev/service-affecting-monitor.tf
+#      - nats/**/*

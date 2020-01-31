@@ -28,7 +28,8 @@ notifier-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - notifier/**/*
-      - infra-as-code/dev/task-definitions/notifier.json
-      - infra-as-code/dev/notifier.tf
+#    changes:
+#      - notifier/**/*
+#      - infra-as-code/dev/task-definitions/notifier.json
+#      - infra-as-code/dev/notifier.tf
+#      - nats/**/*

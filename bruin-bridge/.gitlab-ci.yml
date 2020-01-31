@@ -28,6 +28,8 @@ bruin-bridge-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - bruin-bridge/**/*
-      - infra-as-code/dev/bruin-bridge.tf
+#    changes:
+#      - bruin-bridge/**/*
+#      - infra-as-code/dev/bruin-bridge.tf
+#      - infra-as-code/dev/task-definitions/bruin_bridge.json
+#      - nats/**/*

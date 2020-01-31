@@ -39,7 +39,7 @@ locals {
   automation-nats-server-2-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
 
   // bruin-brige local vars
-  automation-bruin-bridge-image = "${data.aws_ecr_repository.automation-bruin-bridge.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-bruin-bridge-image = "${data.aws_ecr_repository.automation-bruin-bridge.repository_url}:${var.BRUIN_BRIDGE_BUILD_NUMBER}"
   automation-bruin-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-bruin-bridge"
   automation-bruin-bridge_service-security_group-name = "${var.ENVIRONMENT}-bruin-bridge"
   automation-bruin-bridge-resource-name = "${var.ENVIRONMENT}-bruin-bridge"
@@ -48,7 +48,7 @@ locals {
   automation-bruin-bridge-service_discovery_service-name = "bruin-bridge-${var.ENVIRONMENT}"
 
   // t7-brige local vars
-  automation-t7-bridge-image = "${data.aws_ecr_repository.automation-t7-bridge.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-t7-bridge-image = "${data.aws_ecr_repository.automation-t7-bridge.repository_url}:${var.T7_BRIDGE_BUILD_NUMBER}"
   automation-t7-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-t7-bridge"
   automation-t7-bridge_service-security_group-name = "${var.ENVIRONMENT}-t7-bridge"
   automation-t7-bridge-resource-name = "${var.ENVIRONMENT}-t7-bridge"
@@ -58,7 +58,7 @@ locals {
 
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
-  automation-last-contact-report-image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-last-contact-report-image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${var.LAST_CONTACT_REPORT_BUILD_NUMBER}"
   automation-last-contact-report-service-security_group-name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-service-security_group-tag-Name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-resource-name = "${var.ENVIRONMENT}-last-contact-report"
@@ -66,12 +66,12 @@ locals {
   automation-last-contact-service_discovery_service-name = "last-contact-report-${var.ENVIRONMENT}"
 
   // automation-metrics-grafana local vars
-  automation-metrics-grafana-image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-metrics-grafana-image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.GRAFANA_BUILD_NUMBER}"
   automation-metrics-grafana-target_group-name = "${var.ENVIRONMENT}-mts-grafana"
   automation-metrics-grafana-target_group-tag-Name = "${var.ENVIRONMENT}-metrics-grafana"
 
   // automation-metrics-prometheus local vars
-  automation-metrics-prometheus-image = "${data.aws_ecr_repository.automation-metrics-prometheus.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-metrics-prometheus-image = "${data.aws_ecr_repository.automation-metrics-prometheus.repository_url}:${var.PROMETHEUS_BUILD_NUMBER}"
   automation-metrics-prometheus-ecs_task_definition-family = "${var.ENVIRONMENT}-metrics-prometheus"
   automation-metrics-prometheus-service-security_group-name = "${var.ENVIRONMENT}-metrics-prometheus"
   automation-metrics-prometheus-service-security_group-tag-Name = "${var.ENVIRONMENT}-metrics-prometheus"
@@ -89,24 +89,24 @@ locals {
   automation-metrics-prometheus-s3-storage-tag-Name = "${var.ENVIRONMENT}-metrics-prometheus-storage"
 
   // automation-metrics-thanos-sidecar local vars
-  automation-metrics-thanos-sidecar-image = "${data.aws_ecr_repository.automation-metrics-thanos-sidecar.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-metrics-thanos-sidecar-image = "${data.aws_ecr_repository.automation-metrics-thanos-sidecar.repository_url}:${var.THANOS_BUILD_NUMBER}"
   automation-metrics-thanos-sidecar-GRPC_PORT = 10091
   automation-metrics-thanos-sidecar-HTTP_PORT = 10902
   automation-metrics-thanos-sidecar-objstore-config_file = "/tmp/bucket_config.yaml"
 
   // automation-metrics-thanos-store-gateway local vars
-  automation-metrics-thanos-store-gateway-image = "${data.aws_ecr_repository.automation-metrics-thanos-store-gateway.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-metrics-thanos-store-gateway-image = "${data.aws_ecr_repository.automation-metrics-thanos-store-gateway.repository_url}:${var.THANOS_STORE_GATEWAY_BUILD_NUMBER}"
   automation-metrics-thanos-store-gateway-GRPC_PORT = 10901
   automation-metrics-thanos-store-gateway-HTTP_PORT = 19191
   automation-metrics-thanos-store-gateway-config_file = "/tmp/bucket_config.yaml"
 
   // automation-metrics-thanos-querier local vars
-  automation-metrics-thanos-querier-image = "${data.aws_ecr_repository.automation-metrics-thanos-querier.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-metrics-thanos-querier-image = "${data.aws_ecr_repository.automation-metrics-thanos-querier.repository_url}:${var.THANOS_QUERIER_BUILD_NUMBER}"
   automation-metrics-thanos-querier-GRPC_PORT = 10999
   automation-metrics-thanos-querier-HTTP_PORT = 19091
 
   // automation-notifier local vars
-  automation-notifier-image = "${data.aws_ecr_repository.automation-notifier.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-notifier-image = "${data.aws_ecr_repository.automation-notifier.repository_url}:${var.NOTIFIER_BUILD_NUMBER}"
   automation-notifier-ecs_task_definition-family = "${var.ENVIRONMENT}-notifier"
   automation-notifier-service-security_group-name = "${var.ENVIRONMENT}-notifier"
   automation-notifier-service-security_group-tag-Name = "${var.ENVIRONMENT}-notifier"
@@ -114,7 +114,7 @@ locals {
   automation-notifier-ecs_service-task_definition = "${aws_ecs_task_definition.automation-notifier.family}:${aws_ecs_task_definition.automation-notifier.revision}"
 
   // automation-service-affecting-monitor local vars
-  automation-service-affecting-monitor-image = "${data.aws_ecr_repository.automation-service-affecting-monitor.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-service-affecting-monitor-image = "${data.aws_ecr_repository.automation-service-affecting-monitor.repository_url}:${var.SERVICE_AFFECTING_MONITOR_BUILD_NUMBER}"
   automation-service-affecting-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-service-affecting-monitor"
   automation-service-affecting-monitor-service-security_group-name = "${var.ENVIRONMENT}-service-affecting-monitor"
   automation-service-affecting-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-affecting-monitor"
@@ -123,7 +123,7 @@ locals {
   automation-service-affecting-monitor-service_discovery_service-name = "service-affecting-monitor-${var.ENVIRONMENT}"
 
   // automation-service-outage-monitor local vars
-  automation-service-outage-monitor-image = "${data.aws_ecr_repository.automation-service-outage-monitor.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-service-outage-monitor-image = "${data.aws_ecr_repository.automation-service-outage-monitor.repository_url}:${var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
   automation-service-outage-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor"
   automation-service-outage-monitor-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor"
   automation-service-outage-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-monitor"
@@ -132,7 +132,7 @@ locals {
   automation-service-outage-monitor-service_discovery_service-name = "service-outage-monitor-${var.ENVIRONMENT}"
 
   // automation-service-outage-triage local vars
-  automation-service-outage-triage-image = "${data.aws_ecr_repository.automation-service-outage-triage.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-service-outage-triage-image = "${data.aws_ecr_repository.automation-service-outage-triage.repository_url}:${var.SERVICE_OUTAGE_TRIAGE_BUILD_NUMBER}"
   automation-service-outage-triage-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   automation-service-outage-triage-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-triage"
   automation-service-outage-triage-service-security_group-name = "${var.ENVIRONMENT}-service-outage-triage"
@@ -142,7 +142,7 @@ locals {
   automation-service-outage-triage-service_discovery_service-name = "service-outage-triage-${var.ENVIRONMENT}"
 
   // automation-velocloud-bridge local vars
-  automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.VELOCLOUD_BRIDGE_BUILD_NUMBER}"
   automation-velocloud-bridge-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   automation-velocloud-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-velocloud-bridge"
   automation-velocloud-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-velocloud-bridge"
@@ -151,7 +151,7 @@ locals {
   automation-velocloud-bridge-service_discovery_service-name = "velocloud-bridge-${var.ENVIRONMENT}"
 
   // automation-sites-monitor local vars
-  automation-sites-monitor-image = "${data.aws_ecr_repository.automation-sites-monitor.repository_url}:${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-sites-monitor-image = "${data.aws_ecr_repository.automation-sites-monitor.repository_url}:${var.SITES_MONITOR_BUILD_NUMBER}"
   automation-sites-monitor-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   automation-sites-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-sites-monitor"
   automation-sites-monitor-service-security_group-name = "${var.ENVIRONMENT}-sites-monitor"

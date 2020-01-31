@@ -32,3 +32,4 @@ last-contact-report-build:
       - last-contact-report/**/*
       - infra-as-code/dev/task-definitions/last_contact_report.json
       - infra-as-code/dev/last-contact-report.tf
+      - nats/**/*

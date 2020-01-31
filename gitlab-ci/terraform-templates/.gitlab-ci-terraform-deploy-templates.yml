@@ -13,8 +13,11 @@
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
-    - apk --upgrade --no-cache add bash gettext python3 py-pip
+    - apk --upgrade --no-cache add bash gettext python3 py-pip jq
     - pip3 install -r ci-utils/requirements.txt
+    - export ENVIRONMENT_VAR=${TF_VAR_ENVIRONMENT}
+    - python3 ci-utils/manage_ecr_docker_images.py -g
+    - source ci-utils/assign_docker_images_build_numbers.sh
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf

@@ -28,7 +28,8 @@ velocloud-bridge-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - velocloud-bridge/**/*
-      - infra-as-code/dev/task-definitions/velocloud_bridge.json
-      - infra-as-code/dev/velocloud-bridge.tf
+#    changes:
+#      - velocloud-bridge/**/*
+#      - infra-as-code/dev/task-definitions/velocloud_bridge.json
+#      - infra-as-code/dev/velocloud-bridge.tf
+#      - nats/**/*

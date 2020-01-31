@@ -28,8 +28,9 @@ t7-bridge-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - t7-bridge/**/*
-      - infra-as-code/dev/task-definitionst/t7_bridge.json
-      - infra-as-code/dev/t7-bridge.tf
-      - infra-as-code/dev/t7-bridge.tf
+#    changes:
+#      - t7-bridge/**/*
+#      - infra-as-code/dev/task-definitionst/t7_bridge.json
+#      - infra-as-code/dev/t7-bridge.tf
+#      - infra-as-code/dev/t7-bridge.tf
+#      - nats/**/*

@@ -19,10 +19,11 @@ grafana-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/grafana/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
+#    changes:
+#      - metrics-dashboard/grafana/**/*
+#      - infra-as-code/dev/task-definitions/prometheus.json
+#      - infra-as-code/dev/metrics-prometheus.tf
+#      - nats/**/*
 
 prometheus-build:
   stage: build
@@ -42,10 +43,11 @@ prometheus-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/prometheus/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
+#    changes:
+#      - metrics-dashboard/prometheus/**/*
+#      - infra-as-code/dev/task-definitions/prometheus.json
+#      - infra-as-code/dev/metrics-prometheus.tf
+#      - nats/**/*
 
 thanos-sidecar-build:
   stage: build
@@ -67,10 +69,11 @@ thanos-sidecar-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/thanos/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
+#    changes:
+#      - metrics-dashboard/thanos/**/*
+#      - infra-as-code/dev/task-definitions/prometheus.json
+#      - infra-as-code/dev/metrics-prometheus.tf
+#      - nats/**/*
 
 thanos-store-gateway-build:
   stage: build
@@ -96,10 +99,11 @@ thanos-store-gateway-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/thanos/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
+#    changes:
+#      - metrics-dashboard/thanos/**/*
+#      - infra-as-code/dev/task-definitions/prometheus.json
+#      - infra-as-code/dev/metrics-prometheus.tf
+#      - nats/**/*
 
 thanos-querier-build:
   stage: build
@@ -122,7 +126,8 @@ thanos-querier-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/thanos/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
+#    changes:
+#      - metrics-dashboard/thanos/**/*
+#      - infra-as-code/dev/task-definitions/prometheus.json
+#      - infra-as-code/dev/metrics-prometheus.tf
+#      - nats/**/*
