@@ -32,6 +32,7 @@
     * [Response message](#response-message-6)      
 - [Running in docker-compose](#running-in-docker-compose)
 
+
 # Bruin API
 ### Description
 
