@@ -88,6 +88,26 @@ class ServiceOutageDetector:
             edge_status = await self._get_edge_status_by_id(edge_full_id)
             self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
 
+            self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
+            enterprise_name = edge_status['enterprise_name']
+            bruin_client_id = self._extract_client_id(enterprise_name)
+            serial_number = edge_status['edges']['serialNumber']
+            management_request = {
+                "request_id": uuid(),
+                "filters": {
+                    "client_id": bruin_client_id,
+                    "status": "A",
+                    "service_number": serial_number
+                }}
+            management_status = await self._event_bus.rpc_request("bruin.inventory.management.status",
+                                                                  management_request, timeout=30)
+            self._logger.info(f'Got management status {management_status} for {serial_number}')
+            if management_status["management_status"] not in "Pending, Active – Silver Monitoring, " \
+                                                             "Active – Gold Monitoring, Active – Platinum Monitoring":
+                self._logger.info(f'Management status is not active for {serial_number}. Skipping process')
+                return
+            self._logger.info(f'Management status for {serial_number} seems active. Monitoring..')
+
             outage_happened = self._outage_utils.is_there_an_outage(edge_status)
             if outage_happened:
                 self._logger.info(

@@ -2114,6 +2114,8 @@ class TestServiceOutageMonitor:
         ]
 
         event_bus = Mock()
+        management_status = {"management_status": "Active – Platinum Monitoring"}
+        event_bus.rpc_request = CoroutineMock(return_value=management_status)
         scheduler = Mock()
         logger = Mock()
         quarantine_edge_repository = Mock()
@@ -2160,6 +2162,8 @@ class TestServiceOutageMonitor:
         is_there_an_outage = True
 
         event_bus = Mock()
+        management_status = {"management_status": "Active – Platinum Monitoring"}
+        event_bus.rpc_request = CoroutineMock(return_value=management_status)
         logger = Mock()
         quarantine_edge_repository = Mock()
         reporting_edge_repository = Mock()
@@ -2234,6 +2238,8 @@ class TestServiceOutageMonitor:
         ]
 
         event_bus = Mock()
+        management_status = {"management_status": "Active – Platinum Monitoring"}
+        event_bus.rpc_request = CoroutineMock(return_value=management_status)
         scheduler = Mock()
         logger = Mock()
         quarantine_edge_repository = Mock()
