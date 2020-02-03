@@ -200,11 +200,18 @@ class BruinClient:
                 return_response["status_code"] = 401
                 raise Exception(return_response)
 
+            if response.status_code == 404:
+                self._logger.error(f"Got 404 from Bruin, resource not found for filters {parsed_filters}")
+                return_response["body"] = f"Resource not found"
+                return_response["status_code"] = 404
+
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got {response.status_code}. Retrying...")
                 return_response["body"] = f"Got internal error from Bruin"
                 return_response["status_code"] = 500
                 raise Exception(return_response)
+
+            return return_response
 
         try:
             return get_management_status()
