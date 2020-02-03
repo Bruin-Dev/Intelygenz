@@ -63,8 +63,7 @@ class TaskHealthcheck:
         logging.info(f"Searching task with name {task_name_param} in the cluster ECS {ENVIRONMENT}")
         # time.sleep(30)
         tasks_arn_with_task_name = self._get_tasks_arn_for_clusters(task_name_param, task_definition_arn_p)
-        logging.info(f"tasks_arn_with_task_name is {tasks_arn_with_task_name}")
-        if tasks_arn_with_task_name is None:
+        if not tasks_arn_with_task_name:
             logging.error(f"No task running for specified task {task_name_param}")
             sys.exit(1)
         logging.info(f"Current tasks with name {task_name_param} are the following")
@@ -94,15 +93,16 @@ class TaskHealthcheck:
             logging.info(f"task_arn: {element['task_arn']}")
             logging.info(f"task_definition_arn: {element['task_definition_arn']}")
 
-    @staticmethod
-    def _get_tasks_arn_for_clusters(task_name_param, task_definition_arn_p):
+    @retry(wait=wait_exponential(multiplier=5,
+                                 min=5),
+           stop=stop_after_delay(360))
+    def _get_tasks_arn_for_clusters(self, task_name_param, task_definition_arn_p):
         family_for_task_param = ENVIRONMENT + '-' + task_name_param
         tasks_arn_call = subprocess.Popen(
             ['aws', 'ecs', 'list-tasks', '--cluster', ENVIRONMENT,
              '--family', family_for_task_param, '--region', 'us-east-1'],
             stdout=subprocess.PIPE, stderr=FNULL)
         tasks_arn_list = json.loads(tasks_arn_call.stdout.read())['taskArns']
-        logging.info(f"tasks_arn_list is {tasks_arn_list}")
         container_arns = []
         for element in tasks_arn_list:
             get_task_detail_call = subprocess.Popen(['aws', 'ecs', 'describe-tasks', '--cluster',
@@ -115,7 +115,10 @@ class TaskHealthcheck:
                     container_arns.append({'task_arn': element,
                                            'task_definition_arn': get_task_detail_call_output[0]["taskDefinitionArn"]})
                     break
-        logging.info(f"container_arns is {container_arns}")
+        if not container_arns:
+            logging.error(f"No containers found in environment {ENVIRONMENT} for task "
+                          f"definition {task_definition_arn_p}")
+            raise Exception
         return container_arns
 
     @staticmethod
@@ -125,7 +128,6 @@ class TaskHealthcheck:
 
 if __name__ == '__main__':
     task_healthcheck_instance = TaskHealthcheck()
-    logging.info(f"sys.argv is {sys.argv}")
     if sys.argv[0] == '-t':
         task_name = sys.argv[1]
         file_to_load = sys.argv[2]

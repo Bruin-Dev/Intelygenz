@@ -160,15 +160,34 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
   depends_on = [ null_resource.nats-server-healthcheck, aws_s3_bucket.prometheus-storage]
 }
 
+data "template_file" "automation-metrics-prometheus-task-definition-output" {
+  template = file("${path.module}/task-definitions/task_definition_output_template.json")
+
+  vars = {
+    task_definition_arn = aws_ecs_task_definition.automation-metrics-prometheus.arn
+  }
+}
+
+resource "null_resource" "generate_metrics_prometheus_task_definition_output_json" {
+  provisioner "local-exec" {
+    command = format("cat <<\"EOF\" > \"%s\"\n%s\nEOF", var.metrics-prometheus-task-definition-json, data.template_file.automation-metrics-prometheus-task-definition-output.rendered)
+  }
+  triggers = {
+    always_run = timestamp()
+  }
+  depends_on = [aws_ecs_task_definition.automation-metrics-prometheus]
+}
+
 resource "null_resource" "metrics-prometheus-healthcheck" {
   count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
 
   depends_on = [aws_ecs_service.automation-metrics-prometheus,
                 aws_ecs_task_definition.automation-metrics-prometheus,
-                null_resource.nats-server-healthcheck]
+                null_resource.nats-server-healthcheck,
+                null_resource.generate_metrics_prometheus_task_definition_output_json]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t metrics-prometheus ${aws_ecs_task_definition.automation-metrics-prometheus.arn}"
+    command = "python3 ci-utils/task_healthcheck.py -t metrics-prometheus ${var.metrics-prometheus-task-definition-json}"
   }
 
   triggers = {

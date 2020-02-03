@@ -319,3 +319,33 @@ variable "nats-server-task-definition-json" {
   description = "Task definition arn output in rendered json for nats-server"
   default = "/tmp/nats-server-taks-definition.json"
 }
+
+variable "bruin-bridge-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for bruin-bridge"
+  default = "/tmp/bruin-bridge-task-definition.json"
+}
+
+variable "metrics-prometheus-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for bruin-bridge"
+  default = "/tmp/metrics-prometheus-task-definition.json"
+}
+
+variable "notifier-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for notifier"
+  default = "/tmp/notifier-task-definition.json"
+}
+
+variable "t7-bridge-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for t7-bridge"
+  default = "/tmp/t7-bridge-task-definition.json"
+}
+
+variable "velocloud-bridge-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for velocloud-bridge"
+  default = "/tmp/velocloud-bridge-task-definition.json"
+}

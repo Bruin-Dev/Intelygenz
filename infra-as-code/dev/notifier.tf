@@ -86,15 +86,34 @@ resource "aws_ecs_service" "automation-notifier" {
   depends_on = [ null_resource.nats-server-healthcheck ]
 }
 
+data "template_file" "automation-notifier-task-definition-output" {
+  template = file("${path.module}/task-definitions/task_definition_output_template.json")
+
+  vars = {
+    task_definition_arn = aws_ecs_task_definition.automation-notifier.arn
+  }
+}
+
+resource "null_resource" "generate_notifier_task_definition_output_json" {
+  provisioner "local-exec" {
+    command = format("cat <<\"EOF\" > \"%s\"\n%s\nEOF", var.notifier-task-definition-json, data.template_file.automation-notifier-task-definition-output.rendered)
+  }
+  triggers = {
+    always_run = timestamp()
+  }
+  depends_on = [aws_ecs_task_definition.automation-notifier]
+}
+
 resource "null_resource" "notifier-healthcheck" {
   count = var.notifier_desired_tasks > 0 ? 1 : 0
 
   depends_on = [aws_ecs_service.automation-notifier,
                 aws_ecs_task_definition.automation-notifier,
-                null_resource.nats-server-healthcheck]
+                null_resource.nats-server-healthcheck,
+                null_resource.generate_notifier_task_definition_output_json]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t notifier ${aws_ecs_task_definition.automation-notifier.arn}"
+    command = "python3 ci-utils/task_healthcheck.py -t notifier ${var.notifier-task-definition-json}"
   }
 
   triggers = {

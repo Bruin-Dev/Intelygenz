@@ -9,6 +9,7 @@ nats-server-build:
   extends: .build_app_image
   script:
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
+    - python3 ci-utils/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-${CI_PIPELINE_ID}
   after_script:
@@ -20,13 +21,13 @@ nats-server-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-#    changes:
-#      - nats-server/**/*
-#      - infra-as-code/dev/task-definitions/nats_server.json
-#      - infra-as-code/dev/task-definition/nats_server_seed.json
-#      - infra-as-code/dev/nats-server.tf
-#      - infra-as-code/dev/nats-server-1.tf
-#      - infra-as-code/dev/nats-server-2.tf
+    changes:
+      - nats-server/**/*
+      - infra-as-code/dev/task-definitions/nats_server.json
+      - infra-as-code/dev/task-definition/nats_server_seed.json
+      - infra-as-code/dev/nats-server.tf
+      - infra-as-code/dev/nats-server-1.tf
+      - infra-as-code/dev/nats-server-2.tf
   except:
     changes:
       - nats-server/*.md

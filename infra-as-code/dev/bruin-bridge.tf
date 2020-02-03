@@ -118,15 +118,34 @@ resource "aws_ecs_service" "automation-bruin-bridge" {
   depends_on = [ null_resource.nats-server-healthcheck ]
 }
 
+data "template_file" "automation-bruin-bridge-task-definition-output" {
+  template = file("${path.module}/task-definitions/task_definition_output_template.json")
+
+  vars = {
+    task_definition_arn = aws_ecs_task_definition.automation-bruin-bridge.arn
+  }
+}
+
+resource "null_resource" "generate_bruin_bridge_task_definition_output_json" {
+  provisioner "local-exec" {
+    command = format("cat <<\"EOF\" > \"%s\"\n%s\nEOF", var.bruin-bridge-task-definition-json, data.template_file.automation-bruin-bridge-task-definition-output.rendered)
+  }
+  triggers = {
+    always_run = timestamp()
+  }
+  depends_on = [aws_ecs_task_definition.automation-bruin-bridge]
+}
+
 resource "null_resource" "bruin-bridge-healthcheck" {
   count = var.bruin_bridge_desired_tasks > 0 ? 1 : 0
 
   depends_on = [aws_ecs_service.automation-bruin-bridge,
                 aws_ecs_task_definition.automation-bruin-bridge,
-                null_resource.nats-server-healthcheck]
+                null_resource.nats-server-healthcheck,
+                null_resource.generate_bruin_bridge_task_definition_output_json]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t bruin-bridge ${aws_ecs_task_definition.automation-bruin-bridge.arn}"
+    command = "python3 ci-utils/task_healthcheck.py -t bruin-bridge ${var.bruin-bridge-task-definition-json}"
   }
 
   triggers = {
