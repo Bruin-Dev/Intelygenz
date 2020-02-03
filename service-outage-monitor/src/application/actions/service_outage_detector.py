@@ -116,10 +116,10 @@ class ServiceOutageDetector:
             self._logger.info(f'Management status for {serial_number} seems active. Monitoring..')
             if not await self._is_management_status_active(edge_status):
                 self._logger.info(
-                    f'Management status is not active for {edge_status["edges"]["serialNumber"]}. Skipping process')
-                return
-            self._logger.info(
-                f'Management status for {edge_status["edges"]["serialNumber"]} seems active. Monitoring..')
+                    f'Management status is not active for {edge_identifier}. Skipping process...')
+                continue
+            else:
+                self._logger.info(f'Management status for {edge_identifier} seems active.')
 
             outage_happened = self._outage_utils.is_there_an_outage(edge_status)
             if outage_happened:
@@ -320,13 +320,15 @@ class ServiceOutageDetector:
 
         edge_list = await self._get_all_edges()
         for edge_full_id in edge_list:
+            edge_identifier = EdgeIdentifier(**edge_full_id)
             edge_status = await self._get_edge_status_by_id(edge_full_id)
             if not await self._is_management_status_active(edge_status):
-                self._logger.info("Managemnt status is not active , skipping monitoring...")
-                return
-            if self._outage_utils.is_there_an_outage(edge_status):
-                await self._start_quarantine_job(edge_full_id)
-                self._add_edge_to_quarantine(edge_full_id, edge_status)
+                self._logger.info(f"Management status is not active. {edge_identifier} won't be reported")
+                continue
+            else:
+                if self._outage_utils.is_there_an_outage(edge_status):
+                    await self._start_quarantine_job(edge_full_id)
+                    self._add_edge_to_quarantine(edge_full_id, edge_status)
 
     async def _start_quarantine_job(self, edge_full_id, run_date: datetime = None):
         edge_identifier = EdgeIdentifier(**edge_full_id)
