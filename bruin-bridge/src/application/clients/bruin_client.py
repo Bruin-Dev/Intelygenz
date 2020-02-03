@@ -171,7 +171,7 @@ class BruinClient:
     def get_management_status(self, filters):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
-               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
         def get_management_status():
             self._logger.info(f'Getting management status for client ID: {filters["client_id"]}')
             parsed_filters = humps.pascalize(filters)
@@ -182,17 +182,31 @@ class BruinClient:
                                     params=parsed_filters,
                                     verify=False)
 
+            return_response = dict.fromkeys(["body", "status_code"])
+
             if response.status_code in range(200, 299):
-                return response.json()
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
 
             if response.status_code == 400:
-                return 400
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.error(f"Got error from Bruin {response.json()}")
 
             if response.status_code == 401:
+                self._logger.info(f"Got 401 from Bruin, re-login and retrying get management status")
                 self.login()
-                raise Exception
+                return_response["body"] = f"Maximum retries while relogin"
+                return_response["status_code"] = 401
+                raise Exception(return_response)
 
-            if response.status_code in range(500, 511):
-                raise Exception
+            if response.status_code in range(500, 513):
+                self._logger.error(f"Got {response.status_code}. Retrying...")
+                return_response["body"] = f"Got internal error from Bruin"
+                return_response["status_code"] = 500
+                raise Exception(return_response)
 
-        return get_management_status()
+        try:
+            return get_management_status()
+        except Exception as e:
+            return e.args[0]
