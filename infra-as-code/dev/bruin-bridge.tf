@@ -122,10 +122,11 @@ resource "null_resource" "bruin-bridge-healthcheck" {
   count = var.bruin_bridge_desired_tasks > 0 ? 1 : 0
 
   depends_on = [aws_ecs_service.automation-bruin-bridge,
+                aws_ecs_task_definition.automation-bruin-bridge,
                 null_resource.nats-server-healthcheck]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t bruin-bridge"
+    command = "python3 ci-utils/task_healthcheck.py -t bruin-bridge ${aws_ecs_task_definition.automation-bruin-bridge.arn}"
   }
 
   triggers = {

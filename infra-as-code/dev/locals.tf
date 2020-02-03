@@ -13,7 +13,7 @@ locals {
   automation-zone-service_discovery_private_dns-name = "${var.ENVIRONMENT}.local"
 
   // automation-nats-server local vars
-  automation-nats-server-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_MODULE_VERSION}"
+  automation-nats-server-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
   automation-nats-server-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server"
@@ -28,7 +28,7 @@ locals {
   automation-redis-security_group-tag-Name = "${var.ENVIRONMENT}-redis"
 
   // automation-nats-server-2 local vars
-  automation-nats-server-2-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_MODULE_VERSION}"
+  automation-nats-server-2-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
   automation-nats-server-2-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-2"
   automation-nats-server-2-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-2"
   automation-nats-server-2-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-2"
@@ -250,7 +250,7 @@ locals {
   cloudformation_sns_stack_alarms_errors_exceptions_messages-description-operator_email="Email address to notify if there are any active alarms in MetTel automation infrastructure"
 
   // automation-nats-server-1 local vars
-  automation-nats-server-1-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_MODULE_VERSION}"
+  automation-nats-server-1-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
   automation-nats-server-1-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-1"
   automation-nats-server-1-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-1"
   automation-nats-server-1-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-1"

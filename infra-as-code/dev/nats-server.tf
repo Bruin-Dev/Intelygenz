@@ -127,12 +127,32 @@ resource "aws_ecs_service" "automation-nats-server" {
 
 }
 
+data "template_file" "automation-nats-server-task-definition-output" {
+  template = file("${path.module}/task-definitions/task_definition_output_template.json")
+
+  vars = {
+    task_definition_arn = aws_ecs_task_definition.automation-nats-server.arn
+  }
+}
+
+resource "null_resource" "generate_nats_server_task_definition_output_json" {
+  provisioner "local-exec" {
+    command = format("cat <<\"EOF\" > \"%s\"\n%s\nEOF", var.nats-server-task-definition-json, data.template_file.automation-nats-server-task-definition-output.rendered)
+  }
+  triggers = {
+    always_run = timestamp()
+  }
+  depends_on = [aws_ecs_task_definition.automation-nats-server]
+}
+
 resource "null_resource" "nats-server-healthcheck" {
 
-  depends_on = [aws_ecs_service.automation-nats-server]
+  depends_on = [aws_ecs_service.automation-nats-server,
+                aws_ecs_task_definition.automation-nats-server,
+                null_resource.generate_nats_server_task_definition_output_json]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t nats-server ${aws_ecs_task_definition.automation-nats-server.arn}"
+    command = "python3 ci-utils/task_healthcheck.py -t nats-server ${var.nats-server-task-definition-json}"
   }
 
   triggers = {

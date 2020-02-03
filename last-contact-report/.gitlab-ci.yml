@@ -28,11 +28,11 @@ last-contact-report-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - last-contact-report/**/*
-      - infra-as-code/dev/task-definitions/last_contact_report.json
-      - infra-as-code/dev/last-contact-report.tf
-      - nats-server/**/*
+#    changes:
+#      - last-contact-report/**/*
+#      - infra-as-code/dev/task-definitions/last_contact_report.json
+#      - infra-as-code/dev/last-contact-report.tf
+#      - nats-server/**/*
   except:
     changes:
       - bruin-bridge/*.md

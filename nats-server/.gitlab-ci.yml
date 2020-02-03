@@ -12,7 +12,7 @@ nats-server-build:
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-${CI_PIPELINE_ID}
   after_script:
-    - source ci-utils/environments_assign.sh
+    - source ci-utils/environment_assign.sh
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-${CI_PIPELINE_ID}
   only:
@@ -20,13 +20,13 @@ nats-server-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - nats-server/**/*
-      - infra-as-code/dev/task-definitions/nats_server.json
-      - infra-as-code/dev/task-definition/nats_server_seed.json
-      - infra-as-code/dev/nats-server.tf
-      - infra-as-code/dev/nats-server-1.tf
-      - infra-as-code/dev/nats-server-2.tf
+#    changes:
+#      - nats-server/**/*
+#      - infra-as-code/dev/task-definitions/nats_server.json
+#      - infra-as-code/dev/task-definition/nats_server_seed.json
+#      - infra-as-code/dev/nats-server.tf
+#      - infra-as-code/dev/nats-server-1.tf
+#      - infra-as-code/dev/nats-server-2.tf
   except:
     changes:
       - nats-server/*.md

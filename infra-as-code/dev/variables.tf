@@ -313,3 +313,9 @@ variable "velocloud_bridge_desired_tasks" {
   type = number
   description = "Number of desired tasks of microservice velocloud-bridge"
 }
+
+variable "nats-server-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for nats-server"
+  default = "/tmp/nats-server-taks-definition.json"
+}

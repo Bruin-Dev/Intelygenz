@@ -121,10 +121,11 @@ resource "null_resource" "t7-bridge-healthcheck" {
   count = var.t7_bridge_desired_tasks > 0 ? 1 : 0
 
   depends_on = [aws_ecs_service.automation-t7-bridge,
+                aws_ecs_task_definition.automation-t7-bridge,
                 null_resource.nats-server-healthcheck]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t t7-bridge"
+    command = "python3 ci-utils/task_healthcheck.py -t t7-bridge ${aws_ecs_task_definition.automation-t7-bridge.arn}"
   }
 
   triggers = {

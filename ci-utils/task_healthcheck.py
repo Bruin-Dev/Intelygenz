@@ -15,8 +15,8 @@ VELOCLOUD_BRIDGE_TASKS = os.environ['TF_VAR_velocloud_bridge_desired_tasks']
 
 
 class TaskHealthcheck:
-    def check_task_is_ready(self, task_name_param):
-        major_tasks_info = self._get_major_tasks(task_name_param)
+    def check_task_is_ready(self, task_name_param, task_definition_arn_p):
+        major_tasks_info = self._get_major_tasks(task_name_param, task_definition_arn_p)
         try:
             self._wait_until_tasks_is_ready(major_tasks_info, task_name_param)
         except Exception as e:
@@ -59,10 +59,11 @@ class TaskHealthcheck:
             logging.info(f"The task {task_info['task_arn']} doesn't exists")
             sys.exit(1)
 
-    def _get_major_tasks(self, task_name_param):
+    def _get_major_tasks(self, task_name_param, task_definition_arn_p):
         logging.info(f"Searching task with name {task_name_param} in the cluster ECS {ENVIRONMENT}")
-        time.sleep(30)
-        tasks_arn_with_task_name = self._get_tasks_arn_for_clusters(task_name_param)
+        # time.sleep(30)
+        tasks_arn_with_task_name = self._get_tasks_arn_for_clusters(task_name_param, task_definition_arn_p)
+        logging.info(f"tasks_arn_with_task_name is {tasks_arn_with_task_name}")
         if tasks_arn_with_task_name is None:
             logging.error(f"No task running for specified task {task_name_param}")
             sys.exit(1)
@@ -94,12 +95,14 @@ class TaskHealthcheck:
             logging.info(f"task_definition_arn: {element['task_definition_arn']}")
 
     @staticmethod
-    def _get_tasks_arn_for_clusters(task_name_param):
+    def _get_tasks_arn_for_clusters(task_name_param, task_definition_arn_p):
+        family_for_task_param = ENVIRONMENT + '-' + task_name_param
         tasks_arn_call = subprocess.Popen(
-            ['aws', 'ecs', 'list-tasks', '--cluster', ENVIRONMENT, '--region',
-             'us-east-1'],
+            ['aws', 'ecs', 'list-tasks', '--cluster', ENVIRONMENT,
+             '--family', family_for_task_param, '--region', 'us-east-1'],
             stdout=subprocess.PIPE, stderr=FNULL)
         tasks_arn_list = json.loads(tasks_arn_call.stdout.read())['taskArns']
+        logging.info(f"tasks_arn_list is {tasks_arn_list}")
         container_arns = []
         for element in tasks_arn_list:
             get_task_detail_call = subprocess.Popen(['aws', 'ecs', 'describe-tasks', '--cluster',
@@ -107,26 +110,34 @@ class TaskHealthcheck:
                                                     stdout=subprocess.PIPE, stderr=FNULL)
             get_task_detail_call_output = json.loads(get_task_detail_call.stdout.read())['tasks']
             for i in range(len(get_task_detail_call_output[0]["containers"])):
-                if task_name_param == get_task_detail_call_output[0]["containers"][i]["name"]:
+                if task_name_param == get_task_detail_call_output[0]["containers"][i]["name"]\
+                        and task_definition_arn_p == get_task_detail_call_output[0]["taskDefinitionArn"]:
                     container_arns.append({'task_arn': element,
                                            'task_definition_arn': get_task_detail_call_output[0]["taskDefinitionArn"]})
                     break
+        logging.info(f"container_arns is {container_arns}")
         return container_arns
 
     @staticmethod
     def print_usage():
-        print('task_healthcheck.py -t <task_name>')
+        print('task_healthcheck.py -t <task_name> <task_definition_arn>')
 
 
 if __name__ == '__main__':
-    logging.info(f"sys.argv {sys.argv}")
     task_healthcheck_instance = TaskHealthcheck()
+    logging.info(f"sys.argv is {sys.argv}")
     if sys.argv[0] == '-t':
         task_name = sys.argv[1]
+        file_to_load = sys.argv[2]
     elif sys.argv[1] == '-t':
         task_name = sys.argv[2]
+        file_to_load = sys.argv[3]
     else:
         task_healthcheck_instance.print_usage()
         sys.exit(1)
 
-    task_healthcheck_instance.check_task_is_ready(task_name)
+    with open(file_to_load, 'r') as fd:
+        file_task_definition = json.load(fd)
+    task_definition_arn = file_task_definition['taskDefinitionArn']
+    logging.info(f"task_definition_arn is {task_definition_arn}")
+    task_healthcheck_instance.check_task_is_ready(task_name, task_definition_arn)

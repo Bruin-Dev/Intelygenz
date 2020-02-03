@@ -19,11 +19,11 @@ grafana-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/grafana/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
-      - nats-server/**/*
+#    changes:
+#      - metrics-dashboard/grafana/**/*
+#      - infra-as-code/dev/task-definitions/prometheus.json
+#      - infra-as-code/dev/metrics-prometheus.tf
+#      - nats-server/**/*
   except:
     changes:
       - metrics-dashboard/grafana/*.md
@@ -46,11 +46,11 @@ prometheus-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/prometheus/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
-      - nats-server/**/*
+#    changes:
+#      - metrics-dashboard/prometheus/**/*
+#      - infra-as-code/dev/task-definitions/prometheus.json
+#      - infra-as-code/dev/metrics-prometheus.tf
+#      - nats-server/**/*
   except:
     changes:
       - metrics-dashboard/prometheus/*.md
@@ -69,11 +69,11 @@ thanos-sidecar-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/thanos/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
-      - nats-server/**/*
+#    changes:
+#      - metrics-dashboard/thanos/**/*
+#      - infra-as-code/dev/task-definitions/prometheus.json
+#      - infra-as-code/dev/metrics-prometheus.tf
+#      - nats-server/**/*
   except:
     changes:
       - metrics-dashboard/thanos/*.md
@@ -92,11 +92,11 @@ thanos-store-gateway-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/thanos/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
-      - nats-server/**/*
+#    changes:
+#      - metrics-dashboard/thanos/**/*
+#      - infra-as-code/dev/task-definitions/prometheus.json
+#      - infra-as-code/dev/metrics-prometheus.tf
+#      - nats-server/**/*
   except:
     changes:
       - metrics-dashboard/thanos/*.md
@@ -123,11 +123,11 @@ thanos-querier-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/thanos/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
-      - nats-server/**/*
+#    changes:
+#      - metrics-dashboard/thanos/**/*
+#      - infra-as-code/dev/task-definitions/prometheus.json
+#      - infra-as-code/dev/metrics-prometheus.tf
+#      - nats-server/**/*
   except:
     changes:
       - metrics-dashboard/thanos/*.md

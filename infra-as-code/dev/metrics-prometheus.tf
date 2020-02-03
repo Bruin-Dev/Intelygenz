@@ -164,10 +164,11 @@ resource "null_resource" "metrics-prometheus-healthcheck" {
   count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
 
   depends_on = [aws_ecs_service.automation-metrics-prometheus,
+                aws_ecs_task_definition.automation-metrics-prometheus,
                 null_resource.nats-server-healthcheck]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t metrics-prometheus"
+    command = "python3 ci-utils/task_healthcheck.py -t metrics-prometheus ${aws_ecs_task_definition.automation-metrics-prometheus.arn}"
   }
 
   triggers = {
@@ -178,7 +179,13 @@ resource "null_resource" "metrics-prometheus-healthcheck" {
 resource "null_resource" "grafana-user-creation" {
   count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
 
-  depends_on = [null_resource.metrics-prometheus-healthcheck, aws_ecs_service.automation-metrics-prometheus]
+  depends_on = [null_resource.metrics-prometheus-healthcheck,
+                aws_ecs_service.automation-metrics-prometheus,
+                aws_ecs_task_definition.automation-metrics-prometheus,
+                null_resource.notifier-healthcheck,
+                null_resource.t7-bridge-healthcheck,
+                null_resource.velocloud-bridge-healthcheck,
+                null_resource.bruin-bridge-healthcheck]
 
   provisioner "local-exec" {
     command = "python3 ci-utils/grafana_users_creation.py"

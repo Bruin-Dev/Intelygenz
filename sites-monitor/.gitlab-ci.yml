@@ -28,11 +28,11 @@ sites-monitor-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-    changes:
-      - sites-monitor/**/*
-      - infra-as-code/dev/task-definitions/sites_monitor.json
-      - infra-as-code/dev/sites-monitor.tf
-      - nats-server/**/*
+#    changes:
+#      - sites-monitor/**/*
+#      - infra-as-code/dev/task-definitions/sites_monitor.json
+#      - infra-as-code/dev/sites-monitor.tf
+#      - nats-server/**/*
   except:
     changes:
       - sites-monitor/*.md
