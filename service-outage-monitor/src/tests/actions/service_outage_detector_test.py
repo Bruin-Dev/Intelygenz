@@ -331,6 +331,7 @@ class TestServiceOutageDetectorJob:
 
         service_outage_detector._start_quarantine_job = Mock()
         service_outage_detector._add_edge_to_quarantine = Mock()
+        service_outage_detector._is_management_status_active = CoroutineMock(return_value=True)
 
         await service_outage_detector._service_outage_detector_process()
 
@@ -422,6 +423,7 @@ class TestServiceOutageDetectorJob:
         service_outage_detector._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
         service_outage_detector._start_quarantine_job = CoroutineMock()
         service_outage_detector._add_edge_to_quarantine = Mock()
+        service_outage_detector._is_management_status_active = CoroutineMock(return_value=True)
 
         await service_outage_detector._service_outage_detector_process()
 
@@ -3158,3 +3160,88 @@ class TestServiceOutageMonitor:
             ],
             "contacts": config.OUTAGE_CONTACTS[f'{serial_number}']
         }
+
+    @pytest.mark.asyncio
+    async def is_management_status_active_ok_test(self):
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC9876'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|12345|',
+        }
+        management_status = {"management_status": "Pending, Active – Silver Monitoring, "
+                                                  "Active – Gold Monitoring, Active – Platinum Monitoring"}
+        uuid_ = uuid()
+        management_request = {
+            "request_id": uuid_,
+            "filters": {
+                "client_id": 12345,
+                "status": "A",
+                "service_number": 'VC9876'
+            }}
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_utils = Mock()
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config, template_renderer, outage_utils)
+
+        service_outage_detector._extract_client_id = Mock(return_value=12345)
+        event_bus.rpc_request = CoroutineMock(return_value=management_status)
+
+        with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
+            is_edge_active = await service_outage_detector._is_management_status_active(edge_status)
+            event_bus.rpc_request.assert_awaited_once_with("bruin.inventory.management.status",
+                                                           management_request, timeout=30)
+        service_outage_detector._logger.assert_called
+        assert is_edge_active is True
+
+    @pytest.mark.asyncio
+    async def is_management_status_active_false_test(self):
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC9876'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|12345|',
+        }
+        management_status = {"management_status": "Inactive"}
+        uuid_ = uuid()
+        management_request = {
+            "request_id": uuid_,
+            "filters": {
+                "client_id": 12345,
+                "status": "A",
+                "service_number": 'VC9876'
+            }}
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_utils = Mock()
+
+        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
+                                                        quarantine_edge_repository, reporting_edge_repository,
+                                                        config, template_renderer, outage_utils)
+
+        service_outage_detector._extract_client_id = Mock(return_value=12345)
+        event_bus.rpc_request = CoroutineMock(return_value=management_status)
+
+        with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
+            is_edge_active = await service_outage_detector._is_management_status_active(edge_status)
+            event_bus.rpc_request.assert_awaited_once_with("bruin.inventory.management.status",
+                                                           management_request, timeout=30)
+        service_outage_detector._logger.assert_called
+        assert is_edge_active is False
