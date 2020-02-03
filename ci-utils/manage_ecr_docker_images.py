@@ -47,7 +47,7 @@ class DeleteOlderDockerImage:
                          f"{ENVIRONMENT} has imageDigest {newer_image['imageDigest']} and was pushed "
                          f"at {newer_image['imagePushedAt']}")
             for tag in newer_image['imageTags']:
-                if 'latest' in tag.split('-'):
+                if 'latest' not in tag.split('-'):
                     data_newer_image['tag'] = tag
                     break
         if not data_newer_image:
@@ -105,8 +105,13 @@ class DeleteOlderDockerImage:
         num_of_images_for_repository = len(get_all_images_for_repository)
         logging.info(f"ECR repository {repository_name_p} has {num_of_images_for_repository} docker images "
                      f"for environment {ENVIRONMENT}")
-        if ((num_of_images_for_repository > 1) and (pos == 0)) or \
-                ((num_of_images_for_repository > 0) and (pos == -1)):
+
+        asking_for_oldest_image = pos == 0
+        at_least_two_images = num_of_images_for_repository > 1
+        asking_for_newest_image = pos == -1
+        at_least_one_image = num_of_images_for_repository > 0
+
+        if (asking_for_oldest_image and at_least_two_images) or (asking_for_newest_image and at_least_one_image):
             repository_image = get_all_images_for_repository[pos]
             repository_image_date = self._convert_timestamp_to_date(
                 repository_image['imagePushedAt'])
@@ -114,9 +119,9 @@ class DeleteOlderDockerImage:
                                                   'imagePushedAt': repository_image_date,
                                                   'imageTags': repository_image['imageTags'],
                                                   'has_images': True})
-        elif num_of_images_for_repository > 1 and pos == 0:
-            logging.error(f"Only one image is available for the environment {ENVIRONMENT}, "
-                          f"at least one image must be preserved for each environment")
+        elif not (asking_for_oldest_image and at_least_two_images):
+            logging.error(f"There’s just one or no images available for the environment {ENVIRONMENT}. "
+                          f"At least two of them must be preserved for each environment.")
         else:
             logging.error(f"No docker images were found for the ECR repository {repository_name_p} "
                           f"and the environment {ENVIRONMENT}")

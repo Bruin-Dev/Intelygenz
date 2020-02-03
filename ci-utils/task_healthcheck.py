@@ -119,6 +119,7 @@ class TaskHealthcheck:
 
 
 if __name__ == '__main__':
+    logging.info(f"sys.argv {sys.argv}")
     task_healthcheck_instance = TaskHealthcheck()
     if sys.argv[0] == '-t':
         task_name = sys.argv[1]

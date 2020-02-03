@@ -20,10 +20,13 @@ nats-server-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-#    changes:
-#      - nats-server/**/*
-#      - infra-as-code/dev/task-definitions/nats_server.json
-#      - infra-as-code/dev/task-definition/nats_server_seed.json
-#      - infra-as-code/dev/nats-server.tf
-#      - infra-as-code/dev/nats-server-1.tf
-#      - infra-as-code/dev/nats-server-2.tf
+    changes:
+      - nats-server/**/*
+      - infra-as-code/dev/task-definitions/nats_server.json
+      - infra-as-code/dev/task-definition/nats_server_seed.json
+      - infra-as-code/dev/nats-server.tf
+      - infra-as-code/dev/nats-server-1.tf
+      - infra-as-code/dev/nats-server-2.tf
+  except:
+    changes:
+      - nats-server/*.md

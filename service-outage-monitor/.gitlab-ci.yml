@@ -28,8 +28,11 @@ service-outage-monitor-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-#    changes:
-#      - service-outage-monitor/**/*
-#      - infra-as-code/dev/task-definitions/service_outage_monitor.json
-#      - infra-as-code/dev/service-outage-monitor.tf
-#      - nats/**/*
+    changes:
+      - service-outage-monitor/**/*
+      - infra-as-code/dev/task-definitions/service_outage_monitor.json
+      - infra-as-code/dev/service-outage-monitor.tf
+      - nats-server/**/*
+  except:
+    changes:
+      - service-outage-monitor/*.md

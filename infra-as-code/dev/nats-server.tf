@@ -132,7 +132,7 @@ resource "null_resource" "nats-server-healthcheck" {
   depends_on = [aws_ecs_service.automation-nats-server]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t nats-server"
+    command = "python3 ci-utils/task_healthcheck.py -t nats-server ${aws_ecs_task_definition.automation-nats-server.arn}"
   }
 
   triggers = {

@@ -163,7 +163,8 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
 resource "null_resource" "metrics-prometheus-healthcheck" {
   count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
 
-  depends_on = [aws_ecs_service.automation-metrics-prometheus]
+  depends_on = [aws_ecs_service.automation-metrics-prometheus,
+                null_resource.nats-server-healthcheck]
 
   provisioner "local-exec" {
     command = "python3 ci-utils/task_healthcheck.py -t metrics-prometheus"

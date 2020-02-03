@@ -19,11 +19,14 @@ grafana-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-#    changes:
-#      - metrics-dashboard/grafana/**/*
-#      - infra-as-code/dev/task-definitions/prometheus.json
-#      - infra-as-code/dev/metrics-prometheus.tf
-#      - nats/**/*
+    changes:
+      - metrics-dashboard/grafana/**/*
+      - infra-as-code/dev/task-definitions/prometheus.json
+      - infra-as-code/dev/metrics-prometheus.tf
+      - nats-server/**/*
+  except:
+    changes:
+      - metrics-dashboard/grafana/*.md
 
 prometheus-build:
   stage: build
@@ -43,37 +46,37 @@ prometheus-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-#    changes:
-#      - metrics-dashboard/prometheus/**/*
-#      - infra-as-code/dev/task-definitions/prometheus.json
-#      - infra-as-code/dev/metrics-prometheus.tf
-#      - nats/**/*
+    changes:
+      - metrics-dashboard/prometheus/**/*
+      - infra-as-code/dev/task-definitions/prometheus.json
+      - infra-as-code/dev/metrics-prometheus.tf
+      - nats-server/**/*
+  except:
+    changes:
+      - metrics-dashboard/prometheus/*.md
 
 thanos-sidecar-build:
   stage: build
   variables:
     MODULE_NAME: metrics-dashboard/thanos
+    REPOSITORY_NAME: metrics-dashboard/thanos
     MODULE_VERSION: ${CI_PIPELINE_ID}
     GRPC_PORT: 10091
     HTTP_PORT: 10902
-  extends: .build_app_image
-  script:
-    - source ci-utils/environment_assign.sh
-    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/thanos/config/bucket_config.yaml
-    - cp metrics-dashboard/thanos/config/bucket_config.yaml metrics-dashboard/thanos/bucket_config.yaml
-    - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
-    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+  extends: .build_thanos_with_config_bucket
   only:
     refs:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-#    changes:
-#      - metrics-dashboard/thanos/**/*
-#      - infra-as-code/dev/task-definitions/prometheus.json
-#      - infra-as-code/dev/metrics-prometheus.tf
-#      - nats/**/*
+    changes:
+      - metrics-dashboard/thanos/**/*
+      - infra-as-code/dev/task-definitions/prometheus.json
+      - infra-as-code/dev/metrics-prometheus.tf
+      - nats-server/**/*
+  except:
+    changes:
+      - metrics-dashboard/thanos/*.md
 
 thanos-store-gateway-build:
   stage: build
@@ -83,27 +86,20 @@ thanos-store-gateway-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
     GRPC_PORT: 10901
     HTTP_PORT: 19191
-  extends: .build_app_image
-  script:
-    - source ci-utils/environment_assign.sh
-    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/thanos/config/bucket_config.yaml
-    - cp metrics-dashboard/thanos/config/bucket_config.yaml metrics-dashboard/thanos/bucket_config.yaml
-    - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
-    - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
-  after_script:
-    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
-    - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+  extends: .build_thanos_with_config_bucket
   only:
     refs:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-#    changes:
-#      - metrics-dashboard/thanos/**/*
-#      - infra-as-code/dev/task-definitions/prometheus.json
-#      - infra-as-code/dev/metrics-prometheus.tf
-#      - nats/**/*
+    changes:
+      - metrics-dashboard/thanos/**/*
+      - infra-as-code/dev/task-definitions/prometheus.json
+      - infra-as-code/dev/metrics-prometheus.tf
+      - nats-server/**/*
+  except:
+    changes:
+      - metrics-dashboard/thanos/*.md
 
 thanos-querier-build:
   stage: build
@@ -119,6 +115,7 @@ thanos-querier-build:
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   after_script:
+    - source ci-utils/environment_assign.sh
     - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   only:
@@ -126,8 +123,11 @@ thanos-querier-build:
       - master
       - /^*dev/feature/.*$/
       - /^*dev/fix/.*$/
-#    changes:
-#      - metrics-dashboard/thanos/**/*
-#      - infra-as-code/dev/task-definitions/prometheus.json
-#      - infra-as-code/dev/metrics-prometheus.tf
-#      - nats/**/*
+    changes:
+      - metrics-dashboard/thanos/**/*
+      - infra-as-code/dev/task-definitions/prometheus.json
+      - infra-as-code/dev/metrics-prometheus.tf
+      - nats-server/**/*
+  except:
+    changes:
+      - metrics-dashboard/thanos/*.md

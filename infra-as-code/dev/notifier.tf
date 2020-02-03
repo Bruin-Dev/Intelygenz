@@ -89,7 +89,8 @@ resource "aws_ecs_service" "automation-notifier" {
 resource "null_resource" "notifier-healthcheck" {
   count = var.notifier_desired_tasks > 0 ? 1 : 0
 
-  depends_on = [aws_ecs_service.automation-notifier]
+  depends_on = [aws_ecs_service.automation-notifier,
+                null_resource.nats-server-healthcheck]
 
   provisioner "local-exec" {
     command = "python3 ci-utils/task_healthcheck.py -t notifier"
