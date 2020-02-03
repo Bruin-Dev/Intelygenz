@@ -40,17 +40,27 @@ class GetManagementStatus:
         )
 
         management_status = self._bruin_repository.get_management_status(filters)
-        if management_status:
-            if management_status == 400:
-                response["status"] = 400
-                response["error_message"] = "Error in filters provided to get management status"
-                self._logger.error(f'Error trying to get management status using filters: {json.dumps(filters)}.')
-                await self._event_bus.publish_message(response_topic, response)
-                return
 
-        self._logger.info(f'Management status found using the filters {json.dumps(filters)}')
-        response["status"] = 200
-        response["management_status"] = management_status
+        if management_status["status_code"] in range(200, 300):
+            response["management_status"] = management_status["body"]
+            response["status"] = 200
+            self._logger.info(f'Management status found using the filters {json.dumps(filters)}')
+        elif management_status["status_code"] == 400:
+            response["status"] = 400
+            response["error_message"] = f"Bad request when retrieving management status: {management_status['body']}"
+            self._logger.error(f'Error trying to get management status: {management_status["body"]}')
+        elif management_status["status_code"] == 401:
+            response["status"] = 400
+            response["error_message"] = f"Authentication error in bruin API."
+            print(response)  # Remove
+            self._logger.error(f'Error trying to authenticate against bruin API: {management_status["body"]}')
+        elif management_status["status_code"] in range(500, 513):
+            response["status"] = 500
+            response["error_message"] = f"Internal server error from bruin API"
+            self._logger.error(f'Error accesing bruin API: {management_status["body"]}')
+
         await self._event_bus.publish_message(response_topic, response)
-
-        self._logger.info(f'Management status published in event bus for request {json.dumps(msg)}')
+        self._logger.info(
+            f'Management status published in event bus for request {json.dumps(msg)}. '
+            f"Message published was {response}"
+        )

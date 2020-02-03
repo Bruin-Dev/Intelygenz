@@ -627,19 +627,24 @@ class TestBruinRepository:
             "service_number": "VC05400009999"
         }
         response = {
-            "inventoryId": "12796795",
-            "serviceNumber": "VC05400002265",
-            "attributes": [
+            "body":
                 {
-                    "key": "Management Status",
-                    "value": "Active – Platinum Monitoring"
-                }
-            ]
+                    "inventoryId": "12796795",
+                    "serviceNumber": "VC05400002265",
+                    "attributes": [
+                        {
+                            "key": "Management Status",
+                            "value": "Active – Platinum Monitoring"
+                        }
+                    ]
+                },
+            "status_code": 200,
         }
         bruin_client = Mock()
         bruin_client.get_management_status = Mock(return_value=response)
         bruin_repository = BruinRepository(logger, bruin_client)
-        management_status = bruin_repository.get_management_status(filters)
+        response = bruin_repository.get_management_status(filters)
+        management_status = response["body"]
         bruin_client.get_management_status.assert_called_once_with(filters)
         assert "Active – Platinum Monitoring" in management_status
 
@@ -649,13 +654,16 @@ class TestBruinRepository:
             "client_id": 9994,
             "service_number": "VC05400009999"
         }
-        response = 400
+        response = {
+            "body": "empty",
+            "status_code": 400
+        }
         bruin_client = Mock()
         bruin_client.get_management_status = Mock(return_value=response)
         bruin_repository = BruinRepository(logger, bruin_client)
         management_status = bruin_repository.get_management_status(filters)
         bruin_client.get_management_status.assert_called_once_with(filters)
-        assert management_status == 400
+        assert management_status == response
 
     def get_management_status_ko_test(self):
         logger = Mock()
@@ -664,10 +672,13 @@ class TestBruinRepository:
             "status": "A",
             "service_number": "VC05400009999"
         }
-        response = {}
+        response = {
+            "body": "empty",
+            "status_code": 500
+        }
         bruin_client = Mock()
         bruin_client.get_management_status = Mock(return_value=response)
         bruin_repository = BruinRepository(logger, bruin_client)
         management_status = bruin_repository.get_management_status(filters)
         bruin_client.get_management_status.assert_called_once_with(filters)
-        assert management_status == {}
+        assert management_status == response

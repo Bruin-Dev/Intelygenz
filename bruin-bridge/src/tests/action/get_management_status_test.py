@@ -27,7 +27,10 @@ class TestGetManagementStatus:
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        management_status = "Active – Platinum Monitoring"
+        management_status = {
+            "body": "Active – Platinum Monitoring",
+            "status_code": 200
+        }
         bruin_repository.get_management_status = Mock(return_value=management_status)
 
         filters = {
@@ -44,7 +47,7 @@ class TestGetManagementStatus:
 
         event_bus_response = {
             "request_id": 19,
-            'management_status': management_status,
+            'management_status': management_status["body"],
             'status': 200
         }
 
@@ -93,7 +96,11 @@ class TestGetManagementStatus:
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        management_status = 400
+        management_status = {
+            "status_code": 400,
+            "body": "empty"
+
+        }
         bruin_repository.get_management_status = Mock(return_value=management_status)
 
         filters = {
@@ -111,7 +118,7 @@ class TestGetManagementStatus:
         event_bus_response = {
             "request_id": 19,
             'management_status': None,
-            'error_message': "Error in filters provided to get management status",
+            'error_message': 'Bad request when retrieving management status: empty',
             'status': 400
         }
 
@@ -143,6 +150,78 @@ class TestGetManagementStatus:
             'error_message': 'You must specify '
                              '{.."filter":{"client_id", "status", "service_number"}...} in the request',
             'status': 400
+        }
+
+        get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
+        await get_management_status.get_management_status(event_bus_request)
+        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
+        assert logger.error.called
+
+    @pytest.mark.asyncio
+    async def get_management_status_401_in_response_from_bruin_test(self):
+        logger = Mock()
+        logger.info = Mock()
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        bruin_repository = Mock()
+
+        management_status = {
+            "body": {},
+            "status_code": 401
+        }
+        bruin_repository.get_management_status = Mock(return_value=management_status)
+
+        event_bus_request = {
+            "request_id": 19,
+            "filters": {
+                "client_id": 12345,
+                "status": "A",
+                "service_number": "VC9876"
+            },
+            "response_topic": "some.topic"
+        }
+
+        event_bus_response = {
+            "request_id": 19,
+            'management_status': None,
+            'error_message': "Authentication error in bruin API.",
+            'status': 400
+        }
+
+        get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
+        await get_management_status.get_management_status(event_bus_request)
+        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
+        assert logger.error.called
+
+    @pytest.mark.asyncio
+    async def get_management_status_500_in_response_from_bruin_test(self):
+        logger = Mock()
+        logger.info = Mock()
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        bruin_repository = Mock()
+
+        management_status = {
+            "body": {},
+            "status_code": 500
+        }
+        bruin_repository.get_management_status = Mock(return_value=management_status)
+
+        event_bus_request = {
+            "request_id": 19,
+            "filters": {
+                "client_id": 12345,
+                "status": "A",
+                "service_number": "VC9876"
+            },
+            "response_topic": "some.topic"
+        }
+
+        event_bus_response = {
+            "request_id": 19,
+            'management_status': None,
+            'error_message': "Internal server error from bruin API",
+            'status': 500
         }
 
         get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
