@@ -84,23 +84,22 @@ class ServiceOutageDetector:
         for edge_full_id in edges_to_monitor:
             edge_identifier = EdgeIdentifier(**edge_full_id)
 
-            self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}.')
-            edge_status = await self._get_edge_status_by_id(edge_full_id)
-            self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
+            try:
+                self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}.')
+                edge_status = await self._get_edge_status_by_id(edge_full_id)
+                self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
 
-            self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
-            enterprise_name = edge_status['enterprise_name']
-            bruin_client_id = self._extract_client_id(enterprise_name)
-            serial_number = edge_status['edges']['serialNumber']
-            management_request = {
-                "request_id": uuid(),
-                "filters": {
-                    "client_id": bruin_client_id,
-                    "status": "A",
-                    "service_number": serial_number
-                }}
-            management_status = await self._event_bus.rpc_request("bruin.inventory.management.status",
-                                                                  management_request, timeout=30)
+                try:
+                    self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
+                    if not await self._is_management_status_active(edge_status):
+                        self._logger.info(
+                            f'Management status is not active for {edge_identifier}. Skipping process...')
+                        continue
+                    else:
+                        self._logger.info(f'Management status for {edge_identifier} seems active.')
+            except ValueError:
+                self._logger.info(f"Management status is unknown for {edge_identifier}")
+                continue
 
             if not management_status["management_status"]:
                 self._logger.error(f'Could not retrieve management status for {serial_number}')
@@ -120,13 +119,24 @@ class ServiceOutageDetector:
                 continue
             else:
                 self._logger.info(f'Management status for {edge_identifier} seems active.')
+                try:
+                    self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
+                    if not await self._is_management_status_active(edge_status):
+                        self._logger.info(
+                            f'Management status is not active for {edge_identifier}. Skipping process...')
+                        continue
+                    else:
+                        self._logger.info(f'Management status for {edge_identifier} seems active.')
+                except ValueError:
+                    self._logger.info(f"Management status is unknown for {edge_identifier}")
+                    continue
 
-            outage_happened = self._outage_utils.is_there_an_outage(edge_status)
-            if outage_happened:
-                self._logger.info(
-                    f'[outage-monitoring] Outage detected for {edge_identifier}. '
-                    'Scheduling edge to re-check it in a few moments.'
-                )
+                outage_happened = self._outage_utils.is_there_an_outage(edge_status)
+                if outage_happened:
+                    self._logger.info(
+                        f'[outage-monitoring] Outage detected for {edge_identifier}. '
+                        'Scheduling edge to re-check it in a few moments.'
+                    )
 
                 try:
                     tz = timezone(self._config.MONITOR_CONFIG['timezone'])
@@ -407,6 +417,9 @@ class ServiceOutageDetector:
         for interface, state in links_states.items():
             outage_causes.append(f"Link {interface} was {state}")
 
+        client_id_exists = bool(self.__client_id_regex.match(enterprise_name))
+        management_status = "A" if client_id_exists else "?"
+
         return {
             'detection_time': outage_detection_datetime,
             'edge_name': edge_name,
@@ -415,6 +428,7 @@ class ServiceOutageDetector:
             'enterprise': enterprise_name,
             'edge_url': edge_url,
             'outage_causes': outage_causes,
+            'management_status': management_status,
         }
 
     async def _service_outage_reporter_process(self):
@@ -436,9 +450,9 @@ class ServiceOutageDetector:
 
         # TODO: Move these fields to a proper place as they will always be the same in every outage report
         fields = ["Date of detection", "Company", "Edge name", "Last contact", "Serial Number", "Edge URL",
-                  "Outage causes"]
+                  "Outage causes", "Management status"]
         fields_edge = ["detection_time", "enterprise", "edge_name", "last_contact", "serial_number", "edge_url",
-                       "outage_causes"]
+                       "outage_causes", "management_status"]
         email_report = self._email_template_renderer.compose_email_object(edges_for_email_template, fields=fields,
                                                                           fields_edge=fields_edge)
         await self._event_bus.rpc_request("notification.email.request", email_report, timeout=10)
@@ -451,23 +465,28 @@ class ServiceOutageDetector:
 
         for edge_identifier, edge_value in edges_to_report.items():
             edge_full_id = edge_identifier._asdict()
-            edge_new_status = await self._get_edge_status_by_id(edge_full_id)
 
             try:
-                is_reportable_edge = await self._is_reportable_edge(edge_new_status)
-            except ValueError:
-                self._logger.error(
-                    f'An error ocurred while trying to look up an outage ticket for edge {edge_identifier}. '
-                    'It will not be removed from the reporting queue because its current status is unknown.'
-                )
-            else:
-                if is_reportable_edge:
-                    edge_new_value = {**edge_value, **{'edge_status': edge_new_status}}
-                    self._reporting_edge_repository.add_edge(
-                        edge_full_id, edge_new_value, update_existing=True, time_to_live=None
+                edge_new_status = await self._get_edge_status_by_id(edge_full_id)
+
+                try:
+                    is_reportable_edge = await self._is_reportable_edge(edge_new_status)
+                except ValueError:
+                    self._logger.error(
+                        f'An error ocurred while trying to look up an outage ticket for edge {edge_identifier}. '
+                        'It will not be removed from the reporting queue because its current status is unknown.'
                     )
                 else:
-                    self._reporting_edge_repository.remove_edge(edge_full_id)
+                    if is_reportable_edge:
+                        edge_new_value = {**edge_value, **{'edge_status': edge_new_status}}
+                        self._reporting_edge_repository.add_edge(
+                            edge_full_id, edge_new_value, update_existing=True, time_to_live=None
+                        )
+                    else:
+                        self._reporting_edge_repository.remove_edge(edge_full_id)
+            except Exception:
+                self._logger.exception(f"Unexpected error occurred while refreshing the reporting queue for edge "
+                                       f"{edge_identifier}. Skipping...")
 
     def _attach_outage_causes_to_edges(self, edges_to_report) -> NoReturn:
         for edge_identifier, edge_value in edges_to_report.items():
@@ -584,6 +603,8 @@ class ServiceOutageDetector:
     async def _is_management_status_active(self, edge_status):
         enterprise_name = edge_status['enterprise_name']
         bruin_client_id = self._extract_client_id(enterprise_name)
+        if bruin_client_id == 9994:
+            return False
         serial_number = edge_status['edges']['serialNumber']
         management_request = {
             "request_id": uuid(),
@@ -595,8 +616,9 @@ class ServiceOutageDetector:
         }
         management_status = await self._event_bus.rpc_request("bruin.inventory.management.status",
                                                               management_request, timeout=30)
-        print(management_status)
         self._logger.info(f'Got management status {management_status} for {serial_number}')
+        if management_status["management_status"] is None:
+            raise ValueError
         if management_status["management_status"] in "Pending, Active – Silver Monitoring, " \
                                                      "Active – Gold Monitoring, Active – Platinum Monitoring":
             return True
