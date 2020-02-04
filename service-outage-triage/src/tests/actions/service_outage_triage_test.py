@@ -329,7 +329,6 @@ class TestServiceOutageTriage:
         service_outage_triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
         service_outage_triage._template_renderer._ticket_object_to_email_obj =\
             Mock(return_value=ticket_note_as_email_object)
-        service_outage_triage._get_edge_id = CoroutineMock(return_value=edge_id_by_serial)
         service_outage_triage._client_id_from_edge_status = Mock(return_value=85940)
 
         uuid_1 = uuid()
@@ -446,7 +445,6 @@ class TestServiceOutageTriage:
         service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
         service_outage_triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
         service_outage_triage._ticket_object_to_string = Mock(return_value=ticket_note_as_string)
-        service_outage_triage._get_edge_id = CoroutineMock(return_value=edge_id_by_serial)
         service_outage_triage._client_id_from_edge_status = Mock(return_value=85940)
 
         uuid_1 = uuid()
@@ -566,7 +564,6 @@ class TestServiceOutageTriage:
         service_outage_triage._compose_ticket_note_object = Mock()
         service_outage_triage._ticket_object_to_string = Mock()
         service_outage_triage._template_renderer._ticket_object_to_email_obj = Mock()
-        service_outage_triage._get_edge_id = CoroutineMock(return_value=edge_id_by_serial)
         service_outage_triage._client_id_from_edge_status = Mock(return_value=85940)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
@@ -1096,8 +1093,6 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
-        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
-                                                                             edge_id=edge_id))
 
         current_datetime = datetime.now()
         datetime_mock = Mock()
@@ -1175,7 +1170,6 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
-        service_outage_triage._get_edge_id = CoroutineMock()
         await service_outage_triage._check_for_new_events(timestamp, ticket)
 
         service_outage_triage._compose_event_note_object.assert_any_call(events_data_sorted_by_timestamp)
@@ -1221,7 +1215,6 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
-        service_outage_triage._get_edge_id = CoroutineMock()
 
         await service_outage_triage._check_for_new_events(timestamp, ticket)
 
@@ -1274,7 +1267,6 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
         service_outage_triage._compose_event_note_object = Mock(return_value=event_note)
-        service_outage_triage._get_edge_id = CoroutineMock()
 
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             await service_outage_triage._check_for_new_events(timestamp, ticket)
@@ -1357,8 +1349,6 @@ class TestServiceOutageTriage:
         service_outage_triage._compose_event_note_object = Mock(side_effect=[
             events_note, events_note
         ])
-        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
-                                                                             edge_id=edge_id))
 
         current_datetime = datetime.now()
         datetime_mock = Mock()
@@ -1781,8 +1771,6 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
-        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
-                                                                             edge_id=edge_id))
 
         ticket_id = "123"
         ticket_notes = ['list of notes']
@@ -1907,8 +1895,6 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
-        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
-                                                                             edge_id=edge_id))
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -1999,8 +1985,6 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
-        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
-                                                                             edge_id=edge_id))
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -2062,8 +2046,6 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
-        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
-                                                                             edge_id=edge_id))
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
@@ -2072,7 +2054,6 @@ class TestServiceOutageTriage:
 
         outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
         outage_utils.is_there_an_outage.assert_not_called()
-        service_outage_triage._get_edge_id.assert_awaited_once_with(serial)
         event_bus.rpc_request.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -2133,8 +2114,7 @@ class TestServiceOutageTriage:
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
-        service_outage_triage._get_edge_id = CoroutineMock(return_value=dict(host=host, enterprise_id=enterprise_id,
-                                                                             edge_id=edge_id))
+
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
         uuid_ = uuid()
@@ -2163,37 +2143,3 @@ class TestServiceOutageTriage:
                  },
                  timeout=180)
         ])
-
-    @pytest.mark.asyncio
-    async def get_edge_id_test(self):
-        logger = Mock()
-        scheduler = Mock()
-        config = Mock()
-        template_renderer = Mock()
-        outage_utils = Mock()
-
-        serial = "VC05400002265"
-        uuid_ = uuid()
-        id_by_serial_return = {
-            "request_id": uuid_,
-            "edge_id": {
-                        "host": "some.host",
-                        "enterprise_id": 127,
-                        "edge_id": 29
-                       }
-        }
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=id_by_serial_return)
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
-                                                    outage_utils)
-
-        with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
-            edge_id = await service_outage_triage._get_edge_id(serial)
-
-        event_bus.rpc_request.assert_awaited_once_with("edge.ids.by.serial",
-                                                       {
-                                                           "request_id": uuid_,
-                                                           "serial": serial
-                                                       },
-                                                       timeout=45)
-        assert edge_id == id_by_serial_return["edge_id"]
