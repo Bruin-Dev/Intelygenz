@@ -64,9 +64,9 @@ class Container:
         # await self._service_outage_detector.report_persisted_edges()
         # await self._service_outage_detector.load_persisted_quarantine()
 
-        # await self._service_outage_detector.start_service_outage_detector_job(exec_on_start=True)
-        # await self._service_outage_detector.start_service_outage_reporter_job(exec_on_start=False)
-        await self._service_outage_detector.start_service_outage_monitoring(exec_on_start=True)
+        await self._service_outage_detector.start_service_outage_detector_job(exec_on_start=True)
+        await self._service_outage_detector.start_service_outage_reporter_job(exec_on_start=False)
+        # await self._service_outage_detector.start_service_outage_monitoring(exec_on_start=True)
 
         self._scheduler.start()
 
