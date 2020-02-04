@@ -1,4 +1,5 @@
-import json
+from collections import defaultdict
+
 import asyncio
 import requests
 from tenacity import retry, wait_exponential, stop_after_delay
@@ -168,7 +169,7 @@ class VelocloudClient:
         return edges_by_enterprise_and_host
 
     async def get_all_enterprises_edges_with_host_by_serial(self):
-        serial_to_edge_id = dict()
+        serial_to_edge_id = defaultdict(list)
         loop = asyncio.get_event_loop()
         for client in self._clients:
             res = self.get_monitoring_aggregates(client)
@@ -184,12 +185,12 @@ class VelocloudClient:
             for enterprise_info in await asyncio.gather(*futures):
                 for edge in enterprise_info:
                     if edge["haSerialNumber"] is not None:
-                        serial_to_edge_id[edge["haSerialNumber"]] = {"host": client["host"],
-                                                                     "enterprise_id": edge["enterpriseId"],
-                                                                     "edge_id": edge["id"]}
-                    serial_to_edge_id[edge["serialNumber"]] = {"host": client["host"],
-                                                               "enterprise_id": edge["enterpriseId"],
-                                                               "edge_id": edge["id"]}
+                        serial_to_edge_id[edge["haSerialNumber"]].append({"host": client["host"],
+                                                                          "enterprise_id": edge["enterpriseId"],
+                                                                          "edge_id": edge["id"]})
+                    serial_to_edge_id[edge["serialNumber"]].append({"host": client["host"],
+                                                                    "enterprise_id": edge["enterpriseId"],
+                                                                    "edge_id": edge["id"]})
 
         return serial_to_edge_id
 

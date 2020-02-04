@@ -392,12 +392,12 @@ class TestVelocloudClient:
 
         velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
         velocloud_client.get_all_enterprises_edges_by_id.assert_called_once_with(clients[0], 1)
-        assert edge_ids_by_serial == {'VC0123': {'host': clients[0]['host'],
-                                                 'enterprise_id': 1,
-                                                 'edge_id': 25},
-                                      'VC0234': {'host': clients[0]['host'],
-                                                 'enterprise_id': 1,
-                                                 'edge_id': 25}
+        assert edge_ids_by_serial == {'VC0123': [{'host': clients[0]['host'],
+                                                  'enterprise_id': 1,
+                                                  'edge_id': 25}],
+                                      'VC0234': [{'host': clients[0]['host'],
+                                                  'enterprise_id': 1,
+                                                  'edge_id': 25}]
                                       }
 
     @pytest.mark.asyncio
@@ -419,9 +419,9 @@ class TestVelocloudClient:
 
         velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
         velocloud_client.get_all_enterprises_edges_by_id.assert_called_once_with(clients[0], 1)
-        assert edge_ids_by_serial == {'VC0123': {'host': clients[0]['host'],
-                                                 'enterprise_id': 1,
-                                                 'edge_id': 25},
+        assert edge_ids_by_serial == {'VC0123': [{'host': clients[0]['host'],
+                                                  'enterprise_id': 1,
+                                                  'edge_id': 25}, ]
                                       }
 
     def get_all_hosts_count_test(self):
