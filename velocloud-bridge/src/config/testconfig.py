@@ -27,7 +27,7 @@ VELOCLOUD_CONFIG = {
     'min': 0,
     'stop_delay': 0.4,
     'timezone': 'US/Eastern',
-    'days_to_create_dict': 1
+    'ids_by_serial_cache_ttl': 86400
 
 }
 

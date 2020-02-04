@@ -184,6 +184,8 @@ class VelocloudClient:
             ]
             for enterprise_info in await asyncio.gather(*futures):
                 for edge in enterprise_info:
+                    # serialNumber is the serial number of the current edge
+                    # haSerialNumber is the serial number of the backup edge of the current edge
                     if edge["haSerialNumber"] is not None:
                         serial_to_edge_id[edge["haSerialNumber"]].append({"host": client["host"],
                                                                           "enterprise_id": edge["enterpriseId"],

@@ -115,7 +115,7 @@ __edge.ids.by.serial response schema__
 ```
 {
     "request_id": 123, 
-    "edge_id": {"host": "some.host", "enterprise_id":19, "edge_id":99}, 
+    "edge_id": [{"host": "some.host", "enterprise_id":19, "edge_id":99}], 
     "status": 200
 }
 ```

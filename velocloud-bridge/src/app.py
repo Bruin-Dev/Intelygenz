@@ -31,7 +31,8 @@ class Container:
         self._velocloud_repository = VelocloudRepository(config, self._logger, self._velocloud_client)
 
         self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
-        self._edge_dict_repository = EdgeDictRepository(self._redis_client, self._logger)
+        self._edge_dict_repository = EdgeDictRepository(self._redis_client, self._logger,
+                                                        'VELOCLOUD_BRIDGE_IDS_BY_SERIAL')
 
         self._ids_by_serial_client = IDsBySerialClient(config, self._logger, self._velocloud_client,
                                                        self._edge_dict_repository)

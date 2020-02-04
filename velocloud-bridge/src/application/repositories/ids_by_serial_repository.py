@@ -19,7 +19,7 @@ class IDsBySerialRepository:
             next_run_time = datetime.now(timezone(self._config.VELOCLOUD_CONFIG['timezone']))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._ids_by_serial_client.create_id_by_serial_dict, 'interval',
-                                days=self._config.VELOCLOUD_CONFIG['days_to_create_dict'],
+                                seconds=self._config.VELOCLOUD_CONFIG['ids_by_serial_cache_ttl'],
                                 next_run_time=next_run_time, replace_existing=True,
                                 id='create_id_by_serial_dict')
 

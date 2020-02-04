@@ -42,7 +42,7 @@ class TestIdsBySerialRepository:
 
         scheduler.add_job.assert_called_once_with(
             ids_by_serial_client.create_id_by_serial_dict, 'interval',
-            days=config.VELOCLOUD_CONFIG['days_to_create_dict'],
+            seconds=config.VELOCLOUD_CONFIG['ids_by_serial_cache_ttl'],
             next_run_time=next_run_time,
             replace_existing=True,
             id='create_id_by_serial_dict',
@@ -61,7 +61,7 @@ class TestIdsBySerialRepository:
 
         scheduler.add_job.assert_called_once_with(
             ids_by_serial_client.create_id_by_serial_dict, 'interval',
-            days=config.VELOCLOUD_CONFIG['days_to_create_dict'],
+            seconds=config.VELOCLOUD_CONFIG['ids_by_serial_cache_ttl'],
             next_run_time=undefined,
             replace_existing=True,
             id='create_id_by_serial_dict',
