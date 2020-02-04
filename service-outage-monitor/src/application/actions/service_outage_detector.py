@@ -340,6 +340,25 @@ class ServiceOutageDetector:
                     await self._start_quarantine_job(edge_full_id)
                     self._add_edge_to_quarantine(edge_full_id, edge_status)
 
+            try:
+                try:
+                    edge_status = await self._get_edge_status_by_id(edge_full_id)
+                    if not await self._is_management_status_active(edge_status):
+                        self._logger.info(f"Management status is not active. {edge_identifier} won't be reported")
+                        continue
+                    else:
+                        self._logger.info(
+                            f"Management status is active. Checking outage state for {edge_identifier}...")
+
+                    if self._outage_utils.is_there_an_outage(edge_status):
+                        await self._start_quarantine_job(edge_full_id)
+                        self._add_edge_to_quarantine(edge_full_id, edge_status)
+                except ValueError:
+                    self._logger.info(f"Managament status is unknown for {edge_identifier}")
+            except Exception:
+                self._logger.exception(f"Unexpected error occurred while running the detection process for edge "
+                                       f"{edge_identifier}. Skipping...")
+
     async def _start_quarantine_job(self, edge_full_id, run_date: datetime = None):
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
