@@ -622,8 +622,6 @@ class ServiceOutageDetector:
     async def _is_management_status_active(self, edge_status):
         enterprise_name = edge_status['enterprise_name']
         bruin_client_id = self._extract_client_id(enterprise_name)
-        if bruin_client_id == 9994:
-            return False
         serial_number = edge_status['edges']['serialNumber']
         management_request = {
             "request_id": uuid(),

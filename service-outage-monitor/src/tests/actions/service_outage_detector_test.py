@@ -3543,32 +3543,3 @@ class TestServiceOutageMonitor:
                 event_bus.rpc_request.assert_awaited_once_with("bruin.inventory.management.status",
                                                                management_request, timeout=30)
         service_outage_detector._logger.assert_called
-
-    @pytest.mark.asyncio
-    async def is_management_status_active_no_id_test(self):
-        edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC9876'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP||',
-        }
-        uuid_ = uuid()
-        event_bus = Mock()
-        scheduler = Mock()
-        logger = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_utils = Mock()
-
-        service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
-                                                        quarantine_edge_repository, reporting_edge_repository,
-                                                        config, template_renderer, outage_utils)
-
-        service_outage_detector._extract_client_id = Mock(return_value=9994)
-        is_edge_active = await service_outage_detector._is_management_status_active(edge_status)
-        service_outage_detector._logger.assert_called
-        assert is_edge_active is False
