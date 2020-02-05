@@ -53,7 +53,10 @@ class DeleteOlderDockerImage:
         if not data_newer_image:
             logging.info(f"There isn't a newer image for the ECR repository {repository_name_p} and environment "
                          f"{ENVIRONMENT}. It's going to be used latest stable upload to production environment")
-            data_newer_image['tag'] = "automation-master-latest"
+            if repository_name_p == 'automation-nats-server':
+                data_newer_image['tag'] = 'automation-master-2.1.0-latest'
+            else:
+                data_newer_image['tag'] = "automation-master-latest"
         self._save_repository_name_newer_image(repository_name_p, data_newer_image)
 
     def _save_repository_name_newer_image(self, repository_name_p, data_newer_image):
