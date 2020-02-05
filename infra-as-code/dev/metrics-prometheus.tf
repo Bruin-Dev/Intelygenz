@@ -159,7 +159,10 @@ resource "aws_ecs_service" "automation-metrics-prometheus" {
     container_port = 3000
   }
 
-  depends_on = [ null_resource.nats-server-healthcheck, aws_s3_bucket.prometheus-storage]
+  depends_on = [
+    null_resource.nats-server-healthcheck,
+    aws_s3_bucket.prometheus-storage,
+    aws_elasticache_cluster.automation-redis]
 }
 
 data "template_file" "automation-metrics-prometheus-task-definition-output" {
@@ -188,7 +191,8 @@ resource "null_resource" "metrics-prometheus-healthcheck" {
   depends_on = [aws_ecs_service.automation-metrics-prometheus,
                 aws_ecs_task_definition.automation-metrics-prometheus,
                 null_resource.nats-server-healthcheck,
-                null_resource.generate_metrics_prometheus_task_definition_output_json]
+                null_resource.generate_metrics_prometheus_task_definition_output_json,
+                aws_elasticache_cluster.automation-redis]
 
   provisioner "local-exec" {
     command = "python3 ci-utils/task_healthcheck.py -t metrics-prometheus ${var.metrics-prometheus-task-definition-json}"

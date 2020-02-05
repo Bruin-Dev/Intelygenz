@@ -83,7 +83,7 @@ resource "aws_ecs_service" "automation-notifier" {
     assign_public_ip = false
   }
 
-  depends_on = [ null_resource.nats-server-healthcheck ]
+  depends_on = [ null_resource.nats-server-healthcheck, aws_elasticache_cluster.automation-redis ]
 }
 
 data "template_file" "automation-notifier-task-definition-output" {
@@ -112,7 +112,8 @@ resource "null_resource" "notifier-healthcheck" {
   depends_on = [aws_ecs_service.automation-notifier,
                 aws_ecs_task_definition.automation-notifier,
                 null_resource.nats-server-healthcheck,
-                null_resource.generate_notifier_task_definition_output_json]
+                null_resource.generate_notifier_task_definition_output_json,
+                aws_elasticache_cluster.automation-redis]
 
   provisioner "local-exec" {
     command = "python3 ci-utils/task_healthcheck.py -t notifier ${var.notifier-task-definition-json}"

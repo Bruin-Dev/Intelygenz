@@ -116,7 +116,10 @@ resource "aws_ecs_service" "automation-bruin-bridge" {
     registry_arn = aws_service_discovery_service.bruin-bridge.arn
   }
 
-  depends_on = [ null_resource.nats-server-healthcheck ]
+  depends_on = [
+    null_resource.nats-server-healthcheck,
+    aws_elasticache_cluster.automation-redis
+  ]
 }
 
 data "template_file" "automation-bruin-bridge-task-definition-output" {
@@ -145,7 +148,9 @@ resource "null_resource" "bruin-bridge-healthcheck" {
   depends_on = [aws_ecs_service.automation-bruin-bridge,
                 aws_ecs_task_definition.automation-bruin-bridge,
                 null_resource.nats-server-healthcheck,
-                null_resource.generate_bruin_bridge_task_definition_output_json]
+                null_resource.generate_bruin_bridge_task_definition_output_json,
+                aws_elasticache_cluster.automation-redis
+  ]
 
   provisioner "local-exec" {
     command = "python3 ci-utils/task_healthcheck.py -t bruin-bridge ${var.bruin-bridge-task-definition-json}"

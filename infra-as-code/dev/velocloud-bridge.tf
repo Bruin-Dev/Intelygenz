@@ -115,7 +115,7 @@ resource "aws_ecs_service" "automation-velocloud-bridge" {
     registry_arn = aws_service_discovery_service.velocloud-bridge.arn
   }
 
-  depends_on = [ null_resource.nats-server-healthcheck ]
+  depends_on = [ null_resource.nats-server-healthcheck, aws_elasticache_cluster.automation-redis ]
 }
 
 data "template_file" "automation-velocloud-bridge-task-definition-output" {
@@ -143,7 +143,8 @@ resource "null_resource" "velocloud-bridge-healthcheck" {
   depends_on = [aws_ecs_service.automation-velocloud-bridge,
                 aws_ecs_task_definition.automation-velocloud-bridge,
                 null_resource.nats-server-healthcheck,
-                null_resource.generate_velocloud_bridge_task_definition_output_json]
+                null_resource.generate_velocloud_bridge_task_definition_output_json,
+                aws_elasticache_cluster.automation-redis]
 
   provisioner "local-exec" {
     command = "python3 ci-utils/task_healthcheck.py -t velocloud-bridge ${var.velocloud-bridge-task-definition-json}"
