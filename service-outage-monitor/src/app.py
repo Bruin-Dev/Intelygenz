@@ -7,8 +7,8 @@ from redis import Redis
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
-from igz.packages.nats.storage_managers import RedisStorageManager
 from igz.packages.server.api import QuartServer
 from igz.packages.repositories.edge_repository import EdgeRepository
 from igz.packages.repositories.outageutils import OutageUtils
@@ -40,8 +40,8 @@ class Container:
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
         # EVENT BUS
-        self._publisher = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._event_bus = EventBus(logger=self._logger)
+        self._publisher = NATSClient(config, logger=self._logger)
+        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
         # EMAIL TEMPLATE

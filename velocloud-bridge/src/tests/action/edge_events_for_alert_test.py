@@ -10,7 +10,8 @@ class TestEventEdgesForAlert:
 
     def instance_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(logger=mock_logger)
+        storage_manager = Mock()
+        test_bus = EventBus(storage_manager, logger=mock_logger)
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
         assert edges_for_alert._event_bus is test_bus
@@ -20,7 +21,8 @@ class TestEventEdgesForAlert:
     @pytest.mark.asyncio
     async def report_edge_event_ok_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(logger=mock_logger)
+        storage_manager = Mock()
+        test_bus = EventBus(storage_manager, logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
@@ -50,7 +52,8 @@ class TestEventEdgesForAlert:
     @pytest.mark.asyncio
     async def report_edge_event_ok_no_limit_no_filter_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(logger=mock_logger)
+        storage_manager = Mock()
+        test_bus = EventBus(storage_manager, logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
@@ -78,7 +81,8 @@ class TestEventEdgesForAlert:
     @pytest.mark.asyncio
     async def report_edge_event_empty_ko_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(logger=mock_logger)
+        storage_manager = Mock()
+        test_bus = EventBus(storage_manager, logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)

@@ -13,7 +13,8 @@ class TestEdgeIdBySerialResponse:
     def instance_test(self):
         config = Mock()
         mock_logger = Mock()
-        test_bus = EventBus(logger=mock_logger)
+        storage_manager = Mock()
+        test_bus = EventBus(storage_manager, logger=mock_logger)
         id_by_serial_repo = Mock()
         actions = SearchForIDsBySerial(config, test_bus, mock_logger, id_by_serial_repo)
         assert actions._config is config
@@ -26,8 +27,9 @@ class TestEdgeIdBySerialResponse:
     async def search_for_edge_id_ok_test(self):
         config = Mock()
         mock_logger = Mock()
+        storage_manager = Mock()
 
-        test_bus = EventBus(logger=mock_logger)
+        test_bus = EventBus(storage_manager, logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
 
         edge_id_return = 'Some Edge ID'
@@ -53,8 +55,9 @@ class TestEdgeIdBySerialResponse:
     async def search_for_edge_id_ko_none_test(self):
         config = Mock()
         mock_logger = Mock()
+        storage_manager = Mock()
 
-        test_bus = EventBus(logger=mock_logger)
+        test_bus = EventBus(storage_manager, logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
 
         edge_id_return = None
@@ -80,8 +83,9 @@ class TestEdgeIdBySerialResponse:
     async def search_for_edge_id_ok_exception_test(self):
         config = Mock()
         mock_logger = Mock()
+        storage_manager = Mock()
 
-        test_bus = EventBus(logger=mock_logger)
+        test_bus = EventBus(storage_manager, logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
 
         edge_id_return = Exception()

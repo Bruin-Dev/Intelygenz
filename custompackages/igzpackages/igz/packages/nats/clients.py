@@ -10,9 +10,8 @@ from igz.packages.eventbus.action import ActionWrapper
 
 class NATSClient:
 
-    def __init__(self, config, messages_storage_manager, logger=None):
+    def __init__(self, config, logger=None):
         self._config = config.NATS_CONFIG
-        self._messages_storage_manager = messages_storage_manager
         self._topic_action = dict()
         self._subs = list()
         if logger is None:
@@ -43,14 +42,6 @@ class NATSClient:
 
             await self._nc.publish(topic, message.encode())
 
-        if self._messages_storage_manager.is_message_larger_than_1mb(message):
-            message = self._messages_storage_manager.store_message(message, encode_result=True)
-            self._logger.info(
-                'Message received in publish() was larger than 1MB so it was stored with '
-                f'{type(self._messages_storage_manager).__name__}. The token needed to recover it is '
-                f'{json.loads(message)["token"]}.'
-            )
-
         await publish()
 
     async def rpc_request(self, topic, message, timeout=10):
@@ -64,14 +55,6 @@ class NATSClient:
             rpc_request = await self._nc.timed_request(topic, message.encode(), timeout)
             return json.loads(rpc_request.data)
 
-        if self._messages_storage_manager.is_message_larger_than_1mb(message):
-            message = self._messages_storage_manager.store_message(message, encode_result=True)
-            self._logger.info(
-                'Message received in rpc_request() was larger than 1MB so it was stored with '
-                f'{type(self._messages_storage_manager).__name__}. The token needed to recover it is '
-                f'{json.loads(message)["token"]}.'
-            )
-
         return await rpc_request()
 
     async def _cb_with_action(self, msg):
@@ -83,14 +66,6 @@ class NATSClient:
             return
 
         event = json.loads(msg.data)
-        if event.get("is_stored") is True:
-            event = self._messages_storage_manager.recover_message(event, encode_result=False)
-            self._logger.info(
-                f'Message received from topic {msg_subject} indicates that the actual message was larger than 1MB and '
-                f'was stored with {type(self._messages_storage_manager).__name__}. '
-                f'The original message (truncated) is "{json.dumps(event)[:200]}..."'
-            )
-
         event["response_topic"] = msg.reply
 
         try:

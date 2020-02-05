@@ -13,8 +13,8 @@ from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
-from igz.packages.nats.storage_managers import RedisStorageManager
 from igz.packages.server.api import QuartServer
 
 MESSAGES_PROCESSED = Summary('nats_processed_messages', 'Messages processed from NATS')
@@ -57,11 +57,11 @@ class Container:
 
         self.message_storage_manager = RedisStorageManager(logger, self.redis_connection)
 
-        self.client1 = NATSClient(config, self.message_storage_manager, logger=logger)
-        self.client2 = NATSClient(config, self.message_storage_manager, logger=logger)
-        self.client3 = NATSClient(config, self.message_storage_manager, logger=logger)
-        self.client4 = NATSClient(config, self.message_storage_manager, logger=logger)
-        self.client5 = NATSClient(config, self.message_storage_manager, logger=logger)
+        self.client1 = NATSClient(config, logger=logger)
+        self.client2 = NATSClient(config, logger=logger)
+        self.client3 = NATSClient(config, logger=logger)
+        self.client4 = NATSClient(config, logger=logger)
+        self.client5 = NATSClient(config, logger=logger)
 
         base_durable_action = DurableAction()
         base_from_first_action = FromFirstAction()
@@ -69,7 +69,7 @@ class Container:
         self.durable_action = ActionWrapper(base_durable_action, "durable_print_callback", logger=logger)
         self.from_first_action = ActionWrapper(base_from_first_action, "first_print_callback", logger=logger)
 
-        self.event_bus = EventBus(logger=logger)
+        self.event_bus = EventBus(self.message_storage_manager, logger=logger)
         rpc_action = RPCAction(event_bus=self.event_bus)
         self.rpc_action = ActionWrapper(rpc_action, "rpc_response", logger=logger, is_async=True)
 

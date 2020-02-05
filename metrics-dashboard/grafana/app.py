@@ -9,8 +9,8 @@ from shortuuid import uuid
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
-from igz.packages.nats.storage_managers import RedisStorageManager
 
 
 logger = LoggerClient(config).get_logger()
@@ -21,8 +21,8 @@ class Container:
     def __init__(self):
         self.redis_connection = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self.message_storage_manager = RedisStorageManager(logger, self.redis_connection)
-        self.client1 = NATSClient(config, self.message_storage_manager, logger=logger)
-        self.event_bus = EventBus(logger=logger)
+        self.client1 = NATSClient(config, logger=logger)
+        self.event_bus = EventBus(self.message_storage_manager, logger=logger)
         self.event_bus.set_producer(self.client1)
         self.enterprise_names = []
 

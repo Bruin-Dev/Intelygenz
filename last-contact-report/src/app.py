@@ -7,8 +7,8 @@ from pytz import timezone
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
-from igz.packages.nats.storage_managers import RedisStorageManager
 from igz.packages.server.api import QuartServer
 from application.repositories.template_management import TemplateRenderer
 
@@ -24,9 +24,9 @@ class Container:
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
-        self._publisher = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self.subscriber_alert = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._event_bus = EventBus(logger=self._logger)
+        self._publisher = NATSClient(config, logger=self._logger)
+        self.subscriber_alert = NATSClient(config, logger=self._logger)
+        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self.subscriber_alert, consumer_name="sub-alert")
         self._event_bus.set_producer(self._publisher)
         self._template_renderer = TemplateRenderer(config.ALERTS_CONFIG)

@@ -12,9 +12,9 @@ from application.actions.post_note import PostNote
 from application.actions.open_ticket import OpenTicket
 from application.actions.resolve_ticket import ResolveTicket
 from igz.packages.nats.clients import NATSClient
-from igz.packages.nats.storage_managers import RedisStorageManager
 from application.actions.post_ticket import PostTicket
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.eventbus.action import ActionWrapper
 
 from igz.packages.Logger.logger_client import LoggerClient
@@ -34,21 +34,19 @@ class Container:
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
-        self._publisher = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._publisher = NATSClient(config, logger=self._logger)
 
-        self._subscriber_tickets = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_details = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_affecting_details_by_edge_serial = NATSClient(config, self._message_storage_manager,
-                                                                       logger=self._logger)
-        self._subscriber_outage_details_by_edge_serial = NATSClient(config, self._message_storage_manager,
-                                                                    logger=self._logger)
-        self._subscriber_post_note = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_post_ticket = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_open_ticket = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_resolve_ticket = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_get_management_status = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._subscriber_tickets = NATSClient(config, logger=self._logger)
+        self._subscriber_details = NATSClient(config, logger=self._logger)
+        self._subscriber_affecting_details_by_edge_serial = NATSClient(config, logger=self._logger)
+        self._subscriber_outage_details_by_edge_serial = NATSClient(config, logger=self._logger)
+        self._subscriber_post_note = NATSClient(config, logger=self._logger)
+        self._subscriber_post_ticket = NATSClient(config, logger=self._logger)
+        self._subscriber_open_ticket = NATSClient(config, logger=self._logger)
+        self._subscriber_resolve_ticket = NATSClient(config, logger=self._logger)
+        self._subscriber_get_management_status = NATSClient(config, logger=self._logger)
 
-        self._event_bus = EventBus(logger=self._logger)
+        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
         self._event_bus.add_consumer(self._subscriber_details, consumer_name="ticket_details")
         self._event_bus.add_consumer(

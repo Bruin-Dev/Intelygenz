@@ -16,7 +16,7 @@ from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.action import ActionWrapper
 from igz.packages.eventbus.eventbus import EventBus
-from igz.packages.nats.storage_managers import RedisStorageManager
+from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 
@@ -42,14 +42,14 @@ class Container:
                                                                self._scheduler)
 
         self._publisher = NATSClient(config, logger=self._logger)
-        self._subscriber_list = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_stat = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_alert = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_event_alert = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_enterprise_name_list = NATSClient(config, self._message_storage_manager, logger=self._logger)
-        self._subscriber_id_by_serial = NATSClient(config, self._message_storage_manager, logger=self._logger)
+        self._subscriber_list = NATSClient(config, logger=self._logger)
+        self._subscriber_stat = NATSClient(config, logger=self._logger)
+        self._subscriber_alert = NATSClient(config, logger=self._logger)
+        self._subscriber_event_alert = NATSClient(config, logger=self._logger)
+        self._subscriber_enterprise_name_list = NATSClient(config, logger=self._logger)
+        self._subscriber_id_by_serial = NATSClient(config, logger=self._logger)
 
-        self._event_bus = EventBus(logger=self._logger)
+        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_list, consumer_name="list")
         self._event_bus.add_consumer(self._subscriber_stat, consumer_name="status")
         self._event_bus.add_consumer(self._subscriber_alert, consumer_name="alert")

@@ -6,9 +6,9 @@ from unittest.mock import patch
 from pytest import raises
 from shortuuid import uuid
 
-from igz.packages.nats import storage_managers as storage_managers_module
-from igz.packages.nats.storage_managers import MessageStorageManager
-from igz.packages.nats.storage_managers import RedisStorageManager
+from igz.packages.eventbus import storage_managers as storage_managers_module
+from igz.packages.eventbus.storage_managers import MessageStorageManager
+from igz.packages.eventbus.storage_managers import RedisStorageManager
 
 
 class TestAbstractMessageStorageManager:

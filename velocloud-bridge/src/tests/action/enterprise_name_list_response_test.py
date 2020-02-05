@@ -13,7 +13,8 @@ class TestEnterpriseNameListResponse:
 
     def instance_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(logger=mock_logger)
+        storage_manager = Mock()
+        test_bus = EventBus(storage_manager, logger=mock_logger)
         velocloud_repo = Mock()
         actions = EnterpriseNameList(test_bus, velocloud_repo, mock_logger)
         assert actions._logger is mock_logger
@@ -24,7 +25,8 @@ class TestEnterpriseNameListResponse:
     @pytest.mark.asyncio
     async def report_enterprise_name_list_response_test(self):
         mock_logger = Mock()
-        test_bus = EventBus(logger=mock_logger)
+        storage_manager = Mock()
+        test_bus = EventBus(storage_manager, logger=mock_logger)
         test_bus.publish_message = CoroutineMock()
         velocloud_repo = Mock()
         actions = EnterpriseNameList(test_bus, velocloud_repo, mock_logger)
