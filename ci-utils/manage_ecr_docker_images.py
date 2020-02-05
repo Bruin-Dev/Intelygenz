@@ -44,8 +44,8 @@ class DeleteOlderDockerImage:
         data_newer_image = {}
         if newer_image['has_images']:
             logging.info(f"The newer docker image for the ECR repository {repository_name_p} and environment "
-                         f"{ENVIRONMENT} has imageDigest {newer_image['imageDigest']} and was pushed "
-                         f"at {newer_image['imagePushedAt']}")
+                         f"{ENVIRONMENT} has imageDigest {newer_image['imageDigest']}, tags {newer_image['imageTags']}"
+                         f" and was pushed at {newer_image['imagePushedAt']}")
             for tag in newer_image['imageTags']:
                 if 'latest' not in tag.split('-'):
                     data_newer_image['tag'] = tag

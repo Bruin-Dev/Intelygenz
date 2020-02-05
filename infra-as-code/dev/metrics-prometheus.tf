@@ -132,6 +132,7 @@ resource "aws_lb_target_group" "automation-metrics-grafana" {
     Name = local.automation-metrics-grafana-target_group-tag-Name
     Environment = var.ENVIRONMENT
   }
+  
 }
 
 resource "aws_ecs_service" "automation-metrics-prometheus" {

@@ -111,6 +111,11 @@ resource "aws_lb" "automation-alb" {
     Name = var.ENVIRONMENT
     Environment = var.ENVIRONMENT
   }
+
+  timeouts {
+    create = "15m"
+    update = "15m"
+  }
 }
 
 resource "aws_lb_listener" "front_end" {

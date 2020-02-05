@@ -22,7 +22,7 @@ def get_users():
     u_roles = os.environ.get("GRAFANA_USER_ROLE").split(',')
     u_companies = os.environ.get("GRAFANA_USER_COMPANY").split(',')
 
-    if not len(u_mails) == len(u_logins) == len(u_names) == len(u_passwords):
+    if not len(u_mails) == len(u_logins) == len(u_names) == len(u_passwords) == len(u_roles) == len(u_companies):
         print('User variables have different length; aborting process.')
         exit(1)
 
@@ -191,6 +191,7 @@ def get_folder_uid(user_company, main_folder=False):
             for f in folders:
                 if f["title"] == folder_name:
                     return f["uid"]
+            print(f'There isn\'t a specific folder for the company {user_company}')
             return None
         else:
             raise Exception
