@@ -4,28 +4,31 @@ In this folder are stored a series of scripts implemented in bash and python use
 
 **Table of content:**
 
-+ [Task_healtcheck](#task_healthcheck)
-    - [Description](#task_healthcheck_description)
-    - [Usage](#task_healthcheck_usage)
-+ [Grafana_users_creation](#grafana_users_creation)
-    - [Description](#grafana_users_creation_description)
-    - [Usage](#grafana_users_creation_usae)
-+ [Script utils delete_environments_aws_resources](#script_utils-delete_environments_aws_resources)
-    - [Description](#delete_environments_aws_resources_description)
-    - [Usage](#delete_environments_aws_resources_usage)
-    - [Commands](#delete_environments_aws_resources_commands)
-+ [Aws_nuke_conf_generator](#aws_nuke_conf_generator)
-    - [Description](#aws_nuke_conf_generator_description)
-    - [Usage](#aws_nuke_conf_generator_usage)
-+ [Script check_ecs_resources](#script_check_ecs_resources)
-    - [Description](#check_ecs_resources_description)
-    - [Usage](#check_ecs_resources_usage)
+- [Task_healtcheck](#task_healthcheck)
+  - [Description](#task_healthcheck_description)
+  - [Usage](#task_healthcheck_usage)
+- [Grafana_users_creation](#grafana_users_creation)
+  - [Description](#grafana_users_creation_description)
+  - [Usage](#grafana_users_creation_usae)
+- [Script utils delete_environments_aws_resources](#script_utils-delete_environments_aws_resources)
+  - [Description](#delete_environments_aws_resources_description)
+  - [Usage](#delete_environments_aws_resources_usage)
+  - [Commands](#delete_environments_aws_resources_commands)
+- [Aws_nuke_conf_generator](#aws_nuke_conf_generator)
+  - [Description](#aws_nuke_conf_generator_description)
+  - [Usage](#aws_nuke_conf_generator_usage)
+- [Script check_ecs_resources](#script_check_ecs_resources)
+  - [Description](#check_ecs_resources_description)
+  - [Usage](#check_ecs_resources_usage)
+- [Script manage_ecr_docker_images](#manage_ecr_docker_images)
+  - [Description](#manage_ecr_docker_images_description)
+  - [Usage](#manage_ecr_docker_images_usage)
 
 ## Script task_healtheck<a name="task_healthcheck"></a>
 
 ### Description <a name="task_healthcheck_description"></a>
 
-This [script](./task_healthcheck.sh) has been implemented in *Python*, it is used to check if for a service of a given ECS cluster the last task definition relative to a service provided as parameter is being executed, as well as if it has a `HEALTHY` state.
+This [script](./task_healthcheck.sh) has been implemented in *Python*, it is used to check if for a service of a given ECS cluster the given task definition relative to a service provided as parameters is being executed, as well as if it has a `HEALTHY` state.
 
 ### Usage <a name="task_healthcheck_usage"></a>
 
@@ -46,10 +49,18 @@ In order to use this [script](./task_healthcheck.py) it is necessary to perform 
 
     >It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment.
 
-Once the previous steps have been carried out, it is possible to use this [script](./task_healthcheck.sh) providing as parameter `-t` the name of the service on which you want to perform the check performed by the script explained above, as shown below:
+Once the previous steps have been carried out, it is possible to use this [script](./task_healthcheck.sh) providing as parameter `-t` the name of the service on which you want to perform the check performed by the script explained above, as well as the ARN of the task definition of the service defined in a JSON file as the following parameter, as shown below:
 
 ```sh
-$ python3 ci-utils/task_healthcheck.py -t <service_name>
+$ python3 ci-utils/task_healthcheck.py -t <service_name> <task_definition_arn_definition.json>
+```
+
+The file <task_definition_arn_definition.json> must comply with the following format:
+
+```json
+{
+    "taskDefinitionArn": "<task_definition_arn>"
+}
 ```
 
 ## Script grafana_users_creation<a name="grafana_users_creation"></a>
@@ -216,3 +227,57 @@ Once the previous steps have been carried out, it is possible to use this [scrip
 ```sh
 $ python3 ci-utils/check_ecs_resources.py
 ```
+
+## Script manage_ecr_docker_images <a name="manage_ecr_docker_images"></a>
+
+### Description <a name="manage_ecr_docker_images_description"></a>
+
+This [script](./manage_ecr_docker_images_description.py) has been implemented in *Python*, it can be used for any of the following functions:
+
+* Get the oldest image from an ECR repository provided as a parameter in a given environment. In case that repository has more than two images in the provided environment, it will perform the deletion of the oldest image according to the ECR upload date.
+
+* Obtain the most up-to-date image of all the ECR repositories used in the project by saving each one of them in a JSON file for each of the repositories with the following format
+
+   ```json
+   {
+       "tag": <ecr_repository_tag>
+   }
+   ```
+
+### Usage <a name="manage_ecr_docker_images_usage"></a>
+
+In order to use this [script](./manage_ecr_docker_images_description.py) it is necessary to perform the following steps previously:
+
+* Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION` in the following way:
+
+    ```sh
+    $ export AWS_ACCESS_KEY_ID=<access_key>
+    $ export AWS_SECRET_ACCESS_KEY=<secret_key>
+    $ export AWS_DEFAULT_REGION=<aws_region>
+    ```
+
+    > The default AWS region used in the project is us-east-1
+
+* Declare the variable `ENVIRONMENT_VAR` with the value of the environment on which you it is going to to used in the following way:
+
+    ```sh
+    $ export ENVIRONMENT_VAR=<environment_name>
+    ```
+
+    >It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment.
+
+Once the previous steps have been carried out, it is possible to use this [script](./check_ecs_resources.py) as shown below:
+
+* To get the oldest image from a particular repository, provide the name of the repository using the -t option, as follows:
+
+    ```sh
+    $ python3 ci-utils/manage_ecr_docker_images.py -r <ecr_repository_name>
+    ```
+
+    >The nomenclature of the images in the project is `automation-<microservice_name>`
+
+* To obtain the most up-to-date image for the environment provided in each of the repositories, simply indicate the -g option, as shown below:
+
+   ```sh
+   $ python3 ci-utils/manage_ecr_docker_images.py -g
+   ```

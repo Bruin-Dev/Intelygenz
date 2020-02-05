@@ -126,6 +126,7 @@ data "template_file" "automation-t7-bridge-task-definition-output" {
 }
 
 resource "null_resource" "generate_t7_bridge_task_definition_output_json" {
+  count = var.t7_bridge_desired_tasks > 0 ? 1 : 0
   provisioner "local-exec" {
     command = format("cat <<\"EOF\" > \"%s\"\n%s\nEOF", var.t7-bridge-task-definition-json, data.template_file.automation-t7-bridge-task-definition-output.rendered)
   }

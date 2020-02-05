@@ -95,6 +95,8 @@ data "template_file" "automation-notifier-task-definition-output" {
 }
 
 resource "null_resource" "generate_notifier_task_definition_output_json" {
+  count = var.notifier_desired_tasks > 0 ? 1 : 0
+
   provisioner "local-exec" {
     command = format("cat <<\"EOF\" > \"%s\"\n%s\nEOF", var.notifier-task-definition-json, data.template_file.automation-notifier-task-definition-output.rendered)
   }

@@ -61,7 +61,6 @@ class TaskHealthcheck:
 
     def _get_major_tasks(self, task_name_param, task_definition_arn_p):
         logging.info(f"Searching task with name {task_name_param} in the cluster ECS {ENVIRONMENT}")
-        # time.sleep(30)
         tasks_arn_with_task_name = self._get_tasks_arn_for_clusters(task_name_param, task_definition_arn_p)
         if not tasks_arn_with_task_name:
             logging.error(f"No task running for specified task {task_name_param}")

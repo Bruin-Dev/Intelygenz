@@ -119,6 +119,7 @@ resource "aws_ecs_service" "automation-bruin-bridge" {
 }
 
 data "template_file" "automation-bruin-bridge-task-definition-output" {
+
   template = file("${path.module}/task-definitions/task_definition_output_template.json")
 
   vars = {
@@ -127,6 +128,7 @@ data "template_file" "automation-bruin-bridge-task-definition-output" {
 }
 
 resource "null_resource" "generate_bruin_bridge_task_definition_output_json" {
+  count = var.bruin_bridge_desired_tasks > 0 ? 1 : 0
   provisioner "local-exec" {
     command = format("cat <<\"EOF\" > \"%s\"\n%s\nEOF", var.bruin-bridge-task-definition-json, data.template_file.automation-bruin-bridge-task-definition-output.rendered)
   }
