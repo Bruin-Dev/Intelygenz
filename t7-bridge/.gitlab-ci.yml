@@ -23,18 +23,3 @@ t7-bridge-build:
     MODULE_NAME: t7-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
   extends: .build_app_image
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
-    changes:
-      - t7-bridge/**/*
-      - infra-as-code/dev/task-definitionst/t7_bridge.json
-      - infra-as-code/dev/t7-bridge.tf
-      - infra-as-code/dev/t7-bridge.tf
-      - nats-server/**/*
-  except:
-    changes:
-      - t7-bridge/*.md
-      - nats-server/*.md

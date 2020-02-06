@@ -15,20 +15,6 @@ grafana-build:
     - python3 ci-utils/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/grafana/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
-      - nats-server/**/*
-  except:
-    changes:
-      - metrics-dashboard/grafana/*.md
-      - nats-server/*.md
 
 prometheus-build:
   stage: build
@@ -44,20 +30,6 @@ prometheus-build:
     - python3 ci-utils/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/prometheus/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
-      - nats-server/**/*
-  except:
-    changes:
-      - metrics-dashboard/prometheus/*.md
-      - nats-server/*.md
 
 thanos-sidecar-build:
   stage: build
@@ -68,20 +40,6 @@ thanos-sidecar-build:
     GRPC_PORT: 10091
     HTTP_PORT: 10902
   extends: .build_thanos_with_config_bucket
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/thanos/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
-      - nats-server/**/*
-  except:
-    changes:
-      - metrics-dashboard/thanos/*.md
-      - nats-server/*.md
 
 thanos-store-gateway-build:
   stage: build
@@ -92,20 +50,6 @@ thanos-store-gateway-build:
     GRPC_PORT: 10901
     HTTP_PORT: 19191
   extends: .build_thanos_with_config_bucket
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/thanos/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
-      - nats-server/**/*
-  except:
-    changes:
-      - metrics-dashboard/thanos/*.md
-      - nats-server/*.md
 
 thanos-querier-build:
   stage: build
@@ -125,17 +69,3 @@ thanos-querier-build:
     - source ci-utils/environment_assign.sh
     - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
-  only:
-    refs:
-      - master
-      - /^*dev/feature/.*$/
-      - /^*dev/fix/.*$/
-    changes:
-      - metrics-dashboard/thanos/**/*
-      - infra-as-code/dev/task-definitions/prometheus.json
-      - infra-as-code/dev/metrics-prometheus.tf
-      - nats-server/**/*
-  except:
-    changes:
-      - metrics-dashboard/thanos/*.md
-      - nats-server/*.md

@@ -18,6 +18,10 @@
     - source ci-utils/environment_assign.sh
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+  only:
+    - master
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
   tags:
     - kubernetes
 
@@ -41,5 +45,9 @@
     - source ci-utils/environment_assign.sh
     - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+  only:
+    - master
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
   tags:
     - kubernetes
