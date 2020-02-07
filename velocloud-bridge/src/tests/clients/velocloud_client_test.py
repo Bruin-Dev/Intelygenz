@@ -193,7 +193,7 @@ class TestVelocloudClient:
             with pytest.raises(Exception):
                 header = velocloud_client._create_headers_by_host(host, username, password)
                 mock_post.assert_called()
-                assert header == expected_header
+                assert header == ''
 
     def _get_header_by_host_test(self):
         configs = Mock()
