@@ -99,10 +99,8 @@ class VelocloudClient:
         return host_client
 
     def get_edge_information(self, edge):
-
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'],
-                                     min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']))
+        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
+               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
         def get_edge_information():
             target_host_client = self._get_header_by_host(edge["host"])
             edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"]}
@@ -110,10 +108,39 @@ class VelocloudClient:
                                      json=edgeids,
                                      headers=target_host_client['headers'],
                                      verify=self._config['verify_ssl'])
+            return_response = dict.fromkeys(["body", "status_code"])
+            print(response)
+            if response.status_code in range(200, 300):
+                self._logger.info(f'Host: {edge["host"]} logged in')
+                return_response["body"] = self._json_return(response.json())
+                return_response["status_code"] = response.status_code
+                return return_response
+            if response.status_code == 400:
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.error(f"Got error from Velocloud {response.json()}")
+            if response.status_code == 401:
+                self._logger.info(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
+                self.instantiate_and_connect_clients()
+                return_response["body"] = f"Maximum retries while relogin"
+                return_response["status_code"] = 401
+                raise Exception(return_response)
+            if response.status_code == 404:
+                self._logger.error(f"Got 404 from Velocloud, resource not found")
+                return_response["body"] = f"Resource not found"
+                return_response["status_code"] = 404
+            if response.status_code in range(500, 513):
+                self._logger.error(f"Got {response.status_code}. Retrying...")
+                return_response["body"] = f"Got internal error from Velocloud"
+                return_response["status_code"] = 500
+                raise Exception(return_response)
 
-            return self._json_return(response.json())
+            return return_response
 
-        return get_edge_information()
+        try:
+            return get_edge_information()
+        except Exception as e:
+            return e.args[0]
 
     def get_link_information(self, edge, interval):
 
