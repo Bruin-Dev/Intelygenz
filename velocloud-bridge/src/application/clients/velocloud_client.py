@@ -22,24 +22,35 @@ class VelocloudClient:
 
         client = dict()
         client['host'] = host
-        client['headers'] = self._create_headers_by_host(host, user, password)
-
-        return client
+        headers = self._create_headers_by_host(host, user, password)
+        if headers["status_code"] in range(200, 300):
+            self._logger.info("Connection succesful")
+            client['headers'] = headers["body"]
+            return client
+        else:
+            self._logger.info(f'Connection wans\'t possible, error {headers["status_code"]}')
+            self._logger.info(headers['body'])
+            return
 
     def _create_headers_by_host(self, host, user, password):
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'],
                                      min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']))
+               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
         def _create_headers_by_host():
             credentials = {
                 "username": user,
                 "password": password
             }
-            response = requests.post(f"https://{host}/portal/rest/login/operatorLogin",
-                                     headers={"Content-Type": "application/json"},
-                                     json=credentials,
-                                     allow_redirects=False,
-                                     verify=self._config['verify_ssl'])
+            post = {
+                'headers': {"Content-Type": "application/json"},
+                'json': credentials,
+                'allow_redirects': False,
+                'verify': self._config['verify_ssl']
+            }
+            uri = f"https://{host}/portal/rest/login/operatorLogin"
+            response = requests.post(uri, **post)
+            return_response = dict.fromkeys(["body", "status_code"])
+
             if response.status_code in range(200, 300):
                 self._logger.info(f'Host: {host} logged in')
                 session_index = response.headers['Set-Cookie'].find("velocloud.session")
@@ -52,12 +63,34 @@ class VelocloudClient:
                     "Content-Type": "application/json-patch+json",
                     "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
                 }
+                return_response["body"] = headers
+                return_response["status_code"] = response.status_code
+                return return_response
+            if response.status_code == 400:
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.error(f"Got error from Velocloud {response.json()}")
+            if response.status_code == 401:
+                self._logger.info(f"Got 401 from Bruin, re-login with credentials and retrying get headers")
+                return_response["body"] = f"Maximum retries while relogin"
+                return_response["status_code"] = 401
+                raise Exception(return_response)
+            if response.status_code == 404:
+                self._logger.error(f"Got 404 from Velocloud, resource not found")
+                return_response["body"] = f"Resource not found"
+                return_response["status_code"] = 404
+            if response.status_code in range(500, 513):
+                self._logger.error(f"Got {response.status_code}. Retrying...")
+                return_response["body"] = f"Got internal error from Velocloud"
+                return_response["status_code"] = 500
+                raise Exception(return_response)
 
-                return headers
-            else:
-                raise Exception
+            return return_response
 
-        return _create_headers_by_host()
+        try:
+            return _create_headers_by_host()
+        except Exception as e:
+            return e.args[0]
 
     def _get_header_by_host(self, host):
         host_client = [client
