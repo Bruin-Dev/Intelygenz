@@ -32,20 +32,38 @@ class TestVelocloudRepository:
         edges_by_ent = vr.get_all_enterprises_edges_with_host(msg)
         assert edges_by_ent == [edges[0], edges[2]]
 
-    def get_edge_information_test(self):
+    def get_edge_information_OK_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        test_velocloud_client.get_edge_information = Mock()
+        mock_response = {"status_code": 200, "body": "info"}
+        test_velocloud_client.get_edge_information = Mock(return_value=mock_response)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         edge_info = vr.get_edge_information(edge)
+
         assert test_velocloud_client.get_edge_information.called
+        assert edge_info == mock_response["body"]
+
+    def get_edge_information_KO_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        mock_response = {"status_code": 500, "body": "error"}
+        test_velocloud_client.get_edge_information = Mock(return_value=mock_response)
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        edge_info = vr.get_edge_information(edge)
+
+        assert test_velocloud_client.get_edge_information.called
+        assert edge_info is None
 
     def get_link_information_ok_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        link_status = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}]
+        link_status = {
+            "body": [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}],
+            "status_code": 200
+        }
         link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
         link_info_return = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'},
                              "serviceGroups": ["PUBLIC_WIRED"]}]
@@ -62,7 +80,10 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        link_status = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}]
+        link_status = {
+            "body": [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}],
+            "status_code": 200
+        }
         link_service_group = [{"linkId": "143", "serviceGroups": ["PUBLIC_WIRED"]}]
         link_info_return = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}]
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
@@ -70,6 +91,7 @@ class TestVelocloudRepository:
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         interval = "some Interval"
         link_info = vr.get_link_information(edge, interval)
+
         assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
         assert link_info == link_info_return
@@ -78,7 +100,8 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        link_status = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'STABLE'}}]
+        link_status = {"body": [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'STABLE'}}],
+                       "status_code": 200}
         link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
         link_info_return = [{"link_data": "STABLE", "linkId": "143", 'link': {'backupState': 'UNCONFIGURED'},
                              "serviceGroups": ["PUBLIC_WIRED"]}]
@@ -95,31 +118,33 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        link_status = None
+        link_status = {"body": None,
+                       "status_code": 200}
         link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         interval = "some Interval"
         link_info = vr.get_link_information(edge, interval)
+
         assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
         assert link_info is None
 
-    def get_link_information_ko_exception_link_test(self):
+    def get_link_information_ko_link_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        link_status = Exception()
-        link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
+        link_status = {
+            "body": "Got internal error from Velocloud",
+            "status_code": 500
+        }
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
-        test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         interval = "some Interval"
         link_info = vr.get_link_information(edge, interval)
-        assert test_velocloud_client.get_link_information.called
-        assert test_velocloud_client.get_link_service_groups_information.called
-        assert link_info == link_status
+
+        assert link_info is None
 
     def get_enterprise_information_test(self):
         mock_logger = Mock()
