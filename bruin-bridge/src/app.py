@@ -28,10 +28,12 @@ class Container:
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("Bruin bridge starting...")
 
+        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._redis_client.ping()
+
         self._bruin_client = BruinClient(self._logger, config)
         self._bruin_repository = BruinRepository(self._logger, self._bruin_client)
 
-        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
         self._publisher = NATSClient(config, logger=self._logger)

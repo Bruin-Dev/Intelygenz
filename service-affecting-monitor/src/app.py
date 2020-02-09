@@ -18,10 +18,13 @@ class Container:
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
         self._logger.info(f'Service Affecting Monitor starting in {config.MONITOR_CONFIG["environment"]}...')
+
+        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._redis_client.ping()
+
         self._scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self._server = QuartServer(config)
 
-        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
         self._publisher = NATSClient(config, logger=self._logger)

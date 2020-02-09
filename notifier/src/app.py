@@ -23,6 +23,8 @@ class Container:
         self._logger.info("Notifier starting...")
 
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._redis_client.ping()
+
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
         self._subscriber_email = NATSClient(config, logger=self._logger)

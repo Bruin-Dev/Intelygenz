@@ -52,8 +52,10 @@ class RPCAction:
 class Container:
 
     def __init__(self):
-        self._my_scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
         self.redis_connection = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self.redis_connection.ping()
+
+        self._my_scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
 
         self.message_storage_manager = RedisStorageManager(logger, self.redis_connection)
 

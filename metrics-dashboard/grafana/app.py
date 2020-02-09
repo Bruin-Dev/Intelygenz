@@ -20,6 +20,8 @@ class Container:
 
     def __init__(self):
         self.redis_connection = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self.redis_connection.ping()
+
         self.message_storage_manager = RedisStorageManager(logger, self.redis_connection)
         self.client1 = NATSClient(config, logger=logger)
         self.event_bus = EventBus(self.message_storage_manager, logger=logger)

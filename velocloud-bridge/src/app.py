@@ -10,7 +10,7 @@ from application.repositories.ids_by_serial_repository import IDsBySerialReposit
 from application.repositories.velocloud_repository import VelocloudRepository
 from application.repositories.edge_dict_repository import EdgeDictRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from redis import Redis
+import redis
 
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
@@ -26,12 +26,15 @@ class Container:
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("Velocloud bridge starting...")
+
+        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._redis_client.ping()
+
         self._scheduler = AsyncIOScheduler(timezone=config.VELOCLOUD_CONFIG['timezone'])
 
         self._velocloud_client = VelocloudClient(config, self._logger)
         self._velocloud_repository = VelocloudRepository(config, self._logger, self._velocloud_client)
 
-        self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
         self._edge_dict_repository = EdgeDictRepository(self._redis_client, self._logger,
                                                         'VELOCLOUD_BRIDGE_IDS_BY_SERIAL')

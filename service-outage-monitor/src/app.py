@@ -2,7 +2,7 @@ import asyncio
 from application.actions.service_outage_detector import ServiceOutageDetector
 from application.repositories.service_outage_report_template_renderer import ServiceOutageReportTemplateRenderer
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from redis import Redis
+import redis
 
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
@@ -22,7 +22,8 @@ class Container:
         self._logger.info(f'Service Outage Monitor starting in {config.MONITOR_CONFIG["environment"]}...')
 
         # REDIS
-        self._redis_client = Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._redis_client.ping()
 
         # SCHEDULER
         self._scheduler = AsyncIOScheduler(timezone=config.MONITOR_CONFIG['timezone'])

@@ -19,10 +19,13 @@ class Container:
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("T7 bridge starting...")
+
+        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._redis_client.ping()
+
         self._t7_client = T7Client(self._logger, config)
         self._t7_repository = T7Repository(self._logger, self._t7_client)
 
-        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
         self._publisher = NATSClient(config, logger=self._logger)
