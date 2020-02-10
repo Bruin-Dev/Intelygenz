@@ -127,8 +127,13 @@ class ServiceOutageDetector:
                         continue
                     else:
                         self._logger.info(f'Management status for {edge_identifier} seems active.')
-                except ValueError:
+                except ValueError as e:
                     self._logger.info(f"Management status is unknown for {edge_identifier}")
+                    slack_message = {'request_id': uuid(),
+                                     'message': f"Managament status is unknown for {edge_identifier}\r\n"
+                                     f"ValueError: {e}"
+                                     }
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                     continue
 
                 outage_happened = self._outage_utils.is_there_an_outage(edge_status)
@@ -353,8 +358,14 @@ class ServiceOutageDetector:
                     if self._outage_utils.is_there_an_outage(edge_status):
                         await self._start_quarantine_job(edge_full_id)
                         self._add_edge_to_quarantine(edge_full_id, edge_status)
-                except ValueError:
+                except ValueError as e:
                     self._logger.info(f"Managament status is unknown for {edge_identifier}")
+                    slack_message = {'request_id': uuid(),
+                                     'message': f"Managament status is unknown for {edge_identifier}\r\n"
+                                     f"ValueError: {e}"
+                                     }
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+
             except Exception:
                 self._logger.exception(f"Unexpected error occurred while running the detection process for edge "
                                        f"{edge_identifier}. Skipping...")
