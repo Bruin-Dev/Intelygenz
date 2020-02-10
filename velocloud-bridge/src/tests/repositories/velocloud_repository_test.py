@@ -206,7 +206,8 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
 
-        events = {"data": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]}
+        events = {"body": {"data": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]},
+                  "status_code": 200}
         filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
 
         test_velocloud_client.get_all_edge_events = Mock(return_value=events)
@@ -223,7 +224,8 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
 
-        events = {"data": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]}
+        events = {"body": {"data": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]},
+                  "status_code": 200}
         filter_events_status_list = None
 
         test_velocloud_client.get_all_edge_events = Mock(return_value=events)
@@ -234,6 +236,24 @@ class TestVelocloudRepository:
         edge_events = vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
         assert test_velocloud_client.get_all_edge_events.called
         assert edge_events == [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]
+
+    def get_all_edge_events_none_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+
+        events = {"body": None,
+                  "status_code": 500}
+        filter_events_status_list = None
+
+        test_velocloud_client.get_all_edge_events = Mock(return_value=events)
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        start = datetime.now() - timedelta(hours=24)
+        end = datetime.now()
+        limit = None
+        edge_events = vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
+        assert test_velocloud_client.get_all_edge_events.called
+        assert edge_events is None
 
     def connect_to_all_servers_test(self):
         mock_logger = Mock()

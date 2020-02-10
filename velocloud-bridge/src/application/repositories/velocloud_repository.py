@@ -78,7 +78,13 @@ class VelocloudRepository:
     def get_all_edge_events(self, edge, start, end, limit, filter_events_status_list):
         self._logger.info(f'Getting events from edge:{edge["edge_id"]} from time:{start} to time:{end}')
 
-        full_events = self._velocloud_client.get_all_edge_events(edge, start, end, limit)
+        response = self._velocloud_client.get_all_edge_events(edge, start, end, limit)
+
+        if response["status_code"] not in range(200, 300):
+            return
+
+        full_events = response["body"]
+
         if filter_events_status_list is None:
             return full_events["data"]
         else:
