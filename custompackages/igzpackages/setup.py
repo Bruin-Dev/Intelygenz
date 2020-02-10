@@ -21,7 +21,8 @@ REQUIRES = [
     "behave == 1.2.6",
     "tenacity == 5.0.4",
     "shortuuid==0.5.0",
-    "multidict==4.6.1"
+    "multidict==4.6.1",
+    "redis==3.3.11",
 ]
 setup(
     name=NAME,
