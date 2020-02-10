@@ -39,6 +39,7 @@ services:
       - base-microservice/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 9100:9100
   # ============================
@@ -51,6 +52,7 @@ services:
       - sites-monitor/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 5000:5000
       - 9110:9090
@@ -64,6 +66,7 @@ services:
       - velocloud-bridge/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 5001:5000
       - 9120:9090
@@ -77,6 +80,7 @@ services:
       - notifier/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 5002:5000
 
@@ -89,6 +93,7 @@ services:
       - last-contact-report/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 5003:5000
 
@@ -102,6 +107,7 @@ services:
       - service-outage-triage/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 5005:5000
 
@@ -114,6 +120,7 @@ services:
       - bruin-bridge/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 5006:5000
 
@@ -126,6 +133,7 @@ services:
       - service-outage-monitor/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 5007:5000
 
@@ -138,6 +146,7 @@ services:
       - service-affecting-monitor/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 5008:5000
 
@@ -150,6 +159,7 @@ services:
       - t7-bridge/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 5009:5000
 
@@ -170,6 +180,8 @@ services:
       - metrics-dashboard/grafana/config/env
     depends_on:
       - prometheus
+      - "nats-server"
+      - redis
     restart: unless-stopped
     ports:
       - 3000:3000
