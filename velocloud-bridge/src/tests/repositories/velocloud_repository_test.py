@@ -92,7 +92,7 @@ class TestVelocloudRepository:
             "status_code": 200
         }
         link_info_return = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'},
-                            "serviceGroups": ["PUBLIC_WIRED"]}]
+                             "serviceGroups": ["PUBLIC_WIRED"]}]
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
@@ -169,11 +169,37 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        test_velocloud_client.get_enterprise_information = Mock(return_value={'name': 'test'})
+        enterprise_info = {"body": {"name": "test"},
+                           "status_code": 200}
+        test_velocloud_client.get_enterprise_information = Mock(return_value=enterprise_info)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         enterprise_info = vr.get_enterprise_information(edge)
         assert test_velocloud_client.get_enterprise_information.called
         assert enterprise_info == 'test'
+
+    def get_enterprise_information_ko_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        enterprise_info = {"body": None,
+                           "status_code": 500}
+        test_velocloud_client.get_enterprise_information = Mock(return_value=enterprise_info)
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        enterprise_info = vr.get_enterprise_information(edge)
+        assert test_velocloud_client.get_enterprise_information.called
+        assert enterprise_info is None
+
+    def get_enterprise_information_without_name_key_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        enterprise_info = {"body": None,
+                           "status_code": 200}
+        test_velocloud_client.get_enterprise_information = Mock(return_value=enterprise_info)
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        enterprise_info = vr.get_enterprise_information(edge)
+        assert test_velocloud_client.get_enterprise_information.called
+        assert enterprise_info is None
 
     def get_all_edge_events_filter_test(self):
         mock_logger = Mock()
