@@ -1,4 +1,44 @@
-#Packages
+# Packages
+## event-bus
+### event_bus (class)
+The event bus is the entity responsible for the management of subscriptions and the addition of consumers and the corresponding
+producer in each microservice. This is the piece between NATS and producers/consumers as it also is in charge of creating and
+destroying the connections of these entities with the NATS server.
+
+It also forwards messages published (either via `publish()` or `rpc_request()`) to the proper `NATSClient` instance.
+If the message is larger than 1MB, it will be stored within an external storage service as NATS is not able to forward
+such kind of messages.
+
+Every single consumer (a `NATSClient` instace), when registered through the event bus, is patched in runtime in order to make the callback
+registered to _react_ to an event (i.e., a message published to a topic that the consumer is subscribed to) capable to recover
+messages larger than 1MB that were stored into an external storage service (see [storage_managers](#storage_managers) section).
+
+This artifact acts as a singleton at microservice level; that is, there should be just one event bus per microservice. Developers
+should use it to manage `NATSClient` instances instead of using these instances directly.
+
+### storage_managers
+Storage managers are artifacts that allow storing and retrieving messages by using an external storage service. It is an abstraction
+specified by the abstract base class `MessageStorageManager` that can be subclassed to support additional storage services. To subclass
+it, both `store_message()` and `recover_message()` methods must be implemented.
+
+These pieces are intended to be injected into `EventBus` instances. The idea behind this artifact is that messages stored with
+`store_message()` should be easily recoverable with `recover_message()`.
+
+At the time of this writing, **Redis** is the only external storage service supported (through the concrete class `RedisStorageManager`).
+
+#### Redis storage manager
+When a message is published through the `EventBus::publish()` or `EventBus::rpc_request()` methods, it is previously stored into Redis
+with `store_message()` and a message with the following structure is delivered instead:
+```
+{
+    "token": "jUh2DjpY8Mke3evRtdqFej",  # This is just an UUID
+    "is_stored": true
+}
+```
+
+In case it needs to be recovered from Redis, the message above is passed to `receive_message()` and then the original message is finally
+recovered.
+
 ## nats
 ### clients
 This is a wrapper of the official [NATS client for python](https://github.com/nats-io/asyncio-nats)
@@ -6,15 +46,10 @@ It expects to receive a config object that has something like [this one](../../b
 There are a lot of possible configurations due different scenarios. 
 All non-critical parameters for a base configuration are set to a default.
 
-The parameters `start_at` and `durable_name` are quite important.
-- `start_at= 'first'` will consume the full queue, despite of ack status of the messages.
-- `start_at= 'new_only'` will only consume the no-ack messages in the queue.
-- `durable_name` is used to keep the track of the consumed messages for a clientID. Clients with durable names that reconnect to NATS should continue their subscription drain in the point they left.
-
 This object accepts multiple subscriptions. 
 
 The callback passed in the `subscribe` will be called with the decoded JSON that represents an event.
-If the callback fails, the message wont be ACKed.
+
 ## quart
 ### api
 `Quart` is an async version of `Flask`. Its used to check the status of the microservice its 
