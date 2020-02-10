@@ -64,7 +64,10 @@ class TestVelocloudRepository:
             "body": [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}],
             "status_code": 200
         }
-        link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
+        link_service_group = {
+            "body": [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}],
+            "status_code": 200
+        }
         link_info_return = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'},
                              "serviceGroups": ["PUBLIC_WIRED"]}]
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
@@ -84,8 +87,12 @@ class TestVelocloudRepository:
             "body": [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}],
             "status_code": 200
         }
-        link_service_group = [{"linkId": "143", "serviceGroups": ["PUBLIC_WIRED"]}]
-        link_info_return = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}]
+        link_service_group = {
+            "body": [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}],
+            "status_code": 200
+        }
+        link_info_return = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'},
+                            "serviceGroups": ["PUBLIC_WIRED"]}]
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
@@ -94,6 +101,8 @@ class TestVelocloudRepository:
 
         assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
+        print(link_info)
+        print(link_info_return)
         assert link_info == link_info_return
 
     def get_link_information_ko_different_backup_test(self):
@@ -102,7 +111,10 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         link_status = {"body": [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'STABLE'}}],
                        "status_code": 200}
-        link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
+        link_service_group = {
+            "body": [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}],
+            "status_code": 200
+        }
         link_info_return = [{"link_data": "STABLE", "linkId": "143", 'link': {'backupState': 'UNCONFIGURED'},
                              "serviceGroups": ["PUBLIC_WIRED"]}]
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
@@ -120,7 +132,10 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         link_status = {"body": None,
                        "status_code": 200}
-        link_service_group = [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}]
+        link_service_group = {
+            "body": [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}],
+            "status_code": 200
+        }
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
@@ -137,6 +152,10 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         link_status = {
             "body": "Got internal error from Velocloud",
+            "status_code": 500
+        }
+        link_service_group = {
+            "body": None,
             "status_code": 500
         }
         test_velocloud_client.get_link_information = Mock(return_value=link_status)

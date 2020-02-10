@@ -44,7 +44,14 @@ class VelocloudRepository:
             return
 
         links = response["body"]
-        link_service_group = self._velocloud_client.get_link_service_groups_information(edge, interval)
+        response_link_service_group = self._velocloud_client.get_link_service_groups_information(edge, interval)
+
+        if response_link_service_group["status_code"] not in range(200, 300):
+            self._logger.info(f"Error {response_link_service_group['status_code'], response['body']}")
+            return
+
+        link_service_group = response_link_service_group["body"]
+
         if links is not None:
             for link in links:
                 for link_service in link_service_group:
