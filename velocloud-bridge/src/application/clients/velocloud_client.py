@@ -330,7 +330,7 @@ class VelocloudClient:
                 continue
             for enterprise in res["body"]["enterprises"]:
                 edges_by_enterprise = self.get_all_enterprises_edges_by_id(client, enterprise["id"])
-                for edge in edges_by_enterprise:
+                for edge in edges_by_enterprise["body"]:
                     edges_by_enterprise_and_host.append(
                         {"host": client["host"],
                          "enterprise_id": enterprise["id"],
@@ -357,7 +357,7 @@ class VelocloudClient:
                 for enterprise in res["body"]["enterprises"]
             ]
             for enterprise_info in await asyncio.gather(*futures):
-                for edge in enterprise_info:
+                for edge in enterprise_info["body"]:
                     # serialNumber is the serial number of the current edge
                     # haSerialNumber is the serial number of the backup edge of the current edge
                     if edge["haSerialNumber"] is not None:
@@ -424,25 +424,55 @@ class VelocloudClient:
             return e.args[0]
 
     def get_all_enterprises_edges_by_id(self, client, enterprise_id):
-
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'],
-                                     min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']))
+        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
+               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
         def get_all_enterprises_edges_by_id():
             body = {"enterpriseId": enterprise_id}
             response = requests.post(f"https://{client['host']}/portal/rest/enterprise/getEnterpriseEdges",
                                      json=body,
                                      headers=client['headers'],
                                      verify=False)
-            return self._json_return(response.json())
+            return_response = dict.fromkeys(["body", "status_code"])
+            if response.status_code in range(200, 300):
+                self._logger.info(f'Host: {client["host"]} logged in')
+                return_response["body"] = self._json_return(response.json())
+                return_response["status_code"] = response.status_code
+                return return_response
+            if response.status_code == 400:
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.error(f"Got error from Velocloud {response.json()}")
+            if response.status_code == 401:
+                self._logger.info(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
+                self.instantiate_and_connect_clients()
+                return_response["body"] = f"Maximum retries while relogin"
+                return_response["status_code"] = 401
+                raise Exception(return_response)
+            if response.status_code == 404:
+                self._logger.error(f"Got 404 from Velocloud, resource not found")
+                return_response["body"] = f"Resource not found"
+                return_response["status_code"] = 404
+            if response.status_code in range(500, 513):
+                self._logger.error(f"Got {response.status_code}. Retrying...")
+                return_response["body"] = f"Got internal error from Velocloud"
+                return_response["status_code"] = 500
+                raise Exception(return_response)
 
-        return get_all_enterprises_edges_by_id()
+            return return_response
+
+        try:
+            return get_all_enterprises_edges_by_id()
+        except Exception as e:
+            return e.args[0]
 
     def get_all_enterprise_names(self):
         enterprise_names = list()
         for client in self._clients:
             res = self.get_monitoring_aggregates(client)
-            for enterprise in res["enterprises"]:
+            if res["status_code"] not in range(200, 300):
+                self._logger.info(f"status code: {res['status_code']}, error {res['body']}")
+                continue
+            for enterprise in res["body"]["enterprises"]:
                 enterprise_names.append({
                     "enterprise_name": enterprise["name"]
                 })

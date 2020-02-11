@@ -806,7 +806,10 @@ class TestVelocloudClient:
                 "status_code": 500
             }
         ]
-        enterprise_edges_by_id_return = [{'id': 25}]
+        enterprise_edges_by_id_return = {
+            "body": [{'id': 25}],
+            "status_code": 200
+        }
 
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(side_effect=monitoring_aggregates_return)
@@ -828,9 +831,9 @@ class TestVelocloudClient:
 
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
         monitoring_aggregates_return = {
-                "body": None,
-                "status_code": 500
-            }
+            "body": None,
+            "status_code": 500
+        }
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
         velocloud_client._clients = clients
@@ -850,8 +853,10 @@ class TestVelocloudClient:
             "body": {'enterprises': [{'id': 1}]},
             "status_code": 200
         }
-        enterprise_edges_by_id_return = [{'id': 25, 'enterpriseId': 1, 'serialNumber': 'VC0123',
-                                          'haSerialNumber': 'VC0234'}]
+        enterprise_edges_by_id_return = {
+            "body": [{'id': 25, 'enterpriseId': 1, 'serialNumber': 'VC0123',
+                      'haSerialNumber': 'VC0234'}],
+            "status_code": 200}
 
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
@@ -899,8 +904,11 @@ class TestVelocloudClient:
             "body": {'enterprises': [{'id': 1}]},
             "status_code": 200
         }
-        enterprise_edges_by_id_return = [{'id': 25, 'enterpriseId': 1, 'serialNumber': 'VC0123',
-                                          'haSerialNumber': None}]
+        enterprise_edges_by_id_return = {
+            "body": [{'id': 25, 'enterpriseId': 1, 'serialNumber': 'VC0123',
+                      'haSerialNumber': None}],
+            "status_code": 200
+        }
 
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
@@ -1081,6 +1089,7 @@ class TestVelocloudClient:
 
         response_mock = Mock()
         response_mock.json = Mock(return_value=enterprise_edge_return)
+        response_mock.status_code = 200
 
         with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
             velocloud_client = VelocloudClient(configs, logger)
@@ -1092,9 +1101,9 @@ class TestVelocloudClient:
             assert mock_post.call_args[1]["json"] == {'enterpriseId': enterprise_id}
             assert clients['host'] in mock_post.call_args[0][0]
             assert mock_post.call_args[1]['headers'] == clients['headers']
-            assert list_of_enterprise_edges == enterprise_edge_return
+            assert list_of_enterprise_edges["body"] == enterprise_edge_return
 
-    def get_all_enterprises_edges_by_id_ko_test(self):
+    def get_all_enterprises_edges_by_id_error_400_test(self):
         configs = testconfig
         logger = Mock()
 
@@ -1104,22 +1113,78 @@ class TestVelocloudClient:
 
         response_mock = Mock()
         response_mock.json = Mock(return_value=enterprise_edge_return)
+        response_mock.status_code = 400
 
         with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
             velocloud_client = VelocloudClient(configs, logger)
-            velocloud_client._json_return = Mock(return_value=response_mock.json())
+            list_of_enterprise_edges = velocloud_client.get_all_enterprises_edges_by_id(clients, enterprise_id)
+            mock_post.assert_called_once()
 
-            with raises(Exception):
-                list_of_enterprise_edges = velocloud_client.get_all_enterprises_edges_by_id(clients, enterprise_id)
-                mock_post.assert_called()
-                assert list_of_enterprise_edges == ''
+            assert list_of_enterprise_edges == {"body": enterprise_edge_return, "status_code": 400}
+
+    def get_all_enterprises_edges_by_id_error_401_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        clients = {'host': 'some_host2', 'headers': 'some header dict'}
+        enterprise_id = 42
+        enterprise_edge_return = "some list of edges"
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=enterprise_edge_return)
+        response_mock.status_code = 401
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock):
+            velocloud_client = VelocloudClient(configs, logger)
+            list_of_enterprise_edges = velocloud_client.get_all_enterprises_edges_by_id(clients, enterprise_id)
+
+            assert list_of_enterprise_edges == {"body": 'Maximum retries while relogin', "status_code": 401}
+
+    def get_all_enterprises_edges_by_id_error_404_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        clients = {'host': 'some_host2', 'headers': 'some header dict'}
+        enterprise_id = 42
+        enterprise_edge_return = "some list of edges"
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=enterprise_edge_return)
+        response_mock.status_code = 404
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock):
+            velocloud_client = VelocloudClient(configs, logger)
+            list_of_enterprise_edges = velocloud_client.get_all_enterprises_edges_by_id(clients, enterprise_id)
+
+            assert list_of_enterprise_edges == {"body": "Resource not found", "status_code": 404}
+
+    def get_all_enterprises_edges_by_id_error_500_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        clients = {'host': 'some_host2', 'headers': 'some header dict'}
+        enterprise_id = 42
+        enterprise_edge_return = "some list of edges"
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=enterprise_edge_return)
+        response_mock.status_code = 500
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock):
+            velocloud_client = VelocloudClient(configs, logger)
+            list_of_enterprise_edges = velocloud_client.get_all_enterprises_edges_by_id(clients, enterprise_id)
+
+            assert list_of_enterprise_edges == {"body": 'Got internal error from Velocloud', "status_code": 500}
 
     def get_all_enterprise_names_test(self):
         configs = Mock()
         logger = Mock()
 
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
-        monitoring_aggregates_return = {'enterprises': [{'id': 1, 'name': 'A name'}]}
+        monitoring_aggregates_return = {
+            "body": {'enterprises': [{'id': 1, 'name': 'A name'}]},
+            "status_code": 200
+        }
 
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
@@ -1129,6 +1194,25 @@ class TestVelocloudClient:
 
         velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
         assert enterprise_names == [{'enterprise_name': 'A name'}]
+
+    def get_all_enterprise_names_with_empty_list_test(self):
+        configs = Mock()
+        logger = Mock()
+
+        clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
+        monitoring_aggregates_return = {
+            "body": None,
+            "status_code": 500
+        }
+
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
+        velocloud_client._clients = clients
+
+        enterprise_names = velocloud_client.get_all_enterprise_names()
+
+        velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
+        assert enterprise_names == []
 
     def json_return_ok_test(self):
         configs = testconfig
