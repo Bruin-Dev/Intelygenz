@@ -35,7 +35,6 @@ class ServiceOutageTriage:
     async def _poll_tickets(self):
         self._logger.info("Requesting tickets from Bruin")
         all_tickets = {"tickets": []}
-        request_tickets_message = {}
         for company in self._config.TRIAGE_CONFIG["bruin_company_ids"]:
             try:
                 self._logger.info(f'Requesting tickets for Bruin company {company}')
@@ -317,7 +316,7 @@ class ServiceOutageTriage:
         return edge_triage_str
 
     async def _auto_resolve_tickets(self, ticket_id, detail_id):
-        if ticket_id["serial"] != "VC05400002265":
+        if ticket_id["serial"] not in self._config.TRIAGE_CONFIG["autoresolve_serials_whitelist"]:
             return
         self._logger.info(f'Checking autoresolve for ticket id {json.dumps(ticket_id, indent=2, default=str)}')
 

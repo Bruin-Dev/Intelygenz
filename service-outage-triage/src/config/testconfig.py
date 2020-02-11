@@ -20,6 +20,7 @@ TRIAGE_CONFIG = {
     'timezone': 'US/Eastern',
     'monitoring_seconds': 120,
     'event_limit': 15,
+    'autoresolve_serials_whitelist': ["VC05400002265"],
     'bruin_company_ids': [85940],
     'id_by_serial': {
         "VC05200026138": {

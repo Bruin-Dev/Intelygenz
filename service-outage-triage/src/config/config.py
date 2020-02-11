@@ -27,6 +27,13 @@ TRIAGE_CONFIG = {
     'timezone': 'US/Eastern',
     'monitoring_seconds': 120,
     'event_limit': 15,
+    'autoresolve_serials_whitelist': [
+        # Mettel test edge
+        "VC05400002265",
+        # Marwood edges
+        "VC05400001257",
+        "VCE08400001789"
+    ],
     'bruin_company_ids': [
         # Titan America
         85940,
