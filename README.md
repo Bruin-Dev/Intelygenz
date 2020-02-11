@@ -21,6 +21,7 @@
 
 # Table of Contents
 
+
 - [Project structure](#project-structure)
   - [Naming conventions](#naming-conventions)
 - [Technologies used](#technologies-used)
