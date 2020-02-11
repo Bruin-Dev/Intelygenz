@@ -41,14 +41,14 @@ class VelocloudRepository:
 
         if response["status_code"] not in range(200, 300):
             self._logger.info(f"Error {response['status_code'], response['body']}")
-            return
+            return link_status
 
         links = response["body"]
         response_link_service_group = self._velocloud_client.get_link_service_groups_information(edge, interval)
 
         if response_link_service_group["status_code"] not in range(200, 300):
             self._logger.info(f"Error {response_link_service_group['status_code'], response['body']}")
-            return
+            return link_status
 
         link_service_group = response_link_service_group["body"]
 
@@ -62,12 +62,16 @@ class VelocloudRepository:
                     link_status.append(link)
 
         elif links is None:
-            link_status = None
+            return link_status
 
         return link_status
 
     def get_enterprise_information(self, edge):
         enterprise_info = self._velocloud_client.get_enterprise_information(edge)
+        if enterprise_info["status_code"] not in range(200, 300):
+            self._logger.info(f"Error {enterprise_info['status_code']}, error: {enterprise_info['body']}")
+            return
+
         body = enterprise_info["body"]
         name = body.get("name") if isinstance(body, dict) else None
         if enterprise_info['status_code'] in range(200, 300) and name:
@@ -94,7 +98,11 @@ class VelocloudRepository:
     def get_all_enterprise_names(self, msg):
         self._logger.info('Getting all enterprise names')
         enterprises = self._velocloud_client.get_all_enterprise_names()
-        enterprise_names = [e["enterprise_name"] for e in enterprises]
+        if enterprises["status_code"] not in range(200, 300):
+            self._logger.info(f"Error {enterprises['status_code']}, error: {enterprises['body']}")
+            return
+
+        enterprise_names = [e["enterprise_name"] for e in enterprises["body"]]
 
         if len(msg['filter']) > 0:
             enterprise_names = [

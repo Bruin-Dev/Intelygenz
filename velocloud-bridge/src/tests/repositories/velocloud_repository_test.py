@@ -142,9 +142,25 @@ class TestVelocloudRepository:
         interval = "some Interval"
         link_info = vr.get_link_information(edge, interval)
 
-        assert test_velocloud_client.get_link_information.called
-        assert test_velocloud_client.get_link_service_groups_information.called
-        assert link_info is None
+        assert link_info == []
+
+    def get_link_information_ko_none_link_service_groups_information_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        link_status = {"body": None,
+                       "status_code": 200}
+        link_service_group = {
+            "body": None,
+            "status_code": 500
+        }
+        test_velocloud_client.get_link_information = Mock(return_value=link_status)
+        test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
+        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
+        interval = "some Interval"
+        link_info = vr.get_link_information(edge, interval)
+
+        assert link_info == []
 
     def get_link_information_ko_link_test(self):
         mock_logger = Mock()
@@ -163,7 +179,7 @@ class TestVelocloudRepository:
         interval = "some Interval"
         link_info = vr.get_link_information(edge, interval)
 
-        assert link_info is None
+        assert link_info == []
 
     def get_enterprise_information_test(self):
         mock_logger = Mock()
@@ -263,15 +279,35 @@ class TestVelocloudRepository:
         vr.connect_to_all_servers()
         assert test_velocloud_client.instantiate_and_connect_clients.called
 
-    def get_all_enterprise_names_test(self):
+    def get_all_enterprise_names_with_filter_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        enterprises = [{"enterprise_name": "The Name"}]
+        enterprises = {
+            "body": [{"enterprise_name": "The Name"}],
+            "status_code": 200
+        }
         msg = {"request_id": "123", "filter": []}
         test_velocloud_client.get_all_enterprise_names = Mock(
             return_value=enterprises
         )
         enterprise_names = vr.get_all_enterprise_names(msg)
+
         assert test_velocloud_client.get_all_enterprise_names.called
         assert enterprise_names == ["The Name"]
+
+    def get_all_enterprise_names_none_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        enterprises = {
+            "body": None,
+            "status_code": 500
+        }
+        msg = {"request_id": "123", "filter": []}
+        test_velocloud_client.get_all_enterprise_names = Mock(
+            return_value=enterprises
+        )
+        enterprise_names = vr.get_all_enterprise_names(msg)
+
+        assert enterprise_names is None
