@@ -17,13 +17,64 @@ class TestT7Repository:
     def get_prediction_test(self):
         logger = Mock()
         ticket_id = 123
-        expected_predictions = ['prediction-1', 'prediction-2', 'prediction-3']
+        raw_predictions = {
+            "body": {
+                "assets": [
+                    {
+                        "assetId": "some_serial_number",
+                        "predictions": [
+                            {
+                                "name": "Some action",
+                                "probability": 0.9484384655952454
+                            },
+                        ]
+                    }
+                ],
+                "requestId": "e676150a-73b9-412b-8207-ac2a3bbc9cbc"
+            },
+            "status_code": 200
+        }
+
+        expected_predictions = {
+            "body":
+                [
+                    {
+                        "assetId": "some_serial_number",
+                        "predictions": [
+                            {
+                                "name": "Some action",
+                                "probability": 0.9484384655952454
+                            },
+                        ]
+                    }
+                ],
+            "status_code": 200
+        }
 
         t7_client = Mock()
-        t7_client.get_prediction = Mock(return_value=expected_predictions)
+        t7_client.get_prediction = Mock(return_value=raw_predictions)
 
         t7_repository = T7Repository(logger, t7_client)
         predictions = t7_repository.get_prediction(ticket_id=ticket_id)
 
         t7_repository._t7_client.get_prediction.assert_called_once_with(ticket_id)
         assert predictions == expected_predictions
+
+    def get_prediction_not_200_test(self):
+        logger = Mock()
+        ticket_id = 123
+        raw_predictions = {
+            "body": {
+                "Some error ocurred"
+            },
+            "status_code": 500
+        }
+
+        t7_client = Mock()
+        t7_client.get_prediction = Mock(return_value=raw_predictions)
+
+        t7_repository = T7Repository(logger, t7_client)
+        predictions = t7_repository.get_prediction(ticket_id=ticket_id)
+
+        t7_repository._t7_client.get_prediction.assert_called_once_with(ticket_id)
+        assert predictions == raw_predictions
