@@ -26,7 +26,6 @@ MONITOR_CONFIG = {
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'device_by_id': contact_info.devices_by_id,
     'environment': os.environ["CURRENT_ENVIRONMENT"],
-    'jitter_whitelist': jitter_device_whitelist.jitter_whitelist,
     'timezone': 'US/Eastern',
     "latency_wireless": 120,
     "latency_wired": 50,

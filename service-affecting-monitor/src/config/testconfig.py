@@ -16,7 +16,6 @@ NATS_CONFIG = {
 MONITOR_CONFIG = {
     'recipient': "some.recipient@email.com",
     'environment': "dev",
-    'jitter_whitelist': ["VC05200028729"],
     'timezone': 'US/Eastern',
     'monitoring_seconds': 600,
     "latency_wireless": 120,

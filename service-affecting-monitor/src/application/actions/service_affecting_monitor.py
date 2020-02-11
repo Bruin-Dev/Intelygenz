@@ -89,8 +89,6 @@ class ServiceAffectingMonitor:
                                            'Packet Loss', self._config.MONITOR_CONFIG["packet_loss_wired"])
 
     async def _jitter_check(self, device, edge_status, link):
-        if device["serial"] not in self._config.MONITOR_CONFIG["jitter_whitelist"]:
-            return
         if link['bestJitterMsRx'] > self._config.MONITOR_CONFIG["jitter"] or \
            link['bestJitterMsTx'] > self._config.MONITOR_CONFIG["jitter"]:
             await self._notify_trouble(device, edge_status, link, link['bestJitterMsRx'], link['bestJitterMsTx'],
