@@ -39,14 +39,14 @@ QUART_CONFIG = {
     'port': 5000
 }
 
-OUTAGE_CONTACTS = [
-    {
+OUTAGE_CONTACTS = {
+    "VC0123456789": [{
         "email": "dummy@dummy.com",
         "phone": "123-456-7890",
         "name": "John Doe",
         "type": "ticket"
-    },
-]
+    }],
+}
 
 MONITORING_EDGES = {
     'VC0123456789': {

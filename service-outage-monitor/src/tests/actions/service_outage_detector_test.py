@@ -2108,9 +2108,9 @@ class TestServiceOutageMonitor:
         edges_statuses = [edge_1_status, edge_2_status, edge_3_status]
 
         is_there_an_outage_side_effect = [
-            False,   # Edge 1
-            False,   # Edge 2
-            False,   # Edge 3
+            False,  # Edge 1
+            False,  # Edge 2
+            False,  # Edge 3
         ]
 
         event_bus = Mock()
@@ -2232,9 +2232,9 @@ class TestServiceOutageMonitor:
         edges_statuses = [edge_1_status, edge_2_status, edge_3_status]
 
         is_there_an_outage_side_effect = [
-            True,   # Edge 1
+            True,  # Edge 1
             False,  # Edge 2
-            True,   # Edge 3
+            True,  # Edge 3
         ]
 
         event_bus = Mock()
@@ -2256,7 +2256,11 @@ class TestServiceOutageMonitor:
         service_outage_detector._get_edges_for_monitoring = Mock(return_value=edges_for_monitoring)
         service_outage_detector._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses)
 
-        await service_outage_detector._outage_monitoring_process()
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(service_outage_detector_module, 'datetime', new=datetime_mock):
+            await service_outage_detector._outage_monitoring_process()
 
         service_outage_detector._get_edges_for_monitoring.assert_called_once()
         service_outage_detector._get_edge_status_by_id.assert_has_awaits([
@@ -2265,18 +2269,22 @@ class TestServiceOutageMonitor:
         outage_utils.is_there_an_outage.assert_has_calls([
             call(edge_1_status), call(edge_2_status), call(edge_3_status)
         ])
+        run_date = current_time + timedelta(
+            seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
         scheduler.add_job.assert_has_calls([
             call(
-                service_outage_detector._recheck_edge_for_ticket_creation, 'interval',
-                seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'],
+                service_outage_detector._recheck_edge_for_ticket_creation, 'date',
+                run_date=run_date,
                 replace_existing=False,
+                misfire_grace_time=9999,
                 id=f'_ticket_creation_recheck_{json.dumps(edge_1_full_id)}',
                 kwargs={'edge_full_id': edge_1_full_id}
             ),
             call(
-                service_outage_detector._recheck_edge_for_ticket_creation, 'interval',
-                seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'],
+                service_outage_detector._recheck_edge_for_ticket_creation, 'date',
+                run_date=run_date,
                 replace_existing=False,
+                misfire_grace_time=9999,
                 id=f'_ticket_creation_recheck_{json.dumps(edge_3_full_id)}',
                 kwargs={'edge_full_id': edge_3_full_id}
             ),
@@ -3117,7 +3125,7 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def generate_outage_ticket_test(self):
         bruin_client_id = 12345
-        serial_number = 'VC1234567'
+        serial_number = 'VC0123456789'
         edge_status = {
             'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
             'links': [
@@ -3148,5 +3156,5 @@ class TestServiceOutageMonitor:
             "services": [
                 {"serviceNumber": serial_number}
             ],
-            "contacts": config.OUTAGE_CONTACTS
+            "contacts": config.OUTAGE_CONTACTS[f'{serial_number}']
         }

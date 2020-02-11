@@ -101,11 +101,18 @@ class ServiceOutageDetector:
                 }}
             management_status = await self._event_bus.rpc_request("bruin.inventory.management.status",
                                                                   management_request, timeout=30)
+
+            if not management_status["management_status"]:
+                self._logger.error(f'Could not retrieve management status for {serial_number}')
+                self._logger.error(f'Full message: {json.dumps(management_status, indent=2, default=str)}')
+                self._logger.error(f'Considering it as inactive')
+                continue
+
             self._logger.info(f'Got management status {management_status} for {serial_number}')
-            if management_status["management_status"] not in "Pending, Active – Silver Monitoring, " \
-                                                             "Active – Gold Monitoring, Active – Platinum Monitoring":
+            if management_status["management_status"] \
+                    not in "Pending, Active – Gold Monitoring, Active – Platinum Monitoring":
                 self._logger.info(f'Management status is not active for {serial_number}. Skipping process')
-                return
+                continue
             self._logger.info(f'Management status for {serial_number} seems active. Monitoring..')
 
             outage_happened = self._outage_utils.is_there_an_outage(edge_status)
@@ -116,9 +123,14 @@ class ServiceOutageDetector:
                 )
 
                 try:
-                    self._scheduler.add_job(self._recheck_edge_for_ticket_creation, 'interval',
-                                            seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'],
+                    tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+                    current_datetime = datetime.now(tz)
+                    run_date = current_datetime + timedelta(
+                        seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
+                    self._scheduler.add_job(self._recheck_edge_for_ticket_creation, 'date',
+                                            run_date=run_date,
                                             replace_existing=False,
+                                            misfire_grace_time=9999,
                                             id=f'_ticket_creation_recheck_{json.dumps(edge_full_id)}',
                                             kwargs={'edge_full_id': edge_full_id})
                     self._logger.info(f'[outage-monitoring] {edge_identifier} successfully scheduled for re-check.')
@@ -277,7 +289,7 @@ class ServiceOutageDetector:
             "services": [
                 {"serviceNumber": serial_number}
             ],
-            "contacts": self._config.OUTAGE_CONTACTS,
+            "contacts": self._config.OUTAGE_CONTACTS[f'{serial_number}'],
         }
 
     async def start_service_outage_reporter_job(self, exec_on_start=False):
