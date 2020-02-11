@@ -9,6 +9,8 @@ from pytest import raises
 from application.clients import velocloud_client as velocloud_client_module
 from config import testconfig
 
+from collections import defaultdict
+
 
 class TestVelocloudClient:
 
@@ -794,11 +796,20 @@ class TestVelocloudClient:
         logger = Mock()
 
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
-        monitoring_aggregates_return = {'enterprises': [{'id': 1}]}
+        monitoring_aggregates_return = [
+            {
+                "body": {'enterprises': [{'id': 1}]},
+                "status_code": 200
+            },
+            {
+                "body": None,
+                "status_code": 500
+            }
+        ]
         enterprise_edges_by_id_return = [{'id': 25}]
 
         velocloud_client = VelocloudClient(configs, logger)
-        velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
+        velocloud_client.get_monitoring_aggregates = Mock(side_effect=monitoring_aggregates_return)
         velocloud_client.get_all_enterprises_edges_by_id = Mock(return_value=enterprise_edges_by_id_return)
         velocloud_client._clients = clients
 
@@ -809,6 +820,25 @@ class TestVelocloudClient:
         assert edge_ids == [{'host': clients[0]['host'],
                              'enterprise_id': 1,
                              'edge_id': 25}]
+        velocloud_client.get_all_enterprises_edges_by_id.assert_called_once()
+
+    def get_all_enterprise_edges_with_host_with_empty_list_result_test(self):
+        configs = Mock()
+        logger = Mock()
+
+        clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
+        monitoring_aggregates_return = {
+                "body": None,
+                "status_code": 500
+            }
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
+        velocloud_client._clients = clients
+
+        edge_ids = velocloud_client.get_all_enterprises_edges_with_host()
+
+        velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
+        assert edge_ids == []
 
     @pytest.mark.asyncio
     async def get_all_enterprise_edges_with_host_by_serial_haserial_test(self):
@@ -816,7 +846,10 @@ class TestVelocloudClient:
         logger = Mock()
 
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
-        monitoring_aggregates_return = {'enterprises': [{'id': 1}]}
+        monitoring_aggregates_return = {
+            "body": {'enterprises': [{'id': 1}]},
+            "status_code": 200
+        }
         enterprise_edges_by_id_return = [{'id': 25, 'enterpriseId': 1, 'serialNumber': 'VC0123',
                                           'haSerialNumber': 'VC0234'}]
 
@@ -838,12 +871,34 @@ class TestVelocloudClient:
                                       }
 
     @pytest.mark.asyncio
+    async def get_all_enterprise_edges_with_host_by_serial_haserial_with_epty_list_test(self):
+        configs = Mock()
+        logger = Mock()
+
+        clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
+        monitoring_aggregates_return = {
+            "body": None,
+            "status_code": 500
+        }
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
+        velocloud_client._clients = clients
+
+        edge_ids_by_serial = await velocloud_client.get_all_enterprises_edges_with_host_by_serial()
+
+        print(edge_ids_by_serial)
+        assert edge_ids_by_serial == defaultdict(list)
+
+    @pytest.mark.asyncio
     async def get_all_enterprise_edges_with_host_by_serial_none_haSerial_test(self):
         configs = Mock()
         logger = Mock()
 
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
-        monitoring_aggregates_return = {'enterprises': [{'id': 1}]}
+        monitoring_aggregates_return = {
+            "body": {'enterprises': [{'id': 1}]},
+            "status_code": 200
+        }
         enterprise_edges_by_id_return = [{'id': 25, 'enterpriseId': 1, 'serialNumber': 'VC0123',
                                           'haSerialNumber': None}]
 
@@ -867,8 +922,16 @@ class TestVelocloudClient:
 
         clients = [{'host': 'some_host2', 'headers': 'some header dict'},
                    {'host': 'some_host', 'headers': 'some header dict'}]
-        monitoring_aggregates_return = [{"edgeCount": 25}, {"edgeCount": 24}]
+        monitoring_aggregates1 = {
+            "body": {"edgeCount": 25},
+            "status_code": 200
+        }
+        monitoring_aggregates2 = {
+            "body": {"edgeCount": 24},
+            "status_code": 200
+        }
 
+        monitoring_aggregates_return = [monitoring_aggregates1, monitoring_aggregates2]
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(side_effect=monitoring_aggregates_return)
         velocloud_client._clients = clients
@@ -880,6 +943,33 @@ class TestVelocloudClient:
             call(clients[1])])
         assert sum_of_edges == 49
 
+    def get_all_hosts_count_0_result_test(self):
+        configs = Mock()
+        logger = Mock()
+
+        clients = [{'host': 'some_host2', 'headers': 'some header dict'},
+                   {'host': 'some_host', 'headers': 'some header dict'}]
+        monitoring_aggregates1 = {
+            "body": None,
+            "status_code": 500
+        }
+        monitoring_aggregates2 = {
+            "body": None,
+            "status_code": 500
+        }
+
+        monitoring_aggregates_return = [monitoring_aggregates1, monitoring_aggregates2]
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client.get_monitoring_aggregates = Mock(side_effect=monitoring_aggregates_return)
+        velocloud_client._clients = clients
+
+        sum_of_edges = velocloud_client.get_all_hosts_edge_count()
+
+        velocloud_client.get_monitoring_aggregates.assert_has_calls([
+            call(clients[0]),
+            call(clients[1])])
+        assert sum_of_edges == 0
+
     def get_monitoring_aggregates_test(self):
         configs = testconfig
         logger = Mock()
@@ -889,6 +979,7 @@ class TestVelocloudClient:
 
         response_mock = Mock()
         response_mock.json = Mock(return_value=monitoring_aggregates_return)
+        response_mock.status_code = 200
 
         with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
             velocloud_client = VelocloudClient(configs, logger)
@@ -899,26 +990,86 @@ class TestVelocloudClient:
             mock_post.assert_called_once()
             assert clients['host'] in mock_post.call_args[0][0]
             assert mock_post.call_args[1]['headers'] == clients['headers']
-            assert monitoring_aggregates == monitoring_aggregates_return
+            assert monitoring_aggregates["body"] == monitoring_aggregates_return
 
-    def get_monitoring_aggregates_ko_test(self):
+    def get_monitoring_aggregates_error_400_test(self):
         configs = testconfig
         logger = Mock()
 
         clients = {'host': 'some_host2', 'headers': 'some header dict'}
-        monitoring_aggregates_return = {'enterprises': [{'id': 1}]}
+        monitoring_aggregates_return = "some value"
 
         response_mock = Mock()
         response_mock.json = Mock(return_value=monitoring_aggregates_return)
+        response_mock.status_code = 400
 
         with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
             velocloud_client = VelocloudClient(configs, logger)
             velocloud_client._json_return = Mock(return_value=response_mock.json())
 
-            with raises(Exception):
-                monitoring_aggregates = velocloud_client.get_monitoring_aggregates(clients)
-                mock_post.assert_called()
-                assert monitoring_aggregates == ''
+            monitoring_aggregates = velocloud_client.get_monitoring_aggregates(clients)
+
+            mock_post.assert_called_once()
+
+            assert monitoring_aggregates == {"body": monitoring_aggregates_return,
+                                             "status_code": 400}
+
+    def get_monitoring_aggregates_error_401_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        clients = {'host': 'some_host2', 'headers': 'some header dict'}
+        monitoring_aggregates_return = "some value"
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=monitoring_aggregates_return)
+        response_mock.status_code = 401
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client._json_return = Mock(return_value=response_mock.json())
+
+            monitoring_aggregates = velocloud_client.get_monitoring_aggregates(clients)
+
+            assert monitoring_aggregates == {"body": "Maximum retries while relogin", "status_code": 401}
+
+    def get_monitoring_aggregates_error_404_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        clients = {'host': 'some_host2', 'headers': 'some header dict'}
+        monitoring_aggregates_return = "some value"
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=monitoring_aggregates_return)
+        response_mock.status_code = 404
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client._json_return = Mock(return_value=response_mock.json())
+
+            monitoring_aggregates = velocloud_client.get_monitoring_aggregates(clients)
+
+            assert monitoring_aggregates == {"body": "Resource not found", "status_code": 404}
+
+    def get_monitoring_aggregates_error_500_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        clients = {'host': 'some_host2', 'headers': 'some header dict'}
+        monitoring_aggregates_return = "some value"
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=monitoring_aggregates_return)
+        response_mock.status_code = 500
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client._json_return = Mock(return_value=response_mock.json())
+
+            monitoring_aggregates = velocloud_client.get_monitoring_aggregates(clients)
+
+            assert monitoring_aggregates == {"body": "Got internal error from Velocloud", "status_code": 500}
 
     def get_all_enterprises_edges_by_id_test(self):
         configs = testconfig
