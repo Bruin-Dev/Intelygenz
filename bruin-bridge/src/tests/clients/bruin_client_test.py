@@ -449,3 +449,34 @@ class TestBruinClient:
                 params=pascalized_filter,
                 verify=False
             )
+
+    def get_management_status_with_connection_error_test(self):
+        logger = Mock()
+
+        filters = {
+            "client_id": 9994,
+            "service_number": "VC05400009999"
+        }
+        pascalized_filter = {
+            "ClientId": 9994,
+            "ServiceNumber": "VC05400009999"
+        }
+
+        message = {
+            "body": "Error in the the request to the API",
+            "status_code": 503}
+
+        with patch.object(bruin_client_module.requests, 'get', side_effect=ConnectionError):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            result = bruin_client.get_management_status(filters)
+            bruin_client_module.requests.get.assert_called_with(
+                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
+                headers=bruin_client._get_request_headers(),
+                params=pascalized_filter,
+                verify=False
+            )
+
+            print(result)
+            assert result == message

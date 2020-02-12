@@ -54,6 +54,10 @@ class GetManagementStatus:
             response["error_message"] = f"Authentication error in bruin API."
             print(response)  # Remove
             self._logger.error(f'Error trying to authenticate against bruin API: {management_status["body"]}')
+        elif management_status["status_code"] == 503:
+            response["status"] = 503
+            response["error_message"] = management_status["body"]
+            self._logger.info(management_status["body"])
         elif management_status["status_code"] in range(500, 513):
             response["status"] = 500
             response["error_message"] = f"Internal server error from bruin API"

@@ -228,3 +228,38 @@ class TestGetManagementStatus:
         await get_management_status.get_management_status(event_bus_request)
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
         assert logger.error.called
+
+    @pytest.mark.asyncio
+    async def get_management_status_503_in_response_from_bruin_test(self):
+        logger = Mock()
+        logger.info = Mock()
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        bruin_repository = Mock()
+
+        management_status = {
+            "body": "Error in the the request to the API",
+            "status_code": 503
+        }
+        bruin_repository.get_management_status = Mock(return_value=management_status)
+
+        event_bus_request = {
+            "request_id": 19,
+            "filters": {
+                "client_id": 12345,
+                "status": "A",
+                "service_number": "VC9876"
+            },
+            "response_topic": "some.topic"
+        }
+
+        event_bus_response = {
+            "request_id": 19,
+            'management_status': None,
+            'error_message': "Error in the the request to the API",
+            'status': 503
+        }
+
+        get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
+        await get_management_status.get_management_status(event_bus_request)
+        event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)

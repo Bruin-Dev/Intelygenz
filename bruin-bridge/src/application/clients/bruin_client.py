@@ -176,13 +176,18 @@ class BruinClient:
             self._logger.info(f'Getting management status for client ID: {filters["client_id"]}')
             parsed_filters = humps.pascalize(filters)
             self._logger.info(f'Filters that will be applied (parsed to PascalCase): {json.dumps(parsed_filters)}')
-
-            response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
-                                    headers=self._get_request_headers(),
-                                    params=parsed_filters,
-                                    verify=False)
-
             return_response = dict.fromkeys(["body", "status_code"])
+
+            try:
+                response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
+                                        headers=self._get_request_headers(),
+                                        params=parsed_filters,
+                                        verify=False)
+            except ConnectionError:
+                self._logger.error(f"Got error when the request to the API was called")
+                return_response["body"] = "Error in the the request to the API"
+                return_response["status_code"] = 503
+                raise Exception(return_response)
 
             if response.status_code in range(200, 300):
                 return_response["body"] = response.json()
