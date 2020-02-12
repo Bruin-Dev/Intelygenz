@@ -507,13 +507,15 @@ class ServiceOutageDetector:
                     is_reportable_edge = await self._is_reportable_edge(edge_new_status)
                 except ValueError as e:
                     self._logger.error(
-                        f'An error ocurred while trying to look up an outage ticket for edge {edge_identifier}.'
+                        f'An error ocurred while trying to look up an outage ticket for edge {edge_identifier}. '
                         f'It will not be removed from the reporting queue because its current status is unknown. '
                         f'Cause: {e}'
                     )
-                    message = f"[refresh-reporting-queue] An error ocurred while trying to look an outage ticket up " \
-                        f"for edge {edge_identifier}.It will not be removed from the reporting queue " \
+                    message = (
+                        "[refresh-reporting-queue] An error ocurred while trying to look an outage ticket up "
+                        f"for edge {edge_identifier}. It will not be removed from the reporting queue "
                         f"because its current status is unknown. Cause: {e}"
+                    )
                     slack_message = {'request_id': uuid(),
                                      'message': message}
                     await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
@@ -553,12 +555,13 @@ class ServiceOutageDetector:
             is_reportable_edge = await self._is_reportable_edge(edge_status)
         except ValueError as e:
             self._logger.error(
-                f'An error ocurred while trying to look up an outage ticket for edge {edge_identifier}. '
+                f'An error ocurred while trying to look an outage ticket up for edge {edge_identifier}. '
                 f'Skipping edge for now... Cause: {e}'
-                f'Exception: {e}'
             )
-            message = f"[process_edge_from_quarantine] An error ocurred while trying to look up an outage ticket " \
-                f"up for edge {edge_identifier}.Skipping edge for now... Cause: {e}"
+            message = (
+                f"[process-quarantine-edge] An error ocurred while trying to look an outage ticket "
+                f"up for edge {edge_identifier}. Skipping edge for now... Cause: {e}"
+            )
             slack_message = {'request_id': uuid(),
                              'message': message}
             await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
