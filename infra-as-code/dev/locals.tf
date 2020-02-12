@@ -235,7 +235,7 @@ locals {
   automation-dispatch-portal-target_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal"
 
   // automation-tnba-monitor local vars
-  automation-tnba-monitor-image = "${data.aws_ecr_repository.automation-tnba-monitor.repository_url}:${var.BUILD_NUMBER}"
+  automation-tnba-monitor-image = "${data.aws_ecr_repository.automation-tnba-monitor.repository_url}:${var.TNBA_MONITOR_BUILD_NUMBER}"
   automation-tnba-monitor-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   automation-tnba-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-tnba-monitor"
   automation-tnba-monitor-service-security_group-name = "${var.ENVIRONMENT}-tnba-monitor"

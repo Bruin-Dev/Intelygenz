@@ -105,6 +105,11 @@ variable "T7_BRIDGE_BUILD_NUMBER" {
   default = "automation-master-latest"
 }
 
+variable "TNBA_MONITOR_BUILD_NUMBER" {
+  description = "Docker build number of image for tnba-monitor microservice"
+  default = "automation-master-latest"
+}
+
 variable "VELOCLOUD_BRIDGE_BUILD_NUMBER" {
   description = "Docker build number of image for velocloud-bridge microservice"
   default = "automation-master-latest"

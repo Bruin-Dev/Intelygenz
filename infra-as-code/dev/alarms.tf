@@ -88,7 +88,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_tnba-monitor_alarm" {
   statistic                 = "Sum"
   threshold                 = local.running_task_count_service-alarm-threshold
   insufficient_data_actions = []
-  alarm_description         = "This metric monitors the number of running tasks of sites-monitor service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_description         = "This metric monitors the number of running tasks of tnba-monitor service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
   dimensions = {
     ServiceName = "${var.ENVIRONMENT}-tnba-monitor"

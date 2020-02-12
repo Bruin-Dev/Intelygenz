@@ -31,6 +31,7 @@ class DeleteOlderDockerImage:
                              'automation-service-outage-monitor',
                              'automation-sites-monitor',
                              'automation-t7-bridge',
+                             'automation-tnba-monitor',
                              'automation-velocloud-bridge']
 
     _default_route_save_repositories = '/tmp/'

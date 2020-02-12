@@ -36,5 +36,7 @@ export TF_VAR_SITES_MONITOR_BUILD_NUMBER=$(cat /tmp/automation-sites-monitor.jso
 echo "TF_VAR_SITES_MONITOR_BUILD_NUMBER is ${TF_VAR_SITES_MONITOR_BUILD_NUMBER}"
 export TF_VAR_T7_BRIDGE_BUILD_NUMBER=$(cat /tmp/automation-t7-bridge.json | jq -r .tag)
 echo "TF_VAR_T7_BRIDGE_BUILD_NUMBER is ${TF_VAR_T7_BRIDGE_BUILD_NUMBER}"
+export TF_VAR_TNBA_MONITOR_BUILD_NUMBER=$(cat /tmp/automation-tnba-monitor.json | jq -r .tag)
+echo "TF_VAR_TNBA_MONITOR_BUILD_NUMBER is ${TF_VAR_TNBA_MONITOR_BUILD_NUMBER}"
 export TF_VAR_VELOCLOUD_BRIDGE_BUILD_NUMBER=$(cat /tmp/automation-velocloud-bridge.json | jq -r .tag)
 echo "TF_VAR_VELOCLOUD_BRIDGE_BUILD_NUMBER is ${TF_VAR_VELOCLOUD_BRIDGE_BUILD_NUMBER}"
