@@ -2510,9 +2510,10 @@ class TestServiceOutageMonitor:
         outage_utils = Mock()
         outage_utils.is_there_an_outage = Mock()
         cause = "BLA BLA BLA"
-        message = f"Process << _outage_monitoring_process >> Managament status is unknown for " \
-            f"{EdgeIdentifier(**edge_full_id)}\r\n" \
+        message = (
+            f"[outage-monitoring] Management status is unknown for {EdgeIdentifier(**edge_full_id)}. "
             f"Cause: {cause}"
+        )
         slack_message = {'request_id': uuid_,
                          'message': message}
 

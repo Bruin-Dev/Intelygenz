@@ -463,7 +463,7 @@ class TestBruinClient:
         }
 
         message = {
-            "body": "Error in the the request to the API",
+            "body": "Connection error in Bruin API",
             "status_code": 503}
 
         with patch.object(bruin_client_module.requests, 'get', side_effect=ConnectionError):
@@ -478,5 +478,4 @@ class TestBruinClient:
                 verify=False
             )
 
-            print(result)
             assert result == message

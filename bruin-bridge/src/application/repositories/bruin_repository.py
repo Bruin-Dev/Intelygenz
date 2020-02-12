@@ -92,7 +92,6 @@ class BruinRepository:
         response = self._bruin_client.get_management_status(filters)
 
         if response["status_code"] not in range(200, 300):
-            self._logger.info(f"Error from Bruin Client. Cause: {response['body']}")
             return response
 
         if "attributes" in response["body"].keys():

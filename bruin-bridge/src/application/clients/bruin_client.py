@@ -184,8 +184,8 @@ class BruinClient:
                                         params=parsed_filters,
                                         verify=False)
             except ConnectionError:
-                self._logger.error(f"Got error when the request to the API was called")
-                return_response["body"] = "Error in the the request to the API"
+                self._logger.error(f"A connection error happened while trying to connect to Bruin API")
+                return_response["body"] = "Connection error in Bruin API"
                 return_response["status_code"] = 503
                 raise Exception(return_response)
 
