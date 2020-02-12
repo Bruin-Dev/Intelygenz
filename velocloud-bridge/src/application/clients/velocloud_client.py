@@ -40,7 +40,7 @@ class VelocloudClient:
                                      json=credentials,
                                      allow_redirects=False,
                                      verify=self._config['verify_ssl'])
-            if response.status_code in range(200, 299):
+            if response.status_code in range(200, 300):
                 self._logger.info(f'Host: {host} logged in')
                 session_index = response.headers['Set-Cookie'].find("velocloud.session")
                 session_end = response.headers['Set-Cookie'].find(";", session_index)

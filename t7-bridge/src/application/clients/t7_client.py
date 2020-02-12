@@ -28,7 +28,7 @@ class T7Client:
                                     headers=self._get_request_headers(),
                                     verify=False)
 
-            if response.status_code in range(200, 299):
+            if response.status_code in range(200, 300):
                 return response.json()['assets']
             else:
                 raise Exception

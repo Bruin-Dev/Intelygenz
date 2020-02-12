@@ -129,10 +129,11 @@ class ServiceOutageDetector:
                         self._logger.info(f'Management status for {edge_identifier} seems active.')
                 except ValueError as e:
                     self._logger.info(f"Management status is unknown for {edge_identifier}")
+                    message = f"Process << _outage_monitoring_process >> Managament status is unknown for " \
+                        f"{edge_identifier}\r\n" \
+                        f"Cause: {e}"
                     slack_message = {'request_id': uuid(),
-                                     'message': f"Managament status is unknown for {edge_identifier}\r\n"
-                                     f"ValueError: {e}"
-                                     }
+                                     'message': message}
                     await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                     continue
 
@@ -360,10 +361,11 @@ class ServiceOutageDetector:
                         self._add_edge_to_quarantine(edge_full_id, edge_status)
                 except ValueError as e:
                     self._logger.info(f"Managament status is unknown for {edge_identifier}")
+                    message = f"Process << service_outage_detector_process >> Managament status is unknown for " \
+                        f"{edge_identifier}\r\n" \
+                        f"Cause: {e}"
                     slack_message = {'request_id': uuid(),
-                                     'message': f"Managament status is unknown for {edge_identifier}\r\n"
-                                     f"ValueError: {e}"
-                                     }
+                                     'message': message}
                     await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
 
             except Exception:
@@ -501,11 +503,19 @@ class ServiceOutageDetector:
 
                 try:
                     is_reportable_edge = await self._is_reportable_edge(edge_new_status)
-                except ValueError:
+                except ValueError as e:
                     self._logger.error(
-                        f'An error ocurred while trying to look up an outage ticket for edge {edge_identifier}. '
-                        'It will not be removed from the reporting queue because its current status is unknown.'
+                        f'An error ocurred while trying to look up an outage ticket for edge {edge_identifier}.\r\n'
+                        'It will not be removed from the reporting queue because its current status is unknown.\r\n'
+                        f'Exception: {e}'
                     )
+                    message = f"Process << _refresh_reporting_queue >> An error ocurred while trying to look up an " \
+                        f"outage ticket for edge {edge_identifier}.It will not be removed from the reporting queue " \
+                        f"because its current status is unknown.\r\n" \
+                        f"Cause: {e}"
+                    slack_message = {'request_id': uuid(),
+                                     'message': message}
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                 else:
                     if is_reportable_edge:
                         edge_new_value = {**edge_value, **{'edge_status': edge_new_status}}
@@ -540,11 +550,18 @@ class ServiceOutageDetector:
 
         try:
             is_reportable_edge = await self._is_reportable_edge(edge_status)
-        except ValueError:
+        except ValueError as e:
             self._logger.error(
-                f'An error ocurred while trying to look up an outage ticket for edge {edge_identifier}. '
-                'Skipping edge for now...'
+                f'An error ocurred while trying to look up an outage ticket for edge {edge_identifier}.\r\n '
+                'Skipping edge for now...\r\n'
+                f'Exception: {e}'
             )
+            message = f"Process << _process_edge_from_quarantine >> An error ocurred while trying to look up an " \
+                f"outage ticket for edge {edge_identifier}.Skipping edge for now...\r\n" \
+                f"Cause: {e}"
+            slack_message = {'request_id': uuid(),
+                             'message': message}
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
         else:
             if is_reportable_edge:
                 self._add_edge_to_reporting(edge_full_id, edge_status)
@@ -646,8 +663,8 @@ class ServiceOutageDetector:
                                                               management_request, timeout=30)
         self._logger.info(f'Got management status {management_status} for {serial_number}')
         if management_status["management_status"] is None:
-            raise ValueError
-        if management_status["management_status"] in "Pending, Active – Silver Monitoring, " \
-                                                     "Active – Gold Monitoring, Active – Platinum Monitoring":
+            raise ValueError(f"status code: {management_status['status']}, {management_status['error_message']}")
+        if management_status["management_status"] in "Pending, Active – Gold Monitoring, " \
+                                                     "Active – Platinum Monitoring":
             return True
         return False

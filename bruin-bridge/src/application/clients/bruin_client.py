@@ -71,7 +71,7 @@ class BruinClient:
                                     headers=self._get_request_headers(),
                                     verify=False, params=params)
 
-            if response.status_code in range(200, 299):
+            if response.status_code in range(200, 300):
                 return response.json()['responses']
             else:
                 self.login()
@@ -89,7 +89,7 @@ class BruinClient:
                                     headers=self._get_request_headers(),
                                     verify=False)
 
-            if response.status_code in range(200, 299):
+            if response.status_code in range(200, 300):
                 return response.json()
             else:
                 self.login()
@@ -111,7 +111,7 @@ class BruinClient:
                                      json=payload,
                                      verify=False)
 
-            if response.status_code in range(200, 299):
+            if response.status_code in range(200, 300):
                 return response.json()
             else:
                 self.login()
@@ -137,7 +137,7 @@ class BruinClient:
                                      json=payload,
                                      verify=False)
 
-            if response.status_code in range(200, 299):
+            if response.status_code in range(200, 300):
                 return response.json()
             else:
                 self.login()
@@ -160,7 +160,7 @@ class BruinClient:
                                     headers=self._get_request_headers(),
                                     json=payload,
                                     verify=False)
-            if response.status_code in range(200, 299):
+            if response.status_code in range(200, 300):
                 return response.json()
             else:
                 self.login()
@@ -184,7 +184,7 @@ class BruinClient:
 
             return_response = dict.fromkeys(["body", "status_code"])
 
-            if response.status_code in range(200, 299):
+            if response.status_code in range(200, 300):
                 return_response["body"] = response.json()
                 return_response["status_code"] = response.status_code
 

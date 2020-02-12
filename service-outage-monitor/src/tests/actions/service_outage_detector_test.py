@@ -988,6 +988,7 @@ class TestQuarantineJob:
         }
 
         event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
         logger = Mock()
         scheduler = Mock()
         quarantine_edge_repository = Mock()
@@ -2508,10 +2509,12 @@ class TestServiceOutageMonitor:
 
         outage_utils = Mock()
         outage_utils.is_there_an_outage = Mock()
+        cause = "BLA BLA BLA"
+        message = f"Process << _outage_monitoring_process >> Managament status is unknown for " \
+            f"{EdgeIdentifier(**edge_full_id)}\r\n" \
+            f"Cause: {cause}"
         slack_message = {'request_id': uuid_,
-                         'message': f"Managament status is unknown for {EdgeIdentifier(**edge_full_id)}\r\n"
-                         f"ValueError: "
-                         }
+                         'message': message}
 
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
             service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
@@ -2519,7 +2522,7 @@ class TestServiceOutageMonitor:
                                                             config, template_renderer, outage_utils)
             service_outage_detector._get_edges_for_monitoring = Mock(return_value=edge_list)
             service_outage_detector._get_edge_status_by_id = CoroutineMock()
-            service_outage_detector._is_management_status_active = CoroutineMock(side_effect=ValueError)
+            service_outage_detector._is_management_status_active = CoroutineMock(side_effect=ValueError(cause))
             await service_outage_detector._outage_monitoring_process()
 
             outage_utils.is_there_an_outage.assert_not_called()
@@ -3436,8 +3439,7 @@ class TestServiceOutageMonitor:
             ],
             'enterprise_name': f'EVIL-CORP|12345|',
         }
-        management_status = {"management_status": "Pending, Active – Silver Monitoring, "
-                                                  "Active – Gold Monitoring, Active – Platinum Monitoring"}
+        management_status = {"management_status": "Pending, Active – Gold Monitoring, Active – Platinum Monitoring"}
         uuid_ = uuid()
         management_request = {
             "request_id": uuid_,
@@ -3521,7 +3523,9 @@ class TestServiceOutageMonitor:
             ],
             'enterprise_name': f'EVIL-CORP|12345|',
         }
-        management_status = {"management_status": None}
+        management_status = {"management_status": None,
+                             "status": 500,
+                             "error_message": "Internal server error from bruin API"}
         uuid_ = uuid()
         management_request = {
             "request_id": uuid_,
@@ -3548,7 +3552,7 @@ class TestServiceOutageMonitor:
 
         with pytest.raises(ValueError):
             with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
-                is_edge_active = await service_outage_detector._is_management_status_active(edge_status)
+                await service_outage_detector._is_management_status_active(edge_status)
                 event_bus.rpc_request.assert_awaited_once_with("bruin.inventory.management.status",
                                                                management_request, timeout=30)
         service_outage_detector._logger.assert_called
