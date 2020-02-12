@@ -5,7 +5,6 @@ import os
 import logging
 import sys
 from config import contact_info
-from config import jitter_device_whitelist
 
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
