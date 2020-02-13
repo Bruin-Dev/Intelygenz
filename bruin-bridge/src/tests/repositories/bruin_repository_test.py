@@ -1250,3 +1250,127 @@ class TestBruinRepository:
 
         bruin_client.get_client_info.assert_called_once_with(filters)
         assert result == expected_result
+
+    def change_detail_work_queue_ok_test(self):
+        logger = Mock()
+        filters = {
+            "service_number": "VC05400002265",
+            "ticket_id": 4503440,
+            "detail_id": 4806634,
+            "queue_name": "Repair Completed",
+        }
+
+        work_queue_filters = {
+            "ticket_id": filters["ticket_id"],
+            "ServiceNumber": filters["service_number"],
+            "DetailId": filters["detail_id"]
+        }
+
+        possible_work_queues = {
+            "body": {
+                "currentTaskId": 10398903,
+                "currentTaskKey": "344",
+                "currentTaskName": "Holmdel NOC Investigate ",
+                "nextResults": [
+                    {
+                        "resultTypeId": 139,
+                        "resultName": "Repair Completed",
+                        "notes": [
+                            {
+                                "noteType": "RFO",
+                                "noteDescription": "Reason for Outage",
+                                "availableValueOptions": [
+                                    {
+                                        "text": "Area Wide Outage",
+                                        "value": "Area Wide Outage"
+                                    },
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "status_code": 200
+        }
+
+        put_work_queue_payload = {
+            "ticket_id": filters["ticket_id"],
+            "details": [
+                {"detailId": filters["detail_id"],
+                 "serviceNumber": filters["service_number"],
+                 }
+            ],
+            "notes": [],
+            "resultTypeId": possible_work_queues["body"]["nextResults"][0]["resultTypeId"]
+        }
+
+        put_response = {
+            "body": {
+                "message": "success"
+            },
+            "status_code": 200
+        }
+
+        bruin_client = Mock()
+        bruin_client.get_possible_detail_next_result = Mock(return_value=possible_work_queues)
+        bruin_client.change_detail_work_queue = Mock(return_value=put_response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        result = bruin_repository.change_detail_work_queue(filters)
+        bruin_client.get_possible_detail_next_result.assert_called_once_with(work_queue_filters)
+        bruin_client.change_detail_work_queue.assert_called_once_with(put_work_queue_payload)
+        assert result == put_response
+
+    def change_detail_work_queue_ko_test(self):
+        logger = Mock()
+        filters = {
+            "service_number": "VC05400002265",
+            "ticket_id": 4503440,
+            "detail_id": 4806634,
+            "queue_name": "Some Queue",
+        }
+
+        work_queue_filters = {
+            "ticket_id": filters["ticket_id"],
+            "ServiceNumber": filters["service_number"],
+            "DetailId": filters["detail_id"]
+        }
+
+        possible_work_queues = {
+            "body": {
+                "currentTaskId": 10398903,
+                "currentTaskKey": "344",
+                "currentTaskName": "Holmdel NOC Investigate ",
+                "nextResults": [
+                    {
+                        "resultTypeId": 139,
+                        "resultName": "Repair Completed",
+                        "notes": [
+                            {
+                                "noteType": "RFO",
+                                "noteDescription": "Reason for Outage",
+                                "availableValueOptions": [
+                                    {
+                                        "text": "Area Wide Outage",
+                                        "value": "Area Wide Outage"
+                                    },
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "status_code": 200
+        }
+
+        expected_result = {
+            "body": f'Any possible work queue for '
+                    f'filters: {work_queue_filters} and queue: {filters["queue_name"]} was found',
+            "status_code": 400
+        }
+
+        bruin_client = Mock()
+        bruin_client.get_possible_detail_next_result = Mock(return_value=possible_work_queues)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        result = bruin_repository.change_detail_work_queue(filters)
+        bruin_client.get_possible_detail_next_result.assert_called_once_with(work_queue_filters)
+        assert result == expected_result

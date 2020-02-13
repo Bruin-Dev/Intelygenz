@@ -925,6 +925,343 @@ class TestBruinClient:
 
             assert result == message
 
+    def get_possible_detail_next_result_200_test(self):
+        logger = Mock()
+
+        ticket_id = 99
+        filters = {
+            "ticket_id": ticket_id,
+            "ServiceNumber": "VCO10199919",
+            "DetailId": 191919
+        }
+
+        valid_next_result = {
+            "currentTaskId": 10398903,
+            "currentTaskKey": "344",
+            "currentTaskName": "Holmdel NOC Investigate ",
+            "nextResults": [
+                {
+                    "resultTypeId": 139,
+                    "resultName": "Repair Completed",
+                    "notes": [
+                        {
+                            "noteType": "RFO",
+                            "noteDescription": "Reason for Outage",
+                            "availableValueOptions": [
+                                {
+                                    "text": "Area Wide Outage",
+                                    "value": "Area Wide Outage"
+                                },
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
+        expected_result = {
+            "body": valid_next_result,
+            "status_code": 200
+        }
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=valid_next_result)
+        response_mock.status_code = 200
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            next_result = bruin_client.get_possible_detail_next_result(filters)
+            bruin_client_module.requests.get.assert_called_once_with(
+                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
+                headers=bruin_client._get_request_headers(),
+                params=filters,
+                verify=False
+            )
+            response_mock.json.assert_called_once()
+            assert next_result == expected_result
+
+    def get_possible_detail_next_result_400_test(self):
+        logger = Mock()
+        logger.error = Mock()
+
+        ticket_id = 99
+        filters = {
+            "ticket_id": ticket_id,
+            "ServiceNumber": "",
+            "DetailId": None
+        }
+
+        response_400 = {
+            "message": "Ticket Detail not found",
+            "messageDetail": None,
+            "data": None,
+            "type": "ValidationException",
+            "code": 400
+        }
+
+        expected_result = {
+            "body": response_400,
+            "status_code": 400
+        }
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=response_400)
+        response_mock.status_code = 400
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            next_result = bruin_client.get_possible_detail_next_result(filters)
+            bruin_client_module.requests.get.assert_called_once_with(
+                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
+                headers=bruin_client._get_request_headers(),
+                params=filters,
+                verify=False
+            )
+            response_mock.json.assert_called()
+            logger.error.assert_called_once()
+            assert next_result == expected_result
+
+    def get_possible_detail_next_result_401_test(self):
+        logger = Mock()
+        logger.error = Mock()
+
+        ticket_id = 99
+        filters = {
+            "ticket_id": ticket_id,
+            "ServiceNumber": "VCO10199919",
+            "DetailId": 191919
+        }
+
+        response_401 = {}
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=response_401)
+        response_mock.status_code = 401
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            with raises(Exception):
+                bruin_client.get_possible_detail_next_result(filters)
+                bruin_client_module.requests.get.assert_called_once_with(
+                    f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
+                    headers=bruin_client._get_request_headers(),
+                    params=filters,
+                    verify=False
+                )
+                self.assertRaises(Exception, bruin_client.get_possible_detail_next_result)
+                bruin_client.login.assert_called()
+
+    def get_possible_detail_next_result_500_test(self):
+        logger = Mock()
+        logger.error = Mock()
+
+        ticket_id = 99
+        filters = {
+            "ticket_id": ticket_id,
+            "ServiceNumber": "VCO10199919",
+            "DetailId": 191919
+        }
+
+        response_500 = {
+            "Internal server error"
+        }
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=response_500)
+        response_mock.status_code = 500
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            with raises(Exception):
+                bruin_client.get_possible_detail_next_result(filters)
+                bruin_client_module.requests.get.assert_called_once_with(
+                    f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
+                    headers=bruin_client._get_request_headers(),
+                    params=filters,
+                    verify=False
+                )
+                self.assertRaises(Exception, bruin_client.get_possible_detail_next_result)
+                bruin_client.login.assert_called()
+
+    def change_work_queue_200_test(self):
+        logger = Mock()
+
+        ticket_id = 99
+        filters = {
+            "ticket_id": ticket_id,
+            "details": [
+                {
+                    "detailId": 123,
+                    "serviceNumber": "VCO1919191",
+                }
+            ],
+            "notes": [],
+            "resultTypeId": 19
+        }
+
+        valid_put_response = {
+            "message": "success"
+        }
+
+        expected_result = {
+            "body": valid_put_response,
+            "status_code": 200
+        }
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=valid_put_response)
+        response_mock.status_code = 200
+
+        with patch.object(bruin_client_module.requests, 'put', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            put_result = bruin_client.change_detail_work_queue(filters)
+            bruin_client_module.requests.put.assert_called_once_with(
+                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
+                headers=bruin_client._get_request_headers(),
+                json=filters,
+                verify=False
+            )
+            response_mock.json.assert_called_once()
+            assert put_result == expected_result
+
+    def change_work_queue_400_test(self):
+        logger = Mock()
+        logger.error = Mock()
+
+        ticket_id = 99
+        filters = {
+            "ticket_id": ticket_id,
+            "details": [
+                {
+                    "detailId": None,
+                    "serviceNumber": "VCO1919191",
+                }
+            ],
+            "notes": [],
+            "resultTypeId": 19
+        }
+
+        put_response_400 = {
+            "errors": {
+                "details[0].detailId": [
+                    "The value is not valid."
+                ]
+            },
+            "type": None,
+            "title": "Invalid arguments to the API",
+            "status": 400,
+            "detail": "The inputs supplied to the API are invalid",
+            "instance": "/api/Ticket/4503440/details/work",
+            "extensions": {}
+        }
+
+        expected_result = {
+            "body": put_response_400,
+            "status_code": 400
+        }
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=put_response_400)
+        response_mock.status_code = 400
+
+        with patch.object(bruin_client_module.requests, 'put', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            put_result = bruin_client.change_detail_work_queue(filters)
+            bruin_client_module.requests.put.assert_called_once_with(
+                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
+                headers=bruin_client._get_request_headers(),
+                json=filters,
+                verify=False
+            )
+            response_mock.json.assert_called()
+            logger.error.assert_called_once()
+            assert put_result == expected_result
+
+    def change_work_queue_401_test(self):
+        logger = Mock()
+
+        ticket_id = 99
+        filters = {
+            "ticket_id": ticket_id,
+            "details": [
+                {
+                    "detailId": 123,
+                    "serviceNumber": "VCO1919191",
+                }
+            ],
+            "notes": [],
+            "resultTypeId": 19
+        }
+
+        response_401 = {}
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=response_401)
+        response_mock.status_code = 401
+
+        with patch.object(bruin_client_module.requests, 'put', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            with raises(Exception):
+                bruin_client.change_detail_work_queue(filters)
+                bruin_client_module.requests.put.assert_called_once_with(
+                    f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
+                    headers=bruin_client._get_request_headers(),
+                    json=filters,
+                    verify=False
+                )
+                self.assertRaises(Exception, bruin_client.change_detail_work_queue)
+                bruin_client.login.assert_called()
+
+    def change_work_queue_500_test(self):
+        logger = Mock()
+
+        ticket_id = 99
+        filters = {
+            "ticket_id": ticket_id,
+            "details": [
+                {
+                    "detailId": 123,
+                    "serviceNumber": "VCO1919191",
+                }
+            ],
+            "notes": [],
+            "resultTypeId": 19
+        }
+
+        response_500 = {}
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=response_500)
+        response_mock.status_code = 500
+
+        with patch.object(bruin_client_module.requests, 'put', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            with raises(Exception):
+                bruin_client.change_detail_work_queue(filters)
+                bruin_client_module.requests.put.assert_called_once_with(
+                    f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
+                    headers=bruin_client._get_request_headers(),
+                    json=filters,
+                    verify=False
+                )
+                self.assertRaises(Exception, bruin_client.change_detail_work_queue)
+                bruin_client.login.assert_called()
 
 class TestPostOutageTicket:
     def post_outage_ticket_with_connection_error_test(self):

@@ -531,3 +531,92 @@ class BruinClient:
             return get_client_info()
         except Exception as e:
             return e.args[0]
+
+    def change_detail_work_queue(self, filters):
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
+        def change_detail_work_queue():
+            ticket_id = filters["ticket_id"]
+            del filters["ticket_id"]
+            self._logger.info(f'Changing work queue for ticket detail: {filters} and ticket id : {ticket_id}')
+            response = requests.put(
+                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
+                json=filters,
+                headers=self._get_request_headers(),
+                verify=False)
+            return_response = dict.fromkeys(["body", "status_code"])
+
+            if response.status_code in range(200, 299):
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.info(f'Work queue changed for ticket detail: {filters}')
+
+            if response.status_code == 400:
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.error(f"Got error 400 from Bruin {response.json()}")
+
+            if response.status_code == 401:
+                self._logger.info(f"Got 401 from Bruin, re-login and retrying get management status")
+                self.login()
+                return_response["body"] = f"Maximum retries while relogin"
+                return_response["status_code"] = 401
+                raise Exception(return_response)
+
+            if response.status_code in range(500, 513):
+                self._logger.error(f"Got {response.status_code}. Retrying...")
+                return_response["body"] = f"Got internal error from Bruin"
+                return_response["status_code"] = 500
+                raise Exception(return_response)
+
+            return return_response
+
+        try:
+            return change_detail_work_queue()
+        except Exception as e:
+            return e.args[0]
+
+    def get_possible_detail_next_result(self, filters):
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
+        def get_possible_detail_next_result():
+            self._logger.info(f'Getting work queues for ticket detail: {filters}')
+            ticket_id = filters["ticket_id"]
+            del filters["ticket_id"]
+            response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
+                                    headers=self._get_request_headers(),
+                                    params=filters,
+                                    verify=False)
+            return_response = dict.fromkeys(["body", "status_code"])
+
+            if response.status_code in range(200, 299):
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.info(f'Got possible next work queue results for : {filters}')
+
+            if response.status_code == 400:
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.error(f"Got error 400 from Bruin {response.json()}")
+
+            if response.status_code == 401:
+                self._logger.info(f"Got 401 from Bruin, re-login and retrying get management status")
+                self.login()
+                return_response["body"] = f"Maximum retries while relogin"
+                return_response["status_code"] = 401
+                raise Exception(return_response)
+
+            if response.status_code in range(500, 513):
+                self._logger.error(f"Got {response.status_code}. Retrying...")
+                return_response["body"] = f"Got internal error from Bruin"
+                return_response["status_code"] = 500
+                raise Exception(return_response)
+
+            return return_response
+
+        try:
+            return get_possible_detail_next_result()
+        except Exception as e:
+            return e.args[0]

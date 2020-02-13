@@ -188,3 +188,37 @@ class BruinRepository:
 
         response["body"] = response_body
         return response
+
+    def change_detail_work_queue(self, filters):
+        get_work_queues_filters = {
+            "ticket_id": filters["ticket_id"],
+            "ServiceNumber": filters["service_number"],
+            "DetailId": filters["detail_id"]
+        }
+
+        possible_work_queues = self._bruin_client.get_possible_detail_next_result(get_work_queues_filters)
+        result_type_id = None
+        for possible_work_queue in possible_work_queues["body"]["nextResults"]:
+            if possible_work_queue["resultName"] in filters["queue_name"]:
+                result_type_id = possible_work_queue["resultTypeId"]
+                break
+
+        if not result_type_id:
+            result = {
+                "body": f'Any possible work queue for '
+                        f'filters: {get_work_queues_filters} and queue: {filters["queue_name"]} was found',
+                "status_code": 400
+            }
+            return result
+
+        put_work_queue_payload = {
+            "ticket_id": filters["ticket_id"],
+            "details": [
+                {"detailId": filters["detail_id"],
+                 "serviceNumber": filters["service_number"],
+                 }
+            ],
+            "notes": [],
+            "resultTypeId": result_type_id
+        }
+        return self._bruin_client.change_detail_work_queue(put_work_queue_payload)
