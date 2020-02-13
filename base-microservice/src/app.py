@@ -103,47 +103,43 @@ class Container:
                                    id='_publish_msgs')
 
     async def _make_rpc_request(self):
-        management_request = {
+        rpc_request_msg = {
             "request_id": uuid(),
-            "filters": {
-                "client_id": None,
-                "status": "A",
-                "service_number": None
-            }
+            "some_field_1": "Sending data related to request here",
+            "some_field_2": "Sending data related to request here"
         }
-        management_status = await self.event_bus.rpc_request("bruin.inventory.management.status",
-                                                              management_request, timeout=30)
-        print(f'Got RPC response with value: {json.dumps(management_status, indent=2)}')
+        response = await self.event_bus.rpc_request("rpc.request", rpc_request_msg, timeout=1)
+        print(f'Got RPC response with value: {json.dumps(response, indent=2)}')
 
     async def start(self):
         await self.event_bus.connect()
         # Start up the server to expose the metrics.
 
-        # start_http_server(9100)
-        # # Generate some requests.
-        # logger.info('starting metrics loop')
-        #
-        # await self.event_bus.subscribe_consumer(consumer_name="consumer4", topic=f'topic1',
-        #                                         action_wrapper=self.from_first_action)
-        #
-        # await self.event_bus.subscribe_consumer(consumer_name="consumer3", topic=f'topic2',
-        #                                         action_wrapper=self.durable_action,
-        #                                         queue="queue")
-        #
-        # await self.event_bus.subscribe_consumer(consumer_name="consumer2", topic=f'topic3',
-        #                                         action_wrapper=self.durable_action,
-        #                                         queue="queue")
-        #
-        # await self.event_bus.subscribe_consumer(consumer_name="consumer5", topic=f'rpc.request',
-        #                                         action_wrapper=self.rpc_action,
-        #                                         queue="queue")
-        #
-        # await self.start_publish_job(exec_on_start=True)
-        # self._my_scheduler.start()
-        #
-        # self.redis_connection.hset("foo", "key", datetime.now().isoformat())
-        # redis_data = self.redis_connection.hgetall("foo")
-        # logger.info(f'Data retrieved from Redis: {redis_data["key"]}')
+        start_http_server(9100)
+        # Generate some requests.
+        logger.info('starting metrics loop')
+
+        await self.event_bus.subscribe_consumer(consumer_name="consumer4", topic=f'topic1',
+                                                action_wrapper=self.from_first_action)
+
+        await self.event_bus.subscribe_consumer(consumer_name="consumer3", topic=f'topic2',
+                                                action_wrapper=self.durable_action,
+                                                queue="queue")
+
+        await self.event_bus.subscribe_consumer(consumer_name="consumer2", topic=f'topic3',
+                                                action_wrapper=self.durable_action,
+                                                queue="queue")
+
+        await self.event_bus.subscribe_consumer(consumer_name="consumer5", topic=f'rpc.request',
+                                                action_wrapper=self.rpc_action,
+                                                queue="queue")
+
+        await self.start_publish_job(exec_on_start=True)
+        self._my_scheduler.start()
+
+        self.redis_connection.hset("foo", "key", datetime.now().isoformat())
+        redis_data = self.redis_connection.hgetall("foo")
+        logger.info(f'Data retrieved from Redis: {redis_data["key"]}')
 
         await self._make_rpc_request()
 
