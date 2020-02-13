@@ -9,6 +9,8 @@ from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone
 from shortuuid import uuid
+import random
+from collections import namedtuple
 
 from igz.packages.repositories.edge_repository import EdgeIdentifier
 
@@ -88,55 +90,25 @@ class ServiceOutageDetector:
                 self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}.')
                 edge_status = await self._get_edge_status_by_id(edge_full_id)
                 self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
-
-                try:
-                    self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
-                    if not await self._is_management_status_active(edge_status):
-                        self._logger.info(
-                            f'Management status is not active for {edge_identifier}. Skipping process...')
-                        continue
-                    else:
-                        self._logger.info(f'Management status for {edge_identifier} seems active.')
-            except ValueError:
-                self._logger.info(f"Management status is unknown for {edge_identifier}")
-                continue
-
-            if not management_status["management_status"]:
-                self._logger.error(f'Could not retrieve management status for {serial_number}')
-                self._logger.error(f'Full message: {json.dumps(management_status, indent=2, default=str)}')
-                self._logger.error(f'Considering it as inactive')
-                continue
-
-            self._logger.info(f'Got management status {management_status} for {serial_number}')
-            if management_status["management_status"] \
-                    not in "Pending, Active – Gold Monitoring, Active – Platinum Monitoring":
-                self._logger.info(f'Management status is not active for {serial_number}. Skipping process')
-                continue
-            self._logger.info(f'Management status for {serial_number} seems active. Monitoring..')
-            if not await self._is_management_status_active(edge_status):
-                self._logger.info(
-                    f'Management status is not active for {edge_identifier}. Skipping process...')
-                continue
-            else:
-                self._logger.info(f'Management status for {edge_identifier} seems active.')
-                try:
-                    self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
-                    if not await self._is_management_status_active(edge_status):
-                        self._logger.info(
-                            f'Management status is not active for {edge_identifier}. Skipping process...')
-                        continue
-                    else:
-                        self._logger.info(f'Management status for {edge_identifier} seems active.')
-                except ValueError as e:
+                self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
+                management_status = await self._get_management_status(edge_status)
+                if management_status["status"] not in range(200, 300):
                     self._logger.info(f"Management status is unknown for {edge_identifier}")
                     message = (
                         f"[outage-monitoring] Management status is unknown for {edge_identifier}. "
-                        f"Cause: {e}"
+                        f"Cause: {management_status['body']}"
                     )
                     slack_message = {'request_id': uuid(),
                                      'message': message}
                     await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                     continue
+
+                if not self._is_management_status_active(management_status):
+                    self._logger.info(
+                        f'Management status is not active for {edge_identifier}. Skipping process...')
+                    continue
+                else:
+                    self._logger.info(f'Management status for {edge_identifier} seems active.')
 
                 outage_happened = self._outage_utils.is_there_an_outage(edge_status)
                 if outage_happened:
@@ -348,28 +320,33 @@ class ServiceOutageDetector:
                     self._add_edge_to_quarantine(edge_full_id, edge_status)
 
             try:
-                try:
-                    edge_status = await self._get_edge_status_by_id(edge_full_id)
-                    if not await self._is_management_status_active(edge_status):
-                        self._logger.info(f"Management status is not active. {edge_identifier} won't be reported")
-                        continue
-                    else:
-                        self._logger.info(
-                            f"Management status is active. Checking outage state for {edge_identifier}...")
+                self._logger.info(f'[outage-report] Checking status of {edge_identifier}.')
+                edge_status = await self._get_edge_status_by_id(edge_full_id)
+                self._logger.info(f'[outage-report] Got status for edge: {edge_identifier}.')
 
-                    if self._outage_utils.is_there_an_outage(edge_status):
-                        await self._start_quarantine_job(edge_full_id)
-                        self._add_edge_to_quarantine(edge_full_id, edge_status)
-                except ValueError as e:
+                management_status = await self._get_management_status(edge_status)
+
+                if management_status["status"] not in range(200, 300):
                     self._logger.info(f"Managament status is unknown for {edge_identifier}")
                     message = (
-                        f"[outage-report] Management status is unknown for {edge_identifier}."
-                        f"Cause: {e}"
+                        f"[outage-report] Management status is unknown for {edge_identifier}. "
+                        f"Cause: {management_status['body']}"
                     )
                     slack_message = {'request_id': uuid(),
                                      'message': message}
                     await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+                    continue
 
+                if not self._is_management_status_active(management_status):
+                    self._logger.info(f"Management status is not active. {edge_identifier} won't be reported")
+                    continue
+                else:
+                    self._logger.info(
+                        f"Management status is active. Checking outage state for {edge_identifier}...")
+
+                if self._outage_utils.is_there_an_outage(edge_status):
+                    await self._start_quarantine_job(edge_full_id)
+                    self._add_edge_to_quarantine(edge_full_id, edge_status)
             except Exception:
                 self._logger.exception(f"Unexpected error occurred while running the detection process for edge "
                                        f"{edge_identifier}. Skipping...")
@@ -650,7 +627,7 @@ class ServiceOutageDetector:
 
         self._logger.info(f'Edge {edge_identifier} moved from quarantine to the reporting queue.')
 
-    async def _is_management_status_active(self, edge_status):
+    async def _get_management_status(self, edge_status):
         enterprise_name = edge_status['enterprise_name']
         bruin_client_id = self._extract_client_id(enterprise_name)
         serial_number = edge_status['edges']['serialNumber']
@@ -664,10 +641,10 @@ class ServiceOutageDetector:
         }
         management_status = await self._event_bus.rpc_request("bruin.inventory.management.status",
                                                               management_request, timeout=30)
-        self._logger.info(f'Got management status {management_status} for {serial_number}')
-        if management_status["management_status"] is None:
-            raise ValueError(f"Error {management_status['status']}: {management_status['error_message']}")
-        if management_status["management_status"] in "Pending, Active – Gold Monitoring, " \
-                                                     "Active – Platinum Monitoring":
+        return management_status
+
+    def _is_management_status_active(self, management_status) -> bool:
+        if management_status["body"] in {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"}:
             return True
-        return False
+        else:
+            return False
