@@ -22,9 +22,14 @@ class T7Client:
                stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']), reraise=True)
         def get_prediction():
             self._logger.info(f'Getting prediction for ticket id: {ticket_id}')
-            response = requests.get(f"{self._config.T7CONFIG['base_url']}/api/v1/suggestions?ticketId={ticket_id}",
-                                    headers=self._get_request_headers(),
-                                    verify=True)
+
+            try:
+                response = requests.get(f"{self._config.T7CONFIG['base_url']}/api/v1/suggestions?ticketId={ticket_id}",
+                                        headers=self._get_request_headers(),
+                                        verify=True)
+            except requests.exceptions.ConnectionError as conn_err:
+                self._logger.error(f'Got connection error from T7 client {conn_err}')
+                raise Exception({"body": conn_err, "status_code": 500})
 
             return_response = dict.fromkeys(["body", "status_code"])
 
@@ -53,7 +58,7 @@ class T7Client:
                 return_response["body"] = f"Got possible 404 as 500 from TNBA API: {response.json()}"
                 return_response["status_code"] = 500
                 # TNBA API returns 500 code if ticketId is not found in Bruin. We bypass that here
-                # we use the error message under the "error" key in the response body
+                # by using the error message under the "error" key in the response body
                 if response.json().get("error") and not response.json()["error"] in "error_getting_ticket_data":
                     self._logger.error(f"Got unknown 500 error from TNBA API {response.status_code}. Retrying...")
                     return_response["body"] = f"Got 500 from TNBA API: {response.json()}"

@@ -304,6 +304,7 @@ services:
       - tnba-monitor/src/config/env
     depends_on:
       - "nats-server"
+      - redis
     ports:
       - 5012:5000
 

@@ -30,7 +30,7 @@ class ChangeDetailWorkQueue:
 
         if not all(key in filters.keys() for key in ("service_number", "ticket_id", "detail_id", "queue_name")):
             self._logger.error(f'Cannot get management status using {json.dumps(filters)}. '
-                              f'Need "client_id", "status", "service_number"')
+                               f'Need "client_id", "status", "service_number"')
             response["status"] = 400
             response["error_message"] = 'You must specify ' \
                                         '{.."filter":{"service_number", "ticket_id",' \

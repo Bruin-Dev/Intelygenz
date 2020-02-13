@@ -1,11 +1,15 @@
+import json
+
 import asyncio
-from shortuuid import uuid
+import redis
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
-import json
+from shortuuid import uuid
+
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
+from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 
@@ -15,23 +19,20 @@ class Container:
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
         self._logger.info("TNBA Monitor starting...")
+
+        self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
+        self._redis_client.ping()
+        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
+
         self._scheduler = AsyncIOScheduler(timezone=timezone(config.TIMEZONE))
         self._server = QuartServer(config)
 
         self._publisher = NATSClient(config, logger=self._logger)
-        self._event_bus = EventBus(logger=self._logger)
+        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
     async def _start(self):
         await self._event_bus.connect()
-
-        test_message = {
-            "request_id": uuid(),
-            "ticket_id": 4467303
-        }
-        prediction = await self._event_bus.rpc_request("t7.prediction.request", test_message, timeout=60)
-        self._logger.info(f'Got prediction from TNBA API: {json.dumps(prediction, indent=2, default= str)}')
-        self._scheduler.start()
 
     async def start_server(self):
         await self._server.run_server()

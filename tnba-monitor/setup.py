@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 setup(
     name='tnba-monitor',
     version='1.0.0',
-    description='MetTel\'s automation TNBA-monitor for Velocloud',
+    description='MetTel\'s automation TNBA-monitor ',
     packages=find_packages(exclude=['*tests']),
     include_package_data=True,
     setup_requires=[

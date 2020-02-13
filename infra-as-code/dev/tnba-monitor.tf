@@ -12,7 +12,7 @@ data "template_file" "automation-tnba-monitor" {
 
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
-    REDIS_HOSTNAME = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
+    REDIS_HOSTNAME = local.redis-hostname
     CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
   }
 }

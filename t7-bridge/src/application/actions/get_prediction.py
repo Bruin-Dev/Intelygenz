@@ -7,8 +7,8 @@ class GetPrediction:
         self._t7_repository = t7_repository
 
     async def get_prediction(self, msg: dict):
-        if msg.get('ticket_id'):
-            ticket_id = msg["ticket_id"]
+        ticket_id = msg.get('ticket_id')
+        if ticket_id:
             prediction = self._t7_repository.get_prediction(ticket_id)
             response = {
                 'request_id': msg['request_id'],
@@ -25,4 +25,4 @@ class GetPrediction:
             self._logger.error(f'Ticket id not specified for : {msg["request_id"]}')
 
         await self._event_bus.publish_message(msg['response_topic'], response)
-        self._logger.info(f'Message published in event bus')
+        self._logger.info(f'Prediction message published in event bus with status: {response["status"]}')
