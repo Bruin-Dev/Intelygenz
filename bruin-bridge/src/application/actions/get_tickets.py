@@ -1,3 +1,6 @@
+import json
+
+
 class GetTicket:
 
     def __init__(self, logger, config, event_bus, bruin_repository):
@@ -7,32 +10,66 @@ class GetTicket:
         self._bruin_repository = bruin_repository
 
     async def get_all_tickets(self, msg: dict):
-        self._logger.info(f'Collecting all tickets for client id: {msg["client_id"]}...')
-        ticket_id = ''
-        if 'ticket_id' in msg.keys():
-            ticket_id = msg['ticket_id']
-        client_id = msg['client_id']
-        ticket_status = msg['ticket_status']
-        category = msg['category']
-        ticket_topic = msg['ticket_topic']
-        status = 500
-        filtered_tickets = self._bruin_repository.get_all_filtered_tickets(client_id,
-                                                                           ticket_id,
-                                                                           ticket_status,
-                                                                           category,
-                                                                           ticket_topic)
-        if filtered_tickets is not None:
-            status = 200
-
+        response_topic = msg['response_topic']
         filtered_tickets_response = {
-                                     'request_id': msg['request_id'],
-                                     'tickets': filtered_tickets,
-                                     'status': status
-                                    }
+            'request_id': msg['request_id'],
+            'tickets': None,
+            'status': None
+        }
 
-        await self._event_bus.publish_message(msg['response_topic'], filtered_tickets_response)
+        if "params" not in msg.keys() or "ticket_status" not in msg.keys():
+            self._logger.error(f'Cannot get all tickets using {json.dumps(msg)}. '
+                               f'JSON malformed')
+            filtered_tickets_response["status"] = 400
+            filtered_tickets_response["error_message"] = 'You must specify ' \
+                                                         '{.."params":{"client_id", "category", "ticket_topic"},' \
+                                                         ' "ticket_status":[list of statuses]...} in the request'
+            await self._event_bus.publish_message(response_topic, filtered_tickets_response)
+            return
 
-        if filtered_tickets is not None:
-            self._logger.info(f'Tickets that are going to be sent {len(filtered_tickets)}')
+        ticket_status = msg['ticket_status']
 
-        self._logger.info(f'All tickets for client id: {client_id} sent')
+        ticket_id = ''
+        if 'ticket_id' in msg['params'].keys():
+            ticket_id = msg['params']['ticket_id']
+
+        msg['params']['ticket_id'] = ticket_id
+
+        params = msg['params']
+
+        if not all(key in params.keys() for key in ("client_id", "category", "ticket_topic")):
+            self._logger.info(f'Cannot get tickets  using {json.dumps(params)}. '
+                              f'Need "client_id", "category", "ticket_topic"')
+            filtered_tickets_response["status"] = 400
+            filtered_tickets_response["error_message"] = 'You must specify "client_id", "category", ' \
+                                                         '"ticket_topic" in the params'
+            await self._event_bus.publish_message(response_topic, filtered_tickets_response)
+            return
+
+        self._logger.info(f'Collecting all tickets for client id: {params["client_id"]}...')
+
+        filtered_tickets = self._bruin_repository.get_all_filtered_tickets(params, ticket_status)
+
+        self._logger.info(filtered_tickets)
+        if filtered_tickets["status_code"] in range(200, 300):
+            filtered_tickets_response['tickets'] = filtered_tickets["body"]
+            filtered_tickets_response["status"] = 200
+
+            self._logger.info(f'Ticket list of statuses {ticket_status} found using the params {json.dumps(params)} ')
+        elif filtered_tickets["status_code"] == 400:
+            filtered_tickets_response["status"] = 400
+            filtered_tickets_response["error_message"] = f"Bad request when retrieving ticket " \
+                                                         f"list: {filtered_tickets['body']}"
+            self._logger.error(f'Error trying to get ticket list: {filtered_tickets["body"]}')
+        elif filtered_tickets["status_code"] == 401:
+            filtered_tickets_response["status"] = 400
+            filtered_tickets_response["error_message"] = f"Authentication error in bruin API."
+            self._logger.error(f'Error trying to authenticate against bruin API: {filtered_tickets["body"]}')
+        elif filtered_tickets["status_code"] in range(500, 513):
+            filtered_tickets_response["status"] = 500
+            filtered_tickets_response["error_message"] = f"Internal server error from bruin API"
+            self._logger.error(f'Error accessing bruin API: {filtered_tickets["body"]}')
+
+        await self._event_bus.publish_message(response_topic, filtered_tickets_response)
+
+        self._logger.info(f'All tickets for client id: {params["client_id"]} sent')

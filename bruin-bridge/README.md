@@ -70,10 +70,13 @@ the hood.
 ```
 {
     'request_id': 123, 
-    'ticket_id': 123,
-    'client_id': 85940,
-    'ticket_status': ['New', 'InProgress'], 
-    'category': 'SD-WAN'
+    'params':{
+                'ticket_id': 123, #Optional
+                'client_id': 85940,
+                'category': 'SD-WAN',
+                'ticket_topic': 'VOO'
+              }
+     'ticket_status': ['New', 'InProgress'], 
 }
 ```
 
@@ -126,8 +129,9 @@ And then a response message is published to the response topic that was built by
 ```
 {
     'request_id': 123,
-    'ticket_id': 123
+    'ticket_id': 123,
     'note': `Some Ticket Note`
+        
 }
 ```
 ### Response message
@@ -155,54 +159,58 @@ Service Affecting
 ```
 {
     "request_id": 123,
-    "clientId": 321,
-    "category": "VAS",
-    "services": [
-        {
-            "serviceNumber": Serial Number
-        }
-    ],
-    "contacts": [
-        {
-            "email": "Email@email.com",
-            "phone": "5108324567",
-            "name": "Sample name",
-            "type": "site"
-        },
-        {
-           "email": "Email@email.com",
-           "phone": "5108324567",
-           "name": "Sample name",
-           "type": "ticket"
-        }
-    ]
+    "payload":{
+                "clientId": 321,
+                "category": "VAS",
+                "services": [
+                    {
+                        "serviceNumber": Serial Number
+                    }
+                ],
+                "contacts": [
+                    {
+                        "email": "Email@email.com",
+                        "phone": "5108324567",
+                        "name": "Sample name",
+                        "type": "site"
+                    },
+                    {
+                       "email": "Email@email.com",
+                       "phone": "5108324567",
+                       "name": "Sample name",
+                       "type": "ticket"
+                    }
+                ]
+              }
 }
 ```
 Service Outage
 ```
 {
     "request_id": 123,
-    "clientId": 321,
-    "category": "VOO",
-    "services": [
-        {
-            "serviceNumber": Serial Number
-        }
-    ],
-    "contacts": [
-        {
-            "email": "Email@email.com",
-            "phone": "5108324567",
-            "name": "Sample name",
-            "type": "site"
-        },
-        {
-           "email": "Email@email.com",
-           "phone": "5108324567",
-           "name": "Sample name",
-           "type": "ticket"
-        }
-    ]
+     "payload":{
+                "clientId": 321,
+                "category": "VOO",
+                "services": [
+                    {
+                        "serviceNumber": Serial Number
+                    }
+                ],
+                "contacts": [
+                    {
+                        "email": "Email@email.com",
+                        "phone": "5108324567",
+                        "name": "Sample name",
+                        "type": "site"
+                    },
+                    {
+                       "email": "Email@email.com",
+                       "phone": "5108324567",
+                       "name": "Sample name",
+                       "type": "ticket"
+                    }
+                ]
+    }
 }
 ```
 ### Response message

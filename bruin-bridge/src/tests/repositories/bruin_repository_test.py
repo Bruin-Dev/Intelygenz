@@ -19,85 +19,100 @@ class TestBruinRepository:
         logger = Mock()
         bruin_client = Mock()
         bruin_client.get_all_tickets = Mock(side_effect=[
-            [{'ticketID': 123}, {'ticketID': 123}],
-            [{'ticketID': 321}],
+            {'body': [{'ticketID': 123}, {'ticketID': 123}], 'status_code': 200},
+            {'body': [{'ticketID': 321}], 'status_code': 200}
         ])
-        client_id = 123
-        ticket_id = 321
+        params = dict(client_id=123, ticket_id=321, category='SD-WAN', ticket_topic='VOO')
+
         ticket_status_1 = "New"
         ticket_status_2 = "In-Progress"
-        category = 'SD-WAN'
-        ticket_topic = 'VOO'
+
+        full_params_1 = params.copy()
+        full_params_1["TicketStatus"] = ticket_status_1
+
+        full_params_2 = params.copy()
+        full_params_2["TicketStatus"] = ticket_status_2
 
         bruin_repository = BruinRepository(logger, bruin_client)
         filtered_tickets = bruin_repository.get_all_filtered_tickets(
-            client_id=client_id, ticket_id=ticket_id,
+            params=params,
             ticket_status=[ticket_status_1, ticket_status_2],
-            category=category, ticket_topic=ticket_topic
         )
 
         bruin_repository._bruin_client.get_all_tickets.assert_has_calls([
-            call(client_id, ticket_id, ticket_status_1, category, ticket_topic),
-            call(client_id, ticket_id, ticket_status_2, category, ticket_topic),
-        ], any_order=True)
-        assert filtered_tickets == [{'ticketID': 123}, {'ticketID': 321}]
+            call(full_params_1),
+            call(full_params_2),
+        ], any_order=False)
+        assert filtered_tickets['body'] == [{'ticketID': 123}, {'ticketID': 321}]
+        assert filtered_tickets['status_code'] == 200
 
     def get_all_filtered_tickets_with_none_returned_for_one_ticket_status_test(self):
         logger = Mock()
         bruin_client = Mock()
         bruin_client.get_all_tickets = Mock(side_effect=[
-            [{'ticketID': 123}, {'ticketID': 321}],
-            None,
+            {'body': [{'ticketID': 123}, {'ticketID': 321}], 'status_code': 200},
+            {'body': None, 'status_code': 404},
         ])
-        client_id = 123
-        ticket_id = 321
+        params = dict(client_id=123, ticket_id=321, category='SD-WAN', ticket_topic='VOO')
+
         ticket_status_1 = "New"
         ticket_status_2 = "In-Progress"
         ticket_status_3 = "Yet-Another-Status"
-        category = 'SD-WAN'
-        ticket_topic = 'VOO'
+
+        full_params_1 = params.copy()
+        full_params_1["TicketStatus"] = ticket_status_1
+
+        full_params_2 = params.copy()
+        full_params_2["TicketStatus"] = ticket_status_2
+
+        full_params_3 = params.copy()
+        full_params_3["TicketStatus"] = ticket_status_3
 
         bruin_repository = BruinRepository(logger, bruin_client)
         filtered_tickets = bruin_repository.get_all_filtered_tickets(
-            client_id=client_id, ticket_id=ticket_id,
-            ticket_status=[ticket_status_1, ticket_status_2, ticket_status_3],
-            category=category, ticket_topic=ticket_topic
+            params=params,
+            ticket_status=[ticket_status_1, ticket_status_2, ticket_status_3]
         )
 
         bruin_repository._bruin_client.get_all_tickets.assert_has_calls([
-            call(client_id, ticket_id, ticket_status_1, category, ticket_topic),
-            call(client_id, ticket_id, ticket_status_2, category, ticket_topic),
+            call(full_params_1),
+            call(full_params_2),
         ], any_order=False)
-        assert call(client_id, ticket_id, ticket_status_3,
-                    category) not in bruin_repository._bruin_client.get_all_tickets.mock_calls
-        assert filtered_tickets is None
+        assert call(full_params_3) not in bruin_repository._bruin_client.get_all_tickets.mock_calls
+        assert filtered_tickets['body'] is None
+        assert filtered_tickets['status_code'] == 404
 
     def get_filtered_tickets_with_bruin_returning_empty_lists_for_every_status_test(self):
         logger = Mock()
         bruin_client = Mock()
         bruin_client.get_all_tickets = Mock(side_effect=[
-            [],
-            [],
+            {'body': [], 'status_code': 200},
+            {'body': [], 'status_code': 200},
         ])
-        client_id = 123
-        ticket_id = 321
+
         ticket_status_1 = "New"
         ticket_status_2 = "In-Progress"
-        category = 'SD-WAN'
-        ticket_topic = 'VOO'
+
+        params = dict(client_id=123, ticket_id=321, category='SD-WAN', ticket_topic='VOO')
+
+        full_params_1 = params.copy()
+        full_params_1["TicketStatus"] = ticket_status_1
+
+        full_params_2 = params.copy()
+        full_params_2["TicketStatus"] = ticket_status_2
 
         bruin_repository = BruinRepository(logger, bruin_client)
         filtered_tickets = bruin_repository.get_all_filtered_tickets(
-            client_id=client_id, ticket_id=ticket_id,
+            params=params,
             ticket_status=[ticket_status_1, ticket_status_2],
-            category=category, ticket_topic=ticket_topic
-        )
+            )
 
         bruin_repository._bruin_client.get_all_tickets.assert_has_calls([
-            call(client_id, ticket_id, ticket_status_1, category, ticket_topic),
-            call(client_id, ticket_id, ticket_status_2, category, ticket_topic),
+            call(full_params_1),
+            call(full_params_2)
         ], any_order=True)
-        assert filtered_tickets == []
+        assert filtered_tickets['body'] == []
+        assert filtered_tickets['status_code'] == 200
 
     def get_ticket_details_test(self):
         logger = Mock()
@@ -118,13 +133,10 @@ class TestBruinRepository:
         bruin_client = Mock()
 
         edge_serial = 'VC05200026138'
-        client_id = 123
-
+        params = dict(client_id=123, category='SD-WAN', ticket_topic='VAS')
         ticket_status_1 = "New"
         ticket_status_2 = "In-Progress"
         ticket_statuses = [ticket_status_1, ticket_status_2]
-        category = 'SD-WAN'
-        ticket_topic = 'VAS'
 
         ticket_1_id = 123
         ticket_2_id = 321
@@ -174,27 +186,24 @@ class TestBruinRepository:
         }
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_all_filtered_tickets = Mock(return_value=[
+        bruin_repository.get_all_filtered_tickets = Mock(return_value={'body': [
             {'ticketID': ticket_1_id},
             {'ticketID': ticket_2_id},
             {'ticketID': ticket_3_id},
-        ])
+        ], 'status_code': 200})
         bruin_repository.get_ticket_details = Mock(side_effect=[
-            ticket_1_details, ticket_2_details, ticket_3_details,
-        ])
+            {'body': ticket_1_details, 'status_code': 200}, {'body': ticket_2_details, 'status_code': 200},
+            {'body': ticket_3_details, 'status_code': 200}])
 
         ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
-            edge_serial=edge_serial, client_id=client_id,
-            category=category, ticket_topic=ticket_topic,
+            edge_serial=edge_serial, params=params,
             ticket_statuses=ticket_statuses,
         )
 
         bruin_repository.get_all_filtered_tickets.assert_called_once_with(
-            client_id=client_id,
-            ticket_id=None,
+            params=params,
             ticket_status=ticket_statuses,
-            category=category,
-            ticket_topic=ticket_topic
+
         )
         bruin_repository.get_ticket_details.assert_has_calls([
             call(ticket_1_id), call(ticket_2_id), call(ticket_3_id),
@@ -210,55 +219,49 @@ class TestBruinRepository:
                 **ticket_3_details,
             },
         ]
-        assert ticket_details_by_edge == expected_ticket_details_list
+        assert ticket_details_by_edge['body'] == expected_ticket_details_list
+        assert ticket_details_by_edge['status_code'] == 200
 
     def get_ticket_details_by_edge_serial_with_no_filtered_tickets_test(self):
         logger = Mock()
         bruin_client = Mock()
 
         edge_serial = 'VC05200026138'
-        client_id = 123
-
+        params = dict(client_id=123, category='SD-WAN', ticket_topic='VAS')
         ticket_status_1 = "New"
         ticket_status_2 = "In-Progress"
         ticket_statuses = [ticket_status_1, ticket_status_2]
-        category = 'SD-WAN'
-        ticket_topic = 'VAS'
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_all_filtered_tickets = Mock(return_value=[])
+        bruin_repository.get_all_filtered_tickets = Mock(return_value={"body": [], "status_code": 200})
         bruin_repository.get_ticket_details = Mock()
 
         ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
-            edge_serial=edge_serial, client_id=client_id,
-            category=category, ticket_topic=ticket_topic,
+            edge_serial=edge_serial, params=params,
             ticket_statuses=ticket_statuses,
         )
 
         bruin_repository.get_all_filtered_tickets.assert_called_once_with(
-            client_id=client_id,
-            ticket_id=None,
             ticket_status=ticket_statuses,
-            category=category,
-            ticket_topic=ticket_topic
+            params=params
         )
         bruin_repository.get_ticket_details.assert_not_called()
 
         expected_ticket_details_list = []
-        assert ticket_details_by_edge == expected_ticket_details_list
+        assert ticket_details_by_edge["body"] == expected_ticket_details_list
+        assert ticket_details_by_edge['status_code'] == 200
 
     def get_ticket_details_by_edge_serial_with_filtered_tickets_and_no_ticket_details_test(self):
         logger = Mock()
         bruin_client = Mock()
 
         edge_serial = 'VC05200026138'
-        client_id = 123
 
+        params = dict(client_id=123, category='SD-WAN', ticket_topic='VAS'
+                      )
         ticket_status_1 = "New"
         ticket_status_2 = "In-Progress"
         ticket_statuses = [ticket_status_1, ticket_status_2]
-        category = 'SD-WAN'
-        ticket_topic = 'VAS'
 
         ticket_1_id = 123
         ticket_2_id = 321
@@ -278,47 +281,45 @@ class TestBruinRepository:
         }
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_all_filtered_tickets = Mock(return_value=[
+        bruin_repository.get_all_filtered_tickets = Mock(return_value={"body": [
             {'ticketID': ticket_1_id},
             {'ticketID': ticket_2_id},
             {'ticketID': ticket_3_id},
-        ])
+        ], "status_code": 200})
         bruin_repository.get_ticket_details = Mock(side_effect=[
-            ticket_1_details, ticket_2_details, ticket_3_details,
+            {"body": ticket_1_details, "status_code": 200},
+            {"body": ticket_2_details, "status_code": 200},
+            {"body": ticket_3_details, "status_code": 200},
         ])
 
         ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
-            edge_serial=edge_serial, client_id=client_id,
-            category=category, ticket_topic=ticket_topic,
+            edge_serial=edge_serial, params=params,
             ticket_statuses=ticket_statuses,
         )
 
         bruin_repository.get_all_filtered_tickets.assert_called_once_with(
-            client_id=client_id,
-            ticket_id=None,
+            params=params,
             ticket_status=ticket_statuses,
-            category=category,
-            ticket_topic=ticket_topic
         )
         bruin_repository.get_ticket_details.assert_has_calls([
             call(ticket_1_id), call(ticket_2_id), call(ticket_3_id)
         ], any_order=True)
 
         expected_ticket_details_list = []
-        assert ticket_details_by_edge == expected_ticket_details_list
+        assert ticket_details_by_edge["body"] == expected_ticket_details_list
+        assert ticket_details_by_edge['status_code'] == 200
 
     def get_ticket_details_by_edge_serial_with_filtered_tickets_and_ticket_details_and_no_serial_coincidence_test(self):
         logger = Mock()
         bruin_client = Mock()
 
         edge_serial = 'VC05200026138'
-        client_id = 123
+
+        params = dict(client_id=123, category='SD-WAN', ticket_topic='VAS')
 
         ticket_status_1 = "New"
         ticket_status_2 = "In-Progress"
         ticket_statuses = [ticket_status_1, ticket_status_2]
-        category = 'SD-WAN'
-        ticket_topic = 'VAS'
 
         ticket_1_id = 123
         ticket_2_id = 321
@@ -368,34 +369,33 @@ class TestBruinRepository:
         }
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_all_filtered_tickets = Mock(return_value=[
+        bruin_repository.get_all_filtered_tickets = Mock(return_value={"body": [
             {'ticketID': ticket_1_id},
             {'ticketID': ticket_2_id},
             {'ticketID': ticket_3_id},
-        ])
+        ], "status_code": 200})
         bruin_repository.get_ticket_details = Mock(side_effect=[
-            ticket_1_details, ticket_2_details, ticket_3_details,
+            {"body": ticket_1_details, "status_code": 200},
+            {"body": ticket_2_details, "status_code": 200},
+            {"body": ticket_3_details, "status_code": 200},
         ])
 
         ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
-            edge_serial=edge_serial, client_id=client_id,
-            category=category, ticket_topic=ticket_topic,
+            edge_serial=edge_serial, params=params,
             ticket_statuses=ticket_statuses,
         )
 
         bruin_repository.get_all_filtered_tickets.assert_called_once_with(
-            client_id=client_id,
-            ticket_id=None,
+            params=params,
             ticket_status=ticket_statuses,
-            category=category,
-            ticket_topic=ticket_topic
         )
         bruin_repository.get_ticket_details.assert_has_calls([
             call(ticket_1_id), call(ticket_2_id), call(ticket_3_id)
         ], any_order=False)
 
         expected_ticket_details_list = []
-        assert ticket_details_by_edge == expected_ticket_details_list
+        assert ticket_details_by_edge["body"] == expected_ticket_details_list
+        assert ticket_details_by_edge['status_code'] == 200
 
     def get_affecting_ticket_details_by_edge_serial_test(self):
         logger = Mock()
@@ -428,7 +428,8 @@ class TestBruinRepository:
         }]
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details)
+        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body=ticket_details,
+                                                                                    status_code=200))
 
         affecting_ticket_details_by_edge = bruin_repository.get_affecting_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
@@ -437,44 +438,14 @@ class TestBruinRepository:
 
         bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
             edge_serial=edge_serial,
-            client_id=client_id,
-            ticket_topic=ticket_topic,
+            params=dict(
+                ticket_topic=ticket_topic,
+                client_id=client_id,
+                category=category),
             ticket_statuses=ticket_statuses,
-            category=category,
         )
-        assert affecting_ticket_details_by_edge == ticket_details
-
-    def get_affecting_ticket_details_by_edge_serial_with_no_ticket_details_found_test(self):
-        logger = Mock()
-        bruin_client = Mock()
-
-        edge_serial = 'VC05200026138'
-        client_id = 123
-
-        ticket_status_1 = "New"
-        ticket_status_2 = "In-Progress"
-        ticket_statuses = [ticket_status_1, ticket_status_2]
-        category = 'SD-WAN'
-        ticket_topic = 'VAS'
-
-        ticket_details_list = []
-
-        bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
-
-        affecting_ticket_details_by_edge = bruin_repository.get_affecting_ticket_details_by_edge_serial(
-            edge_serial=edge_serial, client_id=client_id,
-            category=category, ticket_statuses=ticket_statuses,
-        )
-
-        bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
-            edge_serial=edge_serial,
-            client_id=client_id,
-            ticket_topic=ticket_topic,
-            ticket_statuses=ticket_statuses,
-            category=category,
-        )
-        assert affecting_ticket_details_by_edge is None
+        assert affecting_ticket_details_by_edge["body"] == ticket_details
+        assert affecting_ticket_details_by_edge["status_code"] == 200
 
     def get_outage_ticket_details_by_edge_serial_test(self):
         logger = Mock()
@@ -507,7 +478,8 @@ class TestBruinRepository:
         }
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=[ticket_details])
+        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body=[ticket_details],
+                                                                                    status_code=200))
 
         outage_ticket_details_by_edge = bruin_repository.get_outage_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
@@ -516,14 +488,16 @@ class TestBruinRepository:
 
         bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
             edge_serial=edge_serial,
-            client_id=client_id,
-            ticket_topic=ticket_topic,
+            params=dict(
+                ticket_topic=ticket_topic,
+                client_id=client_id,
+                category=category),
             ticket_statuses=ticket_statuses,
-            category=category,
         )
-        assert outage_ticket_details_by_edge == ticket_details
+        assert outage_ticket_details_by_edge["body"] == ticket_details
+        assert outage_ticket_details_by_edge["status_code"] == 200
 
-    def get_outage_ticket_details_by_edge_serial_with_no_ticket_details_found_test(self):
+    def get_outage_ticket_details_by_edge_serial_empty_return_test(self):
         logger = Mock()
         bruin_client = Mock()
 
@@ -536,10 +510,26 @@ class TestBruinRepository:
         category = 'SD-WAN'
         ticket_topic = 'VOO'
 
-        ticket_details_list = []
+        ticket_id = 123
+        ticket_details = {
+            'ticketID': ticket_id,
+            'ticketDetails': [
+                {
+                    "detailID": 2746999,
+                    "detailValue": 'This is a meaningless detail',
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41894999,
+                    "noteValue": 'Nothing to do here!',
+                }
+            ],
+        }
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=ticket_details_list)
+        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body=[],
+                                                                                    status_code=200))
 
         outage_ticket_details_by_edge = bruin_repository.get_outage_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
@@ -548,17 +538,20 @@ class TestBruinRepository:
 
         bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
             edge_serial=edge_serial,
-            client_id=client_id,
-            ticket_topic=ticket_topic,
+            params=dict(
+                ticket_topic=ticket_topic,
+                client_id=client_id,
+                category=category),
             ticket_statuses=ticket_statuses,
-            category=category,
         )
-        assert outage_ticket_details_by_edge is None
+        assert outage_ticket_details_by_edge["body"] == []
+        assert outage_ticket_details_by_edge["status_code"] == 200
 
     def post_ticket_note_test(self):
         logger = Mock()
         ticket_id = 123
         note_contents = 'TicketNote'
+        payload = dict(note=note_contents)
         expected_post_response = 'Ticket Appended'
 
         bruin_client = Mock()
@@ -567,24 +560,21 @@ class TestBruinRepository:
         bruin_repository = BruinRepository(logger, bruin_client)
         post_response = bruin_repository.post_ticket_note(ticket_id, note_contents)
 
-        bruin_client.post_ticket_note.assert_called_once_with(ticket_id, note_contents)
+        bruin_client.post_ticket_note.assert_called_once_with(ticket_id, payload)
         assert post_response == expected_post_response
 
     def post_ticket_test(self):
         logger = Mock()
-        client_id = 321
-        category = 'Some Category'
-        notes = ['List of Notes']
-        services = ['List of Services']
-        contacts = ['List of Contacts']
+        payload = dict(client_id=321, category='Some Category', notes=['List of Notes'],
+                       services=['List of Services'], contacts=['List of Contacts'])
         expected_post_response = 'Ticket Created'
 
         bruin_client = Mock()
         bruin_client.post_ticket = Mock(return_value=expected_post_response)
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        create_ticket = bruin_repository.post_ticket(client_id, category, services, notes, contacts)
-        bruin_client.post_ticket.assert_called_once_with(client_id, category, services, notes, contacts)
+        create_ticket = bruin_repository.post_ticket(payload)
+        bruin_client.post_ticket.assert_called_once_with(payload)
         assert create_ticket == expected_post_response
 
     def open_ticket_test(self):
@@ -592,7 +582,7 @@ class TestBruinRepository:
 
         ticket_id = 123
         detail_id = 321
-        ticket_status = 'O'
+        payload = dict(Status='O')
         successful_status_change = 'Success'
 
         bruin_client = Mock()
@@ -600,7 +590,7 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(logger, bruin_client)
         change_status = bruin_repository.open_ticket(ticket_id, detail_id)
-        bruin_client.update_ticket_status.assert_called_once_with(ticket_id, detail_id, ticket_status)
+        bruin_client.update_ticket_status.assert_called_once_with(ticket_id, detail_id, payload)
         assert change_status == successful_status_change
 
     def resolve_ticket_test(self):
@@ -608,7 +598,7 @@ class TestBruinRepository:
 
         ticket_id = 123
         detail_id = 321
-        ticket_status = 'R'
+        payload = dict(Status='R')
         successful_status_change = 'Success'
 
         bruin_client = Mock()
@@ -616,7 +606,7 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(logger, bruin_client)
         change_status = bruin_repository.resolve_ticket(ticket_id, detail_id)
-        bruin_client.update_ticket_status.assert_called_once_with(ticket_id, detail_id, ticket_status)
+        bruin_client.update_ticket_status.assert_called_once_with(ticket_id, detail_id, payload)
         assert change_status == successful_status_change
 
     def get_management_status_ok_test(self):

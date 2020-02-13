@@ -4,37 +4,44 @@ class BruinRepository:
         self._logger = logger
         self._bruin_client = bruin_client
 
-    def get_all_filtered_tickets(self, client_id, ticket_id, ticket_status, category, ticket_topic):
+    def get_all_filtered_tickets(self, params, ticket_status):
         ticket_list = []
+        response = dict.fromkeys(["body", "status_code"])
+        response['body'] = []
+        response['status_code'] = 200
         for status in ticket_status:
-            status_ticket_list = self._bruin_client.get_all_tickets(client_id, ticket_id, status, category,
-                                                                    ticket_topic)
-            if status_ticket_list is not None:
-                ticket_list = ticket_list + status_ticket_list
-            else:
-                return None
+            full_params = params.copy()
+            full_params["TicketStatus"] = status
+            status_ticket_list = self._bruin_client.get_all_tickets(full_params)
+            response['status_code'] = status_ticket_list['status_code']
+            if status_ticket_list["status_code"] not in range(200, 300):
+                return status_ticket_list
+
+            ticket_list = ticket_list + status_ticket_list["body"]
+
         if len(ticket_list) > 0:
-            return list({ticket_id['ticketID']: ticket_id for ticket_id in ticket_list}.values())
-        return []
+            response['body'] = list({ticket_id['ticketID']: ticket_id for ticket_id in ticket_list}.values())
+
+        return response
 
     def get_ticket_details(self, ticket_id):
         return self._bruin_client.get_ticket_details(ticket_id)
 
-    def get_ticket_details_by_edge_serial(self, edge_serial, client_id,
-                                          ticket_topic, category='SD-WAN',
-                                          ticket_statuses=None):
+    def get_ticket_details_by_edge_serial(self, edge_serial, params, ticket_statuses):
         result = []
 
-        filtered_tickets = self.get_all_filtered_tickets(
-            client_id=client_id, category=category, ticket_topic=ticket_topic,
-            ticket_id=None, ticket_status=ticket_statuses,
-        )
+        response = dict.fromkeys(["body", "status_code"])
 
-        for ticket in filtered_tickets:
+        response['body'] = []
+        response['status_code'] = 200
+
+        filtered_tickets = self.get_all_filtered_tickets(params=params, ticket_status=ticket_statuses,)
+        response['status_code'] = filtered_tickets["status_code"]
+        for ticket in filtered_tickets['body']:
             ticket_id = ticket['ticketID']
             ticket_details_dict = self.get_ticket_details(ticket_id)
-
-            ticket_details_items = ticket_details_dict['ticketDetails']
+            response['status_code'] = ticket_details_dict['status_code']
+            ticket_details_items = ticket_details_dict["body"]['ticketDetails']
             ticket_details_items_as_booleans = map(
                 lambda ticket_detail: ticket_detail['detailValue'] == edge_serial,
                 ticket_details_items,
@@ -42,51 +49,64 @@ class BruinRepository:
             if any(ticket_details_items_as_booleans):
                 result.append({
                     'ticketID': ticket_id,
-                    **ticket_details_dict,
+                    **ticket_details_dict["body"],
                 })
 
-        return result
+        response['body'] = result
+
+        return response
 
     def get_affecting_ticket_details_by_edge_serial(self, edge_serial, client_id,
                                                     category='SD-WAN', ticket_statuses=None):
+        params = {}
+
         if ticket_statuses is None:
             ticket_statuses = ['New', 'InProgress', 'Draft']
-        ticket_details_list = self.get_ticket_details_by_edge_serial(
-            edge_serial=edge_serial, client_id=client_id, ticket_topic='VAS',
-            category=category, ticket_statuses=ticket_statuses,
-        )
 
-        if not ticket_details_list:
-            return
+        params['ticket_topic'] = 'VAS'
+        params['category'] = category
+        params["client_id"] = client_id
+
+        ticket_details_list = self.get_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, params=params, ticket_statuses=ticket_statuses,
+        )
 
         return ticket_details_list
 
     def get_outage_ticket_details_by_edge_serial(self, edge_serial, client_id,
                                                  category='SD-WAN', ticket_statuses=None):
+        params = {}
+
         if ticket_statuses is None:
             ticket_statuses = ['New', 'InProgress', 'Draft']
 
-        ticket_details_list = self.get_ticket_details_by_edge_serial(
-            edge_serial=edge_serial, client_id=client_id, ticket_topic='VOO',
-            category=category, ticket_statuses=ticket_statuses,
-        )
+        params['ticket_topic'] = 'VOO'
+        params['category'] = category
+        params["client_id"] = client_id
 
-        if not ticket_details_list:
-            return
+        ticket_details_list = self.get_ticket_details_by_edge_serial(edge_serial=edge_serial, params=params,
+                                                                     ticket_statuses=ticket_statuses)
 
-        return ticket_details_list[0]
+        if len(ticket_details_list['body']) > 0:
+            body = ticket_details_list['body'][0]
+            ticket_details_list['body'] = body
+
+        return ticket_details_list
 
     def post_ticket_note(self, ticket_id, note):
-        return self._bruin_client.post_ticket_note(ticket_id, note)
+        payload = {"note": note}
+        return self._bruin_client.post_ticket_note(ticket_id, payload)
 
-    def post_ticket(self, client_id, category, services, notes, contacts):
-        return self._bruin_client.post_ticket(client_id, category, services, notes, contacts)
+    def post_ticket(self, payload):
+        return self._bruin_client.post_ticket(payload)
 
     def open_ticket(self, ticket_id, detail_id):
-        return self._bruin_client.update_ticket_status(ticket_id, detail_id, 'O')
+        payload = {"Status": "O"}
+        return self._bruin_client.update_ticket_status(ticket_id, detail_id, payload)
 
     def resolve_ticket(self, ticket_id, detail_id):
-        return self._bruin_client.update_ticket_status(ticket_id, detail_id, 'R')
+        payload = {"Status": "R"}
+        return self._bruin_client.update_ticket_status(ticket_id, detail_id, payload)
 
     def get_management_status(self, filters):
         response = self._bruin_client.get_management_status(filters)
