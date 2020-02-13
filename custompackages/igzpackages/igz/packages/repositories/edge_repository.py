@@ -9,7 +9,15 @@ from typing import Dict
 from typing import Union
 
 
-EdgeIdentifier = namedtuple(typename='EdgeIdentifier', field_names=['host', 'enterprise_id', 'edge_id'])
+class EdgeIdentifier(namedtuple(typename='EdgeIdentifier', field_names=['host', 'enterprise_id', 'edge_id'])):
+
+    def __str__(self):
+        result = ", ".join([f"{field_name} = {value}" for field_name, value in self._asdict().items()])
+        return result
+
+    # def slack_format(self):
+    #     result = " , ".join([f"*{field_name}* = {value}" for field_name, value in self._asdict().items()])
+    #     return result
 
 
 class EdgeRepository:
@@ -115,3 +123,6 @@ class EdgeRepository:
         }
 
         return EdgeIdentifier(**full_id_dict)
+
+
+

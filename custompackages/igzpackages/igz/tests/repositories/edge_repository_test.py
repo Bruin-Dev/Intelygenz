@@ -9,6 +9,25 @@ from igz.packages.repositories.edge_repository import EdgeIdentifier
 from igz.packages.repositories.edge_repository import EdgeRepository
 
 
+class TestEdgeIdentifier:
+
+    def instance_test(self):
+        edge = {'host': "aaa",
+                'enterprise_id': "bbb",
+               'edge_id': "ccc"
+        }
+        edge_identifier = EdgeIdentifier(**edge)
+        assert isinstance(edge_identifier, EdgeIdentifier) is True
+
+    def str_format_test(self):
+        edge = {'host': "aaa",
+                'enterprise_id': "bbb",
+                'edge_id': "ccc"
+                }
+        edge_identifier = EdgeIdentifier(**edge)
+        assert str(edge_identifier)  == "host = aaa, enterprise_id = bbb, edge_id = ccc"
+
+
 class TestEdgeRepository:
 
     def instance_test(self):
