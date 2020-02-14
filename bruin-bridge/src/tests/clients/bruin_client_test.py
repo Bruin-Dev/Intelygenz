@@ -386,38 +386,6 @@ class TestBruinClient:
                 verify=False
             )
 
-    def get_management_status_with_ko_404_test(self):
-        logger = Mock()
-
-        filters = {
-            "client_id": 9994,
-            "service_number": "VC05400009999"
-        }
-        pascalized_filter = {
-            "ClientId": 9994,
-            "ServiceNumber": "VC05400009999"
-        }
-
-        response_404 = {
-            "body": "Resource not found",
-        }
-
-        response_mock = Mock()
-        response_mock.json = Mock(return_value=response_404)
-        response_mock.status_code = 404
-
-        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
-            bruin_client = BruinClient(logger, config)
-            bruin_client.login = Mock()
-            bruin_client._bearer_token = "Someverysecretaccesstoken"
-            bruin_client.get_management_status(filters)
-            bruin_client_module.requests.get.assert_called_once_with(
-                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
-                headers=bruin_client._get_request_headers(),
-                params=pascalized_filter,
-                verify=False
-            )
-
     def get_management_status_with_ko_500_test(self):
         logger = Mock()
 

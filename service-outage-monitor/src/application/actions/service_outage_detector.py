@@ -92,7 +92,7 @@ class ServiceOutageDetector:
             self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
             management_status = await self._get_management_status(edge_status)
             if management_status["status"] not in range(200, 300):
-                self._logger.info(f"Management status is unknown for {edge_identifier}")
+                self._logger.error(f"Management status is unknown for {edge_identifier}")
                 message = (
                     f"[outage-monitoring] Management status is unknown for {edge_identifier}. "
                     f"Cause: {management_status['body']}"
@@ -317,14 +317,15 @@ class ServiceOutageDetector:
                 management_status = await self._get_management_status(edge_status)
 
                 if management_status["status"] not in range(200, 300):
-                    self._logger.info(f"Managament status is unknown for {edge_identifier}")
-                    message = (
-                        f"[outage-report] Management status is unknown for {edge_identifier}. "
-                        f"Cause: {management_status['body']}"
-                    )
-                    slack_message = {'request_id': uuid(),
-                                     'message': message}
-                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+                    self._logger.info(f"Management status is unknown for {edge_identifier}")
+                    if management_status["status"] == 500:
+                        message = (
+                            f"[outage-report] Management status is unknown for {edge_identifier}. "
+                            f"Cause: {management_status['body']}"
+                        )
+                        slack_message = {'request_id': uuid(),
+                                         'message': message}
+                        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                     continue
 
                 if not self._is_management_status_active(management_status):

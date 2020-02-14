@@ -15,10 +15,6 @@ class EdgeIdentifier(namedtuple(typename='EdgeIdentifier', field_names=['host', 
         result = ", ".join([f"{field_name} = {value}" for field_name, value in self._asdict().items()])
         return result
 
-    # def slack_format(self):
-    #     result = " , ".join([f"*{field_name}* = {value}" for field_name, value in self._asdict().items()])
-    #     return result
-
 
 class EdgeRepository:
     def __init__(self, redis_client, keys_prefix, logger=None):

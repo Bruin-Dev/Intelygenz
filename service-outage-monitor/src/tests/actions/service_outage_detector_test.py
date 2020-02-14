@@ -251,7 +251,7 @@ class TestServiceOutageDetectorJob:
         service_outage_detector._get_all_edges.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def service_outage_detector_process_with_managent_status_error_500_test(self):
+    async def service_outage_detector_process_with_management_status_error_500_test(self):
         edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_list = [edge_full_id]
         event_bus = Mock()
@@ -268,7 +268,6 @@ class TestServiceOutageDetectorJob:
         outage_utils = Mock()
         uuid_ = uuid()
 
-        event_bus.rpc_request
         message = (
             f"[outage-report] Management status is unknown for {EdgeIdentifier(**edge_full_id)}. "
             f"Cause: {management_status['body']}"
@@ -311,7 +310,6 @@ class TestServiceOutageDetectorJob:
         outage_utils.is_there_an_outage = Mock(return_value=True)
         uuid_ = uuid()
 
-        event_bus.rpc_request
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
             service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                             quarantine_edge_repository, reporting_edge_repository,
@@ -347,7 +345,6 @@ class TestServiceOutageDetectorJob:
         outage_utils.is_there_an_outage = Mock(return_value=False)
         uuid_ = uuid()
 
-        event_bus.rpc_request
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
             service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                             quarantine_edge_repository, reporting_edge_repository,
