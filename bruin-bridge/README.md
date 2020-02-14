@@ -30,6 +30,10 @@
     * [Description](#description-7)
     * [Request message](#request-message-6)
     * [Response message](#response-message-6)      
+  * [Post Outage Ticket](#post-outage-ticket)
+    * [Description](#description-8)
+    * [Request message](#request-message-7)
+    * [Response message](#response-message-7)
 - [Running in docker-compose](#running-in-docker-compose)
 
 
@@ -287,5 +291,34 @@ a call to the endpoint `/api/Inventory/Attribute` in bruin, using as query param
 }
 
 ```
+
+# Post Outage Ticket
+### Description
+When the bruin bridge receives a request with a request message from topic `bruin.ticket.creation.outage.request` it makes a callback
+to the function `post_outage_ticket`. From the request message, we need the `client_id` to know what client we're creating the ticket for,
+and the `service_number` field which is the serial number of the edge we're creating the outage ticket for.
+
+We call the bruin repository with these fields so that it can call the bruin client to create the outage ticket status.
+The bruin client should return some success message indicating that our ticket status was successfully changed along with
+the ticket id of the newly created ticket. And then a response message is published to the response topic that was built by NATS under the
+hood
+### Request message
+```
+{
+    "request_id": 123,
+    "client_id": 9994,
+    "service_number": "VC05400002265"
+}
+```
+
+### Response message
+```
+{
+    'request_id': 123,
+    'body': 123456,  # Ticket ID
+    'status': 200
+}
+```
+
 # Running in docker-compose 
 `docker-compose up --build redis nats-server bruin-bridge`

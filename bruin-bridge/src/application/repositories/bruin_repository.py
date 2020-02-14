@@ -103,3 +103,13 @@ class BruinRepository:
             response["body"] = management_status
 
         return response
+
+    def post_outage_ticket(self, client_id, service_number):
+        response = self._bruin_client.post_outage_ticket(client_id, service_number)
+
+        status_code = response['status_code']
+        if not (status_code in range(200, 300) or status_code == 409 or status_code == 471):
+            return response
+
+        response['body'] = response['body']['ticketId']
+        return response

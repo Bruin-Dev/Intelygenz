@@ -1,3 +1,6 @@
+import json
+
+from unittest.mock import call
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -448,3 +451,382 @@ class TestBruinClient:
             )
 
             assert result == message
+
+
+class TestPostOutageTicket:
+    def post_outage_ticket_with_connection_error_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+        connection_error_cause = 'Connection timed out'
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', side_effect=ConnectionError(connection_error_cause)):
+            result = bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                verify=False
+            )
+
+        expected = {
+            "body": f"Connection error in Bruin API. Cause: {connection_error_cause}",
+            "status_code": 500
+        }
+        assert result == expected
+
+    def post_outage_ticket_with_http_2XX_response_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        ticket_data = {
+            "ticketId": 4503440,
+            "inventoryId": 12796795,
+            "wtn": service_number,
+            "errorMessage": None,
+            "errorCode": 0,
+        }
+        bruin_response_body = {
+            "assets": [ticket_data]
+        }
+        bruin_response_status_code = 200
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                verify=False
+            )
+
+        expected = {
+            "body": ticket_data,
+            "status_code": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def post_outage_ticket_with_http_409_response_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        ticket_data = {
+            "ticketId": 4503440,
+            "inventoryId": 12796795,
+            "wtn": service_number,
+            "errorMessage": "Ticket is in progress.",
+            "errorCode": 409,
+        }
+        bruin_response_body = {
+            "items": [ticket_data]
+        }
+        bruin_response_status_code = 200
+        bruin_custom_status_code = 409
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                verify=False
+            )
+
+        expected = {
+            "body": ticket_data,
+            "status_code": bruin_custom_status_code,
+        }
+        assert result == expected
+
+    def post_outage_ticket_with_http_471_response_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        ticket_data = {
+            "ticketId": 4503440,
+            "inventoryId": 12796795,
+            "wtn": service_number,
+            "errorMessage": "Ticket is resolved. Please unresolve it first.",
+            "errorCode": 471,
+        }
+        bruin_response_body = {
+            "assets": [ticket_data]
+        }
+        bruin_response_status_code = 200
+        bruin_custom_status_code = 471
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                verify=False
+            )
+
+        expected = {
+            "body": ticket_data,
+            "status_code": bruin_custom_status_code,
+        }
+        assert result == expected
+
+    def post_outage_ticket_with_http_400_response_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        bruin_response_body = {
+            "errors": {
+                "clientId": ["The value is not valid."]
+            },
+            "type": None,
+            "title": "Invalid arguments to the API",
+            "status": 400,
+            "detail": "The inputs supplied to the API are invalid",
+            "instance": "/api/Ticket/repair",
+            "extensions": {}
+        }
+        bruin_response_status_code = 400
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status_code": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def post_outage_ticket_with_http_401_response_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        bruin_response_status_code = 401
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = Mock()
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_outage_ticket(client_id, service_number)
+
+            post_outage_ticket_call = call(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                verify=False
+            )
+            assert post_outage_ticket_call in bruin_client_module.requests.post.mock_calls
+
+        bruin_client.login.assert_called()
+
+        expected = {
+            "body": "Maximum retries reached while re-login",
+            "status_code": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def post_outage_ticket_with_http_403_response_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        bruin_response_status_code = 403
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = Mock()
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client_module.requests.post.assert_called_once_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                verify=False
+            )
+
+        expected = {
+            "body": ("Permissions to create a new outage ticket with payload "
+                     f"{json.dumps(request_params)} were not granted"),
+            "status_code": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def post_outage_ticket_with_http_404_response_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        url = f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair'
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        bruin_response_status_code = 404
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = Mock()
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_outage_ticket(client_id, service_number)
+
+            bruin_client_module.requests.post.assert_called_once_with(
+                url,
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                verify=False
+            )
+
+        expected = {
+            "body": f"Check mistypings in URL: {url}",
+            "status_code": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def post_outage_ticket_with_http_5XX_response_test(self):
+        client_id = 9994,
+        service_number = "VC05400002265"
+
+        request_params = {
+            'ClientID': client_id,
+            'WTNs': [service_number],
+            'RequestDescription': 'Automation Engine -- Service Outage Trouble'
+        }
+
+        bruin_response_status_code = 500
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = Mock()
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_outage_ticket(client_id, service_number)
+
+            post_outage_ticket_call = call(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair',
+                headers=bruin_client._get_request_headers(),
+                json=request_params,
+                verify=False
+            )
+            assert post_outage_ticket_call in bruin_client_module.requests.post.mock_calls
+
+        expected = {
+            "body": "Got internal error from Bruin",
+            "status_code": bruin_response_status_code,
+        }
+        assert result == expected

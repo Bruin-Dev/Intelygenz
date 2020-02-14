@@ -10,6 +10,7 @@ from application.actions.get_outage_ticket_details_by_edge_serial import GetOuta
 from application.actions.get_management_status import GetManagementStatus
 from application.actions.post_note import PostNote
 from application.actions.open_ticket import OpenTicket
+from application.actions.post_outage_ticket import PostOutageTicket
 from application.actions.resolve_ticket import ResolveTicket
 from igz.packages.nats.clients import NATSClient
 from application.actions.post_ticket import PostTicket
@@ -47,6 +48,7 @@ class Container:
         self._subscriber_open_ticket = NATSClient(config, logger=self._logger)
         self._subscriber_resolve_ticket = NATSClient(config, logger=self._logger)
         self._subscriber_get_management_status = NATSClient(config, logger=self._logger)
+        self._subscriber_post_outage_ticket = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
@@ -64,6 +66,7 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_open_ticket, consumer_name="open_ticket")
         self._event_bus.add_consumer(self._subscriber_resolve_ticket, consumer_name="resolve_ticket")
         self._event_bus.add_consumer(self._subscriber_get_management_status, consumer_name="get_management_status")
+        self._event_bus.add_consumer(self._subscriber_post_outage_ticket, consumer_name="post_outage_ticket")
 
         self._event_bus.set_producer(self._publisher)
 
@@ -81,6 +84,7 @@ class Container:
         self._open_ticket = OpenTicket(self._logger, self._event_bus, self._bruin_repository)
         self._resolve_ticket = ResolveTicket(self._logger, self._event_bus, self._bruin_repository)
         self._get_management_status = GetManagementStatus(self._logger, self._event_bus, self._bruin_repository)
+        self._post_outage_ticket = PostOutageTicket(self._logger, self._event_bus, self._bruin_repository)
 
         self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
                                                   is_async=True, logger=self._logger)
@@ -105,6 +109,9 @@ class Container:
         self._action_get_management_status = ActionWrapper(self._get_management_status, "get_management_status",
                                                            is_async=True, logger=self._logger,
                                                            )
+        self._action_post_outage_ticket = ActionWrapper(self._post_outage_ticket, "post_outage_ticket",
+                                                        is_async=True, logger=self._logger,
+                                                        )
 
         self._server = QuartServer(config)
 
@@ -142,6 +149,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="get_management_status",
                                                  topic="bruin.inventory.management.status",
                                                  action_wrapper=self._action_get_management_status,
+                                                 queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="post_outage_ticket",
+                                                 topic="bruin.ticket.creation.outage.request",
+                                                 action_wrapper=self._action_post_outage_ticket,
                                                  queue="bruin_bridge")
 
     async def start_server(self):

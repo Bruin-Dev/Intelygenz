@@ -217,3 +217,108 @@ class BruinClient:
             return get_management_status()
         except Exception as e:
             return e.args[0]
+
+    def post_outage_ticket(self, client_id, service_number):
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
+        def post_outage_ticket():
+            self._logger.info(
+                f'Posting outage ticket for client with ID {client_id} and for service number {service_number}'
+            )
+
+            payload = {
+                "ClientID": client_id,
+                "WTNs": [service_number],
+                "RequestDescription": "Automation Engine -- Service Outage Trouble"
+            }
+            self._logger.info(f'Posting payload {json.dumps(payload)} to create new outage ticket...')
+
+            return_response = dict.fromkeys(["body", "status_code"])
+            url = f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair'
+
+            try:
+                response = requests.post(url, headers=self._get_request_headers(),
+                                         json=payload, verify=False)
+            except ConnectionError as err:
+                self._logger.error(f"A connection error happened while trying to connect to Bruin API. Cause: {err}")
+                return_response["body"] = f"Connection error in Bruin API. Cause: {err}"
+                return_response["status_code"] = 500
+                raise Exception(return_response)
+
+            status_code = response.status_code
+            if status_code in range(200, 300):
+                # The root key may differ depending on the status code...
+                ticket_data = response.json().get(
+                    'assets',
+                    response.json().get('items')
+                )[0]
+
+                # HTTP 409 means the service number is already under an in-progress ticket
+                # HTTP 471 means the service number is already under a resolved ticket
+                # These two codes are embedded in the body of a HTTP 200 response
+                if ticket_data['errorCode'] == 409:
+                    self._logger.info(
+                        f"Got HTTP 409 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
+                        f"There's no need to create a new ticket as there is an existing one with In-Progress status"
+                    )
+                    status_code = 409
+                elif ticket_data['errorCode'] == 471:
+                    self._logger.info(
+                        f"Got HTTP 471 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
+                        f"There's no need to create a new ticket as there is an existing one with Resolved status"
+                    )
+                    status_code = 471
+
+                return_response["body"] = ticket_data
+                return_response["status_code"] = status_code
+
+            if status_code == 400:
+                return_response["body"] = response.json()
+                return_response["status_code"] = status_code
+                self._logger.error(
+                    f"Got HTTP 400 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
+                    f"Reason: {response.json()}"
+                )
+
+            if status_code == 401:
+                self._logger.info(
+                    "Got HTTP 401 from Bruin. Re-login and trying to post outage ticket again with payload "
+                    f"{json.dumps(payload)}"
+                )
+                self.login()
+                return_response["body"] = "Maximum retries reached while re-login"
+                return_response["status_code"] = status_code
+                raise Exception(return_response)
+
+            if status_code == 403:
+                return_response["body"] = ("Permissions to create a new outage ticket with payload "
+                                           f"{json.dumps(payload)} were not granted")
+                return_response["status_code"] = status_code
+                self._logger.error(
+                    "Got HTTP 403 from Bruin. Bruin client doesn't have permissions to post a new outage ticket with "
+                    f"payload {json.dumps(payload)}"
+                )
+
+            if status_code == 404:
+                self._logger.error(
+                    f"Got HTTP 404 from Bruin when posting outage ticket. Payload: {json.dumps(payload)}"
+                )
+                return_response["body"] = f"Check mistypings in URL: {url}"
+                return_response["status_code"] = status_code
+
+            if status_code in range(500, 514):
+                self._logger.error(
+                    f"Got HTTP {status_code} from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
+                    "Retrying request..."
+                )
+                return_response["body"] = "Got internal error from Bruin"
+                return_response["status_code"] = 500
+                raise Exception(return_response)
+
+            return return_response
+
+        try:
+            return post_outage_ticket()
+        except Exception as e:
+            return e.args[0]

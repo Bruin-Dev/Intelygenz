@@ -682,3 +682,112 @@ class TestBruinRepository:
         management_status = bruin_repository.get_management_status(filters)
         bruin_client.get_management_status.assert_called_once_with(filters)
         assert management_status == response
+
+    def post_outage_ticket_with_2XX_status_code_test(self):
+        client_id = 9994
+        service_number = "VC05400002265"
+
+        ticket_id = 4503440
+        response_status = 200
+        client_response = {
+            "body": {
+                "ticketId": ticket_id,
+                "inventoryId": 12796795,
+                "wtn": service_number,
+                "errorMessage": None,
+                "errorCode": 0,
+            },
+            "status_code": response_status,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_outage_ticket = Mock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.post_outage_ticket(client_id, service_number)
+
+        bruin_client.post_outage_ticket.assert_called_once_with(client_id, service_number)
+        assert result == {"body": ticket_id, "status_code": response_status}
+
+    def post_outage_ticket_with_409_status_code_test(self):
+        client_id = 9994
+        service_number = "VC05400002265"
+
+        ticket_id = 4503440
+        response_status = 409
+        client_response = {
+            "body": {
+                "ticketId": ticket_id,
+                "inventoryId": 12796795,
+                "wtn": service_number,
+                "errorMessage": None,
+                "errorCode": response_status,
+            },
+            "status_code": response_status,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_outage_ticket = Mock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.post_outage_ticket(client_id, service_number)
+
+        bruin_client.post_outage_ticket.assert_called_once_with(client_id, service_number)
+        assert result == {"body": ticket_id, "status_code": response_status}
+
+    def post_outage_ticket_with_471_status_code_test(self):
+        client_id = 9994
+        service_number = "VC05400002265"
+
+        ticket_id = 4503440
+        response_status = 471
+        client_response = {
+            "body": {
+                "ticketId": ticket_id,
+                "inventoryId": 12796795,
+                "wtn": service_number,
+                "errorMessage": None,
+                "errorCode": response_status,
+            },
+            "status_code": response_status,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_outage_ticket = Mock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.post_outage_ticket(client_id, service_number)
+
+        bruin_client.post_outage_ticket.assert_called_once_with(client_id, service_number)
+        assert result == {"body": ticket_id, "status_code": response_status}
+
+    def post_outage_ticket_with_error_status_code_test(self):
+        client_id = 9994
+        service_number = "VC05400002265"
+
+        response_status = 500
+        client_response = {
+            "body": "Got internal error from Bruin",
+            "status_code": response_status,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_outage_ticket = Mock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.post_outage_ticket(client_id, service_number)
+
+        bruin_client.post_outage_ticket.assert_called_once_with(client_id, service_number)
+        assert result == client_response
