@@ -57,7 +57,7 @@ class TestGetTicket:
 
         bruin_repository = Mock()
         bruin_repository.get_all_filtered_tickets = Mock(return_value={'body': filtered_tickets_list,
-                                                         'status_code': 200})
+                                                         'status': 200})
 
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(msg)
@@ -105,7 +105,7 @@ class TestGetTicket:
 
         bruin_repository = Mock()
         bruin_repository.get_all_filtered_tickets = Mock(return_value={'body': filtered_tickets_list,
-                                                                       'status_code': 200})
+                                                                       'status': 200})
 
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(msg)
@@ -150,7 +150,7 @@ class TestGetTicket:
 
         bruin_repository = Mock()
         bruin_repository.get_all_filtered_tickets = Mock(return_value={'body': filtered_tickets_list,
-                                                                       'status_code': 200})
+                                                                       'status': 200})
 
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(msg)
@@ -187,7 +187,7 @@ class TestGetTicket:
 
         bruin_repository = Mock()
         bruin_repository.get_all_filtered_tickets = Mock(return_value={'body': filtered_tickets_list,
-                                                                       'status_code': 200})
+                                                                       'status': 200})
 
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(msg)

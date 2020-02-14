@@ -29,7 +29,7 @@ class TestGetManagementStatus:
 
         management_status = {
             "body": "Active – Platinum Monitoring",
-            "status_code": 200
+            "status": 200
         }
         bruin_repository.get_management_status = Mock(return_value=management_status)
 

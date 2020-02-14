@@ -6,15 +6,15 @@ class BruinRepository:
 
     def get_all_filtered_tickets(self, params, ticket_status):
         ticket_list = []
-        response = dict.fromkeys(["body", "status_code"])
+        response = dict.fromkeys(["body", "status"])
         response['body'] = []
-        response['status_code'] = 200
+        response['status'] = 200
         for status in ticket_status:
             full_params = params.copy()
             full_params["TicketStatus"] = status
             status_ticket_list = self._bruin_client.get_all_tickets(full_params)
-            response['status_code'] = status_ticket_list['status_code']
-            if status_ticket_list["status_code"] not in range(200, 300):
+            response['status'] = status_ticket_list['status']
+            if status_ticket_list["status"] not in range(200, 300):
                 return status_ticket_list
 
             ticket_list = ticket_list + status_ticket_list["body"]
@@ -30,17 +30,17 @@ class BruinRepository:
     def get_ticket_details_by_edge_serial(self, edge_serial, params, ticket_statuses):
         result = []
 
-        response = dict.fromkeys(["body", "status_code"])
+        response = dict.fromkeys(["body", "status"])
 
         response['body'] = []
-        response['status_code'] = 200
+        response['status'] = 200
 
         filtered_tickets = self.get_all_filtered_tickets(params=params, ticket_status=ticket_statuses,)
-        response['status_code'] = filtered_tickets["status_code"]
+        response['status'] = filtered_tickets["status"]
         for ticket in filtered_tickets['body']:
             ticket_id = ticket['ticketID']
             ticket_details_dict = self.get_ticket_details(ticket_id)
-            response['status_code'] = ticket_details_dict['status_code']
+            response['status'] = ticket_details_dict['status']
             ticket_details_items = ticket_details_dict["body"]['ticketDetails']
             ticket_details_items_as_booleans = map(
                 lambda ticket_detail: ticket_detail['detailValue'] == edge_serial,
@@ -111,7 +111,7 @@ class BruinRepository:
     def get_management_status(self, filters):
         response = self._bruin_client.get_management_status(filters)
 
-        if response["status_code"] not in range(200, 300):
+        if response["status"] not in range(200, 300):
             return response
 
         if "attributes" in response["body"].keys():

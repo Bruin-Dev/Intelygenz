@@ -29,7 +29,7 @@ class TestResolveTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repo = Mock()
-        bruin_repo.resolve_ticket = Mock(return_value={'body': 'Success', 'status_code': 200})
+        bruin_repo.resolve_ticket = Mock(return_value={'body': 'Success', 'status': 200})
 
         resolve_ticket = ResolveTicket(mock_logger, event_bus, bruin_repo)
         await resolve_ticket.resolve_ticket(msg)
@@ -56,7 +56,7 @@ class TestResolveTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repo = Mock()
-        bruin_repo.resolve_ticket = Mock(return_value={'body': 'Success', 'status_code': 200})
+        bruin_repo.resolve_ticket = Mock(return_value={'body': 'Success', 'status': 200})
 
         resolve_ticket = ResolveTicket(mock_logger, event_bus, bruin_repo)
         await resolve_ticket.resolve_ticket(msg)

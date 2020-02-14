@@ -22,7 +22,7 @@ class GetTicketDetails:
             ticket_details = self._bruin_repository.get_ticket_details(ticket_id)
 
             detail_response['ticket_details'] = ticket_details['body']
-            detail_response['status'] = ticket_details['status_code']
+            detail_response['status'] = ticket_details['status']
             self._logger.info(f'Ticket details for ticket id: {ticket_id} sent!')
         else:
             self._logger.error(f'Cannot get ticket_details using {json.dumps(msg)}. '

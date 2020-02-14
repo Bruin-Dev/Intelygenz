@@ -23,7 +23,7 @@ class ResolveTicket:
             result = self._bruin_repository.resolve_ticket(ticket_id, detail_id)
 
             response['body'] = result['body']
-            response["status"] = result["status_code"]
+            response["status"] = result["status"]
         else:
             self._logger.error(f'Cannot resolve a ticket using {json.dumps(msg)}. '
                                f'JSON malformed')

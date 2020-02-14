@@ -42,7 +42,7 @@ class GetManagementStatus:
         management_status = self._bruin_repository.get_management_status(filters)
 
         response["body"] = management_status["body"]
-        response["status"] = management_status["status_code"]
+        response["status"] = management_status["status"]
 
         await self._event_bus.publish_message(response_topic, response)
         self._logger.info(

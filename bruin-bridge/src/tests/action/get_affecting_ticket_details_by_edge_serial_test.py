@@ -75,7 +75,7 @@ class TestGetAffectingTicketDetailsByEdgeSerial:
 
         bruin_repository = Mock()
         bruin_repository.get_affecting_ticket_details_by_edge_serial = Mock(return_value={'body': ticket_details_list,
-                                                                                          'status_code': 200})
+                                                                                          'status': 200})
 
         ticket_details = GetAffectingTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
         await ticket_details.send_affecting_ticket_details_by_edge_serial(msg)
@@ -144,7 +144,7 @@ class TestGetAffectingTicketDetailsByEdgeSerial:
 
         bruin_repository = Mock()
         bruin_repository.get_affecting_ticket_details_by_edge_serial = Mock(return_value={'body': ticket_details_list,
-                                                                                          'status_code': 200})
+                                                                                          'status': 200})
 
         ticket_details = GetAffectingTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
         await ticket_details.send_affecting_ticket_details_by_edge_serial(msg)

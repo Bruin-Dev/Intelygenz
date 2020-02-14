@@ -85,7 +85,7 @@ class TestPostNote:
     @pytest.mark.asyncio
     async def post_note_200_test(self):
         logger = Mock()
-        append_note_response = {'body': 'Note appended', 'status_code': 200}
+        append_note_response = {'body': 'Note appended', 'status': 200}
         request_id = 123
         ticket_id = 321
         response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'

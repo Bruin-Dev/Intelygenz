@@ -31,7 +31,7 @@ class GetOutageTicketDetailsByEdgeSerial:
             )
 
             response["ticket_details"] = ticket_details_list["body"]
-            response["status"] = ticket_details_list["status_code"]
+            response["status"] = ticket_details_list["status"]
 
             self._logger.info(
                 f'Publishing response to outage ticket details request for edge with serial {edge_serial} '

@@ -50,7 +50,7 @@ class TestPostTicket:
 
         bruin_repository = Mock()
         bruin_repository.post_ticket = Mock(return_value={'body': post_ticket_response,
-                                                          'status_code': 200})
+                                                          'status': 200})
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(msg)
@@ -98,7 +98,7 @@ class TestPostTicket:
 
         bruin_repository = Mock()
         bruin_repository.post_ticket = Mock(return_value={'body': post_ticket_response,
-                                                          'status_code': 400})
+                                                          'status': 400})
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(msg)
@@ -145,7 +145,7 @@ class TestPostTicket:
 
         bruin_repository = Mock()
         bruin_repository.post_ticket = Mock(return_value={'body': post_ticket_response,
-                                                          'status_code': 200})
+                                                          'status': 200})
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(msg)
@@ -186,7 +186,7 @@ class TestPostTicket:
 
         bruin_repository = Mock()
         bruin_repository.post_ticket = Mock(return_value={'body': post_ticket_response,
-                                                          'status_code': 200})
+                                                          'status': 200})
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(msg)
@@ -220,7 +220,7 @@ class TestPostTicket:
 
         bruin_repository = Mock()
         bruin_repository.post_ticket = Mock(return_value={'body': post_ticket_response,
-                                                          'status_code': 200})
+                                                          'status': 200})
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(msg)

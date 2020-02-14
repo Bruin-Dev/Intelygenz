@@ -28,7 +28,7 @@ class TestGetTicketDetails:
             'request_id': request_id,
             'response_topic': response_topic,
         }
-        ticket_details = {"body": {'ticket_details': 'Some ticket details'}, "status_code": 400}
+        ticket_details = {"body": {'ticket_details': 'Some ticket details'}, "status": 400}
         send_details_response = {
             'request_id': request_id,
             'ticket_details': 'You must include ticket_id in the request',
@@ -60,7 +60,7 @@ class TestGetTicketDetails:
             'response_topic': response_topic,
             'ticket_id': ticket_id,
         }
-        ticket_details = {"body": {'ticket_details': 'Some ticket details'}, "status_code": 200}
+        ticket_details = {"body": {'ticket_details': 'Some ticket details'}, "status": 200}
         send_details_response = {
             'request_id': request_id,
             'ticket_details': ticket_details["body"],

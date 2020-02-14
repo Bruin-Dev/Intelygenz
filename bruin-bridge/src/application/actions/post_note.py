@@ -33,7 +33,7 @@ class PostNote:
             result = self._bruin_repository.post_ticket_note(ticket_id, note)
 
             response["body"] = result['body']
-            response["status"] = result['status_code']
+            response["status"] = result['status']
             self._logger.info(f'Note successfully posted to ticketID:{ticket_id} ')
 
         else:

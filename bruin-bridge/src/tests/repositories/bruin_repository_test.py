@@ -19,8 +19,8 @@ class TestBruinRepository:
         logger = Mock()
         bruin_client = Mock()
         bruin_client.get_all_tickets = Mock(side_effect=[
-            {'body': [{'ticketID': 123}, {'ticketID': 123}], 'status_code': 200},
-            {'body': [{'ticketID': 321}], 'status_code': 200}
+            {'body': [{'ticketID': 123}, {'ticketID': 123}], 'status': 200},
+            {'body': [{'ticketID': 321}], 'status': 200}
         ])
         params = dict(client_id=123, ticket_id=321, category='SD-WAN', ticket_topic='VOO')
 
@@ -44,14 +44,14 @@ class TestBruinRepository:
             call(full_params_2),
         ], any_order=False)
         assert filtered_tickets['body'] == [{'ticketID': 123}, {'ticketID': 321}]
-        assert filtered_tickets['status_code'] == 200
+        assert filtered_tickets['status'] == 200
 
     def get_all_filtered_tickets_with_none_returned_for_one_ticket_status_test(self):
         logger = Mock()
         bruin_client = Mock()
         bruin_client.get_all_tickets = Mock(side_effect=[
-            {'body': [{'ticketID': 123}, {'ticketID': 321}], 'status_code': 200},
-            {'body': None, 'status_code': 404},
+            {'body': [{'ticketID': 123}, {'ticketID': 321}], 'status': 200},
+            {'body': None, 'status': 404},
         ])
         params = dict(client_id=123, ticket_id=321, category='SD-WAN', ticket_topic='VOO')
 
@@ -80,14 +80,14 @@ class TestBruinRepository:
         ], any_order=False)
         assert call(full_params_3) not in bruin_repository._bruin_client.get_all_tickets.mock_calls
         assert filtered_tickets['body'] is None
-        assert filtered_tickets['status_code'] == 404
+        assert filtered_tickets['status'] == 404
 
     def get_filtered_tickets_with_bruin_returning_empty_lists_for_every_status_test(self):
         logger = Mock()
         bruin_client = Mock()
         bruin_client.get_all_tickets = Mock(side_effect=[
-            {'body': [], 'status_code': 200},
-            {'body': [], 'status_code': 200},
+            {'body': [], 'status': 200},
+            {'body': [], 'status': 200},
         ])
 
         ticket_status_1 = "New"
@@ -112,7 +112,7 @@ class TestBruinRepository:
             call(full_params_2)
         ], any_order=True)
         assert filtered_tickets['body'] == []
-        assert filtered_tickets['status_code'] == 200
+        assert filtered_tickets['status'] == 200
 
     def get_ticket_details_test(self):
         logger = Mock()
@@ -190,10 +190,10 @@ class TestBruinRepository:
             {'ticketID': ticket_1_id},
             {'ticketID': ticket_2_id},
             {'ticketID': ticket_3_id},
-        ], 'status_code': 200})
+        ], 'status': 200})
         bruin_repository.get_ticket_details = Mock(side_effect=[
-            {'body': ticket_1_details, 'status_code': 200}, {'body': ticket_2_details, 'status_code': 200},
-            {'body': ticket_3_details, 'status_code': 200}])
+            {'body': ticket_1_details, 'status': 200}, {'body': ticket_2_details, 'status': 200},
+            {'body': ticket_3_details, 'status': 200}])
 
         ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, params=params,
@@ -220,7 +220,7 @@ class TestBruinRepository:
             },
         ]
         assert ticket_details_by_edge['body'] == expected_ticket_details_list
-        assert ticket_details_by_edge['status_code'] == 200
+        assert ticket_details_by_edge['status'] == 200
 
     def get_ticket_details_by_edge_serial_with_no_filtered_tickets_test(self):
         logger = Mock()
@@ -233,7 +233,7 @@ class TestBruinRepository:
         ticket_statuses = [ticket_status_1, ticket_status_2]
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_all_filtered_tickets = Mock(return_value={"body": [], "status_code": 200})
+        bruin_repository.get_all_filtered_tickets = Mock(return_value={"body": [], "status": 200})
         bruin_repository.get_ticket_details = Mock()
 
         ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
@@ -249,7 +249,7 @@ class TestBruinRepository:
 
         expected_ticket_details_list = []
         assert ticket_details_by_edge["body"] == expected_ticket_details_list
-        assert ticket_details_by_edge['status_code'] == 200
+        assert ticket_details_by_edge['status'] == 200
 
     def get_ticket_details_by_edge_serial_with_filtered_tickets_and_no_ticket_details_test(self):
         logger = Mock()
@@ -285,11 +285,11 @@ class TestBruinRepository:
             {'ticketID': ticket_1_id},
             {'ticketID': ticket_2_id},
             {'ticketID': ticket_3_id},
-        ], "status_code": 200})
+        ], "status": 200})
         bruin_repository.get_ticket_details = Mock(side_effect=[
-            {"body": ticket_1_details, "status_code": 200},
-            {"body": ticket_2_details, "status_code": 200},
-            {"body": ticket_3_details, "status_code": 200},
+            {"body": ticket_1_details, "status": 200},
+            {"body": ticket_2_details, "status": 200},
+            {"body": ticket_3_details, "status": 200},
         ])
 
         ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
@@ -307,7 +307,7 @@ class TestBruinRepository:
 
         expected_ticket_details_list = []
         assert ticket_details_by_edge["body"] == expected_ticket_details_list
-        assert ticket_details_by_edge['status_code'] == 200
+        assert ticket_details_by_edge['status'] == 200
 
     def get_ticket_details_by_edge_serial_with_filtered_tickets_and_ticket_details_and_no_serial_coincidence_test(self):
         logger = Mock()
@@ -373,11 +373,11 @@ class TestBruinRepository:
             {'ticketID': ticket_1_id},
             {'ticketID': ticket_2_id},
             {'ticketID': ticket_3_id},
-        ], "status_code": 200})
+        ], "status": 200})
         bruin_repository.get_ticket_details = Mock(side_effect=[
-            {"body": ticket_1_details, "status_code": 200},
-            {"body": ticket_2_details, "status_code": 200},
-            {"body": ticket_3_details, "status_code": 200},
+            {"body": ticket_1_details, "status": 200},
+            {"body": ticket_2_details, "status": 200},
+            {"body": ticket_3_details, "status": 200},
         ])
 
         ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
@@ -395,7 +395,7 @@ class TestBruinRepository:
 
         expected_ticket_details_list = []
         assert ticket_details_by_edge["body"] == expected_ticket_details_list
-        assert ticket_details_by_edge['status_code'] == 200
+        assert ticket_details_by_edge['status'] == 200
 
     def get_affecting_ticket_details_by_edge_serial_test(self):
         logger = Mock()
@@ -429,7 +429,7 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(logger, bruin_client)
         bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body=ticket_details,
-                                                                                    status_code=200))
+                                                                                    status=200))
 
         affecting_ticket_details_by_edge = bruin_repository.get_affecting_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
@@ -445,7 +445,7 @@ class TestBruinRepository:
             ticket_statuses=ticket_statuses,
         )
         assert affecting_ticket_details_by_edge["body"] == ticket_details
-        assert affecting_ticket_details_by_edge["status_code"] == 200
+        assert affecting_ticket_details_by_edge["status"] == 200
 
     def get_outage_ticket_details_by_edge_serial_test(self):
         logger = Mock()
@@ -479,7 +479,7 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(logger, bruin_client)
         bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body=[ticket_details],
-                                                                                    status_code=200))
+                                                                                    status=200))
 
         outage_ticket_details_by_edge = bruin_repository.get_outage_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
@@ -495,7 +495,7 @@ class TestBruinRepository:
             ticket_statuses=ticket_statuses,
         )
         assert outage_ticket_details_by_edge["body"] == ticket_details
-        assert outage_ticket_details_by_edge["status_code"] == 200
+        assert outage_ticket_details_by_edge["status"] == 200
 
     def get_outage_ticket_details_by_edge_serial_empty_return_test(self):
         logger = Mock()
@@ -529,7 +529,7 @@ class TestBruinRepository:
 
         bruin_repository = BruinRepository(logger, bruin_client)
         bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body=[],
-                                                                                    status_code=200))
+                                                                                    status=200))
 
         outage_ticket_details_by_edge = bruin_repository.get_outage_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
@@ -545,7 +545,7 @@ class TestBruinRepository:
             ticket_statuses=ticket_statuses,
         )
         assert outage_ticket_details_by_edge["body"] == []
-        assert outage_ticket_details_by_edge["status_code"] == 200
+        assert outage_ticket_details_by_edge["status"] == 200
 
     def post_ticket_note_test(self):
         logger = Mock()
@@ -628,7 +628,7 @@ class TestBruinRepository:
                         }
                     ]
                 },
-            "status_code": 200,
+            "status": 200,
         }
         bruin_client = Mock()
         bruin_client.get_management_status = Mock(return_value=response)
@@ -646,7 +646,7 @@ class TestBruinRepository:
         }
         response = {
             "body": "empty",
-            "status_code": 400
+            "status": 400
         }
         bruin_client = Mock()
         bruin_client.get_management_status = Mock(return_value=response)
@@ -664,7 +664,7 @@ class TestBruinRepository:
         }
         response = {
             "body": "empty",
-            "status_code": 500
+            "status": 500
         }
         bruin_client = Mock()
         bruin_client.get_management_status = Mock(return_value=response)

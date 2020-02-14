@@ -57,7 +57,7 @@ class TestGetOutageTicketDetailsByEdgeSerial:
 
         bruin_repository = Mock()
         bruin_repository.get_outage_ticket_details_by_edge_serial = Mock(return_value={'body': ticket_details,
-                                                                                       'status_code': 200})
+                                                                                       'status': 200})
 
         outage_ticket_details = GetOutageTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
         await outage_ticket_details.send_outage_ticket_details_by_edge_serial(msg)
@@ -108,7 +108,7 @@ class TestGetOutageTicketDetailsByEdgeSerial:
 
         bruin_repository = Mock()
         bruin_repository.get_outage_ticket_details_by_edge_serial = Mock(return_value={'body': ticket_details,
-                                                                                       'status_code': 200})
+                                                                                       'status': 200})
 
         outage_ticket_details = GetOutageTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
         await outage_ticket_details.send_outage_ticket_details_by_edge_serial(msg)

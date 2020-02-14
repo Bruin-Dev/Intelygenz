@@ -36,7 +36,7 @@ class PostTicket:
             result = self._bruin_repository.post_ticket(payload)
 
             response['ticketIds'] = result["body"]
-            response["status"] = result["status_code"]
+            response["status"] = result["status"]
             if response["status"] in range(200, 300):
                 self._logger.info(f'Ticket created for client id: {payload["clientId"]} with ticket id:'
                                   f' {result["body"]["ticketIds"][0]}')

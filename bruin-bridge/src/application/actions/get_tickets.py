@@ -42,7 +42,7 @@ class GetTicket:
             filtered_tickets = self._bruin_repository.get_all_filtered_tickets(params, ticket_status)
 
             filtered_tickets_response['tickets'] = filtered_tickets["body"]
-            filtered_tickets_response["status"] = filtered_tickets["status_code"]
+            filtered_tickets_response["status"] = filtered_tickets["status"]
 
             self._logger.info(f'All tickets for client id: {params["client_id"]} sent')
 

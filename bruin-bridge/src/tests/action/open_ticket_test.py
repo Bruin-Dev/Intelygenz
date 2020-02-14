@@ -30,7 +30,7 @@ class TestOpenTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repo = Mock()
-        bruin_repo.open_ticket = Mock(return_value={'body': 'Success', 'status_code': 200})
+        bruin_repo.open_ticket = Mock(return_value={'body': 'Success', 'status': 200})
 
         open_ticket = OpenTicket(mock_logger, event_bus, bruin_repo)
         await open_ticket.open_ticket(msg)
@@ -56,7 +56,7 @@ class TestOpenTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repo = Mock()
-        bruin_repo.open_ticket = Mock(return_value={'body': 'Success', 'status_code': 200})
+        bruin_repo.open_ticket = Mock(return_value={'body': 'Success', 'status': 200})
 
         open_ticket = OpenTicket(mock_logger, event_bus, bruin_repo)
         await open_ticket.open_ticket(msg)

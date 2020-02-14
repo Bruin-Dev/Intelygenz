@@ -99,7 +99,7 @@ class TestBruinClient:
             assert mock_get.call_args[1]['params']['Category'] == params['category']
             assert mock_get.call_args[1]['params']['TicketTopic'] == params['ticket_topic']
             assert tickets['body'] == get_response['responses']
-            assert tickets['status_code'] == 200
+            assert tickets['status'] == 200
 
     def get_all_tickets_with_400_status_code_test(self):
         logger = Mock()
@@ -119,7 +119,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert tickets['body'] == error_response
-            assert tickets['status_code'] == 400
+            assert tickets['status'] == 400
 
     def get_all_tickets_with_401_status_code_test(self):
         logger = Mock()
@@ -137,7 +137,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert tickets['body'] == f"Maximum retries while relogin"
-            assert tickets['status_code'] == 401
+            assert tickets['status'] == 401
 
     def get_all_tickets_with_404_status_code_test(self):
         logger = Mock()
@@ -157,7 +157,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert tickets['body'] == "Resource not found"
-            assert tickets['status_code'] == 404
+            assert tickets['status'] == 404
 
     def get_all_tickets_with_500_status_code_test(self):
         logger = Mock()
@@ -177,7 +177,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert tickets['body'] == "Got internal error from Bruin"
-            assert tickets['status_code'] == 500
+            assert tickets['status'] == 500
 
     def get_ticket_details_test(self):
         logger = Mock()
@@ -194,7 +194,7 @@ class TestBruinClient:
 
             mock_get.assert_called_once()
             assert ticket_details["body"] == get_response
-            assert ticket_details["status_code"] == 200
+            assert ticket_details["status"] == 200
 
     def get_ticket_details_with_400_status_code_test(self):
         logger = Mock()
@@ -214,7 +214,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert ticket_details['body'] == error_response
-            assert ticket_details['status_code'] == 400
+            assert ticket_details['status'] == 400
 
     def get_ticket_details_with_401_status_code_test(self):
         logger = Mock()
@@ -234,7 +234,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert ticket_details['body'] == "Maximum retries while relogin"
-            assert ticket_details['status_code'] == 401
+            assert ticket_details['status'] == 401
 
     def get_ticket_details_with_404_status_code_test(self):
         logger = Mock()
@@ -253,7 +253,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert ticket_details['body'] == "Resource not found"
-            assert ticket_details['status_code'] == 404
+            assert ticket_details['status'] == 404
 
     def get_ticket_details_with_500_status_code_test(self):
         logger = Mock()
@@ -272,7 +272,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert ticket_details['body'] == "Got internal error from Bruin"
-            assert ticket_details['status_code'] == 500
+            assert ticket_details['status'] == 500
 
     def post_ticket_note_test(self):
         logger = Mock()
@@ -292,7 +292,7 @@ class TestBruinClient:
 
             mock_post.assert_called_once()
             assert post_response["body"] == expected_post_response
-            assert post_response["status_code"] == 200
+            assert post_response["status"] == 200
 
     def post_ticket_note_with_400_status_code_test(self):
         logger = Mock()
@@ -313,7 +313,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert post_response["body"] == expected_post_response
-            assert post_response["status_code"] == 400
+            assert post_response["status"] == 400
 
     def post_ticket_note_with_401_status_code_test(self):
         logger = Mock()
@@ -335,7 +335,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert post_response["body"] == "Maximum retries while relogin"
-            assert post_response["status_code"] == 401
+            assert post_response["status"] == 401
 
     def post_ticket_note_with_404_status_code_test(self):
         logger = Mock()
@@ -357,7 +357,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert post_response["body"] == "Resource not found"
-            assert post_response["status_code"] == 404
+            assert post_response["status"] == 404
 
     def post_ticket_note_with_500_status_code_test(self):
         logger = Mock()
@@ -378,7 +378,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert post_response["body"] == "Got internal error from Bruin"
-            assert post_response["status_code"] == 500
+            assert post_response["status"] == 500
 
     def post_ticket_test(self):
         logger = Mock()
@@ -395,7 +395,7 @@ class TestBruinClient:
             post_ticket = bruin_client.post_ticket(payload)
             mock_post.assert_called_once()
             assert post_ticket['body'] == expected_post_response
-            assert post_ticket['status_code'] == 200
+            assert post_ticket['status'] == 200
 
     def post_ticket_400_status_test(self):
         logger = Mock()
@@ -417,7 +417,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert post_ticket["body"] == expected_post_response
-            assert post_ticket["status_code"] == 400
+            assert post_ticket["status"] == 400
 
     def post_ticket_401_status_test(self):
         logger = Mock()
@@ -439,7 +439,7 @@ class TestBruinClient:
             logger.error.assert_called()
             bruin_client.login.assert_called()
             assert post_ticket["body"] == "Maximum retries while relogin"
-            assert post_ticket["status_code"] == 401
+            assert post_ticket["status"] == 401
 
     def post_ticket_404_status_test(self):
         logger = Mock()
@@ -461,7 +461,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert post_ticket["body"] == "Resource not found"
-            assert post_ticket["status_code"] == 404
+            assert post_ticket["status"] == 404
 
     def post_ticket_500_status_test(self):
         logger = Mock()
@@ -483,7 +483,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert post_ticket["body"] == "Got internal error from Bruin"
-            assert post_ticket["status_code"] == 500
+            assert post_ticket["status"] == 500
 
     def update_ticket_status_test(self):
         logger = Mock()
@@ -502,7 +502,7 @@ class TestBruinClient:
             update_ticket_status = bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
             mock_put.assert_called_once()
             assert update_ticket_status["body"] == successful_status_change
-            assert update_ticket_status["status_code"] == 200
+            assert update_ticket_status["status"] == 200
 
     def update_ticket_status_400_error_status_test(self):
         logger = Mock()
@@ -527,7 +527,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert update_ticket_status["body"] == failure_status_change
-            assert update_ticket_status["status_code"] == 400
+            assert update_ticket_status["status"] == 400
 
     def update_ticket_status_401_error_status_test(self):
         logger = Mock()
@@ -553,7 +553,7 @@ class TestBruinClient:
             bruin_client.login.assert_called()
 
             assert update_ticket_status["body"] == "Maximum retries while relogin"
-            assert update_ticket_status["status_code"] == 401
+            assert update_ticket_status["status"] == 401
 
     def update_ticket_status_404_error_status_test(self):
         logger = Mock()
@@ -578,7 +578,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert update_ticket_status["body"] == "Resource not found"
-            assert update_ticket_status["status_code"] == 404
+            assert update_ticket_status["status"] == 404
 
     def update_ticket_status_500_error_status_test(self):
         logger = Mock()
@@ -603,7 +603,7 @@ class TestBruinClient:
             logger.error.assert_called()
 
             assert update_ticket_status["body"] == "Got internal error from Bruin"
-            assert update_ticket_status["status_code"] == 500
+            assert update_ticket_status["status"] == 500
 
     def get_management_status_pascalize_with_ok_test(self):
         logger = Mock()
@@ -765,7 +765,7 @@ class TestBruinClient:
 
         message = {
             "body": f"Connection error in Bruin API. {cause}",
-            "status_code": 500}
+            "status": 500}
 
         with patch.object(bruin_client_module.requests, 'get', side_effect=ConnectionError(cause)):
             bruin_client = BruinClient(logger, config)
