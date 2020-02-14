@@ -20,21 +20,19 @@ class TestGetTicketDetails:
         assert ticket_details._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
-    async def send_ticket_details_test(self):
+    async def send_ticket_details_no_ticket_id_test(self):
         logger = Mock()
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
-        ticket_id = 123
         msg = {
             'request_id': request_id,
             'response_topic': response_topic,
-            'ticket_id': ticket_id,
         }
-        ticket_details = {'ticket_details': 'Some ticket details'}
+        ticket_details = {"body": {'ticket_details': 'Some ticket details'}, "status_code": 400}
         send_details_response = {
             'request_id': request_id,
-            'ticket_details': ticket_details,
-            'status': 200,
+            'ticket_details': 'You must include ticket_id in the request',
+            'status': 400,
         }
 
         event_bus = Mock()
@@ -46,13 +44,13 @@ class TestGetTicketDetails:
         ticket_details = GetTicketDetails(logger, event_bus, bruin_repository)
         await ticket_details.send_ticket_details(msg)
 
-        ticket_details._bruin_repository.get_ticket_details.assert_called_once_with(ticket_id)
+        ticket_details._bruin_repository.get_ticket_details.assert_not_called()
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
             response_topic, send_details_response
         )
 
     @pytest.mark.asyncio
-    async def send_ticket_details_with_no_ticket_details_returned_test(self):
+    async def send_ticket_details_200_test(self):
         logger = Mock()
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
@@ -62,11 +60,11 @@ class TestGetTicketDetails:
             'response_topic': response_topic,
             'ticket_id': ticket_id,
         }
-        ticket_details = None
+        ticket_details = {"body": {'ticket_details': 'Some ticket details'}, "status_code": 200}
         send_details_response = {
             'request_id': request_id,
-            'ticket_details': ticket_details,
-            'status': 500,
+            'ticket_details': ticket_details["body"],
+            'status': 200,
         }
 
         event_bus = Mock()

@@ -18,31 +18,31 @@ class TestOpenTicket:
         assert open_ticket._bruin_repository == bruin_repo
 
     @pytest.mark.asyncio
-    async def open_ticket_ok_test(self):
+    async def open_ticket_no_ticket_id_no_detail_id_test(self):
         mock_logger = Mock()
 
         request_id = 'some.id'
         response_topic = 'some.response'
-        ticket_id = 123
-        detail_id = 432
-        msg = {'request_id': request_id, 'response_topic': response_topic, 'ticket_id': ticket_id,
-               'detail_id': detail_id}
+
+        msg = {'request_id': request_id, 'response_topic': response_topic}
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
 
         bruin_repo = Mock()
-        bruin_repo.open_ticket = Mock(return_value='Success')
+        bruin_repo.open_ticket = Mock(return_value={'body': 'Success', 'status_code': 200})
 
         open_ticket = OpenTicket(mock_logger, event_bus, bruin_repo)
         await open_ticket.open_ticket(msg)
 
-        bruin_repo.open_ticket.assert_called_once_with(ticket_id, detail_id)
+        bruin_repo.open_ticket.assert_not_called()
         event_bus.publish_message.assert_awaited_once_with(response_topic,
-                                                           dict(request_id=request_id, status=200))
+                                                           dict(request_id=request_id,
+                                                                body='You must include ticket_id '
+                                                                     'and detail_id in the request', status=400))
 
     @pytest.mark.asyncio
-    async def open_ticket_ko_test(self):
+    async def open_ticket_200_test(self):
         mock_logger = Mock()
 
         request_id = 'some.id'
@@ -56,11 +56,11 @@ class TestOpenTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repo = Mock()
-        bruin_repo.open_ticket = Mock(return_value=None)
+        bruin_repo.open_ticket = Mock(return_value={'body': 'Success', 'status_code': 200})
 
         open_ticket = OpenTicket(mock_logger, event_bus, bruin_repo)
         await open_ticket.open_ticket(msg)
 
         bruin_repo.open_ticket.assert_called_once_with(ticket_id, detail_id)
         event_bus.publish_message.assert_awaited_once_with(response_topic,
-                                                           dict(request_id=request_id, status=500))
+                                                           dict(request_id=request_id, body='Success', status=200))
