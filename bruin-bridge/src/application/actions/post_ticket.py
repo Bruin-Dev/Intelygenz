@@ -48,6 +48,6 @@ class PostTicket:
                                f'JSON malformed')
             response["status"] = 400
             response["ticketIds"] = 'You must specify ' \
-                                        '{.."payload":{"clientId", "category", "services", "contacts"}, in the request'
+                                    '{.."payload":{"clientId", "category", "services", "contacts"}, in the request'
 
         await self._event_bus.publish_message(msg['response_topic'], response)
