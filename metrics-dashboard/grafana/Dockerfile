@@ -12,7 +12,7 @@ COPY ./metrics-dashboard /metrics-dashboard
 
 RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.9/main' >> /etc/apk/repositories
 RUN apk update && apk add python3=3.6.9-r2 py3-setuptools gcc libc-dev g++ python3-dev
-RUN pip3 install -r /metrics-dashboard/grafana/requirements.txt
+RUN pip3 install -r /metrics-dashboard/grafana/requirements.txt -f https://d3nllpcjtts00v.cloudfront.net/igzpackages/index.html
 
 COPY metrics-dashboard/grafana/datasources /etc/grafana/provisioning/datasources
 COPY metrics-dashboard/grafana/dashboards /etc/grafana/provisioning/dashboards

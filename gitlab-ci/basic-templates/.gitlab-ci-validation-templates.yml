@@ -4,10 +4,11 @@
 
 .lint_module: &lint_module
   stage: validation
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - pip install pycodestyle
+  image:
+    name: gitlab.intelygenz.com:5001/mettel/automation-engine/alpine_pycodestyle_linter:latest
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
     - pycodestyle --max-line-length=120 ${MODULE}
   only:

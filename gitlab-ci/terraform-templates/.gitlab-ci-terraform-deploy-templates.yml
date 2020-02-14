@@ -4,7 +4,7 @@
 
 .terraform_template_deploy_environment: &terraform_template_deploy_environment
   image:
-    name: hashicorp/terraform:0.12.7
+    name: gitlab.intelygenz.com:5001/mettel/automation-engine/terraform_0.12.7_awscli:latest
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -13,8 +13,6 @@
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
   script:
-    - apk --upgrade --no-cache add bash gettext python3 py-pip jq
-    - pip3 install -r ci-utils/requirements.txt
     - export ENVIRONMENT_VAR=${TF_VAR_ENVIRONMENT}
     - python3 ci-utils/manage_ecr_docker_images.py -g
     - source ci-utils/assign_docker_images_build_numbers.sh

@@ -12,7 +12,7 @@ sites-monitor-linter:
 sites-monitor-test:
   variables:
     MODULE: sites-monitor
-  extends: .unittest_module
+  extends: .unittest_module_python
 
 # ====================================================
 # Images builds jobs for sites-monitor module

@@ -12,7 +12,7 @@ bruin-bridge-linter:
 bruin-bridge-test:
   variables:
     MODULE: bruin-bridge
-  extends: .unittest_module
+  extends: .unittest_module_python_alpine
 
 # ==========================================
 # Images builds jobs for bruin-bridge module

@@ -12,7 +12,7 @@ service-outage-monitor-linter:
 service-outage-monitor-test:
   variables:
     MODULE: service-outage-monitor
-  extends: .unittest_module
+  extends: .unittest_module_python
 
 # ====================================================
 # Images builds jobs for service-outage-monitor module

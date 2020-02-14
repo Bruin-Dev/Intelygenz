@@ -12,7 +12,7 @@ notifier-linter:
 notifier-test:
   variables:
     MODULE: notifier
-  extends: .unittest_module
+  extends: .unittest_module_python_alpine
 
 # ======================================
 # Images builds jobs for notifier module

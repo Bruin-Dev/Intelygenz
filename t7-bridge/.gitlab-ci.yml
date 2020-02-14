@@ -12,7 +12,7 @@ t7-bridge-linter:
 t7-bridge-test:
   variables:
     MODULE: t7-bridge
-  extends: .unittest_module
+  extends: .unittest_module_python
 
 # =======================================
 # Images builds jobs for t7-bridge module

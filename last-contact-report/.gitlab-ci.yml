@@ -12,7 +12,7 @@ last-contact-report-linter:
 last-contact-report-test:
   variables:
     MODULE: last-contact-report
-  extends: .unittest_module
+  extends: .unittest_module_python
 
 # =================================================
 # Images builds jobs for last-contact-report module

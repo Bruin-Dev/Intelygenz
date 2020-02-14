@@ -12,7 +12,7 @@ service-outage-triage-linter:
 service-outage-triage-test:
   variables:
     MODULE: service-outage-triage
-  extends: .unittest_module
+  extends: .unittest_module_python
 
 # ===================================================
 # Images builds jobs for service-outage-triage module

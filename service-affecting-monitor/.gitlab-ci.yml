@@ -12,7 +12,7 @@ service-affecting-monitor-linter:
 service-affecting-monitor-test:
   variables:
     MODULE: service-affecting-monitor
-  extends: .unittest_module
+  extends: .unittest_module_python_alpine
 
 # =======================================================
 # Images builds jobs for service-affecting-monitor module

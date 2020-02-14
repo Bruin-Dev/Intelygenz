@@ -7,10 +7,13 @@
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  image:
+    name: gitlab.intelygenz.com:5001/mettel/automation-engine/alpine_3.9_awscli:latest
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - apk --upgrade --no-cache add python3 py-pip
-    - pip3 install awscli
     - python3 ci-utils/check_ecs_resources.py
   tags:
     - kubernetes

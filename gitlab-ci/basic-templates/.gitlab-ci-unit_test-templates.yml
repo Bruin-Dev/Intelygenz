@@ -2,11 +2,14 @@
 # Using gitlab-ci extends to reuse scripts between jobs (https://docs.gitlab.com/ee/ci/yaml/#extends)
 #
 
-.unittest_module: &unittest_module
+.unittest_module_python: &unittest_module_python
   stage: unit_test
-  image: python:3.6
+  image:
+    name: gitlab.intelygenz.com:5001/mettel/automation-engine/python3.6_unit_tests:1.0.0
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   before_script:
-    - apt-get update -q -y
     - cd ${MODULE}
     - pip install -r requirements.txt
   script:
@@ -20,6 +23,14 @@
     - /^*dev/fix/.*$/
   tags:
     - kubernetes
+
+.unittest_module_python_alpine: &unittest_module_python_alpine
+  extends: .unittest_module_python
+  image:
+    name: gitlab.intelygenz.com:5001/mettel/automation-engine/python3.6_alpine_unit_tests:1.0.0
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 .unittest_with_setup_template: &unittest_with_setup_template
   stage: unit_test
