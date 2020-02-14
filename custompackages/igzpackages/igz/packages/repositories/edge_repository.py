@@ -123,6 +123,3 @@ class EdgeRepository:
         }
 
         return EdgeIdentifier(**full_id_dict)
-
-
-

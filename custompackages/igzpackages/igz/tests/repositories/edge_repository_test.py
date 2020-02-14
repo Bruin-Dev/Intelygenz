@@ -14,8 +14,8 @@ class TestEdgeIdentifier:
     def instance_test(self):
         edge = {'host': "aaa",
                 'enterprise_id': "bbb",
-               'edge_id': "ccc"
-        }
+                'edge_id': "ccc"
+                }
         edge_identifier = EdgeIdentifier(**edge)
         assert isinstance(edge_identifier, EdgeIdentifier) is True
 
@@ -25,7 +25,7 @@ class TestEdgeIdentifier:
                 'edge_id': "ccc"
                 }
         edge_identifier = EdgeIdentifier(**edge)
-        assert str(edge_identifier)  == "host = aaa, enterprise_id = bbb, edge_id = ccc"
+        assert str(edge_identifier) == "host = aaa, enterprise_id = bbb, edge_id = ccc"
 
 
 class TestEdgeRepository:
