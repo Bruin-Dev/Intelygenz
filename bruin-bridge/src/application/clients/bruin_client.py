@@ -183,10 +183,10 @@ class BruinClient:
                                         headers=self._get_request_headers(),
                                         params=parsed_filters,
                                         verify=False)
-            except ConnectionError:
-                self._logger.error(f"A connection error happened while trying to connect to Bruin API")
-                return_response["body"] = "Connection error in Bruin API"
-                return_response["status_code"] = 503
+            except ConnectionError as e:
+                self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
+                return_response["body"] = f"Connection error in Bruin API. {e}"
+                return_response["status_code"] = 500
                 raise Exception(return_response)
 
             if response.status_code in range(200, 300):

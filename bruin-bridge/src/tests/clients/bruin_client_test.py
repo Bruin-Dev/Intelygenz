@@ -461,12 +461,13 @@ class TestBruinClient:
             "ClientId": 9994,
             "ServiceNumber": "VC05400009999"
         }
+        cause = "ERROR"
 
         message = {
-            "body": "Connection error in Bruin API",
-            "status_code": 503}
+            "body": f"Connection error in Bruin API. {cause}",
+            "status_code": 500}
 
-        with patch.object(bruin_client_module.requests, 'get', side_effect=ConnectionError):
+        with patch.object(bruin_client_module.requests, 'get', side_effect=ConnectionError(cause)):
             bruin_client = BruinClient(logger, config)
             bruin_client.login = Mock()
             bruin_client._bearer_token = "Someverysecretaccesstoken"

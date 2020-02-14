@@ -86,36 +86,35 @@ class ServiceOutageDetector:
         for edge_full_id in edges_to_monitor:
             edge_identifier = EdgeIdentifier(**edge_full_id)
 
-            try:
-                self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}.')
-                edge_status = await self._get_edge_status_by_id(edge_full_id)
-                self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
-                self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
-                management_status = await self._get_management_status(edge_status)
-                if management_status["status"] not in range(200, 300):
-                    self._logger.info(f"Management status is unknown for {edge_identifier}")
-                    message = (
-                        f"[outage-monitoring] Management status is unknown for {edge_identifier}. "
-                        f"Cause: {management_status['body']}"
-                    )
-                    slack_message = {'request_id': uuid(),
-                                     'message': message}
-                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
-                    continue
+            self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}.')
+            edge_status = await self._get_edge_status_by_id(edge_full_id)
+            self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
+            self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
+            management_status = await self._get_management_status(edge_status)
+            if management_status["status"] not in range(200, 300):
+                self._logger.info(f"Management status is unknown for {edge_identifier}")
+                message = (
+                    f"[outage-monitoring] Management status is unknown for {edge_identifier}. "
+                    f"Cause: {management_status['body']}"
+                )
+                slack_message = {'request_id': uuid(),
+                                 'message': message}
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+                continue
 
-                if not self._is_management_status_active(management_status):
-                    self._logger.info(
-                        f'Management status is not active for {edge_identifier}. Skipping process...')
-                    continue
-                else:
-                    self._logger.info(f'Management status for {edge_identifier} seems active.')
+            if not self._is_management_status_active(management_status):
+                self._logger.info(
+                    f'Management status is not active for {edge_identifier}. Skipping process...')
+                continue
+            else:
+                self._logger.info(f'Management status for {edge_identifier} seems active.')
 
-                outage_happened = self._outage_utils.is_there_an_outage(edge_status)
-                if outage_happened:
-                    self._logger.info(
-                        f'[outage-monitoring] Outage detected for {edge_identifier}. '
-                        'Scheduling edge to re-check it in a few moments.'
-                    )
+            outage_happened = self._outage_utils.is_there_an_outage(edge_status)
+            if outage_happened:
+                self._logger.info(
+                    f'[outage-monitoring] Outage detected for {edge_identifier}. '
+                    'Scheduling edge to re-check it in a few moments.'
+                )
 
                 try:
                     tz = timezone(self._config.MONITOR_CONFIG['timezone'])
@@ -310,15 +309,6 @@ class ServiceOutageDetector:
         edge_list = await self._get_all_edges()
         for edge_full_id in edge_list:
             edge_identifier = EdgeIdentifier(**edge_full_id)
-            edge_status = await self._get_edge_status_by_id(edge_full_id)
-            if not await self._is_management_status_active(edge_status):
-                self._logger.info(f"Management status is not active. {edge_identifier} won't be reported")
-                continue
-            else:
-                if self._outage_utils.is_there_an_outage(edge_status):
-                    await self._start_quarantine_job(edge_full_id)
-                    self._add_edge_to_quarantine(edge_full_id, edge_status)
-
             try:
                 self._logger.info(f'[outage-report] Checking status of {edge_identifier}.')
                 edge_status = await self._get_edge_status_by_id(edge_full_id)
@@ -639,8 +629,10 @@ class ServiceOutageDetector:
                 "service_number": serial_number
             }
         }
+
         management_status = await self._event_bus.rpc_request("bruin.inventory.management.status",
                                                               management_request, timeout=30)
+
         return management_status
 
     def _is_management_status_active(self, management_status) -> bool:
