@@ -15,15 +15,19 @@ class VelocloudRepository:
 
     def get_all_enterprises_edges_with_host(self, msg):
         self._logger.info('Getting all enterprises edges with host')
-        edges_by_enterprise = self._velocloud_client.get_all_enterprises_edges_with_host()
+        response = self._velocloud_client.get_all_enterprises_edges_with_host()
+        if response["status_code"] not in range(200, 300):
+            return {"body": response["body"], "status_code": response["status_code"]}
+        status_code = response["status_code"]
+        edges_by_enterprise = response["body"]
         if len(msg['filter']) > 0:
-            edges_by_enterprise = [edge for edge in edges_by_enterprise
+            edges_by_enterprise = [edge for edge in response["body"]
                                    for filter_edge in msg['filter']
                                    if edge['host'] == filter_edge['host']
-                                   if edge['enterprise_id'] in filter_edge['enterprise_ids'] or len(
-                                    filter_edge['enterprise_ids']) is 0]
+                                   if edge['enterprise_id'] in filter_edge['enterprise_ids']
+                                   or len(filter_edge['enterprise_ids']) is 0]
 
-        return edges_by_enterprise
+        return {"body": edges_by_enterprise, "status_code": status_code}
 
     def get_edge_information(self, edge):
         edge_information = self._velocloud_client.get_edge_information(edge)

@@ -330,13 +330,18 @@ class VelocloudClient:
                 continue
             for enterprise in res["body"]["enterprises"]:
                 edges_by_enterprise = self.get_all_enterprises_edges_by_id(client, enterprise["id"])
+                if edges_by_enterprise["status_code"] not in range(200, 300):
+                    continue
                 for edge in edges_by_enterprise["body"]:
                     edges_by_enterprise_and_host.append(
                         {"host": client["host"],
                          "enterprise_id": enterprise["id"],
                          "edge_id": edge["id"]})
 
-        return edges_by_enterprise_and_host
+        if edges_by_enterprise_and_host == []:
+            return {"body": None, "status_code": 500}
+
+        return {"body": edges_by_enterprise_and_host, "status_code": 200}
 
     async def get_all_enterprises_edges_with_host_by_serial(self):
         serial_to_edge_id = defaultdict(list)

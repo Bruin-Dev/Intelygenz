@@ -11,7 +11,8 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        edges = [{"host": "some.host", "enterprise_id": 19, "edge_id": 99}]
+        edges = {"body": [{"host": "some.host", "enterprise_id": 19, "edge_id": 99}],
+                 "status_code": 200}
         msg = {"request_id": "123", "filter": []}
         test_velocloud_client.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         edges_by_ent = vr.get_all_enterprises_edges_with_host(msg)
@@ -23,14 +24,20 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        edges = [{"host": "some.host", "enterprise_id": 19, "edge_id": 99},
-                 {"host": "some.host", "enterprise_id": 32, "edge_id": 99},
-                 {"host": "some.host2", "enterprise_id": 42, "edge_id": 99}]
+        edges = {
+            "body":
+                [
+                    {"host": "some.host", "enterprise_id": 19, "edge_id": 99},
+                    {"host": "some.host", "enterprise_id": 32, "edge_id": 99},
+                    {"host": "some.host2", "enterprise_id": 42, "edge_id": 99}
+                ],
+            "status_code": 200
+        }
         test_velocloud_client.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         msg = {"request_id": "123", "filter": [{"host": "some.host", "enterprise_ids": [19]},
                                                {"host": "some.host2", "enterprise_ids": []}]}
         edges_by_ent = vr.get_all_enterprises_edges_with_host(msg)
-        assert edges_by_ent == [edges[0], edges[2]]
+        assert edges_by_ent["body"] == [edges["body"][0], edges["body"][2]]
 
     def get_edge_information_OK_test(self):
         mock_logger = Mock()
