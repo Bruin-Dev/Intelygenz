@@ -109,27 +109,29 @@ class ServiceAffectingMonitor:
                 ticket_note = self._ticket_object_to_string(ticket_dict)
                 ticket_details = {
                     "request_id": uuid(),
-                    "clientId": client_id,
-                    "category": "VAS",
-                    "services": [
-                        {
-                            "serviceNumber": device['serial']
-                        }
-                    ],
-                    "contacts": [
-                        {
-                            "email": device['email'],
-                            "phone": device['phone'],
-                            "name": device['name'],
-                            "type": "site"
-                        },
-                        {
-                            "email": device['email'],
-                            "phone": device['phone'],
-                            "name": device['name'],
-                            "type": "ticket"
-                        }
-                    ]
+                    "payload": {
+                                "clientId": client_id,
+                                "category": "VAS",
+                                "services": [
+                                    {
+                                        "serviceNumber": device['serial']
+                                    }
+                                ],
+                                "contacts": [
+                                    {
+                                        "email": device['email'],
+                                        "phone": device['phone'],
+                                        "name": device['name'],
+                                        "type": "site"
+                                    },
+                                    {
+                                        "email": device['email'],
+                                        "phone": device['phone'],
+                                        "name": device['name'],
+                                        "type": "ticket"
+                                    }
+                                ]
+                            }
                 }
                 ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
                                                               ticket_details, timeout=30)
@@ -150,9 +152,13 @@ class ServiceAffectingMonitor:
                 self._logger.info(f'Ticket created with ticket id: {ticket_id["ticketIds"]["ticketIds"][0]}')
 
     async def _ticket_existence(self, client_id, serial, trouble):
-        ticket_request_msg = {'request_id': uuid(), 'client_id': client_id,
-                              'ticket_status': ['New', 'InProgress', 'Draft'],
-                              'category': 'SD-WAN', 'ticket_topic': 'VAS'}
+        ticket_request_msg = {'request_id': uuid(),
+                              'params': {
+                                          'client_id': client_id,
+                                          'category': 'SD-WAN',
+                                          'ticket_topic': 'VAS',
+                              },
+                              'ticket_status': ['New', 'InProgress', 'Draft']}
         all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg, timeout=200)
         for ticket in all_tickets['tickets']:
             ticket_detail_msg = {'request_id': uuid(),

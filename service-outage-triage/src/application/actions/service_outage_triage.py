@@ -44,8 +44,10 @@ class ServiceOutageTriage:
                 self._logger.info(f'Requesting tickets for Bruin company of client_id: {client_id}')
                 request_tickets_message = {'request_id': uuid(), 'client_id': client_id,
                                            'ticket_status': ['New', 'InProgress', 'Draft'],
-                                           'category': 'SD-WAN',
-                                           'ticket_topic': 'VOO'}
+                                           'params': {'client_id': client_id,
+                                                      'category': 'SD-WAN',
+                                                      'ticket_topic': 'VOO'}
+                                           }
                 ticket_response = await self._event_bus.rpc_request("bruin.ticket.request",
                                                                     request_tickets_message,
                                                                     timeout=90)

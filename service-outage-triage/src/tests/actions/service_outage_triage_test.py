@@ -119,10 +119,12 @@ class TestServiceOutageTriage:
             call('bruin.ticket.request',
                  {
                      'request_id': uuid_,
-                     'client_id': 85940,
                      'ticket_status': ['New', 'InProgress', 'Draft'],
-                     'category': 'SD-WAN',
-                     'ticket_topic': 'VOO'
+                     'params': {
+                                 'client_id': 85940,
+                                 'category': 'SD-WAN',
+                                 'ticket_topic': 'VOO'
+                     }
                  },
                  timeout=90, )
         ])
@@ -167,10 +169,12 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 {
                     'request_id': uuid_1,
-                    'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
+                    'params':{
+                              'client_id': 85940,
+                              'category': 'SD-WAN',
+                              'ticket_topic': 'VOO'
+                    }
                 },
                 timeout=90,
             ),
@@ -227,10 +231,12 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 {
                     'request_id': uuid_1,
-                    'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
+                    'params':{
+                              'client_id': 85940,
+                              'category': 'SD-WAN',
+                              'ticket_topic': 'VOO'
+                    }
                 },
                 timeout=90,
             ),
@@ -287,10 +293,12 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 {
                     'request_id': uuid_1,
-                    'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
+                    'params':{
+                              'client_id': 85940,
+                              'category': 'SD-WAN',
+                              'ticket_topic': 'VOO'
+                    }
                 },
                 timeout=90,
             ),
@@ -389,10 +397,12 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 {
                     'request_id': uuid_1,
-                    'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
+                    'params':{
+                               'client_id': 85940,
+                               'category': 'SD-WAN',
+                               'ticket_topic': 'VOO'
+                    }
                 },
                 timeout=90,
             ),
@@ -510,10 +520,12 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 {
                     'request_id': uuid_1,
-                    'client_id': 85940,
                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'category': 'SD-WAN',
-                    'ticket_topic': 'VOO'
+                    'params':{
+                              'client_id': 85940,
+                              'category': 'SD-WAN',
+                              'ticket_topic': 'VOO'
+                    }
                 },
                 timeout=90,
             ),
