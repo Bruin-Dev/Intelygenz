@@ -14,20 +14,20 @@
 
 Infrastructure as Code enables DevOps to test the deployment of environments before use it in production. IaC can deliver 
 stable environments rapidly and at scale. Avoiding manual configuration of environments and enforce consistency by representing
- the desired state of their environments via code. This technique improve the automatic deployments in Nextinit, each time 
+ the desired state of their environments via code. This technique improve the automatic deployments in automation-engine, each time 
  the pipelines launch the [Continuous delivery](./PIPELINES.md##continuous-delivery-cd) will create, update or destroy 
  the infrastructure if it's necessary. 
 
 ## IaC in MetTel Automation
 
-Nextinit runs IaC with [terraform](https://www.terraform.io/), this task is/will be included in the automation [pipelines](./PIPELINES.md##Pipelines).
+Automation-engine runs IaC with [terraform](https://www.terraform.io/), this task is/will be included in the automation [pipelines](./PIPELINES.md##Pipelines).
 Terraform save the state of the infrastructure in a storage, these files have the extension **.tfstate**. In MetTel Automation we
 saves these files in a protected Cloud storage to centralize the states and be accessible each time the pipeline needs to deploy/update
 the infrastructure.
 
 ## Folder structure
 
-````
+````bash
 infra-as-code/
 ├── basic-infra             # basic infrastructure in AWS
 └── dev                     # AWS resources for each environment (ECS Cluster, ElastiCache Cluster, etc.)
@@ -63,6 +63,8 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
     * A [CloudFormation Stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html) for create the [SNS topic](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html) that will be used by *CloudWatch Alarms* notifications of this environment
 
     * A set of [Security Groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html) for all the resources created by the terraform files present in this folder
+
+    * A set of `null_resource` type resources to execute the [python script in charge of performing the healtheck of the tasks](./../ci-utils/task_healthcheck.py) created in a deployment for the capabilites type microservices, as well as to create the *Graphana* users in the environment where the deployment is being done, [using another Python script](./../ci-utils/grafana_users_creation.py).
 
 3. `network-resources`: there are the necessary files for create the [VPC](https://aws.amazon.com/vpc/) and all related resources in the environment used for deployment, these being the following:
 

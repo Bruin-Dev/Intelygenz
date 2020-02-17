@@ -117,9 +117,32 @@ In this process, a series of resources will also be created in AWS for the selec
 
 * A [CloudFormation Stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html) for create the [SNS topic](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html) that will be used by *CloudWatch Alarms* notifications of this environment
 
-## Grafana user creation steps
+Also, resources of type `null_resource` are created to execute from python a series of scripts in python:
 
-This area will cover the creation of a set os users in the Grafana Service created for the environment that is being used in this deployment.
+1. The creation of the [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) is conditioned to a script launched as a `null_resource` to check that the last ECS service created for NATS is running in a healthy state
+
+2. Then the ECS services related to the capabilities type microservices are created, i.e. bruin-bridge, velocloud-bridge, t7-bridge, notifier and prometheus. Once created, the script used for NATS is launched through null resource to check that the tasks for each of these ECS services created are in RUNNING and HEALTHY status.
+
+3. Once all the scripts for the capabilities type microservices have finished satisfactorily, the ECS services of the microservices catalogued as use cases are created, that is, [last-contact-report](../last-contact-report), [service-affecting-monitor](../service-affecting-monitor), [service-outage-monitor](../service-outage-monitor), [service-outage-triage](../service-outage-triage) and [sites-monitor](../sites-monitor). This is achieved by establishing explicit dependencies between the ECS services for the capability-type microservices and the set of null resources that perform the healthcheck of the capability-type microservices.
+
+   The following is an example of a `service-affecting-monitor` microservice of the *use case* type definition using [*Terraform*](https://www.terraform.io/) in which the dependency between the `null_resource` type resources in charge of performing the healthcheck of the different capabilities type microservices in the terraform code for this microservice is established.
+
+   ```terraform
+   resource "aws_ecs_service" "automation-service-affecting-monitor" {
+
+      . . .
+
+      depends_on = [ null_resource.bruin-bridge-healthcheck,
+                     null_resource.velocloud-bridge-healthcheck,
+                     null_resource.t7-bridge-healthcheck,
+                     null_resource.notifier-healthcheck,
+                     null_resource.metrics-prometheus-healthcheck ]
+   }
+   ```
+
+   >This procedure has been done to ensure that use case microservices are not created in ECS until new versions of the capability-type microservices are properly deployed, as use case microservices need to use capability-type microservices.
+
+4. Once all the services have been created following the dependencies explained above, a `null_resource` will be used to execute the [script in charge of creating the Grafana users](../ci-utils/grafana_users_creation.py) in the environment where the deployment is taking place.
 
 ---
 With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2019
