@@ -103,9 +103,10 @@ class VelocloudRepository:
     def get_all_enterprise_names(self, msg):
         self._logger.info('Getting all enterprise names')
         enterprises = self._velocloud_client.get_all_enterprise_names()
+
         if enterprises["status_code"] not in range(200, 300):
-            self._logger.info(f"Error {enterprises['status_code']}, error: {enterprises['body']}")
-            return
+            self._logger.error(f"Error {enterprises['status_code']}, error: {enterprises['body']}")
+            return enterprises
 
         enterprise_names = [e["enterprise_name"] for e in enterprises["body"]]
 
@@ -116,4 +117,4 @@ class VelocloudRepository:
                 if e_name == filter_enterprise
             ]
 
-        return enterprise_names
+        return {"body": enterprise_names, "status_code": enterprises["status_code"]}

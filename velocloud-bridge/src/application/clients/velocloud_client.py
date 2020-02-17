@@ -482,7 +482,10 @@ class VelocloudClient:
                     "enterprise_name": enterprise["name"]
                 })
 
-        return enterprise_names
+        if len(enterprise_names) == 0:
+            return {"body": None, "status_code": 500}
+
+        return {"body": enterprise_names, "status_code": 200}
 
     def _json_return(self, response):
         if isinstance(response, dict):

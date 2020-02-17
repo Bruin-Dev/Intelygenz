@@ -795,7 +795,9 @@ class TestVelocloudClient:
         configs = Mock()
         logger = Mock()
 
-        clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
+        clients = [{'host': 'some_host2', 'headers': 'some header dict'},
+                   {'host': 'some_host3', 'headers': 'some header dict3'},
+                   {'host': 'some_host4', 'headers': 'some header dict4'}]
         monitoring_aggregates_return = [
             {
                 "body": {'enterprises': [{'id': 1}]},
@@ -804,26 +806,35 @@ class TestVelocloudClient:
             {
                 "body": None,
                 "status_code": 500
+            },
+            {
+                "body": {'enterprises': [{'id': 2}]},
+                "status_code": 200
             }
+
         ]
-        enterprise_edges_by_id_return = {
+        enterprise_edges_by_id_return = [{
             "body": [{'id': 25}],
             "status_code": 200
-        }
+        },
+            {
+                "body": [{'id': 26}],
+                "status_code": 200
+            }
+        ]
 
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(side_effect=monitoring_aggregates_return)
-        velocloud_client.get_all_enterprises_edges_by_id = Mock(return_value=enterprise_edges_by_id_return)
+        velocloud_client.get_all_enterprises_edges_by_id = Mock(side_effect=enterprise_edges_by_id_return)
         velocloud_client._clients = clients
 
         edge_ids = velocloud_client.get_all_enterprises_edges_with_host()
 
-        velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
-        velocloud_client.get_all_enterprises_edges_by_id.assert_called_once_with(clients[0], 1)
-        assert edge_ids["body"] == [{'host': clients[0]['host'],
-                                     'enterprise_id': 1,
-                                     'edge_id': 25}]
-        velocloud_client.get_all_enterprises_edges_by_id.assert_called_once()
+        velocloud_client.get_monitoring_aggregates.assert_has_calls([call(clients[0]), call(clients[1]),
+                                                                     call(clients[2])])
+        velocloud_client.get_all_enterprises_edges_by_id.assert_has_calls([call(clients[0], 1)])
+        assert edge_ids["body"] == [{'host': clients[0]['host'], 'enterprise_id': 1, 'edge_id': 25},
+                                    {'host': clients[2]['host'], 'enterprise_id': 2, 'edge_id': 26}]
 
     def get_all_enterprise_edges_with_host_with_empty_list_result_test(self):
         configs = Mock()
@@ -1193,7 +1204,7 @@ class TestVelocloudClient:
         enterprise_names = velocloud_client.get_all_enterprise_names()
 
         velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
-        assert enterprise_names == [{'enterprise_name': 'A name'}]
+        assert enterprise_names["body"] == [{'enterprise_name': 'A name'}]
 
     def get_all_enterprise_names_with_empty_list_test(self):
         configs = Mock()
@@ -1212,7 +1223,7 @@ class TestVelocloudClient:
         enterprise_names = velocloud_client.get_all_enterprise_names()
 
         velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
-        assert enterprise_names == []
+        assert enterprise_names == {"body": None, "status_code": 500}
 
     def json_return_ok_test(self):
         configs = testconfig

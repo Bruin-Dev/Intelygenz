@@ -297,7 +297,7 @@ class TestVelocloudRepository:
         enterprise_names = vr.get_all_enterprise_names(msg)
 
         assert test_velocloud_client.get_all_enterprise_names.called
-        assert enterprise_names == ["The Name"]
+        assert enterprise_names["body"] == ["The Name"]
 
     def get_all_enterprise_names_none_test(self):
         mock_logger = Mock()
@@ -313,4 +313,4 @@ class TestVelocloudRepository:
         )
         enterprise_names = vr.get_all_enterprise_names(msg)
 
-        assert enterprise_names is None
+        assert enterprise_names["body"] is None
