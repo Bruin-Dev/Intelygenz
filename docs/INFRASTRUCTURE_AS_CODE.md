@@ -64,7 +64,7 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
 
     * A set of [Security Groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html) for all the resources created by the terraform files present in this folder
 
-    * A set of `null_resource` type resources to execute the [python script in charge of performing the healtheck of the tasks](./../ci-utils/task_healthcheck.py) created in a deployment for the capabilites type microservices, as well as to create the *Graphana* users in the environment where the deployment is being done, [using another Python script](./../ci-utils/grafana_users_creation.py).
+    * A set of [null_resource](https://www.terraform.io/docs/providers/null/resource.html) *Terraform* type resources to execute the [python script in charge of performing the healtheck of the tasks](./../ci-utils/task_healthcheck.py) created in a deployment for the capabilites type microservices, as well as to create the *Graphana* users in the environment where the deployment is being done, [using another Python script](./../ci-utils/grafana_users_creation.py).
 
 3. `network-resources`: there are the necessary files for create the [VPC](https://aws.amazon.com/vpc/) and all related resources in the environment used for deployment, these being the following:
 
