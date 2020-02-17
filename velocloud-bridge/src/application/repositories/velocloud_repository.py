@@ -85,15 +85,17 @@ class VelocloudRepository:
         response = self._velocloud_client.get_all_edge_events(edge, start, end, limit)
 
         if response["status_code"] not in range(200, 300):
-            return
+            return response
 
         full_events = response["body"]
 
         if filter_events_status_list is None:
-            return full_events["data"]
+            response["body"] = full_events["data"]
+            return response
         else:
             event_list = [event for event in full_events["data"] if event['event'] in filter_events_status_list]
-            return event_list
+            response["body"] = event_list
+            return response
 
     def get_all_enterprise_names(self, msg):
         self._logger.info('Getting all enterprise names')

@@ -233,7 +233,7 @@ class TestVelocloudRepository:
         limit = None
         edge_events = vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
         assert test_velocloud_client.get_all_edge_events.called
-        assert edge_events == [{'event': 'EDGE_UP'}]
+        assert edge_events == {"body": [{'event': 'EDGE_UP'}], "status_code": 200}
 
     def get_all_edge_events_none_filter_test(self):
         mock_logger = Mock()
@@ -251,7 +251,7 @@ class TestVelocloudRepository:
         limit = None
         edge_events = vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
         assert test_velocloud_client.get_all_edge_events.called
-        assert edge_events == [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]
+        assert edge_events == {"body": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}], "status_code": 200}
 
     def get_all_edge_events_none_test(self):
         mock_logger = Mock()
@@ -269,7 +269,7 @@ class TestVelocloudRepository:
         limit = None
         edge_events = vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
         assert test_velocloud_client.get_all_edge_events.called
-        assert edge_events is None
+        assert edge_events == {"body": None, "status_code": 500}
 
     def connect_to_all_servers_test(self):
         mock_logger = Mock()

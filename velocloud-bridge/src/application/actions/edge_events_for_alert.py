@@ -1,4 +1,5 @@
 from igz.packages.eventbus.eventbus import EventBus
+import json
 
 
 class EventEdgesForAlert:
@@ -23,13 +24,11 @@ class EventEdgesForAlert:
 
         self._logger.info(f'Sending events for edge with data {edgeids} for alerts')
         events_by_edge = self._velocloud_repository.get_all_edge_events(edgeids, start, end, limit, filter)
+        edge_event_response = {"request_id": msg['request_id'], "events": events_by_edge["body"],
+                               "status": events_by_edge["status_code"]}
 
-        status = 200
-        if events_by_edge is None:
-            status = 204
-        if isinstance(events_by_edge, Exception):
-            status = 500
-
-        edge_event_response = {"request_id": msg['request_id'], "events": events_by_edge, "status": status}
+        self._logger.info(
+            f'Edge events for alerts published in event bus for request {json.dumps(msg)}. '
+            f"Message published was {edge_event_response}"
+        )
         await self._event_bus.publish_message(msg['response_topic'], edge_event_response)
-        self._logger.info("Edge events sent")
