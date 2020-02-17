@@ -31,11 +31,10 @@ class VelocloudRepository:
 
     def get_edge_information(self, edge):
         edge_information = self._velocloud_client.get_edge_information(edge)
-        if edge_information["status_code"] in range(200, 300):
-            return edge_information["body"]
-        else:
+        if edge_information["status_code"] not in range(200, 300):
             self._logger.info(f"Error {edge_information['status_code']} edge_information")
-            return
+
+        return edge_information
 
     def get_link_information(self, edge, interval):
         self._logger.info(f'Getting link information from edge:{edge["edge_id"]} in '
@@ -45,14 +44,14 @@ class VelocloudRepository:
 
         if response["status_code"] not in range(200, 300):
             self._logger.info(f"Error {response['status_code'], response['body']}")
-            return link_status
+            return {"body": [], "status_code": response["status_code"]}
 
         links = response["body"]
         response_link_service_group = self._velocloud_client.get_link_service_groups_information(edge, interval)
 
         if response_link_service_group["status_code"] not in range(200, 300):
             self._logger.info(f"Error {response_link_service_group['status_code'], response['body']}")
-            return link_status
+            return {"body": link_status, "status_code": response_link_service_group["status_code"]}
 
         link_service_group = response_link_service_group["body"]
 
@@ -66,14 +65,14 @@ class VelocloudRepository:
                     link_status.append(link)
 
         elif links is None:
-            return link_status
+            return {"body": link_status, "status_code": response["status_code"]}
 
-        return link_status
+        return {"body": link_status, "status_code": response["status_code"]}
 
     def get_enterprise_information(self, edge):
         enterprise_info = self._velocloud_client.get_enterprise_information(edge)
         if enterprise_info["status_code"] not in range(200, 300):
-            self._logger.info(f"Error {enterprise_info['status_code']}, error: {enterprise_info['body']}")
+            self._logger.error(f"Error {enterprise_info['status_code']}, error: {enterprise_info['body']}")
             return
 
         body = enterprise_info["body"]

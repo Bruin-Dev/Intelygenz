@@ -32,11 +32,12 @@ class TestEdgeStatusResponse:
         velocloud_repo = Mock()
         actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        enterprise_info = "TEST"
+        enterprise_info = {"body": "TEST", "status_code": 200}
         velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
-        velocloud_repo.get_edge_information = Mock(return_value=dict(edge_status=[]))
-        velocloud_repo.get_link_information = Mock(return_value=[])
-        velocloud_repo.get_link_information = Mock(return_value=[{"link_data": "STABLE", "linkId": "123"}])
+        edge_information = {"body": [], "status_code": 200}
+        velocloud_repo.get_edge_information = Mock(return_value=edge_information)
+        link_information = {"body": [{"link_data": "STABLE", "linkId": "123"}], "status_code": 200}
+        velocloud_repo.get_link_information = Mock(return_value=link_information)
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
                     "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(edge_msg)
@@ -51,8 +52,8 @@ class TestEdgeStatusResponse:
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
                                                             "edge_id": {"host": "host", "enterprise_id": "2",
                                                                         "edge_id": "1"},
-                                                            "edge_info": {"enterprise_name": enterprise_info,
-                                                                          "edges": {"edge_status": []},
+                                                            "edge_info": {"enterprise_name": enterprise_info["body"],
+                                                                          "edges":  [],
                                                                           "links":
                                                                               [{"link_data": "STABLE",
                                                                                "linkId": "123"}
@@ -69,10 +70,12 @@ class TestEdgeStatusResponse:
         velocloud_repo = Mock()
         actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        enterprise_info = "TEST"
+        enterprise_info = {"body": "TEST", "status_code": 200}
         velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
-        velocloud_repo.get_edge_information = Mock(return_value=dict(edge_status=[]))
-        velocloud_repo.get_link_information = Mock(return_value=[{"link_data": "STABLE", "linkId": "123"}])
+        edge_information = {"body": [], "status_code": 200}
+        velocloud_repo.get_edge_information = Mock(return_value=edge_information)
+        link_information = {"body": [{"link_data": "STABLE", "linkId": "123"}], "status_code": 200}
+        velocloud_repo.get_link_information = Mock(return_value=link_information)
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
                     "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
                     "interval": {"end": "now", "start": "15 mins ago"}}
@@ -89,8 +92,8 @@ class TestEdgeStatusResponse:
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
                                                             "edge_id": {"host": "host", "enterprise_id": "2",
                                                                         "edge_id": "1"},
-                                                            "edge_info": {"enterprise_name": enterprise_info,
-                                                                          "edges": {"edge_status": []},
+                                                            "edge_info": {"enterprise_name": enterprise_info["body"],
+                                                                          "edges": [],
                                                                           "links":
                                                                               [{"link_data": "STABLE",
                                                                                "linkId": "123"}
@@ -107,11 +110,12 @@ class TestEdgeStatusResponse:
         velocloud_repo = Mock()
         actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        enterprise_info = "TEST"
-        edge_status = dict(edge_status=[])
+        enterprise_info = {"body": "TEST", "status_code": 200}
         velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
-        velocloud_repo.get_edge_information = Mock(return_value=edge_status)
-        velocloud_repo.get_link_information = Mock(return_value=None)
+        edge_information = {"body": [], "status_code": 200}
+        velocloud_repo.get_edge_information = Mock(return_value=edge_information)
+        link_information = {"body": None, "status_code": 500}
+        velocloud_repo.get_link_information = Mock(return_value=link_information)
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
                     "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(edge_msg)
@@ -120,8 +124,8 @@ class TestEdgeStatusResponse:
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
                                                             "edge_id": {"host": "host", "enterprise_id": "2",
                                                                         "edge_id": "1"},
-                                                            "edge_info": {"enterprise_name": enterprise_info,
-                                                                          "edges": edge_status,
+                                                            "edge_info": {"enterprise_name": enterprise_info["body"],
+                                                                          "edges": [],
                                                                           "links": None},
-                                                            "status": 204}
+                                                            "status": 500}
         assert actions._logger.info.called
