@@ -151,34 +151,43 @@ class ServiceOutageDetector:
 
             working_environment = self._config.MONITOR_CONFIG['environment']
             if working_environment == 'production':
-                open_outage_ticket = await self._get_outage_ticket_for_edge(edge_status, ticket_statuses=None)
-                open_outage_ticket_details = open_outage_ticket['ticket_details']
-                open_ticket_exists = open_outage_ticket_details is not None
+                self._logger.info(
+                    f'[outage-recheck] Attempting outage ticket creation for faulty edge {edge_identifier}...'
+                )
 
-                # CAVEAT: This check should be performed by Bruin on their side. In the meanwhile...
-                if open_ticket_exists:
+                ticket_creation_response = await self._create_outage_ticket(edge_status)
+                ticket_creation_response_body = ticket_creation_response['body']
+                ticket_creation_response_status = ticket_creation_response['status']
+                if ticket_creation_response_status in range(200, 300):
+                    self._logger.info(f'Successfully created outage ticket for edge {edge_identifier}.')
+
+                    enterprise_name = edge_status['enterprise_name']
+                    bruin_client_id = self._extract_client_id(enterprise_name)
+                    slack_message = {
+                        'request_id': uuid(),
+                        'message': f'Outage ticket created for faulty edge {edge_identifier}. Ticket '
+                                   f'details at https://app.bruin.com/helpdesk?clientId={bruin_client_id}&'
+                                   f'ticketId={ticket_creation_response_body}.'
+                    }
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                elif ticket_creation_response_status == 409:
                     self._logger.info(
-                        f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket with '
-                        f'ID = {open_outage_ticket_details["ticketID"]}. Skipping ticket creation for this edge...')
-                else:
-                    resolved_outage_ticket = await self._get_outage_ticket_for_edge(
-                        edge_status, ticket_statuses=['Resolved']
+                        f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket in progress '
+                        f'(ID = {ticket_creation_response_body}). Skipping outage ticket creation for this edge...'
                     )
-                    resolved_outage_ticket_details = resolved_outage_ticket['ticket_details']
-                    resolved_ticket_exists = resolved_outage_ticket_details is not None
-
-                    if resolved_ticket_exists:
-                        self._logger.info(
-                            f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket with '
-                            f'ID = {resolved_outage_ticket_details["ticketID"]}. Re-opening...')
-                        await self._reopen_outage_ticket(
-                            resolved_outage_ticket_details["ticketID"],
-                            resolved_outage_ticket_details["ticketDetails"][0]["detailID"],
-                            edge_status)
-                    else:
-                        self._logger.info(
-                            f'[outage-recheck] Starting outage ticket creation for faulty edge {edge_identifier}.')
-                        await self._create_outage_ticket(edge_full_id, edge_status)
+                elif ticket_creation_response_status == 471:
+                    self._logger.info(
+                        f'[outage-recheck] Faulty edge {edge_identifier} has a resolved outage ticket '
+                        f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
+                    )
+                    await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
+                else:
+                    slack_message = {
+                        'request_id': uuid(),
+                        'message': f'Outage ticket creation failed for edge {edge_identifier}. Reason: '
+                                   f'Error {ticket_creation_response_status} - {ticket_creation_response_body}'
+                    }
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             else:
                 self._logger.info(
                     f'[outage-recheck] Not starting outage ticket creation for faulty edge {edge_identifier} because '
@@ -188,39 +197,24 @@ class ServiceOutageDetector:
             self._logger.info(
                 f'[outage-recheck] {edge_identifier} seems to be healthy again! No ticket will be created.')
 
-    async def _create_outage_ticket(self, edge_full_id, edge_status):
-        edge_identifier = EdgeIdentifier(**edge_full_id)
-
+    async def _create_outage_ticket(self, edge_status):
         ticket_data = self._generate_outage_ticket(edge_status)
-
-        self._logger.info(f'[outage-ticket-creation] Creating outage ticket for edge {edge_identifier}...')
         ticket_creation_response = await self._event_bus.rpc_request(
-            "bruin.ticket.creation.request", {'request_id': uuid(), **ticket_data}, timeout=30
+            "bruin.ticket.creation.outage.request", {'request_id': uuid(), 'body': ticket_data}, timeout=30
         )
 
-        ticket_id_data = ticket_creation_response['ticketIds']
-        if ticket_id_data is not None:
-            ticket_id = ticket_id_data['ticketIds'][0]
-            self._logger.info(
-                f'[outage-ticket-creation] Outage ticket (ID = {ticket_id}) created successfully '
-                f'for faulty edge {edge_identifier}')
+        return ticket_creation_response
 
-            enterprise_name = edge_status['enterprise_name']
-            bruin_client_id = self._extract_client_id(enterprise_name)
-            slack_message = {
-                'request_id': uuid(),
-                'message': f'Outage ticket created for faulty edge {edge_identifier}. Ticket '
-                           f'details at https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}.'
-            }
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-        else:
-            self._logger.error(
-                f'[outage-ticket-creation] Outage ticket creation failed for edge {edge_identifier}.'
-            )
-
-    async def _reopen_outage_ticket(self, ticket_id, detail_id, edge_status):
+    async def _reopen_outage_ticket(self, ticket_id, edge_status):
         self._logger.info(f'[outage-ticket-reopening] Reopening outage ticket {ticket_id}...')
-        ticket_reopening_msg = {'request_id': uuid(), 'ticket_id': ticket_id, 'detail_id': detail_id}
+
+        ticket_details_request_msg = {'request_id': uuid(), 'ticket_id': ticket_id}
+        ticket_details = await self._event_bus.rpc_request(
+            "bruin.ticket.details.request", ticket_details_request_msg, timeout=15
+        )
+        detail_id_for_reopening = ticket_details['ticket_details']['ticketDetails'][0]['detailID']
+
+        ticket_reopening_msg = {'request_id': uuid(), 'ticket_id': ticket_id, 'detail_id': detail_id_for_reopening}
         ticket_reopening_response = await self._event_bus.rpc_request(
             "bruin.ticket.status.open", ticket_reopening_msg, timeout=30
         )
@@ -278,12 +272,8 @@ class ServiceOutageDetector:
         bruin_client_id = self._extract_client_id(enterprise_name)
 
         return {
-            "clientId": bruin_client_id,
-            "category": "VOO",
-            "services": [
-                {"serviceNumber": serial_number}
-            ],
-            "contacts": self._config.OUTAGE_CONTACTS[f'{serial_number}'],
+            "client_id": bruin_client_id,
+            "service_number": serial_number,
         }
 
     async def start_service_outage_reporter_job(self, exec_on_start=False):
