@@ -73,14 +73,14 @@ class VelocloudRepository:
         enterprise_info = self._velocloud_client.get_enterprise_information(edge)
         if enterprise_info["status_code"] not in range(200, 300):
             self._logger.error(f"Error {enterprise_info['status_code']}, error: {enterprise_info['body']}")
-            return
+            return {"body": None, "status_code": enterprise_info["status_code"]}
 
         body = enterprise_info["body"]
         name = body.get("name") if isinstance(body, dict) else None
         if enterprise_info['status_code'] in range(200, 300) and name:
-            return name
+            return {"body": name, "status_code": enterprise_info["status_code"]}
         else:
-            return enterprise_info["body"]
+            return {"body": enterprise_info["body"], "status_code": enterprise_info["status_code"]}
 
     def get_all_edge_events(self, edge, start, end, limit, filter_events_status_list):
         self._logger.info(f'Getting events from edge:{edge["edge_id"]} from time:{start} to time:{end}')

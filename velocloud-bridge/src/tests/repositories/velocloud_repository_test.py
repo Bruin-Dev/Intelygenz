@@ -206,7 +206,7 @@ class TestVelocloudRepository:
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         enterprise_info = vr.get_enterprise_information(edge)
         assert test_velocloud_client.get_enterprise_information.called
-        assert enterprise_info == 'test'
+        assert enterprise_info["body"] == 'test'
 
     def get_enterprise_information_ko_test(self):
         mock_logger = Mock()
@@ -218,7 +218,7 @@ class TestVelocloudRepository:
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         enterprise_info = vr.get_enterprise_information(edge)
         assert test_velocloud_client.get_enterprise_information.called
-        assert enterprise_info is None
+        assert enterprise_info["body"] is None
 
     def get_enterprise_information_without_name_key_test(self):
         mock_logger = Mock()
@@ -230,7 +230,7 @@ class TestVelocloudRepository:
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         enterprise_info = vr.get_enterprise_information(edge)
         assert test_velocloud_client.get_enterprise_information.called
-        assert enterprise_info is None
+        assert enterprise_info["body"] is None
 
     def get_all_edge_events_filter_test(self):
         mock_logger = Mock()
