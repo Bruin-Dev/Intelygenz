@@ -819,7 +819,7 @@ class TestVelocloudClient:
         },
             {
                 "body": [{'id': 26}],
-                "status_code": 200
+                "status_code": 500
             }
         ]
 
@@ -833,8 +833,7 @@ class TestVelocloudClient:
         velocloud_client.get_monitoring_aggregates.assert_has_calls([call(clients[0]), call(clients[1]),
                                                                      call(clients[2])])
         velocloud_client.get_all_enterprises_edges_by_id.assert_has_calls([call(clients[0], 1)])
-        assert edge_ids["body"] == [{'host': clients[0]['host'], 'enterprise_id': 1, 'edge_id': 25},
-                                    {'host': clients[2]['host'], 'enterprise_id': 2, 'edge_id': 26}]
+        assert edge_ids["body"] == [{'host': clients[0]['host'], 'enterprise_id': 1, 'edge_id': 25}]
 
     def get_all_enterprise_edges_with_host_with_empty_list_result_test(self):
         configs = Mock()

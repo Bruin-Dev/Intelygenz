@@ -61,7 +61,7 @@ class VelocloudRepository:
                     if link['linkId'] == link_service['linkId']:
                         link['serviceGroups'] = link_service['serviceGroups']
                         break
-                if link['link']['backupState'] == 'UNCONFIGURED' or link['link']['backupState'] == 'ACTIVE':
+                if link['link']['backupState'] in ('UNCONFIGURED', 'ACTIVE'):
                     link_status.append(link)
 
         elif links is None:
@@ -106,7 +106,7 @@ class VelocloudRepository:
 
         if enterprises["status_code"] not in range(200, 300):
             self._logger.error(f"Error {enterprises['status_code']}, error: {enterprises['body']}")
-            return enterprises
+            return {"body": enterprises["body"], "status_code": enterprises["status_code"]}
 
         enterprise_names = [e["enterprise_name"] for e in enterprises["body"]]
 

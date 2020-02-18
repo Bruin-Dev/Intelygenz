@@ -19,6 +19,18 @@ class TestVelocloudRepository:
         assert test_velocloud_client.get_all_enterprises_edges_with_host.called
         assert edges_by_ent == edges
 
+    def get_all_enterprises_edges_with_host__error_500_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        edges = {"body": None,
+                 "status_code": 500}
+        msg = {"request_id": "123", "filter": []}
+        test_velocloud_client.get_all_enterprises_edges_with_host = Mock(return_value=edges)
+        edges_by_ent = vr.get_all_enterprises_edges_with_host(msg)
+        assert test_velocloud_client.get_all_enterprises_edges_with_host.called
+        assert edges_by_ent == edges
+
     @pytest.mark.asyncio
     async def send_edge_status_filter_test(self):
         mock_logger = Mock()
@@ -290,7 +302,7 @@ class TestVelocloudRepository:
             "body": [{"enterprise_name": "The Name"}],
             "status_code": 200
         }
-        msg = {"request_id": "123", "filter": []}
+        msg = {"request_id": "123", "filter": ["The Name"]}
         test_velocloud_client.get_all_enterprise_names = Mock(
             return_value=enterprises
         )
@@ -313,4 +325,21 @@ class TestVelocloudRepository:
         )
         enterprise_names = vr.get_all_enterprise_names(msg)
 
-        assert enterprise_names["body"] is None
+        assert enterprise_names == {"body": None, "status_code": 500}
+
+    def get_all_enterprise_names_without_filter_test(self):
+        mock_logger = Mock()
+        test_velocloud_client = Mock()
+        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
+        enterprises = {
+            "body": [{"enterprise_name": "The Name"}],
+            "status_code": 200
+        }
+        msg = {"request_id": "123", "filter": []}
+        test_velocloud_client.get_all_enterprise_names = Mock(
+            return_value=enterprises
+        )
+        enterprise_names = vr.get_all_enterprise_names(msg)
+
+        assert test_velocloud_client.get_all_enterprise_names.called
+        assert enterprise_names["body"] == ["The Name"]
