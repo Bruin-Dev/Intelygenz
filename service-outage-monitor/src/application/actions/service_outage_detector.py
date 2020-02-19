@@ -214,13 +214,14 @@ class ServiceOutageDetector:
     async def _reopen_outage_ticket(self, ticket_id, edge_status):
         self._logger.info(f'[outage-ticket-reopening] Reopening outage ticket {ticket_id}...')
 
-        ticket_details_request_msg = {'request_id': uuid(), 'ticket_id': ticket_id}
+        ticket_details_request_msg = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
         ticket_details = await self._event_bus.rpc_request(
             "bruin.ticket.details.request", ticket_details_request_msg, timeout=15
         )
         detail_id_for_reopening = ticket_details['ticket_details']['ticketDetails'][0]['detailID']
 
-        ticket_reopening_msg = {'request_id': uuid(), 'ticket_id': ticket_id, 'detail_id': detail_id_for_reopening}
+        ticket_reopening_msg = {'request_id': uuid(), 'body': {'ticket_id': ticket_id,
+                                                               'detail_id': detail_id_for_reopening}}
         ticket_reopening_response = await self._event_bus.rpc_request(
             "bruin.ticket.status.open", ticket_reopening_msg, timeout=30
         )
@@ -267,7 +268,7 @@ class ServiceOutageDetector:
             f'TimeStamp: {str(ticket_note_timestamp)}'
         )
 
-        ticket_append_note_msg = {'request_id': uuid(), 'ticket_id': ticket_id, 'note': ticket_note}
+        ticket_append_note_msg = {'request_id': uuid(), 'body': {'ticket_id': ticket_id, 'note': ticket_note}}
 
         self._logger.info(f'[outage-ticket-reopening] Posting reopening note in ticket {ticket_id}...')
         await self._event_bus.rpc_request("bruin.ticket.note.append.request", ticket_append_note_msg, timeout=15)
@@ -548,7 +549,7 @@ class ServiceOutageDetector:
         if outage_ticket is None:
             raise ValueError
 
-        edge_has_ticket = outage_ticket['ticket_details'] is not None
+        edge_has_ticket = outage_ticket['body'] is not None
         if edge_has_ticket:
             return False
 
@@ -574,10 +575,10 @@ class ServiceOutageDetector:
         enterprise_name = edge_status['enterprise_name']
         client_id = self._extract_client_id(enterprise_name)
 
-        outage_ticket_request = {'request_id': uuid(), 'edge_serial': edge_serial, 'client_id': client_id}
+        outage_ticket_request = {'request_id': uuid(), 'body': {'edge_serial': edge_serial, 'client_id': client_id}}
 
         if ticket_statuses is not None:
-            outage_ticket_request['ticket_statuses'] = ticket_statuses
+            outage_ticket_request['body']['ticket_statuses'] = ticket_statuses
 
         outage_ticket = await self._event_bus.rpc_request(
             'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=180,
@@ -626,7 +627,7 @@ class ServiceOutageDetector:
         serial_number = edge_status['edges']['serialNumber']
         management_request = {
             "request_id": uuid(),
-            "filters": {
+            "body": {
                 "client_id": bruin_client_id,
                 "status": "A",
                 "service_number": serial_number

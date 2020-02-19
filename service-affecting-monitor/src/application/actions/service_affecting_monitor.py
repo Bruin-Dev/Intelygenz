@@ -109,7 +109,7 @@ class ServiceAffectingMonitor:
                 ticket_note = self._ticket_object_to_string(ticket_dict)
                 ticket_details = {
                     "request_id": uuid(),
-                    "payload": {
+                    "body": {
                                 "clientId": client_id,
                                 "category": "VAS",
                                 "services": [
@@ -136,39 +136,39 @@ class ServiceAffectingMonitor:
                 ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
                                                               ticket_details, timeout=30)
                 ticket_append_note_msg = {'request_id': uuid(),
-                                          'ticket_id': ticket_id["ticketIds"]["ticketIds"][0],
-                                          'note': ticket_note}
+                                          'body': {
+                                          'ticket_id': ticket_id["body"]["ticketIds"][0],
+                                          'note': ticket_note}}
                 await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                   ticket_append_note_msg,
                                                   timeout=15)
 
                 slack_message = {'request_id': uuid(),
-                                 'message': f'Ticket created with ticket id: {ticket_id["ticketIds"]["ticketIds"][0]}\n'
+                                 'message': f'Ticket created with ticket id: {ticket_id["body"]["ticketIds"][0]}\n'
                                             f'https://app.bruin.com/helpdesk?clientId={client_id}&'
-                                            f'ticketId={ticket_id["ticketIds"]["ticketIds"][0]} , in '
+                                            f'ticketId={ticket_id["body"]["ticketIds"][0]} , in '
                                             f'{self._config.MONITOR_CONFIG["environment"]}'}
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
-                self._logger.info(f'Ticket created with ticket id: {ticket_id["ticketIds"]["ticketIds"][0]}')
+                self._logger.info(f'Ticket created with ticket id: {ticket_id["body"]["ticketIds"][0]}')
 
     async def _ticket_existence(self, client_id, serial, trouble):
         ticket_request_msg = {'request_id': uuid(),
-                              'params': {
+                              'body': {
                                           'client_id': client_id,
                                           'category': 'SD-WAN',
                                           'ticket_topic': 'VAS',
-                              },
-                              'ticket_status': ['New', 'InProgress', 'Draft']}
+                                          'ticket_status': ['New', 'InProgress', 'Draft']}}
         all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg, timeout=200)
-        for ticket in all_tickets['tickets']:
+        for ticket in all_tickets['body']:
             ticket_detail_msg = {'request_id': uuid(),
-                                 'ticket_id': ticket['ticketID']}
+                                 'body': {'ticket_id': ticket['ticketID']}}
             ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request", ticket_detail_msg,
                                                                timeout=15)
-            for ticket_detail in ticket_details['ticket_details']['ticketDetails']:
+            for ticket_detail in ticket_details['body']['ticketDetails']:
                 if 'detailValue' in ticket_detail.keys():
                     if ticket_detail['detailValue'] == serial:
-                        for ticket_note in (ticket_details['ticket_details']['ticketNotes']):
+                        for ticket_note in (ticket_details['body']['ticketNotes']):
                             if ticket_note['noteValue'] is not None:
                                 if trouble in ticket_note['noteValue']:
                                     return True

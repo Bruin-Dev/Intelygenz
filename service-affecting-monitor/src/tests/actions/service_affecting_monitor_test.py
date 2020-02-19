@@ -1623,7 +1623,7 @@ class TestServiceAffectingMonitor:
     @pytest.mark.asyncio
     async def _notify_trouble_pro_ticket_not_exists_test(self):
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[{'ticketIds': {'ticketIds': [123]}}, 'Note Posted',
+        event_bus.rpc_request = CoroutineMock(side_effect=[{'body': {'ticketIds': [123]}}, 'Note Posted',
                                                            'Slack Sent'])
         logger = Mock()
         scheduler = Mock()
@@ -1694,7 +1694,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_object_to_string.assert_called_with('Some ordered dict object')
 
         assert event_bus.rpc_request.called
-        assert 'Some string object' == event_bus.rpc_request.mock_calls[1][1][1]['note']
+        assert 'Some string object' == event_bus.rpc_request.mock_calls[1][1][1]['body']['note']
 
     @pytest.mark.asyncio
     async def notify_trouble_with_unknown_config_test(self):
@@ -1735,12 +1735,12 @@ class TestServiceAffectingMonitor:
         template_renderer = Mock()
         config = testconfig
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
-        tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
-                                             "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
-                                                                           'Trouble: LATENCY\n '
-                                                                           'TimeStamp: 2019-09-10 10:34:00-04:00 ',
-                                                              'createdDate': '2019-09-10 10:34:00-04:00'}]}}
+        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
+        ticket_details = {'body': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
+                                   "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
+                                                                 'Trouble: LATENCY\n '
+                                                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                                                    'createdDate': '2019-09-10 10:34:00-04:00'}]}}
         event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details])
         ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'LATENCY')
         assert ticket_exists is True
@@ -1754,12 +1754,12 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
-        tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
-                                             "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
-                                                                           'Trouble: LATENCY\n '
-                                                                           'TimeStamp: 2019-09-10 10:34:00-04:00 ',
-                                                              'createdDate': '2019-09-10 10:34:00-04:00'}]}}
+        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
+        ticket_details = {'body': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
+                                   "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
+                                                    'Trouble: LATENCY\n '
+                                                    'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                                                    'createdDate': '2019-09-10 10:34:00-04:00'}]}}
         event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details, 'Slack Sent'])
         ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'PACKET_LOSS')
         assert ticket_exists is False
@@ -1773,12 +1773,12 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
-        tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026137'}],
-                                             "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
-                                                                           'Trouble: LATENCY\n '
-                                                                           'TimeStamp: 2019-09-10 10:34:00-04:00 ',
-                                                              'createdDate': '2019-09-10 10:34:00-04:00'}]}}
+        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
+        ticket_details = {'body': {"ticketDetails": [{"detailValue": 'VC05200026137'}],
+                                   "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
+                                                                 'Trouble: LATENCY\n '
+                                                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                                                    'createdDate': '2019-09-10 10:34:00-04:00'}]}}
         event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details])
         ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'LATENCY')
         assert ticket_exists is False
@@ -1792,12 +1792,12 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
-        tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'ticket_details': {"ticketDetails": [{'otherDetails': None}],
-                                             "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
-                                                                           'Trouble: LATENCY\n '
-                                                                           'TimeStamp: 2019-09-10 10:34:00-04:00 ',
-                                                              'createdDate': '2019-09-10 10:34:00-04:00'}]}}
+        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
+        ticket_details = {'body': {"ticketDetails": [{'otherDetails': None}],
+                                   "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
+                                                    'Trouble: LATENCY\n '
+                                                    'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                                                    'createdDate': '2019-09-10 10:34:00-04:00'}]}}
         event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details])
         ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'LATENCY')
         assert ticket_exists is False
@@ -1811,9 +1811,9 @@ class TestServiceAffectingMonitor:
         template_renderer = Mock()
         config = testconfig
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
-        tickets = {'tickets': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'ticket_details': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
-                                             "ticketNotes": [{"noteValue": None}]}}
+        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
+        ticket_details = {'body': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
+                                   "ticketNotes": [{"noteValue": None}]}}
         event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details])
         ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'LATENCY')
         assert ticket_exists is False

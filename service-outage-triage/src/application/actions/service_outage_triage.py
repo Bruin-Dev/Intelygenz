@@ -41,18 +41,18 @@ class ServiceOutageTriage:
         ticket_response = dict()
         for client_id in client_id_to_list_of_serial_dict:
             try:
-                self._logger.info(f'Requesting tickets for Bruin company of client_id: {client_id}')
-                request_tickets_message = {'request_id': uuid(), 'client_id': client_id,
-                                           'ticket_status': ['New', 'InProgress', 'Draft'],
-                                           'params': {'client_id': client_id,
-                                                      'category': 'SD-WAN',
-                                                      'ticket_topic': 'VOO'}
+                self._logger.info(f'Requesting tickets for Bruin company {client_id}')
+                request_tickets_message = {'request_id': uuid(),
+                                           'body': {'ticket_status': ['New', 'InProgress', 'Draft'],
+                                                    'client_id': client_id,
+                                                    'category': 'SD-WAN',
+                                                    'ticket_topic': 'VOO'}
                                            }
                 ticket_response = await self._event_bus.rpc_request("bruin.ticket.request",
                                                                     request_tickets_message,
                                                                     timeout=90)
-                if ticket_response is None or "tickets" not in ticket_response.keys() or type(
-                        ticket_response["tickets"]) is not list:
+                if ticket_response is None or "body" not in ticket_response.keys() or type(
+                        ticket_response["body"]) is not list:
                     self._logger.error(f'Ticket data doesn\'t comply with format in {json.dumps(ticket_response)}')
                     slack_message = {'request_id': uuid(),
                                      'message': f'Service outage triage: Error: ticket list does not comply in format. '
@@ -98,8 +98,9 @@ class ServiceOutageTriage:
                 if self._config.TRIAGE_CONFIG['environment'] == 'production':
                     ticket_note = self._ticket_object_to_string(ticket_dict)
                     ticket_append_note_msg = {'request_id': uuid(),
+                                              'body': {
                                               'ticket_id': ticket_id["ticketID"],
-                                              'note': ticket_note}
+                                              'note': ticket_note}}
                     await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                       ticket_append_note_msg,
                                                       timeout=15)
@@ -119,11 +120,11 @@ class ServiceOutageTriage:
         valid_serials = edge_serial_list.keys()
         for ticket in ticket_list['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
-                                 'ticket_id': ticket['ticketID']}
+                                 'body': {'ticket_id': ticket['ticketID']}}
             ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
                                                                ticket_detail_msg,
                                                                timeout=15)
-            for ticket_detail in ticket_details['ticket_details']['ticketDetails']:
+            for ticket_detail in ticket_details['body']['ticketDetails']:
                 triage_exists = False
                 if 'detailValue' in ticket_detail.keys():
                     if ticket_detail['detailValue'] in valid_serials:
@@ -133,8 +134,8 @@ class ServiceOutageTriage:
                         ticket_item["edge_status"] = edge_serial_list[ticket_detail['detailValue']]
                         ticket_item["ticketID"] = ticket['ticketID']
                         ticket_item["serial"] = ticket_detail['detailValue']
-                        ticket_item['notes'] = ticket_details['ticket_details']['ticketNotes']
-                        sorted_ticket_notes = sorted(ticket_details['ticket_details']['ticketNotes'],
+                        ticket_item['notes'] = ticket_details['body']['ticketNotes']
+                        sorted_ticket_notes = sorted(ticket_details['body']['ticketNotes'],
                                                      key=lambda note: note['createdDate'], reverse=True)
 
                         for ticket_note in sorted_ticket_notes:
@@ -214,8 +215,9 @@ class ServiceOutageTriage:
                     event_timestamp + timedelta(seconds=1))
                 if self._config.TRIAGE_CONFIG['environment'] == 'production':
                     ticket_append_note_msg = {'request_id': uuid(),
-                                              'ticket_id': ticket_id["ticketID"],
-                                              'note': event_ticket_note}
+                                              'body': {
+                                                        'ticket_id': ticket_id["ticketID"],
+                                                        'note': event_ticket_note}}
                     await self._event_bus.rpc_request("bruin.ticket.note.append.request",
                                                       ticket_append_note_msg,
                                                       timeout=15)
@@ -367,16 +369,18 @@ class ServiceOutageTriage:
 
             if self._config.TRIAGE_CONFIG['environment'] == 'production':
                 resolve_ticket_msg = {'request_id': uuid(),
-                                      'ticket_id': ticket_id['ticketID'],
-                                      'detail_id': detail_id
-                                      }
+                                      'body': {
+                                               'ticket_id': ticket_id['ticketID'],
+                                               'detail_id': detail_id
+                                      }}
 
                 resolve_note_msg = "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + str(
                     datetime.now(timezone(
                         self._config.TRIAGE_CONFIG['timezone'])) + timedelta(seconds=1))
                 ticket_append_note_msg = {'request_id': uuid(),
-                                          'ticket_id': ticket_id["ticketID"],
-                                          'note': resolve_note_msg}
+                                          'body': {
+                                                   'ticket_id': ticket_id["ticketID"],
+                                                   'note': resolve_note_msg}}
 
                 await self._event_bus.rpc_request("bruin.ticket.status.resolve",
                                                   resolve_ticket_msg,

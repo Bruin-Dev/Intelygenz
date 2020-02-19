@@ -93,7 +93,7 @@ class TestServiceOutageTriage:
         template_renderer = Mock()
 
         tickets_list = []
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
         filtered_tickets_list = []
         edge_status = {
             'edge_id': 'edge-123',
@@ -119,8 +119,8 @@ class TestServiceOutageTriage:
             call('bruin.ticket.request',
                  {
                      'request_id': uuid_,
-                     'ticket_status': ['New', 'InProgress', 'Draft'],
-                     'params': {
+                     'body': {
+                                 'ticket_status': ['New', 'InProgress', 'Draft'],
                                  'client_id': 85940,
                                  'category': 'SD-WAN',
                                  'ticket_topic': 'VOO'
@@ -169,11 +169,11 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 {
                     'request_id': uuid_1,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'params':{
-                              'client_id': 85940,
-                              'category': 'SD-WAN',
-                              'ticket_topic': 'VOO'
+                    'body': {
+                               'ticket_status': ['New', 'InProgress', 'Draft'],
+                               'client_id': 85940,
+                               'category': 'SD-WAN',
+                               'ticket_topic': 'VOO'
                     }
                 },
                 timeout=90,
@@ -231,11 +231,11 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 {
                     'request_id': uuid_1,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'params':{
-                              'client_id': 85940,
-                              'category': 'SD-WAN',
-                              'ticket_topic': 'VOO'
+                    'body': {
+                             'ticket_status': ['New', 'InProgress', 'Draft'],
+                             'client_id': 85940,
+                             'category': 'SD-WAN',
+                             'ticket_topic': 'VOO'
                     }
                 },
                 timeout=90,
@@ -293,11 +293,11 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 {
                     'request_id': uuid_1,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'params':{
-                              'client_id': 85940,
-                              'category': 'SD-WAN',
-                              'ticket_topic': 'VOO'
+                    'body': {
+                               'ticket_status': ['New', 'InProgress', 'Draft'],
+                               'client_id': 85940,
+                               'category': 'SD-WAN',
+                               'ticket_topic': 'VOO'
                     }
                 },
                 timeout=90,
@@ -330,7 +330,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         edge_id_by_serial = {
             "host": "mettel.velocloud.net",
@@ -350,7 +350,7 @@ class TestServiceOutageTriage:
             'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
         }
         edge_event = {'edge_events': 'Some event info'}
-        append_ticket = {'ticket_appended': 'Success'}
+        append_ticket = {'body': 'Success'}
         send_to_slack = {'slack_sent': 'Success'}
 
         client_id_dict = {85940: {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial,
@@ -397,11 +397,11 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 {
                     'request_id': uuid_1,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'params':{
-                               'client_id': 85940,
-                               'category': 'SD-WAN',
-                               'ticket_topic': 'VOO'
+                    'body': {
+                                'ticket_status': ['New', 'InProgress', 'Draft'],
+                                'client_id': 85940,
+                                'category': 'SD-WAN',
+                                'ticket_topic': 'VOO'
                     }
                 },
                 timeout=90,
@@ -454,7 +454,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         edge_id_by_serial = {
             "host": "mettel.velocloud.net",
@@ -520,11 +520,11 @@ class TestServiceOutageTriage:
                 'bruin.ticket.request',
                 {
                     'request_id': uuid_1,
-                    'ticket_status': ['New', 'InProgress', 'Draft'],
-                    'params':{
-                              'client_id': 85940,
-                              'category': 'SD-WAN',
-                              'ticket_topic': 'VOO'
+                    'body': {
+                             'ticket_status': ['New', 'InProgress', 'Draft'],
+                             'client_id': 85940,
+                             'category': 'SD-WAN',
+                             'ticket_topic': 'VOO'
                     }
                 },
                 timeout=90,
@@ -545,8 +545,10 @@ class TestServiceOutageTriage:
                 'bruin.ticket.note.append.request',
                 {
                     'request_id': uuid_3,
-                    'ticket_id': ticket_id,
-                    'note': ticket_note_as_string,
+                    'body': {
+                             'ticket_id': ticket_id,
+                             'note': ticket_note_as_string,
+                    }
                 },
                 timeout=15,
             ),
@@ -581,7 +583,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         edge_id_by_serial = {
             "host": "mettel.velocloud.net",
@@ -685,11 +687,11 @@ class TestServiceOutageTriage:
         tickets = {'tickets': tickets_list}
 
         ticket_details = {
-            'ticket_details': {
-                "ticketDetails": [{"some-key": 'some-value'}],
-                "ticketNotes": [
-                    {"noteValue": 'test info', 'createdDate': '2019-09-10 10:34:00-04:00'}
-                ]
+            'body': {
+                     "ticketDetails": [{"some-key": 'some-value'}],
+                     "ticketNotes": [
+                                     {"noteValue": 'test info', 'createdDate': '2019-09-10 10:34:00-04:00'}
+                     ]
             }
         }
 
@@ -722,7 +724,7 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            {'request_id': uuid_, 'ticket_id': ticket_id},
+            {'request_id': uuid_, 'body': {'ticket_id': ticket_id}},
             timeout=15,
         )
         assert filtered_tickets == []
@@ -743,7 +745,7 @@ class TestServiceOutageTriage:
         tickets = {'tickets': tickets_list}
 
         ticket_details = {
-            'ticket_details': {
+            'body': {
                 "ticketDetails": [{"detailValue": invalid_serial}],
                 "ticketNotes": [
                     {"noteValue": 'test info', 'createdDate': '2019-09-10 10:34:00-04:00'}
@@ -780,7 +782,7 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            {'request_id': uuid_, 'ticket_id': ticket_id},
+            {'request_id': uuid_, 'body': {'ticket_id': ticket_id}},
             timeout=15,
         )
         assert filtered_tickets == []
@@ -803,7 +805,7 @@ class TestServiceOutageTriage:
         tickets = {'tickets': tickets_list}
 
         ticket_details = {
-            'ticket_details': {
+            'body': {
                 "ticketDetails": [{"detailValue": edge_serial, "detailID": detail_id}],
                 "ticketNotes": [
                     {"noteValue": ticket_notes, 'createdDate': created_date}
@@ -841,7 +843,7 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            {'request_id': uuid_, 'ticket_id': ticket_id},
+            {'request_id': uuid_, 'body': {'ticket_id': ticket_id}},
             timeout=15,
         )
         service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
@@ -850,12 +852,12 @@ class TestServiceOutageTriage:
             ticketID=ticket_id,
             serial=edge_serial,
             notes=ticket_details[
-                'ticket_details'][
+                'body'][
                 'ticketNotes']),
             detail_id)
 
         assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details[
-            'ticket_details'][
+            'body'][
             'ticketNotes'], 'client_id': client_id, 'edge_status': client_id_dict[edge_serial]}]
 
     @pytest.mark.asyncio
@@ -876,7 +878,7 @@ class TestServiceOutageTriage:
         tickets = {'tickets': tickets_list}
 
         ticket_details = {
-            'ticket_details': {
+            'body': {
                 "ticketDetails": [{"detailValue": edge_serial, "detailID": detail_id}],
                 "ticketNotes": [
                     {"noteValue": ticket_notes, 'createdDate': created_date}
@@ -914,7 +916,7 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            {'request_id': uuid_, 'ticket_id': ticket_id},
+            {'request_id': uuid_, 'body': {'ticket_id': ticket_id}},
             timeout=15,
         )
         service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
@@ -923,12 +925,12 @@ class TestServiceOutageTriage:
             ticketID=ticket_id,
             serial=edge_serial,
             notes=ticket_details[
-                'ticket_details'][
+                'body'][
                 'ticketNotes']),
             detail_id)
 
         assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details[
-            'ticket_details'][
+            'body'][
             'ticketNotes'], 'client_id': client_id, 'edge_status': client_id_dict[edge_serial]}]
 
     @pytest.mark.asyncio
@@ -949,7 +951,7 @@ class TestServiceOutageTriage:
         tickets = {'tickets': tickets_list}
 
         ticket_details = {
-            'ticket_details': {
+            'body': {
                 "ticketDetails": [{"detailValue": edge_serial, "detailID": detail_id}],
                 "ticketNotes": [
                     {"noteValue": ticket_notes, 'createdDate': created_date}
@@ -987,7 +989,7 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
-            {'request_id': uuid_, 'ticket_id': ticket_id},
+            {'request_id': uuid_, 'body': {'ticket_id': ticket_id}},
             timeout=15,
         )
         service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
@@ -996,7 +998,7 @@ class TestServiceOutageTriage:
             ticketID=ticket_id,
             serial=edge_serial,
             notes=ticket_details[
-                'ticket_details'][
+                'body'][
                 'ticketNotes']),
             detail_id)
 
@@ -1023,7 +1025,7 @@ class TestServiceOutageTriage:
         tickets = {'tickets': tickets_list}
 
         ticket_details = {
-            'ticket_details': {
+            'body': {
                 "ticketDetails": [{"detailValue": edge_serial, "detailID": detail_id}],
                 "ticketNotes": [
                     {"noteValue": ticket_notes, 'createdDate': ticket_notes_timestamp}
@@ -1070,7 +1072,9 @@ class TestServiceOutageTriage:
             'bruin.ticket.details.request',
             {
                 'request_id': uuid_,
-                'ticket_id': ticket_id,
+                'body': {
+                         'ticket_id': ticket_id,
+                }
             },
             timeout=15,
         )
@@ -1084,7 +1088,7 @@ class TestServiceOutageTriage:
             ticketID=ticket_id,
             serial=edge_serial,
             notes=ticket_details[
-                'ticket_details'][
+                'body'][
                 'ticketNotes']),
             detail_id)
 
@@ -1111,7 +1115,7 @@ class TestServiceOutageTriage:
         tickets = {'tickets': tickets_list}
 
         ticket_details = {
-            'ticket_details': {
+            'body': {
                 "ticketDetails": [{"detailValue": edge_serial, "detailID": detail_id}],
                 "ticketNotes": [
                     {"noteValue": ticket_notes, 'createdDate': ticket_notes_timestamp}
@@ -1159,7 +1163,9 @@ class TestServiceOutageTriage:
             'bruin.ticket.details.request',
             {
                 'request_id': uuid_,
-                'ticket_id': ticket_id,
+                'body': {
+                        'ticket_id': ticket_id,
+                }
             },
             timeout=15,
         )
@@ -1168,7 +1174,7 @@ class TestServiceOutageTriage:
         )
         service_outage_triage._check_for_new_events.assert_awaited_once_with(
             ticket_notes_timestamp_naive,
-            {'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details['ticket_details']['ticketNotes'],
+            {'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details['body']['ticketNotes'],
              'client_id': client_id, 'edge_status': client_id_dict[edge_serial]},
         )
         service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
@@ -1177,7 +1183,7 @@ class TestServiceOutageTriage:
             ticketID=ticket_id,
             serial=edge_serial,
             notes=ticket_details[
-                'ticket_details'][
+                'body'][
                 'ticketNotes']),
             detail_id)
 
@@ -1649,8 +1655,10 @@ class TestServiceOutageTriage:
                 'bruin.ticket.note.append.request',
                 {
                     'request_id': uuid_2,
-                    'ticket_id': ticket_id,
-                    'note': events_ticket_note,
+                    'body': {
+                             'ticket_id': ticket_id,
+                             'note': events_ticket_note,
+                    }
                 },
                 timeout=15,
             ),
@@ -2064,15 +2072,19 @@ class TestServiceOutageTriage:
             call("bruin.ticket.status.resolve",
                  {
                      "request_id": uuid_,
-                     "ticket_id": ticket_id,
-                     "detail_id": detail_id
+                     "body": {
+                              "ticket_id": ticket_id,
+                              "detail_id": detail_id
+                     }
                  },
                  timeout=15),
             call("bruin.ticket.note.append.request",
                  {
                      "request_id": uuid_,
-                     "ticket_id": ticket_id,
-                     "note": "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + note_timestamp
+                     "body": {
+                              "ticket_id": ticket_id,
+                              "note": "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + note_timestamp
+                     }
                  },
                  timeout=15),
             call("notification.slack.request",

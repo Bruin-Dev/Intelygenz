@@ -1208,7 +1208,7 @@ class TestQuarantineJob:
 
         outage_ticket = {
             'request_id': uuid(),
-            'ticket_details': {
+            'body': {
                 'ticketID': 12345,
                 'ticketDetails': [
                     {
@@ -1243,7 +1243,6 @@ class TestQuarantineJob:
 
         result = await service_outage_detector._is_reportable_edge(edge_status)
 
-        # service_outage_detector._is_there_an_outage.assert_called_once_with(edge_status)
         service_outage_detector._get_outage_ticket_for_edge.assert_awaited_once_with(edge_status)
         assert result is False
 
@@ -1265,7 +1264,7 @@ class TestQuarantineJob:
 
         outage_ticket = {
             'request_id': uuid(),
-            'ticket_details': None,
+            'body': None,
             'status': 500,
         }
 
@@ -1345,21 +1344,24 @@ class TestQuarantineJob:
         }
 
         outage_ticket = {
-            'ticketID': 12345,
-            'ticketDetails': [
-                {
-                    "detailID": 2746937,
-                    "detailValue": edge_serial_number,
-                },
-            ],
-            'ticketNotes': [
-                {
-                    "noteId": 41894041,
-                    "noteValue": f'#*Automation Engine*# \n TimeStamp: 2019-07-30 06:38:00+00:00',
-                }
-            ],
+            'request_id': 123,
+            'body': {
+                        'ticketID': 12345,
+                        'ticketDetails': [
+                            {
+                                "detailID": 2746937,
+                                "detailValue": edge_serial_number,
+                            },
+                        ],
+                        'ticketNotes': [
+                            {
+                                "noteId": 41894041,
+                                "noteValue": f'#*Automation Engine*# \n TimeStamp: 2019-07-30 06:38:00+00:00',
+                            }
+                        ],
+                    },
+            'status': 200
         }
-
         logger = Mock()
         scheduler = Mock()
         quarantine_edge_repository = Mock()
@@ -1385,8 +1387,10 @@ class TestQuarantineJob:
             'bruin.ticket.outage.details.by_edge_serial.request',
             {
                 'request_id': uuid_,
-                'edge_serial': edge_serial_number,
-                'client_id': client_id,
+                'body': {
+                         'edge_serial': edge_serial_number,
+                         'client_id': client_id,
+                }
             },
             timeout=180,
         )
@@ -1451,9 +1455,11 @@ class TestQuarantineJob:
             'bruin.ticket.outage.details.by_edge_serial.request',
             {
                 'request_id': uuid_,
-                'edge_serial': edge_serial_number,
-                'client_id': client_id,
-                'ticket_statuses': ticket_statuses,
+                'body': {
+                         'edge_serial': edge_serial_number,
+                         'client_id': client_id,
+                         'ticket_statuses': ticket_statuses,
+                }
             },
             timeout=180,
         )
@@ -1975,12 +1981,12 @@ class TestServiceOutageReporterJob:
 
         edge_2_outage_ticket = {
             'request_id': uuid(),
-            'ticket_details': None,
+            'body': None,
             'status': 500,
         }
         edge_3_outage_ticket = {
             'request_id': uuid(),
-            'ticket_details': {
+            'body': {
                 'ticketID': 12345,
                 'ticketDetails': [
                     {
@@ -3131,7 +3137,7 @@ class TestServiceOutageMonitor:
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
                                                         config, template_renderer, outage_utils)
-        service_outage_detector._generate_outage_ticket = Mock(return_value=ticket_creation_details["payload"])
+        service_outage_detector._generate_outage_ticket = Mock(return_value=ticket_creation_details["body"])
 
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
             result = await service_outage_detector._create_outage_ticket(edge_status)
@@ -3165,8 +3171,10 @@ class TestServiceOutageMonitor:
 
         ticket_reopening_msg = {
             'request_id': uuid_,
-            'ticket_id': ticket_id,
-            'detail_id': detail_id
+            'body': {
+                     'ticket_id': ticket_id,
+                     'detail_id': detail_id
+            }
         }
 
         ticket_details_result = {
@@ -3191,6 +3199,7 @@ class TestServiceOutageMonitor:
 
         reopen_ticket_result = {
             'request_id': uuid_,
+            'body': 'Failure',
             'status': 500,
         }
 
@@ -3246,8 +3255,10 @@ class TestServiceOutageMonitor:
 
         ticket_reopening_msg = {
             'request_id': uuid_,
-            'ticket_id': ticket_id,
-            'detail_id': detail_id
+            'body': {
+                     'ticket_id': ticket_id,
+                     'detail_id': detail_id
+            }
         }
 
         ticket_details_result = {
@@ -3272,6 +3283,7 @@ class TestServiceOutageMonitor:
 
         reopen_ticket_result = {
             'request_id': uuid_,
+            'body': 'Success',
             'status': 200,
         }
 
@@ -3346,8 +3358,10 @@ class TestServiceOutageMonitor:
         uuid_ = uuid()
         ticket_append_note_msg = {
             'request_id': uuid_,
-            'ticket_id': ticket_id,
-            'note': ticket_note
+            'body': {
+                     'ticket_id': ticket_id,
+                     'note': ticket_note
+            }
         }
 
         scheduler = Mock()
@@ -3408,8 +3422,10 @@ class TestServiceOutageMonitor:
         uuid_ = uuid()
         ticket_append_note_msg = {
             'request_id': uuid_,
-            'ticket_id': ticket_id,
-            'note': ticket_note
+            'body': {
+                     'ticket_id': ticket_id,
+                     'note': ticket_note
+            }
         }
 
         scheduler = Mock()
@@ -3474,8 +3490,10 @@ class TestServiceOutageMonitor:
         uuid_ = uuid()
         ticket_append_note_msg = {
             'request_id': uuid_,
-            'ticket_id': ticket_id,
-            'note': ticket_note
+            'body': {
+                     'ticket_id': ticket_id,
+                     'note': ticket_note
+            }
         }
 
         scheduler = Mock()
@@ -3545,8 +3563,10 @@ class TestServiceOutageMonitor:
         uuid_ = uuid()
         ticket_append_note_msg = {
             'request_id': uuid_,
-            'ticket_id': ticket_id,
-            'note': ticket_note
+            'body': {
+                     'ticket_id': ticket_id,
+                     'note': ticket_note
+            }
         }
 
         scheduler = Mock()
@@ -3677,7 +3697,7 @@ class TestServiceOutageMonitor:
         uuid_ = uuid()
         management_request = {
             "request_id": uuid_,
-            "filters": {
+            "body": {
                 "client_id": 12345,
                 "status": "A",
                 "service_number": 'VC9876'
