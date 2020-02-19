@@ -13,6 +13,10 @@ from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 
+from application.repositories.ticket_repository import TicketRepository
+from application.repositories.prediction_repository import PredictionRepository
+from application.actions.tnba_monitor import TNBAMonitor
+
 
 class Container:
 
@@ -31,8 +35,17 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
+        self._ticket_repo = TicketRepository(config, self._logger, self._event_bus)
+        self._prediction_repo = PredictionRepository(config, self._logger, self._event_bus)
+        self._tnba_monitor = TNBAMonitor(config, self._logger, self._event_bus, self._scheduler, self._prediction_repo,
+                                         self._ticket_repo)
+
     async def _start(self):
         await self._event_bus.connect()
+
+        await self._tnba_monitor.start_tnba_automated_process(exec_on_start=True)
+
+        self._scheduler.start()
 
     async def start_server(self):
         await self._server.run_server()

@@ -4,6 +4,7 @@
 import os
 import logging
 import sys
+from config.customer_list import customer_list as CUSTOMER_LIST
 
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
@@ -22,6 +23,8 @@ NATS_CONFIG = {
 
 TIMEZONE = 'US/Eastern'
 
+MONITORING_INTERVAL_SECONDS = 60 * 10
+
 LOG_CONFIG = {
     'name': 'tnba-monitor',
     'level': logging.DEBUG,
@@ -37,6 +40,20 @@ QUART_CONFIG = {
 GRAFANA_CONFIG = {
     'port': 9090
 }
+
+CONDITIONS = {
+    "ticket_min_age_minutes": 45,
+    "automatable_task_list": ["Repair Completed",
+                              "Request Completed",
+                              "Holmdel NOC Investigate",
+                              "No Trouble Found - Carrier Issue",
+                              "Refer to Holmdel NOC for Repair",
+                              "Wireless Repair Intervention Needed"],
+    "max_recursive_depth": 7,
+    "min_probability_threshold": 0.60
+}
+
+CUSTOMER_LIST = CUSTOMER_LIST
 
 REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
