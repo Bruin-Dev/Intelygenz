@@ -70,13 +70,13 @@ the hood.
 ```
 {
     'request_id': 123, 
-    'params':{
-                'ticket_id': 123, #Optional
-                'client_id': 85940,
-                'category': 'SD-WAN',
-                'ticket_topic': 'VOO'
-              }
-     'ticket_status': ['New', 'InProgress'], 
+    'body:{
+            'ticket_id': 123, #Optional
+            'client_id': 85940,
+            'category': 'SD-WAN',
+            'ticket_topic': 'VOO'
+            'ticket_status': ['New', 'InProgress'],
+    } 
 }
 ```
 
@@ -84,7 +84,7 @@ the hood.
 ```
 {
     'request_id': msg_dict['request_id'],
-    'tickets': All tickets recieved from bruin client,
+    'body': All tickets recieved from bruin client,
     'status': 200
 }
 
@@ -104,14 +104,16 @@ and publish it to the response topic that was built by NATS under the hood.
 ```
 {
     'request_id': 123,
-    'ticket_id': 123,
+    'body': {
+             'ticket_id': 123,
+            }
 }
 ```
 ### Response message
 ```
 {
     'request_id': msg_dict['request_id'],
-    'ticket_details': List of ticket details,
+    'body': List of ticket details,
     'status': 200
 }
 ```
@@ -129,8 +131,10 @@ And then a response message is published to the response topic that was built by
 ```
 {
     'request_id': 123,
-    'ticket_id': 123,
-    'note': `Some Ticket Note`
+    'body':{
+            'ticket_id': 123,
+            'note': `Some Ticket Note`
+            }
         
 }
 ```
@@ -138,6 +142,7 @@ And then a response message is published to the response topic that was built by
 ```
 {
     'request_id': msg_dict['request_id'],
+    'body': 'Some response',
     'status': 200
 }
 ```
@@ -159,7 +164,7 @@ Service Affecting
 ```
 {
     "request_id": 123,
-    "payload":{
+    "body":{
                 "clientId": 321,
                 "category": "VAS",
                 "services": [
@@ -188,7 +193,7 @@ Service Outage
 ```
 {
     "request_id": 123,
-     "payload":{
+     "body":{
                 "clientId": 321,
                 "category": "VOO",
                 "services": [
@@ -217,7 +222,7 @@ Service Outage
 ```
 {
     'request_id': 123,
-    'ticketIds': 321,
+    'body': 321,
     'status': 200
 }
 ```
@@ -235,15 +240,17 @@ And then a response message is published to the response topic that was built by
 ```
 {
     'request_id': 123,
-    'ticket_id': 321,
-    'detail_id': 123
-
+    'body':{
+            'ticket_id': 321,
+            'detail_id': 123
+           }
 }
 ```
 ### Response message
 ```
 {
     'request_id': 123,
+    'body': Some response,
     'status': 200
 }
 ```
@@ -260,8 +267,10 @@ And then a response message is published to the response topic that was built by
 ```
 {
     'request_id': 123,
-    'ticket_id': 321,
-    'detail_id': 123
+    'body':{
+            'ticket_id': 321,
+            'detail_id': 123
+           }
 
 }
 ```
@@ -269,6 +278,7 @@ And then a response message is published to the response topic that was built by
 ```
 {
     'request_id': 123,
+    'body': Some response,
     'status': 200
 }
 ```
@@ -283,7 +293,7 @@ a call to the endpoint `/api/Inventory/Attribute` in bruin, using as query param
 ```
 {
     'request_id': 123,
-    'filters': {"client_id": 191919 # MANDATORY parameter,
+    'body': {"client_id": 191919 # MANDATORY parameter,
                 "status": "A" # MANDATORY Can be A(Active), D(Decomissined), S(Suspended),
                 "service_number": "VCO128739819" # MANDATORY Is the serial number in velocloud
     }
@@ -294,7 +304,7 @@ a call to the endpoint `/api/Inventory/Attribute` in bruin, using as query param
 ```
 {
     'request_id': 123,
-    'management_status':"Active – Platinum Monitoring",
+    'body':"Active – Platinum Monitoring",
     'status': 200
 }
 

@@ -38,19 +38,21 @@ class TestGetTicket:
         msg = {
             'request_id': request_id,
             'response_topic': response_topic,
-            'params': {
+            'body': {
                 'client_id': client_id,
                 'ticket_id': ticket_id,
                 'category': category,
-                'ticket_topic': ticket_topic
+                'ticket_topic': ticket_topic,
+                'ticket_status': ticket_status_list,
             },
-            'ticket_status': ticket_status_list,
         }
         response_to_publish_in_topic = {
             'request_id': request_id,
-            'tickets': filtered_tickets_list,
+            'body': filtered_tickets_list,
             'status': 200
         }
+        param_copy = msg['body'].copy()
+        del[param_copy['ticket_status']]
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -63,7 +65,7 @@ class TestGetTicket:
         await bruin_ticket_response.get_all_tickets(msg)
 
         bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_called_once_with(
-            msg['params'], msg['ticket_status']
+            param_copy, ticket_status_list
         )
         bruin_ticket_response._event_bus.publish_message.assert_awaited_once_with(
             response_topic, response_to_publish_in_topic
@@ -85,18 +87,19 @@ class TestGetTicket:
         msg = {
             'request_id': request_id,
             'response_topic': response_topic,
-            'params': {
+            'body': {
                 'client_id': client_id,
                 'category': category,
-                'ticket_topic': ticket_topic
+                'ticket_topic': ticket_topic,
+                'ticket_status': ticket_status_list,
             },
-            'ticket_status': ticket_status_list,
         }
-        param_copy = msg['params'].copy()
+        param_copy = msg['body'].copy()
+        del [param_copy['ticket_status']]
         param_copy['ticket_id'] = ''
         response_to_publish_in_topic = {
             'request_id': request_id,
-            'tickets': filtered_tickets_list,
+            'body': filtered_tickets_list,
             'status': 200
         }
 
@@ -111,7 +114,7 @@ class TestGetTicket:
         await bruin_ticket_response.get_all_tickets(msg)
 
         bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_called_once_with(
-            msg['params'], msg['ticket_status']
+            param_copy, ticket_status_list
         )
         bruin_ticket_response._event_bus.publish_message.assert_awaited_once_with(
             response_topic, response_to_publish_in_topic
@@ -131,17 +134,18 @@ class TestGetTicket:
         msg = {
             'request_id': request_id,
             'response_topic': response_topic,
-            'params': {
+            'body': {
                 'category': category,
-                'ticket_topic': ticket_topic
+                'ticket_topic': ticket_topic,
+                'ticket_status': ticket_status_list,
             },
-            'ticket_status': ticket_status_list,
         }
 
         response_to_publish_in_topic = {
             'request_id': request_id,
-            'tickets': 'You must specify "client_id", "category", '
-                       '"ticket_topic" in the params',
+            'body': 'You must specify '
+                    '{..."body:{"client_id", "category", "ticket_topic",'
+                    ' "ticket_status":[list of statuses]}...} in the request',
             'status': 400
         }
 
@@ -161,7 +165,7 @@ class TestGetTicket:
         )
 
     @pytest.mark.asyncio
-    async def get_all_tickets_missing_params_test(self):
+    async def get_all_tickets_missing_body_test(self):
         logger = Mock()
         filtered_tickets_list = [{'ticketID': 123}, {'ticketID': 321}]
         request_id = "123"
@@ -171,14 +175,11 @@ class TestGetTicket:
         msg = {
             'request_id': request_id,
             'response_topic': response_topic,
-            'ticket_status': ticket_status_list,
         }
 
         response_to_publish_in_topic = {
             'request_id': request_id,
-            'tickets': 'You must specify '
-                       '{.."params":{"client_id", "category", "ticket_topic"},'
-                       ' "ticket_status":[list of statuses]...} in the request',
+            'body': 'Must include "body" in request',
             'status': 400
         }
 

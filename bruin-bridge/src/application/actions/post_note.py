@@ -14,10 +14,16 @@ class PostNote:
             'body': None,
             'status': None
         }
-        if msg.get("ticket_id") and msg.get("note"):
+        if msg.get("body") is None:
+            response["status"] = 400
+            response["body"] = 'Must include "body" in request'
+            await self._event_bus.publish_message(msg['response_topic'], response)
+            return
+        body = msg['body']
+        if all(key in body.keys() for key in ("ticket_id", "note")):
 
-            ticket_id = msg["ticket_id"]
-            note = msg["note"]
+            ticket_id = msg["body"]["ticket_id"]
+            note = msg["body"]["note"]
 
             if len(note) > 1500:
                 self._logger.info(f'Cannot post a note to ticket {ticket_id}')
@@ -40,7 +46,7 @@ class PostNote:
             self._logger.error(f'Cannot post a note to ticket using {json.dumps(msg)}. '
                                f'JSON malformed')
 
-            response["body"] = 'You must include "ticket_id" and "note" in the request'
+            response["body"] = 'You must include "ticket_id" and "note" in the "body" field of the response request'
             response["status"] = 400
 
         await self._event_bus.publish_message(msg['response_topic'], response)

@@ -41,7 +41,7 @@ class TestGetManagementStatus:
 
         event_bus_request = {
             "request_id": 19,
-            "filters": filters,
+            "body": filters,
             "response_topic": "some.topic"
         }
 
@@ -74,7 +74,7 @@ class TestGetManagementStatus:
 
         event_bus_response = {
             "request_id": 19,
-            'body': 'You must specify {.."filter":{"client_id", "status", "service_number"}...} in the request',
+            'body': 'You must specify {.."body":{"client_id", "status", "service_number"}...} in the request',
             'status': 400
         }
 
@@ -100,7 +100,7 @@ class TestGetManagementStatus:
 
         event_bus_request = {
             "request_id": 19,
-            "filters": filters,
+            "body": filters,
             "response_topic": "some.topic"
         }
 

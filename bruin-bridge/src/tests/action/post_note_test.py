@@ -19,7 +19,7 @@ class TestPostNote:
         assert post_note._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
-    async def post_note_no_ticket_id_or_note_test(self):
+    async def post_note_no_body_test(self):
         logger = Mock()
         append_note_response = 'Note appended'
         request_id = 123
@@ -30,7 +30,38 @@ class TestPostNote:
         }
         msg_published_in_topic = {
             'request_id': request_id,
-            'body': 'You must include "ticket_id" and "note" in the request',
+            'body': 'Must include "body" in request',
+            'status': 400
+        }
+
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+
+        bruin_repository = Mock()
+        bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
+
+        post_note = PostNote(logger, event_bus, bruin_repository)
+        await post_note.post_note(msg)
+
+        post_note._bruin_repository.post_ticket_note.assert_not_called()
+        post_note._event_bus.publish_message.assert_awaited_once_with(
+            response_topic, msg_published_in_topic
+        )
+
+    @pytest.mark.asyncio
+    async def post_note_no_ticket_id_or_note_test(self):
+        logger = Mock()
+        append_note_response = 'Note appended'
+        request_id = 123
+        response_topic = '_INBOX.2007314fe0fcb2cdc2a2914c1'
+        msg = {
+            'request_id': request_id,
+            'body': {},
+            'response_topic': response_topic,
+        }
+        msg_published_in_topic = {
+            'request_id': request_id,
+            'body': 'You must include "ticket_id" and "note" in the "body" field of the response request',
             'status': 400
         }
 
@@ -59,8 +90,10 @@ class TestPostNote:
         msg = {
             'request_id': request_id,
             'response_topic': response_topic,
-            'ticket_id': ticket_id,
-            'note': note_contents,
+            'body': {
+                     'ticket_id': ticket_id,
+                     'note': note_contents,
+            }
         }
         msg_published_in_topic = {
             'request_id': request_id,
@@ -93,8 +126,10 @@ class TestPostNote:
         msg = {
             'request_id': request_id,
             'response_topic': response_topic,
-            'ticket_id': ticket_id,
-            'note': note_contents,
+            'body': {
+                     'ticket_id': ticket_id,
+                     'note': note_contents,
+            }
         }
         msg_published_in_topic = {
             'request_id': request_id,

@@ -32,7 +32,7 @@ class TestPostTicket:
 
         msg = {'request_id': request_id,
                'response_topic': response_topic,
-               'payload': {
+               'body': {
                            'clientId': client_id,
                            'category': category,
                            'services': services,
@@ -42,7 +42,7 @@ class TestPostTicket:
                }
         msg_published_in_topic = {
                                   'request_id': msg['request_id'],
-                                  'ticketIds': post_ticket_response,
+                                  'body': post_ticket_response,
                                   'status': 200
                                  }
         event_bus = Mock()
@@ -58,7 +58,7 @@ class TestPostTicket:
         logger.error.assert_not_called()
 
         post_ticket._bruin_repository.post_ticket.assert_called_once_with(
-            msg['payload']
+            msg['body']
         )
         post_ticket._event_bus.publish_message.assert_awaited_once_with(
             response_topic, msg_published_in_topic
@@ -80,7 +80,7 @@ class TestPostTicket:
 
         msg = {'request_id': request_id,
                'response_topic': response_topic,
-               'payload': {
+               'body': {
                    'clientId': client_id,
                    'category': category,
                    'services': services,
@@ -90,7 +90,7 @@ class TestPostTicket:
                }
         msg_published_in_topic = {
             'request_id': msg['request_id'],
-            'ticketIds': post_ticket_response,
+            'body': post_ticket_response,
             'status': 400
         }
         event_bus = Mock()
@@ -106,7 +106,7 @@ class TestPostTicket:
         logger.error.assert_called()
 
         post_ticket._bruin_repository.post_ticket.assert_called_once_with(
-            msg['payload']
+            msg['body']
         )
         post_ticket._event_bus.publish_message.assert_awaited_once_with(
             response_topic, msg_published_in_topic
@@ -126,18 +126,18 @@ class TestPostTicket:
 
         msg = {'request_id': request_id,
                'response_topic': response_topic,
-               'payload': {
+               'body': {
                            'clientId': client_id,
                            'category': category,
                            'services': services,
                            'contacts': contacts,
                            }
                }
-        payload_copy = msg['payload'].copy()
+        payload_copy = msg['body'].copy()
         payload_copy['notes'] = []
         msg_published_in_topic = {
                                   'request_id': msg['request_id'],
-                                  'ticketIds': post_ticket_response,
+                                  'body': post_ticket_response,
                                   'status': 200
                                  }
         event_bus = Mock()
@@ -169,7 +169,7 @@ class TestPostTicket:
 
         msg = {'request_id': request_id,
                'response_topic': response_topic,
-               'payload': {
+               'body': {
                            'category': category,
                            'contacts': contacts,
                            }
@@ -177,8 +177,8 @@ class TestPostTicket:
 
         msg_published_in_topic = {
                                   'request_id': msg['request_id'],
-                                  'ticketIds': 'You must specify "clientId", "category", '
-                                               '"services", "contacts" in the payload',
+                                  'body': 'You must specify "clientId", "category", '
+                                          '"services", "contacts" in the body',
                                   'status': 400
                                  }
         event_bus = Mock()
@@ -210,9 +210,9 @@ class TestPostTicket:
 
         msg_published_in_topic = {
                                   'request_id': msg['request_id'],
-                                  'ticketIds': 'You must specify '
-                                               '{.."payload":{"clientId", "category", "services", "contacts"},'
-                                               ' in the request',
+                                  'body': 'You must specify '
+                                          '{.."body":{"clientId", "category", "services", "contacts"},'
+                                          ' in the request',
                                   'status': 400
                                  }
         event_bus = Mock()

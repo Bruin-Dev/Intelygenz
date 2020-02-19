@@ -13,11 +13,16 @@ class ResolveTicket:
             'request_id': msg['request_id'],
             'status': None
         }
+        if msg.get("body") is None:
+            response["status"] = 400
+            response["body"] = 'Must include "body" in request'
+            await self._event_bus.publish_message(msg['response_topic'], response)
+            return
+        body = msg['body']
+        if body.get("ticket_id") and body.get("detail_id"):
 
-        if msg.get("ticket_id") and msg.get("detail_id"):
-
-            ticket_id = msg["ticket_id"]
-            detail_id = msg["detail_id"]
+            ticket_id = body["ticket_id"]
+            detail_id = body["detail_id"]
 
             self._logger.info(f'Updating the ticket status for ticket id: {ticket_id} to RESOLVED')
             result = self._bruin_repository.resolve_ticket(ticket_id, detail_id)

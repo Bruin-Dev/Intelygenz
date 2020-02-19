@@ -205,8 +205,8 @@ class BruinClient:
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
         def post_ticket():
-            self._logger.info(f'Posting note for client id:{payload["clientId"]}')
-            self._logger.info(f'Payload that will be applied : {json.dumps(payload)}')
+            self._logger.info(f'Posting ticket for client id:{payload["clientId"]}')
+            self._logger.info(f'Payload that will be applied : {json.dumps(payload, indent=2)}')
 
             response = requests.post(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/',
                                      headers=self._get_request_headers(),

@@ -36,7 +36,10 @@ class BruinRepository:
         response['status'] = 200
 
         filtered_tickets = self.get_all_filtered_tickets(params=params, ticket_status=ticket_statuses,)
-        response['status'] = filtered_tickets["status"]
+
+        if filtered_tickets['status'] not in range(200, 300):
+            return filtered_tickets
+
         for ticket in filtered_tickets['body']:
             ticket_id = ticket['ticketID']
             ticket_details_dict = self.get_ticket_details(ticket_id)
@@ -87,7 +90,7 @@ class BruinRepository:
         ticket_details_list = self.get_ticket_details_by_edge_serial(edge_serial=edge_serial, params=params,
                                                                      ticket_statuses=ticket_statuses)
 
-        if len(ticket_details_list['body']) > 0:
+        if len(ticket_details_list['body']) > 0 and ticket_details_list['status'] in range(200, 300):
             body = ticket_details_list['body'][0]
             ticket_details_list['body'] = body
 

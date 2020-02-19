@@ -11,13 +11,19 @@ class GetAffectingTicketDetailsByEdgeSerial:
     async def send_affecting_ticket_details_by_edge_serial(self, msg: dict):
         response = {
             'request_id': msg['request_id'],
-            'ticket_details_list': None,
+            'body': None,
             'status': None
         }
-        if msg.get("edge_serial") and msg.get("client_id"):
+        if msg.get("body") is None:
+            response["status"] = 400
+            response["body"] = 'Must include "body" in request'
+            await self._event_bus.publish_message(msg['response_topic'], response)
+            return
+        body = msg['body']
+        if body.get("edge_serial") and body.get("client_id"):
 
-            edge_serial = msg['edge_serial']
-            client_id = msg['client_id']
+            edge_serial = body['edge_serial']
+            client_id = body['client_id']
 
             self._logger.info(
                 f'Looking for an affecting ticket for edge with serial {edge_serial} '
@@ -28,7 +34,7 @@ class GetAffectingTicketDetailsByEdgeSerial:
                 edge_serial=edge_serial, client_id=client_id,
             )
 
-            response["ticket_details_list"] = ticket_details_list["body"]
+            response["body"] = ticket_details_list["body"]
             response["status"] = ticket_details_list["status"]
 
             self._logger.info(
@@ -40,7 +46,7 @@ class GetAffectingTicketDetailsByEdgeSerial:
             self._logger.error(f'Cannot get affecting ticket details using {json.dumps(msg)}. '
                                f'JSON malformed')
 
-            response["ticket_details_list"] = 'You must specify "client_id", "edge_serial", in the request'
+            response["body"] = 'You must specify "client_id", "edge_serial", in the request'
             response["status"] = 400
 
         await self._event_bus.publish_message(msg['response_topic'], response)

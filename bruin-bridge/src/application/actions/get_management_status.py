@@ -16,16 +16,16 @@ class GetManagementStatus:
             'body': None,
             'status': None
         }
-        if "filters" not in msg.keys():
+        if "body" not in msg.keys():
             self._logger.error(f'Cannot get management status using {json.dumps(msg)}. '
                                f'JSON malformed')
             response["status"] = 400
             response["body"] = 'You must specify ' \
-                               '{.."filter":{"client_id", "status", "service_number"}...} in the request'
+                               '{.."body":{"client_id", "status", "service_number"}...} in the request'
             await self._event_bus.publish_message(response_topic, response)
             return
 
-        filters = msg['filters']
+        filters = msg['body']
 
         if not all(key in filters.keys() for key in ("client_id", "status", "service_number")):
             self._logger.info(f'Cannot get management status using {json.dumps(filters)}. '
