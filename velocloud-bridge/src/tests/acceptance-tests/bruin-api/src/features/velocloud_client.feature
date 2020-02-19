@@ -3,3 +3,29 @@
 
 Feature: velocloud client
   general
+
+  Scenario: Response with status code 200
+    Given The velocloud client enviroment
+    When The function is used
+      | function                                      | values                                                    |
+      | _create_headers_by_host                       |                                                           |
+      | get_edge_information                          |                                                           |
+      | get_link_information                          |                                                           |
+      | get_link_service_groups_information           |                                                           |
+      | get_enterprise_information                    | {"host": 'some_host', "enterprise_id": 19, "edge_id": 99} |
+      | get_all_edge_events                           |                                                           |
+      | get_all_enterprises_edges_with_host           |                                                           |
+      | get_all_enterprises_edges_with_host_by_serial |                                                           |
+      | get_monitoring_aggregates                     |                                                           |
+      | get_all_enterprises_edges_by_id               |                                                           |
+    Then the status code is "200"
+    And and the body in response is correct
+    And 
+      |  |
+      |  |
+
+  Scenario: get_enterprise_information
+    Given the function is is goint to be used
+    When the parameters are "<parameters>"
+    Then the status code is "<status_code>"
+    And and the body in response contains "<response>"
