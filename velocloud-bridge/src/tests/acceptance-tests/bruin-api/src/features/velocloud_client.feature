@@ -4,6 +4,20 @@
 Feature: velocloud client
   general
 
+  Scenario Outline: get_enterprise_information
+    Given the function is going to be used
+    When the parameters in the function are edge = {"host": "<host>", "enterprise_id": "<enterprise_id>", "edge_id": "<edge_id>"}
+    Then the status code is "<status_code>"
+    And and the body in response contains "<body>"
+
+    Examples:
+      | status_code | body                              | host    | enterprise_id | edge_id   |
+      | 200         |                                   |         |               |           |
+      | 400         |                                   |         |               |           |
+      | 401         |                                   |         |               |           |
+      | 404         |                                   |         |               |           |
+      | 500         | Got internal error from Velocloud | un-host | 1111111       | 111212223 |
+
   Scenario: Response with status code 200
     Given The velocloud client enviroment
     When The function is used
@@ -20,12 +34,3 @@ Feature: velocloud client
       | get_all_enterprises_edges_by_id               |                                                           |
     Then the status code is "200"
     And and the body in response is correct
-    And 
-      |  |
-      |  |
-
-  Scenario: get_enterprise_information
-    Given the function is is goint to be used
-    When the parameters are "<parameters>"
-    Then the status code is "<status_code>"
-    And and the body in response contains "<response>"
