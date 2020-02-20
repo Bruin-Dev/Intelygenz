@@ -254,11 +254,11 @@ MONITORING_EDGES = {
         'enterprise_id': 170,
         'edge_id': 1610
     },
-    'VCE08400002428': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 170,
-        'edge_id': 3195
-    },
+    # 'VCE08400002428': {
+    #     'host': 'mettel.velocloud.net',
+    #     'enterprise_id': 170,
+    #     'edge_id': 3195
+    # },
     'VCE08400003079': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 170,
