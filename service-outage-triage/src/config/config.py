@@ -2077,11 +2077,11 @@ TRIAGE_CONFIG = {
             'enterprise_id': 60,
             'edge_id': 1132
         },
-        'VC05200028207': {
-            'host': 'mettel.velocloud.net',
-            'enterprise_id': 60,
-            'edge_id': 1292
-        },
+        # 'VC05200028207': {
+        #     'host': 'mettel.velocloud.net',
+        #     'enterprise_id': 60,
+        #     'edge_id': 1292
+        # },
         'VC05200028206': {
             'host': 'mettel.velocloud.net',
             'enterprise_id': 60,
