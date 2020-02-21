@@ -46,3 +46,32 @@ MONITORING_EDGES = {
         'edge_id': 456,
     }
 }
+
+TRIAGE_CONFIG = {
+    'environment': "dev",
+    'polling_minutes': 10,
+    'recipient': "some.recipient@email.com",
+    'timezone': 'US/Eastern',
+    'monitoring_seconds': 120,
+    'event_limit': 15,
+    'velo_filter': {"mettel.velocloud.net": []},
+    'autoresolve_serials_whitelist': ["VC05400002265"],
+    'bruin_company_ids': [85940],
+    'id_by_serial': {
+        "VC05200026138": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        },
+        "VC05400002265": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        },
+        "VC05400001485": {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1502
+        }
+    }
+}

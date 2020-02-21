@@ -116,12 +116,6 @@ env_dict = {
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
         f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}',
-    os.path.join('service-outage-triage', 'src', 'config', 'env'):
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
-        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
-        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}',
     os.path.join('t7-bridge', 'src', 'config', 'env'):
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'

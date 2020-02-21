@@ -13,7 +13,9 @@ from igz.packages.server.api import QuartServer
 
 from application.actions.comparison_report import ComparisonReport
 from application.actions.outage_monitoring import OutageMonitor
-from application.repositories.service_outage_report_template_renderer import ServiceOutageReportTemplateRenderer
+from application.actions.triage import Triage
+from application.repositories.comparison_report_renderer import ComparisonReportRenderer
+from application.repositories.triage_report_renderer import TriageReportRenderer
 from config import config
 
 
@@ -49,7 +51,8 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         # EMAIL TEMPLATE
-        self._template_renderer = ServiceOutageReportTemplateRenderer(config)
+        self._comparison_report_renderer = ComparisonReportRenderer(config)
+        self._triage_report_renderer = TriageReportRenderer(config)
 
         # OUTAGE UTILS
         self._outage_utils = OutageUtils(self._logger)
@@ -58,10 +61,12 @@ class Container:
         self._comparison_report = ComparisonReport(self._event_bus, self._logger, self._scheduler,
                                                    self._quarantine_edge_repository,
                                                    self._reporting_edge_repository,
-                                                   config, self._template_renderer,
+                                                   config, self._comparison_report_renderer,
                                                    self._outage_utils)
         self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
                                              config, self._outage_utils)
+        self._triage = Triage(self._event_bus, self._logger, self._scheduler,
+                              config, self._triage_report_renderer, self._outage_utils)
 
     async def _start(self):
         await self._event_bus.connect()
@@ -73,6 +78,8 @@ class Container:
         await self._comparison_report.start_service_outage_reporter_job(exec_on_start=False)
 
         await self._outage_monitor.start_service_outage_monitoring(exec_on_start=True)
+
+        await self._triage.start_triage_job(exec_on_start=True)
 
         self._scheduler.start()
 

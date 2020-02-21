@@ -1,17 +1,16 @@
-from config import testconfig as config
-from application.repositories.service_outage_report_template_renderer import ServiceOutageReportTemplateRenderer
+from application.repositories.comparison_report_renderer import ComparisonReportRenderer
 from config import testconfig
 
 
-class TestServiceOutageReportTemplateRenderer:
+class TestComparisonReportRenderer:
 
     def instantiation_test(self):
-        test_repo = ServiceOutageReportTemplateRenderer(config)
-        assert test_repo._config == config
+        test_repo = ComparisonReportRenderer(testconfig)
+        assert test_repo._config == testconfig
 
     def compose_email_object_test(self):
         config = testconfig
-        template_renderer = ServiceOutageReportTemplateRenderer(config)
+        template_renderer = ComparisonReportRenderer(config)
         edges_to_report = [{
             "detection_time": "2019-12-02 10:03:25.412646-05:00",
             "serial_number": "VC123456789",
@@ -29,7 +28,7 @@ class TestServiceOutageReportTemplateRenderer:
 
     def compose_email_table_fields_and_values_check_test(self):
         config = testconfig
-        template_renderer = ServiceOutageReportTemplateRenderer(config)
+        template_renderer = ComparisonReportRenderer(config)
         edges_to_report = [{
             "detection_time": "2019-12-02 10:03:25.412646-05:00",
             "serial_number": "VC123456789",

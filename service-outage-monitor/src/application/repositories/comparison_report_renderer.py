@@ -1,14 +1,16 @@
-import jinja2
-from shortuuid import uuid
-from datetime import datetime
 import base64
+
+from datetime import datetime
+
+import jinja2
 import pandas as pd
 import pytz
-import subprocess
+
 from pytz import timezone
+from shortuuid import uuid
 
 
-class ServiceOutageReportTemplateRenderer:
+class ComparisonReportRenderer:
 
     def __init__(self, config):
         self._config = config
@@ -17,9 +19,9 @@ class ServiceOutageReportTemplateRenderer:
         template_vars = {}
         # This path changes if you execute it from pycharm
         templateLoader = jinja2.FileSystemLoader(searchpath=".")
-        template = "src/templates/{}".format(kwargs.get("template", "report_mail_template.html"))
-        logo = "src/templates/images/{}".format(kwargs.get("logo", "logo.png"))
-        header = "src/templates/images/{}".format(kwargs.get("header", "header.jpg"))
+        template = "src/templates/comparison_report/{}".format(kwargs.get("template", "comparison_report.html"))
+        logo = "src/templates/comparison_report/images/{}".format(kwargs.get("logo", "logo.png"))
+        header = "src/templates/comparison_report/images/{}".format(kwargs.get("header", "header.jpg"))
         date = datetime.now(pytz.timezone('US/Eastern'))
         full_date = date.strftime("%b_%d_%Y_%H-%M-%S")
         self.csv = "{}_{}.csv".format(kwargs.get("csv", "report_mail_template"), full_date)
