@@ -17,7 +17,7 @@ class ComparisonReport:
     __client_id_regex = re.compile(r'^.*\|(?P<client_id>\d+)\|$')
 
     def __init__(self, event_bus, logger, scheduler, quarantine_edge_repository, reporting_edge_repository, config,
-                 email_template_renderer, outage_utils):
+                 email_template_renderer, outage_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -25,7 +25,7 @@ class ComparisonReport:
         self._quarantine_edge_repository = quarantine_edge_repository
         self._config = config
         self._email_template_renderer = email_template_renderer
-        self._outage_utils = outage_utils
+        self._outage_repository = outage_repository
 
     async def report_persisted_edges(self):
         self._logger.info('Reporting persisted edges prior to start scheduling jobs...')
@@ -115,7 +115,7 @@ class ComparisonReport:
                     self._logger.info(
                         f"Management status is active. Checking outage state for {edge_identifier}...")
 
-                if self._outage_utils.is_there_an_outage(edge_status):
+                if self._outage_repository.is_there_an_outage(edge_status):
                     await self._start_quarantine_job(edge_full_id)
                     self._add_edge_to_quarantine(edge_full_id, edge_status)
             except Exception:
@@ -157,14 +157,14 @@ class ComparisonReport:
         outage_causes = {}
 
         edge_state = edge_status["edges"]["edgeState"]
-        if self._outage_utils.is_faulty_edge(edge_state):
+        if self._outage_repository.is_faulty_edge(edge_state):
             outage_causes['edge'] = edge_state
 
         for link in edge_status['links']:
             link_data = link['link']
             link_state = link_data['state']
 
-            if self._outage_utils.is_faulty_link(link_state):
+            if self._outage_repository.is_faulty_link(link_state):
                 outage_links_states = outage_causes.setdefault('links', {})
                 outage_links_states[link_data['interface']] = link_state
 
@@ -324,7 +324,7 @@ class ComparisonReport:
                 self._quarantine_edge_repository.remove_edge(edge_full_id)
 
     async def _is_reportable_edge(self, edge_status):
-        outage_happened = self._outage_utils.is_there_an_outage(edge_status)
+        outage_happened = self._outage_repository.is_there_an_outage(edge_status)
         if not outage_happened:
             return False
 

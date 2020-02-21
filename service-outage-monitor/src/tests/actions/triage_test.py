@@ -28,15 +28,15 @@ class TestTriage:
         scheduler = Mock()
         config = Mock()
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         assert triage._event_bus is event_bus
         assert triage._logger is logger
         assert triage._scheduler is scheduler
         assert triage._config is config
-        assert triage._outage_utils is outage_utils
+        assert triage._outage_repository is outage_repository
 
     @pytest.mark.asyncio
     async def start_triage_job_with_exec_on_start_test(self):
@@ -45,9 +45,9 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -71,9 +71,9 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         await triage.start_triage_job(exec_on_start=False)
 
@@ -99,9 +99,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
 
         uuid_ = uuid()
@@ -133,9 +133,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._filtered_ticket_details = CoroutineMock()
 
         uuid_1 = uuid()
@@ -185,9 +185,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._filtered_ticket_details = CoroutineMock()
 
         uuid_1 = uuid()
@@ -237,9 +237,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._filtered_ticket_details = CoroutineMock()
 
         uuid_1 = uuid()
@@ -317,9 +317,9 @@ class TestTriage:
             append_ticket, send_to_slack
         ])
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
         triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
         triage._template_renderer._ticket_object_to_email_obj =\
@@ -433,9 +433,9 @@ class TestTriage:
             tickets, edge_status, edge_event,
             append_ticket, send_to_slack
         ])
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
         triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
         triage._ticket_object_to_string = Mock(return_value=ticket_note_as_string)
@@ -550,9 +550,9 @@ class TestTriage:
             tickets, edge_status, edge_event,
             append_ticket, send_to_slack
         ])
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
         triage._compose_ticket_note_object = Mock()
         triage._ticket_object_to_string = Mock()
@@ -582,9 +582,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         filtered_tickets = await triage._filtered_ticket_details(tickets)
 
@@ -616,9 +616,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         uuid_ = uuid()
         with patch.object(triage_module, 'uuid', return_value=uuid_):
@@ -658,9 +658,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         uuid_ = uuid()
         with patch.object(triage_module, 'uuid', return_value=uuid_):
@@ -702,9 +702,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._auto_resolve_tickets = CoroutineMock()
 
         uuid_ = uuid()
@@ -757,9 +757,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._auto_resolve_tickets = CoroutineMock()
 
         uuid_ = uuid()
@@ -812,9 +812,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._auto_resolve_tickets = CoroutineMock()
 
         uuid_ = uuid()
@@ -867,9 +867,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._extract_field_from_string = Mock(return_value=ticket_notes_timestamp_naive)
         triage._check_for_new_events = CoroutineMock()
         triage._auto_resolve_tickets = CoroutineMock()
@@ -937,9 +937,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._extract_field_from_string = Mock(return_value=ticket_notes_timestamp_naive)
         triage._check_for_new_events = CoroutineMock()
         triage._auto_resolve_tickets = CoroutineMock()
@@ -1003,18 +1003,18 @@ class TestTriage:
             }
         ]
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         edge_online_time = triage._find_recent_occurence_of_event(event_list, 'EDGE_ALIVE')
         assert str(edge_online_time) == '2019-07-30 02:38:00-04:00'
 
         link_online_time = triage._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
-                                                                                 'Link GE2 is no longer DEAD')
+                                                                  'Link GE2 is no longer DEAD')
         assert str(link_online_time) == '2019-07-30 00:26:00-04:00'
         link_dead_time = triage._find_recent_occurence_of_event(event_list, 'LINK_ALIVE',
-                                                                               'Link GE1 is no longer DEAD')
+                                                                'Link GE1 is no longer DEAD')
         assert link_dead_time is None
 
     def extract_field_from_string_test(self):
@@ -1025,9 +1025,9 @@ class TestTriage:
         template_renderer = Mock()
         dict_as_string = 'Edge Name: Test \nTimeStamp1: 2019-08-29 14:36:19-04:00 \nTimeStamp2 : Now \n'
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         timestamp = triage._extract_field_from_string(dict_as_string, 'TimeStamp1: ', '\nTimeStamp2')
 
@@ -1072,9 +1072,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[edge_status, events_to_report])
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         current_datetime = datetime.now()
         datetime_mock = Mock()
@@ -1147,9 +1147,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._compose_event_note_object = Mock(return_value=event_note)
         await triage._check_for_new_events(timestamp, ticket)
 
@@ -1191,9 +1191,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._compose_event_note_object = Mock(return_value=event_note)
 
         await triage._check_for_new_events(timestamp, ticket)
@@ -1242,9 +1242,9 @@ class TestTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._compose_event_note_object = Mock(return_value=event_note)
 
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
@@ -1321,9 +1321,9 @@ class TestTriage:
             rpc_response_append_ticket, rpc_response_slack_msg
         ])
 
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._compose_event_note_object = Mock(side_effect=[
             events_note, events_note
         ])
@@ -1407,9 +1407,9 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         event_str = triage._compose_event_note_object(events_to_report)
 
         assert 'Edge' in event_str
@@ -1425,9 +1425,9 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         event_str = triage._compose_event_note_object(events_to_report)
 
         assert 'Interface GE1' in event_str
@@ -1443,9 +1443,9 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         event_str = triage._compose_event_note_object(events_to_report)
 
@@ -1458,9 +1458,9 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._find_recent_occurence_of_event = Mock()
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
@@ -1511,9 +1511,9 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -1559,9 +1559,9 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -1607,9 +1607,9 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -1647,9 +1647,9 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._find_recent_occurence_of_event = Mock()
 
         edges_to_report = {
@@ -1687,9 +1687,9 @@ class TestTriage:
         config = Mock()
         template_renderer = Mock()
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
-        outage_utils = Mock()
+        outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         ticket_note = triage._ticket_object_to_string(test_dict)
         assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'
 
@@ -1734,11 +1734,11 @@ class TestTriage:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'production'
 
-        outage_utils = Mock()
-        outage_utils.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_utils.is_there_an_outage = Mock(return_value=False)
+        outage_repository = Mock()
+        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_repository.is_there_an_outage = Mock(return_value=False)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         ticket_id = "123"
         ticket_notes = ['list of notes']
@@ -1760,8 +1760,8 @@ class TestTriage:
                 with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
                     await triage._auto_resolve_tickets(ticket_item, detail_id)
 
-        outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
+        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
+        outage_repository.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
 
         event_bus.rpc_request.assert_has_awaits([
             call("edge.status.request",
@@ -1845,9 +1845,9 @@ class TestTriage:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'production'
 
-        outage_utils = Mock()
-        outage_utils.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_utils.is_there_an_outage = Mock(return_value=True)
+        outage_repository = Mock()
+        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_repository.is_there_an_outage = Mock(return_value=True)
 
         ticket_id = "123"
         ticket_notes = ['list of notes']
@@ -1861,7 +1861,7 @@ class TestTriage:
         start_datetime = datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
         note_timestamp = '2019-09-10 10:45:01'
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -1871,8 +1871,8 @@ class TestTriage:
                 with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
                     await triage._auto_resolve_tickets(ticket_item, detail_id)
 
-        outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_utils.is_there_an_outage.assert_not_called()
+        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
+        outage_repository.is_there_an_outage.assert_not_called()
 
         event_bus.rpc_request.assert_has_awaits([
                                                     call("edge.status.request",
@@ -1934,9 +1934,9 @@ class TestTriage:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'production'
 
-        outage_utils = Mock()
-        outage_utils.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_utils.is_there_an_outage = Mock(return_value=True)
+        outage_repository = Mock()
+        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_repository.is_there_an_outage = Mock(return_value=True)
 
         ticket_id = "123"
         ticket_notes = ['list of notes']
@@ -1950,7 +1950,7 @@ class TestTriage:
         start_datetime = datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
         note_timestamp = '2019-09-10 10:45:01'
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -1960,8 +1960,8 @@ class TestTriage:
                 with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
                     await triage._auto_resolve_tickets(ticket_item, detail_id)
 
-        outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status["edge_info"])
+        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
+        outage_repository.is_there_an_outage.assert_called_once_with(edge_status["edge_info"])
 
         event_bus.rpc_request.assert_has_awaits([
             call("edge.status.request",
@@ -2000,9 +2000,9 @@ class TestTriage:
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = 'production'
 
-        outage_utils = Mock()
-        outage_utils.is_outage_ticket_auto_resolvable = Mock(return_value=False)
-        outage_utils.is_there_an_outage = Mock(return_value=False)
+        outage_repository = Mock()
+        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=False)
+        outage_repository.is_there_an_outage = Mock(return_value=False)
 
         ticket_id = "123"
         ticket_notes = ['list of notes']
@@ -2010,15 +2010,15 @@ class TestTriage:
 
         detail_id = "321"
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         uuid_ = uuid()
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
                 await triage._auto_resolve_tickets(ticket_item, detail_id)
 
-        outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_utils.is_there_an_outage.assert_not_called()
+        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
+        outage_repository.is_there_an_outage.assert_not_called()
         event_bus.rpc_request.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -2061,9 +2061,9 @@ class TestTriage:
 
         config = testconfig
 
-        outage_utils = Mock()
-        outage_utils.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_utils.is_there_an_outage = Mock(return_value=False)
+        outage_repository = Mock()
+        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+        outage_repository.is_there_an_outage = Mock(return_value=False)
 
         ticket_id = "123"
         ticket_notes = ['list of notes']
@@ -2077,7 +2077,7 @@ class TestTriage:
         start_datetime = datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
         note_timestamp = '2019-09-10 10:45:01'
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_utils)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
 
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=current_datetime)
@@ -2086,8 +2086,8 @@ class TestTriage:
             with patch.object(triage_module, 'datetime', new=datetime_mock):
                 await triage._auto_resolve_tickets(ticket_item, detail_id)
 
-        outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
+        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
+        outage_repository.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
 
         event_bus.rpc_request.assert_has_awaits([
             call("edge.status.request",

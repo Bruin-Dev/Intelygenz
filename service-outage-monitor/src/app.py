@@ -7,14 +7,14 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.nats.clients import NATSClient
-from igz.packages.repositories.edge_repository import EdgeRepository
-from igz.packages.repositories.outageutils import OutageUtils
 from igz.packages.server.api import QuartServer
 
 from application.actions.comparison_report import ComparisonReport
 from application.actions.outage_monitoring import OutageMonitor
 from application.actions.triage import Triage
 from application.repositories.comparison_report_renderer import ComparisonReportRenderer
+from application.repositories.edge_redis_repository import EdgeRedisRepository
+from application.repositories.outage_repository import OutageRepository
 from application.repositories.triage_report_renderer import TriageReportRenderer
 from config import config
 
@@ -37,10 +37,10 @@ class Container:
         self._server = QuartServer(config)
 
         # REPOSITORIES
-        self._quarantine_edge_repository = EdgeRepository(redis_client=self._redis_client,
-                                                          keys_prefix='EDGES_QUARANTINE', logger=self._logger)
-        self._reporting_edge_repository = EdgeRepository(redis_client=self._redis_client,
-                                                         keys_prefix='EDGES_TO_REPORT', logger=self._logger)
+        self._quarantine_edge_repository = EdgeRedisRepository(redis_client=self._redis_client,
+                                                               keys_prefix='EDGES_QUARANTINE', logger=self._logger)
+        self._reporting_edge_repository = EdgeRedisRepository(redis_client=self._redis_client,
+                                                              keys_prefix='EDGES_TO_REPORT', logger=self._logger)
 
         # MESSAGES STORAGE MANAGER
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
@@ -55,18 +55,18 @@ class Container:
         self._triage_report_renderer = TriageReportRenderer(config)
 
         # OUTAGE UTILS
-        self._outage_utils = OutageUtils(self._logger)
+        self._outage_repository = OutageRepository(self._logger)
 
         # ACTIONS
         self._comparison_report = ComparisonReport(self._event_bus, self._logger, self._scheduler,
                                                    self._quarantine_edge_repository,
                                                    self._reporting_edge_repository,
                                                    config, self._comparison_report_renderer,
-                                                   self._outage_utils)
+                                                   self._outage_repository)
         self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
-                                             config, self._outage_utils)
+                                             config, self._outage_repository)
         self._triage = Triage(self._event_bus, self._logger, self._scheduler,
-                              config, self._triage_report_renderer, self._outage_utils)
+                              config, self._triage_report_renderer, self._outage_repository)
 
     async def _start(self):
         await self._event_bus.connect()

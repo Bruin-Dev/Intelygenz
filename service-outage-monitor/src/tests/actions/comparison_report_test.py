@@ -29,11 +29,11 @@ class TestComparisonReport:
         reporting_edge_repository = Mock()
         config = Mock()
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
-                                              quarantine_edge_repository, reporting_edge_repository,
-                                              config, template_renderer, outage_utils)
+                                             quarantine_edge_repository, reporting_edge_repository,
+                                             config, template_renderer, outage_repository)
 
         assert comparison_report._event_bus is event_bus
         assert comparison_report._logger is logger
@@ -41,7 +41,7 @@ class TestComparisonReport:
         assert comparison_report._quarantine_edge_repository is quarantine_edge_repository
         assert comparison_report._reporting_edge_repository is reporting_edge_repository
         assert comparison_report._config is config
-        assert comparison_report._outage_utils is outage_utils
+        assert comparison_report._outage_repository is outage_repository
 
     @pytest.mark.asyncio
     async def report_persisted_edges_test(self):
@@ -52,11 +52,11 @@ class TestComparisonReport:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report.start_service_outage_reporter_job = CoroutineMock()
 
         await comparison_report.report_persisted_edges()
@@ -114,14 +114,14 @@ class TestComparisonReport:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         quarantine_edge_repository = Mock()
         quarantine_edge_repository.get_all_edges = Mock(return_value=quarantine_edges)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._start_quarantine_job = CoroutineMock()
 
         await comparison_report.load_persisted_quarantine()
@@ -151,11 +151,11 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -181,11 +181,11 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         await comparison_report.start_service_outage_detector_job(exec_on_start=False)
 
@@ -208,14 +208,14 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         try:
             await comparison_report.start_service_outage_detector_job()
@@ -240,11 +240,11 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
 
         await comparison_report._service_outage_detector_process()
@@ -283,7 +283,7 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -299,7 +299,7 @@ class TestServiceOutageDetectorJob:
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         comparison_report._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -312,7 +312,7 @@ class TestServiceOutageDetectorJob:
         comparison_report._get_all_edges.assert_awaited_once()
         comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         event_bus.rpc_request.assert_awaited_with("notification.slack.request", slack_message, timeout=30)
-        outage_utils.is_there_an_outage.assert_not_called()
+        outage_repository.is_there_an_outage.assert_not_called()
         comparison_report._start_quarantine_job.assert_not_awaited()
         comparison_report._is_management_status_active.assert_not_called()
 
@@ -350,12 +350,12 @@ class TestServiceOutageDetectorJob:
         config = testconfig
         template_renderer = Mock()
 
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock(return_value=True)
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(return_value=True)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         comparison_report._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -369,7 +369,7 @@ class TestServiceOutageDetectorJob:
 
         comparison_report._get_all_edges.assert_awaited_once()
         comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_utils.is_there_an_outage.assert_called()
+        outage_repository.is_there_an_outage.assert_called()
         comparison_report._start_quarantine_job.assert_awaited()
 
     @pytest.mark.asyncio
@@ -406,12 +406,12 @@ class TestServiceOutageDetectorJob:
         config = testconfig
         template_renderer = Mock()
 
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock(return_value=False)
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(return_value=False)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         comparison_report._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -425,7 +425,7 @@ class TestServiceOutageDetectorJob:
 
         comparison_report._get_all_edges.assert_awaited_once()
         comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_utils.is_there_an_outage.assert_called()
+        outage_repository.is_there_an_outage.assert_called()
         comparison_report._start_quarantine_job.assert_not_awaited()
         comparison_report._add_edge_to_quarantine.assert_not_called()
 
@@ -463,12 +463,12 @@ class TestServiceOutageDetectorJob:
         config = testconfig
         template_renderer = Mock()
 
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock(return_value=False)
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(return_value=False)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         comparison_report._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -479,7 +479,7 @@ class TestServiceOutageDetectorJob:
 
         comparison_report._get_all_edges.assert_awaited_once()
         comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_utils.is_there_an_outage.assert_not_called()
+        outage_repository.is_there_an_outage.assert_not_called()
         comparison_report._start_quarantine_job.assert_not_awaited()
         logger.info.assert_called()
 
@@ -553,12 +553,12 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock(side_effect=is_there_outage_side_effect)
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(side_effect=is_there_outage_side_effect)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
 
@@ -645,10 +645,10 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
 
@@ -737,12 +737,12 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock(side_effect=is_there_outage_side_effect)
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(side_effect=is_there_outage_side_effect)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
         comparison_report._start_quarantine_job = CoroutineMock()
@@ -777,17 +777,17 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock()
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._start_quarantine_job = CoroutineMock()
         comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=ValueError)
         await comparison_report._service_outage_detector_process()
-        outage_utils.is_there_an_outage.assert_not_called()
+        outage_repository.is_there_an_outage.assert_not_called()
 
         comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=Exception)
         comparison_report._is_management_status_active = CoroutineMock()
@@ -808,18 +808,18 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock()
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._start_quarantine_job = CoroutineMock()
         comparison_report._get_edge_status_by_id = CoroutineMock()
         comparison_report._is_management_status_active = CoroutineMock(return_value=False)
         await comparison_report._service_outage_detector_process()
-        outage_utils.is_there_an_outage.assert_not_called()
+        outage_repository.is_there_an_outage.assert_not_called()
 
     @pytest.mark.asyncio
     async def get_all_edges_test(self):
@@ -844,11 +844,11 @@ class TestServiceOutageDetectorJob:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edge_list_response)
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
             result = await comparison_report._get_all_edges()
@@ -883,7 +883,7 @@ class TestServiceOutageDetectorJob:
         }
         edge_status_response = {
             'request_id': uuid_,
-            'body': edge_status,
+            'body': edge_data,
             'status': 200,
         }
 
@@ -896,11 +896,11 @@ class TestServiceOutageDetectorJob:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edge_status_response)
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
             result = await comparison_report._get_edge_status_by_id(edge_full_id)
@@ -935,11 +935,11 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         comparison_report._add_edge_to_quarantine(edge_full_id, edge_status)
 
@@ -1007,13 +1007,13 @@ class TestServiceOutageDetectorJob:
         config = testconfig
         template_renderer = Mock()
 
-        outage_utils = Mock()
-        outage_utils.is_faulty_edge = Mock(side_effect=[False, True, True])
-        outage_utils.is_faulty_link = Mock(side_effect=[False, False, True, True, False, True])
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(side_effect=[False, True, True])
+        outage_repository.is_faulty_link = Mock(side_effect=[False, False, True, True, False, True])
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         result = comparison_report._get_outage_causes(edge_status_1)
         assert result is None
@@ -1056,14 +1056,14 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=management_status_response)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         comparison_report._extract_client_id = Mock(return_value=12345)
 
@@ -1086,11 +1086,11 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
             is_management_status_active = comparison_report._is_management_status_active(management_status_str)
@@ -1109,11 +1109,11 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
             is_management_status_active = comparison_report._is_management_status_active(management_status_str)
@@ -1133,11 +1133,11 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         current_datetime = datetime.now()
         current_timestamp = datetime.timestamp(current_datetime)
@@ -1169,11 +1169,11 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         job_run_date = datetime.fromtimestamp(999999)
         await comparison_report._start_quarantine_job(edge_full_id, run_date=job_run_date)
@@ -1202,11 +1202,11 @@ class TestQuarantineJob:
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         current_datetime = datetime.now()
         current_timestamp = datetime.timestamp(current_datetime)
@@ -1262,11 +1262,11 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         comparison_report._is_reportable_edge = CoroutineMock(return_value=False)
         comparison_report._add_edge_to_reporting = Mock()
@@ -1307,11 +1307,11 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         comparison_report._is_reportable_edge = CoroutineMock(return_value=True)
         comparison_report._add_edge_to_reporting = Mock()
@@ -1353,11 +1353,11 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         comparison_report._is_reportable_edge = CoroutineMock(side_effect=ValueError)
         comparison_report._add_edge_to_reporting = Mock()
@@ -1389,12 +1389,12 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock(return_value=False)
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(return_value=False)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_outage_ticket_for_edge = CoroutineMock()
 
         result = await comparison_report._is_reportable_edge(edge_status)
@@ -1445,12 +1445,12 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
-        outage_utils.is_there_an_outage = Mock(wraps=outage_utils.is_there_an_outage)
+                                             config, template_renderer, outage_repository)
+        outage_repository.is_there_an_outage = Mock(wraps=outage_repository.is_there_an_outage)
         comparison_report._get_outage_ticket_for_edge = CoroutineMock(return_value=outage_ticket)
 
         result = await comparison_report._is_reportable_edge(edge_status)
@@ -1488,12 +1488,12 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
-        outage_utils.is_there_an_outage = Mock(wraps=outage_utils.is_there_an_outage)
+                                             config, template_renderer, outage_repository)
+        outage_repository.is_there_an_outage = Mock(wraps=outage_repository.is_there_an_outage)
         comparison_report._get_outage_ticket_for_edge = CoroutineMock(return_value=outage_ticket)
 
         result = await comparison_report._is_reportable_edge(edge_status)
@@ -1527,11 +1527,11 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_outage_ticket_for_edge = CoroutineMock(return_value=outage_ticket)
 
         with pytest.raises(ValueError):
@@ -1584,11 +1584,11 @@ class TestQuarantineJob:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=outage_ticket)
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._extract_client_id = Mock(return_value=client_id)
 
         uuid_ = uuid()
@@ -1653,11 +1653,11 @@ class TestQuarantineJob:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=outage_ticket)
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._extract_client_id = Mock(return_value=client_id)
 
         uuid_ = uuid()
@@ -1692,11 +1692,11 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         result_client_id = comparison_report._extract_client_id(enterprise_name)
         assert result_client_id == client_id
@@ -1711,11 +1711,11 @@ class TestQuarantineJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         result_client_id = comparison_report._extract_client_id(enterprise_name)
         assert result_client_id == 9994
@@ -1764,11 +1764,11 @@ class TestQuarantineJob:
 
         quarantine_edge_repository = Mock()
         quarantine_edge_repository.get_edge = Mock(return_value=edge_status_in_quarantine)
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         comparison_report._add_edge_to_reporting(edge_full_id, edge_status)
 
@@ -1809,11 +1809,11 @@ class TestQuarantineJob:
 
         quarantine_edge_repository = Mock()
         quarantine_edge_repository.get_edge = Mock(return_value=None)
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         current_datetime = datetime.now()
         current_timestamp = datetime.timestamp(current_datetime)
@@ -1845,11 +1845,11 @@ class TestServiceOutageReporterJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -1875,11 +1875,11 @@ class TestServiceOutageReporterJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         await comparison_report.start_service_outage_reporter_job(exec_on_start=False)
 
@@ -1988,11 +1988,11 @@ class TestServiceOutageReporterJob:
 
         template_renderer = Mock()
         template_renderer.compose_email_object = Mock(return_value=email_object)
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._refresh_reporting_queue = CoroutineMock()
         comparison_report._attach_outage_causes_to_edges = Mock()
         comparison_report._unmarshall_edge_to_report = Mock(side_effect=unmarshalling_result)
@@ -2035,11 +2035,11 @@ class TestServiceOutageReporterJob:
 
         reporting_edge_repository = Mock()
         reporting_edge_repository.get_all_edges = Mock(return_value=edges_to_report)
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._refresh_reporting_queue = CoroutineMock()
         comparison_report._attach_outage_causes_to_edges = Mock()
         comparison_report._unmarshall_edge_to_report = Mock()
@@ -2258,15 +2258,15 @@ class TestServiceOutageReporterJob:
         quarantine_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock(side_effect=[False, True, True, True])
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(side_effect=[False, True, True, True])
 
         reporting_edge_repository = Mock()
         reporting_edge_repository.get_all_edges = Mock(return_value=edges_to_report)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=[
             edge_1_new_status_response,
             edge_2_new_status_response,
@@ -2323,15 +2323,15 @@ class TestServiceOutageReporterJob:
         quarantine_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
-        outage_utils.is_there_an_outage = Mock(side_effect=[False, True, True, True])
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(side_effect=[False, True, True, True])
 
         reporting_edge_repository = Mock()
         reporting_edge_repository.get_all_edges = Mock(return_value=edges_to_report)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
         comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=Exception)
 
         await comparison_report._refresh_reporting_queue()
@@ -2419,13 +2419,13 @@ class TestServiceOutageReporterJob:
 
         is_faulty_edge_side_effect = [True, False, True]
         is_faulty_link_side_effect = [True, True, True, True, False, False]
-        outage_utils = Mock()
-        outage_utils.is_faulty_edge = Mock(side_effect=is_faulty_edge_side_effect)
-        outage_utils.is_faulty_link = Mock(side_effect=is_faulty_link_side_effect)
+        outage_repository = Mock()
+        outage_repository.is_faulty_edge = Mock(side_effect=is_faulty_edge_side_effect)
+        outage_repository.is_faulty_link = Mock(side_effect=is_faulty_link_side_effect)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         comparison_report._attach_outage_causes_to_edges(edges_to_report)
 
@@ -2455,11 +2455,11 @@ class TestServiceOutageReporterJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         result_url = comparison_report._generate_edge_url(edge_full_id)
 
@@ -2521,11 +2521,11 @@ class TestServiceOutageReporterJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
-        outage_utils = Mock()
+        outage_repository = Mock()
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_utils)
+                                             config, template_renderer, outage_repository)
 
         tz = timezone(config.MONITOR_CONFIG['timezone'])
         expected_detection_time = datetime.fromtimestamp(detection_timestamp, tz=tz)

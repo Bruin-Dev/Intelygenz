@@ -13,13 +13,13 @@ from igz.packages.eventbus.eventbus import EventBus
 
 class Triage:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, outage_utils):
+    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, outage_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._template_renderer = template_renderer
-        self._outage_utils = outage_utils
+        self._outage_repository = outage_repository
 
     async def start_triage_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service outage triage configured to run every '
@@ -323,7 +323,7 @@ class Triage:
         id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
         edge_id = id_by_serial[ticket_id["serial"]]
 
-        if not self._outage_utils.is_outage_ticket_auto_resolvable(ticket_id['ticketID'], ticket_id['notes'], 3):
+        if not self._outage_repository.is_outage_ticket_auto_resolvable(ticket_id['ticketID'], ticket_id['notes'], 3):
             self._logger.info("Cannot autoresolved due to ticket being autoresolved more than 3 times")
             return
 
@@ -351,7 +351,7 @@ class Triage:
                               "last 45 minutes")
             return
 
-        if self._outage_utils.is_there_an_outage(edge_info) is False:
+        if self._outage_repository.is_there_an_outage(edge_info) is False:
             self._logger.info(f'Autoresolving ticket of ticket id: {json.dumps(ticket_id, indent=2, default=str)}')
 
             if self._config.TRIAGE_CONFIG['environment'] == 'production':

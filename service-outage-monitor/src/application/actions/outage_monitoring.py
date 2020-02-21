@@ -15,12 +15,12 @@ from igz.packages.repositories.edge_repository import EdgeIdentifier
 class OutageMonitor:
     __client_id_regex = re.compile(r'^.*\|(?P<client_id>\d+)\|$')
 
-    def __init__(self, event_bus, logger, scheduler, config, outage_utils):
+    def __init__(self, event_bus, logger, scheduler, config, outage_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
-        self._outage_utils = outage_utils
+        self._outage_repository = outage_repository
 
     async def start_service_outage_monitoring(self, exec_on_start):
         self._logger.info('Scheduling Service Outage Monitor job...')
@@ -74,7 +74,7 @@ class OutageMonitor:
             else:
                 self._logger.info(f'Management status for {edge_identifier} seems active.')
 
-            outage_happened = self._outage_utils.is_there_an_outage(edge_status)
+            outage_happened = self._outage_repository.is_there_an_outage(edge_status)
             if outage_happened:
                 self._logger.info(
                     f'[outage-monitoring] Outage detected for {edge_identifier}. '
@@ -113,7 +113,7 @@ class OutageMonitor:
         is_outage = None
         if full_edge_status["status"] in range(200, 300):
             edge_status = full_edge_status["body"]["edge_info"]
-            is_outage = self._outage_utils.is_there_an_outage(edge_status)
+            is_outage = self._outage_repository.is_there_an_outage(edge_status)
         if is_outage:
             self._logger.info(f'[outage-recheck] Edge {edge_identifier} is still in outage state.')
 
@@ -249,14 +249,14 @@ class OutageMonitor:
         outage_causes = {}
 
         edge_state = edge_status["edges"]["edgeState"]
-        if self._outage_utils.is_faulty_edge(edge_state):
+        if self._outage_repository.is_faulty_edge(edge_state):
             outage_causes['edge'] = edge_state
 
         for link in edge_status['links']:
             link_data = link['link']
             link_state = link_data['state']
 
-            if self._outage_utils.is_faulty_link(link_state):
+            if self._outage_repository.is_faulty_link(link_state):
                 outage_links_states = outage_causes.setdefault('links', {})
                 outage_links_states[link_data['interface']] = link_state
 
