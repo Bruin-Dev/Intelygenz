@@ -15,6 +15,7 @@ This microservice is in charge of running two processes:
 
 # Outage report
 
+
 ### Overview
 The outage report process aims to detect faulty edges which are not linked in any way to an open
 Bruin ticket and send a report with all those edges via e-mail. Note that edges targeted at testing purposes are
