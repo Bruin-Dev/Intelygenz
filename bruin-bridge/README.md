@@ -10,30 +10,35 @@
     * [Description](#description-2)
     * [Request message](#request-message-1)
     * [Response message](#response-message-1)
-  * [Post notes to Ticket](#post-notes-to-ticket)
+  * [Get Tickets Details by edge serial](#get-tickets-details-by-edge-serial)
     * [Description](#description-3)
     * [Request message](#request-message-2)
     * [Response message](#response-message-2)
-  * [Post Ticket](#post-ticket)
+  * [Post notes to Ticket](#post-notes-to-ticket)
     * [Description](#description-4)
     * [Request message](#request-message-3)
     * [Response message](#response-message-3)
-  * [Open Ticket](#open-ticket)
+  * [Post Ticket](#post-ticket)
     * [Description](#description-5)
     * [Request message](#request-message-4)
     * [Response message](#response-message-4)
-  * [Resolve Ticket](#resolve-ticket)
+  * [Open Ticket](#open-ticket)
     * [Description](#description-6)
     * [Request message](#request-message-5)
     * [Response message](#response-message-5)
-  * [Get Management status](#get-management-status)
+  * [Resolve Ticket](#resolve-ticket)
     * [Description](#description-7)
     * [Request message](#request-message-6)
-    * [Response message](#response-message-6)      
-  * [Post Outage Ticket](#post-outage-ticket)
+    * [Response message](#response-message-6)
+  * [Get Management status](#get-management-status)
     * [Description](#description-8)
     * [Request message](#request-message-7)
-    * [Response message](#response-message-7)
+    * [Response message](#response-message-7)      
+    * [Response message](#response-message-6)      
+  * [Post Outage Ticket](#post-outage-ticket)
+    * [Description](#description-9)
+    * [Request message](#request-message-8)
+    * [Response message](#response-message-8)
 - [Running in docker-compose](#running-in-docker-compose)
 
 
@@ -106,6 +111,38 @@ and publish it to the response topic that was built by NATS under the hood.
     'request_id': 123,
     'body': {
              'ticket_id': 123,
+            }
+}
+```
+### Response message
+```
+{
+    'request_id': msg_dict['request_id'],
+    'body': List of ticket details,
+    'status': 200
+}
+```
+# Get Tickets Details by edge serial
+### Description
+When the bruin bridge receives a request with a request message from topic 
+`bruin.ticket.affecting.details.by_edge_serial.request` or  `bruin.ticket.outage.details.by_edge_serial.request`
+it makes a callback to either the function `send_affecting_ticket_details_by_edge_serial` or 
+`send_outage_ticket_details_by_edge_serial`.  From the request message we obtain the `edge_serial` and `client_id` 
+of the edge that we want the ticket details from. 
+
+Using that `edge_serial` and `client_id`  as a parameter we make a call to the bruin repository which calls to the bruin client to receive 
+a list of details pertaining to the associated `edge_serial` and `client_id` . Now that we have the list we format it into a response message 
+and publish it to the response topic that was built by NATS under the hood.
+
+
+### Request message
+```
+{
+    'request_id': 123,
+    'body': {
+             'client_id': 123,
+              'edge_serial': "VC0123"
+              'ticket_statuses':[List of statuses] //optional parameter for bruin.ticket.outage.details.by_edge_serial.request
             }
 }
 ```

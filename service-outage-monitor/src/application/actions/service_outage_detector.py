@@ -218,7 +218,7 @@ class ServiceOutageDetector:
         ticket_details = await self._event_bus.rpc_request(
             "bruin.ticket.details.request", ticket_details_request_msg, timeout=15
         )
-        detail_id_for_reopening = ticket_details['ticket_details']['ticketDetails'][0]['detailID']
+        detail_id_for_reopening = ticket_details['body']['ticketDetails'][0]['detailID']
 
         ticket_reopening_msg = {'request_id': uuid(), 'body': {'ticket_id': ticket_id,
                                                                'detail_id': detail_id_for_reopening}}

@@ -3137,7 +3137,7 @@ class TestServiceOutageMonitor:
         service_outage_detector = ServiceOutageDetector(event_bus, logger, scheduler,
                                                         quarantine_edge_repository, reporting_edge_repository,
                                                         config, template_renderer, outage_utils)
-        service_outage_detector._generate_outage_ticket = Mock(return_value=ticket_creation_details["body"])
+        service_outage_detector._generate_outage_ticket = Mock(return_value=ticket_creation_details)
 
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
             result = await service_outage_detector._create_outage_ticket(edge_status)
@@ -3166,7 +3166,9 @@ class TestServiceOutageMonitor:
 
         ticket_details_msg = {
             'request_id': uuid_,
-            'ticket_id': ticket_id,
+            'body': {
+                     'ticket_id': ticket_id,
+                    }
         }
 
         ticket_reopening_msg = {
@@ -3179,7 +3181,7 @@ class TestServiceOutageMonitor:
 
         ticket_details_result = {
             'request_id': uuid_,
-            'ticket_details': {
+            'body': {
                 'ticketDetails': [
                     {
                         "detailID": detail_id,
@@ -3250,7 +3252,9 @@ class TestServiceOutageMonitor:
 
         ticket_details_msg = {
             'request_id': uuid_,
-            'ticket_id': ticket_id,
+            'body': {
+                     'ticket_id': ticket_id,
+                    }
         }
 
         ticket_reopening_msg = {
@@ -3263,7 +3267,7 @@ class TestServiceOutageMonitor:
 
         ticket_details_result = {
             'request_id': uuid_,
-            'ticket_details': {
+            'body': {
                 'ticketDetails': [
                     {
                         "detailID": detail_id,
