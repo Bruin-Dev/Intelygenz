@@ -49,51 +49,6 @@ REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
 }
 
-OUTAGE_CONTACTS = {
-    "VC05400002265": [
-        {
-            "email": "ndimuro@mettel.net",
-            "phone": "732-837-9570",
-            "name": "Nicholas Di Muro",
-            "type": "site"
-        },
-        {
-            "email": "ndimuro@mettel.net",
-            "phone": "732-837-9570",
-            "name": "Nicholas Di Muro",
-            "type": "ticket"
-        },
-    ],
-    "VC05400001257": [
-        {
-            "email": "rrogers@marwoodgroup.com",
-            "phone": "917-9028-237",
-            "name": "Randy Rogers",
-            "type": "site"
-        },
-        {
-            "email": "rrogers@marwoodgroup.com",
-            "phone": "917-9028-237",
-            "name": "Randy Rogers",
-            "type": "ticket"
-        }
-    ],
-    "VCE08400001789": [
-        {
-            "email": "rrogers@marwoodgroup.com",
-            "phone": "917-9028-237",
-            "name": "Randy Rogers",
-            "type": "site"
-        },
-        {
-            "email": "rrogers@marwoodgroup.com",
-            "phone": "917-9028-237",
-            "name": "Randy Rogers",
-            "type": "ticket"
-        }
-    ]
-}
-
 MONITORING_EDGES = {
 
     # Mettel Edge
@@ -244,16 +199,18 @@ MONITORING_EDGES = {
         'enterprise_id': 170,
         'edge_id': 2428
     },
-    'VC05400014471': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 170,
-        'edge_id': 2675
-    },
+    # False positive in management status. Should be decomissioned.
+    # 'VC05400014471': {
+    #     'host': 'mettel.velocloud.net',
+    #     'enterprise_id': 170,
+    #     'edge_id': 2675
+    # },
     'VCE08400000024': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 170,
         'edge_id': 1610
     },
+    # Is an old edge but it's management status is Active.
     # 'VCE08400002428': {
     #     'host': 'mettel.velocloud.net',
     #     'enterprise_id': 170,

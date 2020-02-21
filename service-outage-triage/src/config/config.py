@@ -38,8 +38,9 @@ TRIAGE_CONFIG = {
         'VC05200035645', 'VC05200035383', 'VC05200036935', 'VC05200016642', 'VC05200012781', 'VC05200069359',
         # Planet home lending
         # Faulty: "VCE08400002428"
+        # False positive in management status. Should be decomissioned: 'VC05400014471'
         'VC05400017787', 'VC05400018334', 'VC05200039042', 'VC05400018645', 'VC05200039063', 'VC05200043037',
-        'VC05400006773', 'VCE08400002713', 'VC05200056383', 'VC05200069615', 'VC05400012544', 'VC05400014471',
+        'VC05400006773', 'VCE08400002713', 'VC05200056383', 'VC05200069615', 'VC05400012544',
         'VCE08400000024', 'VCE08400003079', 'VC05100042088', 'VC05200035353', 'VCE08400000896',
         'VCE08400000737', 'VC05200044788', 'VCE08400002115', 'VC05400010813', 'VCE08400002682', 'VC05200043272',
         'VC05200062803', 'VC05400011928', 'VC05400014486', 'VC05200043505', 'VC05200038567', 'VC05400012064',
@@ -792,11 +793,12 @@ TRIAGE_CONFIG = {
             'enterprise_id': 170,
             'edge_id': 2428
         },
-        'VC05400014471': {
-            'host': 'mettel.velocloud.net',
-            'enterprise_id': 170,
-            'edge_id': 2675
-        },
+        # False positive in management status. Should be decomissioned
+        # 'VC05400014471': {
+        #     'host': 'mettel.velocloud.net',
+        #     'enterprise_id': 170,
+        #     'edge_id': 2675
+        # },
         'VCE08400000024': {
             'host': 'mettel.velocloud.net',
             'enterprise_id': 170,
