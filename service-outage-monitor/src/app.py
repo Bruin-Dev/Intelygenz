@@ -1,17 +1,20 @@
 import asyncio
-from application.actions.service_outage_detector import ServiceOutageDetector
-from application.repositories.service_outage_report_template_renderer import ServiceOutageReportTemplateRenderer
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 import redis
 
-from config import config
-from igz.packages.Logger.logger_client import LoggerClient
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
+from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.nats.clients import NATSClient
-from igz.packages.server.api import QuartServer
 from igz.packages.repositories.edge_repository import EdgeRepository
 from igz.packages.repositories.outageutils import OutageUtils
+from igz.packages.server.api import QuartServer
+
+from application.actions.comparison_report import ComparisonReport
+from application.actions.outage_monitoring import OutageMonitor
+from application.repositories.service_outage_report_template_renderer import ServiceOutageReportTemplateRenderer
+from config import config
 
 
 class Container:
@@ -52,21 +55,24 @@ class Container:
         self._outage_utils = OutageUtils(self._logger)
 
         # ACTIONS
-        self._service_outage_detector = ServiceOutageDetector(self._event_bus, self._logger, self._scheduler,
-                                                              self._quarantine_edge_repository,
-                                                              self._reporting_edge_repository,
-                                                              config, self._template_renderer,
-                                                              self._outage_utils)
+        self._comparison_report = ComparisonReport(self._event_bus, self._logger, self._scheduler,
+                                                   self._quarantine_edge_repository,
+                                                   self._reporting_edge_repository,
+                                                   config, self._template_renderer,
+                                                   self._outage_utils)
+        self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
+                                             config, self._outage_utils)
 
     async def _start(self):
         await self._event_bus.connect()
 
-        await self._service_outage_detector.report_persisted_edges()
-        await self._service_outage_detector.load_persisted_quarantine()
+        await self._comparison_report.report_persisted_edges()
+        await self._comparison_report.load_persisted_quarantine()
 
-        await self._service_outage_detector.start_service_outage_detector_job(exec_on_start=True)
-        await self._service_outage_detector.start_service_outage_reporter_job(exec_on_start=False)
-        await self._service_outage_detector.start_service_outage_monitoring(exec_on_start=True)
+        await self._comparison_report.start_service_outage_detector_job(exec_on_start=True)
+        await self._comparison_report.start_service_outage_reporter_job(exec_on_start=False)
+
+        await self._outage_monitor.start_service_outage_monitoring(exec_on_start=True)
 
         self._scheduler.start()
 
