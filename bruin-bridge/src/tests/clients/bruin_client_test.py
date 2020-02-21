@@ -139,6 +139,26 @@ class TestBruinClient:
             assert tickets['body'] == f"Maximum retries while relogin"
             assert tickets['status'] == 401
 
+    def get_all_tickets_with_403_status_code_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        params = dict(client_id=123, ticket_id=321, ticket_status="New", category='SD-WAN', ticket_topic='VOO')
+        error_response = {'error': "403 error"}
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=error_response)
+        response_mock.status_code = 403
+        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+            tickets = bruin_client.get_all_tickets(params)
+
+            logger.error.assert_called()
+
+            assert tickets['body'] == error_response
+            assert tickets['status'] == 403
+
     def get_all_tickets_with_404_status_code_test(self):
         logger = Mock()
         logger.error = Mock()
@@ -235,6 +255,26 @@ class TestBruinClient:
 
             assert ticket_details['body'] == "Maximum retries while relogin"
             assert ticket_details['status'] == 401
+
+    def get_ticket_details_with_403_status_code_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        ticket_id = 321
+        error_response = {'error': "403 error"}
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=error_response)
+        response_mock.status_code = 403
+        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+            ticket_details = bruin_client.get_ticket_details(ticket_id)
+            logger.error.assert_called()
+
+            assert ticket_details['body'] == error_response
+            assert ticket_details['status'] == 403
 
     def get_ticket_details_with_404_status_code_test(self):
         logger = Mock()
@@ -336,6 +376,27 @@ class TestBruinClient:
 
             assert post_response["body"] == "Maximum retries while relogin"
             assert post_response["status"] == 401
+
+    def post_ticket_note_with_403_status_code_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        ticket_id = 321
+        note_contents = 'Ticket Notes'
+        expected_post_response = {'response': 'Error 403'}
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=expected_post_response)
+        response_mock.status_code = 403
+        with patch.object(bruin_client_module.requests, 'post', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+            post_response = bruin_client.post_ticket_note(ticket_id, note_contents)
+            logger.error.assert_called()
+
+            assert post_response["body"] == expected_post_response
+            assert post_response["status"] == 403
 
     def post_ticket_note_with_404_status_code_test(self):
         logger = Mock()
@@ -440,6 +501,28 @@ class TestBruinClient:
             bruin_client.login.assert_called()
             assert post_ticket["body"] == "Maximum retries while relogin"
             assert post_ticket["status"] == 401
+
+    def post_ticket_403_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+        payload = dict(clientId=321, category='Some Category', notes=['List of Notes'], services=['List of Services'],
+                       contacts=['List of Contacts'])
+        expected_post_response = 'Ticket failed to create'
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=expected_post_response)
+        response_mock.status_code = 403
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = Mock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=response_mock):
+            post_ticket = bruin_client.post_ticket(payload)
+            logger.error.assert_called()
+
+            assert post_ticket["body"] == expected_post_response
+            assert post_ticket["status"] == 403
 
     def post_ticket_404_status_test(self):
         logger = Mock()
@@ -554,6 +637,31 @@ class TestBruinClient:
 
             assert update_ticket_status["body"] == "Maximum retries while relogin"
             assert update_ticket_status["status"] == 401
+
+    def update_ticket_status_403_error_status_test(self):
+        logger = Mock()
+        logger.error = Mock()
+
+        ticket_id = 123
+        detail_id = 321
+        ticket_status = 'X'
+        failure_status_change = 'failed'
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=failure_status_change)
+        response_mock.status_code = 403
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = Mock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'put', return_value=response_mock):
+            update_ticket_status = bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
+
+            logger.error.assert_called()
+
+            assert update_ticket_status["body"] == failure_status_change
+            assert update_ticket_status["status"] == 403
 
     def update_ticket_status_404_error_status_test(self):
         logger = Mock()
@@ -705,6 +813,42 @@ class TestBruinClient:
         response_mock = Mock()
         response_mock.json = Mock(return_value=response_400)
         response_mock.status_code = 400
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            bruin_client.get_management_status(filters)
+            bruin_client_module.requests.get.assert_called_once_with(
+                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
+                headers=bruin_client._get_request_headers(),
+                params=pascalized_filter,
+                verify=False
+            )
+
+    def get_management_status_with_ko_403_test(self):
+        logger = Mock()
+
+        filters = {
+            "client_id": 9994,
+            "service_number": "VC05400009999"
+        }
+        pascalized_filter = {
+            "ClientId": 9994,
+            "ServiceNumber": "VC05400009999"
+        }
+
+        response_403 = {
+            "message": "Please provide valid ClientId, Status and ServiceNumber.",
+            "messageDetail": None,
+            "data": None,
+            "type": "ValidationException",
+            "code": 403
+        }
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=response_403)
+        response_mock.status_code = 403
 
         with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
             bruin_client = BruinClient(logger, config)

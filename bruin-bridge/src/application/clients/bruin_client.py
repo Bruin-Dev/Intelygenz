@@ -86,6 +86,11 @@ class BruinClient:
                 return_response["status"] = response.status_code
                 raise Exception(return_response)
 
+            if response.status_code == 403:
+                return_response["body"] = response.json()
+                return_response["status"] = response.status_code
+                self._logger.error(f"Forbidden error from Bruin {response.json()}")
+
             if response.status_code == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not found for params {parsed_params}")
                 return_response["body"] = "Resource not found"
@@ -130,6 +135,11 @@ class BruinClient:
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = response.status_code
                 raise Exception(return_response)
+
+            if response.status_code == 403:
+                return_response["body"] = response.json()
+                return_response["status"] = response.status_code
+                self._logger.error(f"Forbidden error from Bruin {response.json()}")
 
             if response.status_code == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not found for ticket id {ticket_id}")
@@ -181,6 +191,11 @@ class BruinClient:
                 return_response["status"] = 401
                 raise Exception(return_response)
 
+            if response.status_code == 403:
+                return_response["body"] = response.json()
+                return_response["status"] = response.status_code
+                self._logger.error(f"Forbidden error from Bruin {response.json()}")
+
             if response.status_code == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not posted for ticket_id {ticket_id} with "
                                    f"payload {payload}")
@@ -231,6 +246,11 @@ class BruinClient:
                 return_response["status"] = 401
                 raise Exception(return_response)
 
+            if response.status_code == 403:
+                return_response["body"] = response.json()
+                return_response["status"] = response.status_code
+                self._logger.error(f"Forbidden error from Bruin {response.json()}")
+
             if response.status_code == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not posted for payload of {payload}")
                 return_response["body"] = "Resource not found"
@@ -280,6 +300,11 @@ class BruinClient:
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
+
+            if response.status_code == 403:
+                return_response["body"] = response.json()
+                return_response["status"] = response.status_code
+                self._logger.error(f"Forbidden error from Bruin {response.json()}")
 
             if response.status_code == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not posted for payload of {payload}")
@@ -335,6 +360,11 @@ class BruinClient:
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
+
+            if response.status_code == 403:
+                return_response["body"] = response.json()
+                return_response["status"] = response.status_code
+                self._logger.error(f"Forbidden error from Bruin {response.json()}")
 
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got {response.status_code}. Retrying...")
