@@ -316,11 +316,12 @@ MONITORING_EDGES = {
         'enterprise_id': 170,
         'edge_id': 2655
     },
-    'VC05400015370': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 170,
-        'edge_id': 2674
-    },
+    # Edge should be decomissioned
+    # 'VC05400015370': {
+    #     'host': 'mettel.velocloud.net',
+    #     'enterprise_id': 170,
+    #     'edge_id': 2674
+    # },
     'VCE08400001089': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 170,
