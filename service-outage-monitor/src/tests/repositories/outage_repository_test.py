@@ -82,69 +82,70 @@ class TestOutageRepository:
         assert result is True
 
     def is_outage_ticket_auto_resolvable_test(self):
-        text_identifier = "#*Automation Engine*#\n" \
-                          "Auto-resolving ticket.\n"
+        text_identifier = ("#*Automation Engine*#\n"
+                           "Auto-resolving ticket.\n")
 
-        note_value1 = f"{text_identifier}" \
-            f"TimeStamp: 2021-01-02 10:18:16-05:00\n" \
-            f"{text_identifier}" \
-            f"TimeStamp: 2020-01-02 10:18:16-05:00\n" \
-            f"{text_identifier}" \
-            "TimeStamp: 2022-01-02 10:18:16-05:00"
+        note_value1 = f"{text_identifier}TimeStamp: 2021-01-02 10:18:16-05:00"
+        note_value2 = f"{text_identifier}TimeStamp: 2020-01-02 10:18:16-05:00"
+        note_value3 = f"{text_identifier}TimeStamp: 2022-01-02 10:18:16-05:00"
 
-        note_value2 = f"TimeStamp: 2021-01-02 10:18:16-05:00\n"
+        note_value4 = ("#*Automation Engine*#\n"
+                       "Just another kind of note\n")
 
-        ticket_id1 = 1
         ticket_notes1 = [
             {
                 "noteId": 41894040,
                 "noteValue": note_value1,
             },
             {
-                "noteId": 41894041,
-                "noteValue": text_identifier,
-            }
+                "noteId": 41894043,
+                "noteValue": note_value4,
+            },
         ]
 
-        ticket_id2 = 2
         ticket_notes2 = [
+            {
+                "noteId": 41894040,
+                "noteValue": note_value1,
+            },
+            {
+                "noteId": 41894041,
+                "noteValue": note_value2,
+            },
+            {
+                "noteId": 41894042,
+                "noteValue": note_value4,
+            },
+        ]
+
+        ticket_notes3 = [
+            {
+                "noteId": 41894040,
+                "noteValue": note_value1,
+            },
+            {
+                "noteId": 41894041,
+                "noteValue": note_value4,
+            },
             {
                 "noteId": 41894042,
                 "noteValue": note_value2,
             },
             {
                 "noteId": 41894043,
-                "noteValue": text_identifier,
-            },
-        ]
-
-        ticket_id3 = 3
-        ticket_notes3 = [
-            {
-                "noteId": 41894044,
-                "noteValue": text_identifier,
-            },
-            {
-                "noteId": 41894045,
-                "noteValue": text_identifier,
-            },
-            {
-                "noteId": 41894046,
-                "noteValue": text_identifier,
-            },
-            {
-                "noteId": 41894047,
-                "noteValue": text_identifier,
+                "noteValue": note_value3,
             }
         ]
 
         logger = Mock()
         outage_utils = OutageRepository(logger=logger)
-        limit_resolv = 3
-        ticket_bool1 = outage_utils.is_outage_ticket_auto_resolvable(ticket_id1, ticket_notes1, limit_resolv)
-        ticket_bool2 = outage_utils.is_outage_ticket_auto_resolvable(ticket_id2, ticket_notes2, limit_resolv)
-        ticket_bool3 = outage_utils.is_outage_ticket_auto_resolvable(ticket_id3, ticket_notes3, limit_resolv)
+        autoresolve_limit = 3
 
-        assert ticket_bool1 is False
+        ticket_bool1 = outage_utils.is_outage_ticket_auto_resolvable(ticket_notes1, autoresolve_limit)
+        assert ticket_bool1 is True
+
+        ticket_bool2 = outage_utils.is_outage_ticket_auto_resolvable(ticket_notes2, autoresolve_limit)
         assert ticket_bool2 is True
+
+        ticket_bool3 = outage_utils.is_outage_ticket_auto_resolvable(ticket_notes3, autoresolve_limit)
         assert ticket_bool3 is False

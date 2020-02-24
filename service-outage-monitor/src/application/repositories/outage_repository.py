@@ -32,19 +32,16 @@ class OutageRepository:
     def is_faulty_link(self, link_state: str):
         return link_state == 'DISCONNECTED'
 
-    def is_outage_ticket_auto_resolvable(self, ticket_id, ticket_notes: list, limit) -> bool:
-        regex = r"#\*Automation Engine\*#\s*Auto-resolving ticket."
-        internal_amount_times = 0
+    def is_outage_ticket_auto_resolvable(self, ticket_notes: list, max_autoresolves: int) -> bool:
+        regex = re.compile(r"^#\*Automation Engine\*#\s*Auto-resolving ticket\.")
+        times_autoresolved = 0
 
         for ticket_note in ticket_notes:
             note_value = ticket_note['noteValue']
-            matches = re.findall(regex, note_value)
-            count_matches = len(matches)
-            internal_amount_times += count_matches
+            match = regex.match(note_value)
+            times_autoresolved += bool(match)
 
-            if internal_amount_times >= limit:
-                self.logger.info(f'ticket {ticket_id} can\'t be be auto-resolved')
+            if times_autoresolved >= max_autoresolves:
                 return False
 
-        self.logger.info(f'ticket {ticket_id} is ready for autoresolving')
         return True

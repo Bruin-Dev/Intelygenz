@@ -285,6 +285,7 @@ class TestServiceOutageMonitor:
         outage_repository.is_there_an_outage = Mock(side_effect=is_there_an_outage_side_effect)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edges_for_monitoring = Mock(return_value=edges_for_monitoring)
         outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status)
@@ -300,7 +301,11 @@ class TestServiceOutageMonitor:
         outage_repository.is_there_an_outage.assert_has_calls([
             call(edge_1_status_data), call(edge_2_status_data), call(edge_3_status_data)
         ])
-        scheduler.add_job.assert_not_called()
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_has_awaits([
+            call(edge_1_full_id, edge_1_status_data),
+            call(edge_2_full_id, edge_2_status_data),
+            call(edge_3_full_id, edge_3_status_data),
+        ])
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_edges_and_some_outages_detected_and_recheck_job_not_scheduled_test(self):
@@ -343,6 +348,7 @@ class TestServiceOutageMonitor:
         outage_repository.is_there_an_outage = Mock(return_value=is_there_an_outage)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edges_for_monitoring = Mock(return_value=[edge_full_id])
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -441,6 +447,7 @@ class TestServiceOutageMonitor:
         outage_repository.is_there_an_outage = Mock(side_effect=is_there_an_outage_side_effect)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edges_for_monitoring = Mock(return_value=edges_for_monitoring)
         outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -479,6 +486,783 @@ class TestServiceOutageMonitor:
                 kwargs={'edge_full_id': edge_3_full_id}
             ),
         ])
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edge_2_full_id, edge_2_status_data)
+
+    @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_non_whitelisted_edge_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['autoresolve_serials_whitelist'] = ['VC99999999']
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_last_down_events_for_edge = CoroutineMock()
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+
+        outage_monitor._get_last_down_events_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_environment_different_from_production_test(self):
+        serial_number = 'VC1234567'
+
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'dev'
+        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_last_down_events_for_edge = CoroutineMock()
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+
+        outage_monitor._get_last_down_events_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_prod_and_request_for_down_events_failed_test(self):
+        serial_number = 'VC1234567'
+
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+        uuid_ = uuid()
+
+        last_down_events_response_body = "Invalid parameters"
+        last_down_events_response_status = 400
+
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
+            'body': last_down_events_response_body, 'status': last_down_events_response_status
+        })
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+
+        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        outage_monitor._get_last_down_events_for_edge.assert_awaited_once_with(edge_full_id, down_events_since)
+        event_bus.rpc_request.assert_awaited_once_with(
+            "notification.slack.request",
+            {
+                'request_id': uuid_,
+                'message': f'Error while retrieving down events for edge {edge_identifier}. '
+                           f'Reason: Error {last_down_events_response_status} - {last_down_events_response_body}'
+            },
+            timeout=10
+        )
+
+    @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_prod_and_no_down_events_test(self):
+        serial_number = 'VC1234567'
+
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        last_down_events_response_body = []
+        last_down_events_response_status = 200
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
+            'body': last_down_events_response_body, 'status': last_down_events_response_status
+        })
+        outage_monitor._get_outage_ticket_for_edge = CoroutineMock()
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+
+        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        outage_monitor._get_last_down_events_for_edge.assert_awaited_once_with(edge_full_id, down_events_since)
+        outage_monitor._get_outage_ticket_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_prod_and_down_events_and_ticket_request_failed_test(self):
+        serial_number = 'VC1234567'
+
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+        uuid_ = uuid()
+
+        last_down_events_response_body = [
+            {
+                'event': 'LINK_ALIVE',
+                'category': 'NETWORK',
+                'eventTime': '2019-07-30 07:38:00+00:00',
+                'message': 'GE2 alive'
+            }
+        ]
+        last_down_events_response_status = 200
+
+        outage_ticket_response_body = "Invalid parameters"
+        outage_ticket_response_status = 400
+
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
+            'body': last_down_events_response_body, 'status': last_down_events_response_status
+        })
+        outage_monitor._get_outage_ticket_for_edge = CoroutineMock(return_value={
+            'body': outage_ticket_response_body, 'status': outage_ticket_response_status
+        })
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+
+        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        outage_monitor._get_last_down_events_for_edge.assert_awaited_once_with(edge_full_id, down_events_since)
+        outage_monitor._get_outage_ticket_for_edge.assert_awaited_once_with(edge_status)
+        event_bus.rpc_request.assert_awaited_once_with(
+            "notification.slack.request",
+            {
+                'request_id': uuid_,
+                'message': f'Error while retrieving outage ticket for edge {edge_identifier}. '
+                           f'Reason: Error {outage_ticket_response_status} - {outage_ticket_response_body}'
+            },
+            timeout=10
+        )
+
+    @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_prod_and_and_down_events_and_no_ticket_found_test(self):
+        serial_number = 'VC1234567'
+
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        uuid_ = uuid()
+
+        last_down_events_response_body = [
+            {
+                'event': 'LINK_ALIVE',
+                'category': 'NETWORK',
+                'eventTime': '2019-07-30 07:38:00+00:00',
+                'message': 'GE2 alive'
+            }
+        ]
+        last_down_events_response_status = 200
+
+        outage_ticket_response_body = None
+        outage_ticket_response_status = 200
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
+            'body': last_down_events_response_body, 'status': last_down_events_response_status
+        })
+        outage_monitor._get_outage_ticket_for_edge = CoroutineMock(return_value={
+            'body': outage_ticket_response_body, 'status': outage_ticket_response_status
+        })
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+
+        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        outage_monitor._get_last_down_events_for_edge.assert_awaited_once_with(edge_full_id, down_events_since)
+
+        outage_monitor._get_outage_ticket_for_edge.assert_awaited_once_with(edge_status)
+        outage_repository._is_outage_ticket_auto_resolvable.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_down_events_and_ticket_and_resolve_limit_exceeded_test(self):
+        serial_number = 'VC1234567'
+
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+
+        uuid_ = uuid()
+
+        last_down_events_response_body = [
+            {
+                'event': 'LINK_ALIVE',
+                'category': 'NETWORK',
+                'eventTime': '2019-07-30 07:38:00+00:00',
+                'message': 'GE2 alive'
+            }
+        ]
+        last_down_events_response_status = 200
+
+        outage_ticket_notes = [
+            {
+                "noteId": 68246614,
+                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            },
+            {
+                "noteId": 68246615,
+                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            },
+            {
+                "noteId": 68246616,
+                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-04 10:18:16-05:00",
+            },
+        ]
+        outage_ticket_response_body = {
+            'ticketID': 12345,
+            'ticketDetails': [
+                {
+                    "detailID": 2746937,
+                    "detailValue": serial_number,
+                    "detailStatus": "I",
+                },
+            ],
+            'ticketNotes': outage_ticket_notes
+        }
+        outage_ticket_response_status = 200
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=False)
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
+            'body': last_down_events_response_body, 'status': last_down_events_response_status
+        })
+        outage_monitor._get_outage_ticket_for_edge = CoroutineMock(return_value={
+            'body': outage_ticket_response_body, 'status': outage_ticket_response_status
+        })
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+
+        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        outage_monitor._get_last_down_events_for_edge.assert_awaited_once_with(edge_full_id, down_events_since)
+
+        outage_monitor._get_outage_ticket_for_edge.assert_awaited_once_with(edge_status)
+        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
+            outage_ticket_notes, max_autoresolves=3
+        )
+
+    @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_down_events_and_ticket_and_resolve_limit_not_exceeded_test(self):
+        serial_number = 'VC1234567'
+        client_id = 12345
+
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{client_id}|',
+        }
+
+        uuid_ = uuid()
+
+        last_down_events_response_body = [
+            {
+                'event': 'LINK_ALIVE',
+                'category': 'NETWORK',
+                'eventTime': '2019-07-30 07:38:00+00:00',
+                'message': 'GE2 alive'
+            }
+        ]
+        last_down_events_response_status = 200
+
+        outage_ticket_id = 12345
+        outage_ticket_detail_id = 2746937
+        outage_ticket_detail = {
+            "detailID": outage_ticket_detail_id,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        outage_ticket_notes = [
+            {
+                "noteId": 68246614,
+                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            },
+            {
+                "noteId": 68246615,
+                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            },
+        ]
+        outage_ticket_response_body = {
+            'ticketID': outage_ticket_id,
+            'ticketDetails': [outage_ticket_detail],
+            'ticketNotes': outage_ticket_notes,
+        }
+        outage_ticket_response_status = 200
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
+            'body': last_down_events_response_body, 'status': last_down_events_response_status
+        })
+        outage_monitor._get_outage_ticket_for_edge = CoroutineMock(return_value={
+            'body': outage_ticket_response_body, 'status': outage_ticket_response_status
+        })
+        outage_monitor._resolve_outage_ticket = CoroutineMock()
+        outage_monitor._append_autoresolve_note_to_ticket = CoroutineMock()
+        outage_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+
+        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        outage_monitor._get_last_down_events_for_edge.assert_awaited_once_with(edge_full_id, down_events_since)
+
+        outage_monitor._get_outage_ticket_for_edge.assert_awaited_once_with(edge_status)
+        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
+            outage_ticket_notes, max_autoresolves=3
+        )
+
+        outage_monitor._resolve_outage_ticket.assert_awaited_once_with(outage_ticket_id, outage_ticket_detail_id)
+        outage_monitor._append_autoresolve_note_to_ticket.assert_awaited_once_with(outage_ticket_id)
+        outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(outage_ticket_id, client_id)
+
+    @pytest.mark.asyncio
+    async def get_outage_ticket_for_edge_with_default_ticket_statuses_test(self):
+        client_id = 12345
+        enterprise_name = f'EVIL-CORP|{client_id}|'
+        edge_serial_number = 'VC1234567'
+        edge_status = {
+            'edges': {
+                'edgeState': 'OFFLINE',
+                'serialNumber': edge_serial_number,
+                'name': 'Saturos',
+                'lastContact': '2020-01-16T14:59:56.245Z'
+            },
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE'}},
+            ],
+            'enterprise_name': enterprise_name,
+        }
+
+        outage_ticket = {
+            'body': {
+                'ticketID': 12345,
+                'ticketDetails': [
+                    {
+                        "detailID": 2746937,
+                        "detailValue": edge_serial_number,
+                    },
+                ],
+                'ticketNotes': [
+                    {
+                        "noteId": 41894041,
+                        "noteValue": f'#*Automation Engine*# \n TimeStamp: 2019-07-30 06:38:00+00:00',
+                    }
+                ],
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=outage_ticket)
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._extract_client_id = Mock(return_value=client_id)
+
+        uuid_ = uuid()
+        with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+            outage_ticket_result = await outage_monitor._get_outage_ticket_for_edge(edge_status)
+
+        outage_monitor._extract_client_id.assert_called_once_with(enterprise_name)
+        event_bus.rpc_request.assert_awaited_once_with(
+            'bruin.ticket.outage.details.by_edge_serial.request',
+            {
+                'request_id': uuid_,
+                'body': {
+                    'edge_serial': edge_serial_number,
+                    'client_id': client_id,
+                },
+            },
+            timeout=180,
+        )
+        assert outage_ticket_result == outage_ticket
+
+    @pytest.mark.asyncio
+    async def get_outage_ticket_for_edge_with_custom_ticket_statuses_test(self):
+        client_id = 12345
+        enterprise_name = f'EVIL-CORP|{client_id}|'
+        edge_serial_number = 'VC1234567'
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE'}},
+            ],
+            'enterprise_name': enterprise_name,
+        }
+
+        outage_ticket = {
+            'body': {
+                'ticketID': 12345,
+                'ticketDetails': [
+                    {
+                        "detailID": 2746937,
+                        "detailValue": edge_serial_number,
+                    },
+                ],
+                'ticketNotes': [
+                    {
+                        "noteId": 41894041,
+                        "noteValue": f'#*Automation Engine*# \n TimeStamp: 2019-07-30 06:38:00+00:00',
+                    }
+                ],
+            },
+            'status': 200,
+        }
+
+        ticket_statuses = ['Resolved', 'New', 'InProgress', 'Draft']
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=outage_ticket)
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._extract_client_id = Mock(return_value=client_id)
+
+        uuid_ = uuid()
+        with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+            outage_ticket_result = await outage_monitor._get_outage_ticket_for_edge(
+                edge_status, ticket_statuses=ticket_statuses
+            )
+
+        outage_monitor._extract_client_id.assert_called_once_with(enterprise_name)
+        event_bus.rpc_request.assert_awaited_once_with(
+            'bruin.ticket.outage.details.by_edge_serial.request',
+            {
+                'request_id': uuid_,
+                'body': {
+                    'edge_serial': edge_serial_number,
+                    'client_id': client_id,
+                    'ticket_statuses': ticket_statuses,
+                },
+            },
+            timeout=180,
+        )
+        assert outage_ticket_result == outage_ticket
+
+    @pytest.mark.asyncio
+    async def get_last_down_events_for_edge_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_events = [
+            {
+                'event': 'LINK_ALIVE',
+                'category': 'NETWORK',
+                'eventTime': '2019-07-30 07:38:00+00:00',
+                'message': 'GE2 alive'
+            }
+        ]
+        rpc_response = {'body': edge_events, 'status': 200}
+
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=rpc_response)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+
+        seconds_ago_for_down_events_lookup = timedelta(config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+
+        uuid_ = uuid()
+        current_datetime = datetime.now()
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
+                with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+                    result = await outage_monitor._get_last_down_events_for_edge(
+                        edge_full_id, since=seconds_ago_for_down_events_lookup
+                    )
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            "alert.request.event.edge",
+            {
+                'request_id': uuid_,
+                'body': {
+                    'edge': edge_full_id,
+                    'start_date': current_datetime - seconds_ago_for_down_events_lookup,
+                    'end_date': current_datetime,
+                    'filter': ['EDGE_DOWN', 'LINK_DEAD'],
+                },
+            },
+            timeout=180,
+        )
+        assert result == rpc_response
+
+    @pytest.mark.asyncio
+    async def resolve_outage_ticket_test(self):
+        ticket_id = 12345
+        detail_id = 67890
+
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+
+        uuid_ = uuid()
+        with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+            await outage_monitor._resolve_outage_ticket(ticket_id, detail_id)
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.status.resolve",
+            {
+                'request_id': uuid_,
+                'body': {
+                    'ticket_id': ticket_id,
+                    'detail_id': detail_id,
+                },
+            },
+            timeout=15,
+        )
+
+    @pytest.mark.asyncio
+    async def append_autoresolve_note_to_ticket_test(self):
+        ticket_id = 12345
+
+        current_datetime = datetime.now()
+        autoresolve_note = (
+            f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: '
+            f'{current_datetime + timedelta(seconds=1)}'
+        )
+
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+
+        uuid_ = uuid()
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
+                with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+                    await outage_monitor._append_autoresolve_note_to_ticket(ticket_id)
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.note.append.request",
+            {
+                'request_id': uuid_,
+                'body': {
+                    'ticket_id': ticket_id,
+                    'note': autoresolve_note,
+                },
+            },
+            timeout=15,
+        )
+
+    @pytest.mark.asyncio
+    async def notify_successful_autoresolve_test(self):
+        ticket_id = 12345
+        bruin_client_id = 67890
+
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+
+        uuid_ = uuid()
+        with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+            await outage_monitor._notify_successful_autoresolve(ticket_id, bruin_client_id)
+
+        autoresolve_slack_message = (
+            f'Ticket {ticket_id} was autoresolved in {config.TRIAGE_CONFIG["environment"].upper()} environment. '
+            f'Details at https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}'
+        )
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            "notification.slack.request",
+            {
+                'request_id': uuid_,
+                'message': autoresolve_slack_message,
+            },
+            timeout=10,
+        )
+
+    def get_first_element_matching_with_match_test(self):
+        payload = range(0, 11)
+
+        def is_divisible_by_5(num):
+            return num % 5 == 0
+
+        def is_not_zero(num):
+            return num != 0
+
+        def cond(num):
+            return is_divisible_by_5(num) and is_not_zero(num)
+
+        result = OutageMonitor._get_first_element_matching(iterable=payload, condition=cond)
+        expected = 5
+
+        assert result == expected
+
+    def get_first_element_matching_with_no_match_test(self):
+        payload = [0] * 10
+        fallback_value = 42
+
+        def is_divisible_by_5(num):
+            return num % 5 == 0
+
+        def is_not_zero(num):
+            return num != 0
+
+        def cond(num):
+            return is_divisible_by_5(num) and is_not_zero(num)
+
+        result = OutageMonitor._get_first_element_matching(iterable=payload, condition=cond, fallback=fallback_value)
+
+        assert result == fallback_value
 
     def get_edges_for_monitoring_test(self):
         event_bus = Mock()
@@ -526,13 +1310,13 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
-        outage_monitor._create_outage_ticket = CoroutineMock()
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
 
         await outage_monitor._recheck_edge_for_ticket_creation(edge_full_id)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
-        outage_monitor._create_outage_ticket.assert_not_awaited()
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edge_full_id, edge_status_data)
 
     @pytest.mark.asyncio
     async def recheck_edge_for_ticket_creation_with_outage_detected_and_no_production_environment_test(self):

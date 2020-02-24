@@ -141,8 +141,6 @@ class Triage:
                         if not triage_exists:
                             filtered_ticket_ids.append(ticket_item)
 
-                        await self._auto_resolve_tickets(ticket_item, ticket_detail['detailID'])
-
                         break
         return filtered_ticket_ids
 
@@ -314,73 +312,3 @@ class Triage:
             parsed_key = re.sub(r" LABELMARK(.)*", "", key)
             edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]} \n'
         return edge_triage_str
-
-    async def _auto_resolve_tickets(self, ticket_id, detail_id):
-        if ticket_id["serial"] not in self._config.TRIAGE_CONFIG["autoresolve_serials_whitelist"]:
-            return
-        self._logger.info(f'Checking autoresolve for ticket id {json.dumps(ticket_id, indent=2, default=str)}')
-
-        id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
-        edge_id = id_by_serial[ticket_id["serial"]]
-
-        if not self._outage_repository.is_outage_ticket_auto_resolvable(ticket_id['ticketID'], ticket_id['notes'], 3):
-            self._logger.info("Cannot autoresolved due to ticket being autoresolved more than 3 times")
-            return
-
-        status_msg = {'request_id': uuid(),
-                      'edge': edge_id}
-        edge_status = await self._event_bus.rpc_request("edge.status.request", status_msg,
-                                                        timeout=45)
-        edge_info = edge_status['edge_info']
-
-        filter_events_status_list = ['EDGE_DOWN', 'LINK_DEAD']
-
-        events_msg = {'request_id': uuid(),
-                      'edge': edge_id,
-                      'start_date': datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone'])) - timedelta(
-                          minutes=45),
-                      'end_date': datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone'])),
-                      'filter': filter_events_status_list}
-
-        edge_events = await self._event_bus.rpc_request("alert.request.event.edge", events_msg, timeout=180)
-
-        self._logger.info(f'Received event list of {json.dumps(edge_events, indent=2, default=str)} from velocloud')
-
-        if len(edge_events["events"]) == 0:
-            self._logger.info("Too much time has passed for an auto-resolve. No down events have occurred in the "
-                              "last 45 minutes")
-            return
-
-        if self._outage_repository.is_there_an_outage(edge_info) is False:
-            self._logger.info(f'Autoresolving ticket of ticket id: {json.dumps(ticket_id, indent=2, default=str)}')
-
-            if self._config.TRIAGE_CONFIG['environment'] == 'production':
-                resolve_ticket_msg = {'request_id': uuid(),
-                                      'ticket_id': ticket_id['ticketID'],
-                                      'detail_id': detail_id
-                                      }
-
-                resolve_note_msg = "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + str(
-                    datetime.now(timezone(
-                        self._config.TRIAGE_CONFIG['timezone'])) + timedelta(seconds=1))
-                ticket_append_note_msg = {'request_id': uuid(),
-                                          'ticket_id': ticket_id["ticketID"],
-                                          'note': resolve_note_msg}
-
-                await self._event_bus.rpc_request("bruin.ticket.status.resolve",
-                                                  resolve_ticket_msg,
-                                                  timeout=15)
-
-                await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                  ticket_append_note_msg,
-                                                  timeout=15)
-
-                client_id = self._client_id_from_edge_status(edge_status)
-                slack_message = {'request_id': uuid(),
-                                 'message': f'Ticket autoresolved '
-                                            f'https://app.bruin.com/helpdesk?clientId={client_id}&'
-                                            f'ticketId={ticket_id["ticketID"]}, in '
-                                            f'{self._config.TRIAGE_CONFIG["environment"]}'}
-                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-
-            self._logger.info(f"Ticket of ticketID:{ticket_id['ticketID']} auto-resolved")

@@ -3,6 +3,7 @@ import re
 
 from datetime import datetime
 from datetime import timedelta
+from typing import Callable
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
@@ -97,7 +98,176 @@ class OutageMonitor:
                     self._logger.info(f'There is a recheck job scheduled for {edge_identifier} already. No new job '
                                       'is going to be scheduled.')
             else:
-                self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state. Skipping...')
+                self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state.')
+                await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+
+    async def _run_ticket_autoresolve_for_edge(self, edge_full_id, edge_status):
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+        self._logger.info(f'[ticket-autoresolve] Starting autoresolve for edge {edge_identifier}...')
+
+        serial_number = edge_status['edges']['serialNumber']
+        if serial_number not in self._config.MONITOR_CONFIG['autoresolve_serials_whitelist']:
+            self._logger.info(f'[ticket-autoresolve] Skipping autoresolve for edge {edge_identifier} because its '
+                              f'serial ({serial_number}) is not whitelisted.')
+            return
+
+        working_environment = self._config.MONITOR_CONFIG['environment']
+        if working_environment != 'production':
+            self._logger.info(f'[ticket-autoresolve] Skipping autoresolve for edge {edge_identifier} since the current '
+                              f'environment is {working_environment.upper()}.')
+            return
+
+        seconds_ago_for_down_events_lookup = self._config.MONITOR_CONFIG['autoresolve_down_events_seconds']
+        timedelta_for_down_events_lookup = timedelta(seconds=seconds_ago_for_down_events_lookup)
+        last_down_events_response = await self._get_last_down_events_for_edge(
+            edge_full_id, timedelta_for_down_events_lookup
+        )
+
+        last_down_events_body = last_down_events_response['body']
+        last_down_events_status = last_down_events_response['status']
+        if last_down_events_status not in range(200, 300):
+            err_msg = (f'Error while retrieving down events for edge {edge_identifier}. '
+                       f'Reason: Error {last_down_events_status} - {last_down_events_body}')
+
+            self._logger.error(f'[ticket-autoresolve] {err_msg}')
+            slack_message = {
+                'request_id': uuid(),
+                'message': err_msg
+            }
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+            return
+
+        if not last_down_events_body:
+            self._logger.info(f'[ticket-autoresolve] No DOWN events found for edge {edge_identifier} in the '
+                              f'last {seconds_ago_for_down_events_lookup / 60} minutes. Skipping autoresolve...')
+            return
+
+        outage_ticket_response = await self._get_outage_ticket_for_edge(edge_status)
+
+        outage_ticket_response_body = outage_ticket_response['body']
+        outage_ticket_response_status = outage_ticket_response['status']
+        if outage_ticket_response_status not in range(200, 300):
+            err_msg = (f'Error while retrieving outage ticket for edge {edge_identifier}. '
+                       f'Reason: Error {outage_ticket_response_status} - {outage_ticket_response_body}')
+
+            self._logger.error(f'[ticket-autoresolve] {err_msg}')
+            slack_message = {
+                'request_id': uuid(),
+                'message': err_msg
+            }
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+            return
+
+        if not outage_ticket_response_body:
+            self._logger.info(f'[ticket-autoresolve] No outage ticket found for edge {edge_identifier}. '
+                              f'Skipping autoresolve...')
+            return
+
+        outage_ticket_id = outage_ticket_response_body['ticketID']
+        notes_from_outage_ticket = outage_ticket_response_body['ticketNotes']
+        if not self._outage_repository.is_outage_ticket_auto_resolvable(notes_from_outage_ticket, max_autoresolves=3):
+            self._logger.info(f'[ticket-autoresolve] Limit to autoresolve ticket {outage_ticket_id} linked to edge '
+                              f'{edge_identifier} has been maxed out already. Skipping autoresolve...')
+            return
+
+        details_from_ticket = outage_ticket_response_body['ticketDetails']
+        detail_for_ticket_resolution = self._get_first_element_matching(
+            details_from_ticket,
+            lambda detail: detail['detailValue'] == serial_number,
+         )
+
+        self._logger.info(f'Autoresolving ticket {outage_ticket_id} linked to edge {edge_identifier}...')
+        await self._resolve_outage_ticket(outage_ticket_id, detail_for_ticket_resolution['detailID'])
+        await self._append_autoresolve_note_to_ticket(outage_ticket_id)
+
+        enterprise_name = edge_status['enterprise_name']
+        bruin_client_id = self._extract_client_id(enterprise_name)
+        await self._notify_successful_autoresolve(outage_ticket_id, bruin_client_id)
+
+        self._logger.info(f'Ticket {outage_ticket_id} linked to edge {edge_identifier} was autoresolved!')
+
+    @staticmethod
+    def _get_first_element_matching(iterable, condition: Callable, fallback=None):
+        try:
+            return next(elem for elem in iterable if condition(elem))
+        except StopIteration:
+            return fallback
+
+    async def _get_last_down_events_for_edge(self, edge_full_id, since: timedelta):
+        current_datetime = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+
+        last_down_events_request = {
+            'request_id': uuid(),
+            'body': {
+                'edge': edge_full_id,
+                'start_date': current_datetime - since,
+                'end_date': current_datetime,
+                'filter': ['EDGE_DOWN', 'LINK_DEAD'],
+            }
+        }
+        down_events = await self._event_bus.rpc_request(
+            "alert.request.event.edge", last_down_events_request, timeout=180
+        )
+        return down_events
+
+    async def _resolve_outage_ticket(self, ticket_id, detail_id):
+        resolve_ticket_request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+                'detail_id': detail_id,
+            }
+        }
+        await self._event_bus.rpc_request("bruin.ticket.status.resolve", resolve_ticket_request, timeout=15)
+
+    async def _append_autoresolve_note_to_ticket(self, ticket_id):
+        current_datetime = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
+        autoresolve_note = (
+            f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: '
+            f'{current_datetime + timedelta(seconds=1)}'
+        )
+
+        append_autoresolve_note_request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+                'note': autoresolve_note,
+            }
+        }
+        await self._event_bus.rpc_request(
+            "bruin.ticket.note.append.request", append_autoresolve_note_request, timeout=15
+        )
+
+    async def _notify_successful_autoresolve(self, ticket_id, client_id):
+        notify_slack_message_request = {
+            'request_id': uuid(),
+            'message': (
+                f'Ticket {ticket_id} was autoresolved in {self._config.TRIAGE_CONFIG["environment"].upper()} '
+                f'environment. Details at https://app.bruin.com/helpdesk?clientId={client_id}&ticketId={ticket_id}'
+            )
+        }
+        await self._event_bus.rpc_request("notification.slack.request", notify_slack_message_request, timeout=10)
+
+    async def _get_outage_ticket_for_edge(self, edge_status: dict, ticket_statuses=None):
+        edge_serial = edge_status['edges']['serialNumber']
+        enterprise_name = edge_status['enterprise_name']
+        client_id = self._extract_client_id(enterprise_name)
+
+        outage_ticket_request = {
+            'request_id': uuid(),
+            'body': {
+                'edge_serial': edge_serial,
+                'client_id': client_id,
+            },
+        }
+
+        if ticket_statuses is not None:
+            outage_ticket_request['body']['ticket_statuses'] = ticket_statuses
+
+        outage_ticket = await self._event_bus.rpc_request(
+            'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=180,
+        )
+        return outage_ticket
 
     def _get_edges_for_monitoring(self):
         return list(self._config.MONITORING_EDGES.values())
@@ -150,10 +320,13 @@ class OutageMonitor:
                     )
                     await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
                 else:
+                    err_msg = (f'Outage ticket creation failed for edge {edge_identifier}. Reason: '
+                               f'Error {ticket_creation_response_status} - {ticket_creation_response_body}')
+
+                    self._logger.error(f'[outage-recheck] {err_msg}')
                     slack_message = {
                         'request_id': uuid(),
-                        'message': f'Outage ticket creation failed for edge {edge_identifier}. Reason: '
-                                   f'Error {ticket_creation_response_status} - {ticket_creation_response_body}'
+                        'message': err_msg
                     }
                     await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             else:
@@ -163,7 +336,9 @@ class OutageMonitor:
                 )
         else:
             self._logger.info(
-                f'[outage-recheck] {edge_identifier} seems to be healthy again! No ticket will be created.')
+                f'[outage-recheck] {edge_identifier} seems to be healthy again! No ticket will be created.'
+            )
+            await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
     async def _create_outage_ticket(self, edge_status):
         ticket_data = self._generate_outage_ticket(edge_status)

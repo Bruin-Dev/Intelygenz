@@ -705,7 +705,6 @@ class TestTriage:
         outage_repository = Mock()
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._auto_resolve_tickets = CoroutineMock()
 
         uuid_ = uuid()
         with patch.object(triage_module, 'uuid', return_value=uuid_):
@@ -716,13 +715,6 @@ class TestTriage:
             {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
-        triage._auto_resolve_tickets.assert_called_once_with(dict(
-            ticketID=ticket_id,
-            serial=edge_serial,
-            notes=ticket_details[
-                'ticket_details'][
-                'ticketNotes']),
-            detail_id)
 
         assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details[
             'ticket_details'][
@@ -760,7 +752,6 @@ class TestTriage:
         outage_repository = Mock()
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._auto_resolve_tickets = CoroutineMock()
 
         uuid_ = uuid()
         with patch.object(triage_module, 'uuid', return_value=uuid_):
@@ -771,13 +762,6 @@ class TestTriage:
             {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
-        triage._auto_resolve_tickets.assert_called_once_with(dict(
-            ticketID=ticket_id,
-            serial=edge_serial,
-            notes=ticket_details[
-                'ticket_details'][
-                'ticketNotes']),
-            detail_id)
 
         assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details[
             'ticket_details'][
@@ -815,7 +799,6 @@ class TestTriage:
         outage_repository = Mock()
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._auto_resolve_tickets = CoroutineMock()
 
         uuid_ = uuid()
         with patch.object(triage_module, 'uuid', return_value=uuid_):
@@ -826,13 +809,6 @@ class TestTriage:
             {'request_id': uuid_, 'ticket_id': ticket_id},
             timeout=15,
         )
-        triage._auto_resolve_tickets.assert_called_once_with(dict(
-            ticketID=ticket_id,
-            serial=edge_serial,
-            notes=ticket_details[
-                'ticket_details'][
-                'ticketNotes']),
-            detail_id)
 
         assert filtered_tickets == []
 
@@ -872,7 +848,6 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._extract_field_from_string = Mock(return_value=ticket_notes_timestamp_naive)
         triage._check_for_new_events = CoroutineMock()
-        triage._auto_resolve_tickets = CoroutineMock()
 
         current_datetime = datetime.strptime(current_timestamp, '%Y-%m-%d %H:%M:%S')
         datetime_mock = Mock()
@@ -895,13 +870,6 @@ class TestTriage:
             ticket_notes, 'TimeStamp: '
         )
         triage._check_for_new_events.assert_not_awaited()
-        triage._auto_resolve_tickets.assert_called_once_with(dict(
-            ticketID=ticket_id,
-            serial=edge_serial,
-            notes=ticket_details[
-                'ticket_details'][
-                'ticketNotes']),
-            detail_id)
 
         assert filtered_tickets == []
 
@@ -942,7 +910,6 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._extract_field_from_string = Mock(return_value=ticket_notes_timestamp_naive)
         triage._check_for_new_events = CoroutineMock()
-        triage._auto_resolve_tickets = CoroutineMock()
 
         current_datetime = datetime.strptime(current_timestamp, '%Y-%m-%d %H:%M:%S')
         datetime_mock = Mock()
@@ -968,13 +935,6 @@ class TestTriage:
             ticket_notes_timestamp_naive,
             {'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details['ticket_details']['ticketNotes']},
         )
-        triage._auto_resolve_tickets.assert_called_once_with(dict(
-            ticketID=ticket_id,
-            serial=edge_serial,
-            notes=ticket_details[
-                'ticket_details'][
-                'ticketNotes']),
-            detail_id)
 
         assert filtered_tickets == []
 
@@ -1692,418 +1652,3 @@ class TestTriage:
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         ticket_note = triage._ticket_object_to_string(test_dict)
         assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'
-
-    @pytest.mark.asyncio
-    async def auto_resolve_ticket_ok_production_test(self):
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-
-        host = "mettel.velocloud.net"
-        enterprise_id = 137
-        edge_id = 958
-        serial = "VC05400002265"
-
-        edge_status = {
-            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
-            }
-        }
-        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "events": ["EDGE_DOWN"]}
-        bruin_resolved = "Resolved"
-        bruin_note_appended = "Appended"
-        slack_sent = "Sent"
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[edge_status, events, bruin_resolved, bruin_note_appended,
-                                                           slack_sent])
-
-        config = testconfig
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-
-        outage_repository = Mock()
-        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_repository.is_there_an_outage = Mock(return_value=False)
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        ticket_id = "123"
-        ticket_notes = ['list of notes']
-        ticket_item = {"ticketID": ticket_id, "serial": serial, "notes": ticket_notes}
-
-        detail_id = "321"
-
-        current_timestamp = '2019-09-10 10:45:00'
-        current_datetime = datetime.strptime(current_timestamp, '%Y-%m-%d %H:%M:%S')
-        start_timestamp = '2019-09-10 10:00:00'
-        start_datetime = datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
-        note_timestamp = '2019-09-10 10:45:01'
-
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_datetime)
-        uuid_ = uuid()
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            with patch.object(triage_module, 'datetime', new=datetime_mock):
-                with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-                    await triage._auto_resolve_tickets(ticket_item, detail_id)
-
-        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_repository.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
-
-        event_bus.rpc_request.assert_has_awaits([
-            call("edge.status.request",
-                 {
-                     "request_id": uuid_,
-                     "edge": config.TRIAGE_CONFIG['id_by_serial'][serial]
-                 },
-                 timeout=45),
-            call("alert.request.event.edge",
-                 {
-                     'request_id': uuid_,
-                     'edge': {"host": host, "enterprise_id": enterprise_id, "edge_id": edge_id},
-                     'start_date': start_datetime,
-                     'end_date': current_datetime,
-                     'filter': ["EDGE_DOWN", "LINK_DEAD"]
-                 },
-                 timeout=180),
-            call("bruin.ticket.status.resolve",
-                 {
-                     "request_id": uuid_,
-                     "ticket_id": ticket_id,
-                     "detail_id": detail_id
-                 },
-                 timeout=15),
-            call("bruin.ticket.note.append.request",
-                 {
-                     "request_id": uuid_,
-                     "ticket_id": ticket_id,
-                     "note": "#*Automation Engine*#\nAuto-resolving ticket.\n" + 'TimeStamp: ' + note_timestamp
-                 },
-                 timeout=15),
-            call("notification.slack.request",
-                 {
-                     "request_id": uuid_,
-                     'message': f'Ticket autoresolved '
-                                f'https://app.bruin.com/helpdesk?clientId=85940&'
-                                f'ticketId={ticket_id}, in '
-                                f'{custom_triage_config["environment"]}'
-                 },
-                 timeout=10)
-        ])
-
-    @pytest.mark.asyncio
-    async def auto_resolve_ticket_no_events_detected_test(self):
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-
-        host = "mettel.velocloud.net"
-        enterprise_id = 137
-        edge_id = 958
-        serial = "VC05400002265"
-
-        edge_status = {
-            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
-            }
-        }
-        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "events": []}
-        bruin_resolved = "Resolved"
-        bruin_note_appended = "Appended"
-        slack_sent = "Sent"
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[edge_status, events, bruin_resolved, bruin_note_appended,
-                                                           slack_sent])
-
-        config = testconfig
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-
-        outage_repository = Mock()
-        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_repository.is_there_an_outage = Mock(return_value=True)
-
-        ticket_id = "123"
-        ticket_notes = ['list of notes']
-        ticket_item = {"ticketID": ticket_id, "serial": serial, "notes": ticket_notes}
-
-        detail_id = "321"
-
-        current_timestamp = '2019-09-10 10:45:00'
-        current_datetime = datetime.strptime(current_timestamp, '%Y-%m-%d %H:%M:%S')
-        start_timestamp = '2019-09-10 10:00:00'
-        start_datetime = datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
-        note_timestamp = '2019-09-10 10:45:01'
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_datetime)
-        uuid_ = uuid()
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            with patch.object(triage_module, 'datetime', new=datetime_mock):
-                with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-                    await triage._auto_resolve_tickets(ticket_item, detail_id)
-
-        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_repository.is_there_an_outage.assert_not_called()
-
-        event_bus.rpc_request.assert_has_awaits([
-                                                    call("edge.status.request",
-                                                         {
-                                                             "request_id": uuid_,
-                                                             "edge": config.TRIAGE_CONFIG['id_by_serial'][serial]
-                                                         },
-                                                         timeout=45),
-                                                    call("alert.request.event.edge",
-                                                         {
-                                                             'request_id': uuid_,
-                                                             'edge': {"host": host, "enterprise_id": enterprise_id,
-                                                                      "edge_id": edge_id},
-                                                             'start_date': start_datetime,
-                                                             'end_date': current_datetime,
-                                                             'filter': ["EDGE_DOWN", "LINK_DEAD"]
-                                                         },
-                                                         timeout=180)
-                                                ])
-
-    @pytest.mark.asyncio
-    async def auto_resolve_ticket_outage_still_exists_test(self):
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-
-        host = "mettel.velocloud.net"
-        enterprise_id = 137
-        edge_id = 958
-        serial = "VC05400002265"
-
-        edge_status = {
-            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
-            }
-        }
-        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "events": ["EDGE_DOWN"]}
-        bruin_resolved = "Resolved"
-        bruin_note_appended = "Appended"
-        slack_sent = "Sent"
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[edge_status, events, bruin_resolved, bruin_note_appended,
-                                                           slack_sent])
-
-        config = testconfig
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-
-        outage_repository = Mock()
-        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_repository.is_there_an_outage = Mock(return_value=True)
-
-        ticket_id = "123"
-        ticket_notes = ['list of notes']
-        ticket_item = {"ticketID": ticket_id, "serial": serial, "notes": ticket_notes}
-
-        detail_id = "321"
-
-        current_timestamp = '2019-09-10 10:45:00'
-        current_datetime = datetime.strptime(current_timestamp, '%Y-%m-%d %H:%M:%S')
-        start_timestamp = '2019-09-10 10:00:00'
-        start_datetime = datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
-        note_timestamp = '2019-09-10 10:45:01'
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_datetime)
-        uuid_ = uuid()
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            with patch.object(triage_module, 'datetime', new=datetime_mock):
-                with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-                    await triage._auto_resolve_tickets(ticket_item, detail_id)
-
-        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_repository.is_there_an_outage.assert_called_once_with(edge_status["edge_info"])
-
-        event_bus.rpc_request.assert_has_awaits([
-            call("edge.status.request",
-                 {
-                     "request_id": uuid_,
-                     "edge": config.TRIAGE_CONFIG['id_by_serial'][serial]
-                 },
-                 timeout=45),
-            call("alert.request.event.edge",
-                 {
-                     'request_id': uuid_,
-                     'edge': {"host": host, "enterprise_id": enterprise_id,
-                              "edge_id": edge_id},
-                     'start_date': start_datetime,
-                     'end_date': current_datetime,
-                     'filter': ["EDGE_DOWN", "LINK_DEAD"]
-                 },
-                 timeout=180)
-        ])
-
-    @pytest.mark.asyncio
-    async def auto_resolve_ticket_too_many_autoresolves_production_test(self):
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-
-        host = "mettel.velocloud.net"
-        enterprise_id = 137
-        edge_id = 958
-        serial = "VC05400002265"
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock()
-
-        config = testconfig
-        custom_triage_config = config.TRIAGE_CONFIG.copy()
-        custom_triage_config['environment'] = 'production'
-
-        outage_repository = Mock()
-        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=False)
-        outage_repository.is_there_an_outage = Mock(return_value=False)
-
-        ticket_id = "123"
-        ticket_notes = ['list of notes']
-        ticket_item = {"ticketID": ticket_id, "serial": serial, "notes": ticket_notes}
-
-        detail_id = "321"
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        uuid_ = uuid()
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
-                await triage._auto_resolve_tickets(ticket_item, detail_id)
-
-        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_repository.is_there_an_outage.assert_not_called()
-        event_bus.rpc_request.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def auto_resolve_ticket_dev_test(self):
-        logger = Mock()
-        scheduler = Mock()
-        template_renderer = Mock()
-
-        host = "mettel.velocloud.net"
-        enterprise_id = 137
-        edge_id = 958
-        serial = "VC05400002265"
-
-        edge_status = {
-            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
-            }
-        }
-        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "events": ["LINK_DEAD"]}
-
-        bruin_resolved = "Resolved"
-        bruin_note_appended = "Appended"
-        slack_sent = "Sent"
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[edge_status, events, bruin_resolved, bruin_note_appended,
-                                                           slack_sent])
-
-        config = testconfig
-
-        outage_repository = Mock()
-        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
-        outage_repository.is_there_an_outage = Mock(return_value=False)
-
-        ticket_id = "123"
-        ticket_notes = ['list of notes']
-        ticket_item = {"ticketID": ticket_id, "serial": serial, "notes": ticket_notes}
-
-        detail_id = "321"
-
-        current_timestamp = '2019-09-10 10:45:00'
-        current_datetime = datetime.strptime(current_timestamp, '%Y-%m-%d %H:%M:%S')
-        start_timestamp = '2019-09-10 10:00:00'
-        start_datetime = datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
-        note_timestamp = '2019-09-10 10:45:01'
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        datetime_mock = Mock()
-        datetime_mock.now = Mock(return_value=current_datetime)
-        uuid_ = uuid()
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            with patch.object(triage_module, 'datetime', new=datetime_mock):
-                await triage._auto_resolve_tickets(ticket_item, detail_id)
-
-        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_repository.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
-
-        event_bus.rpc_request.assert_has_awaits([
-            call("edge.status.request",
-                 {
-                     "request_id": uuid_,
-                     "edge": config.TRIAGE_CONFIG['id_by_serial'][serial]
-                 },
-                 timeout=45),
-            call("alert.request.event.edge",
-                 {
-                     'request_id': uuid_,
-                     'edge': {"host": host, "enterprise_id": enterprise_id,
-                              "edge_id": edge_id},
-                     'start_date': start_datetime,
-                     'end_date': current_datetime,
-                     'filter': ["EDGE_DOWN", "LINK_DEAD"]
-                 },
-                 timeout=180)
-        ])
