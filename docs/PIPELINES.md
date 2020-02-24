@@ -117,15 +117,15 @@ In this process, a series of resources will also be created in AWS for the selec
 
 * A [CloudFormation Stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html) for create the [SNS topic](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html) that will be used by *CloudWatch Alarms* notifications of this environment
 
-Also, resources of type `null_resource` are created to execute from python a series of scripts in python:
+Also, resources of type `null_resource` are created to execute some Python scripts:
 
-1. The creation of the [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) is conditioned to a script launched as a `null_resource` to check that the last ECS service created for NATS is running in a healthy state
+1. The creation of [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) starts only if a Python script launched as a `null_resource` finishes with success. This script checks that the last ECS service created for NATS is running in `HEALTHY` state.
 
-2. Then the ECS services related to the capabilities type microservices are created, i.e. bruin-bridge, velocloud-bridge, t7-bridge, notifier and prometheus. Once created, the script used for NATS is launched through null resource to check that the tasks for each of these ECS services created are in RUNNING and HEALTHY status.
+2. If the previous step succeeded then ECS services related to capabilities microservices are created (`bruin-bridge`, `velocloud-bridge`, `t7-bridge`, `notifier` and `prometheus`). Once created, the script used for NATS is launched through `null_resource` to check that the task instances for each of these ECS services were created successfully and are in `RUNNING` and `HEALTHY` status.
 
-3. Once all the scripts for the capabilities type microservices have finished satisfactorily, the ECS services of the microservices catalogued as use cases are created, that is, [last-contact-report](../last-contact-report), [service-affecting-monitor](../service-affecting-monitor), [service-outage-monitor](../service-outage-monitor), [service-outage-triage](../service-outage-triage) and [sites-monitor](../sites-monitor). This is achieved by establishing explicit dependencies between the ECS services for the capability-type microservices and the set of null resources that perform the healthcheck of the capability-type microservices.
+3. Once all the scripts for the capabilities microservices have finished successfully, ECS services for the use-cases microservices are all created; that is, [last-contact-report](../last-contact-report), [service-affecting-monitor](../service-affecting-monitor), [service-outage-monitor](../service-outage-monitor), [service-outage-triage](../service-outage-triage) and [sites-monitor](../sites-monitor) are created. This is achieved by defining explicit dependencies between the ECS services for the capabilities microservices and the set of null resources that perform the healthcheck of the capabilities microservices.​
 
-   The following is an example of a `service-affecting-monitor` microservice of the *use case* type definition using [*Terraform*](https://www.terraform.io/) in which the dependency between the `null_resource` type resources in charge of performing the healthcheck of the different capabilities type microservices in the terraform code for this microservice is established.
+   The following is an example of a definition for the use-case microservice `service-affecting-monitor` using [*Terraform*](https://www.terraform.io/). Here, the dependency between the corresponding `null_resource` type resources in charge of performing the health check of the different capabilities microservices in Terraform code for this microservice is established.
 
    ```terraform
    resource "aws_ecs_service" "automation-service-affecting-monitor" {

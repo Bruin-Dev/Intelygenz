@@ -14,7 +14,7 @@
 
 Infrastructure as Code enables DevOps to test the deployment of environments before use it in production. IaC can deliver 
 stable environments rapidly and at scale. Avoiding manual configuration of environments and enforce consistency by representing
- the desired state of their environments via code. This technique improve the automatic deployments in automation-engine, each time 
+ the desired state of their environments via code. This technique improves the automatic deployments in automation-engine, each time 
  the pipelines launch the [Continuous delivery](./PIPELINES.md##continuous-delivery-cd) will create, update or destroy 
  the infrastructure if it's necessary. 
 
@@ -64,7 +64,7 @@ Al terraform files are located inside `./infra-as-code`, in this folder there ar
 
     * A set of [Security Groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html) for all the resources created by the terraform files present in this folder
 
-    * A set of [null_resource](https://www.terraform.io/docs/providers/null/resource.html) *Terraform* type resources to execute the [python script in charge of performing the healtheck of the tasks](./../ci-utils/task_healthcheck.py) created in a deployment for the capabilites type microservices, as well as to create the *Graphana* users in the environment where the deployment is being done, [using another Python script](./../ci-utils/grafana_users_creation.py).
+    * A set of [null_resource](https://www.terraform.io/docs/providers/null/resource.html) *Terraform* type resources to execute the [python script in charge of health checking the task instances](./../ci-utils/task_healthcheck.py) created in the deployment of capabilities microservices, as well as to create the *Grafana* users in the environment where the deployment is carried out by [using another Python script](./../ci-utils/grafana_users_creation.py).
 
 3. `network-resources`: there are the necessary files for create the [VPC](https://aws.amazon.com/vpc/) and all related resources in the environment used for deployment, these being the following:
 
