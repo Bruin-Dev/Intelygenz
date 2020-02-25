@@ -243,3 +243,9 @@ class BruinRepository:
             "resultTypeId": work_queue_id
         }
         return self._bruin_client.change_detail_work_queue(ticket_id, put_work_queue_payload)
+
+    def get_ticket_task_history(self, filters):
+        ticket_current_task = self._bruin_client.get_ticket_task_history(filters)
+        if ticket_current_task["status_code"] in range(200, 300):
+            ticket_current_task["body"] = ticket_current_task["body"]["result"]
+        return ticket_current_task

@@ -616,3 +616,51 @@ class BruinClient:
             return get_possible_detail_next_result()
         except Exception as e:
             return e.args[0]
+
+    def get_ticket_task_history(self, filters):
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
+        def get_ticket_task_history():
+            self._logger.info(f'Getting ticket task history for ticket: {filters}')
+            return_response = dict.fromkeys(["body", "status_code"])
+            try:
+                response = requests.get(
+                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/AITicketData?ticketId={filters["ticket_id"]}',
+                    headers=self._get_request_headers(),
+                    verify=False)
+            except ConnectionError as e:
+                self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
+                return_response["body"] = f"Connection error in Bruin API. {e}"
+                return_response["status_code"] = 500
+                raise Exception(return_response)
+
+            if response.status_code in range(200, 299):
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.info(f'Got ticket task history for : {filters}')
+
+            if response.status_code == 400:
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.error(f"Got error 400 from Bruin {response.json()}")
+
+            if response.status_code == 401:
+                self._logger.info(f"Got 401 from Bruin, re-login and retrying get ticket current task")
+                self.login()
+                return_response["body"] = f"Maximum retries while relogin"
+                return_response["status_code"] = 401
+                raise Exception(return_response)
+
+            if response.status_code in range(500, 513):
+                self._logger.error(f"Got {response.status_code}. Retrying...")
+                return_response["body"] = f"Got internal error from Bruin"
+                return_response["status_code"] = 500
+                raise Exception(return_response)
+
+            return return_response
+
+        try:
+            return get_ticket_task_history()
+        except Exception as e:
+            return e.args[0]

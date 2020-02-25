@@ -7,6 +7,7 @@ from application.actions.get_tickets import GetTicket
 from application.actions.get_ticket_details import GetTicketDetails
 from application.actions.get_affecting_ticket_details_by_edge_serial import GetAffectingTicketDetailsByEdgeSerial
 from application.actions.get_outage_ticket_details_by_edge_serial import GetOutageTicketDetailsByEdgeSerial
+from application.actions.get_ticket_task_history import GetTicketTaskHistory
 from application.actions.change_detail_work_queue import ChangeDetailWorkQueue
 from application.actions.get_management_status import GetManagementStatus
 from application.actions.post_note import PostNote
@@ -53,6 +54,7 @@ class Container:
         self._subscriber_post_outage_ticket = NATSClient(config, logger=self._logger)
         self._subscriber_get_client_info = NATSClient(config, logger=self._logger)
         self._subscriber_change_work_queue = NATSClient(config, logger=self._logger)
+        self._subscriber_get_ticket_task_history = NATSClient(config, logger=self._logger)
 
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.add_consumer(self._subscriber_tickets, consumer_name="tickets")
@@ -73,6 +75,7 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_post_outage_ticket, consumer_name="post_outage_ticket")
         self._event_bus.add_consumer(self._subscriber_get_client_info, consumer_name="get_client_info")
         self._event_bus.add_consumer(self._subscriber_change_work_queue, consumer_name="change_work_queue")
+        self._event_bus.add_consumer(self._subscriber_get_ticket_task_history, consumer_name="get_ticket_task_history")
 
         self._event_bus.set_producer(self._publisher)
 
@@ -93,6 +96,7 @@ class Container:
         self._post_outage_ticket = PostOutageTicket(self._logger, self._event_bus, self._bruin_repository)
         self._get_client_info = GetClientInfo(self._logger, self._event_bus, self._bruin_repository)
         self._change_work_queue = ChangeDetailWorkQueue(self._logger, self._event_bus, self._bruin_repository)
+        self._get_ticket_task_history = GetTicketTaskHistory(self._logger, self._event_bus, self._bruin_repository)
 
         self._report_bruin_ticket = ActionWrapper(self._get_tickets, "get_all_tickets",
                                                   is_async=True, logger=self._logger)
@@ -126,6 +130,10 @@ class Container:
         self._action_change_work_queue = ActionWrapper(self._change_work_queue, "change_detail_work_queue",
                                                        is_async=True, logger=self._logger,
                                                        )
+        self._action_get_ticket_task_history = ActionWrapper(self._get_ticket_task_history,
+                                                             "get_ticket_task_history",
+                                                             is_async=True, logger=self._logger,
+                                                             )
 
         self._server = QuartServer(config)
 
@@ -175,6 +183,10 @@ class Container:
         await self._event_bus.subscribe_consumer(consumer_name="change_work_queue",
                                                  topic="bruin.ticket.change.work",
                                                  action_wrapper=self._action_change_work_queue,
+                                                 queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="get_ticket_task_history",
+                                                 topic="bruin.ticket.get.task.history",
+                                                 action_wrapper=self._action_get_ticket_task_history,
                                                  queue="bruin_bridge")
 
     async def start_server(self):
