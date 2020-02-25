@@ -2375,3 +2375,51 @@ class TestServiceOutageTriage:
                  },
                  timeout=180)
         ])
+
+    @pytest.mark.asyncio
+    async def _create_client_id_to_dict_of_serials_dict_test(self):
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_utils = Mock()
+
+        client_id = 9994
+
+        host = "mettel.velocloud.net"
+        enterprise_id = 137
+        edge_id = 958
+        serial = "VC05400002265"
+
+        edge_list = {"request_id": uuid(), 'edges': [{'host': host, 'enterprise_id': enterprise_id,
+                                                      'edge_id': edge_id}],
+                     "status": 200}
+
+        edge_status = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": host,
+                "enterprise_id": enterprise_id,
+                "edge_id": edge_id
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": serial,
+                },
+                "links": [{"link": None}]
+            }
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[edge_list, edge_status])
+
+        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
+                                                    outage_utils)
+        service_outage_triage._client_id_from_edge_status = Mock(return_value=client_id)
+
+        client_id_dict = await service_outage_triage._create_client_id_to_dict_of_serials_dict()
+
+        assert client_id_dict == {client_id: {serial: edge_status}}

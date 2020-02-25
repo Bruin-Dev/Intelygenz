@@ -74,6 +74,7 @@ class ServiceOutageTriage:
                                                                       client_id_to_list_of_serial_dict[client_id])
 
             for ticket_id in filtered_ticket_ids:
+                self._logger.info(f"Triaging ticket id: {ticket_id[ 'ticketID']} in client_id: {client_id}")
                 edge_status = client_id_to_list_of_serial_dict[client_id][ticket_id["serial"]]
                 edge_id = edge_status["edge_id"]
 
@@ -393,6 +394,7 @@ class ServiceOutageTriage:
             {'request_id': edge_list["request_id"], 'edge': edge} for edge in edge_list["edges"]]
         self._logger.info("Processing all edges and building dictionary of clients to a dict of serials")
         for request in edge_status_requests:
+            self._logger.info(f"Processing edge request: {request}")
             edge_status = await self._event_bus.rpc_request("edge.status.request", request, timeout=120)
             client_id = self._client_id_from_edge_status(edge_status)
 
