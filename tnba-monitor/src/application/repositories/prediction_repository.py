@@ -47,7 +47,7 @@ class PredictionRepository:
         transition_map = self._config.TRANSITION_MAP
         allowed_target_transitions = transition_map.get(origin_transition_name)
 
-        self._logger.info(f'Checking if can automate transition{origin_transition_name} ---> {target_transition_name}')
+        self._logger.info(f'Checking if can automate transition {origin_transition_name} ---> {target_transition_name}')
 
         if not allowed_target_transitions:
             return False
