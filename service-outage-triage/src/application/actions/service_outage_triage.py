@@ -1,6 +1,6 @@
 import json
 import re
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta
 
 from apscheduler.util import undefined
@@ -33,12 +33,16 @@ class ServiceOutageTriage:
                                 replace_existing=True, id='_service_outage_triage_process')
 
     async def _poll_tickets(self):
+        self._logger.info(f'Creating dict of serial to monitor using '
+                          f'filter {self._config.TRIAGE_CONFIG["velo_filter"]}')
+        client_id_to_list_of_serial_dict = await self._create_client_id_to_dict_of_serials_dict()
+
         self._logger.info("Requesting tickets from Bruin")
-        all_tickets = {"tickets": []}
-        for company in self._config.TRIAGE_CONFIG["bruin_company_ids"]:
+        ticket_response = dict()
+        for client_id in client_id_to_list_of_serial_dict:
             try:
-                self._logger.info(f'Requesting tickets for Bruin company {company}')
-                request_tickets_message = {'request_id': uuid(), 'client_id': company,
+                self._logger.info(f'Requesting tickets for Bruin company of client_id: {client_id}')
+                request_tickets_message = {'request_id': uuid(), 'client_id': client_id,
                                            'ticket_status': ['New', 'InProgress', 'Draft'],
                                            'category': 'SD-WAN',
                                            'ticket_topic': 'VOO'}
@@ -51,62 +55,59 @@ class ServiceOutageTriage:
                     slack_message = {'request_id': uuid(),
                                      'message': f'Service outage triage: Error: ticket list does not comply in format. '
                                                 f'Ticket list: {json.dumps(ticket_response)}. '
-                                                f'Company Bruin ID: {company}. '
+                                                f'Company Bruin ID: {client_id}. '
                                                 f'Environment: {self._config.TRIAGE_CONFIG["environment"]}'}
                     await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
                     continue
-                all_tickets["tickets"] = all_tickets["tickets"] + ticket_response["tickets"]
-                self._logger.info(f'Tickets for company {company} retrieved correctly')
+                self._logger.info(f'Tickets for company of client_id: {client_id} retrieved correctly')
 
             except Exception:
-                self._logger.error(f'Error trying to get tickets for Bruin company: {company}')
+                self._logger.error(f'Error trying to get tickets for Bruin company of client_id:: {client_id}')
                 slack_message = {'request_id': uuid(),
                                  'message': f'Service outage triage: Unknown error getting ticket list. '
-                                            f'Company Bruin ID: {company}. '
+                                            f'Company Bruin ID: {client_id}. '
                                             f'Environment: {self._config.TRIAGE_CONFIG["environment"]}'}
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
-        filtered_ticket_ids = await self._filtered_ticket_details(all_tickets)
+            filtered_ticket_ids = await self._filtered_ticket_details(ticket_response,
+                                                                      client_id,
+                                                                      client_id_to_list_of_serial_dict[client_id])
 
-        for ticket_id in filtered_ticket_ids:
-            id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
-            edge_id = id_by_serial[ticket_id["serial"]]
-            status_msg = {'request_id': uuid(),
-                          'edge': edge_id}
+            for ticket_id in filtered_ticket_ids:
+                edge_status = client_id_to_list_of_serial_dict[client_id][ticket_id["serial"]]
+                edge_id = edge_status["edge_id"]
 
-            filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-            events_msg = {'request_id': uuid(),
-                          'edge': edge_id,
-                          'start_date': (datetime.now(utc) - timedelta(days=7)),
-                          'end_date': datetime.now(utc),
-                          'filter': filter_events_status_list}
+                filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+                events_msg = {'request_id': uuid(),
+                              'edge': edge_id,
+                              'start_date': (datetime.now(utc) - timedelta(days=7)),
+                              'end_date': datetime.now(utc),
+                              'filter': filter_events_status_list}
 
-            edge_status = await self._event_bus.rpc_request("edge.status.request", status_msg, timeout=10)
-            client_id = self._client_id_from_edge_status(edge_status)
-            edge_events = await self._event_bus.rpc_request("alert.request.event.edge", events_msg, timeout=180)
-            ticket_dict = self._compose_ticket_note_object(edge_status, edge_events)
-            if self._config.TRIAGE_CONFIG['environment'] == 'production':
-                ticket_note = self._ticket_object_to_string(ticket_dict)
-                ticket_append_note_msg = {'request_id': uuid(),
-                                          'ticket_id': ticket_id["ticketID"],
-                                          'note': ticket_note}
-                await self._event_bus.rpc_request("bruin.ticket.note.append.request",
-                                                  ticket_append_note_msg,
-                                                  timeout=15)
-            elif self._config.TRIAGE_CONFIG['environment'] == 'dev':
-                ticket_note = self._template_renderer._ticket_object_to_email_obj(ticket_dict)
-                await self._event_bus.rpc_request("notification.email.request", ticket_note, timeout=10)
-            slack_message = {'request_id': uuid(),
-                             'message': f'Triage appended to ticket: '
-                                        f'https://app.bruin.com/helpdesk?clientId={client_id}&ticketId='
-                                        f'{ticket_id["ticketID"]}, in '
-                                        f'{self._config.TRIAGE_CONFIG["environment"]}'}
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                edge_events = await self._event_bus.rpc_request("alert.request.event.edge", events_msg, timeout=180)
+                ticket_dict = self._compose_ticket_note_object(edge_status, edge_events)
+                if self._config.TRIAGE_CONFIG['environment'] == 'production':
+                    ticket_note = self._ticket_object_to_string(ticket_dict)
+                    ticket_append_note_msg = {'request_id': uuid(),
+                                              'ticket_id': ticket_id["ticketID"],
+                                              'note': ticket_note}
+                    await self._event_bus.rpc_request("bruin.ticket.note.append.request",
+                                                      ticket_append_note_msg,
+                                                      timeout=15)
+                elif self._config.TRIAGE_CONFIG['environment'] == 'dev':
+                    ticket_note = self._template_renderer._ticket_object_to_email_obj(ticket_dict)
+                    await self._event_bus.rpc_request("notification.email.request", ticket_note, timeout=10)
+                slack_message = {'request_id': uuid(),
+                                 'message': f'Triage appended to ticket: '
+                                            f'https://app.bruin.com/helpdesk?clientId={client_id}&ticketId='
+                                            f'{ticket_id["ticketID"]}, in '
+                                            f'{self._config.TRIAGE_CONFIG["environment"]}'}
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
         self._logger.info("End of ticket polling job")
 
-    async def _filtered_ticket_details(self, ticket_list):
+    async def _filtered_ticket_details(self, ticket_list, company_id, edge_serial_list):
         filtered_ticket_ids = []
-        valid_serials = list(self._config.TRIAGE_CONFIG["id_by_serial"].keys())
+        valid_serials = edge_serial_list.keys()
         for ticket in ticket_list['tickets']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'ticket_id': ticket['ticketID']}
@@ -118,6 +119,9 @@ class ServiceOutageTriage:
                 if 'detailValue' in ticket_detail.keys():
                     if ticket_detail['detailValue'] in valid_serials:
                         ticket_item = dict()
+                        # add edge_status to ticket[item]
+                        ticket_item["client_id"] = company_id
+                        ticket_item["edge_status"] = edge_serial_list[ticket_detail['detailValue']]
                         ticket_item["ticketID"] = ticket['ticketID']
                         ticket_item["serial"] = ticket_detail['detailValue']
                         ticket_item['notes'] = ticket_details['ticket_details']['ticketNotes']
@@ -172,22 +176,16 @@ class ServiceOutageTriage:
         return client_id
 
     async def _check_for_new_events(self, timestamp, ticket_id):
-        id_by_serial = self._config.TRIAGE_CONFIG["id_by_serial"]
-        edge_id = id_by_serial[ticket_id["serial"]]
+        edge_status = ticket_id["edge_status"]
+        edge_id = edge_status["edge_id"]
         filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
         events_msg = {'request_id': uuid(),
                       'edge': edge_id,
                       'start_date': timestamp,
                       'end_date': datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone'])),
                       'filter': filter_events_status_list}
-        edge_status_request = {
-            'request_id': uuid(),
-            'edge': edge_id,
-        }
-        edge_status = await self._event_bus.rpc_request(
-            'edge.status.request', edge_status_request, timeout=45,
-        )
-        client_id = self._client_id_from_edge_status(edge_status)
+
+        client_id = ticket_id["client_id"]
         edge_events = await self._event_bus.rpc_request("alert.request.event.edge", events_msg, timeout=180)
 
         event_list = edge_events['events']
@@ -384,3 +382,21 @@ class ServiceOutageTriage:
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
             self._logger.info(f"Ticket of ticketID:{ticket_id['ticketID']} auto-resolved")
+
+    async def _create_client_id_to_dict_of_serials_dict(self):
+        client_id_to_dict_of_serial_dict = defaultdict(dict)
+        self._logger.info("Requesting edge list")
+        list_request = dict(request_id=uuid(), filter=self._config.TRIAGE_CONFIG["velo_filter"])
+        edge_list = await self._event_bus.rpc_request("edge.list.request", list_request, timeout=200)
+        self._logger.info(f'Edge list received from event bus')
+        edge_status_requests = [
+            {'request_id': edge_list["request_id"], 'edge': edge} for edge in edge_list["edges"]]
+        self._logger.info("Processing all edges and building dictionary of clients to a dict of serials")
+        for request in edge_status_requests:
+            edge_status = await self._event_bus.rpc_request("edge.status.request", request, timeout=120)
+            client_id = self._client_id_from_edge_status(edge_status)
+
+            edge_info = edge_status["edge_info"]
+            client_id_to_dict_of_serial_dict[client_id][edge_info["edges"]["serialNumber"]] = edge_status
+
+        return client_id_to_dict_of_serial_dict

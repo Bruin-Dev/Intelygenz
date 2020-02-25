@@ -95,6 +95,11 @@ class TestServiceOutageTriage:
         tickets_list = []
         tickets = {'tickets': tickets_list}
         filtered_tickets_list = []
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+        client_id_dict = {85940: {"VC05200026138": {'request_id': uuid(), 'edge': edge_status}}}
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
@@ -104,6 +109,7 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
         service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
+        service_outage_triage._create_client_id_to_dict_of_serials_dict = CoroutineMock(return_value=client_id_dict)
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
@@ -120,7 +126,9 @@ class TestServiceOutageTriage:
                  },
                  timeout=90, )
         ])
-        service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
+        service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets,
+                                                                                85940,
+                                                                                client_id_dict[85940])
 
     @pytest.mark.asyncio
     async def poll_tickets_with_bruin_tickets_returning_none_test(self):
@@ -131,6 +139,12 @@ class TestServiceOutageTriage:
 
         tickets = None
 
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+        client_id_dict = {85940: {"VC05200026138": {'request_id': uuid(), 'edge': edge_status}}}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
@@ -139,6 +153,7 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
         service_outage_triage._filtered_ticket_details = CoroutineMock()
+        service_outage_triage._create_client_id_to_dict_of_serials_dict = CoroutineMock(return_value=client_id_dict)
 
         uuid_1 = uuid()
         uuid_2 = uuid()
@@ -184,6 +199,12 @@ class TestServiceOutageTriage:
 
         tickets = {'some-key-1': [], 'some-key-2': []}
 
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+        client_id_dict = {85940: {"VC05200026138": {'request_id': uuid(), 'edge': edge_status}}}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
@@ -192,6 +213,7 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
         service_outage_triage._filtered_ticket_details = CoroutineMock()
+        service_outage_triage._create_client_id_to_dict_of_serials_dict = CoroutineMock(return_value=client_id_dict)
 
         uuid_1 = uuid()
         uuid_2 = uuid()
@@ -237,6 +259,12 @@ class TestServiceOutageTriage:
         tickets_list = None
         tickets = {'tickets': tickets_list}
 
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+        client_id_dict = {85940: {"VC05200026138": {'request_id': uuid(), 'edge': edge_status}}}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=tickets)
 
@@ -245,6 +273,7 @@ class TestServiceOutageTriage:
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
         service_outage_triage._filtered_ticket_details = CoroutineMock()
+        service_outage_triage._create_client_id_to_dict_of_serials_dict = CoroutineMock(return_value=client_id_dict)
 
         uuid_1 = uuid()
         uuid_2 = uuid()
@@ -301,6 +330,7 @@ class TestServiceOutageTriage:
             "edge_id": 958
         }
         edge_serial = 'VC05200026138'
+
         filtered_ticket_details = {'ticketID': ticket_id, 'serial': edge_serial}
         filtered_tickets_list = [filtered_ticket_details]
 
@@ -315,9 +345,12 @@ class TestServiceOutageTriage:
         append_ticket = {'ticket_appended': 'Success'}
         send_to_slack = {'slack_sent': 'Success'}
 
+        client_id_dict = {85940: {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial,
+                                                'edge_info': edge_status}}}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            tickets, edge_status, edge_event,
+            tickets, edge_event,
             append_ticket, send_to_slack
         ])
 
@@ -330,6 +363,7 @@ class TestServiceOutageTriage:
         service_outage_triage._template_renderer._ticket_object_to_email_obj =\
             Mock(return_value=ticket_note_as_email_object)
         service_outage_triage._client_id_from_edge_status = Mock(return_value=85940)
+        service_outage_triage._create_client_id_to_dict_of_serials_dict = CoroutineMock(return_value=client_id_dict)
 
         uuid_1 = uuid()
         uuid_2 = uuid()
@@ -363,14 +397,9 @@ class TestServiceOutageTriage:
                 timeout=90,
             ),
             call(
-                'edge.status.request',
-                {'request_id': uuid_2, 'edge': edge_id_by_serial},
-                timeout=10,
-            ),
-            call(
                 'alert.request.event.edge',
                 {
-                    'request_id': uuid_3,
+                    'request_id': uuid_2,
                     'edge': edge_id_by_serial,
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
@@ -386,7 +415,7 @@ class TestServiceOutageTriage:
             call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_4,
+                    'request_id': uuid_3,
                     'message': (
                         'Triage appended to ticket: '
                         f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id}, in {environment}'
@@ -395,8 +424,11 @@ class TestServiceOutageTriage:
                 timeout=10,
             ),
         ], any_order=False)
-        service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
-        service_outage_triage._compose_ticket_note_object.assert_called_once_with(edge_status, edge_event)
+        service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets,
+                                                                                85940,
+                                                                                client_id_dict[85940])
+        service_outage_triage._compose_ticket_note_object.assert_called_once_with(client_id_dict[85940][
+                                                                                      edge_serial], edge_event)
         service_outage_triage._template_renderer._ticket_object_to_email_obj.assert_called_once_with(ticket_note_object)
 
     @pytest.mark.asyncio
@@ -435,9 +467,13 @@ class TestServiceOutageTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            tickets, edge_status, edge_event,
+            tickets, edge_event,
             append_ticket, send_to_slack
         ])
+
+        client_id_dict = {85940: {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial,
+                                                'edge_info': edge_status}}}
+
         outage_utils = Mock()
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
@@ -446,6 +482,7 @@ class TestServiceOutageTriage:
         service_outage_triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
         service_outage_triage._ticket_object_to_string = Mock(return_value=ticket_note_as_string)
         service_outage_triage._client_id_from_edge_status = Mock(return_value=85940)
+        service_outage_triage._create_client_id_to_dict_of_serials_dict = CoroutineMock(return_value=client_id_dict)
 
         uuid_1 = uuid()
         uuid_2 = uuid()
@@ -480,14 +517,9 @@ class TestServiceOutageTriage:
                 timeout=90,
             ),
             call(
-                'edge.status.request',
-                {'request_id': uuid_2, 'edge': edge_id_by_serial},
-                timeout=10,
-            ),
-            call(
                 'alert.request.event.edge',
                 {
-                    'request_id': uuid_3,
+                    'request_id': uuid_2,
                     'edge': edge_id_by_serial,
                     'start_date': current_datetime_previous_week,
                     'end_date': current_datetime,
@@ -498,7 +530,7 @@ class TestServiceOutageTriage:
             call(
                 'bruin.ticket.note.append.request',
                 {
-                    'request_id': uuid_4,
+                    'request_id': uuid_3,
                     'ticket_id': ticket_id,
                     'note': ticket_note_as_string,
                 },
@@ -507,7 +539,7 @@ class TestServiceOutageTriage:
             call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_5,
+                    'request_id': uuid_4,
                     'message': (
                         'Triage appended to ticket: '
                         f'https://app.bruin.com/helpdesk?clientId=85940&ticketId={ticket_id}, in {environment}'
@@ -516,8 +548,11 @@ class TestServiceOutageTriage:
                 timeout=10,
             ),
         ], any_order=False)
-        service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
-        service_outage_triage._compose_ticket_note_object.assert_called_once_with(edge_status, edge_event)
+        service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets,
+                                                                                85940,
+                                                                                client_id_dict[85940])
+        service_outage_triage._compose_ticket_note_object.assert_called_once_with(client_id_dict[85940][
+                                                                                      edge_serial], edge_event)
         service_outage_triage._ticket_object_to_string.assert_called_once_with(ticket_note_object)
 
     @pytest.mark.asyncio
@@ -553,9 +588,13 @@ class TestServiceOutageTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            tickets, edge_status, edge_event,
+            tickets, edge_event,
             append_ticket, send_to_slack
         ])
+
+        client_id_dict = {85940: {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial,
+                                                'edge_info': edge_status}}}
+
         outage_utils = Mock()
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
@@ -565,14 +604,18 @@ class TestServiceOutageTriage:
         service_outage_triage._ticket_object_to_string = Mock()
         service_outage_triage._template_renderer._ticket_object_to_email_obj = Mock()
         service_outage_triage._client_id_from_edge_status = Mock(return_value=85940)
+        service_outage_triage._create_client_id_to_dict_of_serials_dict = CoroutineMock(return_value=client_id_dict)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['environment'] = environment
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config, template_renderer):
             await service_outage_triage._poll_tickets()
 
-        service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets)
-        service_outage_triage._compose_ticket_note_object.assert_called_once_with(edge_status, edge_event)
+        service_outage_triage._filtered_ticket_details.assert_awaited_once_with(tickets,
+                                                                                85940,
+                                                                                client_id_dict[85940])
+        service_outage_triage._compose_ticket_note_object.assert_called_once_with(client_id_dict[85940][
+                                                                                      edge_serial], edge_event)
         service_outage_triage._ticket_object_to_string.assert_not_called()
         service_outage_triage._template_renderer._ticket_object_to_email_obj.assert_not_called()
 
@@ -589,12 +632,27 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
+        client_id = 85940
+        edge_serial = 'VC05200026138'
+        edge_id_by_serial = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        }
+
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+
+        client_id_dict = {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial, 'edge_info': edge_status}}
+
         outage_utils = Mock()
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                     outage_utils)
 
-        filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+        filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets, client_id, client_id_dict)
 
         event_bus.rpc_request.assert_not_awaited()
         assert filtered_tickets == []
@@ -621,6 +679,21 @@ class TestServiceOutageTriage:
             }
         }
 
+        client_id = 85940
+        edge_serial = 'VC05200026138'
+        edge_id_by_serial = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        }
+
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+
+        client_id_dict = {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial, 'edge_info': edge_status}}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
@@ -631,7 +704,7 @@ class TestServiceOutageTriage:
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
-            filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+            filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets, client_id, client_id_dict)
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
@@ -664,6 +737,21 @@ class TestServiceOutageTriage:
             }
         }
 
+        client_id = 85940
+        edge_serial = 'VC05200026138'
+        edge_id_by_serial = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        }
+
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+
+        client_id_dict = {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial, 'edge_info': edge_status}}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
@@ -674,7 +762,7 @@ class TestServiceOutageTriage:
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
-            filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+            filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets, client_id, client_id_dict)
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
@@ -712,6 +800,21 @@ class TestServiceOutageTriage:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
+        client_id = 85940
+        edge_serial = 'VC05200026138'
+        edge_id_by_serial = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        }
+
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+
+        client_id_dict = {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial, 'edge_info': edge_status}}
+
         outage_utils = Mock()
 
         service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
@@ -720,7 +823,7 @@ class TestServiceOutageTriage:
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
-            filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+            filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets, client_id, client_id_dict)
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
@@ -728,6 +831,8 @@ class TestServiceOutageTriage:
             timeout=15,
         )
         service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
+            client_id=client_id,
+            edge_status=client_id_dict[edge_serial],
             ticketID=ticket_id,
             serial=edge_serial,
             notes=ticket_details[
@@ -737,7 +842,7 @@ class TestServiceOutageTriage:
 
         assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details[
             'ticket_details'][
-            'ticketNotes']}]
+            'ticketNotes'], 'client_id': client_id, 'edge_status': client_id_dict[edge_serial]}]
 
     @pytest.mark.asyncio
     async def filtered_ticket_details_with_no_existing_triage_test(self):
@@ -765,6 +870,21 @@ class TestServiceOutageTriage:
             }
         }
 
+        client_id = 85940
+        edge_serial = 'VC05200026138'
+        edge_id_by_serial = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        }
+
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+
+        client_id_dict = {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial, 'edge_info': edge_status}}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
@@ -776,7 +896,7 @@ class TestServiceOutageTriage:
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
-            filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+            filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets, client_id, client_id_dict)
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
@@ -784,6 +904,8 @@ class TestServiceOutageTriage:
             timeout=15,
         )
         service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
+            client_id=client_id,
+            edge_status=client_id_dict[edge_serial],
             ticketID=ticket_id,
             serial=edge_serial,
             notes=ticket_details[
@@ -793,7 +915,7 @@ class TestServiceOutageTriage:
 
         assert filtered_tickets == [{'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details[
             'ticket_details'][
-            'ticketNotes']}]
+            'ticketNotes'], 'client_id': client_id, 'edge_status': client_id_dict[edge_serial]}]
 
     @pytest.mark.asyncio
     async def filtered_ticket_details_with_existing_triage_and_no_timestamp_for_ticket_notes_test(self):
@@ -821,6 +943,21 @@ class TestServiceOutageTriage:
             }
         }
 
+        client_id = 85940
+        edge_serial = 'VC05200026138'
+        edge_id_by_serial = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        }
+
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+
+        client_id_dict = {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial, 'edge_info': edge_status}}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
@@ -832,7 +969,7 @@ class TestServiceOutageTriage:
 
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
-            filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+            filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets, client_id, client_id_dict)
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
@@ -840,6 +977,8 @@ class TestServiceOutageTriage:
             timeout=15,
         )
         service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
+            client_id=client_id,
+            edge_status=client_id_dict[edge_serial],
             ticketID=ticket_id,
             serial=edge_serial,
             notes=ticket_details[
@@ -878,6 +1017,21 @@ class TestServiceOutageTriage:
             }
         }
 
+        client_id = 85940
+        edge_serial = 'VC05200026138'
+        edge_id_by_serial = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        }
+
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+
+        client_id_dict = {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial, 'edge_info': edge_status}}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
         outage_utils = Mock()
@@ -895,7 +1049,8 @@ class TestServiceOutageTriage:
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
             with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
-                filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+                filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets, client_id,
+                                                                                        client_id_dict)
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
@@ -910,6 +1065,8 @@ class TestServiceOutageTriage:
         )
         service_outage_triage._check_for_new_events.assert_not_awaited()
         service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
+            client_id=client_id,
+            edge_status=client_id_dict[edge_serial],
             ticketID=ticket_id,
             serial=edge_serial,
             notes=ticket_details[
@@ -948,6 +1105,21 @@ class TestServiceOutageTriage:
             }
         }
 
+        client_id = 85940
+        edge_serial = 'VC05200026138'
+        edge_id_by_serial = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 958
+        }
+
+        edge_status = {
+            'edge_id': 'edge-123',
+            'edge_info': {'edges': {'edgeState': 'OFFLINE'}}
+        }
+
+        client_id_dict = {edge_serial: {'request_id': uuid(), "edge_id": edge_id_by_serial, 'edge_info': edge_status}}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=ticket_details)
 
@@ -966,7 +1138,8 @@ class TestServiceOutageTriage:
         uuid_ = uuid()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
             with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
-                filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets)
+                filtered_tickets = await service_outage_triage._filtered_ticket_details(tickets, client_id,
+                                                                                        client_id_dict)
 
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.details.request',
@@ -981,9 +1154,12 @@ class TestServiceOutageTriage:
         )
         service_outage_triage._check_for_new_events.assert_awaited_once_with(
             ticket_notes_timestamp_naive,
-            {'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details['ticket_details']['ticketNotes']},
+            {'ticketID': ticket_id, 'serial': edge_serial, 'notes': ticket_details['ticket_details']['ticketNotes'],
+             'client_id': client_id, 'edge_status': client_id_dict[edge_serial]},
         )
         service_outage_triage._auto_resolve_tickets.assert_called_once_with(dict(
+            client_id=client_id,
+            edge_status=client_id_dict[edge_serial],
             ticketID=ticket_id,
             serial=edge_serial,
             notes=ticket_details[
@@ -1058,7 +1234,6 @@ class TestServiceOutageTriage:
         template_renderer = Mock()
 
         timestamp = '2019-07-30 00:26:00-04:00'
-        ticket = {"ticketID": 123, "serial": "VC05200026138"}
         events_to_report = {
             'events': []
         }
@@ -1085,9 +1260,12 @@ class TestServiceOutageTriage:
                 "links": [{"link": None}]
             }
         }
+        client_id = 85940
+
+        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status, "client_id": client_id}
 
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[edge_status, events_to_report])
+        event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
         outage_utils = Mock()
 
@@ -1103,30 +1281,19 @@ class TestServiceOutageTriage:
             with patch.object(service_outage_triage_module, 'datetime', new=datetime_mock):
                 await service_outage_triage._check_for_new_events(timestamp, ticket)
 
-        event_bus.rpc_request.assert_has_awaits([
-            call('edge.status.request',
-                 {
-                   'request_id': uuid_,
-                   'edge': {
-                       "host": host,
-                       "enterprise_id": enterprise_id,
-                       "edge_id": edge_id
-                   }
-                 },
-                 timeout=45),
-            call('alert.request.event.edge',
-                 {
-                    'request_id': uuid_,
-                    'edge': {
-                     "host": "mettel.velocloud.net",
-                     "enterprise_id": 137,
-                     "edge_id": 958
-                    },
-                    'start_date': timestamp,
-                    'end_date': current_datetime,
-                    'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-                 },
-                 timeout=180)], any_order=False)
+        event_bus.rpc_request.assert_awaited_once_with('alert.request.event.edge',
+                                                       {
+                                                        'request_id': uuid_,
+                                                        'edge': {
+                                                         "host": "mettel.velocloud.net",
+                                                         "enterprise_id": 137,
+                                                         "edge_id": 958
+                                                        },
+                                                        'start_date': timestamp,
+                                                        'end_date': current_datetime,
+                                                        'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+                                                       },
+                                                       timeout=180)
 
     @pytest.mark.asyncio
     async def check_for_new_events_with_meaningful_events_and_check_they_are_sorted_test(self):
@@ -1136,7 +1303,6 @@ class TestServiceOutageTriage:
         template_renderer = Mock()
 
         timestamp = '2019-07-30 00:26:00-04:00'
-        ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         event_1_data = {
             'event': 'LINK_ALIVE',
@@ -1162,6 +1328,32 @@ class TestServiceOutageTriage:
 
         event_note = 'X' * 1500
 
+        host = "mettel.velocloud.net"
+        enterprise_id = 137
+        edge_id = 958
+        serial = "VC05400002265"
+
+        edge_status = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": host,
+                "enterprise_id": enterprise_id,
+                "edge_id": edge_id
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": serial,
+                },
+                "links": [{"link": None}]
+            }
+        }
+        client_id = 85940
+
+        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status, "client_id": client_id}
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
 
@@ -1182,7 +1374,6 @@ class TestServiceOutageTriage:
         template_renderer = Mock()
 
         timestamp = '2019-07-30 00:26:00-04:00'
-        ticket = {"ticketID": 123, "serial": "VC05200026138"}
 
         event_1_data = {
             'event': 'LINK_ALIVE',
@@ -1209,6 +1400,32 @@ class TestServiceOutageTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
+
+        host = "mettel.velocloud.net"
+        enterprise_id = 137
+        edge_id = 958
+        serial = "VC05400002265"
+
+        edge_status = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": host,
+                "enterprise_id": enterprise_id,
+                "edge_id": edge_id
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": serial,
+                },
+                "links": [{"link": None}]
+            }
+        }
+        client_id = 85940
+
+        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status, "client_id": client_id}
 
         outage_utils = Mock()
 
@@ -1261,6 +1478,32 @@ class TestServiceOutageTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
+
+        host = "mettel.velocloud.net"
+        enterprise_id = 137
+        edge_id = 958
+        serial = "VC05400002265"
+
+        edge_status = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "edge_id": {
+                "host": host,
+                "enterprise_id": enterprise_id,
+                "edge_id": edge_id
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": serial,
+                },
+                "links": [{"link": None}]
+            }
+        }
+        client_id = 85940
+
+        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status, "client_id": client_id}
 
         outage_utils = Mock()
 
@@ -1334,10 +1577,11 @@ class TestServiceOutageTriage:
                 "links": [{"link": None}]
             }
         }
+        client_id = 85940
 
+        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status, "client_id": client_id}
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            edge_status,
             events_to_report,
             rpc_response_append_ticket, rpc_response_slack_msg
         ])
@@ -1370,18 +1614,6 @@ class TestServiceOutageTriage:
         service_outage_triage._compose_event_note_object.assert_called_once_with(events_data)
         event_bus.rpc_request.assert_has_awaits([
             call(
-                'edge.status.request',
-                {
-                    'request_id': uuid_2,
-                    'edge': {
-                        "host": host,
-                        "enterprise_id": enterprise_id,
-                        "edge_id": edge_id
-                    }
-                },
-                timeout=45,
-            ),
-            call(
                 'alert.request.event.edge',
                 {
                     'request_id': uuid_1,
@@ -1399,7 +1631,7 @@ class TestServiceOutageTriage:
             call(
                 'bruin.ticket.note.append.request',
                 {
-                    'request_id': uuid_3,
+                    'request_id': uuid_2,
                     'ticket_id': ticket_id,
                     'note': events_ticket_note,
                 },
@@ -1408,7 +1640,7 @@ class TestServiceOutageTriage:
             call(
                 'notification.slack.request',
                 {
-                    'request_id': uuid_4,
+                    'request_id': uuid_3,
                     'message': (
                         'Events appended to ticket: https://app.bruin.com/helpdesk?clientId=85940&'
                         f'ticketId={ticket_id}, in production'
