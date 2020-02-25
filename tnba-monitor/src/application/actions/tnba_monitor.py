@@ -47,10 +47,14 @@ class TNBAMonitor:
             serial_number = valid_ticket_object["serial_number"]
             detail_id = valid_ticket_object["detail_id"]
             prediction = await self._prediction_repository.get_prediction(ticket_id, serial_number)
-
+            self._logger.info(f'Checking if a prediction is automatable for ticket {ticket_id}')
             # Check if ticket was resolved between getting the ticket and making the prediction
-            if prediction and not await self._ticket_repository.ticket_is_resolved(ticket_id):
-                await self._change_detail_work_queue(ticket_id, detail_id, serial_number, prediction)
+            ticket_resolved = await self._ticket_repository.ticket_is_resolved(ticket_id)
+            if prediction and not ticket_resolved:
+                current_task = await self._ticket_repository.get_ticket_current_task(ticket_id)
+                can_automate = self._prediction_repository.can_automate_transition(current_task, prediction)
+                if can_automate:
+                    await self._change_detail_work_queue(ticket_id, detail_id, serial_number, prediction)
 
     async def _change_detail_work_queue(self, ticket_id, detail_id, serial_number, queue_name):
         # If production or development do things here

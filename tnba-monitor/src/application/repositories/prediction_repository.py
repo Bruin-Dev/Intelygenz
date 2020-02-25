@@ -42,3 +42,16 @@ class PredictionRepository:
             return None
 
         return best_prediction["name"]
+
+    def can_automate_transition(self, origin_transition_name, target_transition_name):
+        transition_map = self._config.TRANSITION_MAP
+        allowed_target_transitions = transition_map.get(origin_transition_name)
+
+        self._logger.info(f'Checking if can automate transition{origin_transition_name} ---> {target_transition_name}')
+
+        if not allowed_target_transitions:
+            return False
+
+        if target_transition_name in allowed_target_transitions:
+            return True
+        return False

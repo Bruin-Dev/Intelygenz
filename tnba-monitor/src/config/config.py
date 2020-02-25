@@ -53,6 +53,11 @@ CONDITIONS = {
     "min_probability_threshold": 0.60
 }
 
+TRANSITION_MAP = {
+    "None": ["Holmdel NOC Investigate", "Wireless Repair Intervention Needed"],
+    "Holmdel NOC Investigate": ["Wireless Repair Intervention Needed"]
+}
+
 CUSTOMER_LIST = CUSTOMER_LIST
 
 REDIS = {

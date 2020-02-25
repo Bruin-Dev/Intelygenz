@@ -120,3 +120,24 @@ class TicketRepository:
             if ticket_age_in_minutes > self._config.CONDITIONS["ticket_min_age_minutes"]:
                 return True
         return False
+
+    async def get_ticket_current_task(self, ticket_id):
+        get_ticket_task_payload = {'request_id': uuid(),
+                                   "filters": {'ticket_id': ticket_id},
+                                   }
+
+        ticket_task_history_response = await self._event_bus.rpc_request("bruin.ticket.get.task.history",
+                                                                         get_ticket_task_payload,
+                                                                         timeout=90)
+
+        # Each task history entry has an accumulator of the current task: Ticket Status (yes, the key has an space)
+        # So the first registry in the array can be used.
+        ticket_status_candidate = ticket_task_history_response.get('body')[0]["Ticket Status"]
+
+        # A literal is needed for the map of "Current status --> [automatable statuses]".None is T7's null ticket status
+        ticket_status = "None"
+
+        if ticket_status_candidate:
+            ticket_status = ticket_status_candidate
+
+        return ticket_status
