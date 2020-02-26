@@ -54,8 +54,9 @@ CONDITIONS = {
 }
 
 TRANSITION_MAP = {
-    "None": ["Holmdel NOC Investigate ", "Wireless Repair Intervention Needed"],
-    "Holmdel NOC Investigate ": ["Wireless Repair Intervention Needed"]
+    "None": ["Holmdel NOC Investigate ", "Wireless Repair Intervention Needed", "Repair Completed",
+             "Request Completed"],
+    "Holmdel NOC Investigate ": ["Wireless Repair Intervention Needed", "Repair Completed"]
 }
 
 CUSTOMER_LIST = CUSTOMER_LIST
