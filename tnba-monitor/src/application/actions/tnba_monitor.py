@@ -51,14 +51,15 @@ class TNBAMonitor:
             # Check if ticket was resolved between getting the ticket and making the prediction
             ticket_resolved = await self._ticket_repository.ticket_is_resolved(ticket_id)
             if prediction and not ticket_resolved:
-                current_task = await self._ticket_repository.get_ticket_current_task(ticket_id)
+                current_task = await self._ticket_repository.get_ticket_current_task(ticket_id, serial_number)
                 can_automate = self._prediction_repository.can_automate_transition(current_task, prediction)
                 if can_automate:
-                    await self._change_detail_work_queue(ticket_id, detail_id, serial_number, prediction)
+                    await self._change_detail_work_queue(ticket_id, detail_id, serial_number, prediction, current_task)
 
-    async def _change_detail_work_queue(self, ticket_id, detail_id, serial_number, queue_name):
+    async def _change_detail_work_queue(self, ticket_id, detail_id, serial_number, queue_name, current_queue):
         # If production or development do things here
-        message = f'Prediction {queue_name} would have been applied to ticket {ticket_id} with serial {serial_number}'
+        message = f'Transition {current_queue} ---> {queue_name} would have been applied to ticket {ticket_id} ' \
+                  f'with serial {serial_number}'
         self._logger.info(f'{message}')
         slack_message = {'request_id': uuid(),
                          'message': "##ST-TNBA##" + message}

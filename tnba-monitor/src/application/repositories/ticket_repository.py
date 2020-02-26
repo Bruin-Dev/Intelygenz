@@ -121,7 +121,7 @@ class TicketRepository:
                 return True
         return False
 
-    async def get_ticket_current_task(self, ticket_id):
+    async def get_ticket_current_task(self, ticket_id, serial_number):
         get_ticket_task_payload = {'request_id': uuid(),
                                    "filters": {'ticket_id': ticket_id},
                                    }
@@ -138,6 +138,7 @@ class TicketRepository:
         # A literal is needed for the map of "Current status --> [automatable statuses]".None is T7's null task result
         current_task_result = "None"
 
+        # Use serial here to only read registries for that asset
         for task_registry in task_registries:
             current_task_candidate = task_registry.get("Task Result")
             if current_task_candidate:
