@@ -130,14 +130,17 @@ class TicketRepository:
                                                                          get_ticket_task_payload,
                                                                          timeout=90)
 
-        # Each task history entry has an accumulator of the current task: Ticket Status (yes, the key has an space)
-        # So the first registry in the array can be used.
-        ticket_status_candidate = ticket_task_history_response.get('body')[0]["Ticket Status"]
+        # The current Task Result will be the one in the last registry that doesn't have any null
+        task_registries = ticket_task_history_response.get('body')
 
-        # A literal is needed for the map of "Current status --> [automatable statuses]".None is T7's null ticket status
-        ticket_status = "None"
+        task_registries.sort(key=lambda r: r["EnteredDate_N"])
 
-        if ticket_status_candidate:
-            ticket_status = ticket_status_candidate
+        # A literal is needed for the map of "Current status --> [automatable statuses]".None is T7's null task result
+        current_task_result = "None"
 
-        return ticket_status
+        for task_registry in task_registries:
+            current_task_candidate = task_registry.get("Task Result")
+            if current_task_candidate:
+                current_task_result = current_task_candidate
+
+        return current_task_result
