@@ -4,15 +4,12 @@
 
 .unittest_module_python: &unittest_module_python
   stage: unit_test
-  image:
-    name: gitlab.intelygenz.com:5001/mettel/docker_images/python3.6_unit_tests:1.0.0
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  image: gitlab.intelygenz.com:5001/mettel/docker_images/python-3.6:${DOCKER_BASE_IMAGE_VERSION}
   before_script:
     - cd ${MODULE}
     - pip install -r requirements.txt
   script:
+    - pip freeze
     - pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:
@@ -26,11 +23,7 @@
 
 .unittest_module_python_alpine: &unittest_module_python_alpine
   extends: .unittest_module_python
-  image:
-    name: gitlab.intelygenz.com:5001/mettel/docker_images/python3.6_alpine_unit_tests:1.0.0
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  image: gitlab.intelygenz.com:5001/mettel/docker_images/python-3.6-alpine:${DOCKER_BASE_IMAGE_VERSION}
 
 .unittest_with_setup_template: &unittest_with_setup_template
   stage: unit_test
@@ -39,26 +32,6 @@
     - apt-get update -q -y
     - cd ${MODULE}
     - python setup.py install
-  script:
-    - pytest --cov
-  coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
-  only:
-    - master
-    - /^*feature/.*$/
-    - /^*fix/.*$/
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
-  tags:
-    - kubernetes
-
-.unittest_custom_package_template: &unittest_custom_package_template
-  stage: unit_test
-  image: python:3.6
-  before_script:
-    - apt-get update -q -y
-    - cd ${CUSTOM_PACKAGE_DIR}
-    - python setup.py install
-    - cd ${MODULE}
   script:
     - pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'

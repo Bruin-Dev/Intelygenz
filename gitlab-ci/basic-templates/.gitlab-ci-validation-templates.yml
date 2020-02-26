@@ -5,7 +5,7 @@
 .lint_module: &lint_module
   stage: validation
   image:
-    name: gitlab.intelygenz.com:5001/mettel/docker_images/alpine3.9_python3_pycodestyle:latest
+    name: gitlab.intelygenz.com:5001/mettel/docker_images/alpine3.6_python3_pycodestyle:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'

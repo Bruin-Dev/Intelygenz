@@ -124,6 +124,7 @@ def assign_viewer_permissions(user, user_id):
 
     if folder_uid is None:
         print(f'Error updating permissions for user {user["login"]}.')
+        raise Exception
     else:
         try:
             response = requests.post(
