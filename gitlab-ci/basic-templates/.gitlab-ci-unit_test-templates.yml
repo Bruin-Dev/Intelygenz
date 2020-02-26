@@ -5,7 +5,7 @@
 .unittest_module_python: &unittest_module_python
   stage: unit_test
   image:
-    name: gitlab.intelygenz.com:5001/mettel/automation-engine/python3.6_unit_tests:1.0.0
+    name: gitlab.intelygenz.com:5001/mettel/docker_images/python3.6_unit_tests:1.0.0
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -27,7 +27,7 @@
 .unittest_module_python_alpine: &unittest_module_python_alpine
   extends: .unittest_module_python
   image:
-    name: gitlab.intelygenz.com:5001/mettel/automation-engine/python3.6_alpine_unit_tests:1.0.0
+    name: gitlab.intelygenz.com:5001/mettel/docker_images/python3.6_alpine_unit_tests:1.0.0
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'

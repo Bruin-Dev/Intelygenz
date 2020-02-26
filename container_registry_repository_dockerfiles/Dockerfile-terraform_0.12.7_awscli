@@ -1,7 +1,0 @@
-FROM hashicorp/terraform:0.12.7
-
-COPY ci-utils/requirements.txt ci-utils/requirements.txt
-
-RUN apk --upgrade --no-cache add bash gettext python3 py-pip jq
-RUN pip install --upgrade pip
-RUN pip3 install -r ci-utils/requirements.txt

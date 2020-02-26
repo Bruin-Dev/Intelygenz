@@ -213,29 +213,6 @@ deploy-master:
 # ===============================================
 # Terraform destroy jobs for infra-as-code module
 # ===============================================
-destroy-network-resources-branches:
-  stage: basic_infra
-  extends: .terraform_template_destroy_network-resources
-  before_script:
-    - terraform init -backend=true -get=true -input=false
-    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
-  when: manual
-  only:
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
-  except:
-    - master
-
-destroy-network-resources-master:
-  stage: basic_infra
-  extends: .terraform_template_destroy_network-resources
-  before_script:
-    - terraform init -backend=true -get=true -input=false
-    - export TF_VAR_CURRENT_ENVIRONMENT="production"
-  when: manual
-  only:
-    - master
-
 destroy-branches:
   stage: deploy
   extends: .terraform_template_destroy_environment

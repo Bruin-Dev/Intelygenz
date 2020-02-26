@@ -4,7 +4,7 @@
 
 .terraform_template_deploy_environment: &terraform_template_deploy_environment
   image:
-    name: gitlab.intelygenz.com:5001/mettel/automation-engine/terraform_0.12.7_awscli:latest
+    name: gitlab.intelygenz.com:5001/mettel/docker_images/terraform_0.12.7_awscli:latest
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
