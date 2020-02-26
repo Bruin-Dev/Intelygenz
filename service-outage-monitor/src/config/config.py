@@ -685,11 +685,6 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 2246
     },
-    'VC05200038150': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 2337
-    },
     'VC05200046490': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
@@ -702,11 +697,6 @@ MONITORING_EDGES = {
     #     'enterprise_id': 120,
     #     'edge_id': 3328
     # },
-    'VC05200057225': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1269
-    },
     #    'VC05200027808': {
     #        'host': 'mettel.velocloud.net',
     #        'enterprise_id': 120,
@@ -746,21 +736,6 @@ MONITORING_EDGES = {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 2397
-    },
-    'VC05200014675': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 968
-    },
-    'VC05200014677': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 946
-    },
-    'VC05200038146': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 2368
     },
     'VC05200036802': {
         'host': 'mettel.velocloud.net',
@@ -808,11 +783,6 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 2986
     },
-    'VC05200055904': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 2625
-    },
     # Error in Bruin. Should be active
     # 'VC05200028313': {
     #     'host': 'mettel.velocloud.net',
@@ -823,11 +793,6 @@ MONITORING_EDGES = {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 1681
-    },
-    'VC05200014704': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 967
     },
     'VC05200036673': {
         'host': 'mettel.velocloud.net',
@@ -854,11 +819,6 @@ MONITORING_EDGES = {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 1988
-    },
-    'VC05200028324': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1404
     },
     'VC05200036838': {
         'host': 'mettel.velocloud.net',
@@ -916,11 +876,6 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 2010
     },
-    'VC05200028306': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1242
-    },
     'VC05200037069': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
@@ -940,11 +895,6 @@ MONITORING_EDGES = {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 1293
-    },
-    'VC05200028226': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1227
     },
     'VC05200037797': {
         'host': 'mettel.velocloud.net',
@@ -1016,11 +966,6 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 2009
     },
-    'VC05200037626': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 2361
-    },
     'VC05200036880': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
@@ -1052,11 +997,6 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 1306
     },
-    'VC05200016788': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 898
-    },
     'VC05200037270': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
@@ -1072,16 +1012,7 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 1991
     },
-    'VC05200028623': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1171
-    },
-    'VC05200016793': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 874
-    },
+
     'VC05200014642': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
@@ -1102,11 +1033,6 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 2274
     },
-    'VC05200028630': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1186
-    },
     # 'VC05200028734': {
     #     'host': 'mettel.velocloud.net',
     #     'enterprise_id': 120,
@@ -1117,11 +1043,6 @@ MONITORING_EDGES = {
     #     'enterprise_id': 120,
     #     'edge_id': 1071
     # },
-    'VC05200027962': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1243
-    },
     'VC05200036977': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
@@ -1137,20 +1058,10 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 1327
     },
-    'VC05200038381': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 2354
-    },
     'VC05200051065': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 2254
-    },
-    'VC05200026458': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1261
     },
     # 'VC05200014877': {
     #     'host': 'mettel.velocloud.net',
@@ -1161,11 +1072,6 @@ MONITORING_EDGES = {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 1245
-    },
-    'VC05200029338': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1132
     },
     'VC05200028207': {
         'host': 'mettel.velocloud.net',
@@ -1203,65 +1109,16 @@ MONITORING_EDGES = {
     #     'enterprise_id': 120,
     #     'edge_id': 1176
     # },
-    'VC05200029231': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1466
-    },
-    'VC05200028725': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1193
-    },
-    'VC05200013228': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 847
-    },
-    'VC05200032600': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1951
-    },
-    'VC05200014888': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 901
-    },
-    'VC05200037872': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 2363
-    },
-    'VC05200028844': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1521
-    },
     # 'VC05200029909': {
     #     'host': 'mettel.velocloud.net',
     #     'enterprise_id': 120,
     #     'edge_id': 1204
     # },
-    'VC05200040328': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 2266
-    },
-    'VC05200027977': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1162
-    },
+
     'VC05200038729': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 2027
-    },
-    'VC05200008657': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1822
     },
     # Inactive when added
     # 'VC05200036959': {
@@ -1274,30 +1131,10 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 1291
     },
-    'VC05200028214': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1313
-    },
     'VC05200028216': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 1305
-    },
-    'VC05200038286': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 2356
-    },
-    'VC05200028211': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1260
-    },
-    'VC05200032479': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1662
     },
     'VC05200038671': {
         'host': 'mettel.velocloud.net',
@@ -1320,11 +1157,7 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 1650
     },
-    'VC05200029736': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1537
-    },
+
     # No management status found
     # 'VC05200015357': {
     #     'host': 'mettel.velocloud.net',
@@ -1362,11 +1195,6 @@ MONITORING_EDGES = {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 1294
-    },
-    'VC05200028612': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1192
     },
     'VC05200036749': {
         'host': 'mettel.velocloud.net',
@@ -1422,16 +1250,6 @@ MONITORING_EDGES = {
     #     'enterprise_id': 120,
     #     'edge_id': 1051
     # },
-    'VC05200014697': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1023
-    },
-    'VC05200030210': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1522
-    },
     # 'VC05200014695': {
     #     'host': 'mettel.velocloud.net',
     #     'enterprise_id': 120,
@@ -1442,16 +1260,6 @@ MONITORING_EDGES = {
     #     'enterprise_id': 120,
     #     'edge_id': 1073
     # },
-    'VC05200028064': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1151
-    },
-    'VC05200016746': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 875
-    },
     # 'VC05200015160': {
     #     'host': 'mettel.velocloud.net',
     #     'enterprise_id': 120,
@@ -1467,11 +1275,6 @@ MONITORING_EDGES = {
     #        'enterprise_id': 120,
     #        'edge_id': 751
     #    },
-    'VC05200016667': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 919
-    },
     'VC05200036882': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
@@ -1493,22 +1296,6 @@ MONITORING_EDGES = {
     #     'enterprise_id': 120,
     #     'edge_id': 1076
     # },
-    'VC05200015070': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1075
-    },
-    'VC05200028277': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1272
-    },
-    # Decomissioned
-    # 'VC05200027244': {
-    #     'host': 'mettel.velocloud.net',
-    #     'enterprise_id': 120,
-    #     'edge_id': 1211
-    # },
     'VC05200037109': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
@@ -1529,11 +1316,6 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 1798
     },
-    'VC05200038870': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 2357
-    },
     # 'VC05200015606': {
     #     'host': 'mettel.velocloud.net',
     #     'enterprise_id': 120,
@@ -1549,29 +1331,15 @@ MONITORING_EDGES = {
         'enterprise_id': 120,
         'edge_id': 1290
     },
-    'VC05200028175': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1270
-    },
     'VC05200034034': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 1695
-    },
-    'VC05200028176': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1228
     },
     'VC05200032559': {
         'host': 'mettel.velocloud.net',
         'enterprise_id': 120,
         'edge_id': 1950
     },
-    'VC05200030204': {
-        'host': 'mettel.velocloud.net',
-        'enterprise_id': 120,
-        'edge_id': 1525
-    }
+
 }
