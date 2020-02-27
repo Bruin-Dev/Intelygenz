@@ -27,7 +27,8 @@ TRIAGE_CONFIG = {
     'timezone': 'US/Eastern',
     'monitoring_seconds': 120,
     'event_limit': 15,
-    'velo_filter': [{"host": "mettel.velocloud.net", "enterprise_ids": []}],
+    'velo_filter': [{"host": "mettel.velocloud.net", "enterprise_ids": []},
+                    {"host": "metvco02.mettel.net", "enterprise_ids": []}],
     'autoresolve_serials_whitelist': [
         # Mettel test edge
         "VC05400002265",
