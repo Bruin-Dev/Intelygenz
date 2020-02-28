@@ -39,14 +39,14 @@ class TestEdgeStatusResponse:
         link_information = {"body": [{"link_data": "STABLE", "linkId": "123"}], "status_code": 200}
         velocloud_repo.get_link_information = Mock(return_value=link_information)
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
-                    "body": {"edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}}
+                    "body": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(edge_msg)
         assert velocloud_repo.get_enterprise_information.called
-        assert velocloud_repo.get_enterprise_information.call_args[0][0] == edge_msg["body"]["edge"]
+        assert velocloud_repo.get_enterprise_information.call_args[0][0] == edge_msg["body"]
         assert velocloud_repo.get_edge_information.called
-        assert velocloud_repo.get_edge_information.call_args[0][0] == edge_msg["body"]["edge"]
+        assert velocloud_repo.get_edge_information.call_args[0][0] == edge_msg["body"]
         assert velocloud_repo.get_link_information.called
-        assert velocloud_repo.get_link_information.call_args[0][0] == edge_msg["body"]["edge"]
+        assert velocloud_repo.get_link_information.call_args[0][0] == edge_msg["body"]
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
@@ -81,17 +81,18 @@ class TestEdgeStatusResponse:
         velocloud_repo.get_link_information = Mock(return_value=link_information)
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
                     "body": {
-                        "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
-                        "interval": {"end": "now", "start": "15 mins ago"}}
+                        "host": "host", "enterprise_id": "2", "edge_id": "1",
+                        "interval": {"end": "now", "start": "15 mins ago"}
+                    }
                     }
         await actions.report_edge_status(edge_msg)
         assert velocloud_repo.get_enterprise_information.called
-        assert velocloud_repo.get_enterprise_information.call_args[0][0] == edge_msg["body"]["edge"]
+        assert velocloud_repo.get_enterprise_information.call_args[0][0] == edge_msg["body"]
         assert velocloud_repo.get_edge_information.called
-        assert velocloud_repo.get_edge_information.call_args[0][0] == edge_msg["body"]["edge"]
+        assert velocloud_repo.get_edge_information.call_args[0][0] == edge_msg["body"]
         assert velocloud_repo.get_link_information.called
-        assert velocloud_repo.get_link_information.call_args[0][0] == edge_msg["body"]["edge"]
-        assert velocloud_repo.get_link_information.call_args[0][1] == edge_msg["body"]["interval"]
+        assert velocloud_repo.get_link_information.call_args[0][0] == edge_msg["body"]
+        assert velocloud_repo.get_link_information.call_args[0][1] == {"end": "now", "start": "15 mins ago"}
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
@@ -126,7 +127,7 @@ class TestEdgeStatusResponse:
         link_information = {"body": None, "status_code": 500}
         velocloud_repo.get_link_information = Mock(return_value=link_information)
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
-                    "body": {"edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}}
+                    "body": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(edge_msg)
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]

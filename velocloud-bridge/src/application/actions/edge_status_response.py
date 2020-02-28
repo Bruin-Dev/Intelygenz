@@ -19,7 +19,7 @@ class ReportEdgeStatus:
         is_body = msg.get("body") is not None
 
         if is_body:
-            interval = msg["body"]["interval"] if msg["body"].get("interval") else interval
+            interval = msg["body"].pop("interval") if "interval" in msg["body"].keys() else interval
         status_code = 200
 
         self._logger.info(f'Processing edge with data {msg}')

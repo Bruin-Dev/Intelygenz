@@ -15,12 +15,13 @@ class ReportEdgeList:
             f'Getting edge list with host'
         )
         if not msg.get('body'):
-            edges_by_enterprise = {"body": None, "status": 500}
+            edges_by_enterprise = {"body": None, "status_code": 500}
             self._logger.info(f"msg hasn't body content: {msg}")
         else:
             edges_by_enterprise = self._velocloud_repository.get_all_enterprises_edges_with_host(msg['body'])
 
         edge_list_response = {"request_id": msg['request_id'],
-                              **edges_by_enterprise}
+                              "body": edges_by_enterprise["body"],
+                              "status": edges_by_enterprise["status_code"]}
         await self._event_bus.publish_message(msg['response_topic'], edge_list_response)
         self._logger.info("Edge list sent")
