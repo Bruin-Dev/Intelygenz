@@ -191,20 +191,18 @@ class TestServiceAffectingMonitor:
                 call("edge.status.request",
                      {
                          'request_id': uuid_1,
-                         'edge': device,
-                         'interval': {
-                             'end': current_datetime,
-                             'start': current_datetime - timedelta(minutes=10)
-                         }
+                         'body': {**device,
+                                  'interval': {'end': current_datetime,
+                                               'start': current_datetime - timedelta(minutes=10)}
+                                  }
                      },
                      timeout=60, ),
-
                 call('notification.slack.request',
                      {
                          'request_id': uuid_2,
                          'message': f'Error while monitoring edge for service affecting trouble, seems like data '
-                                    f'is corrupted: \n {json.dumps(edges_to_report, indent=2)} \n'
-                                    f'The environment is dev'},
+                         f'is corrupted: \n {json.dumps(edges_to_report, indent=2)} \n'
+                         f'The environment is dev'},
                      timeout=10, )
             ], any_order=False
         )

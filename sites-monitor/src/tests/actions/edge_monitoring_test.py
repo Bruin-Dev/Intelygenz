@@ -60,7 +60,7 @@ class TestEdgeMonitoring:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            {'request_id': request_id, 'edges': ["test_host1", "test_host2"]},
+            {'request_id': request_id, 'body': ["test_host1", "test_host2"]},
             {
                 'request_id': request_id,
                 'edge_id': {'host': 'test_host1'},
@@ -116,9 +116,9 @@ class TestEdgeMonitoring:
         edge_repository.set_current_edge_list.assert_called_once()
 
         event_bus.rpc_request.assert_has_awaits([
-            call("edge.list.request", {'request_id': request_id, 'filter': []}, timeout=200),
-            call("edge.status.request", {'request_id': request_id, 'edge': "test_host1"}, timeout=10),
-            call("edge.status.request", {'request_id': request_id, 'edge': "test_host2"}, timeout=10),
+            call("edge.list.request", {'request_id': request_id, 'body': {'filter': []}}, timeout=200),
+            call("edge.status.request", {'request_id': request_id, 'body': "test_host1"}, timeout=10),
+            call("edge.status.request", {'request_id': request_id, 'body': "test_host2"}, timeout=10),
         ], any_order=False)
         assert edge_monitoring._process_edge.await_count == 2
 
@@ -131,7 +131,7 @@ class TestEdgeMonitoring:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            {'request_id': request_id, 'edges': ["test_host1", "test_host2"]},
+            {'request_id': request_id, 'body': ["test_host1", "test_host2"]},
             {
                 'request_id': request_id,
                 'edge_id': {'host': 'test_host1'},
@@ -216,7 +216,7 @@ class TestEdgeMonitoring:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            {'request_id': request_id, 'edges': ["test_host1", "test_host2"]},
+            {'request_id': request_id, 'body': ["test_host1", "test_host2"]},
             {
                 'request_id': request_id,
                 'edge_id': {'host': 'test_host1'},
@@ -289,7 +289,7 @@ class TestEdgeMonitoring:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            {'request_id': request_id, 'edges': ["test_host1", "test_host2"]},
+            {'request_id': request_id, 'body': ["test_host1", "test_host2"]},
             {
                 'request_id': request_id,
                 'edge_id': {'host': 'test_host1'},

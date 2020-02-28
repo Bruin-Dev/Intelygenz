@@ -360,7 +360,7 @@ class TestServiceOutageTriage:
                                                     outage_utils)
         service_outage_triage._filtered_ticket_details = CoroutineMock(return_value=filtered_tickets_list)
         service_outage_triage._compose_ticket_note_object = Mock(return_value=ticket_note_object)
-        service_outage_triage._template_renderer._ticket_object_to_email_obj =\
+        service_outage_triage._template_renderer._ticket_object_to_email_obj = \
             Mock(return_value=ticket_note_as_email_object)
         service_outage_triage._client_id_from_edge_status = Mock(return_value=85940)
         service_outage_triage._create_client_id_to_dict_of_serials_dict = CoroutineMock(return_value=client_id_dict)
@@ -400,10 +400,11 @@ class TestServiceOutageTriage:
                 'alert.request.event.edge',
                 {
                     'request_id': uuid_2,
-                    'edge': edge_id_by_serial,
-                    'start_date': current_datetime_previous_week,
-                    'end_date': current_datetime,
-                    'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+                    'body': {
+                        'edge': edge_id_by_serial,
+                        'start_date': current_datetime_previous_week,
+                        'end_date': current_datetime,
+                        'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']}
                 },
                 timeout=180,
             ),
@@ -520,10 +521,11 @@ class TestServiceOutageTriage:
                 'alert.request.event.edge',
                 {
                     'request_id': uuid_2,
-                    'edge': edge_id_by_serial,
-                    'start_date': current_datetime_previous_week,
-                    'end_date': current_datetime,
-                    'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+                    'body': {
+                        'edge': edge_id_by_serial,
+                        'start_date': current_datetime_previous_week,
+                        'end_date': current_datetime,
+                        'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']}
                 },
                 timeout=180,
             ),
@@ -1283,15 +1285,17 @@ class TestServiceOutageTriage:
 
         event_bus.rpc_request.assert_awaited_once_with('alert.request.event.edge',
                                                        {
-                                                        'request_id': uuid_,
-                                                        'edge': {
-                                                         "host": "mettel.velocloud.net",
-                                                         "enterprise_id": 137,
-                                                         "edge_id": 958
-                                                        },
-                                                        'start_date': timestamp,
-                                                        'end_date': current_datetime,
-                                                        'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+                                                           'request_id': uuid_,
+                                                           'body': {
+                                                               'edge': {
+                                                                   "host": "mettel.velocloud.net",
+                                                                   "enterprise_id": 137,
+                                                                   "edge_id": 958
+                                                               },
+                                                               'start_date': timestamp,
+                                                               'end_date': current_datetime,
+                                                               'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE',
+                                                                          'LINK_DEAD']}
                                                        },
                                                        timeout=180)
 
@@ -1617,14 +1621,15 @@ class TestServiceOutageTriage:
                 'alert.request.event.edge',
                 {
                     'request_id': uuid_1,
-                    'edge': {
-                        "host": "mettel.velocloud.net",
-                        "enterprise_id": 137,
-                        "edge_id": 958
-                    },
-                    'start_date': timestamp,
-                    'end_date': current_datetime,
-                    'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+                    'body': {
+                        'edge': {
+                            "host": "mettel.velocloud.net",
+                            "enterprise_id": 137,
+                            "edge_id": 958
+                        },
+                        'start_date': timestamp,
+                        'end_date': current_datetime,
+                        'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']}
                 },
                 timeout=180,
             ),
@@ -2031,16 +2036,17 @@ class TestServiceOutageTriage:
             call("edge.status.request",
                  {
                      "request_id": uuid_,
-                     "edge": config.TRIAGE_CONFIG['id_by_serial'][serial]
+                     'body': config.TRIAGE_CONFIG['id_by_serial'][serial]
                  },
                  timeout=45),
             call("alert.request.event.edge",
                  {
                      'request_id': uuid_,
-                     'edge': {"host": host, "enterprise_id": enterprise_id, "edge_id": edge_id},
-                     'start_date': start_datetime,
-                     'end_date': current_datetime,
-                     'filter': ["EDGE_DOWN", "LINK_DEAD"]
+                     'body': {
+                         'edge': {"host": host, "enterprise_id": enterprise_id, "edge_id": edge_id},
+                         'start_date': start_datetime,
+                         'end_date': current_datetime,
+                         'filter': ["EDGE_DOWN", "LINK_DEAD"]}
                  },
                  timeout=180),
             call("bruin.ticket.status.resolve",
@@ -2061,9 +2067,9 @@ class TestServiceOutageTriage:
                  {
                      "request_id": uuid_,
                      'message': f'Ticket autoresolved '
-                                f'https://app.bruin.com/helpdesk?clientId=85940&'
-                                f'ticketId={ticket_id}, in '
-                                f'{custom_triage_config["environment"]}'
+                     f'https://app.bruin.com/helpdesk?clientId=85940&'
+                     f'ticketId={ticket_id}, in '
+                     f'{custom_triage_config["environment"]}'
                  },
                  timeout=10)
         ])
@@ -2140,23 +2146,24 @@ class TestServiceOutageTriage:
         outage_utils.is_there_an_outage.assert_not_called()
 
         event_bus.rpc_request.assert_has_awaits([
-                                                    call("edge.status.request",
-                                                         {
-                                                             "request_id": uuid_,
-                                                             "edge": config.TRIAGE_CONFIG['id_by_serial'][serial]
-                                                         },
-                                                         timeout=45),
-                                                    call("alert.request.event.edge",
-                                                         {
-                                                             'request_id': uuid_,
-                                                             'edge': {"host": host, "enterprise_id": enterprise_id,
-                                                                      "edge_id": edge_id},
-                                                             'start_date': start_datetime,
-                                                             'end_date': current_datetime,
-                                                             'filter': ["EDGE_DOWN", "LINK_DEAD"]
-                                                         },
-                                                         timeout=180)
-                                                ])
+            call("edge.status.request",
+                 {
+                     "request_id": uuid_,
+                     'body': config.TRIAGE_CONFIG['id_by_serial'][serial]
+                 },
+                 timeout=45),
+            call("alert.request.event.edge",
+                 {
+                     'request_id': uuid_,
+                     'body': {
+                         'edge': {"host": host, "enterprise_id": enterprise_id,
+                                  "edge_id": edge_id},
+                         'start_date': start_datetime,
+                         'end_date': current_datetime,
+                         'filter': ["EDGE_DOWN", "LINK_DEAD"]}
+                 },
+                 timeout=180)
+        ])
 
     @pytest.mark.asyncio
     async def auto_resolve_ticket_outage_still_exists_test(self):
@@ -2233,17 +2240,18 @@ class TestServiceOutageTriage:
             call("edge.status.request",
                  {
                      "request_id": uuid_,
-                     "edge": config.TRIAGE_CONFIG['id_by_serial'][serial]
+                     "body": config.TRIAGE_CONFIG['id_by_serial'][serial]
                  },
                  timeout=45),
             call("alert.request.event.edge",
                  {
                      'request_id': uuid_,
-                     'edge': {"host": host, "enterprise_id": enterprise_id,
-                              "edge_id": edge_id},
-                     'start_date': start_datetime,
-                     'end_date': current_datetime,
-                     'filter': ["EDGE_DOWN", "LINK_DEAD"]
+                     'body': {
+                         'edge': {"host": host, "enterprise_id": enterprise_id,
+                                  "edge_id": edge_id},
+                         'start_date': start_datetime,
+                         'end_date': current_datetime,
+                         'filter': ["EDGE_DOWN", "LINK_DEAD"]}
                  },
                  timeout=180)
         ])
@@ -2361,17 +2369,18 @@ class TestServiceOutageTriage:
             call("edge.status.request",
                  {
                      "request_id": uuid_,
-                     "edge": config.TRIAGE_CONFIG['id_by_serial'][serial]
+                     'body': config.TRIAGE_CONFIG['id_by_serial'][serial]
                  },
                  timeout=45),
             call("alert.request.event.edge",
                  {
                      'request_id': uuid_,
-                     'edge': {"host": host, "enterprise_id": enterprise_id,
-                              "edge_id": edge_id},
-                     'start_date': start_datetime,
-                     'end_date': current_datetime,
-                     'filter': ["EDGE_DOWN", "LINK_DEAD"]
+                     'body': {
+                         'edge': {"host": host, "enterprise_id": enterprise_id,
+                                  "edge_id": edge_id},
+                         'start_date': start_datetime,
+                         'end_date': current_datetime,
+                         'filter': ["EDGE_DOWN", "LINK_DEAD"]}
                  },
                  timeout=180)
         ])
@@ -2390,9 +2399,10 @@ class TestServiceOutageTriage:
         enterprise_id = 137
         edge_id = 958
         serial = "VC05400002265"
+        uuid_ = uuid()
 
-        edge_list = {"request_id": uuid(), 'edges': [{'host': host, 'enterprise_id': enterprise_id,
-                                                      'edge_id': edge_id}],
+        edge_list = {"request_id": uuid_,
+                     'body': [{'host': host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}],
                      "status": 200}
 
         edge_status = {
@@ -2414,12 +2424,26 @@ class TestServiceOutageTriage:
         }
 
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[edge_list, edge_status])
+        with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
+            event_bus.rpc_request = CoroutineMock(side_effect=[edge_list, edge_status])
 
-        service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
-                                                    outage_utils)
-        service_outage_triage._client_id_from_edge_status = Mock(return_value=client_id)
+            service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
+                                                        outage_utils)
+            service_outage_triage._client_id_from_edge_status = Mock(return_value=client_id)
 
-        client_id_dict = await service_outage_triage._create_client_id_to_dict_of_serials_dict()
+            client_id_dict = await service_outage_triage._create_client_id_to_dict_of_serials_dict()
 
-        assert client_id_dict == {client_id: {serial: edge_status}}
+            assert client_id_dict == {client_id: {serial: edge_status}}
+            event_bus.rpc_request.assert_has_awaits([
+                call('edge.list.request',
+                     {
+                         'request_id': uuid_,
+                         'body': {'filter': [{'host': 'mettel.velocloud.net', 'enterprise_ids': []}]}
+                     },
+                     timeout=200),
+                call('edge.status.request',
+                     {
+                         'request_id': uuid_,
+                         'body': {'host': 'mettel.velocloud.net', 'enterprise_id': 137,
+                                  'edge_id': 958}},
+                     timeout=120)])

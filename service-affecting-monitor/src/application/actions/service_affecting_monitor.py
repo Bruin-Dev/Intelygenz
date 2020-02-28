@@ -37,10 +37,12 @@ class ServiceAffectingMonitor:
 
     async def _service_affecting_monitor_process(self, device):
         edge_id = {"host": device['host'], "enterprise_id": device['enterprise_id'], "edge_id": device['edge_id']}
+        interval = {
+            "end": datetime.now(utc),
+            "start": (datetime.now(utc) - timedelta(minutes=self._monitoring_minutes))}
         edge_status_request = {'request_id': uuid(),
-                               'edge': edge_id,
-                               'interval': {"end": datetime.now(utc),
-                                            "start": (datetime.now(utc) - timedelta(minutes=self._monitoring_minutes))}}
+                               'body': {**edge_id, "interval": interval}
+                               }
         edge_status = await self._event_bus.rpc_request("edge.status.request", edge_status_request, timeout=60)
         self._logger.info(f'Edge received from event bus')
 

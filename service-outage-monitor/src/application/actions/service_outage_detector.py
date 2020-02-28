@@ -90,7 +90,11 @@ class ServiceOutageDetector:
             edge_status = await self._get_edge_status_by_id(edge_full_id)
             self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
             self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
-            management_status = await self._get_management_status(edge_status)
+            if edge_status:
+                management_status = await self._get_management_status(edge_status)
+            else:
+                management_status = {"status": 500, "body": None}
+
             if management_status["status"] not in range(200, 300):
                 self._logger.error(f"Management status is unknown for {edge_identifier}")
                 message = (
@@ -145,7 +149,9 @@ class ServiceOutageDetector:
         edge_status = await self._get_edge_status_by_id(edge_full_id)
         self._logger.info(f'[outage-recheck] Got status for edge {edge_identifier}.')
 
-        is_outage = self._outage_utils.is_there_an_outage(edge_status)
+        is_outage = None
+        if edge_status is not None:
+            is_outage = self._outage_utils.is_there_an_outage(edge_status)
         if is_outage:
             self._logger.info(f'[outage-recheck] Edge {edge_identifier} is still in outage state.')
 
@@ -497,13 +503,13 @@ class ServiceOutageDetector:
     async def _get_all_edges(self):
         edge_list_request_dict = {
             'request_id': uuid(),
-            'filter': []
+            'body': {'filter': []}
         }
         edge_list_response = await self._event_bus.rpc_request(
             'edge.list.request', edge_list_request_dict, timeout=600,
         )
 
-        return edge_list_response['edges']
+        return edge_list_response['body']
 
     async def _process_edge_from_quarantine(self, edge_full_id):
         edge_identifier = EdgeIdentifier(**edge_full_id)
@@ -551,13 +557,17 @@ class ServiceOutageDetector:
     async def _get_edge_status_by_id(self, edge_full_id):
         edge_status_request_dict = {
             'request_id': uuid(),
-            'edge': edge_full_id,
+            'body': edge_full_id,
         }
         edge_status_response = await self._event_bus.rpc_request(
             'edge.status.request', edge_status_request_dict, timeout=120,
         )
 
-        return edge_status_response['edge_info']
+        if edge_status_response["status"] in range(200, 300):
+            return edge_status_response['body']['edge_info']
+
+        self._logger.error(f"It wasn't possible get the edge status for {edge_full_id}")
+        return None
 
     async def _get_outage_ticket_for_edge(self, edge_status: dict, ticket_statuses=None):
         edge_serial = edge_status['edges']['serialNumber']
@@ -609,6 +619,8 @@ class ServiceOutageDetector:
         self._logger.info(f'Edge {edge_identifier} moved from quarantine to the reporting queue.')
 
     async def _get_management_status(self, edge_status):
+        if not edge_status:
+            return {"body": None, "status": 500}
         enterprise_name = edge_status['enterprise_name']
         bruin_client_id = self._extract_client_id(enterprise_name)
         serial_number = edge_status['edges']['serialNumber']

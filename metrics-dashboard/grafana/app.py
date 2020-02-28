@@ -126,7 +126,7 @@ class Container:
     async def _make_rpc_request(self):
         rpc_request_msg = {
             "request_id": uuid(),
-            "filter": ['Titan America|85940|']
+            "body": {"filter": ['Titan America|85940|']}
         }
         logger.info('Requesting...')
         response = await self.event_bus.rpc_request(

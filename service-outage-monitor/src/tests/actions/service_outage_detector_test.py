@@ -744,7 +744,7 @@ class TestServiceOutageDetectorJob:
         ]
         edge_list_response = {
             'request_id': uuid_,
-            'edges': edge_list,
+            'body': edge_list,
             'status': 200,
         }
 
@@ -768,7 +768,7 @@ class TestServiceOutageDetectorJob:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'edge.list.request',
-            {'request_id': uuid_, 'filter': []},
+            {'request_id': uuid_, 'body': {'filter': []}},
             timeout=600,
         )
         assert result == edge_list
@@ -792,8 +792,7 @@ class TestServiceOutageDetectorJob:
         }
         edge_status_response = {
             'request_id': uuid_,
-            'edge_id': edge_full_id,
-            'edge_info': edge_status,
+            'body': {'edge_id': edge_full_id, 'edge_info': edge_status},
             'status': 200,
         }
 
@@ -817,7 +816,7 @@ class TestServiceOutageDetectorJob:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'edge.status.request',
-            {'request_id': uuid_, 'edge': edge_full_id},
+            {'request_id': uuid_, 'body': edge_full_id},
             timeout=120,
         )
         assert result == edge_status

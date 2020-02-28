@@ -88,54 +88,63 @@ class TestAlert:
         test_uuid = 'random-uuid'
 
         edge_1 = {
-            "edge_id": {
-                "host": "some.host",
-                "enterprise_id": "123",
-                "edge_id": "123"
-            },
-            'edge_info': {
-                "edges": {
-                    "serialNumber": "some serial",
-                    "lastContact": "2018-06-24T20:27:44.000Z",
-                    "modelNumber": "edge123",
-                    "name": "Saturos",
-                },
-                "enterprise_name": "Fake Corp"
-            }
+            "body":
+                {
+                    "edge_id": {
+                        "host": "some.host",
+                        "enterprise_id": "123",
+                        "edge_id": "123"
+                    },
+                    'edge_info': {
+                        "edges": {
+                            "serialNumber": "some serial",
+                            "lastContact": "2018-06-24T20:27:44.000Z",
+                            "modelNumber": "edge123",
+                            "name": "Saturos",
+                        },
+                        "enterprise_name": "Fake Corp"
+                    }
+                }
         }
         edge_2 = {
-            "edge_id": {
-                "host": "some.host",
-                "enterprise_id": "123",
-                "edge_id": "456"
-            },
-            'edge_info': {
-                "edges": {
-                    "serialNumber": "some serial",
-                    "lastContact": "2018-09-24T20:27:44.000Z",
-                    "modelNumber": "edge456",
-                    "name": "Menardi",
-                },
-                "enterprise_name": "Fake Corp"
-            },
+            "body":
+                {
+                    "edge_id": {
+                        "host": "some.host",
+                        "enterprise_id": "123",
+                        "edge_id": "456"
+                    },
+                    'edge_info': {
+                        "edges": {
+                            "serialNumber": "some serial",
+                            "lastContact": "2018-09-24T20:27:44.000Z",
+                            "modelNumber": "edge456",
+                            "name": "Menardi",
+                        },
+                        "enterprise_name": "Fake Corp"
+                    },
+                }
         }
         edge_3 = {
-            "edge_id": {
-                "host": "some.host",
-                "enterprise_id": "123",
-                "edge_id": "789"
-            },
-            'edge_info': {
-                "edges": {
-                    "serialNumber": "some serial",
-                    "lastContact": "2018-10-24T20:27:44.000Z",
-                    "modelNumber": "edge789",
-                    "name": "Isaac",
-                },
-                "enterprise_name": "Fake Corp"
-            }
+            "body":
+                {
+                    "edge_id": {
+                        "host": "some.host",
+                        "enterprise_id": "123",
+                        "edge_id": "789"
+                    },
+                    'edge_info': {
+                        "edges": {
+                            "serialNumber": "some serial",
+                            "lastContact": "2018-10-24T20:27:44.000Z",
+                            "modelNumber": "edge789",
+                            "name": "Isaac",
+                        },
+                        "enterprise_name": "Fake Corp"
+                    }
+                }
         }
-        edge_request = {"request_id": 123, "edges": ['Edge1', 'Edge2', 'Edge3']}
+        edge_request = {"request_id": 123, "body": ['Edge1', 'Edge2', 'Edge3']}
         email_contents = {'email': "<div>Some email</div>"}
         event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
@@ -148,18 +157,18 @@ class TestAlert:
         assert len(reported_edges) == 3
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
-                 {'request_id': test_uuid, 'filter': []},
+                 {'request_id': test_uuid, 'body': {'filter': []}},
                  timeout=200),
             call("edge.status.request",
-                 {'request_id': 123, 'edge': 'Edge1'},
+                 {'request_id': 123, 'body': 'Edge1'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 {'request_id': 123, 'edge': 'Edge2'},
+                 {'request_id': 123, 'body': 'Edge2'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 {'request_id': 123, 'edge': 'Edge3'},
+                 {'request_id': 123, 'body': 'Edge3'},
                  timeout=120
                  ),
         ])
@@ -180,54 +189,63 @@ class TestAlert:
         test_uuid = 'random-uuid'
 
         edge_1 = {
-            "edge_id": {
-                "host": "some.host",
-                "enterprise_id": "123",
-                "edge_id": "123"
-            },
-            'edge_info': {
-                "edges": {
-                    "serialNumber": "some serial",
-                    "lastContact": "0000-00-00 00:00:00.000Z",
-                    "modelNumber": "edge123",
-                    "name": "Saturos",
-                },
-                "enterprise_name": "Fake Corp"
-            }
+            "body":
+                {
+                    "edge_id": {
+                        "host": "some.host",
+                        "enterprise_id": "123",
+                        "edge_id": "123"
+                    },
+                    'edge_info': {
+                        "edges": {
+                            "serialNumber": "some serial",
+                            "lastContact": "0000-00-00 00:00:00.000Z",
+                            "modelNumber": "edge123",
+                            "name": "Saturos",
+                        },
+                        "enterprise_name": "Fake Corp"
+                    }
+                }
         }
         edge_2 = {
-            "edge_id": {
-                "host": "some.host",
-                "enterprise_id": "123",
-                "edge_id": "456"
-            },
-            'edge_info': {
-                "edges": {
-                    "serialNumber": "some serial",
-                    "lastContact": "0000-00-00 00:00:00.000Z",
-                    "modelNumber": "edge456",
-                    "name": "Menardi",
-                },
-                "enterprise_name": "Fake Corp"
-            }
+            "body":
+                {
+                    "edge_id": {
+                        "host": "some.host",
+                        "enterprise_id": "123",
+                        "edge_id": "456"
+                    },
+                    'edge_info': {
+                        "edges": {
+                            "serialNumber": "some serial",
+                            "lastContact": "0000-00-00 00:00:00.000Z",
+                            "modelNumber": "edge456",
+                            "name": "Menardi",
+                        },
+                        "enterprise_name": "Fake Corp"
+                    }
+                }
         }
         edge_3 = {
-            "edge_id": {
-                "host": "some.host",
-                "enterprise_id": "123",
-                "edge_id": "789"
-            },
-            'edge_info': {
-                "edges": {
-                    "serialNumber": "some serial",
-                    "lastContact": "2018-10-24T20:27:44.000Z",
-                    "modelNumber": "edge789",
-                    "name": "Isaac",
-                },
-                "enterprise_name": "Fake Corp"
-            }
+            "body":
+                {
+                    "edge_id": {
+                        "host": "some.host",
+                        "enterprise_id": "123",
+                        "edge_id": "789"
+                    },
+                    'edge_info': {
+                        "edges": {
+                            "serialNumber": "some serial",
+                            "lastContact": "2018-10-24T20:27:44.000Z",
+                            "modelNumber": "edge789",
+                            "name": "Isaac",
+                        },
+                        "enterprise_name": "Fake Corp"
+                    }
+                }
         }
-        edge_request = {"request_id": 123, "edges": ['Edge1', 'Edge2', 'Edge3']}
+        edge_request = {"request_id": 123, "body": ['Edge1', 'Edge2', 'Edge3']}
         email_contents = {'email': "<div>Some email</div>"}
         event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
         alert = Alert(event_bus, scheduler, logger, config, template_renderer)
@@ -244,19 +262,19 @@ class TestAlert:
         assert len(reported_edges) == 1
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
-                 {'request_id': test_uuid, 'filter': []},
+                 {'request_id': test_uuid, 'body': {'filter': []}},
                  timeout=200
                  ),
             call("edge.status.request",
-                 {'request_id': 123, 'edge': 'Edge1'},
+                 {'request_id': 123, 'body': 'Edge1'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 {'request_id': 123, 'edge': 'Edge2'},
+                 {'request_id': 123, 'body': 'Edge2'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 {'request_id': 123, 'edge': 'Edge3'},
+                 {'request_id': 123, 'body': 'Edge3'},
                  timeout=120
                  ),
         ])
@@ -276,54 +294,63 @@ class TestAlert:
         test_uuid = 'random-uuid'
 
         edge_1 = {
-            "edge_id": {
-                "host": "some.host",
-                "enterprise_id": "123",
-                "edge_id": "123"
-            },
-            'edge_info': {
-                "edges": {
-                    "serialNumber": "some serial",
-                    "lastContact": "2018-06-20T20:27:44.000Z",
-                    "modelNumber": "edge123",
-                    "name": "Saturos",
-                },
-                "enterprise_name": "Fake Corp"
-            }
+            "body":
+                {
+                    "edge_id": {
+                        "host": "some.host",
+                        "enterprise_id": "123",
+                        "edge_id": "123"
+                    },
+                    'edge_info': {
+                        "edges": {
+                            "serialNumber": "some serial",
+                            "lastContact": "2018-06-20T20:27:44.000Z",
+                            "modelNumber": "edge123",
+                            "name": "Saturos",
+                        },
+                        "enterprise_name": "Fake Corp"
+                    }
+                }
         }
         edge_2 = {
-            "edge_id": {
-                "host": "some.host",
-                "enterprise_id": "123",
-                "edge_id": "456"
-            },
-            'edge_info': {
-                "edges": {
-                    "serialNumber": "some serial",
-                    "lastContact": "2018-06-25T20:27:44.000Z",
-                    "modelNumber": "edge456",
-                    "name": "Menardi",
-                },
-                "enterprise_name": "Fake Corp"
-            }
+            "body":
+                {
+                    "edge_id": {
+                        "host": "some.host",
+                        "enterprise_id": "123",
+                        "edge_id": "456"
+                    },
+                    'edge_info': {
+                        "edges": {
+                            "serialNumber": "some serial",
+                            "lastContact": "2018-06-25T20:27:44.000Z",
+                            "modelNumber": "edge456",
+                            "name": "Menardi",
+                        },
+                        "enterprise_name": "Fake Corp"
+                    }
+                }
         }
         edge_3 = {
-            "edge_id": {
-                "host": "some.host",
-                "enterprise_id": "123",
-                "edge_id": "789"
-            },
-            'edge_info': {
-                "edges": {
-                    "serialNumber": "some serial",
-                    "lastContact": "2018-06-30T20:27:44.000Z",
-                    "modelNumber": "edge789",
-                    "name": "Isaac",
-                },
-                "enterprise_name": "Fake Corp"
-            }
+            "body":
+                {
+                    "edge_id": {
+                        "host": "some.host",
+                        "enterprise_id": "123",
+                        "edge_id": "789"
+                    },
+                    'edge_info': {
+                        "edges": {
+                            "serialNumber": "some serial",
+                            "lastContact": "2018-06-30T20:27:44.000Z",
+                            "modelNumber": "edge789",
+                            "name": "Isaac",
+                        },
+                        "enterprise_name": "Fake Corp"
+                    }
+                }
         }
-        edge_request = {"request_id": 123, "edges": ['Edge1', 'Edge2', 'Edge3']}
+        edge_request = {"request_id": 123, "body": ['Edge1', 'Edge2', 'Edge3']}
         email_contents = {'email': "<div>Some email</div>"}
         event_bus.rpc_request = CoroutineMock(side_effect=[edge_request, edge_1, edge_2, edge_3])
 
@@ -342,19 +369,19 @@ class TestAlert:
         assert len(reported_edges) == 2
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
-                 {'request_id': test_uuid, 'filter': []},
+                 {'request_id': test_uuid, 'body': {'filter': []}},
                  timeout=200
                  ),
             call("edge.status.request",
-                 {'request_id': 123, 'edge': 'Edge1'},
+                 {'request_id': 123, 'body': 'Edge1'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 {'request_id': 123, 'edge': 'Edge2'},
+                 {'request_id': 123, 'body': 'Edge2'},
                  timeout=120
                  ),
             call("edge.status.request",
-                 {'request_id': 123, 'edge': 'Edge3'},
+                 {'request_id': 123, 'body': 'Edge3'},
                  timeout=120
                  ),
         ])

@@ -56,27 +56,27 @@ class EdgeMonitoring:
     async def _process_all_edges(self, request_id):
         msg = {
             'request_id': request_id,
-            'filter': []
+            'body': {'filter': []}
         }
         self._status_repository.set_current_cycle_request_id(request_id)
 
         edge_list = await self._event_bus.rpc_request("edge.list.request", msg, timeout=200)
         self._logger.info(f'Edge list received from event bus')
         edge_status_requests = [
-            {'request_id': edge_list["request_id"], 'edge': edge} for edge in edge_list["edges"]]
+            {'request_id': edge_list["request_id"], 'body': edge} for edge in edge_list["body"]]
         self._prometheus_repository.set_cycle_total_edges(len(edge_status_requests))
         self._status_repository.set_edges_to_process(len(edge_status_requests))
 
         cache_edge_list = self._edge_repository.get_last_edge_list()
         if cache_edge_list is not None:
             decoded_cache_edge_list = json.loads(cache_edge_list)
-            if len(decoded_cache_edge_list) != len(edge_list["edges"]):
+            if len(decoded_cache_edge_list) != len(edge_list["body"]):
                 for cache_edge in decoded_cache_edge_list:
-                    if cache_edge not in edge_list['edges']:
+                    if cache_edge not in edge_list['body']:
                         cache_edge_info = json.loads(self._edge_repository.get_edge(str(cache_edge)))
                         self._prometheus_repository.dec(cache_edge_info["cache_edge"])
 
-        self._edge_repository.set_current_edge_list(json.dumps(edge_list["edges"]))
+        self._edge_repository.set_current_edge_list(json.dumps(edge_list["body"]))
 
         self._logger.info(f'Splitting and sending edges to the event bus')
 
