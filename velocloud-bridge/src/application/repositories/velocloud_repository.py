@@ -44,13 +44,13 @@ class VelocloudRepository:
 
         if response["status_code"] not in range(200, 300):
             self._logger.error(f"Error {response['status_code'], response['body']}")
-            return {"body": [], "status_code": response["status_code"]}
+            return {"body": response["body"], "status_code": response["status_code"]}
 
         links = response["body"]
         response_link_service_group = self._velocloud_client.get_link_service_groups_information(edge, interval)
 
         if response_link_service_group["status_code"] not in range(200, 300):
-            self._logger.info(f"Error {response_link_service_group['status_code'], response['body']}")
+            self._logger.error(f"Error {response_link_service_group['status_code'], response['body']}")
             return {"body": link_status, "status_code": response_link_service_group["status_code"]}
 
         link_service_group = response_link_service_group["body"]

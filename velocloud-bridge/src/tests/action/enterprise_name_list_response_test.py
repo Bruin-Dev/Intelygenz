@@ -32,7 +32,7 @@ class TestEnterpriseNameListResponse:
         velocloud_repo = Mock()
         actions = EnterpriseNameList(test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        msg_dict = {"request_id": "123", "response_topic": "request.enterprises.names.123", "filter": []}
+        msg_dict = {"request_id": "123", "response_topic": "request.enterprises.names.123", "body": {"filter": []}}
         enterprises = {
             "body": [{"enterprise_name": "A Name"}, {"enterprise_name": "Another Name"}],
             "status_code": 200
@@ -41,10 +41,10 @@ class TestEnterpriseNameListResponse:
         await actions.enterprise_name_list(msg_dict)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprise_names.called
-        assert velocloud_repo.get_all_enterprise_names.call_args[0][0] == msg_dict
+        assert velocloud_repo.get_all_enterprise_names.call_args[0][0] == msg_dict["body"]
         assert test_bus.publish_message.call_args[0][0] == msg_dict["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "enterprise_names": enterprises["body"],
+                                                            "body": enterprises["body"],
                                                             "status": 200}
         assert not actions._logger.error.called
 
@@ -58,7 +58,7 @@ class TestEnterpriseNameListResponse:
         velocloud_repo = Mock()
         actions = EnterpriseNameList(test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        msg_dict = {"request_id": "123", "response_topic": "request.enterprises.names.123", "filter": []}
+        msg_dict = {"request_id": "123", "response_topic": "request.enterprises.names.123", "body": {"filter": []}}
         enterprises = {
             "body": None,
             "status_code": 500
@@ -67,9 +67,9 @@ class TestEnterpriseNameListResponse:
         await actions.enterprise_name_list(msg_dict)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprise_names.called
-        assert velocloud_repo.get_all_enterprise_names.call_args[0][0] == msg_dict
+        assert velocloud_repo.get_all_enterprise_names.call_args[0][0] == msg_dict["body"]
         assert test_bus.publish_message.call_args[0][0] == msg_dict["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "enterprise_names": None,
+                                                            "body": None,
                                                             "status": 500}
         assert actions._logger.error.called

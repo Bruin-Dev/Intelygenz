@@ -65,13 +65,12 @@ class VelocloudClient:
                 }
                 return_response["body"] = headers
                 return_response["status_code"] = response.status_code
-                return return_response
             if response.status_code == 400:
                 return_response["body"] = response.json()
                 return_response["status_code"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
             if response.status_code == 401:
-                self._logger.info(f"Got 401 from Bruin, re-login with credentials and retrying get headers")
+                self._logger.error(f"Got 401 from Bruin, re-login with credentials and retrying get headers")
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status_code"] = 401
                 raise Exception(return_response)

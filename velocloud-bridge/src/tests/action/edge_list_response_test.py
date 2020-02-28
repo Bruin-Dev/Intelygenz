@@ -32,16 +32,16 @@ class TestEdgeListResponse:
         velocloud_repo = Mock()
         actions = ReportEdgeList(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123", "filter": []}
+        msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123", 'body': {"filter": []}}
         edges = {"body": ["task1", "task2"], "status_code": 200}
         velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         await actions.report_edge_list(msg_dict)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprises_edges_with_host.called
-        assert velocloud_repo.get_all_enterprises_edges_with_host.call_args[0][0] == msg_dict
+        assert velocloud_repo.get_all_enterprises_edges_with_host.call_args[0][0] == msg_dict['body']
         assert test_bus.publish_message.call_args[0][0] == msg_dict["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "edges": edges["body"],
+                                                            "body": edges["body"],
                                                             "status": 200}
 
     @pytest.mark.asyncio
@@ -53,14 +53,34 @@ class TestEdgeListResponse:
         velocloud_repo = Mock()
         actions = ReportEdgeList(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123", "filter": []}
+        msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123", 'body': {"filter": []}}
         edges = {"body": None, "status_code": 500}
         velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         await actions.report_edge_list(msg_dict)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprises_edges_with_host.called
-        assert velocloud_repo.get_all_enterprises_edges_with_host.call_args[0][0] == msg_dict
+        assert velocloud_repo.get_all_enterprises_edges_with_host.call_args[0][0] == msg_dict['body']
         assert test_bus.publish_message.call_args[0][0] == msg_dict["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "edges": None,
+                                                            "body": None,
+                                                            "status": 500}
+
+    @pytest.mark.asyncio
+    async def report_edge_list_empty_msg_test(self):
+        mock_logger = Mock()
+        storage_manager = Mock()
+        test_bus = EventBus(storage_manager, logger=mock_logger)
+        test_bus.publish_message = CoroutineMock()
+        velocloud_repo = Mock()
+        actions = ReportEdgeList(config, test_bus, velocloud_repo, mock_logger)
+        actions._logger.info = Mock()
+        msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123"}
+        velocloud_repo.get_all_enterprises_edges_with_host = Mock()
+
+        await actions.report_edge_list(msg_dict)
+        assert actions._logger.info.called
+        assert not velocloud_repo.get_all_enterprises_edges_with_host.called
+        assert test_bus.publish_message.call_args[0][0] == msg_dict["response_topic"]
+        assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
+                                                            "body":  None,
                                                             "status": 500}

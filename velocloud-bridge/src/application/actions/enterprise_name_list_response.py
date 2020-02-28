@@ -10,7 +10,7 @@ class EnterpriseNameList:
 
     async def enterprise_name_list(self, msg):
         self._logger.info("Sending enterprise name list")
-        enterprise_names = self._velocloud_repository.get_all_enterprise_names(msg)
+        enterprise_names = self._velocloud_repository.get_all_enterprise_names(msg["body"])
 
         if enterprise_names["status_code"] == 500:
             self._logger.error("Fail to get the list of enterprise names")

@@ -29,24 +29,29 @@ class TestEventEdgesForAlert:
         edges_for_alert._logger.info = Mock()
         all_edge_events_response = {"body": "Some edge event info", "status_code": 200}
         velocloud_repo.get_all_edge_events = Mock(return_value=all_edge_events_response)
-        edge_msg = {"request_id": "123", "response_topic": "alert.request.event.edge.response.123",
-                    "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
-                    "start_date": "2019-07-26 14:19:45.334427",
-                    "end_date": "now",
-                    "limit": 200,
-                    "filter": ['EDGE_UP']}
+        edge_msg = {
+            "request_id": "123",
+            "response_topic": "alert.request.event.edge.response.123",
+            "body": {
+                "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
+                "start_date": "2019-07-26 14:19:45.334427",
+                "end_date": "now",
+                "limit": 200,
+                "filter": ['EDGE_UP']
+            }
+        }
         await edges_for_alert.report_edge_event(edge_msg)
         assert velocloud_repo.get_all_edge_events.called
-        assert velocloud_repo.get_all_edge_events.call_args[0][0] == edge_msg["edge"]
-        assert velocloud_repo.get_all_edge_events.call_args[0][1] == edge_msg["start_date"]
+        assert velocloud_repo.get_all_edge_events.call_args[0][0] == edge_msg["body"]["edge"]
+        assert velocloud_repo.get_all_edge_events.call_args[0][1] == edge_msg["body"]["start_date"]
 
-        assert velocloud_repo.get_all_edge_events.call_args[0][2] == edge_msg["end_date"]
-        assert velocloud_repo.get_all_edge_events.call_args[0][3] == edge_msg["limit"]
-        assert velocloud_repo.get_all_edge_events.call_args[0][4] == edge_msg["filter"]
+        assert velocloud_repo.get_all_edge_events.call_args[0][2] == edge_msg["body"]["end_date"]
+        assert velocloud_repo.get_all_edge_events.call_args[0][3] == edge_msg["body"]["limit"]
+        assert velocloud_repo.get_all_edge_events.call_args[0][4] == edge_msg["body"]["filter"]
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "events": "Some edge event info",
+                                                            "body": "Some edge event info",
                                                             "status": 200}
         assert edges_for_alert._logger.info.called
 
@@ -61,22 +66,27 @@ class TestEventEdgesForAlert:
         edges_for_alert._logger.info = Mock()
         all_edge_events_response = {"body": "Some edge event info", "status_code": 200}
         velocloud_repo.get_all_edge_events = Mock(return_value=all_edge_events_response)
-        edge_msg = {"request_id": "123", "response_topic": "alert.request.event.edge.response.123",
-                    "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
-                    "start_date": "2019-07-26 14:19:45.334427",
-                    "end_date": "now"}
+        edge_msg = {
+            "request_id": "123",
+            "response_topic": "alert.request.event.edge.response.123",
+            "body": {
+                "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
+                "start_date": "2019-07-26 14:19:45.334427",
+                "end_date": "now"
+            }
+        }
         await edges_for_alert.report_edge_event(edge_msg)
         assert velocloud_repo.get_all_edge_events.called
-        assert velocloud_repo.get_all_edge_events.call_args[0][0] == edge_msg["edge"]
-        assert velocloud_repo.get_all_edge_events.call_args[0][1] == edge_msg["start_date"]
+        assert velocloud_repo.get_all_edge_events.call_args[0][0] == edge_msg["body"]["edge"]
+        assert velocloud_repo.get_all_edge_events.call_args[0][1] == edge_msg["body"]["start_date"]
 
-        assert velocloud_repo.get_all_edge_events.call_args[0][2] == edge_msg["end_date"]
+        assert velocloud_repo.get_all_edge_events.call_args[0][2] == edge_msg["body"]["end_date"]
         assert velocloud_repo.get_all_edge_events.call_args[0][3] is None
         assert velocloud_repo.get_all_edge_events.call_args[0][4] is None
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "events": "Some edge event info",
+                                                            "body": "Some edge event info",
                                                             "status": 200}
         assert edges_for_alert._logger.info.called
 
@@ -91,14 +101,19 @@ class TestEventEdgesForAlert:
         edges_for_alert._logger.info = Mock()
         all_edge_events_response = {"body": None, "status_code": 500}
         velocloud_repo.get_all_edge_events = Mock(return_value=all_edge_events_response)
-        edge_msg = {"request_id": "123", "response_topic": "alert.request.event.edge.response.123",
-                    "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
-                    "start_date": "2019-07-26 14:19:45.334427",
-                    "end_date": "now"}
+        edge_msg = {
+            "request_id": "123",
+            "response_topic": "alert.request.event.edge.response.123",
+            "body": {
+                "edge": {"host": "host", "enterprise_id": "2", "edge_id": "1"},
+                "start_date": "2019-07-26 14:19:45.334427",
+                "end_date": "now"
+            }
+        }
         await edges_for_alert.report_edge_event(edge_msg)
         assert test_bus.publish_message.called
         assert test_bus.publish_message.call_args[0][0] == edge_msg["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "events": None,
+                                                            "body": None,
                                                             "status": 500}
         assert edges_for_alert._logger.info.called

@@ -194,7 +194,7 @@ class TestVelocloudRepository:
         interval = "some Interval"
         link_info = vr.get_link_information(edge, interval)
 
-        assert link_info["body"] == []
+        assert link_info["body"] == "Got internal error from Velocloud"
 
     def get_enterprise_information_test(self):
         mock_logger = Mock()
