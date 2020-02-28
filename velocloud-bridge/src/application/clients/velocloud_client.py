@@ -247,7 +247,7 @@ class VelocloudClient:
     def _json_return(self, response):
         if isinstance(response, dict):
             if 'error' in response.keys():
-                if 'tokenError [expired session cookie]' in response['error']['message']:
+                if 'tokenError' in response['error']['message']:
                     self._logger.info(f'Response returned: {response}. Attempting to relogin')
                     self.instantiate_and_connect_clients()
                     raise Exception
