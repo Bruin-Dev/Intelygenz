@@ -17,7 +17,7 @@ class EnterpriseNameList:
 
         enterprise_name_list_response = {
             "request_id": msg['request_id'],
-            "enterprise_names": enterprise_names["body"],
+            "body": enterprise_names["body"],
             "status": enterprise_names["status_code"]
         }
         await self._event_bus.publish_message(msg['response_topic'], enterprise_name_list_response)

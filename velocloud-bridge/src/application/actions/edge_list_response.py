@@ -17,7 +17,7 @@ class ReportEdgeList:
         edges_by_enterprise = self._velocloud_repository.get_all_enterprises_edges_with_host(msg)
 
         edge_list_response = {"request_id": msg['request_id'],
-                              "edges": edges_by_enterprise["body"],
+                              "body": edges_by_enterprise["body"],
                               "status": edges_by_enterprise["status_code"]}
         await self._event_bus.publish_message(msg['response_topic'], edge_list_response)
         self._logger.info("Edge list sent")

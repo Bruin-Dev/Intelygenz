@@ -32,7 +32,7 @@ class VelocloudRepository:
     def get_edge_information(self, edge):
         edge_information = self._velocloud_client.get_edge_information(edge)
         if edge_information["status_code"] not in range(200, 300):
-            self._logger.info(f"Error {edge_information['status_code']} edge_information")
+            self._logger.error(f"Error {edge_information['status_code']} edge_information")
 
         return edge_information
 
@@ -43,7 +43,7 @@ class VelocloudRepository:
         response = self._velocloud_client.get_link_information(edge, interval)
 
         if response["status_code"] not in range(200, 300):
-            self._logger.info(f"Error {response['status_code'], response['body']}")
+            self._logger.error(f"Error {response['status_code'], response['body']}")
             return {"body": [], "status_code": response["status_code"]}
 
         links = response["body"]

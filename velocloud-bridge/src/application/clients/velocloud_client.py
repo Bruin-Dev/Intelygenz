@@ -119,7 +119,7 @@ class VelocloudClient:
                 return_response["status_code"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
             if response.status_code == 401:
-                self._logger.info(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
+                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
                 self.instantiate_and_connect_clients()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status_code"] = 401
@@ -163,7 +163,7 @@ class VelocloudClient:
                 return_response["status_code"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
             if response.status_code == 401:
-                self._logger.info(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
+                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
                 self.instantiate_and_connect_clients()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status_code"] = 401
@@ -207,7 +207,7 @@ class VelocloudClient:
                 return_response["status_code"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
             if response.status_code == 401:
-                self._logger.info(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
+                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
                 self.instantiate_and_connect_clients()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status_code"] = 401
@@ -251,7 +251,7 @@ class VelocloudClient:
                 return_response["status_code"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
             if response.status_code == 401:
-                self._logger.info(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
+                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
                 self.instantiate_and_connect_clients()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status_code"] = 401
@@ -299,7 +299,7 @@ class VelocloudClient:
                 return_response["status_code"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
             if response.status_code == 401:
-                self._logger.info(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
+                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
                 self.instantiate_and_connect_clients()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status_code"] = 401
@@ -326,7 +326,7 @@ class VelocloudClient:
         for client in self._clients:
             res = self.get_monitoring_aggregates(client)
             if res["status_code"] not in range(200, 300):
-                self._logger.info(f"status code: {res['status_code']}, error {res['body']}")
+                self._logger.error(f"status code: {res['status_code']}, error {res['body']}")
                 continue
             for enterprise in res["body"]["enterprises"]:
                 edges_by_enterprise = self.get_all_enterprises_edges_by_id(client, enterprise["id"])
@@ -349,7 +349,7 @@ class VelocloudClient:
         for client in self._clients:
             res = self.get_monitoring_aggregates(client)
             if res["status_code"] not in range(200, 300):
-                self._logger.info(f"status code: {res['status_code']}, error {res['body']}")
+                self._logger.error(f"status code: {res['status_code']}, error {res['body']}")
                 continue
 
             futures = [
@@ -406,7 +406,7 @@ class VelocloudClient:
                 return_response["status_code"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
             if response.status_code == 401:
-                self._logger.info(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
+                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
                 self.instantiate_and_connect_clients()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status_code"] = 401
@@ -448,7 +448,7 @@ class VelocloudClient:
                 return_response["status_code"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
             if response.status_code == 401:
-                self._logger.info(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
+                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
                 self.instantiate_and_connect_clients()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status_code"] = 401
@@ -475,7 +475,7 @@ class VelocloudClient:
         for client in self._clients:
             res = self.get_monitoring_aggregates(client)
             if res["status_code"] not in range(200, 300):
-                self._logger.info(f"status code: {res['status_code']}, error {res['body']}")
+                self._logger.error(f"status code: {res['status_code']}, error {res['body']}")
                 continue
             for enterprise in res["body"]["enterprises"]:
                 enterprise_names.append({
