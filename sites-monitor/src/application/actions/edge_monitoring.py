@@ -82,8 +82,11 @@ class EdgeMonitoring:
 
         for request in edge_status_requests:
             edge = await self._event_bus.rpc_request("edge.status.request", request, timeout=10)
-            await self._process_edge(edge)
-        self._logger.info(f'Requests sent')
+            if edge["status"] in range(200, 300):
+                await self._process_edge(edge)
+                self._logger.info(f'Requests sent')
+            else:
+                self._logger.info(f"Not edge status for {request}")
 
     async def _process_edge(self, edge):
         self._logger.info(f'Edge received from event bus')
@@ -92,21 +95,21 @@ class EdgeMonitoring:
         edges_processed = edges_processed + 1
         self._status_repository.set_edges_processed(edges_processed)
 
-        cache_edge = self._edge_repository.get_edge(str(edge['edge_id']))
+        cache_edge = self._edge_repository.get_edge(str(edge['body']['edge_id']))
         if cache_edge is None:
-            self._prometheus_repository.inc(edge['edge_info'])
+            self._prometheus_repository.inc(edge['body']['edge_info'])
         else:
             cache_edge_data = json.loads(cache_edge)
-            if cache_edge_data['cache_edge']['edges']['edgeState'] != edge['edge_info']['edges']['edgeState']:
-                self._prometheus_repository.update_edge(edge['edge_info'], cache_edge_data['cache_edge'])
+            if cache_edge_data['cache_edge']['edges']['edgeState'] != edge['body']['edge_info']['edges']['edgeState']:
+                self._prometheus_repository.update_edge(edge['body']['edge_info'], cache_edge_data['cache_edge'])
 
-            for link, cache_link in zip(edge['edge_info']['links'], cache_edge_data['cache_edge']['links']):
+            for link, cache_link in zip(edge['body']['edge_info']['links'], cache_edge_data['cache_edge']['links']):
                 if link['link']['state'] != cache_link['link']['state']:
-                    self._prometheus_repository.update_link(edge['edge_info'], link,
+                    self._prometheus_repository.update_link(edge['body']['edge_info'], link,
                                                             cache_edge_data['cache_edge'], cache_link)
 
-        cache_data = {"request_id": edge["request_id"], "cache_edge": edge['edge_info']}
-        self._edge_repository.set_edge(edge['edge_id'], json.dumps(cache_data))
+        cache_data = {"request_id": edge["request_id"], "cache_edge": edge['body']['edge_info']}
+        self._edge_repository.set_edge(edge['body']['edge_id'], json.dumps(cache_data))
         self._logger.info(f'Edges processed: {edges_processed} / {edges_to_process}')
         if edges_processed == edges_to_process:
             self._logger.info("All edges processed, starting the cycle again")

@@ -60,31 +60,44 @@ class TestEdgeMonitoring:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
-            {'request_id': request_id, 'body': ["test_host1", "test_host2"]},
+            {'request_id': request_id, 'body': ["test_host1", "test_host2", "test_host3"]},
             {
                 'request_id': request_id,
-                'edge_id': {'host': 'test_host1'},
-                'edge_info': {
-                    'enterprise_name': 'evil-corp',
-                    'edges': {'edgeState': 'DISCONNECTED'},
-                    'links': [
-                        {'link': {'state': 'DISCONNECTED'}},
-                        {'link': {'state': 'DISCONNECTED'}},
-                    ],
-                },
+                'status': 200,
+                'body': {
+                    'edge_id': {'host': 'test_host1'},
+                    'edge_info': {
+                        'enterprise_name': 'evil-corp',
+                        'edges': {'edgeState': 'DISCONNECTED'},
+                        'links': [
+                            {'link': {'state': 'DISCONNECTED'}},
+                            {'link': {'state': 'DISCONNECTED'}},
+                        ],
+                    }
+                }
             },
             {
                 'request_id': request_id,
-                'edge_id': {'host': 'test_host2'},
-                'edge_info': {
-                    'enterprise_name': 'evil-corp',
-                    'edges': {'edgeState': 'CONNECTED'},
-                    'links': [
-                        {'link': {'state': 'DISCONNECTED'}},
-                        {'link': {'state': 'CONNECTED'}},
-                    ],
-                },
+                'status': 200,
+                'body':
+                    {
+                        'edge_id': {'host': 'test_host2'},
+                        'edge_info': {
+                            'enterprise_name': 'evil-corp',
+                            'edges': {'edgeState': 'CONNECTED'},
+                            'links': [
+                                {'link': {'state': 'DISCONNECTED'}},
+                                {'link': {'state': 'CONNECTED'}},
+                            ],
+                        }
+                    }
+
             },
+            {
+                'request_id': request_id,
+                'status': 500,
+                'body': None
+            }
         ])
 
         edge_repository = Mock()
@@ -134,27 +147,35 @@ class TestEdgeMonitoring:
             {'request_id': request_id, 'body': ["test_host1", "test_host2"]},
             {
                 'request_id': request_id,
-                'edge_id': {'host': 'test_host1'},
-                'edge_info': {
-                    'enterprise_name': 'evil-corp',
-                    'edges': {'edgeState': 'DISCONNECTED'},
-                    'links': [
-                        {'link': {'state': 'DISCONNECTED'}},
-                        {'link': {'state': 'CONNECTED'}},
-                    ],
-                },
+                'status': 200,
+                'body':
+                    {
+                        'edge_id': {'host': 'test_host1'},
+                        'edge_info': {
+                            'enterprise_name': 'evil-corp',
+                            'edges': {'edgeState': 'DISCONNECTED'},
+                            'links': [
+                                {'link': {'state': 'DISCONNECTED'}},
+                                {'link': {'state': 'CONNECTED'}},
+                            ],
+                        }
+                    }
             },
             {
                 'request_id': request_id,
-                'edge_id': {'host': 'test_host2'},
-                'edge_info': {
-                    'enterprise_name': 'evil-corp',
-                    'edges': {'edgeState': 'CONNECTED'},
-                    'links': [
-                        {'link': {'state': 'DISCONNECTED'}},
-                        {'link': {'state': 'DISCONNECTED'}},
-                    ],
-                },
+                'status': 200,
+                'body':
+                    {
+                        'edge_id': {'host': 'test_host2'},
+                        'edge_info': {
+                            'enterprise_name': 'evil-corp',
+                            'edges': {'edgeState': 'CONNECTED'},
+                            'links': [
+                                {'link': {'state': 'DISCONNECTED'}},
+                                {'link': {'state': 'DISCONNECTED'}},
+                            ],
+                        }
+                    }
             },
         ])
 
@@ -219,27 +240,35 @@ class TestEdgeMonitoring:
             {'request_id': request_id, 'body': ["test_host1", "test_host2"]},
             {
                 'request_id': request_id,
-                'edge_id': {'host': 'test_host1'},
-                'edge_info': {
-                    'enterprise_name': 'evil-corp',
-                    'edges': {'edgeState': 'DISCONNECTED'},
-                    'links': [
-                        {'link': {'state': 'DISCONNECTED'}},
-                        {'link': {'state': 'CONNECTED'}},
-                    ],
-                },
+                'status': 200,
+                'body':
+                    {
+                        'edge_id': {'host': 'test_host1'},
+                        'edge_info': {
+                            'enterprise_name': 'evil-corp',
+                            'edges': {'edgeState': 'DISCONNECTED'},
+                            'links': [
+                                {'link': {'state': 'DISCONNECTED'}},
+                                {'link': {'state': 'CONNECTED'}},
+                            ],
+                        },
+                    }
             },
             {
                 'request_id': request_id,
-                'edge_id': {'host': 'test_host2'},
-                'edge_info': {
-                    'enterprise_name': 'evil-corp',
-                    'edges': {'edgeState': 'CONNECTED'},
-                    'links': [
-                        {'link': {'state': 'DISCONNECTED'}},
-                        {'link': {'state': 'DISCONNECTED'}},
-                    ],
-                },
+                'status': 200,
+                'body':
+                    {
+                        'edge_id': {'host': 'test_host2'},
+                        'edge_info': {
+                            'enterprise_name': 'evil-corp',
+                            'edges': {'edgeState': 'CONNECTED'},
+                            'links': [
+                                {'link': {'state': 'DISCONNECTED'}},
+                                {'link': {'state': 'DISCONNECTED'}},
+                            ],
+                        }
+                    }
             },
         ])
 
@@ -292,27 +321,35 @@ class TestEdgeMonitoring:
             {'request_id': request_id, 'body': ["test_host1", "test_host2"]},
             {
                 'request_id': request_id,
-                'edge_id': {'host': 'test_host1'},
-                'edge_info': {
-                    'enterprise_name': 'evil-corp',
-                    'edges': {'edgeState': 'CONNECTED'},
-                    'links': [
-                        {'link': {'state': 'DISCONNECTED'}},
-                        {'link': {'state': 'CONNECTED'}},
-                    ],
-                },
+                'status': 200,
+                'body':
+                    {
+                        'edge_id': {'host': 'test_host1'},
+                        'edge_info': {
+                            'enterprise_name': 'evil-corp',
+                            'edges': {'edgeState': 'CONNECTED'},
+                            'links': [
+                                {'link': {'state': 'DISCONNECTED'}},
+                                {'link': {'state': 'CONNECTED'}},
+                            ],
+                        }
+                    },
             },
             {
                 'request_id': request_id,
-                'edge_id': {'host': 'test_host2'},
-                'edge_info': {
-                    'enterprise_name': 'evil-corp',
-                    'edges': {'edgeState': 'DISCONNECTED'},
-                    'links': [
-                        {'link': {'state': 'DISCONNECTED'}},
-                        {'link': {'state': 'DISCONNECTED'}},
-                    ],
-                },
+                'status': 200,
+                'body':
+                    {
+                        'edge_id': {'host': 'test_host2'},
+                        'edge_info': {
+                            'enterprise_name': 'evil-corp',
+                            'edges': {'edgeState': 'DISCONNECTED'},
+                            'links': [
+                                {'link': {'state': 'DISCONNECTED'}},
+                                {'link': {'state': 'DISCONNECTED'}},
+                            ],
+                        }
+                    }
             },
         ])
 
@@ -358,8 +395,11 @@ class TestEdgeMonitoring:
         }
         velocloud_edge = {
             'request_id': 1234,
-            'edge_id': edge_id,
-            'edge_info': edge_info,
+            'status': 200,
+            'body': {
+                'edge_id': edge_id,
+                'edge_info': edge_info
+            }
         }
         cache_edge = {
             'request_id': 1234,
@@ -410,8 +450,11 @@ class TestEdgeMonitoring:
         }
         edge = {
             'request_id': 1234,
-            'edge_id': {'host': 'test_host1'},
-            'edge_info': edge_info,
+            'status': 200,
+            'body': {
+                'edge_id': {'host': 'test_host1'},
+                'edge_info': edge_info
+            }
         }
 
         edge_repository = Mock()
@@ -446,15 +489,18 @@ class TestEdgeMonitoring:
 
         velocloud_edge = {
             'request_id': 1234,
-            'edge_id': {'host': 'test_host1'},
-            'edge_info': {
-                'enterprise_name': 'evil-corp',
-                'edges': {'edgeState': velocloud_edge_state},
-                'links': [
-                    {'link': {'state': 'DISCONNECTED'}},
-                    {'link': {'state': 'DISCONNECTED'}},
-                ],
-            },
+            'status': 200,
+            'body': {
+                'edge_id': {'host': 'test_host1'},
+                'edge_info': {
+                    'enterprise_name': 'evil-corp',
+                    'edges': {'edgeState': velocloud_edge_state},
+                    'links': [
+                        {'link': {'state': 'DISCONNECTED'}},
+                        {'link': {'state': 'DISCONNECTED'}},
+                    ],
+                }
+            }
         }
 
         cache_edge_info = {
@@ -491,7 +537,7 @@ class TestEdgeMonitoring:
         await edge_monitoring._process_edge(velocloud_edge)
 
         prometheus_repository.update_edge.assert_called_once_with(
-            velocloud_edge['edge_info'], cache_edge['cache_edge']
+            velocloud_edge['body']['edge_info'], cache_edge['cache_edge']
         )
 
     @pytest.mark.asyncio
@@ -513,12 +559,16 @@ class TestEdgeMonitoring:
 
         velocloud_edge = {
             'request_id': 1234,
-            'edge_id': {'host': 'test_host1'},
-            'edge_info': {
-                'enterprise_name': 'evil-corp',
-                'edges': {'edgeState': 'CONNECTED'},
-                'links': [velocloud_link_1, velocloud_link_2],
-            },
+            'status': 200,
+            'body':
+                {
+                    'edge_id': {'host': 'test_host1'},
+                    'edge_info': {
+                        'enterprise_name': 'evil-corp',
+                        'edges': {'edgeState': 'CONNECTED'},
+                        'links': [velocloud_link_1, velocloud_link_2],
+                    }
+                }
         }
 
         cache_edge_info = {
@@ -553,11 +603,11 @@ class TestEdgeMonitoring:
 
         prometheus_repository.update_link.assert_has_calls([
             call(
-                velocloud_edge['edge_info'], velocloud_link_1,
+                velocloud_edge['body']['edge_info'], velocloud_link_1,
                 cache_edge['cache_edge'], cache_link_1,
             ),
             call(
-                velocloud_edge['edge_info'], velocloud_link_2,
+                velocloud_edge['body']['edge_info'], velocloud_link_2,
                 cache_edge['cache_edge'], cache_link_2,
             ),
         ])
@@ -571,15 +621,19 @@ class TestEdgeMonitoring:
 
         edge = {
             'request_id': 1234,
-            'edge_id': {'host': 'test_host1'},
-            'edge_info': {
-                'enterprise_name': 'evil-corp',
-                'edges': {'edgeState': 'DISCONNECTED'},
-                'links': [
-                    {'link': {'state': 'DISCONNECTED'}},
-                    {'link': {'state': 'DISCONNECTED'}},
-                ],
-            },
+            'status': 200,
+            'body':
+                {
+                    'edge_id': {'host': 'test_host1'},
+                    'edge_info': {
+                        'enterprise_name': 'evil-corp',
+                        'edges': {'edgeState': 'DISCONNECTED'},
+                        'links': [
+                            {'link': {'state': 'DISCONNECTED'}},
+                            {'link': {'state': 'DISCONNECTED'}},
+                        ],
+                    },
+                }
         }
 
         edges_processed = 9  # We are processing the last remaining edge
