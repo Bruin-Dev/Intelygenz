@@ -2396,36 +2396,49 @@ class TestServiceOutageTriage:
         client_id = 9994
 
         host = "mettel.velocloud.net"
-        enterprise_id = 137
-        edge_id = 958
+        enterprise_id1 = 137
+        enterprise_id2 = 138
+        edge_id1 = 958
+        edge_id2 = 959
         serial = "VC05400002265"
         uuid_ = uuid()
 
         edge_list = {"request_id": uuid_,
-                     'body': [{'host': host, 'enterprise_id': enterprise_id, 'edge_id': edge_id}],
+                     'body': [
+                         {'host': host, 'enterprise_id': enterprise_id1, 'edge_id': edge_id1},
+                         {'host': host, 'enterprise_id': enterprise_id2, 'edge_id': edge_id2}
+                     ],
                      "status": 200}
 
-        edge_status = {
+        edge_status1 = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
+            "status": 200,
+            "body": {
+                "edge_id": {
+                    "host": host,
+                    "enterprise_id": enterprise_id1,
+                    "edge_id": edge_id1
                 },
-                "links": [{"link": None}]
+                "edge_info": {
+                    "enterprise_name": "Titan America|85940|",
+                    "edges": {
+                        "name": "TEST",
+                        "edgeState": "OFFLINE",
+                        "serialNumber": serial,
+                    },
+                    "links": [{"link": None}]
+                }
             }
+        }
+        edge_status2 = {
+            "request_id": "E4irhhgzqTxmSMFudJSF7Z",
+            "status": 500,
+            "body": None
         }
 
         event_bus = Mock()
         with patch.object(service_outage_triage_module, 'uuid', return_value=uuid_):
-            event_bus.rpc_request = CoroutineMock(side_effect=[edge_list, edge_status])
+            event_bus.rpc_request = CoroutineMock(side_effect=[edge_list, edge_status1, edge_status2])
 
             service_outage_triage = ServiceOutageTriage(event_bus, logger, scheduler, config, template_renderer,
                                                         outage_utils)
@@ -2433,7 +2446,7 @@ class TestServiceOutageTriage:
 
             client_id_dict = await service_outage_triage._create_client_id_to_dict_of_serials_dict()
 
-            assert client_id_dict == {client_id: {serial: edge_status}}
+            assert client_id_dict == {client_id: {serial: edge_status1}}
             event_bus.rpc_request.assert_has_awaits([
                 call('edge.list.request',
                      {
