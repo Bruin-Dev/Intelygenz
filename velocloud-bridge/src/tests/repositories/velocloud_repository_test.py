@@ -120,7 +120,9 @@ class TestVelocloudRepository:
 
         assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
-        assert link_info == link_info_return
+        print(link_info)
+        print(link_info_return)
+        assert link_info["body"] == link_info_return
 
     def get_link_information_ko_different_backup_test(self):
         mock_logger = Mock()

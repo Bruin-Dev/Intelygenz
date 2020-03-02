@@ -38,7 +38,7 @@ class TestVelocloudClient:
                                                                             server_block['password'])
         assert velocloud_client._clients == [client]
 
-    def create_and_connect_client_test(self):
+    def create_and_connect_client_ok_test(self):
         configs = Mock()
         logger = Mock()
 
@@ -46,7 +46,10 @@ class TestVelocloudClient:
         username = 'Some user'
         password = 'Some password'
 
-        headers = {'Cookie': 'some test cookie'}
+        headers = {
+            "body": {'Cookie': 'some test cookie'},
+            "status_code": 200
+        }
 
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client._create_headers_by_host = Mock(return_value=headers)
@@ -54,7 +57,28 @@ class TestVelocloudClient:
         client = velocloud_client._create_and_connect_client(host, username, password)
 
         velocloud_client._create_headers_by_host.assert_called_once_with(host, username, password)
-        assert client == {'host': host, 'headers': headers}
+        assert client == {'host': host, 'headers': headers['body']}
+
+    def create_and_connect_client_ko_test(self):
+        configs = Mock()
+        logger = Mock()
+
+        host = 'Some url'
+        username = 'Some user'
+        password = 'Some password'
+
+        headers = {
+            "body": f"Got internal error from Velocloud",
+            "status_code": 500
+        }
+
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client._create_headers_by_host = Mock(return_value=headers)
+
+        client = velocloud_client._create_and_connect_client(host, username, password)
+
+        velocloud_client._create_headers_by_host.assert_called_once_with(host, username, password)
+        assert client is None
 
     def create_headers_by_host_test(self):
         configs = testconfig
@@ -75,12 +99,12 @@ class TestVelocloudClient:
             mock_post.assert_called_once()
             assert host in mock_post.call_args[0][0]
             assert mock_post.call_args[1]['json'] == dict(username=username, password=password)
-            assert header == {"Cookie": 'velocloud.session=secret',
-                              "Content-Type": "application/json-patch+json",
-                              "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached"
-                              }
+            assert header["body"] == {"Cookie": 'velocloud.session=secret',
+                                      "Content-Type": "application/json-patch+json",
+                                      "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached"
+                                      }
 
-    def create_headers_by_host_failure_test(self):
+    def create_headers_by_host_error_400_test(self):
         configs = testconfig
         logger = Mock()
 
@@ -89,15 +113,87 @@ class TestVelocloudClient:
         password = 'Some password'
 
         response_mock = Mock()
+        expected_header = {
+            "body": {},
+            "status_code": 400
+        }
 
-        response_mock.status_code = 302
-        with patch.object(velocloud_client_module.requests, 'post', side_effect=response_mock) as mock_post:
+        response_mock.status_code = 400
+        response_mock.json = Mock(return_value={})
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
             velocloud_client = VelocloudClient(configs, logger)
+            header = velocloud_client._create_headers_by_host(host, username, password)
+            mock_post.assert_called()
+            assert header == expected_header
 
-            with raises(Exception):
+    def create_headers_by_host_error_401_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        host = 'Some url'
+        username = 'Some user'
+        password = 'Some password'
+
+        response_mock = Mock()
+        expected_header = {
+            "body": f"Resource not found",
+            "status_code": 401
+        }
+
+        response_mock.status_code = 401
+        response_mock.json = Mock(return_value={})
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client.instantiate_and_connect_clients = Mock()
+            with pytest.raises(Exception):
+                header = velocloud_client._create_headers_by_host(host, username, password)
+                velocloud_client.instantiate_and_connect_clients.assert_called()
+                mock_post.assert_called()
+                assert header == expected_header
+
+    def create_headers_by_host_error_404_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        host = 'Some url'
+        username = 'Some user'
+        password = 'Some password'
+
+        response_mock = Mock()
+        expected_header = {
+            "body": f"Resource not found",
+            "status_code": 404
+        }
+
+        response_mock.status_code = 404
+        response_mock.json = Mock(return_value={})
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            header = velocloud_client._create_headers_by_host(host, username, password)
+            mock_post.assert_called()
+            assert header == expected_header
+
+    def create_headers_by_host_error_500_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        host = 'Some url'
+        username = 'Some user'
+        password = 'Some password'
+        response_mock = Mock()
+        expected_header = {
+            "body": f"Got internal error from Velocloud",
+            "status_code": 501
+        }
+
+        response_mock.status_code = 501
+        response_mock.json = Mock(return_value={})
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            with pytest.raises(Exception):
                 header = velocloud_client._create_headers_by_host(host, username, password)
                 mock_post.assert_called()
-                assert header == ''
+                assert header == expected_header
 
     def _get_header_by_host_test(self):
         configs = Mock()
@@ -124,6 +220,7 @@ class TestVelocloudClient:
 
         response_mock = Mock()
         response_mock.json = Mock(return_value=edge_status)
+        response_mock.status_code = 200
 
         with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
             velocloud_client = VelocloudClient(configs, logger)
@@ -136,9 +233,10 @@ class TestVelocloudClient:
             assert mock_post.call_args[1]['json'] == {"enterpriseId": edge_id['enterprise_id'],
                                                       "id": edge_id['edge_id']}
             assert mock_post.call_args[1]['headers'] == header['headers']
-            assert edge_info == edge_status
+            assert edge_info["body"] == edge_status
+            assert edge_info["status_code"] == 200
 
-    def get_edge_information_ko_test(self):
+    def get_edge_information_error_400_test(self):
         configs = testconfig
         logger = Mock()
 
@@ -148,15 +246,69 @@ class TestVelocloudClient:
 
         response_mock = Mock()
         response_mock.json = Mock(return_value=edge_status)
+        response_mock.status_code = 400
 
         with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
             velocloud_client = VelocloudClient(configs, logger)
             velocloud_client._get_header_by_host = Mock(return_value=header)
-            velocloud_client._json_return = Mock(return_value=Exception)
-            with raises(Exception):
-                edge_info = velocloud_client.get_edge_information(edge_id)
-                mock_post.assert_called()
-                assert edge_info == ''
+            velocloud_client._json_return = Mock(return_value=response_mock.json())
+            edge_info = velocloud_client.get_edge_information(edge_id)
+
+            mock_post.assert_called_once()
+            assert edge_info == {"body": edge_status, "status_code": 400}
+
+    def get_edge_information_error_401_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+
+        response_mock = Mock()
+        response_mock.status_code = 401
+        response_mock.json = Mock(return_value={})
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client.instantiate_and_connect_clients = Mock()
+            velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
+            edge_information = velocloud_client.get_edge_information(edge_id)
+            assert edge_information == {"body": 'Maximum retries while relogin', "status_code": 401}
+
+    def get_edge_information_error_404_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        edge_status = "Some Edge Information"
+        header = {'host': 'some_host', 'headers': 'some header dict'}
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=edge_status)
+        response_mock.status_code = 404
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client._get_header_by_host = Mock(return_value=header)
+            velocloud_client._json_return = Mock(return_value=response_mock.json())
+            edge_info = velocloud_client.get_edge_information(edge_id)
+
+            mock_post.assert_called_once()
+            assert edge_info == {"body": "Resource not found", "status_code": 404}
+
+    def get_edge_information_error_500_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+
+        response_mock = Mock()
+        response_mock.status_code = 500
+        response_mock.json = Mock(return_value={})
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock):
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client.instantiate_and_connect_clients = Mock()
+            velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
+            edge_information = velocloud_client.get_edge_information(edge_id)
+            assert edge_information == {"body": 'Got internal error from Velocloud', "status_code": 500}
 
     def get_link_information_test(self):
         configs = testconfig
@@ -169,6 +321,7 @@ class TestVelocloudClient:
 
         response_mock = Mock()
         response_mock.json = Mock(return_value=link_status)
+        response_mock.status_code = 200
 
         with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
             velocloud_client = VelocloudClient(configs, logger)
@@ -178,12 +331,95 @@ class TestVelocloudClient:
             link_info = velocloud_client.get_link_information(edge_id, interval)
 
             mock_post.assert_called_once()
+
             assert edge_id['host'] in mock_post.call_args[0][0]
             assert mock_post.call_args[1]['json'] == {'enterpriseId': edge_id['enterprise_id'],
                                                       'id': edge_id['edge_id'],
                                                       'interval': interval}
             assert mock_post.call_args[1]['headers'] == header['headers']
-            assert link_info == link_status
+            assert link_info["body"] == link_status
+
+    def get_link_information_error_400_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        interval = "Some interval"
+        link_status = "error"
+        header = {'host': 'some_host', 'headers': 'some header dict'}
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=link_status)
+        response_mock.status_code = 400
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client._get_header_by_host = Mock(return_value=header)
+            link_info = velocloud_client.get_link_information(edge_id, interval)
+            mock_post.assert_called_once()
+
+            assert link_info["status_code"] == 400
+            assert link_info["body"] == link_status
+
+    def get_link_information_error_401_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        interval = "Some interval"
+        header = {'host': 'some_host', 'headers': 'some header dict'}
+
+        response_mock = Mock()
+        response_mock.status_code = 401
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client._get_header_by_host = Mock(return_value=header)
+            link_info = velocloud_client.get_link_information(edge_id, interval)
+            mock_post.assert_called()
+            assert link_info["status_code"] == 401
+            assert link_info["body"] == "Maximum retries while relogin"
+
+    def get_link_information_error_404_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        interval = "Some interval"
+        link_status = "error"
+        header = {'host': 'some_host', 'headers': 'some header dict'}
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=link_status)
+        response_mock.status_code = 404
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client._get_header_by_host = Mock(return_value=header)
+            link_info = velocloud_client.get_link_information(edge_id, interval)
+            mock_post.assert_called_once()
+
+            assert link_info["status_code"] == 404
+            assert link_info["body"] == "Resource not found"
+
+    def get_link_information_error_500_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        interval = "Some interval"
+        header = {'host': 'some_host', 'headers': 'some header dict'}
+
+        response_mock = Mock()
+        response_mock.status_code = 500
+
+        with patch.object(velocloud_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            velocloud_client = VelocloudClient(configs, logger)
+            velocloud_client._get_header_by_host = Mock(return_value=header)
+            link_info = velocloud_client.get_link_information(edge_id, interval)
+            mock_post.assert_called()
+            assert link_info["status_code"] == 500
+            assert link_info["body"] == "Got internal error from Velocloud"
 
     def get_link_information_ko_test(self):
         configs = testconfig
@@ -721,8 +957,8 @@ class TestVelocloudClient:
         sum_of_edges = velocloud_client.get_all_hosts_edge_count()
 
         velocloud_client.get_monitoring_aggregates.assert_has_calls([
-                                                                    call(clients[0]),
-                                                                    call(clients[1])])
+            call(clients[0]),
+            call(clients[1])])
         assert sum_of_edges == 49
 
     def get_all_hosts_count_0_result_test(self):
