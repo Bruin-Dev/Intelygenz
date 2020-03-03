@@ -100,19 +100,21 @@ class TestServiceAffectingMonitor:
         }
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": "VC05200028729",
-                },
-                "links": [link_1, link_2]
+            "body": {
+                        "edge_id": {
+                            "host": "mettel.velocloud.net",
+                            "enterprise_id": 137,
+                            "edge_id": 1602
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": "VC05200028729",
+                            },
+                            "links": [link_1, link_2]
+                        }
             }
         }
         event_bus = Mock()
@@ -128,16 +130,16 @@ class TestServiceAffectingMonitor:
 
         event_bus.rpc_request.assert_awaited_once()
         service_affecting_monitor._latency_check.assert_has_awaits([
-            call(device, edges_to_report, link_1),
-            call(device, edges_to_report, link_2)
+            call(device, edges_to_report["body"], link_1),
+            call(device, edges_to_report["body"], link_2)
         ], any_order=True)
         service_affecting_monitor._packet_loss_check.assert_has_awaits([
-            call(device, edges_to_report, link_1),
-            call(device, edges_to_report, link_2)
+            call(device, edges_to_report["body"], link_1),
+            call(device, edges_to_report["body"], link_2)
         ], any_order=True)
         service_affecting_monitor._jitter_check.assert_has_awaits([
-            call(device, edges_to_report, link_1),
-            call(device, edges_to_report, link_2)
+            call(device, edges_to_report["body"], link_1),
+            call(device, edges_to_report["body"], link_2)
         ], any_order=True)
 
     @pytest.mark.asyncio
@@ -228,19 +230,21 @@ class TestServiceAffectingMonitor:
         }
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": "VC05200028729",
-                },
-                "links": [link_1, link_2]
+            "body": {
+                        "edge_id": {
+                            "host": "mettel.velocloud.net",
+                            "enterprise_id": 137,
+                            "edge_id": 1602
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": "VC05200028729",
+                            },
+                            "links": [link_1, link_2]
+                        }
             }
         }
         event_bus = Mock()

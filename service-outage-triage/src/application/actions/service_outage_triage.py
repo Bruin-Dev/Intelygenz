@@ -118,7 +118,7 @@ class ServiceOutageTriage:
     async def _filtered_ticket_details(self, ticket_list, company_id, edge_serial_list):
         filtered_ticket_ids = []
         valid_serials = edge_serial_list.keys()
-        for ticket in ticket_list['tickets']:
+        for ticket in ticket_list['body']:
             ticket_detail_msg = {'request_id': uuid(),
                                  'body': {'ticket_id': ticket['ticketID']}}
             ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
@@ -200,7 +200,7 @@ class ServiceOutageTriage:
         client_id = ticket_id["client_id"]
         edge_events = await self._event_bus.rpc_request("alert.request.event.edge", events_msg, timeout=180)
 
-        event_list = edge_events['events']
+        event_list = edge_events['body']
 
         if len(event_list) > 0:
             sorted_event_list = sorted(event_list, key=lambda event: event['eventTime'])
@@ -294,26 +294,26 @@ class ServiceOutageTriage:
             edge_triage_dict["Interface GE2 Status"] = f'{link_data["GE2"][0]["link"]["state"]}\n'
             edge_triage_dict["Label LABELMARK4"] = link_data["GE2"][0]["link"]['displayName']
 
-        edge_triage_dict["Last Edge Online"] = self._find_recent_occurence_of_event(edges_events_to_report["events"],
+        edge_triage_dict["Last Edge Online"] = self._find_recent_occurence_of_event(edges_events_to_report["body"],
                                                                                     'EDGE_UP')
-        edge_triage_dict["Last Edge Offline"] = self._find_recent_occurence_of_event(edges_events_to_report["events"],
+        edge_triage_dict["Last Edge Offline"] = self._find_recent_occurence_of_event(edges_events_to_report["body"],
                                                                                      'EDGE_DOWN')
         edge_triage_dict["Last GE1 Interface Online"] = self._find_recent_occurence_of_event(edges_events_to_report
-                                                                                             ["events"],
+                                                                                             ["body"],
                                                                                              'LINK_ALIVE',
                                                                                              'Link GE1 is no'
                                                                                              ' longer DEAD')
         edge_triage_dict["Last GE1 Interface Offline"] = self._find_recent_occurence_of_event(edges_events_to_report
-                                                                                              ["events"],
+                                                                                              ["body"],
                                                                                               'LINK_DEAD',
                                                                                               'Link GE1 is now DEAD')
         edge_triage_dict["Last GE2 Interface Online"] = self._find_recent_occurence_of_event(edges_events_to_report
-                                                                                             ["events"],
+                                                                                             ["body"],
                                                                                              'LINK_ALIVE',
                                                                                              'Link GE2 is no'
                                                                                              ' longer DEAD')
         edge_triage_dict["Last GE2 Interface Offline"] = self._find_recent_occurence_of_event(edges_events_to_report
-                                                                                              ["events"],
+                                                                                              ["body"],
                                                                                               'LINK_DEAD',
                                                                                               'Link GE2 is now DEAD')
         edge_triage_dict["TimeStamp"] = datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone']))
@@ -342,7 +342,7 @@ class ServiceOutageTriage:
                       'body': edge_id}
         edge_status = await self._event_bus.rpc_request("edge.status.request", status_msg,
                                                         timeout=45)
-        edge_info = edge_status['edge_info']
+        edge_info = edge_status['body']['edge_info']
 
         filter_events_status_list = ['EDGE_DOWN', 'LINK_DEAD']
 
@@ -359,7 +359,7 @@ class ServiceOutageTriage:
 
         self._logger.info(f'Received event list of {json.dumps(edge_events, indent=2, default=str)} from velocloud')
 
-        if len(edge_events["events"]) == 0:
+        if len(edge_events["body"]) == 0:
             self._logger.info("Too much time has passed for an auto-resolve. No down events have occurred in the "
                               "last 45 minutes")
             return
@@ -390,7 +390,7 @@ class ServiceOutageTriage:
                                                   ticket_append_note_msg,
                                                   timeout=15)
 
-                client_id = self._client_id_from_edge_status(edge_status)
+                client_id = self._client_id_from_edge_status(edge_status['body'])
                 slack_message = {'request_id': uuid(),
                                  'message': f'Ticket autoresolved '
                                  f'https://app.bruin.com/helpdesk?clientId={client_id}&'
@@ -415,7 +415,7 @@ class ServiceOutageTriage:
             if edge_status["status"] in range(200, 300):
                 client_id = self._client_id_from_edge_status(edge_status)
                 edge_info = edge_status["body"]["edge_info"]
-                client_id_to_dict_of_serial_dict[client_id][edge_info["edges"]["serialNumber"]] = edge_status
+                client_id_to_dict_of_serial_dict[client_id][edge_info["edges"]["serialNumber"]] = edge_status["body"]
             else:
                 self._logger.info(f"Not edge status for {request}")
 

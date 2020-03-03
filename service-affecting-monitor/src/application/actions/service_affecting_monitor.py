@@ -47,7 +47,8 @@ class ServiceAffectingMonitor:
         self._logger.info(f'Edge received from event bus')
 
         if edge_status is None or \
-                ('edge_info' not in edge_status.keys() or 'links' not in edge_status['edge_info'].keys()):
+                ('edge_info' not in edge_status['body'].keys() or 'links' not in edge_status['body'][
+                                                                                 'edge_info'].keys()):
             self._logger.error(f'Data received from Velocloud is incomplete')
             self._logger.error(f'{json.dumps(edge_status, indent=2)}')
             slack_message = {'request_id': uuid(),
@@ -59,11 +60,11 @@ class ServiceAffectingMonitor:
 
         self._logger.info(f'{edge_status}')
 
-        for link in edge_status['edge_info']['links']:
+        for link in edge_status['body']['edge_info']['links']:
             if 'serviceGroups' in link.keys():
-                await self._latency_check(device, edge_status, link)
-                await self._packet_loss_check(device, edge_status, link)
-                await self._jitter_check(device, edge_status, link)
+                await self._latency_check(device, edge_status['body'], link)
+                await self._packet_loss_check(device, edge_status['body'], link)
+                await self._jitter_check(device, edge_status['body'], link)
         self._logger.info("End of service affecting monitor job")
 
     async def _latency_check(self, device, edge_status, link):

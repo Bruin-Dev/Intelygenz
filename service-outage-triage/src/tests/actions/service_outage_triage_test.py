@@ -643,7 +643,7 @@ class TestServiceOutageTriage:
         template_renderer = Mock()
 
         tickets_list = []
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -684,7 +684,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         ticket_details = {
             'body': {
@@ -742,7 +742,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         ticket_details = {
             'body': {
@@ -802,7 +802,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         ticket_details = {
             'body': {
@@ -875,7 +875,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         ticket_details = {
             'body': {
@@ -948,7 +948,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         ticket_details = {
             'body': {
@@ -1022,7 +1022,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         ticket_details = {
             'body': {
@@ -1112,7 +1112,7 @@ class TestServiceOutageTriage:
 
         ticket_details = {'ticketID': ticket_id}
         tickets_list = [ticket_details]
-        tickets = {'tickets': tickets_list}
+        tickets = {'body': tickets_list}
 
         ticket_details = {
             'body': {
@@ -1255,7 +1255,7 @@ class TestServiceOutageTriage:
 
         timestamp = '2019-07-30 00:26:00-04:00'
         events_to_report = {
-            'events': []
+            'body': []
         }
 
         host = "mettel.velocloud.net"
@@ -1265,24 +1265,27 @@ class TestServiceOutageTriage:
 
         edge_status = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
+            "body": {
+                        "edge_id": {
+                            "host": host,
+                            "enterprise_id": enterprise_id,
+                            "edge_id": edge_id
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": serial,
+                            },
+                            "links": [{"link": None}]
+                        }
             }
         }
         client_id = 85940
 
-        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status, "client_id": client_id}
+        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status['body'],
+                  "client_id": client_id}
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
@@ -1346,7 +1349,7 @@ class TestServiceOutageTriage:
         }
         events_data = [event_1_data, event_2_data, event_3_data]
         events_data_sorted_by_timestamp = [event_2_data, event_3_data, event_1_data]
-        events_to_report = {'events': events_data}
+        events_to_report = {'body': events_data}
 
         event_note = 'X' * 1500
 
@@ -1357,24 +1360,27 @@ class TestServiceOutageTriage:
 
         edge_status = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
+            "body": {
+                        "edge_id": {
+                            "host": host,
+                            "enterprise_id": enterprise_id,
+                            "edge_id": edge_id
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": serial,
+                            },
+                            "links": [{"link": None}]
+                        }
             }
         }
         client_id = 85940
 
-        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status, "client_id": client_id}
+        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status['body'],
+                  "client_id": client_id}
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=events_to_report)
@@ -1416,7 +1422,7 @@ class TestServiceOutageTriage:
             'message': 'GE2 alive'
         }
         events_data = [event_1_data, event_2_data, event_3_data]
-        events_to_report = {'events': events_data}
+        events_to_report = {'body': events_data}
 
         event_note = 'X' * 500
 
@@ -1430,24 +1436,27 @@ class TestServiceOutageTriage:
 
         edge_status = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
+            "body": {
+                        "edge_id": {
+                            "host": host,
+                            "enterprise_id": enterprise_id,
+                            "edge_id": edge_id
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": serial,
+                            },
+                            "links": [{"link": None}]
+                        }
             }
         }
         client_id = 85940
 
-        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status, "client_id": client_id}
+        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status['body'],
+                  "client_id": client_id}
 
         outage_utils = Mock()
 
@@ -1494,7 +1503,7 @@ class TestServiceOutageTriage:
             'message': 'GE2 alive'
         }
         events_data = [event_1_data, event_2_data, event_3_data]
-        events_to_report = {'events': events_data}
+        events_to_report = {'body': events_data}
 
         event_note = 'X' * 500
 
@@ -1508,24 +1517,27 @@ class TestServiceOutageTriage:
 
         edge_status = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
+            "body": {
+                        "edge_id": {
+                            "host": host,
+                            "enterprise_id": enterprise_id,
+                            "edge_id": edge_id
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": serial,
+                            },
+                            "links": [{"link": None}]
+                        }
             }
         }
         client_id = 85940
 
-        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status, "client_id": client_id}
+        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status['body'],
+                  "client_id": client_id}
 
         outage_utils = Mock()
 
@@ -1569,7 +1581,7 @@ class TestServiceOutageTriage:
             'message': 'GE2 alive'
         }
         events_data = [event_1_data, event_2_data]
-        events_to_report = {'events': events_data}
+        events_to_report = {'body': events_data}
 
         events_note = 'This is the note for all these events\n'
         events_note_timestamp = parse(event_2_timestamp).astimezone(timezone('US/Eastern')) + timedelta(seconds=1)
@@ -1584,24 +1596,27 @@ class TestServiceOutageTriage:
 
         edge_status = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
+            "body": {
+                        "edge_id": {
+                            "host": host,
+                            "enterprise_id": enterprise_id,
+                            "edge_id": edge_id
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": serial,
+                            },
+                            "links": [{"link": None}]
+                        }
             }
         }
         client_id = 85940
 
-        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status, "client_id": client_id}
+        ticket = {"ticketID": 123, "serial": "VC05200026138", "edge_status": edge_status['body'],
+                  "client_id": client_id}
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
             events_to_report,
@@ -1754,30 +1769,32 @@ class TestServiceOutageTriage:
             },
             "edge_info": {
                 "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": "VC05200028729",
-                },
-                "links": [
-                    {
-                        "link": {
-                            "interface": "GE1",
-                            "displayName": "Test1",
-                            "state": "DISCONNECTED",
+                "body": {
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": "VC05200028729",
+                            },
+                            "links": [
+                                {
+                                    "link": {
+                                        "interface": "GE1",
+                                        "displayName": "Test1",
+                                        "state": "DISCONNECTED",
+                                    }
+                                },
+                                {
+                                    "link": {
+                                        "interface": "GE2",
+                                        "displayName": "Test2",
+                                        "state": "DISCONNECTED",
+                                    }
+                                }
+                            ]
                         }
-                    },
-                    {
-                        "link": {
-                            "interface": "GE2",
-                            "displayName": "Test2",
-                            "state": "DISCONNECTED",
-                        }
-                    }
-                ]
             }
         }
-        events_to_report = {'events': 'Some Event Info'}
+        events_to_report = {'body': 'Some Event Info'}
 
         ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
 
@@ -1802,32 +1819,34 @@ class TestServiceOutageTriage:
 
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": "VC05200028729",
-                },
-                "links": [
-                    {
-                        "link": {
-                            "interface": "GE1",
-                            "displayName": "Test1",
-                            "state": "DISCONNECTED",
+            "body": {
+                        "edge_id": {
+                            "host": "mettel.velocloud.net",
+                            "enterprise_id": 137,
+                            "edge_id": 1602
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": "VC05200028729",
+                            },
+                            "links": [
+                                {
+                                    "link": {
+                                        "interface": "GE1",
+                                        "displayName": "Test1",
+                                        "state": "DISCONNECTED",
+                                    }
+                                }
+                            ]
                         }
-                    }
-                ]
             }
         }
-        events_to_report = {'events': 'Some Event Info'}
+        events_to_report = {'body': 'Some Event Info'}
 
-        ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
+        ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report['body'], events_to_report)
 
         assert isinstance(ticket_object, OrderedDict)
         assert ticket_object['Interface LABELMARK1'] == "GE1"
@@ -1851,32 +1870,34 @@ class TestServiceOutageTriage:
 
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": "VC05200028729",
-                },
-                "links": [
-                    {
-                        "link": {
-                            "interface": "GE2",
-                            "displayName": "Test1",
-                            "state": "DISCONNECTED",
+            "body": {
+                        "edge_id": {
+                            "host": "mettel.velocloud.net",
+                            "enterprise_id": 137,
+                            "edge_id": 1602
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": "VC05200028729",
+                            },
+                            "links": [
+                                {
+                                    "link": {
+                                        "interface": "GE2",
+                                        "displayName": "Test1",
+                                        "state": "DISCONNECTED",
+                                    }
+                                }
+                            ]
                         }
-                    }
-                ]
             }
         }
-        events_to_report = {'events': 'Some Event Info'}
+        events_to_report = {'body': 'Some Event Info'}
 
-        ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
+        ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report['body'], events_to_report)
 
         assert isinstance(ticket_object, OrderedDict)
         assert ticket_object['Interface LABELMARK1'] is None
@@ -1900,24 +1921,26 @@ class TestServiceOutageTriage:
 
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": "VC05200028729",
-                },
-                "links": []
+            "body": {
+                        "edge_id": {
+                            "host": "mettel.velocloud.net",
+                            "enterprise_id": 137,
+                            "edge_id": 1602
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": "VC05200028729",
+                            },
+                            "links": []
+                        }
             }
         }
-        events_to_report = {'events': 'Some Event Info'}
+        events_to_report = {'body': 'Some Event Info'}
 
-        ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
+        ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report['body'], events_to_report)
 
         assert isinstance(ticket_object, OrderedDict)
         assert ticket_object['Interface LABELMARK1'] is None
@@ -1941,24 +1964,26 @@ class TestServiceOutageTriage:
 
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": "mettel.velocloud.net",
-                "enterprise_id": 137,
-                "edge_id": 1602
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": "VC05200028729",
-                },
-                "links": [{"link": None}]
+            "body": {
+                        "edge_id": {
+                            "host": "mettel.velocloud.net",
+                            "enterprise_id": 137,
+                            "edge_id": 1602
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": "VC05200028729",
+                            },
+                            "links": [{"link": None}]
+                        }
             }
         }
-        events_to_report = {'events': 'Some Event Info'}
+        events_to_report = {'body': 'Some Event Info'}
 
-        ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report, events_to_report)
+        ticket_object = service_outage_triage._compose_ticket_note_object(edges_to_report['body'], events_to_report)
 
         assert isinstance(ticket_object, OrderedDict)
         assert ticket_object['Interface LABELMARK1'] is None
@@ -1994,22 +2019,24 @@ class TestServiceOutageTriage:
 
         edge_status = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
+            "body": {
+                        "edge_id": {
+                            "host": host,
+                            "enterprise_id": enterprise_id,
+                            "edge_id": edge_id
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": serial,
+                            },
+                            "links": [{"link": None}]
+                        }
             }
         }
-        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "events": ["EDGE_DOWN"]}
+        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "body": ["EDGE_DOWN"]}
         bruin_resolved = "Resolved"
         bruin_note_appended = "Appended"
         slack_sent = "Sent"
@@ -2050,7 +2077,7 @@ class TestServiceOutageTriage:
                     await service_outage_triage._auto_resolve_tickets(ticket_item, detail_id)
 
         outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['body']['edge_info'])
 
         event_bus.rpc_request.assert_has_awaits([
             call("edge.status.request",
@@ -2111,22 +2138,24 @@ class TestServiceOutageTriage:
 
         edge_status = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
+            "body": {
+                        "edge_id": {
+                            "host": host,
+                            "enterprise_id": enterprise_id,
+                            "edge_id": edge_id
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": serial,
+                            },
+                            "links": [{"link": None}]
+                        }
             }
         }
-        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "events": []}
+        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "body": []}
         bruin_resolved = "Resolved"
         bruin_note_appended = "Appended"
         slack_sent = "Sent"
@@ -2202,22 +2231,24 @@ class TestServiceOutageTriage:
 
         edge_status = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
+            "body": {
+                        "edge_id": {
+                            "host": host,
+                            "enterprise_id": enterprise_id,
+                            "edge_id": edge_id
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": serial,
+                            },
+                            "links": [{"link": None}]
+                        }
             }
         }
-        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "events": ["EDGE_DOWN"]}
+        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "body": ["EDGE_DOWN"]}
         bruin_resolved = "Resolved"
         bruin_note_appended = "Appended"
         slack_sent = "Sent"
@@ -2258,7 +2289,7 @@ class TestServiceOutageTriage:
                     await service_outage_triage._auto_resolve_tickets(ticket_item, detail_id)
 
         outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status["edge_info"])
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['body']["edge_info"])
 
         event_bus.rpc_request.assert_has_awaits([
             call("edge.status.request",
@@ -2333,22 +2364,24 @@ class TestServiceOutageTriage:
 
         edge_status = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
-            "edge_id": {
-                "host": host,
-                "enterprise_id": enterprise_id,
-                "edge_id": edge_id
-            },
-            "edge_info": {
-                "enterprise_name": "Titan America|85940|",
-                "edges": {
-                    "name": "TEST",
-                    "edgeState": "OFFLINE",
-                    "serialNumber": serial,
-                },
-                "links": [{"link": None}]
+            "body": {
+                        "edge_id": {
+                            "host": host,
+                            "enterprise_id": enterprise_id,
+                            "edge_id": edge_id
+                        },
+                        "edge_info": {
+                            "enterprise_name": "Titan America|85940|",
+                            "edges": {
+                                "name": "TEST",
+                                "edgeState": "OFFLINE",
+                                "serialNumber": serial,
+                            },
+                            "links": [{"link": None}]
+                        }
             }
         }
-        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "events": ["LINK_DEAD"]}
+        events = {"request_id": "E4irhhgzqTxmSMFudJSF5Z", "body": ["LINK_DEAD"]}
 
         bruin_resolved = "Resolved"
         bruin_note_appended = "Appended"
@@ -2387,7 +2420,7 @@ class TestServiceOutageTriage:
                 await service_outage_triage._auto_resolve_tickets(ticket_item, detail_id)
 
         outage_utils.is_outage_ticket_auto_resolvable.assert_called_once_with(ticket_id, ticket_notes, 3)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['edge_info'])
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['body']['edge_info'])
 
         event_bus.rpc_request.assert_has_awaits([
             call("edge.status.request",
@@ -2470,7 +2503,7 @@ class TestServiceOutageTriage:
 
             client_id_dict = await service_outage_triage._create_client_id_to_dict_of_serials_dict()
 
-            assert client_id_dict == {client_id: {serial: edge_status1}}
+            assert client_id_dict == {client_id: {serial: edge_status1["body"]}}
             event_bus.rpc_request.assert_has_awaits([
                 call('edge.list.request',
                      {

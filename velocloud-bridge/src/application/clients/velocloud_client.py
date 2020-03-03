@@ -24,11 +24,11 @@ class VelocloudClient:
         client['host'] = host
         headers = self._create_headers_by_host(host, user, password)
         if headers["status"] in range(200, 300):
-            self._logger.info("Connection succesful")
+            self._logger.info("Connection successful")
             client['headers'] = headers["body"]
             return client
         else:
-            self._logger.info(f'Connection wans\'t possible, error {headers["status"]}')
+            self._logger.info(f'Connection wasn\'t possible, error {headers["status"]}')
             self._logger.info(headers['body'])
             return
 

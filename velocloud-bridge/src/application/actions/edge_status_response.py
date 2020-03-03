@@ -22,10 +22,10 @@ class ReportEdgeStatus:
             status = 400
             body_content = 'Must include "body" in request'
         else:
-            self._logger.info(f'Processing edge with data {msg}')
-            interval = msg["body"].pop("interval") if "interval" in msg["body"].keys() else interval
-            if msg["body"].get("edge"):
-                edgeids = msg["body"]["edge"]
+            if all(key in msg['body'].keys() for key in ("host", "edge_id", "enterprise_id")):
+                self._logger.info(f'Processing edge with data {msg}')
+                interval = msg["body"].pop("interval") if "interval" in msg["body"].keys() else interval
+                edgeids = msg["body"]
                 enterprise_name = self._velocloud_repository.get_enterprise_information(edgeids)
                 edge_status_vr = self._velocloud_repository.get_edge_information(edgeids)
                 link_status = self._velocloud_repository.get_link_information(edgeids, interval)
@@ -39,7 +39,7 @@ class ReportEdgeStatus:
                 edge_status = dict(zip(edge_status_values, body))
                 body_content = {"edge_id": edgeids, "edge_info": edge_status}
             else:
-                body_content = 'Must include "edge" in body'
+                body_content = 'Must include "host", "edge_id", and "enterprise_id"  in body'
                 status = 400
 
         edge_response = {"request_id": request_id, "body": body_content, "status": status}

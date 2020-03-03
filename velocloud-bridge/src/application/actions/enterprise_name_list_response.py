@@ -10,7 +10,6 @@ class EnterpriseNameList:
 
     async def enterprise_name_list(self, msg):
         self._logger.info("Sending enterprise name list")
-        # Check if body exists
         enterprise_name_list_response = {
             "request_id": msg['request_id'],
             "body": None,

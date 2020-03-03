@@ -33,14 +33,16 @@ __edge.list.request schema__
 ```
 {
  "request_id": "c681c72a-9c52-4c74-bd99-53c2c973b037" (per-request generated UUID),
- "filter": [{"host": "some.host", "enterprise_ids": [19,42,99] }](leave blank for all hosts and enterprises)
+ "body":{
+    "filter": [{"host": "some.host", "enterprise_ids": [19,42,99] }](leave blank for all hosts and enterprises)
+ }
 }
 ```
 __edge.list.response.{some service id} schema__
 ```
 {
  "request_id": "c681c72a-9c52-4c74-bd99-53c2c973b037",
- "edges": [{"host": "some.host", "enterprise_id":19, "edge_id":99}],
+ "body": [{"host": "some.host", "enterprise_id":19, "edge_id":99}],
  "status": 200 
 }
 ```
@@ -56,15 +58,17 @@ __edge.status.request schema__
 ```
  {
  "request_id": "4a1c306f-fdca-4e84-bdd0-363e88e76d2a",
- "edge": {"host": "some.host", "enterprise_id":19, "edge_id":99}
+ "body": {"host": "some.host", "enterprise_id":19, "edge_id":99}
  }
 ```
 __edge.status.response.{some service id} schema__
 ```
 {
  "request_id": "4a1c306f-fdca-4e84-bdd0-363e88e76d2a",
- "edge_id":{"host": "some.host", "enterprise_id":19, "edge_id":99},
- "edge_info": {....},
+ "body":{
+    "edge_id":{"host": "some.host", "enterprise_id":19, "edge_id":99},
+     "edge_info": {....},
+ }
  "status": 200
 }
 ```
@@ -76,11 +80,13 @@ __alert.request.event.edge schema__
 ```
 {
     'request_id': 123,
-    'edge': {"host": "some.host", "enterprise_id":19, "edge_id":99},
-    'start_date': '2019-07-19 14:19:45',  # Seven days before end_date
-    'end_date': '2019-07-26 14:19:45',
-    'filter': ['EDGE_UP']
-    'limit':  200
+    'body':{
+        'edge': {"host": "some.host", "enterprise_id":19, "edge_id":99},
+        'start_date': '2019-07-19 14:19:45',  # Seven days before end_date
+        'end_date': '2019-07-26 14:19:45',
+        'filter': ['EDGE_UP']
+        'limit':  200
+    }
 }
 ```
 The `filter` field is used to request from the bridge only events that have event names in the list. If no filter is provided
@@ -93,7 +99,7 @@ __alert.response.event.edge.{some service id} schema__
 ```
 {
     'request_id': 123, 
-    'events': {...}, 
+    'body': {...}, 
     'status': 200
 }
 ```
