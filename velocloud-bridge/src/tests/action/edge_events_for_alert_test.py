@@ -27,7 +27,7 @@ class TestEventEdgesForAlert:
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
         edges_for_alert._logger.info = Mock()
-        all_edge_events_response = {"body": "Some edge event info", "status_code": 200}
+        all_edge_events_response = {"body": "Some edge event info", "status": 200}
         velocloud_repo.get_all_edge_events = Mock(return_value=all_edge_events_response)
         edge_msg = {
             "request_id": "123",
@@ -64,7 +64,7 @@ class TestEventEdgesForAlert:
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
         edges_for_alert._logger.info = Mock()
-        all_edge_events_response = {"body": "Some edge event info", "status_code": 200}
+        all_edge_events_response = {"body": "Some edge event info", "status": 200}
         velocloud_repo.get_all_edge_events = Mock(return_value=all_edge_events_response)
         edge_msg = {
             "request_id": "123",
@@ -99,7 +99,7 @@ class TestEventEdgesForAlert:
         velocloud_repo = Mock()
         edges_for_alert = EventEdgesForAlert(test_bus, velocloud_repo, mock_logger)
         edges_for_alert._logger.info = Mock()
-        all_edge_events_response = {"body": None, "status_code": 500}
+        all_edge_events_response = {"body": None, "status": 500}
         velocloud_repo.get_all_edge_events = Mock(return_value=all_edge_events_response)
         edge_msg = {
             "request_id": "123",

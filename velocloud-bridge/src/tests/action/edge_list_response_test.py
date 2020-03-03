@@ -33,7 +33,7 @@ class TestEdgeListResponse:
         actions = ReportEdgeList(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
         msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123", 'body': {"filter": []}}
-        edges = {"body": ["task1", "task2"], "status_code": 200}
+        edges = {"body": ["task1", "task2"], "status": 200}
         velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         await actions.report_edge_list(msg_dict)
         assert actions._logger.info.called
@@ -54,7 +54,7 @@ class TestEdgeListResponse:
         actions = ReportEdgeList(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
         msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123", 'body': {"filter": []}}
-        edges = {"body": None, "status_code": 500}
+        edges = {"body": None, "status": 500}
         velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         await actions.report_edge_list(msg_dict)
         assert actions._logger.info.called
@@ -82,5 +82,5 @@ class TestEdgeListResponse:
         assert not velocloud_repo.get_all_enterprises_edges_with_host.called
         assert test_bus.publish_message.call_args[0][0] == msg_dict["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body":  None,
-                                                            "status": 500}
+                                                            "body": 'Must include "body" in request',
+                                                            "status": 400}

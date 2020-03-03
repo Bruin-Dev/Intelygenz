@@ -10,6 +10,14 @@ class EventEdgesForAlert:
         self._logger = logger
 
     async def report_edge_event(self, msg: dict):
+        edge_event_response = {"request_id": msg['request_id'], "body": None,
+                               "status": None}
+        if msg.get("body") is None:
+            edge_event_response["status"] = 400
+            edge_event_response["body"] = 'Must include "body" in request'
+            await self._event_bus.publish_message(msg['response_topic'], edge_event_response)
+            return
+
         edgeids = msg["body"]["edge"]
         start = msg["body"]["start_date"]
         end = msg["body"]["end_date"]
@@ -24,8 +32,8 @@ class EventEdgesForAlert:
 
         self._logger.info(f'Sending events for edge with data {edgeids} for alerts')
         events_by_edge = self._velocloud_repository.get_all_edge_events(edgeids, start, end, limit, filter)
-        edge_event_response = {"request_id": msg['request_id'], "body": events_by_edge["body"],
-                               "status": events_by_edge["status_code"]}
+        edge_event_response["body"] = events_by_edge["body"]
+        edge_event_response["status"] = events_by_edge["status"]
 
         self._logger.info(
             f'Edge events for alerts published in event bus for request {json.dumps(msg)}. '

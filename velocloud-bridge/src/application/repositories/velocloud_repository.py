@@ -16,23 +16,23 @@ class VelocloudRepository:
     def get_all_enterprises_edges_with_host(self, msg):
         self._logger.info('Getting all enterprises edges with host')
         response = self._velocloud_client.get_all_enterprises_edges_with_host()
-        if response["status_code"] not in range(200, 300):
-            return {"body": response["body"], "status_code": response["status_code"]}
-        status_code = response["status_code"]
+        if response["status"] not in range(200, 300):
+            return {"body": response["body"], "status": response["status"]}
+        status = response["status"]
         edges_by_enterprise = response["body"]
         if len(msg['filter']) > 0:
+
             edges_by_enterprise = [edge for edge in response["body"]
                                    for filter_edge in msg['filter']
                                    if edge['host'] == filter_edge['host']
-                                   if edge['enterprise_id'] in filter_edge['enterprise_ids']
-                                   or len(filter_edge['enterprise_ids']) is 0]
+                                   if edge['enterprise_id'] in filter_edge['enterprise_ids'] or len(filter_edge['enterprise_ids']) is 0]
 
-        return {"body": edges_by_enterprise, "status_code": status_code}
+        return {"body": edges_by_enterprise, "status": status}
 
     def get_edge_information(self, edge):
         edge_information = self._velocloud_client.get_edge_information(edge)
-        if edge_information["status_code"] not in range(200, 300):
-            self._logger.error(f"Error {edge_information['status_code']} edge_information")
+        if edge_information["status"] not in range(200, 300):
+            self._logger.error(f"Error {edge_information['status']} edge_information")
 
         return edge_information
 
@@ -42,16 +42,16 @@ class VelocloudRepository:
         link_status = []
         response = self._velocloud_client.get_link_information(edge, interval)
 
-        if response["status_code"] not in range(200, 300):
-            self._logger.error(f"Error {response['status_code'], response['body']}")
-            return {"body": response["body"], "status_code": response["status_code"]}
+        if response["status"] not in range(200, 300):
+            self._logger.error(f"Error {response['status'], response['body']}")
+            return {"body": response["body"], "status": response["status"]}
 
         links = response["body"]
         response_link_service_group = self._velocloud_client.get_link_service_groups_information(edge, interval)
 
-        if response_link_service_group["status_code"] not in range(200, 300):
-            self._logger.error(f"Error {response_link_service_group['status_code'], response['body']}")
-            return {"body": link_status, "status_code": response_link_service_group["status_code"]}
+        if response_link_service_group["status"] not in range(200, 300):
+            self._logger.error(f"Error {response_link_service_group['status'], response['body']}")
+            return {"body": link_status, "status": response_link_service_group["status"]}
 
         link_service_group = response_link_service_group["body"]
 
@@ -65,29 +65,29 @@ class VelocloudRepository:
                     link_status.append(link)
 
         elif links is None:
-            return {"body": link_status, "status_code": response["status_code"]}
+            return {"body": link_status, "status": response["status"]}
 
-        return {"body": link_status, "status_code": response["status_code"]}
+        return {"body": link_status, "status": response["status"]}
 
     def get_enterprise_information(self, edge):
         enterprise_info = self._velocloud_client.get_enterprise_information(edge)
-        if enterprise_info["status_code"] not in range(200, 300):
-            self._logger.error(f"Error {enterprise_info['status_code']}, error: {enterprise_info['body']}")
-            return {"body": None, "status_code": enterprise_info["status_code"]}
+        if enterprise_info["status"] not in range(200, 300):
+            self._logger.error(f"Error {enterprise_info['status']}, error: {enterprise_info['body']}")
+            return {"body": None, "status": enterprise_info["status"]}
 
         body = enterprise_info["body"]
         name = body.get("name") if isinstance(body, dict) else None
-        if enterprise_info['status_code'] in range(200, 300) and name:
-            return {"body": name, "status_code": enterprise_info["status_code"]}
+        if enterprise_info['status'] in range(200, 300) and name:
+            return {"body": name, "status": enterprise_info["status"]}
         else:
-            return {"body": enterprise_info["body"], "status_code": enterprise_info["status_code"]}
+            return {"body": enterprise_info["body"], "status": enterprise_info["status"]}
 
     def get_all_edge_events(self, edge, start, end, limit, filter_events_status_list):
         self._logger.info(f'Getting events from edge:{edge["edge_id"]} from time:{start} to time:{end}')
 
         response = self._velocloud_client.get_all_edge_events(edge, start, end, limit)
 
-        if response["status_code"] not in range(200, 300):
+        if response["status"] not in range(200, 300):
             return response
 
         full_events = response["body"]
@@ -104,9 +104,9 @@ class VelocloudRepository:
         self._logger.info('Getting all enterprise names')
         enterprises = self._velocloud_client.get_all_enterprise_names()
 
-        if enterprises["status_code"] not in range(200, 300):
-            self._logger.error(f"Error {enterprises['status_code']}, error: {enterprises['body']}")
-            return {"body": enterprises["body"], "status_code": enterprises["status_code"]}
+        if enterprises["status"] not in range(200, 300):
+            self._logger.error(f"Error {enterprises['status']}, error: {enterprises['body']}")
+            return {"body": enterprises["body"], "status": enterprises["status"]}
 
         enterprise_names = [e["enterprise_name"] for e in enterprises["body"]]
 
@@ -117,4 +117,4 @@ class VelocloudRepository:
                 if e_name == filter_enterprise
             ]
 
-        return {"body": enterprise_names, "status_code": enterprises["status_code"]}
+        return {"body": enterprise_names, "status": enterprises["status"]}

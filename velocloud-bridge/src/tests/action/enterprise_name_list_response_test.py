@@ -35,7 +35,7 @@ class TestEnterpriseNameListResponse:
         msg_dict = {"request_id": "123", "response_topic": "request.enterprises.names.123", "body": {"filter": []}}
         enterprises = {
             "body": [{"enterprise_name": "A Name"}, {"enterprise_name": "Another Name"}],
-            "status_code": 200
+            "status": 200
         }
         velocloud_repo.get_all_enterprise_names = Mock(return_value=enterprises)
         await actions.enterprise_name_list(msg_dict)
@@ -61,7 +61,7 @@ class TestEnterpriseNameListResponse:
         msg_dict = {"request_id": "123", "response_topic": "request.enterprises.names.123", "body": {"filter": []}}
         enterprises = {
             "body": None,
-            "status_code": 500
+            "status": 500
         }
         velocloud_repo.get_all_enterprise_names = Mock(return_value=enterprises)
         await actions.enterprise_name_list(msg_dict)
@@ -72,4 +72,3 @@ class TestEnterpriseNameListResponse:
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
                                                             "body": None,
                                                             "status": 500}
-        assert actions._logger.error.called

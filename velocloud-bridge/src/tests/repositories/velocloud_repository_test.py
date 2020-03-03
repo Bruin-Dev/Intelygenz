@@ -12,7 +12,7 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         edges = {"body": [{"host": "some.host", "enterprise_id": 19, "edge_id": 99}],
-                 "status_code": 200}
+                 "status": 200}
         msg = {"request_id": "123", "filter": []}
         test_velocloud_client.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         edges_by_ent = vr.get_all_enterprises_edges_with_host(msg)
@@ -24,7 +24,7 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         edges = {"body": None,
-                 "status_code": 500}
+                 "status": 500}
         msg = {"request_id": "123", "filter": []}
         test_velocloud_client.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         edges_by_ent = vr.get_all_enterprises_edges_with_host(msg)
@@ -43,7 +43,7 @@ class TestVelocloudRepository:
                     {"host": "some.host", "enterprise_id": 32, "edge_id": 99},
                     {"host": "some.host2", "enterprise_id": 42, "edge_id": 99}
                 ],
-            "status_code": 200
+            "status": 200
         }
         test_velocloud_client.get_all_enterprises_edges_with_host = Mock(return_value=edges)
         msg = {"request_id": "123", "filter": [{"host": "some.host", "enterprise_ids": [19]},
@@ -55,7 +55,7 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        mock_response = {"status_code": 200, "body": "info"}
+        mock_response = {"status": 200, "body": "info"}
         test_velocloud_client.get_edge_information = Mock(return_value=mock_response)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         edge_info = vr.get_edge_information(edge)
@@ -67,7 +67,7 @@ class TestVelocloudRepository:
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        mock_response = {"status_code": 500, "body": "error"}
+        mock_response = {"status": 500, "body": "error"}
         test_velocloud_client.get_edge_information = Mock(return_value=mock_response)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         edge_info = vr.get_edge_information(edge)
@@ -81,11 +81,11 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         link_status = {
             "body": [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}],
-            "status_code": 200
+            "status": 200
         }
         link_service_group = {
             "body": [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}],
-            "status_code": 200
+            "status": 200
         }
         link_info_return = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'},
                              "serviceGroups": ["PUBLIC_WIRED"]}]
@@ -104,11 +104,11 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         link_status = {
             "body": [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'}}],
-            "status_code": 200
+            "status": 200
         }
         link_service_group = {
             "body": [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}],
-            "status_code": 200
+            "status": 200
         }
         link_info_return = [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'UNCONFIGURED'},
                              "serviceGroups": ["PUBLIC_WIRED"]}]
@@ -129,10 +129,10 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         link_status = {"body": [{"link_data": "STABLE", "linkId": "123", 'link': {'backupState': 'STABLE'}}],
-                       "status_code": 200}
+                       "status": 200}
         link_service_group = {
             "body": [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}],
-            "status_code": 200
+            "status": 200
         }
 
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
@@ -149,10 +149,10 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         link_status = {"body": None,
-                       "status_code": 200}
+                       "status": 200}
         link_service_group = {
             "body": [{"linkId": "123", "serviceGroups": ["PUBLIC_WIRED"]}],
-            "status_code": 200
+            "status": 200
         }
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
@@ -167,10 +167,10 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         link_status = {"body": None,
-                       "status_code": 200}
+                       "status": 200}
         link_service_group = {
             "body": None,
-            "status_code": 500
+            "status": 500
         }
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
         test_velocloud_client.get_link_service_groups_information = Mock(return_value=link_service_group)
@@ -186,7 +186,7 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         link_status = {
             "body": "Got internal error from Velocloud",
-            "status_code": 500
+            "status": 500
         }
 
         test_velocloud_client.get_link_information = Mock(return_value=link_status)
@@ -201,7 +201,7 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         enterprise_info = {"body": {"name": "test"},
-                           "status_code": 200}
+                           "status": 200}
         test_velocloud_client.get_enterprise_information = Mock(return_value=enterprise_info)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         enterprise_info = vr.get_enterprise_information(edge)
@@ -213,7 +213,7 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         enterprise_info = {"body": None,
-                           "status_code": 500}
+                           "status": 500}
         test_velocloud_client.get_enterprise_information = Mock(return_value=enterprise_info)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         enterprise_info = vr.get_enterprise_information(edge)
@@ -225,7 +225,7 @@ class TestVelocloudRepository:
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         enterprise_info = {"body": None,
-                           "status_code": 200}
+                           "status": 200}
         test_velocloud_client.get_enterprise_information = Mock(return_value=enterprise_info)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         enterprise_info = vr.get_enterprise_information(edge)
@@ -238,7 +238,7 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
 
         events = {"body": {"data": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]},
-                  "status_code": 200}
+                  "status": 200}
         filter_events_status_list = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
 
         test_velocloud_client.get_all_edge_events = Mock(return_value=events)
@@ -248,7 +248,7 @@ class TestVelocloudRepository:
         limit = None
         edge_events = vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
         assert test_velocloud_client.get_all_edge_events.called
-        assert edge_events == {"body": [{'event': 'EDGE_UP'}], "status_code": 200}
+        assert edge_events == {"body": [{'event': 'EDGE_UP'}], "status": 200}
 
     def get_all_edge_events_none_filter_test(self):
         mock_logger = Mock()
@@ -256,7 +256,7 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
 
         events = {"body": {"data": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}]},
-                  "status_code": 200}
+                  "status": 200}
         filter_events_status_list = None
 
         test_velocloud_client.get_all_edge_events = Mock(return_value=events)
@@ -266,7 +266,7 @@ class TestVelocloudRepository:
         limit = None
         edge_events = vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
         assert test_velocloud_client.get_all_edge_events.called
-        assert edge_events == {"body": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}], "status_code": 200}
+        assert edge_events == {"body": [{'event': 'EDGE_UP'}, {'event': 'EDGE_GONE'}], "status": 200}
 
     def get_all_edge_events_none_test(self):
         mock_logger = Mock()
@@ -274,7 +274,7 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
 
         events = {"body": None,
-                  "status_code": 500}
+                  "status": 500}
         filter_events_status_list = None
 
         test_velocloud_client.get_all_edge_events = Mock(return_value=events)
@@ -284,7 +284,7 @@ class TestVelocloudRepository:
         limit = None
         edge_events = vr.get_all_edge_events(edge, start, end, limit, filter_events_status_list)
         assert test_velocloud_client.get_all_edge_events.called
-        assert edge_events == {"body": None, "status_code": 500}
+        assert edge_events == {"body": None, "status": 500}
 
     def connect_to_all_servers_test(self):
         mock_logger = Mock()
@@ -300,7 +300,7 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         enterprises = {
             "body": [{"enterprise_name": "The Name"}],
-            "status_code": 200
+            "status": 200
         }
         msg = {"request_id": "123", "filter": ["The Name"]}
         test_velocloud_client.get_all_enterprise_names = Mock(
@@ -317,7 +317,7 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         enterprises = {
             "body": None,
-            "status_code": 500
+            "status": 500
         }
         msg = {"request_id": "123", "filter": []}
         test_velocloud_client.get_all_enterprise_names = Mock(
@@ -325,7 +325,7 @@ class TestVelocloudRepository:
         )
         enterprise_names = vr.get_all_enterprise_names(msg)
 
-        assert enterprise_names == {"body": None, "status_code": 500}
+        assert enterprise_names == {"body": None, "status": 500}
 
     def get_all_enterprise_names_without_filter_test(self):
         mock_logger = Mock()
@@ -333,7 +333,7 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         enterprises = {
             "body": [{"enterprise_name": "The Name"}],
-            "status_code": 200
+            "status": 200
         }
         msg = {"request_id": "123", "filter": []}
         test_velocloud_client.get_all_enterprise_names = Mock(

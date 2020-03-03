@@ -48,7 +48,7 @@ class TestVelocloudClient:
 
         headers = {
             "body": {'Cookie': 'some test cookie'},
-            "status_code": 200
+            "status": 200
         }
 
         velocloud_client = VelocloudClient(configs, logger)
@@ -69,7 +69,7 @@ class TestVelocloudClient:
 
         headers = {
             "body": f"Got internal error from Velocloud",
-            "status_code": 500
+            "status": 500
         }
 
         velocloud_client = VelocloudClient(configs, logger)
@@ -115,7 +115,7 @@ class TestVelocloudClient:
         response_mock = Mock()
         expected_header = {
             "body": {},
-            "status_code": 400
+            "status": 400
         }
 
         response_mock.status_code = 400
@@ -137,7 +137,7 @@ class TestVelocloudClient:
         response_mock = Mock()
         expected_header = {
             "body": f"Resource not found",
-            "status_code": 401
+            "status": 401
         }
 
         response_mock.status_code = 401
@@ -162,7 +162,7 @@ class TestVelocloudClient:
         response_mock = Mock()
         expected_header = {
             "body": f"Resource not found",
-            "status_code": 404
+            "status": 404
         }
 
         response_mock.status_code = 404
@@ -183,7 +183,7 @@ class TestVelocloudClient:
         response_mock = Mock()
         expected_header = {
             "body": f"Got internal error from Velocloud",
-            "status_code": 501
+            "status": 501
         }
 
         response_mock.status_code = 501
@@ -234,7 +234,7 @@ class TestVelocloudClient:
                                                       "id": edge_id['edge_id']}
             assert mock_post.call_args[1]['headers'] == header['headers']
             assert edge_info["body"] == edge_status
-            assert edge_info["status_code"] == 200
+            assert edge_info["status"] == 200
 
     def get_edge_information_error_400_test(self):
         configs = testconfig
@@ -255,7 +255,7 @@ class TestVelocloudClient:
             edge_info = velocloud_client.get_edge_information(edge_id)
 
             mock_post.assert_called_once()
-            assert edge_info == {"body": edge_status, "status_code": 400}
+            assert edge_info == {"body": edge_status, "status": 400}
 
     def get_edge_information_error_401_test(self):
         configs = testconfig
@@ -271,7 +271,7 @@ class TestVelocloudClient:
             velocloud_client.instantiate_and_connect_clients = Mock()
             velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
             edge_information = velocloud_client.get_edge_information(edge_id)
-            assert edge_information == {"body": 'Maximum retries while relogin', "status_code": 401}
+            assert edge_information == {"body": 'Maximum retries while relogin', "status": 401}
 
     def get_edge_information_error_404_test(self):
         configs = testconfig
@@ -292,7 +292,7 @@ class TestVelocloudClient:
             edge_info = velocloud_client.get_edge_information(edge_id)
 
             mock_post.assert_called_once()
-            assert edge_info == {"body": "Resource not found", "status_code": 404}
+            assert edge_info == {"body": "Resource not found", "status": 404}
 
     def get_edge_information_error_500_test(self):
         configs = testconfig
@@ -308,7 +308,7 @@ class TestVelocloudClient:
             velocloud_client.instantiate_and_connect_clients = Mock()
             velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
             edge_information = velocloud_client.get_edge_information(edge_id)
-            assert edge_information == {"body": 'Got internal error from Velocloud', "status_code": 500}
+            assert edge_information == {"body": 'Got internal error from Velocloud', "status": 500}
 
     def get_link_information_test(self):
         configs = testconfig
@@ -358,7 +358,7 @@ class TestVelocloudClient:
             link_info = velocloud_client.get_link_information(edge_id, interval)
             mock_post.assert_called_once()
 
-            assert link_info["status_code"] == 400
+            assert link_info["status"] == 400
             assert link_info["body"] == link_status
 
     def get_link_information_error_401_test(self):
@@ -377,7 +377,7 @@ class TestVelocloudClient:
             velocloud_client._get_header_by_host = Mock(return_value=header)
             link_info = velocloud_client.get_link_information(edge_id, interval)
             mock_post.assert_called()
-            assert link_info["status_code"] == 401
+            assert link_info["status"] == 401
             assert link_info["body"] == "Maximum retries while relogin"
 
     def get_link_information_error_404_test(self):
@@ -399,7 +399,7 @@ class TestVelocloudClient:
             link_info = velocloud_client.get_link_information(edge_id, interval)
             mock_post.assert_called_once()
 
-            assert link_info["status_code"] == 404
+            assert link_info["status"] == 404
             assert link_info["body"] == "Resource not found"
 
     def get_link_information_error_500_test(self):
@@ -418,7 +418,7 @@ class TestVelocloudClient:
             velocloud_client._get_header_by_host = Mock(return_value=header)
             link_info = velocloud_client.get_link_information(edge_id, interval)
             mock_post.assert_called()
-            assert link_info["status_code"] == 500
+            assert link_info["status"] == 500
             assert link_info["body"] == "Got internal error from Velocloud"
 
     def get_link_information_ko_test(self):
@@ -490,7 +490,7 @@ class TestVelocloudClient:
             link_service_group_info = velocloud_client.get_link_service_groups_information(edge_id, interval)
 
             mock_post.assert_called_once()
-            assert link_service_group_info == {"body": edge_status, "status_code": 400}
+            assert link_service_group_info == {"body": edge_status, "status": 400}
 
     def get_link_service_groups_information_error_401_test(self):
         configs = testconfig
@@ -507,7 +507,7 @@ class TestVelocloudClient:
             velocloud_client.instantiate_and_connect_clients = Mock()
             velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
             link_service_group_info = velocloud_client.get_link_service_groups_information(edge_id, interval)
-            assert link_service_group_info == {"body": 'Maximum retries while relogin', "status_code": 401}
+            assert link_service_group_info == {"body": 'Maximum retries while relogin', "status": 401}
 
     def get_link_service_groups_information_error_404_test(self):
         configs = testconfig
@@ -529,7 +529,7 @@ class TestVelocloudClient:
             link_service_group_info = velocloud_client.get_link_service_groups_information(edge_id, interval)
 
             mock_post.assert_called_once()
-            assert link_service_group_info == {"body": "Resource not found", "status_code": 404}
+            assert link_service_group_info == {"body": "Resource not found", "status": 404}
 
     def get_link_service_groups_information_error_500_test(self):
         configs = testconfig
@@ -546,7 +546,7 @@ class TestVelocloudClient:
             velocloud_client.instantiate_and_connect_clients = Mock()
             velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
             link_service_group_info = velocloud_client.get_link_service_groups_information(edge_id, interval)
-            assert link_service_group_info == {"body": 'Got internal error from Velocloud', "status_code": 500}
+            assert link_service_group_info == {"body": 'Got internal error from Velocloud', "status": 500}
 
     def get_link_service_groups_information_ko_test(self):
         configs = testconfig
@@ -614,7 +614,7 @@ class TestVelocloudClient:
             edge_info = velocloud_client.get_enterprise_information(edge_id)
 
             mock_post.assert_called_once()
-            assert edge_info == {"body": edge_status, "status_code": 400}
+            assert edge_info == {"body": edge_status, "status": 400}
 
     def get_enterprise_information_error_401_test(self):
         configs = testconfig
@@ -630,7 +630,7 @@ class TestVelocloudClient:
             velocloud_client.instantiate_and_connect_clients = Mock()
             velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
             edge_information = velocloud_client.get_enterprise_information(edge_id)
-            assert edge_information == {"body": 'Maximum retries while relogin', "status_code": 401}
+            assert edge_information == {"body": 'Maximum retries while relogin', "status": 401}
 
     def get_enterprise_information_error_404_test(self):
         configs = testconfig
@@ -651,7 +651,7 @@ class TestVelocloudClient:
             edge_info = velocloud_client.get_enterprise_information(edge_id)
 
             mock_post.assert_called_once()
-            assert edge_info == {"body": "Resource not found", "status_code": 404}
+            assert edge_info == {"body": "Resource not found", "status": 404}
 
     def get_enterprise_information_error_500_test(self):
         configs = testconfig
@@ -667,7 +667,7 @@ class TestVelocloudClient:
             velocloud_client.instantiate_and_connect_clients = Mock()
             velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
             edge_information = velocloud_client.get_enterprise_information(edge_id)
-            assert edge_information == {"body": 'Got internal error from Velocloud', "status_code": 500}
+            assert edge_information == {"body": 'Got internal error from Velocloud', "status": 500}
 
     def get_all_event_information_test(self):
         configs = testconfig
@@ -742,7 +742,7 @@ class TestVelocloudClient:
             velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
             events = velocloud_client.get_all_edge_events(edge_id, interval_start, interval_end, limit)
 
-            assert events == {"body": 'Maximum retries while relogin', "status_code": 401}
+            assert events == {"body": 'Maximum retries while relogin', "status": 401}
 
     def get_get_all_event_information_error_404_test(self):
         configs = testconfig
@@ -766,7 +766,7 @@ class TestVelocloudClient:
             events = velocloud_client.get_all_edge_events(edge_id, interval_start, interval_end, limit)
 
             mock_post.assert_called_once()
-            assert events == {"body": "Resource not found", "status_code": 404}
+            assert events == {"body": "Resource not found", "status": 404}
 
     def get_get_all_event_information_error_500_test(self):
         configs = testconfig
@@ -789,7 +789,7 @@ class TestVelocloudClient:
             velocloud_client._json_return = Mock(return_value=response_mock.json())
             events = velocloud_client.get_all_edge_events(edge_id, interval_start, interval_end, limit)
 
-            assert events == {"body": 'Got internal error from Velocloud', "status_code": 500}
+            assert events == {"body": 'Got internal error from Velocloud', "status": 500}
 
     def get_all_enterprise_edges_with_host_test(self):
         configs = Mock()
@@ -801,25 +801,25 @@ class TestVelocloudClient:
         monitoring_aggregates_return = [
             {
                 "body": {'enterprises': [{'id': 1}]},
-                "status_code": 200
+                "status": 200
             },
             {
                 "body": None,
-                "status_code": 500
+                "status": 500
             },
             {
                 "body": {'enterprises': [{'id': 2}]},
-                "status_code": 200
+                "status": 200
             }
 
         ]
         enterprise_edges_by_id_return = [{
             "body": [{'id': 25}],
-            "status_code": 200
+            "status": 200
         },
             {
                 "body": [{'id': 26}],
-                "status_code": 500
+                "status": 500
             }
         ]
 
@@ -842,7 +842,7 @@ class TestVelocloudClient:
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
         monitoring_aggregates_return = {
             "body": None,
-            "status_code": 500
+            "status": 500
         }
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
@@ -861,12 +861,12 @@ class TestVelocloudClient:
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
         monitoring_aggregates_return = {
             "body": {'enterprises': [{'id': 1}]},
-            "status_code": 200
+            "status": 200
         }
         enterprise_edges_by_id_return = {
             "body": [{'id': 25, 'enterpriseId': 1, 'serialNumber': 'VC0123',
                       'haSerialNumber': 'VC0234'}],
-            "status_code": 200}
+            "status": 200}
 
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
@@ -893,7 +893,7 @@ class TestVelocloudClient:
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
         monitoring_aggregates_return = {
             "body": None,
-            "status_code": 500
+            "status": 500
         }
         velocloud_client = VelocloudClient(configs, logger)
         velocloud_client.get_monitoring_aggregates = Mock(return_value=monitoring_aggregates_return)
@@ -901,7 +901,6 @@ class TestVelocloudClient:
 
         edge_ids_by_serial = await velocloud_client.get_all_enterprises_edges_with_host_by_serial()
 
-        print(edge_ids_by_serial)
         assert edge_ids_by_serial == defaultdict(list)
 
     @pytest.mark.asyncio
@@ -912,12 +911,12 @@ class TestVelocloudClient:
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
         monitoring_aggregates_return = {
             "body": {'enterprises': [{'id': 1}]},
-            "status_code": 200
+            "status": 200
         }
         enterprise_edges_by_id_return = {
             "body": [{'id': 25, 'enterpriseId': 1, 'serialNumber': 'VC0123',
                       'haSerialNumber': None}],
-            "status_code": 200
+            "status": 200
         }
 
         velocloud_client = VelocloudClient(configs, logger)
@@ -942,11 +941,11 @@ class TestVelocloudClient:
                    {'host': 'some_host', 'headers': 'some header dict'}]
         monitoring_aggregates1 = {
             "body": {"edgeCount": 25},
-            "status_code": 200
+            "status": 200
         }
         monitoring_aggregates2 = {
             "body": {"edgeCount": 24},
-            "status_code": 200
+            "status": 200
         }
 
         monitoring_aggregates_return = [monitoring_aggregates1, monitoring_aggregates2]
@@ -969,11 +968,11 @@ class TestVelocloudClient:
                    {'host': 'some_host', 'headers': 'some header dict'}]
         monitoring_aggregates1 = {
             "body": None,
-            "status_code": 500
+            "status": 500
         }
         monitoring_aggregates2 = {
             "body": None,
-            "status_code": 500
+            "status": 500
         }
 
         monitoring_aggregates_return = [monitoring_aggregates1, monitoring_aggregates2]
@@ -1030,7 +1029,7 @@ class TestVelocloudClient:
             mock_post.assert_called_once()
 
             assert monitoring_aggregates == {"body": monitoring_aggregates_return,
-                                             "status_code": 400}
+                                             "status": 400}
 
     def get_monitoring_aggregates_error_401_test(self):
         configs = testconfig
@@ -1049,7 +1048,7 @@ class TestVelocloudClient:
 
             monitoring_aggregates = velocloud_client.get_monitoring_aggregates(clients)
 
-            assert monitoring_aggregates == {"body": "Maximum retries while relogin", "status_code": 401}
+            assert monitoring_aggregates == {"body": "Maximum retries while relogin", "status": 401}
 
     def get_monitoring_aggregates_error_404_test(self):
         configs = testconfig
@@ -1068,7 +1067,7 @@ class TestVelocloudClient:
 
             monitoring_aggregates = velocloud_client.get_monitoring_aggregates(clients)
 
-            assert monitoring_aggregates == {"body": "Resource not found", "status_code": 404}
+            assert monitoring_aggregates == {"body": "Resource not found", "status": 404}
 
     def get_monitoring_aggregates_error_500_test(self):
         configs = testconfig
@@ -1087,7 +1086,7 @@ class TestVelocloudClient:
 
             monitoring_aggregates = velocloud_client.get_monitoring_aggregates(clients)
 
-            assert monitoring_aggregates == {"body": "Got internal error from Velocloud", "status_code": 500}
+            assert monitoring_aggregates == {"body": "Got internal error from Velocloud", "status": 500}
 
     def get_all_enterprises_edges_by_id_test(self):
         configs = testconfig
@@ -1130,7 +1129,7 @@ class TestVelocloudClient:
             list_of_enterprise_edges = velocloud_client.get_all_enterprises_edges_by_id(clients, enterprise_id)
             mock_post.assert_called_once()
 
-            assert list_of_enterprise_edges == {"body": enterprise_edge_return, "status_code": 400}
+            assert list_of_enterprise_edges == {"body": enterprise_edge_return, "status": 400}
 
     def get_all_enterprises_edges_by_id_error_401_test(self):
         configs = testconfig
@@ -1148,7 +1147,7 @@ class TestVelocloudClient:
             velocloud_client = VelocloudClient(configs, logger)
             list_of_enterprise_edges = velocloud_client.get_all_enterprises_edges_by_id(clients, enterprise_id)
 
-            assert list_of_enterprise_edges == {"body": 'Maximum retries while relogin', "status_code": 401}
+            assert list_of_enterprise_edges == {"body": 'Maximum retries while relogin', "status": 401}
 
     def get_all_enterprises_edges_by_id_error_404_test(self):
         configs = testconfig
@@ -1166,7 +1165,7 @@ class TestVelocloudClient:
             velocloud_client = VelocloudClient(configs, logger)
             list_of_enterprise_edges = velocloud_client.get_all_enterprises_edges_by_id(clients, enterprise_id)
 
-            assert list_of_enterprise_edges == {"body": "Resource not found", "status_code": 404}
+            assert list_of_enterprise_edges == {"body": "Resource not found", "status": 404}
 
     def get_all_enterprises_edges_by_id_error_500_test(self):
         configs = testconfig
@@ -1184,7 +1183,7 @@ class TestVelocloudClient:
             velocloud_client = VelocloudClient(configs, logger)
             list_of_enterprise_edges = velocloud_client.get_all_enterprises_edges_by_id(clients, enterprise_id)
 
-            assert list_of_enterprise_edges == {"body": 'Got internal error from Velocloud', "status_code": 500}
+            assert list_of_enterprise_edges == {"body": 'Got internal error from Velocloud', "status": 500}
 
     def get_all_enterprise_names_test(self):
         configs = Mock()
@@ -1193,7 +1192,7 @@ class TestVelocloudClient:
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
         monitoring_aggregates_return = {
             "body": {'enterprises': [{'id': 1, 'name': 'A name'}]},
-            "status_code": 200
+            "status": 200
         }
 
         velocloud_client = VelocloudClient(configs, logger)
@@ -1212,7 +1211,7 @@ class TestVelocloudClient:
         clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
         monitoring_aggregates_return = {
             "body": None,
-            "status_code": 500
+            "status": 500
         }
 
         velocloud_client = VelocloudClient(configs, logger)
@@ -1222,7 +1221,7 @@ class TestVelocloudClient:
         enterprise_names = velocloud_client.get_all_enterprise_names()
 
         velocloud_client.get_monitoring_aggregates.assert_called_once_with(clients[0])
-        assert enterprise_names == {"body": None, "status_code": 500}
+        assert enterprise_names == {"body": None, "status": 500}
 
     def json_return_ok_test(self):
         configs = testconfig
