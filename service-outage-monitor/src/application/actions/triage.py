@@ -601,7 +601,7 @@ class Triage:
             )
 
             if self._config.TRIAGE_CONFIG['environment'] == 'dev':
-                email_data = self._template_renderer._ticket_object_to_email_obj(relevant_info_for_triage_note)
+                email_data = self._template_renderer.compose_email_object(relevant_info_for_triage_note)
 
                 try:
                     await self._send_email(email_data)

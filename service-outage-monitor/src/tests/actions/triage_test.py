@@ -3384,7 +3384,7 @@ class TestTriage:
         outage_repository = Mock()
 
         template_renderer = Mock()
-        template_renderer._ticket_object_to_email_obj = Mock(side_effect=[email_body_1, email_body_2])
+        template_renderer.compose_email_object = Mock(side_effect=[email_body_1, email_body_2])
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
@@ -3416,7 +3416,7 @@ class TestTriage:
             call(edge_1_data, events_1),
             call(edge_2_data, events_2),
         ])
-        template_renderer._ticket_object_to_email_obj.assert_has_calls([
+        template_renderer.compose_email_object.assert_has_calls([
             call(relevant_data_for_triage_note_1),
             call(relevant_data_for_triage_note_2),
         ])
@@ -4638,7 +4638,7 @@ class TestTriage:
         outage_repository = Mock()
 
         template_renderer = Mock()
-        template_renderer._ticket_object_to_email_obj = Mock(side_effect=[email_body_1, email_body_2])
+        template_renderer.compose_email_object = Mock(side_effect=[email_body_1, email_body_2])
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
@@ -4670,7 +4670,7 @@ class TestTriage:
             call(edge_1_data, events_1),
             call(edge_2_data, events_2),
         ])
-        template_renderer._ticket_object_to_email_obj.assert_has_calls([
+        template_renderer.compose_email_object.assert_has_calls([
             call(relevant_data_for_triage_note_1),
             call(relevant_data_for_triage_note_2),
         ])

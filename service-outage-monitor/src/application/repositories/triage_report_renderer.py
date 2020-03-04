@@ -1,74 +1,84 @@
 import base64
-import re
 
 from collections import OrderedDict
 from datetime import datetime
 
-import jinja2
-
+from pytz import timezone
 from shortuuid import uuid
 
 
 class TriageReportRenderer:
-    def __init__(self, config):
-        self._config = config
+    __report_template_filename = "triage_report.html"
+    __logo_path = "src/templates/images/logo.png"
+    __header_path = "src/templates/images/header.jpg"
 
-    def _ticket_object_to_email_obj(self, ticket_dict, **kwargs):
-        template_vars = {}
-        template = "src/templates/triage/{}".format(kwargs.get("template", "triage_report.html"))
-        logo = "src/templates/triage/images/{}".format(kwargs.get("logo", "logo.png"))
-        header = "src/templates/triage/images/{}".format(kwargs.get("header", "header.jpg"))
-        templateLoader = jinja2.FileSystemLoader(searchpath=".")
-        templateEnv = jinja2.Environment(loader=templateLoader)
-        templ = templateEnv.get_template(template)
-        template_vars["__EDGE_COUNT__"] = '1'
-        template_vars["__SERIAL_NUMBER__"] = "VC05200028729"
-        overview_keys = ["Orchestrator instance", "Edge Name", "Edge URL", "QoE URL", "Transport URL", "Edge Status",
-                         "Interface LABELMARK1", "Label LABELMARK2", "Interface GE1 Status", "Interface LABELMARK3",
-                         "Interface GE2 Status", "Label LABELMARK4"]
-        events_keys = ["Company Events URL", "Last Edge Online", "Last Edge Offline", "Last GE1 Interface Online",
-                       "Last GE1 Interface Offline", "Last GE2 Interface Online", "Last GE2 Interface Offline"]
-        edge_overview = OrderedDict()
-        edge_events = OrderedDict()
-        for key, value in ticket_dict.items():
-            if key in overview_keys:
-                edge_overview[key] = value
-            if key in events_keys:
-                edge_events[key] = value
-        rows = []
-        for idx, key in enumerate(edge_overview.keys()):
-            parsed_key = re.sub(r" LABELMARK(.)*", "", key)
-            rows.append({
-                "type": "even" if idx % 2 == 0 else "odd",
-                "__KEY__": parsed_key,
-                "__VALUE__": str(edge_overview[key])
-            })
-        template_vars["__OVERVIEW_ROWS__"] = rows
-        rows = []
-        for idx, key in enumerate(edge_events.keys()):
-            rows.append({
-                "type": "even" if idx % 2 == 0 else "odd",
+    def __init__(self, config, templates_environment):
+        self._config = config
+        self._templates_environment = templates_environment
+
+    def compose_email_object(self, ticket_data):
+        overview_data = OrderedDict({
+            'Orchestrator Instance': ticket_data.get('Orchestrator Instance'),
+            'Edge Name': ticket_data.get('Edge Name'),
+            'Edge Status': ticket_data.get('Edge Status'),
+        })
+        overview_data['Links'] = ' - '.join(
+            f'<a href="{url}">{name}</a>' for name, url in ticket_data.get("Links").items()
+        )
+
+        events_data = OrderedDict()
+
+        for key, value in ticket_data.items():
+            if key.startswith('Interface'):
+                overview_data[key] = value
+            elif key == 'Last Edge Offline' or key == 'Last Edge Online':
+                events_data[key] = value
+            elif key.startswith('Last') and (key.endswith('Interface Offline') or key.endswith('Interface Online')):
+                events_data[key] = value
+
+        overview_rows = []
+        for index, (key, value) in enumerate(overview_data.items()):
+            overview_rows.append({
+                "type": "even" if index % 2 == 0 else "odd",
                 "__KEY__": key,
-                "__VALUE__": str(edge_events[key])
+                "__VALUE__": str(value),
             })
-        template_vars["__EVENT_ROWS__"] = rows
-        email_html = templ.render(**template_vars)
+
+        event_rows = []
+        for index, (key, value) in enumerate(events_data.items()):
+            event_rows.append({
+                "type": "even" if index % 2 == 0 else "odd",
+                "__KEY__": key,
+                "__VALUE__": str(value)
+            })
+
+        current_datetime = datetime.now(timezone(self._config.TRIAGE_CONFIG['timezone']))
+
+        template_vars = {
+            "__SERIAL_NUMBER__": ticket_data.get('Serial'),
+            "__OVERVIEW_ROWS__": overview_rows,
+            "__EVENT_ROWS__": event_rows,
+            "__CURRENT_YEAR__": current_datetime.year,
+        }
+
+        template = self._templates_environment.get_template(self.__report_template_filename)
+        email_html = template.render(template_vars)
+
         return {
                 'request_id': uuid(),
                 'email_data': {
-                    'subject': f'Service outage triage ({datetime.now().strftime("%Y-%m-%d")})',
+                    'subject': f'Service outage triage ({current_datetime})',
                     'recipient': self._config.TRIAGE_CONFIG["recipient"],
                     'text': 'this is the accessible text for the email',
                     'html': email_html,
                     'images': [
                         {
                             'name': 'logo',
-                            'data': base64.b64encode(open(logo, 'rb').read()).decode('utf-8')
+                            'data': base64.b64encode(open(self.__logo_path, 'rb').read()).decode('utf-8')
                         },
                         {
                             'name': 'header',
-                            'data': base64.b64encode(open(header, 'rb')
-                                                     .read()).decode('utf-8')
+                            'data': base64.b64encode(open(self.__header_path, 'rb').read()).decode('utf-8')
                         },
                     ],
                     'attachments': []

@@ -1,5 +1,6 @@
 import asyncio
 
+import jinja2
 import redis
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -50,9 +51,20 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
+        # JINJA2 TEMPLATE ENVIRONMENTS
+        self._triage_report_templates_loader = jinja2.FileSystemLoader(searchpath="src/templates/triage")
+        self._triage_report_templates_environment = jinja2.Environment(loader=self._triage_report_templates_loader)
+
+        self._comparison_report_templates_loader = jinja2.FileSystemLoader(searchpath="src/templates/comparison_report")
+        self._comparison_report_templates_environment = jinja2.Environment(
+            loader=self._comparison_report_templates_loader
+        )
+
         # EMAIL TEMPLATE
-        self._comparison_report_renderer = ComparisonReportRenderer(config)
-        self._triage_report_renderer = TriageReportRenderer(config)
+        self._comparison_report_renderer = ComparisonReportRenderer(
+            config, self._comparison_report_templates_environment
+        )
+        self._triage_report_renderer = TriageReportRenderer(config, self._triage_report_templates_environment)
 
         # OUTAGE UTILS
         self._outage_repository = OutageRepository(self._logger)

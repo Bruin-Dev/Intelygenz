@@ -1,6 +1,7 @@
-import base64
-
 from collections import OrderedDict
+from unittest.mock import Mock
+
+from dateutil.parser import parse
 
 from application.repositories.triage_report_renderer import TriageReportRenderer
 from config import testconfig
@@ -9,72 +10,72 @@ from config import testconfig
 class TestTriageReportRenderer:
 
     def instantiation_test(self):
-        test_repo = TriageReportRenderer(testconfig)
-        assert test_repo._config == testconfig
+        config = testconfig
+        templates_environment = Mock()
+
+        triage_report_renderer = TriageReportRenderer(config, templates_environment)
+
+        assert triage_report_renderer._config is testconfig
+        assert triage_report_renderer._templates_environment is templates_environment
 
     def compose_email_object_test(self):
-        test_repo = TriageReportRenderer(testconfig)
-        ticket_dict = OrderedDict()
-        ticket_dict['EdgeName'] = 'Test'
-        ticket_dict['Edge Status'] = 'ok'
-        ticket_dict["Company Events URL"] = 'test.com',
-        ticket_dict['Events URL'] = 'event.com'
-        email = test_repo._ticket_object_to_email_obj(ticket_dict)
-        assert email is not None
-        assert isinstance(email, dict) is True
+        payload = OrderedDict({
+            'Orchestrator Instance': 'some-host',
+            'Edge Name': 'Travis Touchdown',
+            'Links': {
+                'Edge': 'https://some-host/#!/operator/customer/100/monitor/edge/200/',
+                'QoE': 'https://some-host/#!/operator/customer/100/monitor/edge/200/qoe/',
+                'Transport': 'https://some-host/#!/operator/customer/100/monitor/edge/200/links/',
+                'Events': 'https://some-host/#!/operator/customer/100/monitor/events/',
+            },
+            'Edge Status': 'OFFLINE',
+            'Serial': 'VC1234567',
+            'Interface GE1': '',
+            'Interface GE1 Label': 'Solid Snake',
+            'Interface GE1 Status': 'DISCONNECTED',
+            'Interface GE2': '',
+            'Interface GE2 Label': None,
+            'Interface GE2 Status': 'Interface GE2 not available',
+            'Interface INTERNET3': '',
+            'Interface INTERNET3 Label': 'Otacon',
+            'Interface INTERNET3 Status': 'STABLE',
+            'Interface GE10': '',
+            'Interface GE10 Label': 'Big Boss',
+            'Interface GE10 Status': 'STABLE',
+            'Last Edge Online': parse('2019-08-01 10:40:00+00:00'),
+            'Last Edge Offline': parse('2019-08-01 11:40:00+00:00'),
+            'Last GE1 Interface Online': parse('2019-07-30 02:40:00+00:00'),
+            'Last GE1 Interface Offline': parse('2019-07-30 01:40:00+00:00'),
+            'Last GE2 Interface Online': parse('2019-07-01 07:40:00+00:00'),
+            'Last GE2 Interface Offline': parse('2019-07-30 00:40:00+00:00'),
+            'Last INTERNET3 Interface Online': parse('2019-08-01 09:40:00+00:00'),
+            'Last INTERNET3 Interface Offline': None,
+            'Last GE10 Interface Online': None,
+            'Last GE10 Interface Offline': None,
+        })
 
-    def compose_email_object_html_elements_test(self):
-        base = "src/templates/triage/images/{}"
-        kwargs = dict(logo="logo.png",
-                      header="header.jpg")
-        test_repo = TriageReportRenderer(testconfig)
-        ticket_dict = OrderedDict()
-        ticket_dict['EdgeName'] = 'Test'
-        ticket_dict['Edge Status'] = 'ok'
-        ticket_dict["Company Events URL"] = 'test.com',
-        ticket_dict['Events URL'] = 'event.com'
-        email = test_repo._ticket_object_to_email_obj(ticket_dict)
-        assert email["email_data"]["images"][0]["data"] == base64.b64encode(open(base.format(kwargs["logo"]), 'rb')
-                                                                            .read()).decode('utf-8')
-        assert email["email_data"]["images"][1]["data"] == base64.b64encode(open(base.format(kwargs["header"]), 'rb')
-                                                                            .read()).decode('utf-8')
+        email_html = '<html><head>Some head</head><body>Some body</body></html>'
 
-    def ticket_object_to_email_obj_test(self):
         config = testconfig
-        ticket_dict = OrderedDict()
-        ticket_dict['EdgeName'] = 'Test'
-        ticket_dict['Edge Status'] = 'ok'
-        ticket_dict["Company Events URL"] = 'test.com',
-        ticket_dict['Events URL'] = 'event.com'
-        template_renderer = TriageReportRenderer(config)
-        email = template_renderer._ticket_object_to_email_obj(ticket_dict)
 
-        assert 'Service outage triage' in email["email_data"]["subject"]
-        assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
-        assert "<!DOCTYPE html" in email["email_data"]["html"]
+        mock_template = Mock()
+        mock_template.render = Mock(return_value=email_html)
 
-    def ticket_object_to_email_obj_test(self):
-        config = testconfig
-        template_renderer = TriageReportRenderer(config)
-        ticket_dict = OrderedDict()
-        ticket_dict['EdgeName'] = 'Test'
-        ticket_dict['Edge Status'] = 'ok'
-        ticket_dict["Company Events URL"] = 'test.com',
-        ticket_dict['Events URL'] = 'event.com'
-        email = template_renderer._ticket_object_to_email_obj(ticket_dict)
+        templates_environment = Mock()
+        templates_environment.get_template = Mock(return_value=mock_template)
 
-        assert 'Service outage triage' in email["email_data"]["subject"]
-        assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
-        assert "<!DOCTYPE html" in email["email_data"]["html"]
+        triage_report_renderer = TriageReportRenderer(config, templates_environment)
 
-    def ticket_object_to_email_obj_no_events_test(self):
-        config = testconfig
-        template_renderer = TriageReportRenderer(config)
-        ticket_dict = OrderedDict()
-        ticket_dict['EdgeName'] = 'Test'
-        ticket_dict['Edge Status'] = 'ok'
-        email = template_renderer._ticket_object_to_email_obj(ticket_dict)
+        email_object = triage_report_renderer.compose_email_object(payload)
 
-        assert 'Service outage triage' in email["email_data"]["subject"]
-        assert config.TRIAGE_CONFIG["recipient"] in email["email_data"]["recipient"]
-        assert "<!DOCTYPE html" in email["email_data"]["html"]
+        email_object_root_keys = email_object.keys()
+        assert 'request_id' in email_object_root_keys
+        assert 'email_data' in email_object_root_keys
+
+        email_object_data = email_object['email_data']
+        assert 'subject' in email_object_data
+        assert 'recipient' in email_object_data
+        assert 'html' in email_object_data
+        assert 'images' in email_object_data
+
+        assert email_object_data['html'] == email_html
