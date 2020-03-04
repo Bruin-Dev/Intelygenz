@@ -162,6 +162,7 @@ class ServiceOutageTriage:
 
     def _find_recent_occurence_of_event(self, event_list, event_type, message=None):
         for event_obj in event_list:
+
             if event_obj['event'] == event_type:
                 if message is not None:
                     if event_obj['message'] == message:
