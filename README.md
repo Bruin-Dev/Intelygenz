@@ -21,7 +21,6 @@
 
 # Table of Contents
 
-
 - [Project structure](#project-structure)
   - [Naming conventions](#naming-conventions)
 - [Technologies used](#technologies-used)
@@ -35,6 +34,8 @@
 - [Running the project](#running-the-project)
   - [Python 3.6](#python-3.6)
   - [Docker and Docker Compose](#docker-and-docker-compose)
+  - [Docker ECR private repository](#docker-ecr-private-repository)
+  - [Docker custom images](#docker-custom-images)
   - [Env files](#env-files)
   - [Finish up](#finish-up)
 - [Lists of projects READMEs](#lists-of-projects-readmes)
@@ -201,8 +202,8 @@ Python 3.6 is pre-installed in Ubuntu 18.04 so the output should be something li
 
 Remove any old versions and install the latest one:
 
-```
-$ apt update
+```bash
+$ apt update -y
 $ apt -y upgrade
 $ apt remove docker docker-engine docker.io
 $ apt install docker.io
@@ -210,7 +211,7 @@ $ apt install docker.io
 
 For Docker Compose there's a good tutorial in [the official docs](https://docs.docker.com/compose/install/). Summarizing it says:
 
-```
+```bash
 $ curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 $ chmod +x /usr/local/bin/docker-compose
 $ docker-compose --version
@@ -220,15 +221,77 @@ Last command should output something like:
 
 `docker-compose version 1.24.1, build 4667896b`
 
+## Docker ECR private repository
+
+For the images of the Python microservices, one of the custom images uploaded to the ECR repository used in the project is used as a base, these are generated from a [specific repository](https://gitlab.intelygenz.com/mettel/docker_images) for this purpose.
+
+In order to use these images it will be necessary to have configured the authentication with this private repository. To do this it is necessary to perform the following steps:
+
+1. Install awscli, executing from a terminal the following command
+
+    ```bash
+    $ sudo pip3 install awscli -U
+    ```
+
+2. Set up a specific profile with the user's credentials in the AWS account used in the project. To do this, if the `~/.aws/credentials` file does not exist, it will be necessary to modify or create it and add the following
+
+   ```bash
+   [mettel-automation]
+   aws_access_key_id = <user_aws_acces_key_id>
+   aws_secret_access_key = <user_secret_access_key>
+   ```
+
+3. Configure the profile created in the previous step, to do this it is necessary to modify or create in case there is no `~/.aws/config` and add the following:
+
+   ```bash
+   [profile mettel-automation]
+   region=us-east-1
+   output=json
+   ```
+
+4. Use the awscli tool to generate a new entry in `~/.docker/config.json` with the necessary credentials for the ECR repository used in the repository. To do this you need to run the following command:
+
+   ```bash
+   $(aws ecr get-login --no-include-email --profile mettel-automation)
+   ```
+
+## Docker custom images
+
+As mentioned in the previous section, the project uses custom images created from a specific repository, in which semantic-release is used to version these images. Each of these images has a specific version of the python library `igzpackages` installed.
+
+There are a number of variables to indicate the version number of these images, as well as of the `igzpackages` library, which will be used in the CI/CD process of the branch you are working on
+
+- `IGZ_PACKAGES_VERSION`: Used version of the `igzpackages` library. These are published in a S3 bucket, accessible via [CloudFront URL](https://d3nllpcjtts00v.cloudfront.net/igzpackages/index.html).
+
+- `DOCKER_BASE_IMAGE_VERSION`: Used version of the docker custom images as base images of the Python microservices in its `Dockerfile`.
+
+>The versions are available in the [releases](https://gitlab.intelygenz.com/mettel/docker_images/-/releases) section of the repository that manages igzpackages.
+
+These variables are declared in the [.gitlab-ci.yml](.gitlab-ci.yml) file, as explained below:
+
+```yaml
+. . .
+
+variables:
+  . . .
+  IGZ_PACKAGES_VERSION: 1.0.0
+  DOCKER_BASE_IMAGE_VERSION: 1.0.2
+  . . .
+
+. . .
+```
+
+So in case you want to change the version used of the `igzpackages` library and/or the base docker images you must change the variables mentioned.
+
 ## Env files
 
 Ask a maintainer for a temp private token. Clone the mettel repo and run:
 
-```
+```bash
 $ cd installation-utils
 $ python3 -m pip install -r requirements.txt
 $ python3 environment_files_generator.py <private_token>
-``` 
+```
 
 That'll generate all env files needed.
 
