@@ -283,7 +283,7 @@ class BruinClient:
                                     headers=self._get_request_headers(),
                                     json=payload,
                                     verify=False)
-            return_response = dict.fromkeys(["body", "status_code"])
+            return_response = dict.fromkeys(["body", "status"])
 
             if response.status_code in range(200, 300):
                 return_response["body"] = response.json()
