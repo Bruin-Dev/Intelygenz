@@ -29,11 +29,12 @@ class GetTicket:
             if 'ticket_id' in body.keys():
                 ticket_id = body['ticket_id']
 
-            params = dict()
-            params["ticket_id"] = ticket_id
-            params["client_id"] = body["client_id"]
-            params["category"] = body["category"]
-            params["ticket_topic"] = body["ticket_topic"]
+            params = {
+                "ticket_id": ticket_id,
+                "client_id": body["client_id"],
+                "category": body["category"],
+                "ticket_topic": body["ticket_topic"]
+            }
 
             self._logger.info(f'Collecting all tickets for client id: {params["client_id"]}...')
 
