@@ -20,10 +20,9 @@ class GetOutageTicketDetailsByEdgeSerial:
             response["body"] = 'Must include "body" in request'
             await self._event_bus.publish_message(msg['response_topic'], response)
             return
-        if body.get("edge_serial") and body.get("client_id"):
-
-            edge_serial = body['edge_serial']
-            client_id = body['client_id']
+        edge_serial = body.get("edge_serial")
+        client_id = body.get('client_id')
+        if edge_serial and client_id:
             ticket_statuses = body.get('ticket_statuses')
 
             self._logger.info(
