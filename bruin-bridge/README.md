@@ -34,7 +34,6 @@
     * [Description](#description-8)
     * [Request message](#request-message-7)
     * [Response message](#response-message-7)      
-    * [Response message](#response-message-6)      
   * [Post Outage Ticket](#post-outage-ticket)
     * [Description](#description-9)
     * [Request message](#request-message-8)
