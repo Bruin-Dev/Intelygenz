@@ -73,14 +73,14 @@ the hood.
 ### Request message
 ```
 {
-    'request_id': 123, 
-    'body:{
-            'ticket_id': 123, #Optional
-            'client_id': 85940,
-            'category': 'SD-WAN',
-            'ticket_topic': 'VOO'
-            'ticket_status': ['New', 'InProgress'],
-    } 
+    "request_id": "kNxC7FxXpg5ApdgGaX7otC",  # UUID
+    "body": {
+        "ticket_id": 123,  # Optional
+        "client_id": 85940,
+        "category": "SD-WAN",
+        "ticket_topic": "VOO",
+        "ticket_status": ["New", "InProgress"]
+    }
 }
 ```
 
