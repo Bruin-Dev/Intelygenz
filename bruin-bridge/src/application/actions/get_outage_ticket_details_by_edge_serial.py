@@ -14,12 +14,12 @@ class GetOutageTicketDetailsByEdgeSerial:
             'body': None,
             'status': None
         }
-        if msg.get("body") is None:
+        body = msg.get("body")
+        if body is None:
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
             await self._event_bus.publish_message(msg['response_topic'], response)
             return
-        body = msg['body']
         if body.get("edge_serial") and body.get("client_id"):
 
             edge_serial = body['edge_serial']
