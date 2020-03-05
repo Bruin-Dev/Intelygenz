@@ -30,7 +30,7 @@
     * [Description](#description-7)
     * [Request message](#request-message-6)
     * [Response message](#response-message-6)
-  * [Get Management status](#get-management-status)
+  * [Get Management Status](#get-management-status)
     * [Description](#description-8)
     * [Request message](#request-message-7)
     * [Response message](#response-message-7)      
