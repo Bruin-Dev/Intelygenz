@@ -31,7 +31,10 @@ class Alert:
 
     async def _alert_process(self):
         self._logger.info("Requesting all edges with details for alert report")
-        list_request = dict(request_id=uuid(), body={'filter': []})
+        list_request = {
+            'request_id': uuid(),
+            'body': {'filter': []}
+        }
         edge_list = await self._event_bus.rpc_request("edge.list.request", list_request, timeout=200)
         self._logger.info(f'Edge list received from event bus')
         edge_status_requests = [
