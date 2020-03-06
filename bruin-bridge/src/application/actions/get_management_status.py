@@ -16,6 +16,8 @@ class GetManagementStatus:
             'body': None,
             'status': None
         }
+
+        filters = msg.get("body")
         if "body" not in msg.keys():
             self._logger.error(f'Cannot get management status using {json.dumps(msg)}. '
                                f'JSON malformed')
@@ -24,8 +26,6 @@ class GetManagementStatus:
                                '{.."body":{"client_id", "status", "service_number"}...} in the request'
             await self._event_bus.publish_message(response_topic, response)
             return
-
-        filters = msg['body']
 
         if not all(key in filters.keys() for key in ("client_id", "status", "service_number")):
             self._logger.info(f'Cannot get management status using {json.dumps(filters)}. '

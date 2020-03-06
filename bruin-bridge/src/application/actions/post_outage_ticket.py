@@ -11,13 +11,19 @@ class PostOutageTicket:
     async def post_outage_ticket(self, msg: dict):
         request_id = msg['request_id']
         response_topic = msg['response_topic']
-        msg_data = msg["body"]
+        msg_data = msg.get("body")
 
         response = {
             'request_id': request_id,
             'body': None,
             'status': None
         }
+
+        if msg_data is None:
+            response["status"] = 400
+            response["body"] = 'Must include "body" in request'
+            await self._event_bus.publish_message(msg['response_topic'], response)
+            return
 
         if not all(key in msg_data.keys() for key in ("client_id", "service_number")):
             self._logger.error(f'Cannot post ticket using payload {json.dumps(msg)}. '

@@ -13,12 +13,14 @@ class ResolveTicket:
             'request_id': msg['request_id'],
             'status': None
         }
-        if msg.get("body") is None:
+        body = msg.get("body")
+
+        if body is None:
             response["status"] = 400
             response["body"] = 'Must include "body" in request'
             await self._event_bus.publish_message(msg['response_topic'], response)
             return
-        body = msg['body']
+
         if body.get("ticket_id") and body.get("detail_id"):
 
             ticket_id = body["ticket_id"]

@@ -75,6 +75,34 @@ class TestPostOutageTicket:
         )
 
     @pytest.mark.asyncio
+    async def post_outage_ticket_with_missing_body_test(self):
+        logger = Mock()
+        bruin_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+
+        parameters = {
+            "service_number": "VC05400009999"
+        }
+        response_topic = "some.topic"
+        event_bus_request = {"request_id": 123, "response_topic": response_topic}
+
+        post_outage_ticket = PostOutageTicket(logger, event_bus, bruin_repository)
+
+        await post_outage_ticket.post_outage_ticket(event_bus_request)
+
+        bruin_repository.post_outage_ticket.assert_not_called()
+        event_bus.publish_message.assert_awaited_once_with(
+            "some.topic",
+            {
+                "request_id": 123,
+                "status": 400,
+                "body": 'Must include "body" in request',
+            },
+        )
+
+    @pytest.mark.asyncio
     async def post_outage_ticket_with_invalid_client_id_test(self):
         logger = Mock()
         bruin_repository = Mock()
