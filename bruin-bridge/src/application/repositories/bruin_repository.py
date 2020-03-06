@@ -138,3 +138,26 @@ class BruinRepository:
 
         response['body'] = response['body']['ticketId']
         return response
+
+    def get_client_info(self, filters):
+        response = self._bruin_client.get_client_info(filters)
+
+        if response["status_code"] not in range(200, 300):
+            return response
+
+        documents = response["body"].get("documents")
+        response_body = {"client_id": None,
+                         "client_name": None}
+
+        if documents:
+            # We only want the current active company for the device if there's one
+            active_status = [status for status in documents if status["status"] == "A"]
+            if active_status:
+                # There should be only one active status per serial
+                client_id = active_status[0].get("clientID")
+                client_name = active_status[0].get("clientName")
+                response_body = {"client_id": client_id,
+                                 "client_name": client_name}
+
+        response["body"] = response_body
+        return response

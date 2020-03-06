@@ -483,3 +483,51 @@ class BruinClient:
             return post_outage_ticket()
         except Exception as e:
             return e.args[0]
+
+    def get_client_info(self, filters):
+        @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
+                                     min=self._config.BRUIN_CONFIG['min']),
+               stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
+        def get_client_info():
+            self._logger.info(f'Getting Bruin client ID for filters: {filters}')
+            parsed_filters = humps.pascalize(filters)
+            return_response = dict.fromkeys(["body", "status_code"])
+
+            try:
+                response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+                                        headers=self._get_request_headers(),
+                                        params=parsed_filters,
+                                        verify=False)
+            except ConnectionError as e:
+                self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
+                return_response["body"] = f"Connection error in Bruin API. {e}"
+                return_response["status_code"] = 500
+                return return_response
+
+            if response.status_code in range(200, 300):
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+
+            if response.status_code == 400:
+                return_response["body"] = response.json()
+                return_response["status_code"] = response.status_code
+                self._logger.error(f"Got error from Bruin {response.json()}")
+
+            if response.status_code == 401:
+                self._logger.info(f"Got 401 from Bruin, re-login and retrying")
+                self.login()
+
+                return_response["body"] = f"Got Unauthorized from Bruin"
+                return_response["status_code"] = 401
+                raise Exception(return_response)
+
+            if response.status_code in range(500, 513):
+                return_response["body"] = f"Got internal error from Bruin"
+                return_response["status_code"] = 500
+
+            return return_response
+
+        try:
+            return get_client_info()
+        except Exception as e:
+            return e.args[0]

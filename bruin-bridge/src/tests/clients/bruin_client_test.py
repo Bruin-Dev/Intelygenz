@@ -1,13 +1,13 @@
 import json
-
-from unittest.mock import call
 from unittest.mock import Mock
+from unittest.mock import call
 from unittest.mock import patch
 
-from application.clients.bruin_client import BruinClient
+import humps
 from pytest import raises
 
 from application.clients import bruin_client as bruin_client_module
+from application.clients.bruin_client import BruinClient
 from config import testconfig as config
 
 
@@ -1303,3 +1303,265 @@ class TestPostOutageTicket:
             "status_code": bruin_response_status_code,
         }
         assert result == expected
+
+    def get_client_info_200_test(self):
+        service_number = "VC01919"
+
+        filters = {
+            'service_number': service_number,
+            'status': 'A'
+        }
+
+        bruin_response_message = {
+            "documents": [
+                {
+                    "clientID": 9919,
+                    "clientName": "Tet Corp",
+                    "vendor": "Central Positronics",
+                    "accountNumber": "59864",
+                    "subAccountNumber": "4554",
+                    "inventoryID": "12295777",
+                    "serviceNumber": "VC01919",
+                    "siteId": 16199,
+                    "siteLabel": "Turtle Square",
+                    "address": {
+                        "address": "2125 Fake Street",
+                        "city": "River Crossing",
+                        "state": "ST",
+                        "zip": "1999556",
+                        "country": "MEJIS"
+                    },
+                    "hierarchy": "|Tet Corp|River Crossing|SomeSite|",
+                    "costCenter": "15830",
+                    "assignee": None,
+                    "description": "",
+                    "installDate": "2018-04-03T17:58:51Z",
+                    "disconnectDate": None,
+                    "status": "A",
+                    "verified": "Y",
+                    "productCategory": "SD-WAN",
+                    "productType": "SD-WAN",
+                    "items": [
+                        {
+                            "itemName": "Licensed Software - SD-WAN 30M",
+                            "primaryIndicator": "SD-WAN"
+                        }
+                    ],
+                    "contractIdentifier": None,
+                    "rateCardIdentifier": None,
+                    "lastInvoiceUsageDate": "2020-02-23T05:00:00Z",
+                    "lastUsageDate": None,
+                    "longitude": -76.265384,
+                    "latitude": 36.843456
+                }
+            ]
+        }
+
+        bruin_response_status_code = 200
+
+        bruin_response = Mock()
+        bruin_response.json = Mock(return_value=bruin_response_message)
+        bruin_response.status_code = bruin_response_status_code
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = Mock()
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=bruin_response):
+            result = bruin_client.get_client_info(filters)
+
+            get_client_info_call = call(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+                headers=bruin_client._get_request_headers(),
+                params=humps.pascalize(filters),
+                verify=False
+            )
+            assert get_client_info_call in bruin_client_module.requests.get.mock_calls
+
+        expected = {
+            "body": bruin_response_message,
+            "status_code": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def get_client_info_test_empty_result_200(self):
+        service_number = "VC01919"
+
+        filters = {
+            'service_number': service_number,
+        }
+
+        bruin_response_message = {
+            "documents": []
+        }
+
+        bruin_response_status_code = 200
+
+        bruin_response = Mock()
+        bruin_response.json = Mock(return_value=bruin_response_message)
+        bruin_response.status_code = bruin_response_status_code
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = Mock()
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=bruin_response):
+            result = bruin_client.get_client_info(filters)
+
+            get_client_info_call = call(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+                headers=bruin_client._get_request_headers(),
+                params=humps.pascalize(filters),
+                verify=False
+            )
+            assert get_client_info_call in bruin_client_module.requests.get.mock_calls
+
+        expected = {
+            "body": bruin_response_message,
+            "status_code": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def get_client_info_400_test(self):
+        service_number = "VC01919"
+        # Client ID that doesn't belong to their database.
+        # If serial doesn't belong there will be a 200 empty response
+        client_id = 1328974321874231078946876
+
+        filters = {
+            'service_number': service_number,
+            'client_id': client_id
+        }
+
+        bruin_response_message = {
+            "errors": {
+                "clientId": [
+                    "The value is not valid."
+                ]
+            },
+            "type": None,
+            "title": "Invalid arguments to the API",
+            "status": 400,
+            "detail": "The inputs supplied to the API are invalid",
+            "instance": "/api/Inventory",
+            "extensions": {}
+        }
+
+        bruin_response_status_code = 400
+
+        bruin_response = Mock()
+        bruin_response.json = Mock(return_value=bruin_response_message)
+        bruin_response.status_code = bruin_response_status_code
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+        bruin_client.login = Mock()
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=bruin_response):
+            result = bruin_client.get_client_info(filters)
+
+            get_client_info_call = call(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+                headers=bruin_client._get_request_headers(),
+                params=humps.pascalize(filters),
+                verify=False
+            )
+            assert get_client_info_call in bruin_client_module.requests.get.mock_calls
+
+        expected = {
+            "body": bruin_response_message,
+            "status_code": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def get_client_info_with_ko_401_test(self):
+        logger = Mock()
+
+        filters = {
+            "client_id": 9994,
+            "status": "A",
+            "service_number": "VC05400009999"
+        }
+
+        empty_response = {}
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=empty_response)
+        response_mock.status_code = 401
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            with raises(Exception):
+                bruin_client.get_client_info(filters)
+                bruin_client_module.requests.get.assert_called_once_with(
+                    f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+                    headers=bruin_client._get_request_headers(),
+                    params=humps.pascalize(filters),
+                    verify=False
+                )
+                self.assertRaises(Exception, bruin_client.get_client_info)
+                bruin_client.login.assert_called()
+
+    def get_client_info_with_ko_5XX_test(self):
+        logger = Mock()
+
+        filters = {
+            "client_id": 9994,
+            "service_number": "VC05400009999",
+            "status": "A"
+        }
+
+        response_mock = Mock()
+        response_mock.json = Mock()
+        response_mock.status_code = 500
+
+        expected_result = {"body": "Got internal error from Bruin", "status_code": 500}
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            result = bruin_client.get_client_info(filters)
+            bruin_client_module.requests.get.assert_called_with(
+                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+                headers=bruin_client._get_request_headers(),
+                params=humps.pascalize(filters),
+                verify=False
+            )
+            assert result == expected_result
+
+    def get_client_info_with_connection_error_test(self):
+        logger = Mock()
+
+        filters = {
+            "client_id": 9994,
+            "service_number": "VC05400009999",
+            "status": "A"
+        }
+        cause = "ERROR"
+
+        message = {
+            "body": f"Connection error in Bruin API. {cause}",
+            "status_code": 500}
+
+        with patch.object(bruin_client_module.requests, 'get', side_effect=ConnectionError(cause)):
+            bruin_client = BruinClient(logger, config)
+            bruin_client.login = Mock()
+            bruin_client._bearer_token = "Someverysecretaccesstoken"
+            result = bruin_client.get_client_info(filters)
+            bruin_client_module.requests.get.assert_called_with(
+                f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+                headers=bruin_client._get_request_headers(),
+                params=humps.pascalize(filters),
+                verify=False
+            )
+
+            assert result == message
