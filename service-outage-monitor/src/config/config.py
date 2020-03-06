@@ -28,7 +28,7 @@ MONITOR_CONFIG = {
     'jobs_intervals': {
         'outage_detector': 60 * 40,
         'outage_monitor': 60 * 3,
-        'outage_reporter': 60 * 210,
+        'outage_reporter': 60 * 240,
         'quarantine': quarantine_time,
     },
     'quarantine_key_ttl': quarantine_time + 60 * 5,
