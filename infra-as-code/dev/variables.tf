@@ -80,11 +80,6 @@ variable "SERVICE_OUTAGE_MONITOR_BUILD_NUMBER" {
   default = "automation-master-latest"
 }
 
-variable "SERVICE_OUTAGE_TRIAGE_BUILD_NUMBER" {
-  description = "Docker build number of image for service-outage-triage microservice"
-  default = "automation-master-latest"
-}
-
 variable "SITES_MONITOR_BUILD_NUMBER" {
   description = "Docker build number of image for sites-monitor microservice"
   default = "automation-master-latest"
@@ -284,12 +279,6 @@ variable "service_outage_monitor_desired_tasks" {
   default = 0
   type = number
   description = "Number of desired tasks of microservice service-outage-monitor"
-}
-
-variable "service_outage_triage_desired_tasks" {
-  default = 1
-  type = number
-  description = "Number of desired tasks of microservice service-outage-triage"
 }
 
 variable "sites_monitor_desired_tasks" {

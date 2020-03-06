@@ -14,7 +14,6 @@
 | notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| service-outage-triage|[![service-outage-triage-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-triage-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | t7-bridge|[![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | velocloud-bridge|[![velocloud-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | sites-monitor|[![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -125,7 +124,6 @@ variables:
   notifier_desired_tasks: 1
   service_affecting_monitor_desired_tasks: 1
   service_outage_monitor_desired_tasks: 0
-  service_outage_triage_desired_tasks: 0
   sites_monitor_desired_tasks: 0
   t7_bridge_desired_tasks: 0
   velocloud_bridge_desired_tasks: 5

@@ -12,19 +12,9 @@
                         "ECS/ContainerInsights",
                         "RunningTaskCount",
                         "ServiceName",
-                        "${ENVIRONMENT}-service-outage-triage",
+                        "${ENVIRONMENT}-metrics-prometheus",
                         "ClusterName",
                         "${ENVIRONMENT}",
-                        {
-                            "period":300,
-                            "stat":"Sum"
-                        }
-                    ],
-                    [
-                        "...",
-                        "${ENVIRONMENT}-metrics-prometheus",
-                        ".",
-                        ".",
                         {
                             "period":300,
                             "stat":"Sum"
@@ -219,12 +209,6 @@
                         "${ENVIRONMENT}-service-outage-monitor",
                         ".",
                         "."
-                    ],
-                    [
-                        "...",
-                        "${ENVIRONMENT}-service-outage-triage",
-                        ".",
-                        "."
                     ]
                 ],
                 "region":"us-east-1",
@@ -284,12 +268,6 @@
                     [
                         "...",
                         "${ENVIRONMENT}-service-outage-monitor",
-                        ".",
-                        "."
-                    ],
-                    [
-                        "...",
-                        "${ENVIRONMENT}-service-outage-triage",
                         ".",
                         "."
                     ],

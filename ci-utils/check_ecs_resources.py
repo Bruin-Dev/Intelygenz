@@ -23,7 +23,6 @@ class CheckECSResources:
                            os.environ['TF_VAR_notifier_desired_tasks'],
                            os.environ['TF_VAR_service_affecting_monitor_desired_tasks'],
                            os.environ['TF_VAR_service_outage_monitor_desired_tasks'],
-                           os.environ['TF_VAR_service_outage_triage_desired_tasks'],
                            os.environ['TF_VAR_sites_monitor_desired_tasks'],
                            os.environ['TF_VAR_t7_bridge_desired_tasks'],
                            os.environ['TF_VAR_velocloud_bridge_desired_tasks']]

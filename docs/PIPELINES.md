@@ -85,8 +85,6 @@ In these jobs services in the monorepo will be deployed to the selected environm
 
     * [service-outage-monitor](../service-outage-monitor)
 
-    * [service-outage-triage](../service-outage-triage)
-
     * [t7-bridge](../t7-bridge)
 
     * [velocloud-bridge](../velocloud-bridge)
@@ -123,7 +121,7 @@ Also, resources of type `null_resource` are created to execute some Python scrip
 
 2. If the previous step succeeded then ECS services related to capabilities microservices are created (`bruin-bridge`, `velocloud-bridge`, `t7-bridge`, `notifier` and `prometheus`). Once created, the script used for NATS is launched through `null_resource` to check that the task instances for each of these ECS services were created successfully and are in `RUNNING` and `HEALTHY` status.
 
-3. Once all the scripts for the capabilities microservices have finished successfully, ECS services for the use-cases microservices are all created; that is, [last-contact-report](../last-contact-report), [service-affecting-monitor](../service-affecting-monitor), [service-outage-monitor](../service-outage-monitor), [service-outage-triage](../service-outage-triage) and [sites-monitor](../sites-monitor) are created. This is achieved by defining explicit dependencies between the ECS services for the capabilities microservices and the set of null resources that perform the healthcheck of the capabilities microservices.​
+3. Once all the scripts for the capabilities microservices have finished successfully, ECS services for the use-cases microservices are all created; that is, [last-contact-report](../last-contact-report), [service-affecting-monitor](../service-affecting-monitor), [service-outage-monitor](../service-outage-monitor) and [sites-monitor](../sites-monitor) are created. This is achieved by defining explicit dependencies between the ECS services for the capabilities microservices and the set of null resources that perform the healthcheck of the capabilities microservices.​
 
    The following is an example of a definition for the use-case microservice `service-affecting-monitor` using [*Terraform*](https://www.terraform.io/). Here, the dependency between the corresponding `null_resource` type resources in charge of performing the health check of the different capabilities microservices in Terraform code for this microservice is established.
 

@@ -132,16 +132,6 @@ locals {
   automation-service-outage-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-monitor.family}:${aws_ecs_task_definition.automation-service-outage-monitor.revision}"
   automation-service-outage-monitor-service_discovery_service-name = "service-outage-monitor-${var.ENVIRONMENT}"
 
-  // automation-service-outage-triage local vars
-  automation-service-outage-triage-image = "${data.aws_ecr_repository.automation-service-outage-triage.repository_url}:${var.SERVICE_OUTAGE_TRIAGE_BUILD_NUMBER}"
-  automation-service-outage-triage-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
-  automation-service-outage-triage-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-triage"
-  automation-service-outage-triage-service-security_group-name = "${var.ENVIRONMENT}-service-outage-triage"
-  automation-service-outage-triage-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-triage"
-  automation-service-outage-triage-ecs_service-name = "${var.ENVIRONMENT}-service-outage-triage"
-  automation-service-outage-triage-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-triage.family}:${aws_ecs_task_definition.automation-service-outage-triage.revision}"
-  automation-service-outage-triage-service_discovery_service-name = "service-outage-triage-${var.ENVIRONMENT}"
-
   // automation-velocloud-bridge local vars
   automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.VELOCLOUD_BRIDGE_BUILD_NUMBER}"
   automation-velocloud-bridge-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
@@ -196,10 +186,6 @@ locals {
   // alarm running_task_count_bruin-bridge local variables
   running_task_count_bruin-bridge_alarm-name = "Running tasks count of bruin-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_bruin-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_bruin-bridge"
-
-  // alarm running_task_count_service-outage-triage local variables
-  running_task_count_service-outage-triage_alarm-name = "Running tasks count of service-outage-triage service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_service-outage-triage_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-triage"
 
   // alarm running_task_count_service-affecting-monitor local variables
   running_task_count_service-affecting-monitor_alarm-name = "Running tasks count of service-affecting-monitor service in ECS cluster with name ${var.ENVIRONMENT}"

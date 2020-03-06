@@ -43,7 +43,7 @@ the hood. If any error occurs during the process then an error message is printe
     'request_id': 123,
     'email_data': {
         'subject': 'Some Subject',
-        'recipient': self._config.TRIAGE_CONFIG["recipient"],
+        'recipient': 'some-email',
         'text': 'this is the accessible text for the email',
         'html': email_html,
         'images': [],

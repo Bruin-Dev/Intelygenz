@@ -92,7 +92,6 @@ check-ecs-resources-branches:
     - export TF_VAR_notifier_desired_tasks=${notifier_desired_tasks}
     - export TF_VAR_service_affecting_monitor_desired_tasks=${service_affecting_monitor_desired_tasks}
     - export TF_VAR_service_outage_monitor_desired_tasks=${service_outage_monitor_desired_tasks}
-    - export TF_VAR_service_outage_triage_desired_tasks=${service_outage_triage_desired_tasks}
     - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
     - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
     - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
@@ -115,7 +114,6 @@ check-ecs-resources-master:
     - export TF_VAR_notifier_desired_tasks=${notifier_desired_tasks}
     - export TF_VAR_service_affecting_monitor_desired_tasks=${service_affecting_monitor_desired_tasks}
     - export TF_VAR_service_outage_monitor_desired_tasks=${service_outage_monitor_desired_tasks}
-    - export TF_VAR_service_outage_triage_desired_tasks=${service_outage_triage_desired_tasks}
     - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
     - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
     - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
@@ -153,7 +151,6 @@ deploy-branches:
     - export TF_VAR_notifier_desired_tasks=${notifier_desired_tasks}
     - export TF_VAR_service_affecting_monitor_desired_tasks=${service_affecting_monitor_desired_tasks}
     - export TF_VAR_service_outage_monitor_desired_tasks=${service_outage_monitor_desired_tasks}
-    - export TF_VAR_service_outage_triage_desired_tasks=${service_outage_triage_desired_tasks}
     - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
     - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
     - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
@@ -198,7 +195,6 @@ deploy-master:
     - export TF_VAR_notifier_desired_tasks=${notifier_desired_tasks}
     - export TF_VAR_service_affecting_monitor_desired_tasks=${service_affecting_monitor_desired_tasks}
     - export TF_VAR_service_outage_monitor_desired_tasks=${service_outage_monitor_desired_tasks}
-    - export TF_VAR_service_outage_triage_desired_tasks=${service_outage_triage_desired_tasks}
     - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
     - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
     - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}

@@ -46,8 +46,6 @@ There are two types of microservices showed in the diagram above depending on th
 
     * *service-outage-monitor*
 
-    * *service-outage-triage*
-
     * *sites-monitor*
 
     * *last-contact-report*
@@ -137,24 +135,35 @@ In the following [diagram](https://www.draw.io/#G1FE_V_fGLC9wSsa9wWMixDMnG_7EGGO
 
 ![IMAGE: service-affecting-monitor_microservice_relationships](./img/system_overview/microservices_with_communications/service-affecting-monitor_microservice_relationships.png)
 
-#### Service-outage-triage microservice
-
-The objective of this microservice is to enrich information from a ticket, adding to this edge alerts obtained through the *velocloud-bridge* microservice. It is important to note that this microservice will never create tickets.
-
-For this ticket enrichment process, events are obtained from a router, creating a triage note and adding it to a ticket associated with that router. The events observed correspond to those of the last seven days.
-
-This microservice also sends notifications by email and slack, when the mentioned information is added to the ticket, using the *notifier* microservice.
-
-In the following [diagram](https://www.draw.io/#G1sng_-HPOWgPHWry2uFcHXoVfbEw-3ihN) it's possible see the relations of this microservice with the others.
-![IMAGE: service-outage-triage_microservice_relationships](./img/system_overview/microservices_with_communications/service-outage-triage_microservice_relationships.png)
-
 #### Service-outage-monitor microservice
 
-The function performed by this microservice is to obtain the edges of certain clients, observing these for the detection of falls (outages).
+This microservice orchestrates the execution of three different processes:
 
-When a fall of a router is detected, it is kept in a "quarantine" to observe it more closely. If, after a while, the edge continues to fall, then a query is made as to whether it has a ticket created, and if it does not, it is moved from quarantine to a reporting queue.
+* Comparison report. This process is in charge of reporting edges in outage state that are not under an outage ticket every hour.
 
-Every hour the reporting queue is consumed and an e-mail is sent, this will include all the routers that at some point have fallen without any support ticket created, using the notifier microservice.
+  When an outage is detected, the edge is sent to a quarantine and it is checked again 10 minutes later. If the edge remains in outage state and it
+is not under any outage ticket in Bruin then it is moved from quarantine to another queue to be reported. The report is sent via e-mail when the hour scheduled at the beginning of the process is reached.
+
+* Outage monitoring. This process is responsible for resolving/unresolving outage tickets depending on the state of an edge. It is triggered every 3 minutes.
+
+  If an edge is detected to be in outage state then it is scheduled for a recheck in the next 10 minutes. If the edge is still in outage state, the system
+will try creating a new outage ticket. If Bruin reports back that an outage ticket with Resolved status exists already then it is unresolved; if not, a new outage ticket may have been created or an outage ticket with In Progress status may exist already, so no additional action
+will be taken.
+
+  In case the edge was detected to be healthy, the system looks for an open outage ticket for this edge and resolves it in case it exists.
+
+* Triage. This process is aimed at updating existing outage tickets in Bruin with information related to recent edge events. It is triggered every 2 minutes.
+
+  At the beginning, the process gathers all the open outage tickets related with the companies that are under triage monitoring. Tickets not related with edges belonging to these companies
+  are discarded before going on.
+
+  The process starts dealing with every ticket in the set collected in the previous step:
+  * If the outage ticket does not have any triage note from a previous execution of the triage process then a triage note is appended with information of the events related to the edge corresponding to this ticket. Events correspond to the period between 7 days ago and the current moment.
+    If the current environment is DEV instead of PRODUCTION then no note is appended to the ticket; instead, an e-mail with a summary of the triage results is delivered to the development team.
+
+  * If the outage ticket already has a triage note from a previous execution then the process attempts to append new triage notes to the ticket but only if the last triage note was not appended recently (30 minutes or less ago). In case there's no recent triage note, edge events from the period
+    between the creation date of the last triage note and the current moment are claimed to Velocloud and then they are included in the triage notes, which are finally appended to the ticket. Note that due to Bruin limitations it is not feasible to have a triage note with 1500 characters or more;
+    that is the reason why several triage notes are appended to the ticket (instead of just appending one).
 
 In the following [diagram](https://www.draw.io/#G1Da5yU-ohkQQ5eKJE1sB9URzLyXyXcZx0) it's possible see the relationship of this microservice with the others.
 ![IMAGE: service-outage-monitor_microservice_relationships](./img/system_overview/microservices_with_communications/service-outage-monitor_microservice_relationships.png)

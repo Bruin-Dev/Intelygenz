@@ -22,8 +22,6 @@ export TF_VAR_SERVICE_AFFECTING_MONITOR_BUILD_NUMBER=$(cat /tmp/automation-servi
 echo "TF_VAR_SERVICE_AFFECTING_MONITOR_BUILD_NUMBER is ${TF_VAR_SERVICE_AFFECTING_MONITOR_BUILD_NUMBER}"
 export TF_VAR_SERVICE_OUTAGE_MONITOR_BUILD_NUMBER=$(cat /tmp/automation-service-outage-monitor.json | jq -r .tag)
 echo "TF_VAR_SERVICE_OUTAGE_MONITOR_BUILD_NUMBER is ${TF_VAR_SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
-export TF_VAR_SERVICE_OUTAGE_TRIAGE_BUILD_NUMBER=$(cat /tmp/automation-service-outage-triage.json | jq -r .tag)
-echo "TF_VAR_SERVICE_OUTAGE_TRIAGE_BUILD_NUMBER is ${TF_VAR_SERVICE_OUTAGE_TRIAGE_BUILD_NUMBER}"
 export TF_VAR_SITES_MONITOR_BUILD_NUMBER=$(cat /tmp/automation-sites-monitor.json | jq -r .tag)
 echo "TF_VAR_SITES_MONITOR_BUILD_NUMBER is ${TF_VAR_SITES_MONITOR_BUILD_NUMBER}"
 export TF_VAR_T7_BRIDGE_BUILD_NUMBER=$(cat /tmp/automation-t7-bridge.json | jq -r .tag)

@@ -24,7 +24,6 @@ class DeleteOlderDockerImage:
                              'automation-notifier',
                              'automation-service-affecting-monitor',
                              'automation-service-outage-monitor',
-                             'automation-service-outage-triage',
                              'automation-sites-monitor',
                              'automation-t7-bridge',
                              'automation-velocloud-bridge']
@@ -61,8 +60,7 @@ class DeleteOlderDockerImage:
 
     def _save_repository_name_newer_image(self, repository_name_p, data_newer_image):
         if '/' in repository_name_p:
-            with open(self._default_route_save_repositories +
-                      repository_name_p.split('/')[1] + '.json', 'w') as outfile:
+            with open(f"{self._default_route_save_repositories}{repository_name_p.split('/')[1]}.json", 'w') as outfile:
                 json.dump(data_newer_image, outfile)
         else:
             with open(self._default_route_save_repositories + repository_name_p + '.json', 'w') as outfile:
