@@ -17,7 +17,6 @@ terraform-validate-network-resources:
   extends: .terraform_validate_template
   script:
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
-    - apk add gettext
     - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
     - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources

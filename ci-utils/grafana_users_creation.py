@@ -70,6 +70,9 @@ def check_users_existance():
     update_main_folder_permissions()
 
 
+@retry(wait=wait_exponential(multiplier=5,
+                             min=5),
+       stop=stop_after_delay(300))
 def create_user(user):
     print(f'Creating user {user["login"]}.')
     user_data = {
@@ -97,6 +100,7 @@ def create_user(user):
         else:
             print(response.text)
             print(f'Error creating user {user["login"]}.')
+            raise Exception
     except ConnectionError as e:
         print(e)
         exit(1)

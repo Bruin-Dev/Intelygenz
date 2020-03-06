@@ -1,10 +1,10 @@
 #NOTE: This dockerfile is made to be run with context in the root of the monorepo
-FROM python:3.6
+ARG REPOSITORY_URL
+ARG DOCKER_BASE_IMAGE_VERSION
+FROM ${REPOSITORY_URL}-python-3.6:${DOCKER_BASE_IMAGE_VERSION}
 
 
 COPY base-microservice/ /service/app
-# Add custom packages to the image in order to import them
-COPY custompackages/ /service/custompackages
 
 WORKDIR /service/app
 

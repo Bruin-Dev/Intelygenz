@@ -36,7 +36,6 @@
     - export TF_VAR_BRUIN_LOGIN_URL_PRO=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL_PRO=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-    - apk add gettext
   only:
     - master
     - /^*dev/feature/.*$/

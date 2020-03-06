@@ -1,2 +1,2 @@
 pyyaml==5.2
-igzpackages==0.0.1
+igzpackages==${IGZ_PACKAGES_VERSION}

@@ -1,6 +1,8 @@
 FROM grafana/grafana:6.5.2
 
 ARG IGZ_PACKAGES_REPOSITORY_URL
+ARG IGZ_PACKAGES_VERSION
+ENV IGZ_PACKAGES_VERSION=${IGZ_PACKAGES_VERSION}
 
 USER root
 
@@ -9,7 +11,6 @@ ARG GRAFANA_ADMIN_PASSWORD
 ENV GF_SECURITY_ADMIN_PASSWORD=$GRAFANA_ADMIN_PASSWORD
 ENV GF_INSTALL_PLUGINS=grafana-piechart-panel
 
-COPY ./custompackages /custompackages
 COPY ./metrics-dashboard /metrics-dashboard
 
 RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.9/main' >> /etc/apk/repositories
