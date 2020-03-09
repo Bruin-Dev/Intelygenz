@@ -20,7 +20,7 @@ TRIAGE_CONFIG = {
     'timezone': 'US/Eastern',
     'monitoring_seconds': 120,
     'event_limit': 15,
-    'velo_filter': [{"host": "mettel.velocloud.net", "enterprise_ids": []}],
+    'velo_filter': {"mettel.velocloud.net": []},
     'autoresolve_serials_whitelist': ["VC05400002265"],
     'bruin_company_ids': [85940],
     'id_by_serial': {

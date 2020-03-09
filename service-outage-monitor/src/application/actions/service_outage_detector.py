@@ -87,10 +87,12 @@ class ServiceOutageDetector:
             edge_identifier = EdgeIdentifier(**edge_full_id)
 
             self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}.')
-            edge_status = await self._get_edge_status_by_id(edge_full_id)
+            full_edge_status = await self._get_edge_status_by_id(edge_full_id)
             self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
             self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
-            if edge_status:
+            edge_status = {}
+            if full_edge_status["status"] in range(200, 300):
+                edge_status = full_edge_status["body"]["edge_info"]
                 management_status = await self._get_management_status(edge_status)
             else:
                 management_status = {"status": 500, "body": None}
@@ -106,7 +108,7 @@ class ServiceOutageDetector:
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                 continue
 
-            if not self._is_management_status_active(management_status):
+            if not self._is_management_status_active(management_status["body"]):
                 self._logger.info(
                     f'Management status is not active for {edge_identifier}. Skipping process...')
                 continue
@@ -146,11 +148,12 @@ class ServiceOutageDetector:
 
         self._logger.info(
             f"[outage-recheck] Checking status of {edge_identifier} to ensure it's still in outage state...")
-        edge_status = await self._get_edge_status_by_id(edge_full_id)
+        full_edge_status = await self._get_edge_status_by_id(edge_full_id)
         self._logger.info(f'[outage-recheck] Got status for edge {edge_identifier}.')
-
+        edge_status = {}
         is_outage = None
-        if edge_status is not None:
+        if full_edge_status["status"] in range(200, 300):
+            edge_status = full_edge_status["body"]["edge_info"]
             is_outage = self._outage_utils.is_there_an_outage(edge_status)
         if is_outage:
             self._logger.info(f'[outage-recheck] Edge {edge_identifier} is still in outage state.')
@@ -308,10 +311,15 @@ class ServiceOutageDetector:
             edge_identifier = EdgeIdentifier(**edge_full_id)
             try:
                 self._logger.info(f'[outage-report] Checking status of {edge_identifier}.')
-                edge_status = await self._get_edge_status_by_id(edge_full_id)
-                self._logger.info(f'[outage-report] Got status for edge: {edge_identifier}.')
 
-                management_status = await self._get_management_status(edge_status)
+                full_edge_status = await self._get_edge_status_by_id(edge_full_id)
+                self._logger.info(f'[outage-report] Got status for edge: {edge_identifier}.')
+                edge_status = {}
+                if full_edge_status["status"] in range(200, 300):
+                    edge_status = full_edge_status["body"]["edge_info"]
+                    management_status = await self._get_management_status(edge_status)
+                else:
+                    management_status = {"status": 500, "body": None}
 
                 if management_status["status"] not in range(200, 300):
                     self._logger.info(f"Management status is unknown for {edge_identifier}")
@@ -325,7 +333,7 @@ class ServiceOutageDetector:
                         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                     continue
 
-                if not self._is_management_status_active(management_status):
+                if not self._is_management_status_active(management_status["body"]):
                     self._logger.info(f"Management status is not active. {edge_identifier} won't be reported")
                     continue
                 else:
@@ -466,8 +474,8 @@ class ServiceOutageDetector:
             edge_full_id = edge_identifier._asdict()
 
             try:
-                edge_new_status = await self._get_edge_status_by_id(edge_full_id)
-
+                full_edge_new_status = await self._get_edge_status_by_id(edge_full_id)
+                edge_new_status = full_edge_new_status["body"].get("edge_info")
                 try:
                     is_reportable_edge = await self._is_reportable_edge(edge_new_status)
                 except ValueError as e:
@@ -504,7 +512,7 @@ class ServiceOutageDetector:
     async def _get_all_edges(self):
         edge_list_request_dict = {
             'request_id': uuid(),
-            'body': {'filter': []}
+            'body': {'filter': {}}
         }
         edge_list_response = await self._event_bus.rpc_request(
             'edge.list.request', edge_list_request_dict, timeout=600,
@@ -514,8 +522,8 @@ class ServiceOutageDetector:
 
     async def _process_edge_from_quarantine(self, edge_full_id):
         edge_identifier = EdgeIdentifier(**edge_full_id)
-        edge_status = await self._get_edge_status_by_id(edge_full_id)
-
+        full_edge_status = await self._get_edge_status_by_id(edge_full_id)
+        edge_status = full_edge_status["body"].get("edge_info")
         try:
             is_reportable_edge = await self._is_reportable_edge(edge_status)
         except ValueError as e:
@@ -564,11 +572,7 @@ class ServiceOutageDetector:
             'edge.status.request', edge_status_request_dict, timeout=120,
         )
 
-        if edge_status_response["status"] in range(200, 300):
-            return edge_status_response['body']['edge_info']
-
-        self._logger.error(f"It wasn't possible get the edge status for {edge_full_id}")
-        return None
+        return edge_status_response
 
     async def _get_outage_ticket_for_edge(self, edge_status: dict, ticket_statuses=None):
         edge_serial = edge_status['edges']['serialNumber']
@@ -620,8 +624,6 @@ class ServiceOutageDetector:
         self._logger.info(f'Edge {edge_identifier} moved from quarantine to the reporting queue.')
 
     async def _get_management_status(self, edge_status):
-        if not edge_status:
-            return {"body": None, "status": 500}
         enterprise_name = edge_status['enterprise_name']
         bruin_client_id = self._extract_client_id(enterprise_name)
         serial_number = edge_status['edges']['serialNumber']
@@ -640,7 +642,4 @@ class ServiceOutageDetector:
         return management_status
 
     def _is_management_status_active(self, management_status) -> bool:
-        if management_status["body"] in {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"}:
-            return True
-        else:
-            return False
+        return management_status in {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"}

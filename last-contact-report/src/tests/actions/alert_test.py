@@ -157,7 +157,7 @@ class TestAlert:
         assert len(reported_edges) == 3
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
-                 {'request_id': test_uuid, 'body': {'filter': []}},
+                 {'request_id': test_uuid, 'body': {'filter': {}}},
                  timeout=200),
             call("edge.status.request",
                  {'request_id': 123, 'body': 'Edge1'},
@@ -262,7 +262,7 @@ class TestAlert:
         assert len(reported_edges) == 1
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
-                 {'request_id': test_uuid, 'body': {'filter': []}},
+                 {'request_id': test_uuid, 'body': {'filter': {}}},
                  timeout=200
                  ),
             call("edge.status.request",
@@ -369,7 +369,7 @@ class TestAlert:
         assert len(reported_edges) == 2
         alert._event_bus.rpc_request.assert_has_awaits([
             call('edge.list.request',
-                 {'request_id': test_uuid, 'body': {'filter': []}},
+                 {'request_id': test_uuid, 'body': {'filter': {}}},
                  timeout=200
                  ),
             call("edge.status.request",

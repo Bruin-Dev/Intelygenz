@@ -32,7 +32,7 @@ class TestVelocloudRepository:
         assert edges_by_ent == edges
 
     @pytest.mark.asyncio
-    async def send_edge_status_filter_test(self):
+    async def send_all_edge_with_host_filter_test(self):
         mock_logger = Mock()
         test_velocloud_client = Mock()
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
@@ -46,10 +46,9 @@ class TestVelocloudRepository:
             "status": 200
         }
         test_velocloud_client.get_all_enterprises_edges_with_host = Mock(return_value=edges)
-        msg = {"request_id": "123", "filter": [{"host": "some.host", "enterprise_ids": [19]},
-                                               {"host": "some.host2", "enterprise_ids": []}]}
+        msg = {"request_id": "123", "filter": {}}
         edges_by_ent = vr.get_all_enterprises_edges_with_host(msg)
-        assert edges_by_ent["body"] == [edges["body"][0], edges["body"][2]]
+        assert edges_by_ent["body"] == edges["body"]
 
     def get_edge_information_OK_test(self):
         mock_logger = Mock()
@@ -120,8 +119,6 @@ class TestVelocloudRepository:
 
         assert test_velocloud_client.get_link_information.called
         assert test_velocloud_client.get_link_service_groups_information.called
-        print(link_info)
-        print(link_info_return)
         assert link_info["body"] == link_info_return
 
     def get_link_information_ko_different_backup_test(self):
@@ -178,7 +175,7 @@ class TestVelocloudRepository:
         interval = "some Interval"
         link_info = vr.get_link_information(edge, interval)
 
-        assert link_info["body"] == []
+        assert link_info["body"] is None
 
     def get_link_information_ko_link_test(self):
         mock_logger = Mock()
@@ -214,18 +211,6 @@ class TestVelocloudRepository:
         vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
         enterprise_info = {"body": None,
                            "status": 500}
-        test_velocloud_client.get_enterprise_information = Mock(return_value=enterprise_info)
-        edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
-        enterprise_info = vr.get_enterprise_information(edge)
-        assert test_velocloud_client.get_enterprise_information.called
-        assert enterprise_info["body"] is None
-
-    def get_enterprise_information_without_name_key_test(self):
-        mock_logger = Mock()
-        test_velocloud_client = Mock()
-        vr = VelocloudRepository(config, mock_logger, test_velocloud_client)
-        enterprise_info = {"body": None,
-                           "status": 200}
         test_velocloud_client.get_enterprise_information = Mock(return_value=enterprise_info)
         edge = {"host": vr._config['servers'][0]['url'], "enterprise_id": 19, "edge_id": 99}
         enterprise_info = vr.get_enterprise_information(edge)

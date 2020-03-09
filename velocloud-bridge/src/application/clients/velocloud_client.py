@@ -109,7 +109,6 @@ class VelocloudClient:
                                      verify=self._config['verify_ssl'])
             return_response = dict.fromkeys(["body", "status"])
             if response.status_code in range(200, 300):
-                self._logger.info(f'Host: {edge["host"]} logged in')
                 return_response["body"] = self._json_return(response.json())
                 return_response["status"] = response.status_code
                 return return_response
@@ -153,7 +152,6 @@ class VelocloudClient:
 
             return_response = dict.fromkeys(["body", "status"])
             if response.status_code in range(200, 300):
-                self._logger.info(f'Host: {edge["host"]} logged in')
                 return_response["body"] = self._json_return(response.json())
                 return_response["status"] = response.status_code
                 return return_response
@@ -197,7 +195,6 @@ class VelocloudClient:
 
             return_response = dict.fromkeys(["body", "status"])
             if response.status_code in range(200, 300):
-                self._logger.info(f'Host: {edge["host"]} logged in')
                 return_response["body"] = self._json_return(response.json())
                 return_response["status"] = response.status_code
                 return return_response
@@ -241,7 +238,6 @@ class VelocloudClient:
 
             return_response = dict.fromkeys(["body", "status"])
             if response.status_code in range(200, 300):
-                self._logger.info(f'Host: {edge["host"]} logged in')
                 return_response["body"] = self._json_return(response.json())
                 return_response["status"] = response.status_code
                 return return_response
@@ -289,7 +285,6 @@ class VelocloudClient:
 
             return_response = dict.fromkeys(["body", "status"])
             if response.status_code in range(200, 300):
-                self._logger.info(f'Host: {edge["host"]} logged in')
                 return_response["body"] = self._json_return(response.json())
                 return_response["status"] = response.status_code
                 return return_response
@@ -320,27 +315,44 @@ class VelocloudClient:
         except Exception as e:
             return e.args[0]
 
-    def get_all_enterprises_edges_with_host(self):
+    def get_all_enterprises_edges_with_host(self, filter):
         edges_by_enterprise_and_host = list()
-        for client in self._clients:
+        clients = self._clients
+
+        if len(filter) > 0:
+            clients = []
+            for host in filter.keys():
+                target_host_client = self._get_header_by_host(host)
+                clients.append(target_host_client)
+        else:
+            filter = defaultdict(dict)
+
+        response = {"body": None, "status": 200}
+        for client in clients:
             res = self.get_monitoring_aggregates(client)
             if res["status"] not in range(200, 300):
-                self._logger.error(f"status code: {res['status']}, error {res['body']}")
-                continue
+                self._logger.error(f"Function [get_all_enterprises_edges_with_host] Error: \n"
+                                   f"Status : {res['status']}, \n"
+                                   f"Error Message: {res['body']}")
+                response["body"] = res["body"]
+                response["status"] = 500
+                return response
             for enterprise in res["body"]["enterprises"]:
+                if not enterprise["id"] in filter[client['host']] and len(filter[client['host']]) != 0:
+                    continue
+
                 edges_by_enterprise = self.get_all_enterprises_edges_by_id(client, enterprise["id"])
                 if edges_by_enterprise["status"] not in range(200, 300):
-                    continue
+                    response["body"] = res["body"]
+                    response["status"] = 500
+                    return response
                 for edge in edges_by_enterprise["body"]:
                     edges_by_enterprise_and_host.append(
                         {"host": client["host"],
                          "enterprise_id": enterprise["id"],
                          "edge_id": edge["id"]})
-
-        if edges_by_enterprise_and_host == []:
-            return {"body": None, "status": 500}
-
-        return {"body": edges_by_enterprise_and_host, "status": 200}
+        response['body'] = edges_by_enterprise_and_host
+        return response
 
     async def get_all_enterprises_edges_with_host_by_serial(self):
         serial_to_edge_id = defaultdict(list)
@@ -348,7 +360,9 @@ class VelocloudClient:
         for client in self._clients:
             res = self.get_monitoring_aggregates(client)
             if res["status"] not in range(200, 300):
-                self._logger.error(f"status code: {res['status']}, error {res['body']}")
+                self._logger.error(f"Function [get_all_enterprises_edges_with_host_by_serial] Error: \n"
+                                   f"Status : {res['status']}, \n"
+                                   f"Error Message: {res['body']}")
                 continue
 
             futures = [
@@ -381,7 +395,8 @@ class VelocloudClient:
             if res["status"] in range(200, 300):
                 sum += res["body"]["edgeCount"]
             else:
-                self._logger.info(f"status code: {res['status']}, error {res['body']}")
+                self._logger.error(f"Function [get_all_hosts_edge_count] Error:\n Status: {res['status']},\n "
+                                   f"Error Message: {res['body']}")
 
         return sum
 
@@ -396,7 +411,6 @@ class VelocloudClient:
 
             return_response = dict.fromkeys(["body", "status"])
             if response.status_code in range(200, 300):
-                self._logger.info(f'Host: {client["host"]} logged in')
                 return_response["body"] = self._json_return(response.json())
                 return_response["status"] = response.status_code
                 return return_response
@@ -438,7 +452,6 @@ class VelocloudClient:
                                      verify=False)
             return_response = dict.fromkeys(["body", "status"])
             if response.status_code in range(200, 300):
-                self._logger.info(f'Host: {client["host"]} logged in')
                 return_response["body"] = self._json_return(response.json())
                 return_response["status"] = response.status_code
                 return return_response
@@ -471,20 +484,22 @@ class VelocloudClient:
 
     def get_all_enterprise_names(self):
         enterprise_names = list()
+        response = {"body": None, "status": 200}
         for client in self._clients:
             res = self.get_monitoring_aggregates(client)
             if res["status"] not in range(200, 300):
-                self._logger.error(f"status code: {res['status']}, error {res['body']}")
+                self._logger.error(f"Function [get_all_enterprise_names] Error: \n"
+                                   f"Status : {res['status']}, \n"
+                                   f"Error Message: {res['body']}")
+                response["body"] = res["body"]
+                response["status"] = 500
                 continue
             for enterprise in res["body"]["enterprises"]:
                 enterprise_names.append({
                     "enterprise_name": enterprise["name"]
                 })
-
-        if len(enterprise_names) == 0:
-            return {"body": None, "status": 500}
-
-        return {"body": enterprise_names, "status": 200}
+        response['body'] = enterprise_names
+        return response
 
     def _json_return(self, response):
         if isinstance(response, dict):

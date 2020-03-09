@@ -56,7 +56,7 @@ class EdgeMonitoring:
     async def _process_all_edges(self, request_id):
         msg = {
             'request_id': request_id,
-            'body': {'filter': []}
+            'body': {'filter': {}}
         }
         self._status_repository.set_current_cycle_request_id(request_id)
 

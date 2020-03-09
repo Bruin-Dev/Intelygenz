@@ -2508,7 +2508,7 @@ class TestServiceOutageTriage:
                 call('edge.list.request',
                      {
                          'request_id': uuid_,
-                         'body': {'filter': [{'host': 'mettel.velocloud.net', 'enterprise_ids': []}]}
+                         'body': {'filter': {'mettel.velocloud.net': []}}
                      },
                      timeout=200),
                 call('edge.status.request',

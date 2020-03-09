@@ -34,7 +34,7 @@ __edge.list.request schema__
 {
  "request_id": "c681c72a-9c52-4c74-bd99-53c2c973b037" (per-request generated UUID),
  "body":{
-    "filter": [{"host": "some.host", "enterprise_ids": [19,42,99] }](leave blank for all hosts and enterprises)
+    "filter": {some host: [list of enterprise ids] }(leave blank for all hosts and enterprises)
  }
 }
 ```

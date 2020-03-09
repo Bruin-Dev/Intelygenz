@@ -32,38 +32,46 @@ class Alert:
     async def _alert_process(self):
         self._logger.info("Requesting all edges with details for alert report")
         list_request = {
-            'request_id': uuid(),
-            'body': {'filter': []}
+            "request_id": uuid(),
+            "body": {"filter": {}}
         }
         edge_list = await self._event_bus.rpc_request("edge.list.request", list_request, timeout=200)
         self._logger.info(f'Edge list received from event bus')
         edge_status_requests = [
-            {'request_id': edge_list["request_id"], 'body': edge} for edge in edge_list["body"]]
+            {"request_id": edge_list["request_id"], "body": edge} for edge in edge_list["body"]]
         self._logger.info("Processing all edges with details for alert report")
         edges_to_report = []
         for request in edge_status_requests:
             edge_info = await self._event_bus.rpc_request("edge.status.request", request, timeout=120)
             self._logger.info(f"Processing edge: {edge_info['body']['edge_id']}")
             raw_last_contact = edge_info["body"]["edge_info"]["edges"]["lastContact"]
-            if '0000-00-00 00:00:00' not in raw_last_contact:
-                last_contact = datetime.strptime(raw_last_contact, "%Y-%m-%dT%H:%M:%S.%fZ")
-                time_elapsed = datetime.now() - last_contact
-                relative_time_elapsed = relativedelta.relativedelta(datetime.now(), last_contact)
-                total_months_elapsed = relative_time_elapsed.years * 12 + relative_time_elapsed.months
-                if time_elapsed.days >= 30:
-                    edge_for_alert = OrderedDict()
-                    edge_for_alert['edge_name'] = edge_info["body"]["edge_info"]["edges"]['name']
-                    edge_for_alert['enterprise'] = edge_info["body"]["edge_info"]["enterprise_name"]
-                    edge_for_alert['serial_number'] = edge_info["body"]["edge_info"]["edges"]["serialNumber"]
-                    edge_for_alert['model number'] = edge_info["body"]["edge_info"]["edges"]['modelNumber']
-                    edge_for_alert['last_contact'] = edge_info["body"]["edge_info"]["edges"]["lastContact"]
-                    edge_for_alert['months in SVC'] = total_months_elapsed
-                    edge_for_alert['balance of the 36 months'] = 36 - total_months_elapsed
-                    edge_for_alert['url'] = f'https://{edge_info["body"]["edge_id"]["host"]}/#!/operator/customer/' \
-                        f'{edge_info["body"]["edge_id"]["enterprise_id"]}' \
-                        f'/monitor/edge/{edge_info["body"]["edge_id"]["edge_id"]}/'
 
-                    edges_to_report.append(edge_for_alert)
+            if '0000-00-00 00:00:00' in raw_last_contact:
+                self._logger.info(f'Missing last contact timestamp for edge {request["body"]}. Skipping...')
+                continue
+
+            last_contact = datetime.strptime(raw_last_contact, "%Y-%m-%dT%H:%M:%S.%fZ")
+            time_elapsed = datetime.now() - last_contact
+            relative_time_elapsed = relativedelta.relativedelta(datetime.now(), last_contact)
+            total_months_elapsed = relative_time_elapsed.years * 12 + relative_time_elapsed.months
+
+            if time_elapsed.days < 30:
+                self._logger.info('Time elapsed is less than 30 days')
+                continue
+
+            edge_for_alert = OrderedDict()
+            edge_for_alert['edge_name'] = edge_info["body"]["edge_info"]["edges"]['name']
+            edge_for_alert['enterprise'] = edge_info["body"]["edge_info"]["enterprise_name"]
+            edge_for_alert['serial_number'] = edge_info["body"]["edge_info"]["edges"]["serialNumber"]
+            edge_for_alert['model number'] = edge_info["body"]["edge_info"]["edges"]['modelNumber']
+            edge_for_alert['last_contact'] = edge_info["body"]["edge_info"]["edges"]["lastContact"]
+            edge_for_alert['months in SVC'] = total_months_elapsed
+            edge_for_alert['balance of the 36 months'] = 36 - total_months_elapsed
+            edge_for_alert['url'] = f'https://{edge_info["body"]["edge_id"]["host"]}/#!/operator/customer/' \
+                f'{edge_info["body"]["edge_id"]["enterprise_id"]}' \
+                f'/monitor/edge/{edge_info["body"]["edge_id"]["edge_id"]}/'
+
+            edges_to_report.append(edge_for_alert)
         email_obj = self._template_renderer.compose_email_object(edges_to_report)
         await self._event_bus.publish_message("notification.email.request", email_obj)
         self._logger.info("Last Contact Report sent")

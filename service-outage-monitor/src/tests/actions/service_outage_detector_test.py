@@ -1,12 +1,12 @@
 import json
-import pytest
-
 from datetime import datetime
 from datetime import timedelta
+from unittest.mock import Mock
 from unittest.mock import call
-from unittest.mock import Mock, MagicMock
 from unittest.mock import patch
 
+import pytest
+from application.actions.service_outage_detector import ServiceOutageDetector
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
@@ -14,9 +14,8 @@ from pytz import timezone
 from shortuuid import uuid
 
 from application.actions import service_outage_detector as service_outage_detector_module
-from application.actions.service_outage_detector import ServiceOutageDetector
-from igz.packages.repositories.edge_repository import EdgeIdentifier
 from config import testconfig
+from igz.packages.repositories.edge_repository import EdgeIdentifier
 
 
 class TestServiceOutageDetector:
@@ -254,6 +253,7 @@ class TestServiceOutageDetectorJob:
     async def service_outage_detector_process_with_management_status_error_500_test(self):
         edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_list = [edge_full_id]
+        edge_status = {"body": {"edge_info": "some status"}, "status": 200}
         event_bus = Mock()
         management_status = {"body": "Problem with connection",
                              "status": 500}
@@ -282,6 +282,7 @@ class TestServiceOutageDetectorJob:
             service_outage_detector._get_management_status = CoroutineMock(return_value=management_status)
             service_outage_detector._is_management_status_active = Mock(return_value=True)
             service_outage_detector._start_quarantine_job = CoroutineMock()
+            service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
 
             await service_outage_detector._service_outage_detector_process()
 
@@ -295,6 +296,7 @@ class TestServiceOutageDetectorJob:
     async def service_outage_detector_process_with_managent_status_200_test(self):
         edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_list = [edge_full_id]
+        edge_status = {"body": {"edge_info": "some status"}, "status": 200}
         event_bus = Mock()
         management_status = {"body": "info ",
                              "status": 200}
@@ -319,6 +321,7 @@ class TestServiceOutageDetectorJob:
             service_outage_detector._is_management_status_active = Mock(return_value=True)
             service_outage_detector._start_quarantine_job = CoroutineMock()
             service_outage_detector._add_edge_to_quarantine = Mock()
+            service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
 
             await service_outage_detector._service_outage_detector_process()
 
@@ -331,6 +334,7 @@ class TestServiceOutageDetectorJob:
         edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_list = [edge_full_id]
         event_bus = Mock()
+        edge_status = {"body": {"edge_info": "some status"}, "status": 200}
         management_status = {"body": "info ",
                              "status": 200}
         event_bus.rpc_request = CoroutineMock()
@@ -354,6 +358,7 @@ class TestServiceOutageDetectorJob:
             service_outage_detector._is_management_status_active = Mock(return_value=True)
             service_outage_detector._start_quarantine_job = CoroutineMock()
             service_outage_detector._add_edge_to_quarantine = Mock()
+            service_outage_detector._get_edge_status_by_id = CoroutineMock(return_value=edge_status)
 
             await service_outage_detector._service_outage_detector_process()
 
@@ -768,7 +773,7 @@ class TestServiceOutageDetectorJob:
 
         event_bus.rpc_request.assert_awaited_once_with(
             'edge.list.request',
-            {'request_id': uuid_, 'body': {'filter': []}},
+            {'request_id': uuid_, 'body': {'filter': {}}},
             timeout=600,
         )
         assert result == edge_list
@@ -819,7 +824,7 @@ class TestServiceOutageDetectorJob:
             {'request_id': uuid_, 'body': edge_full_id},
             timeout=120,
         )
-        assert result == edge_status
+        assert result == edge_status_response
 
     def add_edge_to_quarantine_test(self):
         edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
@@ -1045,20 +1050,23 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def process_edge_from_quarantine_with_no_reportable_edge_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
-        edge_status = {
-            'edges': {
-                'edgeState': 'OFFLINE',
-                'serialNumber': 'VC1234567',
-                'name': 'Saturos',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-
+        edge_status = {"body": {
+                             "edge_info": {
+                                            'edges': {
+                                                'edgeState': 'OFFLINE',
+                                                'serialNumber': 'VC1234567',
+                                                'name': 'Saturos',
+                                                'lastContact': '2020-01-16T14:59:56.245Z'
+                                            },
+                                            'links': [
+                                                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                                {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
+                                            ],
+                                            'enterprise_name': 'EVIL-CORP|12345|',
+                                          }
+                              },
+                       "status": 200
+                       }
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -1082,19 +1090,23 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def process_edge_from_quarantine_with_reportable_edge_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
-        edge_status = {
-            'edges': {
-                'edgeState': 'OFFLINE',
-                'serialNumber': 'VC1234567',
-                'name': 'Saturos',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
+        edge_status = {"body": {
+                               "edge_info": {
+                                            'edges': {
+                                                'edgeState': 'OFFLINE',
+                                                'serialNumber': 'VC1234567',
+                                                'name': 'Saturos',
+                                                'lastContact': '2020-01-16T14:59:56.245Z'
+                                            },
+                                            'links': [
+                                                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                                {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
+                                            ],
+                                            'enterprise_name': 'EVIL-CORP|12345|',
+                                        }
+                           },
+                       "status": 200
+                       }
 
         event_bus = Mock()
         logger = Mock()
@@ -1114,24 +1126,29 @@ class TestQuarantineJob:
 
         await service_outage_detector._process_edge_from_quarantine(edge_full_id)
 
-        service_outage_detector._add_edge_to_reporting.assert_called_once_with(edge_full_id, edge_status)
+        service_outage_detector._add_edge_to_reporting.assert_called_once_with(edge_full_id, edge_status["body"][
+                                                                                                           "edge_info"])
 
     @pytest.mark.asyncio
     async def process_edge_from_quarantine_with_exception_raised_while_determining_reportability_of_edge_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
-        edge_status = {
-            'edges': {
-                'edgeState': 'OFFLINE',
-                'serialNumber': 'VC1234567',
-                'name': 'Saturos',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
+        edge_status = {"body": {
+                               "edge_info": {
+                                            'edges': {
+                                                'edgeState': 'OFFLINE',
+                                                'serialNumber': 'VC1234567',
+                                                'name': 'Saturos',
+                                                'lastContact': '2020-01-16T14:59:56.245Z'
+                                            },
+                                            'links': [
+                                                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                                {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
+                                            ],
+                                            'enterprise_name': 'EVIL-CORP|12345|',
+                                        }
+                                },
+                       "status": 200
+                       }
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -1927,56 +1944,76 @@ class TestServiceOutageReporterJob:
         }
 
         edge_1_new_status = {
-            'edges': {
-                'edgeState': 'CONNECTED',
-                'serialNumber': 'VC123456789',
-                'name': 'Saturos',
-                'lastContact': '2020-01-16T14:59:56.245Z'
+            'body': {
+                'edge_info': {
+                                'edges': {
+                                    'edgeState': 'CONNECTED',
+                                    'serialNumber': 'VC123456789',
+                                    'name': 'Saturos',
+                                    'lastContact': '2020-01-16T14:59:56.245Z'
+                                },
+                                'links': [
+                                    {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                                    {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                ],
+                                'enterprise_name': 'EVIL-CORP|12345|',
+                            }
             },
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            "status": 200
         }
         edge_2_new_status = {
-            'edges': {
-                'edgeState': 'OFFLINE',
-                'serialNumber': 'VC987654321',
-                'name': 'Menardi',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {
+                'edge_info': {
+                                'edges': {
+                                    'edgeState': 'OFFLINE',
+                                    'serialNumber': 'VC987654321',
+                                    'name': 'Menardi',
+                                    'lastContact': '2020-01-16T14:59:56.245Z'
+                                },
+                                'links': [
+                                    {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                                    {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                ],
+                                'enterprise_name': 'EVIL-CORP|12345|',
+                }
+                },
+            "status": 200
         }
         edge_3_new_status = {
-            'edges': {
-                'edgeState': 'OFFLINE',
-                'serialNumber': 'VC111122223',
-                'name': 'Isaac',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {
+                'edge_info': {
+                                'edges': {
+                                    'edgeState': 'OFFLINE',
+                                    'serialNumber': 'VC111122223',
+                                    'name': 'Isaac',
+                                    'lastContact': '2020-01-16T14:59:56.245Z'
+                                },
+                                'links': [
+                                    {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                    {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
+                                ],
+                                'enterprise_name': 'EVIL-CORP|12345|',
+                },
+                "status": 200
+            }
         }
         edge_4_new_status = {
-            'edges': {
-                'edgeState': 'OFFLINE',
-                'serialNumber': 'VC111122223',
-                'name': 'Nadia',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {
+                'edge_info': {
+                                'edges': {
+                                    'edgeState': 'OFFLINE',
+                                    'serialNumber': 'VC111122223',
+                                    'name': 'Nadia',
+                                    'lastContact': '2020-01-16T14:59:56.245Z'
+                                },
+                                'links': [
+                                    {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                                    {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
+                                ],
+                                'enterprise_name': 'EVIL-CORP|12345|',
+                },
+                "status": 200
+            }
         }
 
         edge_2_outage_ticket = {
@@ -2029,7 +2066,7 @@ class TestServiceOutageReporterJob:
 
         await service_outage_detector._refresh_reporting_queue()
 
-        edge_2_new_value = {**edge_2_value, **{'edge_status': edge_2_new_status}}
+        edge_2_new_value = {**edge_2_value, **{'edge_status': edge_2_new_status["body"]["edge_info"]}}
         reporting_edge_repository.add_edge.assert_called_once_with(
             edge_2_full_id,
             edge_2_new_value,
@@ -2433,14 +2470,17 @@ class TestServiceOutageMonitor:
 
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
+        edge_status = {'body': {'edge_info': {
+                                            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+                                            'links': [
+                                                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                            ],
+                                            'enterprise_name': 'EVIL-CORP|12345|',
+                                        }
+                                },
+                       'status': 200
+                       }
         management_status = {"body": "None",
                              "status": 500}
         uuid_ = uuid()
@@ -2483,12 +2523,18 @@ class TestServiceOutageMonitor:
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+
+                                  },
+
+                     },
+            'status': 200
         }
         management_status = {"body": "None",
                              "status": 200}
@@ -2527,28 +2573,40 @@ class TestServiceOutageMonitor:
         edges_for_monitoring = [edge_1_full_id, edge_2_full_id, edge_3_full_id]
 
         edge_1_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+                                }
+                     },
+            'status': 200
         }
         edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC7654321'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC7654321'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+            }
+            },
+            'status': 200
         }
         edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1122334'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1122334'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+                                    }
+                     },
+            'status': 200
         }
         edges_statuses = [edge_1_status, edge_2_status, edge_3_status]
 
@@ -2588,7 +2646,8 @@ class TestServiceOutageMonitor:
             call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
         ])
         outage_utils.is_there_an_outage.assert_has_calls([
-            call(edge_1_status), call(edge_2_status), call(edge_3_status)
+            call(edge_1_status["body"]['edge_info']), call(edge_2_status["body"]['edge_info']),
+            call(edge_3_status["body"]['edge_info'])
         ])
         scheduler.add_job.assert_not_called()
 
@@ -2600,13 +2659,15 @@ class TestServiceOutageMonitor:
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+                                }
+                     }, 'status': 200}
 
         is_there_an_outage = True
 
@@ -2648,7 +2709,7 @@ class TestServiceOutageMonitor:
 
         service_outage_detector._get_edges_for_monitoring.assert_called_once()
         service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status)
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status["body"]['edge_info'])
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_edges_and_some_outages_detected_and_recheck_job_scheduled_test(self):
@@ -2658,28 +2719,40 @@ class TestServiceOutageMonitor:
         edges_for_monitoring = [edge_1_full_id, edge_2_full_id, edge_3_full_id]
 
         edge_1_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+                                }
+                     },
+            'status': 200
         }
         edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC7654321'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC7654321'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+                                }
+                     },
+            'status': 200
         }
         edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1122334'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1122334'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+                                    }
+                     },
+            'status': 200
         }
         edges_statuses = [edge_1_status, edge_2_status, edge_3_status]
 
@@ -2721,7 +2794,8 @@ class TestServiceOutageMonitor:
             call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
         ])
         outage_utils.is_there_an_outage.assert_has_calls([
-            call(edge_1_status), call(edge_2_status), call(edge_3_status)
+            call(edge_1_status["body"]['edge_info']), call(edge_2_status["body"]['edge_info']),
+            call(edge_3_status["body"]['edge_info'])
         ])
         run_date = current_time + timedelta(
             seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
@@ -2768,12 +2842,16 @@ class TestServiceOutageMonitor:
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+                                }
+                     },
+            'status': 200
         }
 
         outage_happened = False
@@ -2798,7 +2876,7 @@ class TestServiceOutageMonitor:
         await service_outage_detector._recheck_edge_for_ticket_creation(edge_full_id)
 
         service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status)
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['body']['edge_info'])
         service_outage_detector._create_outage_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -2806,12 +2884,16 @@ class TestServiceOutageMonitor:
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+                                  }
+                     },
+            'status': 200
         }
 
         outage_happened = True
@@ -2840,7 +2922,7 @@ class TestServiceOutageMonitor:
             await service_outage_detector._recheck_edge_for_ticket_creation(edge_full_id)
 
         service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status)
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['body']['edge_info'])
         service_outage_detector._create_outage_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -2849,12 +2931,16 @@ class TestServiceOutageMonitor:
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': 'EVIL-CORP|12345|',
+                                }
+                     },
+            'status': 200
         }
 
         outage_happened = True
@@ -2896,8 +2982,8 @@ class TestServiceOutageMonitor:
                 await service_outage_detector._recheck_edge_for_ticket_creation(edge_full_id)
 
         service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status)
-        service_outage_detector._create_outage_ticket.assert_awaited_once_with(edge_status)
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['body']['edge_info'])
+        service_outage_detector._create_outage_ticket.assert_awaited_once_with(edge_status['body']['edge_info'])
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.slack.request",
             {
@@ -2915,12 +3001,16 @@ class TestServiceOutageMonitor:
 
         client_id = 12345
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': f'EVIL-CORP|{client_id}|',
+                                }
+                     },
+            'status': 200
         }
 
         outage_happened = True
@@ -2962,8 +3052,8 @@ class TestServiceOutageMonitor:
                 await service_outage_detector._recheck_edge_for_ticket_creation(edge_full_id)
 
         service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status)
-        service_outage_detector._create_outage_ticket.assert_awaited_once_with(edge_status)
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['body']['edge_info'])
+        service_outage_detector._create_outage_ticket.assert_awaited_once_with(edge_status['body']['edge_info'])
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.slack.request",
             {
@@ -2981,14 +3071,17 @@ class TestServiceOutageMonitor:
 
         client_id = 12345
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': f'EVIL-CORP|{client_id}|',
+                                }
+                     },
+            'status': 200
         }
-
         outage_happened = True
 
         outage_ticket_creation_body = 12345  # Ticket ID
@@ -3028,8 +3121,8 @@ class TestServiceOutageMonitor:
                 await service_outage_detector._recheck_edge_for_ticket_creation(edge_full_id)
 
         service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status)
-        service_outage_detector._create_outage_ticket.assert_awaited_once_with(edge_status)
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['body']['edge_info'])
+        service_outage_detector._create_outage_ticket.assert_awaited_once_with(edge_status['body']['edge_info'])
         assert call(
             "notification.slack.request",
             {'request_id': 'some-uuid', 'message': 'some-message'},
@@ -3043,13 +3136,17 @@ class TestServiceOutageMonitor:
 
         client_id = 12345
         edge_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{client_id}|',
-        }
+            'body': {'edge_info': {
+                                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+                                    'links': [
+                                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                                    ],
+                                    'enterprise_name': f'EVIL-CORP|{client_id}|',
+                                  }
+                     },
+            'status': 200
+            }
 
         outage_happened = True
 
@@ -3091,10 +3188,10 @@ class TestServiceOutageMonitor:
                 await service_outage_detector._recheck_edge_for_ticket_creation(edge_full_id)
 
         service_outage_detector._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_utils.is_there_an_outage.assert_called_once_with(edge_status)
-        service_outage_detector._create_outage_ticket.assert_awaited_once_with(edge_status)
+        outage_utils.is_there_an_outage.assert_called_once_with(edge_status['body']['edge_info'])
+        service_outage_detector._create_outage_ticket.assert_awaited_once_with(edge_status['body']['edge_info'])
         service_outage_detector._reopen_outage_ticket.assert_awaited_once_with(
-            outage_ticket_creation_body, edge_status
+            outage_ticket_creation_body, edge_status['body']['edge_info']
         )
 
     @pytest.mark.asyncio
@@ -3657,7 +3754,7 @@ class TestServiceOutageMonitor:
         service_outage_detector._get_management_status = CoroutineMock(return_value=management_status)
 
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
-            is_edge_active = service_outage_detector._is_management_status_active(management_status)
+            is_edge_active = service_outage_detector._is_management_status_active(management_status["body"])
         assert is_edge_active is True
 
     @pytest.mark.asyncio
@@ -3683,7 +3780,7 @@ class TestServiceOutageMonitor:
         service_outage_detector._get_management_status = CoroutineMock(return_value=management_status)
 
         with patch.object(service_outage_detector_module, 'uuid', return_value=uuid_):
-            is_edge_active = service_outage_detector._is_management_status_active(management_status)
+            is_edge_active = service_outage_detector._is_management_status_active(management_status["body"])
         assert is_edge_active is False
 
     @pytest.mark.asyncio
