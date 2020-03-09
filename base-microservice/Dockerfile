@@ -9,7 +9,7 @@ COPY base-microservice/ /service/app
 WORKDIR /service/app
 
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt -f ${IGZ_PACKAGES_REPOSITORY_URL}
 
 
 ENV PYTHONUNBUFFERED 1

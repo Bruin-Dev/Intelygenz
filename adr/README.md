@@ -6,6 +6,7 @@
 - [How to use ADRs in repository](#how-to-use-adrs-in-repository)
   - [ADR format](#adr-format)
 - [Actual ADRs](#actual-adrs)
+  - [Custom Docker Images](#custom-docker-images)
 
 ## Introduction
 
@@ -43,6 +44,8 @@ There is a [template document](adr_template.md) that can be used as a basis for 
 
 ## Actual ADRs
 
-Below is the list of current ADRs in the project:
+Current ADRs are presented in the following sections
 
-- [Custom docker images](./custom_docker_images.md)
+### Custom Docker Images
+
+The ADR [Custom Docker Images](./custom_docker_images.md) explains the use of custom docker images in the Dockerfile of the different Python microservices present in the project.

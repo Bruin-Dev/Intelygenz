@@ -267,21 +267,36 @@ There are a number of variables to indicate the version number of these images, 
 
 >The versions are available in the [releases](https://gitlab.intelygenz.com/mettel/docker_images/-/releases) section of the repository that manages igzpackages.
 
-These variables are declared in the [.gitlab-ci.yml](.gitlab-ci.yml) file, as explained below:
+These variables are declared in two files:
 
-```yaml
-. . .
+- In the [.gitlab-ci.yml](.gitlab-ci.yml) file, as explained below:
 
-variables:
-  . . .
-  IGZ_PACKAGES_VERSION: 1.0.0
-  DOCKER_BASE_IMAGE_VERSION: 1.0.2
+  ```yaml
   . . .
 
-. . .
-```
+  variables:
+    . . .
+    IGZ_PACKAGES_VERSION: 1.0.0
+    DOCKER_BASE_IMAGE_VERSION: 1.0.2
+    . . .
 
-So in case you want to change the version used of the `igzpackages` library and/or the base docker images you must change the variables mentioned.
+  . . .
+  ```
+
+  So in case you want to change the version used of the `igzpackages` library and/or the base docker images you must change the variables mentioned. These changes will affect the construction of the different images of the microservices to be deployed in AWS.
+
+- In the different microservices declared in the [docker-compose.yml](./docker-compose.yml) file for local use, **so it is important to update them with the desired values, below you can see how they are used in this file for a microservice declaration**
+
+  ```yaml
+    <microservice_name>:
+      build:
+        context: .
+        dockerfile: <microservice_folder>/Dockerfile
+        args:
+          DOCKER_BASE_IMAGE_VERSION: 1.0.2
+          IGZ_PACKAGES_VERSION: 1.0.0
+    . . .
+  ```
 
 ## Env files
 
@@ -305,7 +320,6 @@ Run:
 
 ## Packages
 
-- [Velocloud sdk](custompackages/velocloud/README.md)
 - [IGZ packages](custompackages/igzpackages/README.md)
 
 ## Microservices
@@ -332,15 +346,15 @@ Services involved: sites-monitor, velocloud-bridge, notifier.
 
 ### Process flow
 
-    - Sites Monitor send a message to the Bridge through to ask for all edges given a list of Velocloud clusters.
-    - For each edge it builds an event composed by the cluster's hostname, the edge ID and the company ID for that edge.
-    - Publish events on NATS.
-    - Sites Monitor consumes the events from NATS and then send each edge to the NATS to be consumed by the Bridge.
-    - For each event, it fetches the edge and link data related to the given IDs
-    - Publishes edge and link data to NATS
-    - Depending on the state of the edge, the Sites Monitor will put the result event in a different Message Queue (one Queue for faulty edges, other for ok edges)
-    - Notifier consumes the faulty edge queue and creates statistics. 
-    - Notifier has an interval set. For each interval will send the statistics to a Slack channel and reset the statistics for the next cycle.
+- Sites Monitor send a message to the Bridge through to ask for all edges given a list of Velocloud clusters.
+- For each edge it builds an event composed by the cluster's hostname, the edge ID and the company ID for that edge.
+- Publish events on NATS.
+- Sites Monitor consumes the events from NATS and then send each edge to the NATS to be consumed by the Bridge.
+- For each event, it fetches the edge and link data related to the given IDs
+- Publishes edge and link data to NATS
+- Depending on the state of the edge, the Sites Monitor will put the result event in a different Message Queue (one Queue for faulty edges, other for ok edges)
+- Notifier consumes the faulty edge queue and creates statistics. 
+- Notifier has an interval set. For each interval will send the statistics to a Slack channel and reset the statistics for the next cycle.
 
 # Good Practices
 
@@ -360,7 +374,7 @@ Services involved: sites-monitor, velocloud-bridge, notifier.
 `/metrics-dashboard/prometheus/` and using the format below, you can add your server to the prometheus app. All the servers connected
 to the prometheus app can be found at `http://localhost:9090/targets`.
 
-    ```
+    ```bash
     - job_name: <the microservice thats hosting you server>
       scrape_interval: 5s
       static_configs:
