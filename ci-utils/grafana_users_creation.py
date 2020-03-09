@@ -41,6 +41,9 @@ def get_users():
     return users
 
 
+@retry(wait=wait_exponential(multiplier=5,
+                             min=5),
+       stop=stop_after_delay(300))
 def check_users_existance():
     for u in get_users():
         try:
@@ -59,6 +62,7 @@ def check_users_existance():
                     f'User {u["login"]} already exists. '
                     f'ID: {response.json().get("users")[0]["id"]}'
                 )
+                raise Exception
             else:
                 print(response.text)
                 print(f'Error searching for user {u["login"]}.')

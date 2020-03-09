@@ -142,48 +142,6 @@ If any of the next requirements is not fulfilled in a merge request, merge reque
 - If it is a new service, all the terraform code to deploy it should be present.
 - Developers should take care of notify the devops/tech lead of putting in the pipeline env any environment variable needed in the pipeline's execution.
 
-## Custom packages
-
-Custom packages are developed using the same branching name and workflow that is used in other pieces of the project.
-Custom packages are:
-    - Wrappers of other packages to adapt them to our needs
-    - SDKs or clients from 3rd party providers
-
-Since they are going to be used among various microservices it is important not to duplicate their code, in order to ease the maintenance of them.
-
-For the IDE to detect changes in custompackages, you need to uninstall & reinstall them via pip in your virtualenvs.
-
-If changes are going to be persistent, remember to test them and change the version depending on the changes made. [Check semver](https://semver.org/) for that.
-
-### Creation and testing
-
-For a wrapper of other package (I.E: httpclient parametrized for some provider) test are **mandatory**.
-If the package is a SDK provided by a 3rd party and will be used "as it is", no testing is needed.
-If there are any new development to create a specific wrapper for an SDK provided, test are **mandatory** for that part.
-
-To add an specific SDK for a 3rd party (I.E: VMWare's Velocloud), just add the SDK folder to the custompackages/ directory.
-
-To add a wrapper for a library:
-    - Create a package inside custompackages/igz/packages/ named mypackage
-    - Create a test folder under custompackages/igz/tests/mypackage
-    - Add your dependencies to custompackages/setup.py in the `REQUIRES` list.
-    - Replicate file and folder structure in both folders.
-    - Add config test variables under custompackages/igz/config/testconfig
-
-### Import and installation in microservices
-
-Add `../custompackages/packagename` to the microservice's requirements.txt file
-
-Make sure the dockerfile copies the custompackages directory to the container.
-
-**VERY IMPORTANT: If the microservice is using any custompackages, change any line related with them after each pip freeze for a relative import. I.E: If you are using velocloud package, change `velocloud==3.2.19` line to `../custompackages/velocloud`**
-
-### Changes and debugging
-
-If any change it's performed in a custom package, it must be uninstalled from the virtual environment and reinstalled with pip.
-
-To debug with PyCharm, you must put the breakpoint **in the copy in site-packages** of the custompackage. To find that files, cntrl + right click on the in a call in your code of the function you want to debug.
-
 # Running the project
 
 This tutorial assumes Ubuntu 18.04 - it might work in other versions of Ubuntu though, but hasn't been tested.
@@ -298,6 +256,8 @@ These variables are declared in two files:
     . . .
   ```
 
+>It is important to reflect the changes in both files simultaneously so that the version of the development in local and AWS is the same at the end of the development of a feature or fix.
+
 ## Env files
 
 Ask a maintainer for a temp private token. Clone the mettel repo and run:
@@ -317,10 +277,6 @@ Run:
 `$ docker-compose up --build`
 
 # Lists of projects READMEs
-
-## Packages
-
-- [IGZ packages](custompackages/igzpackages/README.md)
 
 ## Microservices
 

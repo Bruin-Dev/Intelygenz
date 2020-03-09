@@ -34,20 +34,26 @@ This [script](./task_healthcheck.sh) has been implemented in *Python*, it is use
 
 In order to use this [script](./task_healthcheck.py) it is necessary to perform the following steps previously:
 
-* Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
+- Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
 
     ```sh
     $ export AWS_ACCESS_KEY_ID=<access_key>
     $ export AWS_SECRET_ACCESS_KEY=<secret_key>
     ```
 
-* Declare the variable `TF_VAR_ENVIRONMENT` with the value of the ECS cluster on which you it is going to to used in the following way:
+- Declare the variable `TF_VAR_ENVIRONMENT` with the value of the ECS cluster on which you it is going to to used in the following way:
 
     ```sh
     $ export TF_VAR_ENVIRONMENT=<environment_name>
     ```
 
     >It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment.
+
+- Declare the variable `ECS_MAX_TASKS` with the value of the maximum number of tasks allowed in ECS, currently 100 in the following way:
+
+    ```sh
+    $ export ECS_MAX_TASKS=<ecs_max_tasks>
+    ```
 
 Once the previous steps have been carried out, it is possible to use this [script](./task_healthcheck.sh) providing as parameter `-t` the name of the service on which you want to perform the check performed by the script explained above, as well as the ARN of the task definition of the service defined in a JSON file as the following parameter, as shown below:
 
@@ -75,25 +81,25 @@ To create users, a series of https calls will be made to the endpoint exposed by
 
 To use this script it is necessary to declare a series of variables, exposed below:
 
-* `ENVIRONMENT_SLUG`: Name of the branch relative to the environment where the script it's going to be used.
+- `ENVIRONMENT_SLUG`: Name of the branch relative to the environment where the script it's going to be used.
 
   >It is important to remember that for all environments other than production (`master` branch) it is necessary to apply the function `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name
 
-* `GRAFANA_ADMIN_PASSWORD`: Password for the administrator user for the Grafana service related to the environment
+- `GRAFANA_ADMIN_PASSWORD`: Password for the administrator user for the Grafana service related to the environment
 
-* `GRAFANA_ADMIN_USER`: User name for the administrator user for the Grafana service related to the environment
+- `GRAFANA_ADMIN_USER`: User name for the administrator user for the Grafana service related to the environment
 
-* `GRAFANA_USER_EMAIL`: List of user emails separated by commas to use as an email field in the process of creating them in the Grafana service related to the environment
+- `GRAFANA_USER_EMAIL`: List of user emails separated by commas to use as an email field in the process of creating them in the Grafana service related to the environment
 
-* `GRAFANA_USER_LOGIN`: List of user logins separated by commas to use as a login field in the process of creating them in the Grafana service related to the environment
+- `GRAFANA_USER_LOGIN`: List of user logins separated by commas to use as a login field in the process of creating them in the Grafana service related to the environment
 
-* `GRAFANA_USER_NAME`: List of user names separated by commas to use as a user name field in the process of creating them in the Grafana service related to the environment
+- `GRAFANA_USER_NAME`: List of user names separated by commas to use as a user name field in the process of creating them in the Grafana service related to the environment
 
-* `GRAFANA_USER_PASSWORD`: List of user password separated by commas to use as a user password field in the process of creating them in the Grafana service related to the environment
+- `GRAFANA_USER_PASSWORD`: List of user password separated by commas to use as a user password field in the process of creating them in the Grafana service related to the environment
 
-* `GRAFANA_USER_ROLE`: List of user roles separated by commas to use as a user role field in the process of creating them in the Grafana service related to the environment. Valid values are `viewer`, `editor` and `admin`
+- `GRAFANA_USER_ROLE`: List of user roles separated by commas to use as a user role field in the process of creating them in the Grafana service related to the environment. Valid values are `viewer`, `editor` and `admin`
 
-* `GRAFANA_USER_COMPANY`: List of user companies separated by commas to use as a user company field in the process of creating them in the Grafana service related to the environment
+- `GRAFANA_USER_COMPANY`: List of user companies separated by commas to use as a user company field in the process of creating them in the Grafana service related to the environment
 
 >The number of elements that must have the variables `GRAFANA_USER_EMAIL`, `GRAFANA_USER_LOGIN`, `GRAFANA_USER_NAME`, `GRAFANA_USER_PASSWORD`, `GRAFANA_USER_ROLE` and `GRAFANA_USER_COMPANY` must be the same, since it is necessary to have all the fields related to the users to be created to be able to do it.
 
@@ -125,36 +131,36 @@ python ci-utils/delete_environments_aws_resources/main.py -e <environment_name> 
 
 CLI supports a number of commands. These are explained below:
 
-* `-a`, `--all`: All the resources in AWS associated to the specified environment will be deleted, carrying out the corresponding orderly deletion of them so as not to produce dependency errors during the process.
+- `-a`, `--all`: All the resources in AWS associated to the specified environment will be deleted, carrying out the corresponding orderly deletion of them so as not to produce dependency errors during the process.
 
     >**If this option is specified, any other option will be ignored.**
-* `-c`, `--ecs-cluster`: The ECS cluster associated to the environment provided will be removed, as well as all the resources related to it:
+- `-c`, `--ecs-cluster`: The ECS cluster associated to the environment provided will be removed, as well as all the resources related to it:
   
-  * *ECS Services* defined in the ECS cluster and *Tasks* of each one of them.
+  - *ECS Services* defined in the ECS cluster and *Tasks* of each one of them.
   
-  * *Namespaces* and *Services* associated with the same to perform [*Services Discovery*](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html) in the cluster
+  - *Namespaces* and *Services* associated with the same to perform [*Services Discovery*](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html) in the cluster
 
-* `-d`, `--service-discovery`: The *namespace* created for the *Service Discovery* of the environment provided will be deleted, previously all the services associated to that namespace will be deleted.
+- `-d`, `--service-discovery`: The *namespace* created for the *Service Discovery* of the environment provided will be deleted, previously all the services associated to that namespace will be deleted.
 
-* `-r`, `--redis-cluster`: The *ElastiCache Redis Cluster* associated to the specified environment will be removed.
+- `-r`, `--redis-cluster`: The *ElastiCache Redis Cluster* associated to the specified environment will be removed.
 
-* `-l`, `--load-balancer`: The *Application Load Balancer (ALB)* associated to the specified environment will be removed, as well as all the resources related to it (*Target Groups*).
+- `-l`, `--load-balancer`: The *Application Load Balancer (ALB)* associated to the specified environment will be removed, as well as all the resources related to it (*Target Groups*).
 
-* `-s`, `--security-groups`: All the *Security Groups* associated to the different resources created in *AWS* for the specified environment will be removed.
+- `-s`, `--security-groups`: All the *Security Groups* associated to the different resources created in *AWS* for the specified environment will be removed.
 
-* `-m`, `--metrics`: All the resources related to metrics created for the specified will be removed, being these the ones specified below:
+- `-m`, `--metrics`: All the resources related to metrics created for the specified will be removed, being these the ones specified below:
 
-  * *CloudWatch Alarms*
+  - *CloudWatch Alarms*
   
-  * *CloudWatch Dashboard*
+  - *CloudWatch Dashboard*
 
-  * *CloudWatch Log Filters*
+  - *CloudWatch Log Filters*
 
-* `-z`, `--hosted-zones`: All the record set created for specified environment in hosted zone with name `mettel-automation.net` in *AWS Route53 Service* will be deleted.
+- `-z`, `--hosted-zones`: All the record set created for specified environment in hosted zone with name `mettel-automation.net` in *AWS Route53 Service* will be deleted.
 
-* `-f`, `--cloud-formation`: The *Cloud Formation Stack* resources created for the specified environment will be removed
+- `-f`, `--cloud-formation`: The *Cloud Formation Stack* resources created for the specified environment will be removed
 
-* `-b`, `--buckets`: All *Terraform* files with `tfstate` extension related to the specified environment will be deleted, these are used to know the state of the resources created by it and are stored in an  *S3 Bucket* that is specified in the creation of its with *Terraform*.
+- `-b`, `--buckets`: All *Terraform* files with `tfstate` extension related to the specified environment will be deleted, these are used to know the state of the resources created by it and are stored in an  *S3 Bucket* that is specified in the creation of its with *Terraform*.
 
 ## Script aws_nuke_conf_generator <a name="aws_nuke_conf_generator"></a>
 
@@ -164,19 +170,19 @@ This [script](./aws-nuke/aws_nuke_conf_generator.py) has been implemented to gen
 
 The generated configuration file will allow filtering on the resources to be deleted specified in it, so that `aws-nuke` will only delete those associated with the environment specified in that file. The resources to be deleted specified in this file are the following:
 
-* *ElasticacheCacheCluster*
-* *ElasticacheSubnetGroup*
-* *ELBv2*
-* *ELBv2TargetGroup*
-* *CloudFormationStack*
-* *CloudWatchAlarm*
-* *CloudWatchLogsLogGroup*
-* *ServiceDiscoveryNamespace*
-* *ServiceDiscoveryService*
-* *ECSCluster*
-* *ECSService*
-* *ECSTaskDefinition*
-* *EC2SecurityGroup*
+- *ElasticacheCacheCluster*
+- *ElasticacheSubnetGroup*
+- *ELBv2*
+- *ELBv2TargetGroup*
+- *CloudFormationStack*
+- *CloudWatchAlarm*
+- *CloudWatchLogsLogGroup*
+- *ServiceDiscoveryNamespace*
+- *ServiceDiscoveryService*
+- *ECSCluster*
+- *ECSService*
+- *ECSTaskDefinition*
+- *EC2SecurityGroup*
 
 In order to carry out this process of generating a configuration file, a [template file](./aws-nuke/config_template.yml) is used on which the script applies the relevant changes to the resources to be filtered.
 
@@ -207,14 +213,14 @@ This [script](./check_ecs_resources.py) has been implemented in *Python*, it is 
 
 In order to use this [script](./check_ecs_resources.py) it is necessary to perform the following steps previously:
 
-* Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
+- Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
 
     ```sh
     $ export AWS_ACCESS_KEY_ID=<access_key>
     $ export AWS_SECRET_ACCESS_KEY=<secret_key>
     ```
 
-* Declare the variable `TF_VAR_ENVIRONMENT` with the value of the ECS cluster on which you it is going to to used in the following way:
+- Declare the variable `TF_VAR_ENVIRONMENT` with the value of the ECS cluster on which you it is going to to used in the following way:
 
     ```sh
     $ export TF_VAR_ENVIRONMENT=<environment_name>
@@ -234,9 +240,9 @@ $ python3 ci-utils/check_ecs_resources.py
 
 This [script](./manage_ecr_docker_images_description.py) has been implemented in *Python*, it can be used for any of the following functions:
 
-* Get the oldest image from an ECR repository provided as a parameter in a given environment. In case that repository has more than two images in the provided environment, it will perform the deletion of the oldest image according to the ECR upload date.
+- Get the oldest image from an ECR repository provided as a parameter in a given environment. In case that repository has more than two images in the provided environment, it will perform the deletion of the oldest image according to the ECR upload date.
 
-* Obtain the most up-to-date image of all the ECR repositories used in the project by saving each one of them in a JSON file for each of the repositories with the following format
+- Obtain the most up-to-date image of all the ECR repositories used in the project by saving each one of them in a JSON file for each of the repositories with the following format
 
    ```json
    {
@@ -248,7 +254,7 @@ This [script](./manage_ecr_docker_images_description.py) has been implemented in
 
 In order to use this [script](./manage_ecr_docker_images_description.py) it is necessary to perform the following steps previously:
 
-* Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION` in the following way:
+- Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION` in the following way:
 
     ```sh
     $ export AWS_ACCESS_KEY_ID=<access_key>
@@ -258,7 +264,7 @@ In order to use this [script](./manage_ecr_docker_images_description.py) it is n
 
     > The default AWS region used in the project is us-east-1
 
-* Declare the variable `ENVIRONMENT_VAR` with the value of the environment on which you it is going to to used in the following way:
+- Declare the variable `ENVIRONMENT_VAR` with the value of the environment on which you it is going to to used in the following way:
 
     ```sh
     $ export ENVIRONMENT_VAR=<environment_name>
@@ -268,7 +274,7 @@ In order to use this [script](./manage_ecr_docker_images_description.py) it is n
 
 Once the previous steps have been carried out, it is possible to use this [script](./check_ecs_resources.py) as shown below:
 
-* To get the oldest image from a particular repository, provide the name of the repository using the -t option, as follows:
+- To get the oldest image from a particular repository, provide the name of the repository using the -t option, as follows:
 
     ```sh
     $ python3 ci-utils/manage_ecr_docker_images.py -r <ecr_repository_name>
@@ -276,7 +282,7 @@ Once the previous steps have been carried out, it is possible to use this [scrip
 
     >The nomenclature of the images in the project is `automation-<microservice_name>`
 
-* To obtain the most up-to-date image for the environment provided in each of the repositories, simply indicate the -g option, as shown below:
+- To obtain the most up-to-date image for the environment provided in each of the repositories, simply indicate the -g option, as shown below:
 
    ```sh
    $ python3 ci-utils/manage_ecr_docker_images.py -g
