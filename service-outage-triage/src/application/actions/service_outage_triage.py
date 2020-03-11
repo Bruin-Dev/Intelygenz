@@ -414,7 +414,7 @@ class ServiceOutageTriage:
             self._logger.info(f"Processing edge request: {request}")
             edge_status = await self._event_bus.rpc_request("edge.status.request", request, timeout=120)
             if edge_status["status"] in range(200, 300):
-                client_id = self._client_id_from_edge_status(edge_status)
+                client_id = self._client_id_from_edge_status(edge_status["body"])
                 edge_info = edge_status["body"]["edge_info"]
                 client_id_to_dict_of_serial_dict[client_id][edge_info["edges"]["serialNumber"]] = edge_status["body"]
             else:
