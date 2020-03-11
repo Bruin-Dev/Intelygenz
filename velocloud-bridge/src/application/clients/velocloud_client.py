@@ -65,23 +65,10 @@ class VelocloudClient:
                 }
                 return_response["body"] = headers
                 return_response["status"] = response.status_code
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Velocloud {response.json()}")
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Bruin, re-login with credentials and retrying get headers")
+            if response.status_code == 302:
+                self._logger.error(f"Got 302 from Bruin, re-login with credentials and retrying get headers")
                 return_response["body"] = f"Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Velocloud, resource not found")
-                return_response["body"] = f"Resource not found"
-                return_response["status"] = 404
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
-                return_response["body"] = f"Got internal error from Velocloud"
-                return_response["status"] = 500
+                return_response["status"] = 302
                 raise Exception(return_response)
 
             return return_response
@@ -116,16 +103,6 @@ class VelocloudClient:
                 return_response["body"] = response.json()
                 return_response["status"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
-                self.instantiate_and_connect_clients()
-                return_response["body"] = f"Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Velocloud, resource not found")
-                return_response["body"] = f"Resource not found"
-                return_response["status"] = 404
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got {response.status_code}. Retrying...")
                 return_response["body"] = f"Got internal error from Velocloud"
@@ -159,16 +136,6 @@ class VelocloudClient:
                 return_response["body"] = response.json()
                 return_response["status"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
-                self.instantiate_and_connect_clients()
-                return_response["body"] = f"Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Velocloud, resource not found")
-                return_response["body"] = f"Resource not found"
-                return_response["status"] = 404
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got {response.status_code}. Retrying...")
                 return_response["body"] = f"Got internal error from Velocloud"
@@ -202,16 +169,6 @@ class VelocloudClient:
                 return_response["body"] = response.json()
                 return_response["status"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
-                self.instantiate_and_connect_clients()
-                return_response["body"] = f"Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Velocloud, resource not found")
-                return_response["body"] = f"Resource not found"
-                return_response["status"] = 404
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got {response.status_code}. Retrying...")
                 return_response["body"] = f"Got internal error from Velocloud"
@@ -245,16 +202,6 @@ class VelocloudClient:
                 return_response["body"] = response.json()
                 return_response["status"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
-                self.instantiate_and_connect_clients()
-                return_response["body"] = f"Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Velocloud, resource not found")
-                return_response["body"] = f"Resource not found"
-                return_response["status"] = 404
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got {response.status_code}. Retrying...")
                 return_response["body"] = f"Got internal error from Velocloud"
@@ -292,16 +239,6 @@ class VelocloudClient:
                 return_response["body"] = response.json()
                 return_response["status"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
-                self.instantiate_and_connect_clients()
-                return_response["body"] = f"Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Velocloud, resource not found")
-                return_response["body"] = f"Resource not found"
-                return_response["status"] = 404
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got {response.status_code}. Retrying...")
                 return_response["body"] = f"Got internal error from Velocloud"
@@ -418,16 +355,6 @@ class VelocloudClient:
                 return_response["body"] = response.json()
                 return_response["status"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
-                self.instantiate_and_connect_clients()
-                return_response["body"] = f"Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Velocloud, resource not found")
-                return_response["body"] = f"Resource not found"
-                return_response["status"] = 404
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got {response.status_code}. Retrying...")
                 return_response["body"] = f"Got internal error from Velocloud"
@@ -459,16 +386,6 @@ class VelocloudClient:
                 return_response["body"] = response.json()
                 return_response["status"] = response.status_code
                 self._logger.error(f"Got error from Velocloud {response.json()}")
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Velocloud, re-login with credentials and retrying get headers")
-                self.instantiate_and_connect_clients()
-                return_response["body"] = f"Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Velocloud, resource not found")
-                return_response["body"] = f"Resource not found"
-                return_response["status"] = 404
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got {response.status_code}. Retrying...")
                 return_response["body"] = f"Got internal error from Velocloud"

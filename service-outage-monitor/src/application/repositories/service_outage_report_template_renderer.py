@@ -26,7 +26,7 @@ class ServiceOutageReportTemplateRenderer:
         templateEnv = jinja2.Environment(loader=templateLoader)
         templ = templateEnv.get_template(template)
         template_vars["__EDGE_COUNT__"] = str(len(edges_to_report))
-        template_vars["__TIME_REPORT__"] = kwargs.get("time_report", "60") + " minutes"
+        template_vars["__TIME_REPORT__"] = kwargs.get("time_report", "4") + " hours"
         template_vars["__FIELDS__"] = kwargs.get("fields", list(edges_to_report[0].keys()))
         template_vars["__FIELDS_REL__"] = {field: field_related for field, field_related in
                                            zip(template_vars["__FIELDS__"], kwargs.get("fields_edge"))}
