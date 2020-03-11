@@ -134,6 +134,9 @@ class TicketRepository:
         task_registries = ticket_task_history_response.get('body')
 
         task_registries.sort(key=lambda r: r["EnteredDate_N"])
+        # Remove any registry that doesn't belong to the asset (serial) we're working with
+        task_registries = [registry for registry in task_registries if
+                           registry.get('Asset') and serial_number in registry.get('Asset')]
 
         # A literal is needed for the map of "Current status --> [automatable statuses]".None is T7's null task result
         current_task_result = "None"
