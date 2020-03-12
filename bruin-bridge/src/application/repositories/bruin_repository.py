@@ -151,7 +151,8 @@ class BruinRepository:
 
         if documents:
             # We only want the current active company for the device if there's one
-            active_status = [status for status in documents if status["status"] == "A"]
+            active_status = [status for status in documents if
+                             status["status"] == "A" and status["serviceNumber"] in filters["service_number"]]
             if active_status:
                 # There should be only one active status per serial
                 client_id = active_status[0].get("clientID")

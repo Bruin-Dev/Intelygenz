@@ -1024,3 +1024,76 @@ class TestBruinRepository:
 
         bruin_client.get_client_info.assert_called_once_with(filters)
         assert result == expected_result
+
+    def get_client_info_with_2XX_different_serial_number_than_provided(self):
+        filters = {
+            'service_number': "VC019191",
+            'status': 'A'
+        }
+
+        response_status = 200
+        client_response = {
+            "body": {
+                "documents": [
+                    {
+                        "clientID": 9919,
+                        "clientName": "Tet Corp",
+                        "vendor": "Central Positronics",
+                        "accountNumber": "59864",
+                        "subAccountNumber": "4554",
+                        "inventoryID": "12295777",
+                        "serviceNumber": "VC01919-RET",
+                        "siteId": 16199,
+                        "siteLabel": "Turtle Square",
+                        "address": {
+                            "address": "2125 Fake Street",
+                            "city": "River Crossing",
+                            "state": "ST",
+                            "zip": "1999556",
+                            "country": "MEJIS"
+                        },
+                        "hierarchy": "|Tet Corp|River Crossing|SomeSite|",
+                        "costCenter": "15830",
+                        "assignee": None,
+                        "description": "",
+                        "installDate": "2018-04-03T17:58:51Z",
+                        "disconnectDate": None,
+                        "status": "A",
+                        "verified": "Y",
+                        "productCategory": "SD-WAN",
+                        "productType": "SD-WAN",
+                        "items": [
+                            {
+                                "itemName": "Licensed Software - SD-WAN 30M",
+                                "primaryIndicator": "SD-WAN"
+                            }
+                        ],
+                        "contractIdentifier": None,
+                        "rateCardIdentifier": None,
+                        "lastInvoiceUsageDate": "2020-02-23T05:00:00Z",
+                        "lastUsageDate": None,
+                        "longitude": -76.265384,
+                        "latitude": 36.843456
+                    }
+                ]
+            },
+            "status_code": response_status,
+        }
+
+        expected_result = {
+            "body": {"client_id": None,
+                     "client_name": None},
+            "status_code": response_status
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_client_info = Mock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.get_client_info(filters)
+
+        bruin_client.get_client_info.assert_called_once_with(filters)
+        assert result == expected_result
