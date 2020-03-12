@@ -638,6 +638,35 @@ class TestBruinRepository:
         bruin_client.get_management_status.assert_called_once_with(filters)
         assert "Active – Platinum Monitoring" in management_status
 
+    def get_management_status_ok_no_management_key_test(self):
+        logger = Mock()
+        filters = {
+            "client_id": 9994,
+            "status": "A",
+            "service_number": "VC05400009999"
+        }
+        response = {
+            "body":
+                {
+                    "inventoryId": "12796795",
+                    "serviceNumber": "VC05400002265",
+                    "attributes": [
+                        {
+                            "key": "RD1.K3",
+                            "value": "RD Circuit information"
+                        }
+                    ]
+                },
+            "status": 200,
+        }
+        bruin_client = Mock()
+        bruin_client.get_management_status = Mock(return_value=response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        response = bruin_repository.get_management_status(filters)
+        management_status = response["body"]
+        bruin_client.get_management_status.assert_called_once_with(filters)
+        assert management_status is None
+
     def get_management_status_400_test(self):
         logger = Mock()
         filters = {

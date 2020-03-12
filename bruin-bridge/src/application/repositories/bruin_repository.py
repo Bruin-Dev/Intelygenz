@@ -122,6 +122,8 @@ class BruinRepository:
                                  attribute["key"] == "Management Status"]
             if len(management_status) > 0:
                 management_status = management_status[0]
+            else:
+                management_status = None
 
             response["body"] = management_status
 
