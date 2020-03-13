@@ -140,5 +140,4 @@ if __name__ == '__main__':
     with open(file_to_load, 'r') as fd:
         file_task_definition = json.load(fd)
     task_definition_arn = file_task_definition['taskDefinitionArn']
-    logging.info(f"task_definition_arn is {task_definition_arn}")
     task_healthcheck_instance.check_task_is_ready(task_name, task_definition_arn)

@@ -134,7 +134,7 @@ class Container:
             rpc_request_msg,
             timeout=20
         )
-        self.enterprise_names = response["enterprise_names"]
+        self.enterprise_names = response["body"]
         logger.info(f'Got RPC response with {len(self.enterprise_names)} enterprises')
         print(self.enterprise_names)
         self.generate_dashboards()
