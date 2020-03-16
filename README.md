@@ -35,7 +35,7 @@
   - [Python 3.6](#python-3.6)
   - [Docker and Docker Compose](#docker-and-docker-compose)
   - [Docker ECR private repository](#docker-ecr-private-repository)
-  - [Docker custom images](#docker-custom-images)
+  - [Docker custom images and python libraries](#docker-custom-images-and-python-libraries)
   - [Env files](#env-files)
   - [Finish up](#finish-up)
 - [Lists of projects READMEs](#lists-of-projects-readmes)
@@ -195,7 +195,7 @@ In order to use these images it will be necessary to have configured the authent
 
    ```bash
    [mettel-automation]
-   aws_access_key_id = <user_aws_acces_key_id>
+   aws_access_key_id = <user_aws_access_key_id>
    aws_secret_access_key = <user_secret_access_key>
    ```
 
@@ -213,7 +213,15 @@ In order to use these images it will be necessary to have configured the authent
    $(aws ecr get-login --no-include-email --profile mettel-automation)
    ```
 
-## Docker custom images
+   The above command creates a temporary token in the `~/.docker/config.json` file, so it is possible that after a while an error like the one below will occur when trying to access the ECR repository:
+
+    ```bash
+    ERROR: Service 'last-contact-report' failed to build: pull access denied for 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation-python-3.6, repository does not exist or may require 'docker login': denied: Your Authorization Token has expired. Please run 'aws ecr get-login --no-include-email' to fetch a new one.
+    ```
+
+   To solve this error, simply execute the command mentioned in this step for the generation of a new token.
+
+## Docker custom images and Python Libraries
 
 As mentioned in the previous section, the project uses custom images created from a specific repository, in which semantic-release is used to version these images. Each of these images has a specific version of the python library `igzpackages` installed.
 
@@ -225,38 +233,47 @@ There are a number of variables to indicate the version number of these images, 
 
 >The versions are available in the [releases](https://gitlab.intelygenz.com/mettel/docker_images/-/releases) section of the repository that manages igzpackages.
 
-These variables are declared in two files:
+These variables are indicated in different ways, depending on whether you want to make the changes locally or in an AWS environment:
 
-- In the [.gitlab-ci.yml](.gitlab-ci.yml) file, as explained below:
+- For deploy in an AWS environment it's necessary modify the [.gitlab-ci.yml](.gitlab-ci.yml) file, as explained below:
 
   ```yaml
   . . .
 
   variables:
     . . .
-    IGZ_PACKAGES_VERSION: 1.0.0
-    DOCKER_BASE_IMAGE_VERSION: 1.0.2
+    IGZ_PACKAGES_VERSION: 1.0.9
+    DOCKER_BASE_IMAGE_VERSION: 1.0.7
     . . .
 
   . . .
   ```
 
-  So in case you want to change the version used of the `igzpackages` library and/or the base docker images you must change the variables mentioned. These changes will affect the construction of the different images of the microservices to be deployed in AWS.
+  So in case you want to change the version used of the `igzpackages` library and/or the base docker images you must change the variables mentioned. These changes will affect the construction of the different images of the microservices to be deployed in AWS or in local environment.
 
-- In the different microservices declared in the [docker-compose.yml](./docker-compose.yml) file for local use, **so it is important to update them with the desired values, below you can see how they are used in this file for a microservice declaration**
+- For the local environment, two files must be modified:
 
-  ```yaml
-    <microservice_name>:
-      build:
-        context: .
-        dockerfile: <microservice_folder>/Dockerfile
-        args:
-          DOCKER_BASE_IMAGE_VERSION: 1.0.2
-          IGZ_PACKAGES_VERSION: 1.0.0
+  - In the different microservices declared in the [docker-compose.yml](./docker-compose.yml) file for local use, you must change the version of the docker images to be used, **so it is important to update them with the desired values, below you can see how they are used in this file for a microservice declaration**
+
+    ```yaml
+      <microservice_name>:
+        build:
+          context: .
+          dockerfile: <microservice_folder>/Dockerfile
+          args:
+            DOCKER_BASE_IMAGE_VERSION: 1.0.7
+      . . .
+    ```
+
+  - In each of the `requirements.txt` files of the microservices, which allow these libraries to be installed in the local environment, indicating `-f` flag so that these libraries are searched in the URL configured by means of Cloudfront to access the index.html where the different versions are located. Below is an example of this file for the `velocloud-bridge` microservice
+
+    ```bash
     . . .
-  ```
+    -f https://d3nllpcjtts00v.cloudfront.net/igzpackages/index.html
+    igzpackages==1.0.9
+    ```
 
->It is important to reflect the changes in both files simultaneously so that the version of the development in local and AWS is the same at the end of the development of a feature or fix.
+>It is important to reflect the changes in all files simultaneously so that the version of the development in local and AWS is the same at the end of the development of a feature or fix.
 
 ## Env files
 

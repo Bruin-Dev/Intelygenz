@@ -37,7 +37,7 @@ services:
       dockerfile: base-microservice/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 1.0.2
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
         IGZ_PACKAGES_REPOSITORY_URL: https://d3nllpcjtts00v.cloudfront.net/igzpackages/index.html
         IGZ_PACKAGES_VERSION: 1.0.0
     env_file:
@@ -55,7 +55,7 @@ services:
       dockerfile: sites-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 1.0.2
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
     env_file:
       - sites-monitor/src/config/env
     depends_on:
@@ -72,7 +72,7 @@ services:
       dockerfile: velocloud-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 1.0.2
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
     env_file:
       - velocloud-bridge/src/config/env
     depends_on:
@@ -89,7 +89,7 @@ services:
       dockerfile: notifier/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 1.0.2
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
     env_file:
       - notifier/src/config/env
     depends_on:
@@ -105,7 +105,7 @@ services:
       dockerfile: last-contact-report/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 1.0.2
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
     env_file:
       - last-contact-report/src/config/env
     depends_on:
@@ -122,7 +122,7 @@ services:
       dockerfile: service-outage-triage/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 1.0.2
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
     env_file:
       - service-outage-triage/src/config/env
     depends_on:
@@ -138,7 +138,7 @@ services:
       dockerfile: bruin-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 1.0.2
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
     env_file:
       - bruin-bridge/src/config/env
     depends_on:
@@ -154,7 +154,7 @@ services:
       dockerfile: service-outage-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 1.0.2
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
     env_file:
       - service-outage-monitor/src/config/env
     depends_on:
@@ -170,7 +170,7 @@ services:
       dockerfile: service-affecting-monitor/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 1.0.2
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
     env_file:
       - service-affecting-monitor/src/config/env
     depends_on:
@@ -186,7 +186,7 @@ services:
       dockerfile: t7-bridge/Dockerfile
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
-        DOCKER_BASE_IMAGE_VERSION: 1.0.2
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
     env_file:
       - t7-bridge/src/config/env
     depends_on:
@@ -209,8 +209,6 @@ services:
       dockerfile: metrics-dashboard/grafana/Dockerfile
       args:
         GRAFANA_ADMIN_PASSWORD: password
-        IGZ_PACKAGES_REPOSITORY_URL: https://d3nllpcjtts00v.cloudfront.net/igzpackages/index.html
-        IGZ_PACKAGES_VERSION: 1.0.0
     env_file:
       - metrics-dashboard/grafana/config/env
     depends_on:

@@ -14,7 +14,7 @@ The time required for the deployment of an environment in the project began to i
 
 After analysing the possible causes, it was concluded that the vast majority of the time of a deployment is consumed in the 'building' stage of a pipeline, in which the construction of the docker image of each of the microservices to be deployed in AWS in the 'deployment' phase is carried out.
 
-Analyzing in more depth each one of the jobs of this stage, it was observed that they all started from a docker image `python:3.6` or `python:3.6`, installing a series of python libraries, a great set of them were installed in all the microservices, as well as the library created in a customized way for the project and called `igzpackages`.
+Analyzing in more depth each one of the jobs of this stage, it was observed that they all started from a docker image `python:3.6` or `python:3.6-alpine`, installing a series of python libraries, a great set of them were installed in all the microservices, as well as the library created in a customized way for the project and called `igzpackages`.
 
 ## Decision
 
@@ -26,9 +26,9 @@ In this external repository there will also be one more component where Dockerfi
 
 ## Consequences
 
-### Possitive
+### Positive
 
-The positive consequences will be a notable improvement in the times of the different jobs of the IC/CD process, especially notable in those belonging to the build stage, where most of the time of this process is consumed.
+The positive consequences will be a notable improvement in the times of the different jobs of the CI/CD process, especially notable in those belonging to the build stage, where most of the time of this process is consumed.
 
 #### Validation stage comparison
 
@@ -296,6 +296,10 @@ It becomes a little more complex to work on the project, since the following asp
 
 - The images published directly in [dockerhub](https://hub.docker.com/) will not be used as base images for the Dockerfile of the microservices, but private ones stored in the ECR repository used in the project.
 
-- If you want to update the igzpackages library, you will need to update it in the specific repository where it will be managed, as well as update the variables to reference this library in the GitlabCI files so that it can be used in the CI/CD process.
+- If you want to update the `igzpackages` library, you will need to update it in the specific repository where it will be managed, as well as update the variables to reference this library in the GitlabCI files so that it can be used in the CI/CD process.
+
+-  Now that we are going to have an extra repo solely for the management of `custompackages` we have to deal with two MRs every time we need to carry out a feature or fix in `automation-engine` where altering code within this library is necessary. The MR in `custompackages` must be merged prior to the one in `automation-engine` in order to let the pipeline in the extra repo generate new Docker images and new version tags, which are needed to update `Dockerfile`s in `automation-engine`. It's a matter of coordinating actions.
+
+  Fortunately, we won't have to change `custompackages` too much as this library holds common code across **all** the microservices of this system and hence this code is unlikely to change.
 
 ## Alternatives

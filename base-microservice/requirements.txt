@@ -1,3 +1,4 @@
 prometheus_client==0.6.0
 APScheduler==3.6.0
-igzpackages==${IGZ_PACKAGES_VERSION}
+-f https://d3nllpcjtts00v.cloudfront.net/igzpackages/index.html
+igzpackages==1.0.9

@@ -10,7 +10,7 @@ grafana-build:
   script:
     - source ci-utils/environment_assign.sh
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/grafana/config/prometheus-dev.yml
-    - sed -i "s/igzpackages==0.0.1/igzpackages==${IGZ_PACKAGES_VERSION}/g" ${MODULE_NAME}/requirements.txt
+    - sed -i "s/igzpackages==[0-9]+\.[0-9]+\.[0-9]+/igzpackages==${IGZ_PACKAGES_VERSION}/g" ${MODULE_NAME}/requirements.txt
     - cp metrics-dashboard/grafana/config/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
     - docker build --build-arg IGZ_PACKAGES_REPOSITORY_URL=${IGZ_PACKAGES_REPOSITORY_URL} --build-arg IGZ_PACKAGES_VERSION=${IGZ_PACKAGES_VERSION} --build-arg GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
     - python3 ci-utils/manage_ecr_docker_images.py -r automation-${MODULE_NAME}

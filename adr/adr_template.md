@@ -14,7 +14,7 @@ PROPOSED | ACCEPTED | REJECTED | OBSOLET | REPLACED
 
 ## Consequences
 
-### Possitive
+### Positive
 
 ### Negative
 
