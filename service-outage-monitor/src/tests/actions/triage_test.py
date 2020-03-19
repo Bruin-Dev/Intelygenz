@@ -285,6 +285,46 @@ class TestTriage:
             'status': 200,
         }
 
+        bruin_client_info_1_response_body = {
+            'client_id': bruin_client_1,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_1_response = {
+            'body': bruin_client_info_1_response_body,
+            'status': 200,
+        }
+
+        bruin_client_info_2_response_body = {
+            'client_id': bruin_client_2,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_2_response = {
+            'body': bruin_client_info_2_response_body,
+            'status': 200,
+        }
+
+        bruin_client_info_3_response_body = {
+            'client_id': bruin_client_2,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_3_response = {
+            'body': bruin_client_info_3_response_body,
+            'status': 200,
+        }
+
+        edge_1_status_with_bruin_client_info = {
+            **edge_1_status,
+            'bruin_client_info': bruin_client_info_1_response_body,
+        }
+        edge_2_status_with_bruin_client_info = {
+            **edge_2_status,
+            'bruin_client_info': bruin_client_info_2_response_body,
+        }
+        edge_3_status_with_bruin_client_info = {
+            **edge_3_status,
+            'bruin_client_info': bruin_client_info_3_response_body,
+        }
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -299,6 +339,11 @@ class TestTriage:
             edge_2_status_response,
             edge_3_status_response,
         ])
+        triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
+            bruin_client_info_1_response,
+            bruin_client_info_2_response,
+            bruin_client_info_3_response,
+        ])
 
         result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
 
@@ -311,11 +356,11 @@ class TestTriage:
 
         expected = {
             bruin_client_1: {
-                edge_1_serial: {'edge_id': edge_1_full_id, 'edge_status': edge_1_status},
+                edge_1_serial: {'edge_id': edge_1_full_id, 'edge_status': edge_1_status_with_bruin_client_info},
             },
             bruin_client_2: {
-                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status},
-                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status},
+                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
+                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
             }
         }
         assert result == expected
@@ -391,6 +436,20 @@ class TestTriage:
             'status': 200,
         }
 
+        bruin_client_info_2_response_body = {
+            'client_id': bruin_client_2,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_2_response = {
+            'body': bruin_client_info_2_response_body,
+            'status': 200,
+        }
+
+        edge_2_status_with_bruin_client_info = {
+            **edge_2_status,
+            'bruin_client_info': bruin_client_info_2_response_body,
+        }
+
         logger = Mock()
         scheduler = Mock()
         config = testconfig
@@ -406,6 +465,7 @@ class TestTriage:
         ])
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_2_response)
 
         with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2, uuid_3, uuid_4]):
             result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
@@ -435,7 +495,7 @@ class TestTriage:
 
         expected = {
             bruin_client_2: {
-                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status},
+                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
             }
         }
         assert result == expected
@@ -532,6 +592,24 @@ class TestTriage:
             'status': 200,
         }
 
+        bruin_client_info_response_body = {
+            'client_id': bruin_client,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_response = {
+            'body': bruin_client_info_response_body,
+            'status': 200,
+        }
+
+        edge_2_status_with_bruin_client_info = {
+            **edge_2_status,
+            'bruin_client_info': bruin_client_info_response_body,
+        }
+        edge_3_status_with_bruin_client_info = {
+            **edge_3_status,
+            'bruin_client_info': bruin_client_info_response_body,
+        }
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -547,6 +625,7 @@ class TestTriage:
             edge_3_status_response,
         ])
         triage._notify_failing_rpc_request_for_edge_status = CoroutineMock()
+        triage._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
 
         result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
 
@@ -560,8 +639,8 @@ class TestTriage:
 
         expected = {
             bruin_client: {
-                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status},
-                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status},
+                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
+                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
             }
         }
         assert result == expected
@@ -621,6 +700,24 @@ class TestTriage:
             'status': 200,
         }
 
+        bruin_client_info_response_body = {
+            'client_id': bruin_client,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_response = {
+            'body': bruin_client_info_response_body,
+            'status': 200,
+        }
+
+        edge_2_status_with_bruin_client_info = {
+            **edge_2_status,
+            'bruin_client_info': bruin_client_info_response_body,
+        }
+        edge_3_status_with_bruin_client_info = {
+            **edge_3_status,
+            'bruin_client_info': bruin_client_info_response_body,
+        }
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -635,6 +732,7 @@ class TestTriage:
             edge_2_status_response,
             edge_3_status_response,
         ])
+        triage._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         triage._notify_http_error_when_requesting_edge_status_from_velocloud = CoroutineMock()
 
         result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
@@ -651,8 +749,447 @@ class TestTriage:
 
         expected = {
             bruin_client: {
-                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status},
-                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status},
+                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
+                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
+            }
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_bruin_client_info_request_failing_test(self):
+        uuid_1 = uuid()
+        uuid_2 = uuid()
+
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+        edge_list_response = {
+            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+            'status': 200
+        }
+
+        bruin_client_1 = 12345
+        bruin_client_2 = 54321
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC7654321'
+        edge_3_serial = 'VC1111111'
+
+        edge_1_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
+        }
+        edge_1_status_response = {
+            'body': {
+                'edge_id': edge_1_full_id,
+                'edge_info': edge_1_status,
+            },
+            'status': 200,
+        }
+
+        edge_2_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+        }
+        edge_2_status_response = {
+            'body': {
+                'edge_id': edge_2_full_id,
+                'edge_info': edge_2_status,
+            },
+            'status': 200,
+        }
+
+        edge_3_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+        }
+        edge_3_status_response = {
+            'body': {
+                'edge_id': edge_3_full_id,
+                'edge_info': edge_3_status,
+            },
+            'status': 200,
+        }
+
+        bruin_client_info_3_response_body = {
+            'client_id': bruin_client_2,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_3_response = {
+            'body': bruin_client_info_3_response_body,
+            'status': 200,
+        }
+
+        edge_3_status_with_bruin_client_info = {
+            **edge_3_status,
+            'bruin_client_info': bruin_client_info_3_response_body,
+        }
+
+        slack_message_response = None
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            slack_message_response,
+            slack_message_response,
+        ])
+
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            edge_1_status_response,
+            edge_2_status_response,
+            edge_3_status_response,
+        ])
+        triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
+            Exception,
+            Exception,
+            bruin_client_info_3_response,
+        ])
+
+        with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2]):
+            result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+
+        triage._get_edges_for_triage_monitoring.assert_awaited_once()
+        triage._get_edge_status_by_id.assert_has_awaits([
+            call(edge_1_full_id),
+            call(edge_2_full_id),
+            call(edge_3_full_id),
+        ])
+        triage._get_bruin_client_info_by_serial.assert_has_awaits([
+            call(edge_1_serial), call(edge_2_serial), call(edge_3_serial),
+        ])
+        event_bus.rpc_request.assert_has_awaits([
+            call(
+                "notification.slack.request",
+                {
+                    'request_id': uuid_1,
+                    'message': 'An error occurred when requesting Bruin client info from Bruin for serial '
+                               f'{edge_1_serial}',
+                },
+                timeout=10,
+            ),
+            call(
+                "notification.slack.request",
+                {
+                    'request_id': uuid_2,
+                    'message': 'An error occurred when requesting Bruin client info from Bruin for serial '
+                               f'{edge_2_serial}',
+                },
+                timeout=10,
+            ),
+        ])
+
+        expected = {
+            bruin_client_2: {
+                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
+            }
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_client_info_request_not_having_2XX_status_test(
+            self):
+        uuid_1 = uuid()
+        uuid_2 = uuid()
+
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+        edge_list_response = {
+            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+            'status': 200
+        }
+
+        bruin_client_1 = 12345
+        bruin_client_2 = 54321
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC7654321'
+        edge_3_serial = 'VC1111111'
+
+        edge_1_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
+        }
+        edge_1_status_response = {
+            'body': {
+                'edge_id': edge_1_full_id,
+                'edge_info': edge_1_status,
+            },
+            'status': 200,
+        }
+
+        edge_2_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+        }
+        edge_2_status_response = {
+            'body': {
+                'edge_id': edge_2_full_id,
+                'edge_info': edge_2_status,
+            },
+            'status': 200,
+        }
+
+        edge_3_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+        }
+        edge_3_status_response = {
+            'body': {
+                'edge_id': edge_3_full_id,
+                'edge_info': edge_3_status,
+            },
+            'status': 200,
+        }
+
+        bruin_client_info_failing_response_body = 'Got internal error from Bruin'
+        bruin_client_info_failing_response_status = 500
+        bruin_client_info_failing_response = {
+            'body': bruin_client_info_failing_response_body,
+            'status': bruin_client_info_failing_response_status,
+        }
+
+        bruin_client_info_3_response_body = {
+            'client_id': bruin_client_2,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_3_response = {
+            'body': bruin_client_info_3_response_body,
+            'status': 200,
+        }
+
+        slack_message_response = None
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            slack_message_response,
+            slack_message_response,
+        ])
+
+        edge_3_status_with_bruin_client_info = {
+            **edge_3_status,
+            'bruin_client_info': bruin_client_info_3_response_body,
+        }
+
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            edge_1_status_response,
+            edge_2_status_response,
+            edge_3_status_response,
+        ])
+        triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
+            bruin_client_info_failing_response,
+            bruin_client_info_failing_response,
+            bruin_client_info_3_response,
+        ])
+
+        with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2]):
+            result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+
+        triage._get_edges_for_triage_monitoring.assert_awaited_once()
+        triage._get_edge_status_by_id.assert_has_awaits([
+            call(edge_1_full_id),
+            call(edge_2_full_id),
+            call(edge_3_full_id),
+        ])
+        triage._get_bruin_client_info_by_serial.assert_has_awaits([
+            call(edge_1_serial), call(edge_2_serial), call(edge_3_serial),
+        ])
+        event_bus.rpc_request.assert_has_awaits([
+            call(
+                "notification.slack.request",
+                {
+                    'request_id': uuid_1,
+                    'message': f'Error trying to get Bruin client info from Bruin for serial {edge_1_serial}: '
+                               f'Error {bruin_client_info_failing_response_status} - '
+                               f'{bruin_client_info_failing_response_body}'
+                },
+                timeout=10,
+            ),
+            call(
+                "notification.slack.request",
+                {
+                    'request_id': uuid_2,
+                    'message': f'Error trying to get Bruin client info from Bruin for serial {edge_2_serial}: '
+                               f'Error {bruin_client_info_failing_response_status} - '
+                               f'{bruin_client_info_failing_response_body}'
+                },
+                timeout=10,
+            ),
+        ])
+
+        expected = {
+            bruin_client_2: {
+                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
+            }
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
+    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_bruin_client_info_having_null_client_id_test(
+            self):
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+        edge_list_response = {
+            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+            'status': 200
+        }
+
+        bruin_client_1 = 12345
+        bruin_client_2 = 54321
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC7654321'
+        edge_3_serial = 'VC1111111'
+
+        edge_1_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
+        }
+        edge_1_status_response = {
+            'body': {
+                'edge_id': edge_1_full_id,
+                'edge_info': edge_1_status,
+            },
+            'status': 200,
+        }
+
+        edge_2_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+        }
+        edge_2_status_response = {
+            'body': {
+                'edge_id': edge_2_full_id,
+                'edge_info': edge_2_status,
+            },
+            'status': 200,
+        }
+
+        edge_3_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+        }
+        edge_3_status_response = {
+            'body': {
+                'edge_id': edge_3_full_id,
+                'edge_info': edge_3_status,
+            },
+            'status': 200,
+        }
+
+        bruin_client_info_1_response_body = {
+            'client_id': None,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_1_response = {
+            'body': bruin_client_info_1_response_body,
+            'status': 200,
+        }
+
+        bruin_client_info_2_response_body = {
+            'client_id': bruin_client_1,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_2_response = {
+            'body': bruin_client_info_2_response_body,
+            'status': 200,
+        }
+
+        bruin_client_info_3_response_body = {
+            'client_id': bruin_client_2,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_3_response = {
+            'body': bruin_client_info_3_response_body,
+            'status': 200,
+        }
+
+        edge_2_status_with_bruin_client_info = {
+            **edge_2_status,
+            'bruin_client_info': bruin_client_info_2_response_body,
+        }
+        edge_3_status_with_bruin_client_info = {
+            **edge_3_status,
+            'bruin_client_info': bruin_client_info_3_response_body,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_repository = Mock()
+
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            edge_1_status_response,
+            edge_2_status_response,
+            edge_3_status_response,
+        ])
+        triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
+            bruin_client_info_1_response,
+            bruin_client_info_2_response,
+            bruin_client_info_3_response,
+        ])
+
+        result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+
+        expected = {
+            bruin_client_1: {
+                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
+            },
+            bruin_client_2: {
+                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
             }
         }
         assert result == expected
@@ -867,6 +1404,41 @@ class TestTriage:
             },
             timeout=10,
         )
+
+    @pytest.mark.asyncio
+    async def get_bruin_client_info_by_serial_test(self):
+        uuid_ = uuid()
+
+        serial_number = 'VC1234567'
+        bruin_client_info_response = {
+            'request_id': uuid_,
+            'body': {
+                'client_id': 9994,
+                'client_name': 'METTEL/NEW YORK',
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=bruin_client_info_response)
+
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+
+        with patch.object(triage_module, 'uuid', return_value=uuid_):
+            result = await triage._get_bruin_client_info_by_serial(serial_number)
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            'bruin.customer.get.info',
+            {'request_id': uuid_, 'body': {'service_number': serial_number}},
+            timeout=30,
+        )
+        assert result == bruin_client_info_response
 
     @pytest.mark.asyncio
     async def get_all_open_tickets_with_details_for_monitored_companies_test(self):
@@ -1811,6 +2383,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -1819,6 +2395,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -1827,6 +2407,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -2104,6 +2688,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {
             'edge_id': edge_full_id,
@@ -2213,6 +2801,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {
             'edge_id': edge_full_id,
@@ -2296,6 +2888,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {
             'edge_id': edge_full_id,
@@ -2366,6 +2962,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {
             'edge_id': edge_full_id,
@@ -2406,6 +3006,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {
             'edge_id': edge_full_id,
@@ -2455,6 +3059,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {
             'edge_id': edge_full_id,
@@ -2500,6 +3108,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {
             'edge_id': edge_full_id,
@@ -2593,6 +3205,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {
             'edge_id': edge_full_id,
@@ -2707,6 +3323,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {
             'edge_id': edge_full_id,
@@ -3279,6 +3899,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -3287,6 +3911,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -3295,6 +3923,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -3402,6 +4034,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -3410,6 +4046,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -3418,6 +4058,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -3562,6 +4206,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -3570,6 +4218,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -3578,6 +4230,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -3734,6 +4390,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -3742,6 +4402,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -3750,6 +4414,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -3883,6 +4551,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -3891,6 +4563,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -3899,6 +4575,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -4022,6 +4702,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -4030,6 +4714,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -4038,6 +4726,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -4171,6 +4863,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -4179,6 +4875,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -4187,6 +4887,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -4310,6 +5014,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -4318,6 +5026,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -4326,6 +5038,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -4479,6 +5195,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -4487,6 +5207,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -4495,6 +5219,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -4656,6 +5384,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_2_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
@@ -4664,6 +5396,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_3_status = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
@@ -4672,6 +5408,10 @@ class TestTriage:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
@@ -4810,6 +5550,10 @@ class TestTriage:
                 {'linkId': 3456, 'link': {'state': 'STABLE', 'interface': 'INTERNET3', 'displayName': 'Otacon'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {'edge_id': edge_full_id, 'edge_status': edge_status}
 
@@ -4956,6 +5700,10 @@ class TestTriage:
                 {'linkId': 3456, 'link': None},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
         edge_data = {'edge_id': edge_full_id, 'edge_status': edge_status}
         events = [
@@ -5119,37 +5867,6 @@ class TestTriage:
             'Last GE10 Interface Online: None',
             'Last GE10 Interface Offline: None',
         ])
-
-    def extract_client_id_with_match_found_test(self):
-        client_id = 12345
-        enterprise_name = f'EVIL-CORP|{client_id}|'
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        result_client_id = triage._extract_client_id(enterprise_name)
-        assert result_client_id == client_id
-
-    def extract_client_id_with_no_match_found_test(self):
-        enterprise_name = f'EVIL-CORP'
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        result_client_id = triage._extract_client_id(enterprise_name)
-        assert result_client_id == 9994
 
     def get_first_element_matching_with_match_test(self):
         payload = range(0, 11)

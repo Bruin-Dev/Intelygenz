@@ -295,6 +295,129 @@ class TestServiceOutageDetectorJob:
         comparison_report._get_management_status.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def comparison_report_process_with_retrieval_of_bruin_client_info_returning_non_2XX_status_test(self):
+        uuid_ = uuid()
+
+        edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        edge_list = [edge_full_id]
+
+        serial_number = 'VC1234567'
+        edge_status_data = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|12345|',
+        }
+        edge_status_response = {
+            'body': {
+                'edge_id': edge_full_id,
+                'edge_info': edge_status_data,
+            },
+            'status': 200,
+        }
+
+        bruin_client_info_response_body = 'Got internal error from Bruin'
+        bruin_client_info_response_status = 500
+        bruin_client_info_response = {
+            'body': bruin_client_info_response_body,
+            'status': bruin_client_info_response_status,
+        }
+
+        message = (
+            f'[outage-report] Error trying to get Bruin client info from Bruin for serial '
+            f'{serial_number}: Error {bruin_client_info_response_status} - '
+            f'{bruin_client_info_response_body}'
+        )
+        slack_message = {
+            'request_id': uuid_,
+            'message': message,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        comparison_report = ComparisonReport(event_bus, logger, scheduler,
+                                             quarantine_edge_repository, reporting_edge_repository,
+                                             config, template_renderer, outage_repository)
+        comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
+        comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
+        comparison_report._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
+        comparison_report._get_management_status = CoroutineMock()
+
+        with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
+            await comparison_report._service_outage_detector_process()
+
+        comparison_report._get_all_edges.assert_awaited_once()
+        comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        event_bus.rpc_request.assert_awaited_once_with("notification.slack.request", slack_message, timeout=10)
+        comparison_report._get_management_status.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def comparison_report_process_with_bruin_client_info_having_null_client_id_test(self):
+        edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        edge_list = [edge_full_id]
+
+        serial_number = 'VC1234567'
+        edge_status_data = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|12345|',
+        }
+        edge_status_response = {
+            'body': {
+                'edge_id': edge_full_id,
+                'edge_info': edge_status_data,
+            },
+            'status': 200,
+        }
+
+        bruin_client_info_response = {
+            'body': {
+                'client_id': None,
+                'client_name': None,
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        comparison_report = ComparisonReport(event_bus, logger, scheduler,
+                                             quarantine_edge_repository, reporting_edge_repository,
+                                             config, template_renderer, outage_repository)
+        comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
+        comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
+        comparison_report._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
+        comparison_report._get_management_status = CoroutineMock()
+
+        await comparison_report._service_outage_detector_process()
+
+        comparison_report._get_all_edges.assert_awaited_once()
+        comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        comparison_report._get_management_status.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def comparison_report_process_with_retrieval_of_management_status_returning_non_2XX_status_test(self):
         edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
         edge_identifier = EdgeIdentifier(**edge_full_id)
@@ -314,6 +437,20 @@ class TestServiceOutageDetectorJob:
                 'edge_info': edge_status_data,
             },
             'status': 200,
+        }
+
+        bruin_client_info_response_body = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_response = {
+            'body': bruin_client_info_response_body,
+            'status': 200,
+        }
+
+        edge_status_data_with_bruin_info = {
+            **edge_status_data,
+            'bruin_client_info': bruin_client_info_response_body,
         }
 
         management_status_response_body = "Got internal error from Bruin"
@@ -349,132 +486,17 @@ class TestServiceOutageDetectorJob:
                                              config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
+        comparison_report._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         comparison_report._get_management_status = CoroutineMock(return_value=management_status_response)
-        comparison_report._is_management_status_active = Mock(return_value=True)
-        comparison_report._start_quarantine_job = CoroutineMock()
 
         with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
             await comparison_report._service_outage_detector_process()
 
         comparison_report._get_all_edges.assert_awaited_once()
         comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        comparison_report._get_management_status.assert_awaited_once_with(edge_status_data_with_bruin_info)
         event_bus.rpc_request.assert_awaited_with("notification.slack.request", slack_message, timeout=30)
         outage_repository.is_there_an_outage.assert_not_called()
-        comparison_report._start_quarantine_job.assert_not_awaited()
-        comparison_report._is_management_status_active.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def comparison_report_process_with_management_status_200_test(self):
-        edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
-        edge_list = [edge_full_id]
-
-        edge_status_data = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|12345|',
-        }
-        edge_status_response = {
-            'body': {
-                'edge_id': edge_full_id,
-                'edge_info': edge_status_data,
-            },
-            'status': 200,
-        }
-
-        management_status_response = {
-            "body": "Some info",
-            "status": 200,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-        template_renderer = Mock()
-
-        outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(return_value=True)
-
-        comparison_report = ComparisonReport(event_bus, logger, scheduler,
-                                             quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_repository)
-        comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
-        comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
-        comparison_report._get_management_status = CoroutineMock(return_value=management_status_response)
-        comparison_report._is_management_status_active = Mock(return_value=True)
-        comparison_report._start_quarantine_job = CoroutineMock()
-        comparison_report._add_edge_to_quarantine = Mock()
-
-        uuid_ = uuid()
-        with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
-            await comparison_report._service_outage_detector_process()
-
-        comparison_report._get_all_edges.assert_awaited_once()
-        comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_repository.is_there_an_outage.assert_called()
-        comparison_report._start_quarantine_job.assert_awaited()
-
-    @pytest.mark.asyncio
-    async def comparison_report_process_with_management_status_active_and_no_outage_test(self):
-        edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
-        edge_list = [edge_full_id]
-
-        edge_status_data = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|12345|',
-        }
-        edge_status_response = {
-            'body': {
-                'edge_id': edge_full_id,
-                'edge_info': edge_status_data,
-            },
-            'status': 200,
-        }
-
-        management_status_response = {
-            "body": "Some info",
-            "status": 200,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-        template_renderer = Mock()
-
-        outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(return_value=False)
-
-        comparison_report = ComparisonReport(event_bus, logger, scheduler,
-                                             quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_repository)
-        comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
-        comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
-        comparison_report._get_management_status = CoroutineMock(return_value=management_status_response)
-        comparison_report._is_management_status_active = Mock(return_value=True)
-        comparison_report._start_quarantine_job = CoroutineMock()
-        comparison_report._add_edge_to_quarantine = Mock()
-
-        uuid_ = uuid()
-        with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
-            await comparison_report._service_outage_detector_process()
-
-        comparison_report._get_all_edges.assert_awaited_once()
-        comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
-        outage_repository.is_there_an_outage.assert_called()
-        comparison_report._start_quarantine_job.assert_not_awaited()
-        comparison_report._add_edge_to_quarantine.assert_not_called()
 
     @pytest.mark.asyncio
     async def comparison_report_process_with_management_status_inactive_test(self):
@@ -497,8 +519,16 @@ class TestServiceOutageDetectorJob:
             'status': 200,
         }
 
+        bruin_client_info_response = {
+            'body': {
+                'client_id': 9994,
+                'client_name': 'METTEL/NEW YORK',
+            },
+            'status': 200,
+        }
+
         management_status_response = {
-            "body": "Non active status",
+            "body": "Fake status",
             "status": 200,
         }
 
@@ -518,6 +548,7 @@ class TestServiceOutageDetectorJob:
                                              config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
         comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
+        comparison_report._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         comparison_report._get_management_status = CoroutineMock(return_value=management_status_response)
         comparison_report._is_management_status_active = Mock(return_value=False)
         comparison_report._start_quarantine_job = CoroutineMock()
@@ -528,7 +559,6 @@ class TestServiceOutageDetectorJob:
         comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_repository.is_there_an_outage.assert_not_called()
         comparison_report._start_quarantine_job.assert_not_awaited()
-        logger.info.assert_called()
 
     @pytest.mark.asyncio
     async def comparison_report_process_with_edges_found_and_healthy_edges_test(self):
@@ -557,6 +587,13 @@ class TestServiceOutageDetectorJob:
             ],
             'enterprise_name': edge_1_enterprise_name,
         }
+        edge_1_status_response = {
+            'body': {
+                'edge_id': edge_1_full_id,
+                'edge_info': edge_1_status,
+            },
+            'status': 200,
+        }
 
         edge_2_state = 'CONNECTED'
         edge_2_link_ge1_state = edge_2_link_ge2_state = 'STABLE'
@@ -572,6 +609,13 @@ class TestServiceOutageDetectorJob:
                 {'linkId': 5678, 'link': {'state': edge_2_link_ge2_state, 'interface': 'GE2'}},
             ],
             'enterprise_name': edge_2_enterprise_name,
+        }
+        edge_2_status_response = {
+            'body': {
+                'edge_id': edge_2_full_id,
+                'edge_info': edge_2_status,
+            },
+            'status': 200,
         }
 
         edge_3_state = 'CONNECTED'
@@ -589,9 +633,27 @@ class TestServiceOutageDetectorJob:
             ],
             'enterprise_name': edge_3_enterprise_name,
         }
-        edge_statuses = [edge_1_status, edge_2_status, edge_3_status]
+        edge_3_status_response = {
+            'body': {
+                'edge_id': edge_3_full_id,
+                'edge_info': edge_3_status,
+            },
+            'status': 200,
+        }
+        edge_status_responses = [edge_1_status_response, edge_2_status_response, edge_3_status_response]
 
-        is_there_outage_side_effect = [False, False, False]
+        bruin_client_info_response = {
+            'body': {
+                'client_id': 9994,
+                'client_name': 'METTEL/NEW YORK',
+            },
+            'status': 200,
+        }
+
+        management_status_response = {
+            "body": "Active – Gold Monitoring",
+            "status": 200,
+        }
 
         event_bus = Mock()
         logger = Mock()
@@ -600,108 +662,20 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
+
         outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=is_there_outage_side_effect)
+        outage_repository.is_there_an_outage = Mock(return_value=False)
 
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
                                              config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
-        comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
-
-        comparison_report._start_quarantine_job = Mock()
-        comparison_report._add_edge_to_quarantine = Mock()
+        comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=edge_status_responses)
+        comparison_report._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
+        comparison_report._get_management_status = CoroutineMock(return_value=management_status_response)
         comparison_report._is_management_status_active = CoroutineMock(return_value=True)
-
-        await comparison_report._service_outage_detector_process()
-
-        comparison_report._get_all_edges.assert_awaited_once()
-        comparison_report._get_edge_status_by_id.assert_has_awaits([
-            call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
-        ])
-        comparison_report._start_quarantine_job.assert_not_called()
-        comparison_report._add_edge_to_quarantine.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def comparison_report_process_with_edges_found_and_manamegement_staus_no_active(self):
-        edge_1_id = 5678
-        edge_2_id = 8765
-        edge_3_id = 3344
-        edge_1_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': edge_1_id}
-        edge_2_full_id = {'host': 'metvco03.mettel.net', 'enterprise_id': 4321, 'edge_id': edge_2_id}
-        edge_3_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1122, 'edge_id': edge_3_id}
-        edge_list = [edge_1_full_id, edge_2_full_id, edge_3_full_id]
-
-        edge_1_enterprise_name = edge_2_enterprise_name = edge_3_enterprise_name = 'EVIL-CORP|12345|'
-
-        edge_1_state = 'CONNECTED'
-        edge_1_link_ge1_state = edge_1_link_ge2_state = 'STABLE'
-        edge_1_status = {
-            'edges': {
-                'edgeState': edge_1_state,
-                'serialNumber': 'VC1234567',
-                'name': 'Saturos',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': edge_1_link_ge1_state, 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': edge_1_link_ge2_state, 'interface': 'GE2'}},
-            ],
-            'enterprise_name': edge_1_enterprise_name,
-        }
-
-        edge_2_state = 'CONNECTED'
-        edge_2_link_ge1_state = edge_2_link_ge2_state = 'STABLE'
-        edge_2_status = {
-            'edges': {
-                'edgeState': edge_2_state,
-                'serialNumber': 'VC7654321',
-                'name': 'Menardi',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': edge_2_link_ge1_state, 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': edge_2_link_ge2_state, 'interface': 'GE2'}},
-            ],
-            'enterprise_name': edge_2_enterprise_name,
-        }
-
-        edge_3_state = 'CONNECTED'
-        edge_3_link_ge1_state = edge_3_link_ge2_state = 'STABLE'
-        edge_3_status = {
-            'edges': {
-                'edgeState': edge_3_state,
-                'serialNumber': 'VC1112223',
-                'name': 'Isaac',
-                'lastContact': '2020-01-16T14:59:56.245Z'
-            },
-            'links': [
-                {'linkId': 1234, 'link': {'state': edge_3_link_ge1_state, 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': edge_3_link_ge2_state, 'interface': 'GE2'}},
-            ],
-            'enterprise_name': edge_3_enterprise_name,
-        }
-        edge_statuses = [edge_1_status, edge_2_status, edge_3_status]
-
-        is_management_status_active = [False] * 3
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-        comparison_report = ComparisonReport(event_bus, logger, scheduler,
-                                             quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_repository)
-        comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
-        comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
-
-        comparison_report._start_quarantine_job = Mock()
+        comparison_report._start_quarantine_job = CoroutineMock()
         comparison_report._add_edge_to_quarantine = Mock()
-        comparison_report._is_management_status_active = CoroutineMock(side_effect=is_management_status_active)
 
         await comparison_report._service_outage_detector_process()
 
@@ -709,9 +683,8 @@ class TestServiceOutageDetectorJob:
         comparison_report._get_edge_status_by_id.assert_has_awaits([
             call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
         ])
-        comparison_report._start_quarantine_job.assert_not_called()
+        comparison_report._start_quarantine_job.assert_not_awaited()
         comparison_report._add_edge_to_quarantine.assert_not_called()
-        comparison_report._is_management_status_active.assert_awaited()
 
     @pytest.mark.asyncio
     async def comparison_report_process_with_edges_found_and_edges_with_outages_test(self):
@@ -740,6 +713,13 @@ class TestServiceOutageDetectorJob:
             ],
             'enterprise_name': edge_1_enterprise_name,
         }
+        edge_1_status_response = {
+            'body': {
+                'edge_id': edge_1_full_id,
+                'edge_info': edge_1_status,
+            },
+            'status': 200,
+        }
 
         edge_2_state = 'CONNECTED'
         edge_2_link_ge1_state = edge_2_link_ge2_state = 'STABLE'
@@ -755,6 +735,13 @@ class TestServiceOutageDetectorJob:
                 {'linkId': 5678, 'link': {'state': edge_2_link_ge2_state, 'interface': 'GE2'}},
             ],
             'enterprise_name': edge_2_enterprise_name,
+        }
+        edge_2_status_response = {
+            'body': {
+                'edge_id': edge_2_full_id,
+                'edge_info': edge_2_status,
+            },
+            'status': 200,
         }
 
         edge_3_state = 'OFFLINE'
@@ -773,7 +760,37 @@ class TestServiceOutageDetectorJob:
             ],
             'enterprise_name': edge_3_enterprise_name,
         }
-        edge_statuses = [edge_1_status, edge_2_status, edge_3_status]
+        edge_3_status_response = {
+            'body': {
+                'edge_id': edge_3_full_id,
+                'edge_info': edge_3_status,
+            },
+            'status': 200,
+        }
+        edge_status_responses = [edge_1_status_response, edge_2_status_response, edge_3_status_response]
+
+        bruin_client_info_response_body = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_response = {
+            'body': bruin_client_info_response_body,
+            'status': 200,
+        }
+
+        management_status_response = {
+            "body": "Active – Gold Monitoring",
+            "status": 200,
+        }
+
+        edge_1_status_with_bruin_client_info = {
+            **edge_1_status,
+            'bruin_client_info': bruin_client_info_response_body,
+        }
+        edge_3_status_with_bruin_client_info = {
+            **edge_3_status,
+            'bruin_client_info': bruin_client_info_response_body,
+        }
 
         is_there_outage_side_effect = [True, False, True]
 
@@ -784,6 +801,7 @@ class TestServiceOutageDetectorJob:
         reporting_edge_repository = Mock()
         config = testconfig
         template_renderer = Mock()
+
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(side_effect=is_there_outage_side_effect)
 
@@ -791,11 +809,12 @@ class TestServiceOutageDetectorJob:
                                              quarantine_edge_repository, reporting_edge_repository,
                                              config, template_renderer, outage_repository)
         comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
-        comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=edge_statuses)
+        comparison_report._get_edge_status_by_id = CoroutineMock(side_effect=edge_status_responses)
+        comparison_report._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
+        comparison_report._get_management_status = CoroutineMock(return_value=management_status_response)
+        comparison_report._is_management_status_active = CoroutineMock(return_value=True)
         comparison_report._start_quarantine_job = CoroutineMock()
         comparison_report._add_edge_to_quarantine = Mock()
-        comparison_report._get_management_status = CoroutineMock()
-        comparison_report._is_management_status_active = Mock(return_value=True)
 
         await comparison_report._service_outage_detector_process()
 
@@ -803,13 +822,14 @@ class TestServiceOutageDetectorJob:
         comparison_report._get_edge_status_by_id.assert_has_awaits([
             call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
         ])
-        # comparison_report._start_quarantine_job.assert_has_awaits([
-        #     call(edge_1_full_id), call(edge_3_full_id)
-        # ])
-        # comparison_report._add_edge_to_quarantine.assert_has_calls([
-        #     call(edge_1_full_id, edge_1_status),
-        #     call(edge_3_full_id, edge_3_status),
-        # ])
+        comparison_report._start_quarantine_job.assert_has_awaits([
+            call(edge_1_full_id, bruin_client_info_response_body),
+            call(edge_3_full_id, bruin_client_info_response_body),
+        ])
+        comparison_report._add_edge_to_quarantine.assert_has_calls([
+            call(edge_1_full_id, edge_1_status_with_bruin_client_info),
+            call(edge_3_full_id, edge_3_status_with_bruin_client_info),
+        ])
 
     @pytest.mark.asyncio
     async def comparison_report_process_throws_exception_test(self):
@@ -841,32 +861,6 @@ class TestServiceOutageDetectorJob:
         await comparison_report._service_outage_detector_process()
 
         logger.exception.assert_called()
-
-    @pytest.mark.asyncio
-    async def comparison_report_process_with_status_management_no_active_test(self):
-        edge_id = 5678
-        edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': edge_id}
-        edge_list = [edge_full_id] * 3
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock()
-
-        comparison_report = ComparisonReport(event_bus, logger, scheduler,
-                                             quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_repository)
-        comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
-        comparison_report._start_quarantine_job = CoroutineMock()
-        comparison_report._get_edge_status_by_id = CoroutineMock()
-        comparison_report._is_management_status_active = CoroutineMock(return_value=False)
-        await comparison_report._service_outage_detector_process()
-        outage_repository.is_there_an_outage.assert_not_called()
 
     @pytest.mark.asyncio
     async def get_all_edges_test(self):
@@ -1080,6 +1074,10 @@ class TestServiceOutageDetectorJob:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': f'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            }
         }
 
         uuid_ = uuid()
@@ -1111,8 +1109,6 @@ class TestServiceOutageDetectorJob:
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
                                              config, template_renderer, outage_repository)
-
-        comparison_report._extract_client_id = Mock(return_value=12345)
 
         with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
             management_status = await comparison_report._get_management_status(edge_status)
@@ -1172,6 +1168,10 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def start_quarantine_job_with_run_date_undefined_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        bruin_client_info = {
+            'client_id': 12345,
+            'client_name': 'METTEL/NEW YORK',
+        }
 
         event_bus = Mock()
         logger = Mock()
@@ -1193,7 +1193,7 @@ class TestQuarantineJob:
         datetime_mock.timestamp = Mock(return_value=current_timestamp)
         with patch.object(comparison_report_module, 'datetime', new=datetime_mock):
             with patch.object(comparison_report_module, 'timezone', new=Mock()):
-                await comparison_report._start_quarantine_job(edge_full_id, run_date=None)
+                await comparison_report._start_quarantine_job(edge_full_id, bruin_client_info, run_date=None)
 
         job_run_date = current_datetime + timedelta(seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
         scheduler.add_job.assert_called_once_with(
@@ -1202,12 +1202,16 @@ class TestQuarantineJob:
             replace_existing=False,
             misfire_grace_time=9999,
             id=f'_quarantine_{json.dumps(edge_full_id)}',
-            kwargs={'edge_full_id': edge_full_id},
+            kwargs={'edge_full_id': edge_full_id, 'bruin_client_info': bruin_client_info},
         )
 
     @pytest.mark.asyncio
     async def start_quarantine_job_with_custom_run_date_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        bruin_client_info = {
+            'client_id': 12345,
+            'client_name': 'METTEL/NEW YORK',
+        }
 
         event_bus = Mock()
         logger = Mock()
@@ -1223,7 +1227,7 @@ class TestQuarantineJob:
                                              config, template_renderer, outage_repository)
 
         job_run_date = datetime.fromtimestamp(999999)
-        await comparison_report._start_quarantine_job(edge_full_id, run_date=job_run_date)
+        await comparison_report._start_quarantine_job(edge_full_id, bruin_client_info, run_date=job_run_date)
 
         scheduler.add_job.assert_called_once_with(
             comparison_report._process_edge_from_quarantine, 'date',
@@ -1231,12 +1235,17 @@ class TestQuarantineJob:
             replace_existing=False,
             misfire_grace_time=9999,
             id=f'_quarantine_{json.dumps(edge_full_id)}',
-            kwargs={'edge_full_id': edge_full_id},
+            kwargs={'edge_full_id': edge_full_id, 'bruin_client_info': bruin_client_info},
         )
 
     @pytest.mark.asyncio
     async def start_quarantine_job_with_job_id_already_executing_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        bruin_client_info = {
+            'client_id': 12345,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
         job_id = 'some-duplicated-id'
         exception_instance = ConflictingIdError(job_id)
 
@@ -1264,7 +1273,7 @@ class TestQuarantineJob:
         try:
             with patch.object(comparison_report_module, 'datetime', new=datetime_mock):
                 with patch.object(comparison_report_module, 'timezone', new=Mock()):
-                    await comparison_report._start_quarantine_job(edge_full_id)
+                    await comparison_report._start_quarantine_job(edge_full_id, bruin_client_info)
             # TODO: The test should fail at this point if no exception was raised
         except ConflictingIdError:
             job_run_date = current_datetime + timedelta(seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
@@ -1274,7 +1283,7 @@ class TestQuarantineJob:
                 replace_existing=False,
                 misfire_grace_time=9999,
                 id=f'_quarantine_{json.dumps(edge_full_id)}',
-                kwargs={'edge_full_id': edge_full_id},
+                kwargs={'edge_full_id': edge_full_id, 'bruin_client_info': bruin_client_info},
             )
 
     @pytest.mark.asyncio
@@ -1302,6 +1311,11 @@ class TestQuarantineJob:
             'status': 200,
         }
 
+        bruin_client_info = {
+            'client_id': 12345,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -1318,7 +1332,7 @@ class TestQuarantineJob:
         comparison_report._is_reportable_edge = CoroutineMock(return_value=False)
         comparison_report._add_edge_to_reporting = Mock()
 
-        await comparison_report._process_edge_from_quarantine(edge_full_id)
+        await comparison_report._process_edge_from_quarantine(edge_full_id, bruin_client_info)
 
         quarantine_edge_repository.remove_edge.assert_called_once_with(edge_full_id)
 
@@ -1347,6 +1361,16 @@ class TestQuarantineJob:
             'status': 200,
         }
 
+        bruin_client_info = {
+            'client_id': 12345,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
+        edge_status_data_with_bruin_client_info = {
+            **edge_status_data,
+            'bruin_client_info': bruin_client_info,
+        }
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
@@ -1363,9 +1387,11 @@ class TestQuarantineJob:
         comparison_report._is_reportable_edge = CoroutineMock(return_value=True)
         comparison_report._add_edge_to_reporting = Mock()
 
-        await comparison_report._process_edge_from_quarantine(edge_full_id)
+        await comparison_report._process_edge_from_quarantine(edge_full_id, bruin_client_info)
 
-        comparison_report._add_edge_to_reporting.assert_called_once_with(edge_full_id, edge_status_data)
+        comparison_report._add_edge_to_reporting.assert_called_once_with(
+            edge_full_id, edge_status_data_with_bruin_client_info
+        )
 
     @pytest.mark.asyncio
     async def process_edge_from_quarantine_with_exception_raised_while_determining_reportability_of_edge_test(self):
@@ -1392,6 +1418,11 @@ class TestQuarantineJob:
             'status': 200,
         }
 
+        bruin_client_info = {
+            'client_id': 12345,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
         logger = Mock()
@@ -1409,7 +1440,7 @@ class TestQuarantineJob:
         comparison_report._is_reportable_edge = CoroutineMock(side_effect=ValueError)
         comparison_report._add_edge_to_reporting = Mock()
 
-        await comparison_report._process_edge_from_quarantine(edge_full_id)
+        await comparison_report._process_edge_from_quarantine(edge_full_id, bruin_client_info)
 
         comparison_report._add_edge_to_reporting.assert_not_called()
 
@@ -1427,6 +1458,10 @@ class TestQuarantineJob:
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         event_bus = Mock()
@@ -1463,6 +1498,10 @@ class TestQuarantineJob:
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         outage_ticket = {
@@ -1520,6 +1559,10 @@ class TestQuarantineJob:
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         outage_ticket = {
@@ -1563,6 +1606,10 @@ class TestQuarantineJob:
                 {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         outage_ticket = None
@@ -1601,6 +1648,10 @@ class TestQuarantineJob:
                 {'linkId': 5678, 'link': {'state': 'STABLE'}},
             ],
             'enterprise_name': enterprise_name,
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         outage_ticket = {
@@ -1636,13 +1687,11 @@ class TestQuarantineJob:
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
                                              config, template_renderer, outage_repository)
-        comparison_report._extract_client_id = Mock(return_value=client_id)
 
         uuid_ = uuid()
         with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
             outage_ticket_result = await comparison_report._get_outage_ticket_for_edge(edge_status)
 
-        comparison_report._extract_client_id.assert_called_once_with(enterprise_name)
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.outage.details.by_edge_serial.request',
             {
@@ -1668,6 +1717,10 @@ class TestQuarantineJob:
                 {'linkId': 5678, 'link': {'state': 'STABLE'}},
             ],
             'enterprise_name': enterprise_name,
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
         }
 
         outage_ticket = {
@@ -1705,7 +1758,6 @@ class TestQuarantineJob:
         comparison_report = ComparisonReport(event_bus, logger, scheduler,
                                              quarantine_edge_repository, reporting_edge_repository,
                                              config, template_renderer, outage_repository)
-        comparison_report._extract_client_id = Mock(return_value=client_id)
 
         uuid_ = uuid()
         with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
@@ -1713,7 +1765,6 @@ class TestQuarantineJob:
                 edge_status, ticket_statuses=ticket_statuses
             )
 
-        comparison_report._extract_client_id.assert_called_once_with(enterprise_name)
         event_bus.rpc_request.assert_awaited_once_with(
             'bruin.ticket.outage.details.by_edge_serial.request',
             {
@@ -1727,45 +1778,6 @@ class TestQuarantineJob:
             timeout=180,
         )
         assert outage_ticket_result == outage_ticket
-
-    def extract_client_id_with_match_found_test(self):
-        client_id = 12345
-        enterprise_name = f'EVIL-CORP|{client_id}|'
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        comparison_report = ComparisonReport(event_bus, logger, scheduler,
-                                             quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_repository)
-
-        result_client_id = comparison_report._extract_client_id(enterprise_name)
-        assert result_client_id == client_id
-
-    def extract_client_id_with_no_match_found_test(self):
-        enterprise_name = f'EVIL-CORP'
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        quarantine_edge_repository = Mock()
-        reporting_edge_repository = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        comparison_report = ComparisonReport(event_bus, logger, scheduler,
-                                             quarantine_edge_repository, reporting_edge_repository,
-                                             config, template_renderer, outage_repository)
-
-        result_client_id = comparison_report._extract_client_id(enterprise_name)
-        assert result_client_id == 9994
 
     def add_edge_to_reporting_test(self):
         edge_full_id = {'host': 'metvco04.mettel.net', 'enterprise_id': 1234, 'edge_id': 5678}
@@ -2056,9 +2068,9 @@ class TestServiceOutageReporterJob:
         template_renderer.compose_email_object.assert_called_once_with(
             unmarshalling_result,
             fields=["Date of detection", "Company", "Edge name", "Last contact", "Serial Number", "Edge URL",
-                    "Outage causes", "Management status"],
+                    "Outage causes"],
             fields_edge=["detection_time", "enterprise", "edge_name", "last_contact", "serial_number", "edge_url",
-                         "outage_causes", "management_status"],
+                         "outage_causes"],
         )
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.email.request",
@@ -2523,7 +2535,7 @@ class TestServiceOutageReporterJob:
         edge_name = 'Saturos'
         last_contact = '2020-01-16T14:59:56.245Z'
         edge_serial_number = 'V123456789'
-        enterprise_name = 'EVIL-CORP|12345|'
+        enterprise_name = 'EVIL-CORP'
         edge_1_value = {
             'edge_status': {
                 'edges': {
@@ -2536,7 +2548,11 @@ class TestServiceOutageReporterJob:
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
                 ],
-                'enterprise_name': enterprise_name,
+                'enterprise_name': 'EVIL-CORP|12345|',
+                'bruin_client_info': {
+                    'client_id': 12345,
+                    'client_name': enterprise_name,
+                },
             },
             'detection_timestamp': detection_timestamp,
             'addition_timestamp': 987654321,
@@ -2549,12 +2565,20 @@ class TestServiceOutageReporterJob:
                     'serialNumber': edge_serial_number,
                     'name': edge_name,
                     'lastContact': last_contact,
+                    'bruin_client_info': {
+                        'client_id': 12345,
+                        'client_name': enterprise_name,
+                    },
                 },
                 'links': [
                     {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                     {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
                 ],
-                'enterprise_name': enterprise_name,
+                'enterprise_name': 'EVIL-CORP|12345|',
+                'bruin_client_info': {
+                    'client_id': 12345,
+                    'client_name': enterprise_name,
+                },
             },
             'detection_timestamp': detection_timestamp,
             'addition_timestamp': 987654321,
@@ -2591,7 +2615,6 @@ class TestServiceOutageReporterJob:
                 'Link GE1 was DISCONNECTED',
                 'Link GE2 was DISCONNECTED',
             ],
-            'management_status': 'A',
         }
         assert result == expected
 
@@ -2606,6 +2629,44 @@ class TestServiceOutageReporterJob:
             'outage_causes': [
                 'Link GE2 was DISCONNECTED',
             ],
-            'management_status': 'A'
         }
         assert result == expected
+
+    @pytest.mark.asyncio
+    async def get_bruin_client_info_by_serial_test(self):
+        uuid_ = uuid()
+
+        serial_number = 'VC1234567'
+        bruin_client_info_response = {
+            'request_id': uuid_,
+            'body': {
+                'client_id': 9994,
+                'client_name': 'METTEL/NEW YORK',
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=bruin_client_info_response)
+
+        comparison_report = ComparisonReport(event_bus, logger, scheduler,
+                                             quarantine_edge_repository, reporting_edge_repository,
+                                             config, template_renderer, outage_repository)
+
+        with patch.object(comparison_report_module, 'uuid', return_value=uuid_):
+            result = await comparison_report._get_bruin_client_info_by_serial(serial_number)
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            'bruin.customer.get.info',
+            {'request_id': uuid_, 'body': {'service_number': serial_number}},
+            timeout=30,
+        )
+        assert result == bruin_client_info_response

@@ -14,8 +14,6 @@ from igz.packages.repositories.edge_repository import EdgeIdentifier
 
 
 class OutageMonitor:
-    __client_id_regex = re.compile(r'^.*\|(?P<client_id>\d+)\|$')
-
     def __init__(self, event_bus, logger, scheduler, config, outage_repository):
         self._event_bus = event_bus
         self._logger = logger
@@ -77,7 +75,7 @@ class OutageMonitor:
             if edge_status_response_status not in range(200, 300):
                 err_msg = (
                     f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
-                    f"{edge_identifier}: Error {edge_status_response_status} - {edges_to_monitor_response_body}"
+                    f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
                 )
 
                 self._logger.error(err_msg)
@@ -93,6 +91,31 @@ class OutageMonitor:
                 self._logger.info(f"[outage-monitoring] Edge {edge_identifier} doesn't have any serial associated. "
                                   'Skipping...')
                 continue
+
+            self._logger.info(f'[outage-monitoring] Claiming Bruin client info for serial {edge_serial}...')
+            bruin_client_info_response = await self._get_bruin_client_info_by_serial(edge_serial)
+            self._logger.info(f'[outage-monitoring] Got Bruin client info for serial {edge_serial} -> '
+                              f'{bruin_client_info_response}')
+
+            bruin_client_info_response_body = bruin_client_info_response['body']
+            bruin_client_info_response_status = bruin_client_info_response['status']
+            if bruin_client_info_response_status not in range(200, 300):
+                err_msg = (f'Error trying to get Bruin client info from Bruin for serial {edge_serial}: '
+                           f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}')
+                self._logger.error(err_msg)
+
+                slack_message = {'request_id': uuid(), 'message': err_msg}
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                continue
+
+            if not bruin_client_info_response_body.get('client_id'):
+                self._logger.info(
+                    f"[outage-monitoring] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
+                    'Skipping...')
+                continue
+
+            # Attach Bruin client info to edge_data
+            edge_data['bruin_client_info'] = bruin_client_info_response_body
 
             self._logger.info(f'[outage-monitoring] Getting management status for edge {edge_identifier}...')
             management_status_response = await self._get_management_status(edge_data)
@@ -136,7 +159,10 @@ class OutageMonitor:
                                             replace_existing=False,
                                             misfire_grace_time=9999,
                                             id=f'_ticket_creation_recheck_{json.dumps(edge_full_id)}',
-                                            kwargs={'edge_full_id': edge_full_id})
+                                            kwargs={
+                                                'edge_full_id': edge_full_id,
+                                                'bruin_client_info': bruin_client_info_response_body
+                                            })
                     self._logger.info(f'[outage-monitoring] {edge_identifier} successfully scheduled for re-check.')
                 except ConflictingIdError:
                     self._logger.info(f'There is a recheck job scheduled for {edge_identifier} already. No new job '
@@ -224,8 +250,7 @@ class OutageMonitor:
         await self._resolve_outage_ticket(outage_ticket_id, detail_for_ticket_resolution['detailID'])
         await self._append_autoresolve_note_to_ticket(outage_ticket_id)
 
-        enterprise_name = edge_status['enterprise_name']
-        bruin_client_id = self._extract_client_id(enterprise_name)
+        bruin_client_id = edge_status['bruin_client_info']['client_id']
         await self._notify_successful_autoresolve(outage_ticket_id, bruin_client_id)
 
         self._logger.info(f'Ticket {outage_ticket_id} linked to edge {edge_identifier} was autoresolved!')
@@ -294,8 +319,7 @@ class OutageMonitor:
 
     async def _get_outage_ticket_for_edge(self, edge_status: dict, ticket_statuses=None):
         edge_serial = edge_status['edges']['serialNumber']
-        enterprise_name = edge_status['enterprise_name']
-        client_id = self._extract_client_id(enterprise_name)
+        client_id = edge_status['bruin_client_info']['client_id']
 
         outage_ticket_request = {
             'request_id': uuid(),
@@ -324,7 +348,7 @@ class OutageMonitor:
         edge_list = await self._event_bus.rpc_request("edge.list.request", edge_list_request, timeout=600)
         return edge_list
 
-    async def _recheck_edge_for_ticket_creation(self, edge_full_id):
+    async def _recheck_edge_for_ticket_creation(self, edge_full_id, bruin_client_info):
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
         self._logger.info(
@@ -335,6 +359,8 @@ class OutageMonitor:
         is_outage = None
         if full_edge_status["status"] in range(200, 300):
             edge_status = full_edge_status["body"]["edge_info"]
+            edge_status['bruin_client_info'] = bruin_client_info
+
             is_outage = self._outage_repository.is_there_an_outage(edge_status)
         if is_outage:
             self._logger.info(f'[outage-recheck] Edge {edge_identifier} is still in outage state.')
@@ -351,8 +377,7 @@ class OutageMonitor:
                 if ticket_creation_response_status in range(200, 300):
                     self._logger.info(f'Successfully created outage ticket for edge {edge_identifier}.')
 
-                    enterprise_name = edge_status['enterprise_name']
-                    bruin_client_id = self._extract_client_id(enterprise_name)
+                    bruin_client_id = bruin_client_info['client_id']
                     slack_message = {
                         'request_id': uuid(),
                         'message': f'Outage ticket created for faulty edge {edge_identifier}. Ticket '
@@ -419,8 +444,7 @@ class OutageMonitor:
             self._logger.info(
                 f'[outage-ticket-reopening] Outage ticket {ticket_id} reopening succeeded.'
             )
-            enterprise_name = edge_status['enterprise_name']
-            bruin_client_id = self._extract_client_id(enterprise_name)
+            bruin_client_id = edge_status['bruin_client_info']['client_id']
             slack_message = {
                 'request_id': uuid(),
                 'message': f'Outage ticket {ticket_id} reopened. Ticket details at '
@@ -464,8 +488,7 @@ class OutageMonitor:
 
     def _generate_outage_ticket(self, edge_status):
         serial_number = edge_status['edges']['serialNumber']
-        enterprise_name = edge_status['enterprise_name']
-        bruin_client_id = self._extract_client_id(enterprise_name)
+        bruin_client_id = edge_status['bruin_client_info']['client_id']
 
         return {
             "client_id": bruin_client_id,
@@ -500,18 +523,8 @@ class OutageMonitor:
 
         return edge_status_response
 
-    def _extract_client_id(self, enterprise_name):
-        client_id_match = self.__client_id_regex.match(enterprise_name)
-
-        if client_id_match:
-            client_id = client_id_match.group('client_id')
-            return int(client_id)
-        else:
-            return 9994
-
     async def _get_management_status(self, edge_status):
-        enterprise_name = edge_status['enterprise_name']
-        bruin_client_id = self._extract_client_id(enterprise_name)
+        bruin_client_id = edge_status['bruin_client_info']['client_id']
         serial_number = edge_status['edges']['serialNumber']
         management_request = {
             "request_id": uuid(),
@@ -526,6 +539,17 @@ class OutageMonitor:
                                                               management_request, timeout=30)
 
         return management_status
+
+    async def _get_bruin_client_info_by_serial(self, serial_number):
+        client_info_request = {
+            "request_id": uuid(),
+            "body": {
+                "service_number": serial_number,
+            },
+        }
+
+        client_info = await self._event_bus.rpc_request("bruin.customer.get.info", client_info_request, timeout=30)
+        return client_info
 
     def _is_management_status_active(self, management_status) -> bool:
         return management_status in {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"}

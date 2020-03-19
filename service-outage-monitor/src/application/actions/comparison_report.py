@@ -14,8 +14,6 @@ from igz.packages.repositories.edge_repository import EdgeIdentifier
 
 
 class ComparisonReport:
-    __client_id_regex = re.compile(r'^.*\|(?P<client_id>\d+)\|$')
-
     def __init__(self, event_bus, logger, scheduler, quarantine_edge_repository, reporting_edge_repository, config,
                  email_template_renderer, outage_repository):
         self._event_bus = event_bus
@@ -112,7 +110,36 @@ class ComparisonReport:
                         'Skipping...')
                     continue
 
-                management_status_response = await self._get_management_status(edge_status_response_body)
+                self._logger.info(f'[outage-report] Claiming Bruin client info for serial {edge_serial}...')
+                bruin_client_info_response = await self._get_bruin_client_info_by_serial(edge_serial)
+                self._logger.info(f'[outage-report] Got Bruin client info for serial {edge_serial} -> '
+                                  f'{bruin_client_info_response}')
+
+                bruin_client_info_response_body = bruin_client_info_response['body']
+                bruin_client_info_response_status = bruin_client_info_response['status']
+                if bruin_client_info_response_status not in range(200, 300):
+                    err_msg = (f'[outage-report] Error trying to get Bruin client info from Bruin for serial '
+                               f'{edge_serial}: Error {bruin_client_info_response_status} - '
+                               f'{bruin_client_info_response_body}')
+                    self._logger.error(err_msg)
+
+                    slack_message = {'request_id': uuid(), 'message': err_msg}
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                    continue
+
+                if not bruin_client_info_response_body.get('client_id'):
+                    self._logger.info(
+                        f"[outage-monitoring] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
+                        'Skipping...')
+                    continue
+
+                # Attach Bruin client info to edge_data
+                edge_data['bruin_client_info'] = bruin_client_info_response_body
+
+                self._logger.info(f'[outage-report] Getting management status for edge {edge_identifier}...')
+                management_status_response = await self._get_management_status(edge_data)
+                self._logger.info(f'[outage-report] Got management status for edge {edge_identifier} -> '
+                                  f'{management_status_response}')
 
                 management_status_response_body = management_status_response['body']
                 management_status_response_status = management_status_response['status']
@@ -134,13 +161,13 @@ class ComparisonReport:
                         f"Management status is active. Checking outage state for {edge_identifier}...")
 
                 if self._outage_repository.is_there_an_outage(edge_status_response_body):
-                    await self._start_quarantine_job(edge_full_id)
-                    self._add_edge_to_quarantine(edge_full_id, edge_status_response_body)
+                    await self._start_quarantine_job(edge_full_id, bruin_client_info_response_body)
+                    self._add_edge_to_quarantine(edge_full_id, edge_data)
             except Exception:
                 self._logger.exception(f"Unexpected error occurred while running the detection process for edge "
                                        f"{edge_identifier}. Skipping...")
 
-    async def _start_quarantine_job(self, edge_full_id, run_date: datetime = None):
+    async def _start_quarantine_job(self, edge_full_id, bruin_client_info, run_date: datetime = None):
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
         if run_date is None:
@@ -154,7 +181,7 @@ class ComparisonReport:
             self._scheduler.add_job(self._process_edge_from_quarantine, 'date',
                                     run_date=run_date, replace_existing=False, misfire_grace_time=9999,
                                     id=f'_quarantine_{json.dumps(edge_full_id)}',
-                                    kwargs={'edge_full_id': edge_full_id})
+                                    kwargs={'edge_full_id': edge_full_id, 'bruin_client_info': bruin_client_info})
             self._logger.info(f'Quarantine job for edge "{edge_identifier}" will be launched at {run_date}.')
         except ConflictingIdError as conflict:
             self._logger.info(f'Quarantine job for edge "{edge_identifier}" will not be scheduled. Reason: {conflict}')
@@ -196,10 +223,12 @@ class ComparisonReport:
         edge_status = edge_value['edge_status']
         edge_status_device_info = edge_status['edges']
 
+        enterprise_name = edge_status['bruin_client_info']['client_name']
+        client_id = edge_status['bruin_client_info']['client_id']
+
         edge_name = edge_status_device_info['name']
         last_contact = edge_status_device_info['lastContact']
         edge_serial = edge_status_device_info['serialNumber']
-        enterprise_name = edge_status['enterprise_name']
 
         edge_full_id = edge_identifier._asdict()
         edge_url = self._generate_edge_url(edge_full_id)
@@ -217,9 +246,6 @@ class ComparisonReport:
         for interface, state in links_states.items():
             outage_causes.append(f"Link {interface} was {state}")
 
-        client_id_exists = bool(self.__client_id_regex.match(enterprise_name))
-        management_status = "A" if client_id_exists else "?"
-
         return {
             'detection_time': outage_detection_datetime,
             'edge_name': edge_name,
@@ -228,7 +254,6 @@ class ComparisonReport:
             'enterprise': enterprise_name,
             'edge_url': edge_url,
             'outage_causes': outage_causes,
-            'management_status': management_status,
         }
 
     async def _service_outage_reporter_process(self):
@@ -250,9 +275,9 @@ class ComparisonReport:
 
         # TODO: Move these fields to a proper place as they will always be the same in every outage report
         fields = ["Date of detection", "Company", "Edge name", "Last contact", "Serial Number", "Edge URL",
-                  "Outage causes", "Management status"]
+                  "Outage causes"]
         fields_edge = ["detection_time", "enterprise", "edge_name", "last_contact", "serial_number", "edge_url",
-                       "outage_causes", "management_status"]
+                       "outage_causes"]
         email_report = self._email_template_renderer.compose_email_object(edges_for_email_template, fields=fields,
                                                                           fields_edge=fields_edge)
         await self._event_bus.rpc_request("notification.email.request", email_report, timeout=10)
@@ -313,10 +338,14 @@ class ComparisonReport:
 
         return edge_list_response['body']
 
-    async def _process_edge_from_quarantine(self, edge_full_id):
+    async def _process_edge_from_quarantine(self, edge_full_id, bruin_client_info):
         edge_identifier = EdgeIdentifier(**edge_full_id)
         full_edge_status = await self._get_edge_status_by_id(edge_full_id)
         edge_status = full_edge_status["body"].get("edge_info")
+
+        # Attach Bruin client info to edge_data
+        edge_status['bruin_client_info'] = bruin_client_info
+
         try:
             is_reportable_edge = await self._is_reportable_edge(edge_status)
         except ValueError as e:
@@ -369,8 +398,7 @@ class ComparisonReport:
 
     async def _get_outage_ticket_for_edge(self, edge_status: dict, ticket_statuses=None):
         edge_serial = edge_status['edges']['serialNumber']
-        enterprise_name = edge_status['enterprise_name']
-        client_id = self._extract_client_id(enterprise_name)
+        client_id = edge_status['bruin_client_info']['client_id']
 
         outage_ticket_request = {'request_id': uuid(), 'body': {'edge_serial': edge_serial, 'client_id': client_id}}
 
@@ -381,15 +409,6 @@ class ComparisonReport:
             'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=180,
         )
         return outage_ticket
-
-    def _extract_client_id(self, enterprise_name):
-        client_id_match = self.__client_id_regex.match(enterprise_name)
-
-        if client_id_match:
-            client_id = client_id_match.group('client_id')
-            return int(client_id)
-        else:
-            return 9994
 
     def _add_edge_to_reporting(self, edge_full_id, edge_status):
         edge_identifier = EdgeIdentifier(**edge_full_id)
@@ -417,8 +436,7 @@ class ComparisonReport:
         self._logger.info(f'Edge {edge_identifier} moved from quarantine to the reporting queue.')
 
     async def _get_management_status(self, edge_status):
-        enterprise_name = edge_status['enterprise_name']
-        bruin_client_id = self._extract_client_id(enterprise_name)
+        bruin_client_id = edge_status['bruin_client_info']['client_id']
         serial_number = edge_status['edges']['serialNumber']
         management_request = {
             "request_id": uuid(),
@@ -436,3 +454,14 @@ class ComparisonReport:
 
     def _is_management_status_active(self, management_status) -> bool:
         return management_status in {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"}
+
+    async def _get_bruin_client_info_by_serial(self, serial_number):
+        client_info_request = {
+            "request_id": uuid(),
+            "body": {
+                "service_number": serial_number,
+            },
+        }
+
+        client_info = await self._event_bus.rpc_request("bruin.customer.get.info", client_info_request, timeout=30)
+        return client_info

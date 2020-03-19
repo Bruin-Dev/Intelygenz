@@ -23,7 +23,6 @@ empty_str = str()
 
 
 class Triage:
-    __client_id_regex = re.compile(r'^.*\|(?P<client_id>\d+)\|$')
     __triage_note_regex = re.compile(r'#\*Automation Engine\*#\nTriage')
     __event_interface_name_regex = re.compile(
         r'(^Interface (?P<interface_name>[a-zA-Z0-9]+) is (up|down)$)|'
@@ -116,8 +115,39 @@ class Triage:
                     'Skipping...')
                 continue
 
-            enterprise_name = edge_status_data['enterprise_name']
-            bruin_client_id = self._extract_client_id(enterprise_name)
+            self._logger.info(f'[map-bruin-client-to-edges] Claiming Bruin client info for serial {serial_number}...')
+            try:
+                bruin_client_info_response = await self._get_bruin_client_info_by_serial(serial_number)
+                self._logger.info(f'[map-bruin-client-to-edges] Got Bruin client info for serial {serial_number} -> '
+                                  f'{bruin_client_info_response}')
+            except Exception:
+                err_msg = f'An error occurred when requesting Bruin client info from Bruin for serial {serial_number}'
+
+                self._logger.error(err_msg)
+                slack_message = {'request_id': uuid(), 'message': err_msg}
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                continue
+
+            bruin_client_info_response_body = bruin_client_info_response['body']
+            bruin_client_info_response_status = bruin_client_info_response['status']
+            if bruin_client_info_response_status not in range(200, 300):
+                err_msg = (f'Error trying to get Bruin client info from Bruin for serial {serial_number}: '
+                           f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}')
+                self._logger.error(err_msg)
+
+                slack_message = {'request_id': uuid(), 'message': err_msg}
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                continue
+
+            bruin_client_id = bruin_client_info_response_body.get('client_id')
+            if not bruin_client_id:
+                self._logger.info(
+                    f"[map-bruin-client-to-edges] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
+                    'Skipping...')
+                continue
+
+            # Attach Bruin client info to edge_data
+            edge_status_data['bruin_client_info'] = bruin_client_info_response_body
 
             mapping.setdefault(bruin_client_id, {})
             mapping[bruin_client_id][serial_number] = {
@@ -189,6 +219,17 @@ class Triage:
         self._logger.error(err_msg)
         slack_message = {'request_id': uuid(), 'message': err_msg}
         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
+    async def _get_bruin_client_info_by_serial(self, serial_number):
+        client_info_request = {
+            "request_id": uuid(),
+            "body": {
+                "service_number": serial_number,
+            },
+        }
+
+        client_info = await self._event_bus.rpc_request("bruin.customer.get.info", client_info_request, timeout=30)
+        return client_info
 
     async def _get_all_open_tickets_with_details_for_monitored_companies(self, bruin_clients_ids):
         open_tickets = []
@@ -433,8 +474,7 @@ class Triage:
             notes_were_appended = True
 
         if notes_were_appended:
-            enterprise_name = edge_data['edge_status']['enterprise_name']
-            client_id = self._extract_client_id(enterprise_name)
+            client_id = edge_data['edge_status']['bruin_client_info']['client_id']
             await self._notify_triage_note_was_appended_to_ticket(ticket_id, client_id)
 
     async def _notify_http_error_when_appending_note_to_ticket(self, ticket_id, append_note_response):
@@ -749,15 +789,6 @@ class Triage:
                 ticket_note_lines.append(f'{key}: {value}')
 
         return os.linesep.join(ticket_note_lines)
-
-    def _extract_client_id(self, enterprise_name):
-        client_id_match = self.__client_id_regex.match(enterprise_name)
-
-        if client_id_match:
-            client_id = client_id_match.group('client_id')
-            return int(client_id)
-        else:
-            return 9994
 
     @staticmethod
     def _get_first_element_matching(iterable, condition: Callable, fallback=None):
