@@ -321,6 +321,126 @@ class TestTriage:
         assert result == expected
 
     @pytest.mark.asyncio
+    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edges_having_null_serials_test(self):
+        uuid_1 = uuid()
+        uuid_2 = uuid()
+        uuid_3 = uuid()
+        uuid_4 = uuid()
+
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+        edge_list_response = {
+            'request_id': uuid_1,
+            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+            'status': 200
+        }
+
+        bruin_client_1 = 12345
+        bruin_client_2 = 54321
+        edge_2_serial = 'VC7654321'
+
+        edge_1_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': None},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
+        }
+        edge_1_status_response = {
+            'request_id': uuid_2,
+            'body': {
+                'edge_id': edge_1_full_id,
+                'edge_info': edge_1_status,
+            },
+            'status': 200,
+        }
+
+        edge_2_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+        }
+        edge_2_status_response = {
+            'request_id': uuid_3,
+            'body': {
+                'edge_id': edge_2_full_id,
+                'edge_info': edge_2_status,
+            },
+            'status': 200,
+        }
+
+        edge_3_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': None},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+        }
+        edge_3_status_response = {
+            'request_id': uuid_4,
+            'body': {
+                'edge_id': edge_3_full_id,
+                'edge_info': edge_3_status,
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            edge_list_response,
+            edge_1_status_response,
+            edge_2_status_response,
+            edge_3_status_response,
+        ])
+
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+
+        with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2, uuid_3, uuid_4]):
+            result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+
+        event_bus.rpc_request.assert_has_awaits([
+            call(
+                "edge.list.request",
+                {'request_id': uuid_1, 'body': {'filter': config.TRIAGE_CONFIG['velo_filter']}},
+                timeout=600,
+            ),
+            call(
+                "edge.status.request",
+                {'request_id': uuid_2, 'body': edge_1_full_id},
+                timeout=120,
+            ),
+            call(
+                "edge.status.request",
+                {'request_id': uuid_3, 'body': edge_2_full_id},
+                timeout=120,
+            ),
+            call(
+                "edge.status.request",
+                {'request_id': uuid_4, 'body': edge_3_full_id},
+                timeout=120,
+            ),
+        ])
+
+        expected = {
+            bruin_client_2: {
+                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status},
+            }
+        }
+        assert result == expected
+
+    @pytest.mark.asyncio
     async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_list_request_failing_test(self):
         event_bus = Mock()
         logger = Mock()

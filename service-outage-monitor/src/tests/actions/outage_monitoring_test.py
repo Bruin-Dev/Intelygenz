@@ -201,7 +201,9 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value={'body': {'edge_info': {}}, 'status': 200})
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value={
+            'body': {'edge_info': {'edges': {'serialNumber': 'fake-serial'}}}, 'status': 200}
+        )
         outage_monitor._get_management_status = CoroutineMock(return_value={'body': 'Fake status', 'status': 200})
         outage_monitor._is_management_status_active = Mock(return_value=False)
 
@@ -213,6 +215,47 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edge_status_by_id.assert_has_awaits([
             call(edge_1_full_id), call(edge_3_full_id)
         ])
+
+    @pytest.mark.asyncio
+    async def outage_monitoring_process_with_edge_having_a_null_serial_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_list_response = {
+            'request_id': uuid(),
+            'body': [edge_full_id],
+            'status': 200,
+        }
+
+        edge_status_response = {
+            'body': {
+                'edge_id': edge_full_id,
+                'edge_info': {
+                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': None},
+                    'links': [
+                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                    ],
+                    'enterprise_name': 'EVIL-CORP|12345|',
+                },
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        config = testconfig
+        scheduler = Mock()
+        event_bus = Mock()
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
+        outage_monitor._get_management_status = CoroutineMock()
+
+        await outage_monitor._outage_monitoring_process()
+
+        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
+        outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        outage_monitor._get_management_status.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_status_in_management_500_test(self):

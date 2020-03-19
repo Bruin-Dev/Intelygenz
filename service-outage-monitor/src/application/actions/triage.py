@@ -90,6 +90,8 @@ class Triage:
             raise Exception
 
         for edge_full_id in edge_list_response_body:
+            edge_identifier = EdgeIdentifier(**edge_full_id)
+
             try:
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
             except Exception:
@@ -106,9 +108,16 @@ class Triage:
                 continue
 
             edge_status_data = edge_status_response_body['edge_info']
+
+            serial_number = edge_status_data['edges']['serialNumber']
+            if not serial_number:
+                self._logger.info(
+                    f"[map-bruin-client-to-edges] Edge {edge_identifier} doesn't have any serial associated. "
+                    'Skipping...')
+                continue
+
             enterprise_name = edge_status_data['enterprise_name']
             bruin_client_id = self._extract_client_id(enterprise_name)
-            serial_number = edge_status_data['edges']['serialNumber']
 
             mapping.setdefault(bruin_client_id, {})
             mapping[bruin_client_id][serial_number] = {

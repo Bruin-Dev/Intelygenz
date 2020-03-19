@@ -252,8 +252,52 @@ class TestServiceOutageDetectorJob:
         comparison_report._get_all_edges.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def comparison_report_process_with_management_status_error_500_test(self):
+    async def comparison_report_process_with_edge_having_null_serial_test(self):
         edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        edge_list = [edge_full_id]
+
+        edge_status_data = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': None},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|12345|',
+        }
+        edge_status_response = {
+            'body': {
+                'edge_id': edge_full_id,
+                'edge_info': edge_status_data,
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        event_bus = Mock()
+        scheduler = Mock()
+        quarantine_edge_repository = Mock()
+        reporting_edge_repository = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_repository = Mock()
+
+        comparison_report = ComparisonReport(event_bus, logger, scheduler,
+                                             quarantine_edge_repository, reporting_edge_repository,
+                                             config, template_renderer, outage_repository)
+        comparison_report._get_all_edges = CoroutineMock(return_value=edge_list)
+        comparison_report._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
+        comparison_report._get_management_status = CoroutineMock()
+
+        await comparison_report._service_outage_detector_process()
+
+        comparison_report._get_all_edges.assert_awaited_once()
+        comparison_report._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        comparison_report._get_management_status.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def comparison_report_process_with_retrieval_of_management_status_returning_non_2XX_status_test(self):
+        edge_full_id = {'host': 'mettel.velocloud.net', 'enterprise_id': 1234, 'edge_id': 5678}
+        edge_identifier = EdgeIdentifier(**edge_full_id)
         edge_list = [edge_full_id]
 
         edge_status_data = {
@@ -272,9 +316,11 @@ class TestServiceOutageDetectorJob:
             'status': 200,
         }
 
+        management_status_response_body = "Got internal error from Bruin"
+        management_status_response_status = 500
         management_status_response = {
-            "body": "Problem with connection",
-            "status": 500,
+            "body": management_status_response_body,
+            "status": management_status_response_status,
         }
 
         logger = Mock()
@@ -291,8 +337,9 @@ class TestServiceOutageDetectorJob:
         uuid_ = uuid()
 
         message = (
-            f"[outage-report] Management status is unknown for {EdgeIdentifier(**edge_full_id)}. "
-            f"Cause: {management_status_response['body']}"
+            f'[outage-report] Error trying to get management status from Bruin for edge '
+            f'{edge_identifier}: Error {management_status_response_status} - '
+            f'{management_status_response_body}'
         )
         slack_message = {'request_id': uuid_,
                          'message': message}

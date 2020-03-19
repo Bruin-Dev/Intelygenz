@@ -68,36 +68,58 @@ class OutageMonitor:
                                   'Skipping...')
                 continue
 
-            self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}.')
-            full_edge_status = await self._get_edge_status_by_id(edge_full_id)
-            self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')
-            self._logger.info(f'[outage-monitoring] Getting management status for {edge_identifier}.')
-            edge_status = {}
-            if full_edge_status["status"] in range(200, 300):
-                edge_status = full_edge_status["body"]["edge_info"]
-                management_status = await self._get_management_status(edge_status)
-            else:
-                management_status = {"status": 500, "body": None}
+            self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
+            edge_status_response = await self._get_edge_status_by_id(edge_full_id)
+            self._logger.info(f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
 
-            if management_status["status"] not in range(200, 300):
+            edge_status_response_body = edge_status_response['body']
+            edge_status_response_status = edge_status_response['status']
+            if edge_status_response_status not in range(200, 300):
+                err_msg = (
+                    f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
+                    f"{edge_identifier}: Error {edge_status_response_status} - {edges_to_monitor_response_body}"
+                )
+
+                self._logger.error(err_msg)
+                slack_message = {'request_id': uuid(),
+                                 'message': err_msg}
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+                continue
+
+            edge_data = edge_status_response_body["edge_info"]
+
+            edge_serial = edge_data['edges']['serialNumber']
+            if not edge_serial:
+                self._logger.info(f"[outage-monitoring] Edge {edge_identifier} doesn't have any serial associated. "
+                                  'Skipping...')
+                continue
+
+            self._logger.info(f'[outage-monitoring] Getting management status for edge {edge_identifier}...')
+            management_status_response = await self._get_management_status(edge_data)
+            self._logger.info(f'[outage-monitoring] Got management status for edge {edge_identifier} -> '
+                              f'{management_status_response}')
+
+            management_status_response_body = management_status_response['body']
+            management_status_response_status = management_status_response['status']
+            if management_status_response_status not in range(200, 300):
                 self._logger.error(f"Management status is unknown for {edge_identifier}")
                 message = (
                     f"[outage-monitoring] Management status is unknown for {edge_identifier}. "
-                    f"Cause: {management_status['body']}"
+                    f"Cause: {management_status_response_body}"
                 )
                 slack_message = {'request_id': uuid(),
                                  'message': message}
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                 continue
 
-            if not self._is_management_status_active(management_status["body"]):
+            if not self._is_management_status_active(management_status_response_body):
                 self._logger.info(
                     f'Management status is not active for {edge_identifier}. Skipping process...')
                 continue
             else:
                 self._logger.info(f'Management status for {edge_identifier} seems active.')
 
-            outage_happened = self._outage_repository.is_there_an_outage(edge_status)
+            outage_happened = self._outage_repository.is_there_an_outage(edge_data)
             if outage_happened:
                 self._logger.info(
                     f'[outage-monitoring] Outage detected for {edge_identifier}. '
@@ -121,7 +143,7 @@ class OutageMonitor:
                                       'is going to be scheduled.')
             else:
                 self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state.')
-                await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+                await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
 
     async def _run_ticket_autoresolve_for_edge(self, edge_full_id, edge_status):
         edge_identifier = EdgeIdentifier(**edge_full_id)

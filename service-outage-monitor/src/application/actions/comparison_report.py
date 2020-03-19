@@ -86,38 +86,56 @@ class ComparisonReport:
             edge_identifier = EdgeIdentifier(**edge_full_id)
             try:
                 self._logger.info(f'[outage-report] Checking status of {edge_identifier}.')
-
-                full_edge_status = await self._get_edge_status_by_id(edge_full_id)
+                edge_status_response = await self._get_edge_status_by_id(edge_full_id)
                 self._logger.info(f'[outage-report] Got status for edge: {edge_identifier}.')
-                edge_status = {}
-                if full_edge_status["status"] in range(200, 300):
-                    edge_status = full_edge_status["body"]["edge_info"]
-                    management_status = await self._get_management_status(edge_status)
-                else:
-                    management_status = {"status": 500, "body": None}
 
-                if management_status["status"] not in range(200, 300):
-                    self._logger.info(f"Management status is unknown for {edge_identifier}")
-                    if management_status["status"] == 500:
-                        message = (
-                            f"[outage-report] Management status is unknown for {edge_identifier}. "
-                            f"Cause: {management_status['body']}"
-                        )
-                        slack_message = {'request_id': uuid(),
-                                         'message': message}
-                        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+                edge_status_response_body = edge_status_response['body']
+                edge_status_response_status = edge_status_response['status']
+                if edge_status_response_status not in range(200, 300):
+                    err_msg = (
+                        f"[outage-report] An error occurred while trying to retrieve edge status for edge "
+                        f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
+                    )
+
+                    self._logger.error(err_msg)
+                    slack_message = {'request_id': uuid(),
+                                     'message': err_msg}
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                     continue
 
-                if not self._is_management_status_active(management_status["body"]):
+                edge_data = edge_status_response_body["edge_info"]
+
+                edge_serial = edge_data['edges']['serialNumber']
+                if not edge_serial:
+                    self._logger.info(
+                        f"[outage-report] Edge {edge_identifier} doesn't have any serial associated. "
+                        'Skipping...')
+                    continue
+
+                management_status_response = await self._get_management_status(edge_status_response_body)
+
+                management_status_response_body = management_status_response['body']
+                management_status_response_status = management_status_response['status']
+                if management_status_response_status not in range(200, 300):
+                    err_msg = (f'[outage-report] Error trying to get management status from Bruin for edge '
+                               f'{edge_identifier}: Error {management_status_response_status} - '
+                               f'{management_status_response_body}')
+
+                    self._logger.error(err_msg)
+                    slack_message = {'request_id': uuid(), 'message': err_msg}
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+                    continue
+
+                if not self._is_management_status_active(management_status_response_body):
                     self._logger.info(f"Management status is not active. {edge_identifier} won't be reported")
                     continue
                 else:
                     self._logger.info(
                         f"Management status is active. Checking outage state for {edge_identifier}...")
 
-                if self._outage_repository.is_there_an_outage(edge_status):
+                if self._outage_repository.is_there_an_outage(edge_status_response_body):
                     await self._start_quarantine_job(edge_full_id)
-                    self._add_edge_to_quarantine(edge_full_id, edge_status)
+                    self._add_edge_to_quarantine(edge_full_id, edge_status_response_body)
             except Exception:
                 self._logger.exception(f"Unexpected error occurred while running the detection process for edge "
                                        f"{edge_identifier}. Skipping...")
