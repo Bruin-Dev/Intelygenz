@@ -41,9 +41,26 @@ class OutageMonitor:
             self._logger.info(f'Skipping start of Service Outage Monitoring job. Reason: {conflict}')
 
     async def _outage_monitoring_process(self):
-        edges_to_monitor = self._get_edges_for_monitoring()
+        try:
+            self._logger.info('[outage-monitoring] Claiming edges under monitoring...')
+            edges_to_monitor_response = await self._get_edges_for_monitoring()
+            self._logger.info('[outage-monitoring] Got edges under monitoring from Velocloud')
+        except Exception as e:
+            self._logger.error(f'[outage-monitoring] An error occurred while claiming edges for outage monitoring: {e}')
+            raise
 
-        for edge_full_id in edges_to_monitor:
+        edges_to_monitor_response_body = edges_to_monitor_response['body']
+        edges_to_monitor_response_status = edges_to_monitor_response['status']
+        if edges_to_monitor_response_status not in range(200, 300):
+            err_msg = ('[outage-monitoring] Something happened while retrieving edges under monitoring from Velocloud. '
+                       f'Reason: Error {edges_to_monitor_response_status} - {edges_to_monitor_response_body}')
+            self._logger.error(err_msg)
+
+            slack_message = {'request_id': uuid(), 'message': err_msg}
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+            return
+
+        for edge_full_id in edges_to_monitor_response_body:
             edge_identifier = EdgeIdentifier(**edge_full_id)
 
             self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}.')
@@ -269,8 +286,16 @@ class OutageMonitor:
         )
         return outage_ticket
 
-    def _get_edges_for_monitoring(self):
-        return list(self._config.MONITORING_EDGES.values())
+    async def _get_edges_for_monitoring(self):
+        edge_list_request = {
+            'request_id': uuid(),
+            'body': {
+                'filter': self._config.MONITOR_CONFIG['velocloud_instances_filter']
+            },
+        }
+
+        edge_list = await self._event_bus.rpc_request("edge.list.request", edge_list_request, timeout=600)
+        return edge_list
 
     async def _recheck_edge_for_ticket_creation(self, edge_full_id):
         edge_identifier = EdgeIdentifier(**edge_full_id)

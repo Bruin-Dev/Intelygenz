@@ -25,6 +25,9 @@ MONITOR_CONFIG = {
         'quarantine': quarantine_time,
     },
     'quarantine_key_ttl': quarantine_time + 60 * 5,
+    'velocloud_instances_filter': {
+        "some-host": [],
+    },
     'autoresolve_serials_whitelist': ["VC05400002265"],
     'autoresolve_down_events_seconds': 45 * 60,
 }
@@ -39,14 +42,6 @@ LOG_CONFIG = {
 QUART_CONFIG = {
     'title': 'service-outage-monitor',
     'port': 5000
-}
-
-MONITORING_EDGES = {
-    'VC0123456789': {
-        'host': 'dummy.host.com',
-        'enterprise_id': 123,
-        'edge_id': 456,
-    }
 }
 
 TRIAGE_CONFIG = {
