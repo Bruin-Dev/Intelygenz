@@ -28,6 +28,7 @@ MONITOR_CONFIG = {
     'velocloud_instances_filter': {
         "some-host": [],
     },
+    'blacklisted_edges': [],
     'autoresolve_serials_whitelist': ["VC05400002265"],
     'autoresolve_down_events_seconds': 45 * 60,
 }

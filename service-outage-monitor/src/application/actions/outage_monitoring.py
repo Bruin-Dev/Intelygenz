@@ -63,6 +63,11 @@ class OutageMonitor:
         for edge_full_id in edges_to_monitor_response_body:
             edge_identifier = EdgeIdentifier(**edge_full_id)
 
+            if edge_full_id in self._config.MONITOR_CONFIG['blacklisted_edges']:
+                self._logger.info(f'[outage-monitoring] Edge {edge_identifier} is blacklisted at this moment. '
+                                  'Skipping...')
+                continue
+
             self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}.')
             full_edge_status = await self._get_edge_status_by_id(edge_full_id)
             self._logger.info(f'[outage-monitoring] Got status for edge: {edge_identifier}.')

@@ -178,6 +178,43 @@ class TestServiceOutageMonitor:
         scheduler.add_job.assert_not_called()
 
     @pytest.mark.asyncio
+    async def outage_monitoring_process_with_edges_and_some_edges_in_blacklist_test(self):
+        edge_1_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_2_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 5678}
+        edge_3_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 9012}
+        edges_for_monitoring = [edge_1_full_id, edge_2_full_id, edge_3_full_id]
+
+        edge_list_response = {
+            'request_id': uuid(),
+            'body': edges_for_monitoring,
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        outage_repository = Mock()
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['blacklisted_edges'] = [edge_2_full_id]
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value={'body': {'edge_info': {}}, 'status': 200})
+        outage_monitor._get_management_status = CoroutineMock(return_value={'body': 'Fake status', 'status': 200})
+        outage_monitor._is_management_status_active = Mock(return_value=False)
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._outage_monitoring_process()
+
+        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
+        assert call(edge_2_full_id) not in outage_monitor._get_edge_status_by_id.mock_calls
+        outage_monitor._get_edge_status_by_id.assert_has_awaits([
+            call(edge_1_full_id), call(edge_3_full_id)
+        ])
+
+    @pytest.mark.asyncio
     async def outage_monitoring_process_with_status_in_management_500_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
         edge_list_response = {

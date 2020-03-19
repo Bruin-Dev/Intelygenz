@@ -35,6 +35,7 @@ MONITOR_CONFIG = {
     'velocloud_instances_filter': {
         "mettel.velocloud.net": [],
     },
+    'blacklisted_edges': [],
     'autoresolve_serials_whitelist': [
         # Mettel test edge
         "VC05400002265",
