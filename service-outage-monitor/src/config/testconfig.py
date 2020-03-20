@@ -29,7 +29,6 @@ MONITOR_CONFIG = {
         "some-host": [],
     },
     'blacklisted_edges': [],
-    'autoresolve_serials_whitelist': ["VC05400002265"],
     'autoresolve_down_events_seconds': 45 * 60,
 }
 

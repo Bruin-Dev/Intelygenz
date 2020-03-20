@@ -21,6 +21,8 @@ class OutageMonitor:
         self._config = config
         self._outage_repository = outage_repository
 
+        self.__reset_instance_state()
+
     async def start_service_outage_monitoring(self, exec_on_start):
         self._logger.info('Scheduling Service Outage Monitor job...')
         next_run_time = undefined
@@ -39,6 +41,8 @@ class OutageMonitor:
             self._logger.info(f'Skipping start of Service Outage Monitoring job. Reason: {conflict}')
 
     async def _outage_monitoring_process(self):
+        self.__reset_instance_state()
+
         try:
             self._logger.info('[outage-monitoring] Claiming edges under monitoring...')
             edges_to_monitor_response = await self._get_edges_for_monitoring()
@@ -142,6 +146,12 @@ class OutageMonitor:
             else:
                 self._logger.info(f'Management status for {edge_identifier} seems active.')
 
+            autoresolve_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter'].keys()
+            autoresolve_filter_enabled = len(autoresolve_filter) > 0
+            if (autoresolve_filter_enabled and edge_full_id['host'] in autoresolve_filter) or \
+                    not autoresolve_filter_enabled:
+                self._autoresolve_serials_whitelist.add(edge_serial)
+
             outage_happened = self._outage_repository.is_there_an_outage(edge_data)
             if outage_happened:
                 self._logger.info(
@@ -171,12 +181,15 @@ class OutageMonitor:
                 self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state.')
                 await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
 
+    def __reset_instance_state(self):
+        self._autoresolve_serials_whitelist = set()
+
     async def _run_ticket_autoresolve_for_edge(self, edge_full_id, edge_status):
         edge_identifier = EdgeIdentifier(**edge_full_id)
         self._logger.info(f'[ticket-autoresolve] Starting autoresolve for edge {edge_identifier}...')
 
         serial_number = edge_status['edges']['serialNumber']
-        if serial_number not in self._config.MONITOR_CONFIG['autoresolve_serials_whitelist']:
+        if serial_number not in self._autoresolve_serials_whitelist:
             self._logger.info(f'[ticket-autoresolve] Skipping autoresolve for edge {edge_identifier} because its '
                               f'serial ({serial_number}) is not whitelisted.')
             return

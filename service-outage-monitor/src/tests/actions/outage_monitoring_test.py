@@ -21,6 +21,23 @@ from config import testconfig
 
 
 class TestServiceOutageMonitor:
+    def instance_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = Mock()
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+
+        assert outage_monitor._event_bus is event_bus
+        assert outage_monitor._logger is logger
+        assert outage_monitor._scheduler is scheduler
+        assert outage_monitor._config is config
+        assert outage_monitor._outage_repository is outage_repository
+
+        assert outage_monitor._autoresolve_serials_whitelist == set()
+
     @pytest.mark.asyncio
     async def start_service_outage_monitoring_with_exec_on_start_test(self):
         event_bus = Mock()
@@ -902,6 +919,356 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edge_2_full_id, edge_2_status_data)
 
     @pytest.mark.asyncio
+    async def outage_monitoring_process_side_effects_over_autoresolve_whitelist_with_autoresolve_filter_test(self):
+        edge_1_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_2_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 5678}
+        edge_3_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 2, "edge_id": 1234}
+        edge_4_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 2, "edge_id": 5678}
+        edge_5_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 3, "edge_id": 1234}
+        edge_6_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 3, "edge_id": 5678}
+        edge_list_response = {
+            'request_id': uuid(),
+            'body': [
+                edge_1_full_id, edge_2_full_id, edge_3_full_id,
+                edge_4_full_id, edge_5_full_id, edge_6_full_id,
+            ],
+            'status': 200,
+        }
+
+        edge_1_serial = 'VC1234567'
+        edge_1_status_data = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_1_status_response = {
+            'body': {
+                'edge_id': edge_1_full_id,
+                'edge_info': edge_1_status_data,
+            },
+            'status': 200,
+        }
+
+        edge_2_serial = 'VC7654321'
+        edge_2_status_data = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_2_status_response = {
+            'body': {
+                'edge_id': edge_2_full_id,
+                'edge_info': edge_2_status_data,
+            },
+            'status': 200,
+        }
+
+        edge_3_serial = 'VC1122334'
+        edge_3_status_data = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_3_status_response = {
+            'body': {
+                'edge_id': edge_3_full_id,
+                'edge_info': edge_3_status_data,
+            },
+            'status': 200,
+        }
+
+        edge_4_serial = 'VC9999999'
+        edge_4_status_data = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_4_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_4_status_response = {
+            'body': {
+                'edge_id': edge_4_full_id,
+                'edge_info': edge_4_status_data,
+            },
+            'status': 200,
+        }
+
+        edge_5_serial = 'VC7777777'
+        edge_5_status_data = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_5_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_5_status_response = {
+            'body': {
+                'edge_id': edge_5_full_id,
+                'edge_info': edge_5_status_data,
+            },
+            'status': 200,
+        }
+
+        edge_6_serial = 'VC5555555'
+        edge_6_status_data = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_6_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_6_status_response = {
+            'body': {
+                'edge_id': edge_6_full_id,
+                'edge_info': edge_6_status_data,
+            },
+            'status': 200,
+        }
+
+        edges_statuses_responses = [
+            edge_1_status_response, edge_2_status_response, edge_3_status_response,
+            edge_4_status_response, edge_5_status_response, edge_6_status_response,
+        ]
+
+        bruin_client_info_response_body = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_response = {
+            "body": bruin_client_info_response_body,
+            'status': 200,
+        }
+
+        management_status_response = {
+            "body": "Active – Gold Monitoring",
+            "status": 200,
+        }
+
+        is_there_an_outage_side_effect = [
+            True,   # Edge 1
+            False,  # Edge 2
+            True,   # Edge 3
+            False,  # Edge 4
+            True,   # Edge 5
+            False,  # Edge 6
+        ]
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(side_effect=is_there_an_outage_side_effect)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
+        outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
+        outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
+        outage_monitor._is_management_status_active = Mock(return_value=True)
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['velocloud_instances_filter'] = {
+            "mettel.velocloud.net": [],
+            "metvco02.mettel.net": [],
+        }
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._outage_monitoring_process()
+
+        expected_whitelist = {edge_1_serial, edge_2_serial, edge_3_serial}
+        assert outage_monitor._autoresolve_serials_whitelist == expected_whitelist
+
+    @pytest.mark.asyncio
+    async def outage_monitoring_process_side_effects_over_autoresolve_whitelist_without_autoresolve_filter_test(self):
+        edge_1_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_2_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 5678}
+        edge_3_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 2, "edge_id": 1234}
+        edge_4_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 2, "edge_id": 5678}
+        edge_5_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 3, "edge_id": 1234}
+        edge_6_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 3, "edge_id": 5678}
+        edge_list_response = {
+            'request_id': uuid(),
+            'body': [
+                edge_1_full_id, edge_2_full_id, edge_3_full_id,
+                edge_4_full_id, edge_5_full_id, edge_6_full_id,
+            ],
+            'status': 200,
+        }
+
+        edge_1_serial = 'VC1234567'
+        edge_1_status_data = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_1_status_response = {
+            'body': {
+                'edge_id': edge_1_full_id,
+                'edge_info': edge_1_status_data,
+            },
+            'status': 200,
+        }
+
+        edge_2_serial = 'VC7654321'
+        edge_2_status_data = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_2_status_response = {
+            'body': {
+                'edge_id': edge_2_full_id,
+                'edge_info': edge_2_status_data,
+            },
+            'status': 200,
+        }
+
+        edge_3_serial = 'VC1122334'
+        edge_3_status_data = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_3_status_response = {
+            'body': {
+                'edge_id': edge_3_full_id,
+                'edge_info': edge_3_status_data,
+            },
+            'status': 200,
+        }
+
+        edge_4_serial = 'VC9999999'
+        edge_4_status_data = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_4_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_4_status_response = {
+            'body': {
+                'edge_id': edge_4_full_id,
+                'edge_info': edge_4_status_data,
+            },
+            'status': 200,
+        }
+
+        edge_5_serial = 'VC7777777'
+        edge_5_status_data = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_5_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_5_status_response = {
+            'body': {
+                'edge_id': edge_5_full_id,
+                'edge_info': edge_5_status_data,
+            },
+            'status': 200,
+        }
+
+        edge_6_serial = 'VC5555555'
+        edge_6_status_data = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_6_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_6_status_response = {
+            'body': {
+                'edge_id': edge_6_full_id,
+                'edge_info': edge_6_status_data,
+            },
+            'status': 200,
+        }
+
+        edges_statuses_responses = [
+            edge_1_status_response, edge_2_status_response, edge_3_status_response,
+            edge_4_status_response, edge_5_status_response, edge_6_status_response,
+        ]
+
+        bruin_client_info_response_body = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_response = {
+            "body": bruin_client_info_response_body,
+            'status': 200,
+        }
+
+        management_status_response = {
+            "body": "Active – Gold Monitoring",
+            "status": 200,
+        }
+
+        is_there_an_outage_side_effect = [
+            True,   # Edge 1
+            False,  # Edge 2
+            True,   # Edge 3
+            False,  # Edge 4
+            True,   # Edge 5
+            False,  # Edge 6
+        ]
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(side_effect=is_there_an_outage_side_effect)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
+        outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
+        outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
+        outage_monitor._is_management_status_active = Mock(return_value=True)
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['velocloud_instances_filter'] = {}
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._outage_monitoring_process()
+
+        expected_whitelist = {
+            edge_1_serial, edge_2_serial, edge_3_serial,
+            edge_4_serial, edge_5_serial, edge_6_serial,
+        }
+        assert outage_monitor._autoresolve_serials_whitelist == expected_whitelist
+
+    @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_non_whitelisted_edge_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
         edge_status = {
@@ -920,17 +1287,14 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        config = testconfig
         outage_repository = Mock()
 
-        config = testconfig
-        custom_monitor_config = config.MONITOR_CONFIG.copy()
-        custom_monitor_config['autoresolve_serials_whitelist'] = ['VC99999999']
-
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._autoresolve_serials_whitelist = set()
         outage_monitor._get_last_down_events_for_edge = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+        await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
         outage_monitor._get_last_down_events_for_edge.assert_not_awaited()
 
@@ -960,9 +1324,9 @@ class TestServiceOutageMonitor:
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'dev'
-        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
@@ -1004,9 +1368,9 @@ class TestServiceOutageMonitor:
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
-        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
         })
@@ -1056,9 +1420,9 @@ class TestServiceOutageMonitor:
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
-        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
         })
@@ -1115,9 +1479,9 @@ class TestServiceOutageMonitor:
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
-        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
         })
@@ -1183,9 +1547,9 @@ class TestServiceOutageMonitor:
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
-        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
         })
@@ -1270,9 +1634,9 @@ class TestServiceOutageMonitor:
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
-        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
         })
@@ -1357,9 +1721,9 @@ class TestServiceOutageMonitor:
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
-        custom_monitor_config['autoresolve_serials_whitelist'] = [serial_number]
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
         })
