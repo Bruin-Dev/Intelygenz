@@ -6,8 +6,8 @@ from collections import OrderedDict
 from datetime import datetime
 from datetime import timedelta
 from typing import Callable
-from typing import List
 from typing import NoReturn
+from typing import Set
 
 from apscheduler.util import undefined
 from dateutil.parser import parse
@@ -37,6 +37,11 @@ class Triage:
         self._template_renderer = template_renderer
         self._outage_repository = outage_repository
 
+        self.__reset_instance_state()
+
+    def __reset_instance_state(self):
+        self._monitoring_mapping = {}
+
     async def start_triage_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service outage triage configured to run every '
                           f'{self._config.TRIAGE_CONFIG["polling_minutes"]} minutes')
@@ -50,23 +55,17 @@ class Triage:
                                 replace_existing=True, id='_triage_process')
 
     async def _run_tickets_polling(self):
-        monitoring_mapping = await self._map_bruin_client_ids_to_edges_serials_and_statuses()
+        self.__reset_instance_state()
 
-        clients_under_monitoring: List[int] = list(monitoring_mapping.keys())
-        open_tickets = await self._get_all_open_tickets_with_details_for_monitored_companies(clients_under_monitoring)
+        self._monitoring_mapping = await self._map_bruin_client_ids_to_edges_serials_and_statuses()
 
-        serials_under_monitoring: List[str] = sum(
-            (list(edge_status_by_serial_dict.keys()) for edge_status_by_serial_dict in monitoring_mapping.values()),
-            []
-        )
-        relevant_open_tickets = self._filter_tickets_related_to_edges_under_monitoring(
-            open_tickets, serials_under_monitoring
-        )
+        open_tickets = await self._get_all_open_tickets_with_details_for_monitored_companies()
+        relevant_open_tickets = self._filter_tickets_related_to_edges_under_monitoring(open_tickets)
 
         tickets_with_triage, tickets_without_triage = self._distinguish_tickets_with_and_without_triage(
             relevant_open_tickets)
 
-        edges_data_by_serial = ChainMap(*monitoring_mapping.values())
+        edges_data_by_serial = ChainMap(*self._monitoring_mapping.values())
         await asyncio.gather(
             self._process_tickets_with_triage(tickets_with_triage, edges_data_by_serial),
             self._process_tickets_without_triage(tickets_without_triage, edges_data_by_serial),
@@ -231,9 +230,10 @@ class Triage:
         client_info = await self._event_bus.rpc_request("bruin.customer.get.info", client_info_request, timeout=30)
         return client_info
 
-    async def _get_all_open_tickets_with_details_for_monitored_companies(self, bruin_clients_ids):
+    async def _get_all_open_tickets_with_details_for_monitored_companies(self):
         open_tickets = []
 
+        bruin_clients_ids: Set[int] = set(self._monitoring_mapping.keys())
         for client_id in bruin_clients_ids:
             try:
                 open_tickets += await self._get_open_tickets_with_details_by_client_id(client_id)
@@ -359,7 +359,15 @@ class Triage:
         slack_message = {'request_id': uuid(), 'message': err_msg}
         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
-    def _filter_tickets_related_to_edges_under_monitoring(self, tickets, serials_under_monitoring):
+    def _filter_tickets_related_to_edges_under_monitoring(self, tickets):
+        serials_under_monitoring: Set[str] = set(sum(
+            (
+                list(edge_status_by_serial_dict.keys())
+                for edge_status_by_serial_dict in self._monitoring_mapping.values()
+            ),
+            []
+        ))
+
         return [
             ticket
             for ticket in tickets
@@ -382,7 +390,7 @@ class Triage:
 
         return tickets_with_triage, tickets_without_triage
 
-    async def _process_tickets_with_triage(self, tickets, edges_by_serial):
+    async def _process_tickets_with_triage(self, tickets, edges_data_by_serial):
         self._discard_non_triage_notes(tickets)
 
         for ticket in tickets:
@@ -396,7 +404,7 @@ class Triage:
             ticket_id = ticket['ticket_id']
             serial_number = ticket['ticket_detail']['detailValue']
             newest_triage_note_timestamp = newest_triage_note['createdDate']
-            edge_data = edges_by_serial[serial_number]
+            edge_data = edges_data_by_serial[serial_number]
 
             await self._append_new_triage_notes_based_on_recent_events(
                 ticket_id, newest_triage_note_timestamp, edge_data
@@ -608,12 +616,12 @@ class Triage:
         slack_message = {'request_id': uuid(), 'message': message}
         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
-    async def _process_tickets_without_triage(self, tickets, edges_by_serial):
+    async def _process_tickets_without_triage(self, tickets, edges_data_by_serial):
         for ticket in tickets:
             ticket_id = ticket['ticket_id']
 
             serial_number = ticket['ticket_detail']['detailValue']
-            edge_data = edges_by_serial[serial_number]
+            edge_data = edges_data_by_serial[serial_number]
             edge_full_id = edge_data['edge_id']
             edge_identifier = EdgeIdentifier(**edge_full_id)
 
