@@ -12,6 +12,13 @@ from shortuuid import uuid
 
 from igz.packages.repositories.edge_repository import EdgeIdentifier
 
+import os
+from collections import OrderedDict
+from dateutil.parser import parse
+from pytz import utc
+
+empty_str = str()
+
 
 class OutageMonitor:
     def __init__(self, event_bus, logger, scheduler, config, outage_repository):
@@ -398,6 +405,12 @@ class OutageMonitor:
                                    f'ticketId={ticket_creation_response_body}.'
                     }
                     await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
+                    self._logger.info('Appending triage note to recently created ticket '
+                                      f'{ticket_creation_response_body}...')
+                    await self._append_triage_note_to_new_ticket(
+                        ticket_creation_response_body, edge_full_id, edge_status
+                    )
                 elif ticket_creation_response_status == 409:
                     self._logger.info(
                         f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket in progress '
@@ -437,6 +450,27 @@ class OutageMonitor:
         )
 
         return ticket_creation_response
+
+    async def _append_triage_note_to_new_ticket(self, ticket_id, edge_full_id, edge_status):
+        serial_number = edge_status['edges']['serialNumber']
+
+        tickets = [
+            {
+                'ticket_id': ticket_id,
+                'ticket_detail': {
+                    'detailValue': serial_number,
+                }
+            }
+        ]
+
+        edges_data_by_serial = {
+            serial_number: {
+                'edge_id': edge_full_id,
+                'edge_status': edge_status,
+            }
+        }
+
+        await self._process_tickets_without_triage(tickets, edges_data_by_serial)
 
     async def _reopen_outage_ticket(self, ticket_id, edge_status):
         self._logger.info(f'[outage-ticket-reopening] Reopening outage ticket {ticket_id}...')
@@ -566,3 +600,276 @@ class OutageMonitor:
 
     def _is_management_status_active(self, management_status) -> bool:
         return management_status in {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"}
+
+    # TODO: All the code starting from this line should be isolated to its own repository and then make both
+    # OutageMonitoring and Triage actions share that repo to append the first triage note to the proper tickets
+    async def _process_tickets_without_triage(self, tickets, edges_data_by_serial):  # pragma: no cover
+        self._logger.info('Processing tickets without triage...')
+
+        for ticket in tickets:
+            ticket_id = ticket['ticket_id']
+
+            serial_number = ticket['ticket_detail']['detailValue']
+            edge_data = edges_data_by_serial[serial_number]
+            edge_full_id = edge_data['edge_id']
+            edge_identifier = EdgeIdentifier(**edge_full_id)
+
+            past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
+
+            try:
+                recent_events_response = await self._get_last_events_for_edge(
+                    edge_full_id, since=past_moment_for_events_lookup
+                )
+            except Exception:
+                await self._notify_failing_rpc_request_for_edge_events(edge_full_id)
+                continue
+
+            recent_events_response_body = recent_events_response['body']
+            recent_events_response_status = recent_events_response['status']
+
+            if recent_events_response_status not in range(200, 300):
+                await self._notify_http_error_when_requesting_edge_events_from_velocloud(
+                    edge_full_id, recent_events_response
+                )
+                return
+
+            if not recent_events_response_body:
+                self._logger.info(
+                    f'No events were found for edge {edge_identifier} starting from {past_moment_for_events_lookup}. '
+                    f'Not appending the first triage note to ticket {ticket_id}.'
+                )
+                return
+
+            recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
+
+            relevant_info_for_triage_note = self._gather_relevant_data_for_first_triage_note(
+                edge_data, recent_events_response_body
+            )
+
+            if self._config.TRIAGE_CONFIG['environment'] == 'dev':
+                self._logger.info(f'Triage note would have been appended to ticket {ticket_id} with the following'
+                                  f'info: {relevant_info_for_triage_note}')
+                # email_data = self._template_renderer.compose_email_object(relevant_info_for_triage_note)
+                #
+                # try:
+                #     await self._send_email(email_data)
+                # except Exception:
+                #     self._logger.error(f'An error occurred when sending email with data {email_data}')
+            elif self._config.TRIAGE_CONFIG['environment'] == 'production':
+                ticket_note = self._transform_relevant_data_into_ticket_note(relevant_info_for_triage_note)
+
+                try:
+                    append_note_response = await self._append_note_to_ticket(ticket_id, ticket_note)
+                except Exception:
+                    await self._notify_failing_rpc_request_for_appending_ticket_note(ticket_id, ticket_note)
+                    continue
+
+                append_note_response_status = append_note_response['status']
+                if append_note_response_status not in range(200, 300):
+                    await self._notify_http_error_when_appending_note_to_ticket(ticket_id, append_note_response)
+
+        self._logger.info('Finished processing tickets without triage!')
+
+    async def _get_last_events_for_edge(self, edge_full_id, since: datetime):  # pragma: no cover
+        current_datetime = datetime.now(utc)
+
+        last_events_request = {
+            'request_id': uuid(),
+            'body': {
+                'edge': edge_full_id,
+                'start_date': since,
+                'end_date': current_datetime,
+                'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD'],
+            },
+        }
+        events = await self._event_bus.rpc_request(
+            "alert.request.event.edge", last_events_request, timeout=180
+        )
+        return events
+
+    async def _notify_failing_rpc_request_for_edge_events(self, edge_full_id):  # pragma: no cover
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+        err_msg = f'An error occurred when requesting edge events from Velocloud for edge {edge_identifier}'
+
+        self._logger.error(err_msg)
+        slack_message = {'request_id': uuid(), 'message': err_msg}
+        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
+    async def _notify_http_error_when_requesting_edge_events_from_velocloud(self, edge_full_id, edge_events_response):
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+
+        edge_events_response_body = edge_events_response['body']
+        edge_events_response_status = edge_events_response['status']
+
+        err_msg = (
+            f'Error while retrieving edge events for edge {edge_identifier} in '
+            f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+            f'Error {edge_events_response_status} - {edge_events_response_body}'
+        )
+
+        self._logger.error(err_msg)
+        slack_message = {'request_id': uuid(), 'message': err_msg}
+        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
+    def _gather_relevant_data_for_first_triage_note(self, edge_data, edge_events) -> dict:  # pragma: no cover
+        edge_full_id = edge_data['edge_id']
+        edge_status = edge_data['edge_status']
+
+        host = edge_full_id['host']
+        enterprise_id = edge_full_id['enterprise_id']
+        edge_id = edge_full_id['edge_id']
+
+        edge_status_data = edge_status['edges']
+        edge_name = edge_status_data['name']
+        edge_state = edge_status_data['edgeState']
+        edge_serial = edge_status_data['serialNumber']
+
+        edge_links = edge_status['links']
+
+        velocloud_base_url = f'https://{host}/#!/operator/customer/{enterprise_id}/monitor'
+        velocloud_edge_base_url = f'{velocloud_base_url}/edge/{edge_id}'
+
+        relevant_data: dict = OrderedDict()
+
+        relevant_data["Orchestrator Instance"] = host
+        relevant_data["Edge Name"] = edge_name
+        relevant_data["Links"] = [
+            f'[Edge|{velocloud_edge_base_url}/]',
+            f'[QoE|{velocloud_edge_base_url}/qoe/]',
+            f'[Transport|{velocloud_edge_base_url}/links/]',
+            f'[Events|{velocloud_base_url}/events/]',
+        ]
+
+        relevant_data["Edge Status"] = edge_state
+        relevant_data["Serial"] = edge_serial
+
+        links_interface_names = []
+        for link in edge_links:
+            link_data = link['link']
+            if not link_data:
+                continue
+
+            interface_name = link_data['interface']
+            link_state = link_data['state']
+            link_label = link_data['displayName']
+
+            relevant_data[f'Interface {interface_name}'] = empty_str
+            relevant_data[f'Interface {interface_name} Label'] = link_label
+            relevant_data[f'Interface {interface_name} Status'] = link_state
+
+            links_interface_names.append(interface_name)
+
+        tz_object = timezone(self._config.TRIAGE_CONFIG['timezone'])
+
+        relevant_data["Last Edge Online"] = None
+        relevant_data["Last Edge Offline"] = None
+
+        last_online_event_for_edge = self._get_first_element_matching(
+            iterable=edge_events, condition=lambda event: event['event'] == 'EDGE_UP'
+        )
+        last_offline_event_for_edge = self._get_first_element_matching(
+            iterable=edge_events, condition=lambda event: event['event'] == 'EDGE_DOWN'
+        )
+
+        if last_online_event_for_edge is not None:
+            relevant_data["Last Edge Online"] = parse(last_online_event_for_edge['eventTime']).astimezone(tz_object)
+
+        if last_offline_event_for_edge is not None:
+            relevant_data["Last Edge Offline"] = parse(last_offline_event_for_edge['eventTime']).astimezone(tz_object)
+
+        for interface_name in links_interface_names:
+            last_online_key = f'Last {interface_name} Interface Online'
+            last_offline_key = f'Last {interface_name} Interface Offline'
+
+            relevant_data[last_online_key] = None
+            relevant_data[last_offline_key] = None
+
+            last_online_event_for_current_link = self._get_first_element_matching(
+                iterable=edge_events,
+                condition=lambda event: event['event'] == 'LINK_ALIVE' and self.__event_message_contains_interface_name(
+                    event['message'], interface_name)
+            )
+
+            last_offline_event_for_current_link = self._get_first_element_matching(
+                iterable=edge_events,
+                condition=lambda event: event['event'] == 'LINK_DEAD' and self.__event_message_contains_interface_name(
+                    event['message'], interface_name)
+            )
+
+            if last_online_event_for_current_link is not None:
+                relevant_data[last_online_key] = parse(last_online_event_for_current_link['eventTime']).astimezone(
+                    tz_object)
+
+            if last_offline_event_for_current_link is not None:
+                relevant_data[last_offline_key] = parse(last_offline_event_for_current_link['eventTime']).astimezone(
+                    tz_object)
+
+        return relevant_data
+
+    def _transform_relevant_data_into_ticket_note(self, relevant_data: dict) -> str:  # pragma: no cover
+        ticket_note_lines = []
+
+        for key, value in relevant_data.items():
+            if value is empty_str:
+                ticket_note_lines.append(key)
+            elif key == 'Links':
+                ticket_note_lines.append(key)
+                ticket_note_lines.append(os.linesep.join(value))
+            else:
+                ticket_note_lines.append(f'{key}: {value}')
+
+        return os.linesep.join(ticket_note_lines)
+
+    async def _append_note_to_ticket(self, ticket_id, ticket_note):  # pragma: no cover
+        append_note_to_ticket_request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+                'note': ticket_note,
+            },
+        }
+
+        append_ticket_to_note = await self._event_bus.rpc_request(
+            "bruin.ticket.note.append.request", append_note_to_ticket_request, timeout=15
+        )
+        return append_ticket_to_note
+
+    __event_interface_name_regex = re.compile(
+        r'(^Interface (?P<interface_name>[a-zA-Z0-9]+) is (up|down)$)|'
+        r'(^Link (?P<interface_name2>[a-zA-Z0-9]+) is (no longer|now) DEAD$)'
+    )
+
+    def __event_message_contains_interface_name(self, event_message, interface_name):  # pragma: no cover
+        match = self.__event_interface_name_regex.match(event_message)
+
+        interface_name_found = match.group('interface_name') or match.group('interface_name2')
+        return interface_name == interface_name_found
+
+    async def _notify_failing_rpc_request_for_appending_ticket_note(self, ticket_id, ticket_note):  # pragma: no cover
+        err_msg = f'An error occurred when appending a ticket note to ticket {ticket_id}. Ticket note: {ticket_note}'
+
+        self._logger.error(err_msg)
+        slack_message = {'request_id': uuid(), 'message': err_msg}
+        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
+    async def _notify_http_error_when_appending_note_to_ticket(self, ticket_id, append_note_response):
+        append_note_response_body = append_note_response['body']
+        append_note_response_status = append_note_response['status']
+
+        err_msg = (
+            f'Error while appending note to ticket {ticket_id} in {self._config.TRIAGE_CONFIG["environment"].upper()} '
+            f'environment: Error {append_note_response_status} - {append_note_response_body}'
+        )
+
+        self._logger.error(err_msg)
+        slack_message = {'request_id': uuid(), 'message': err_msg}
+        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
+    async def _notify_triage_note_was_appended_to_ticket(self, ticket_id, bruin_client_id):  # pragma: no cover
+        message = (f'Triage appended to ticket {ticket_id} in '
+                   f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment. Details at '
+                   f'https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}')
+
+        self._logger.info(message)
+        slack_message = {'request_id': uuid(), 'message': message}
+        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)

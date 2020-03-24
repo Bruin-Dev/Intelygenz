@@ -2302,6 +2302,11 @@ class TestServiceOutageMonitor:
             'status': 200,
         }
 
+        edge_status_data_with_bruin_client_info = {
+            **edge_status_data,
+            'bruin_client_info': bruin_client_info,
+        }
+
         outage_happened = True
 
         outage_ticket_creation_body = 12345  # Ticket ID
@@ -2330,6 +2335,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._create_outage_ticket = CoroutineMock(return_value=outage_ticket_creation_response)
+        outage_monitor._append_triage_note_to_new_ticket = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
@@ -2347,6 +2353,9 @@ class TestServiceOutageMonitor:
                            f'ticketId={outage_ticket_creation_body}.'
             },
             timeout=10
+        )
+        outage_monitor._append_triage_note_to_new_ticket.assert_awaited_once_with(
+            outage_ticket_creation_body, edge_full_id, edge_status_data_with_bruin_client_info
         )
 
     @pytest.mark.asyncio
@@ -2529,6 +2538,55 @@ class TestServiceOutageMonitor:
             timeout=30
         )
         assert result == post_ticket_result
+
+    @pytest.mark.asyncio
+    async def append_triage_note_to_new_ticket_test(self):
+        ticket_id = 12345
+
+        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+
+        serial_number = 'VC1234567'
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 9994,
+                'client_name': 'METTEL/NEW YORK',
+            }
+        }
+
+        tickets = [
+            {
+                'ticket_id': ticket_id,
+                'ticket_detail': {
+                    'detailValue': serial_number,
+                }
+            }
+        ]
+
+        edges_data_by_serial = {
+            serial_number: {
+                'edge_id': edge_full_id,
+                'edge_status': edge_status,
+            }
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._process_tickets_without_triage = CoroutineMock()
+
+        await outage_monitor._append_triage_note_to_new_ticket(ticket_id, edge_full_id, edge_status)
+
+        outage_monitor._process_tickets_without_triage.assert_awaited_once_with(tickets, edges_data_by_serial)
 
     @pytest.mark.asyncio
     async def reopen_outage_ticket_with_failing_reopening_test(self):
