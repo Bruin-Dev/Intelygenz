@@ -18,7 +18,6 @@ from igz.packages.eventbus.eventbus import EventBus
 
 from application.repositories.edge_redis_repository import EdgeIdentifier
 
-
 empty_str = str()
 
 
@@ -55,21 +54,35 @@ class Triage:
                                 replace_existing=True, id='_triage_process')
 
     async def _run_tickets_polling(self):
+        self._logger.info(f'Starting triage process...')
         self.__reset_instance_state()
 
+        self._logger.info('Creating map with all customers and all their devices...')
         self._monitoring_mapping = await self._map_bruin_client_ids_to_edges_serials_and_statuses()
+        self._logger.info('Map of devices by customer created')
 
+        self._logger.info('Getting all open tickets for all customers...')
         open_tickets = await self._get_all_open_tickets_with_details_for_monitored_companies()
+        self._logger.info(
+            f'Got all {len(open_tickets)} open tickets for all customers. '
+            f'Filtering them to get only the ones under the device list')
         relevant_open_tickets = self._filter_tickets_related_to_edges_under_monitoring(open_tickets)
+        self._logger.info(f'Got all {len(relevant_open_tickets)} relevant tickets for all customers.')
 
+        self._logger.info(f'Splitting relevant tickets in tickets with and without triage...')
         tickets_with_triage, tickets_without_triage = self._distinguish_tickets_with_and_without_triage(
             relevant_open_tickets)
 
+        self._logger.info(f'Tickets split successfully. '
+                          f'Tickets with triage: {len(tickets_with_triage)}. '
+                          f'Tickets without triage: {len(tickets_without_triage)}. '
+                          'Processing both ticket sets...')
         edges_data_by_serial = ChainMap(*self._monitoring_mapping.values())
         await asyncio.gather(
             self._process_tickets_with_triage(tickets_with_triage, edges_data_by_serial),
             self._process_tickets_without_triage(tickets_without_triage, edges_data_by_serial),
         )
+        self._logger.info('Triage process finished!')
 
     async def _map_bruin_client_ids_to_edges_serials_and_statuses(self):
         mapping = {}
@@ -147,6 +160,9 @@ class Triage:
 
             # Attach Bruin client info to edge_data
             edge_status_data['bruin_client_info'] = bruin_client_info_response_body
+            self._logger.info(
+                f"Edge with serial {serial_number} that belongs to Bruin customer {bruin_client_info_response_body} "
+                f"Has been added to the map of devices to monitor")
 
             mapping.setdefault(bruin_client_id, {})
             mapping[bruin_client_id][serial_number] = {
@@ -244,7 +260,7 @@ class Triage:
 
     async def _get_open_tickets_with_details_by_client_id(self, client_id):
         result = []
-
+        self._logger.info(f'Getting all open tickets with details for Bruin customer: {client_id}...')
         try:
             open_tickets_response = await self._get_open_tickets_by_client_id(client_id)
         except Exception:
@@ -261,6 +277,7 @@ class Triage:
         open_tickets_ids = (ticket['ticketID'] for ticket in open_tickets_response_body)
 
         for ticket_id in open_tickets_ids:
+            self._logger.info(f'Getting details for ticket {ticket_id} of Bruin customer {client_id}...')
             try:
                 ticket_details_response = await self._get_ticket_details_by_ticket_id(ticket_id)
             except Exception:
@@ -281,12 +298,14 @@ class Triage:
                 self._logger.info(f"Ticket {ticket_id} doesn't have any detail under ticketDetails key. Skipping...")
                 continue
 
+            self._logger.info(f'Got details for ticket {ticket_id} of Bruin customer {client_id}!')
+
             result.append({
                 'ticket_id': ticket_id,
                 'ticket_detail': ticket_details_list[0],
                 'ticket_notes': ticket_details_response_body['ticketNotes'],
             })
-
+        self._logger.info(f'Finished getting all opened tickets for Bruin customer {client_id}!')
         return result
 
     async def _get_open_tickets_by_client_id(self, client_id):
@@ -377,8 +396,10 @@ class Triage:
     def _distinguish_tickets_with_and_without_triage(self, tickets) -> tuple:
         tickets_with_triage = []
         for ticket in tickets:
+            self._logger.info(f'Checking if ticket {ticket["ticket_id"]} has a triage note already...')
             for note in ticket['ticket_notes']:
                 if self.__triage_note_regex.match(note['noteValue']):
+                    self._logger.info(f'Ticket {ticket["ticket_id"]} has a triage already!')
                     tickets_with_triage.append(ticket)
                     break
 
@@ -391,15 +412,19 @@ class Triage:
         return tickets_with_triage, tickets_without_triage
 
     async def _process_tickets_with_triage(self, tickets, edges_data_by_serial):
+        self._logger.info('Processing tickets with triage...')
+
         self._discard_non_triage_notes(tickets)
 
         for ticket in tickets:
+            self._logger.info(f'Checking if events need to be appended to ticket with triage {ticket["ticket_id"]}...')
             newest_triage_note = self._get_most_recent_ticket_note(ticket)
 
             if self._was_ticket_note_appended_recently(newest_triage_note):
                 self._logger.info(f'The last triage note was appended to ticket {ticket["ticket_id"]} not long ago so '
                                   'no new triage note will be appended for now')
                 continue
+            self._logger.info(f'Appending events to ticket {ticket["ticket_id"]}...')
 
             ticket_id = ticket['ticket_id']
             serial_number = ticket['ticket_detail']['detailValue']
@@ -409,6 +434,9 @@ class Triage:
             await self._append_new_triage_notes_based_on_recent_events(
                 ticket_id, newest_triage_note_timestamp, edge_data
             )
+            self._logger.info(f'Events appended to ticket {ticket["ticket_id"]}!')
+
+        self._logger.info('Finished processing tickets with triage!')
 
     def _discard_non_triage_notes(self, tickets) -> NoReturn:
         for ticket in tickets:
@@ -430,12 +458,15 @@ class Triage:
         return (current_datetime - ticket_note_creation_datetime) <= timedelta(minutes=30)
 
     async def _append_new_triage_notes_based_on_recent_events(self, ticket_id, last_triage_timestamp: str, edge_data):
+        self._logger.info(f'Appending new triage note to ticket {ticket_id}...')
+
         working_environment = self._config.TRIAGE_CONFIG['environment']
 
         edge_full_id = edge_data['edge_id']
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
         last_triage_datetime = parse(last_triage_timestamp).astimezone(utc)
+        self._logger.info(f'Getting events for edge related to ticket {ticket_id} before applying triage...')
 
         try:
             recent_events_response = await self._get_last_events_for_edge(edge_full_id, since=last_triage_datetime)
@@ -475,6 +506,7 @@ class Triage:
                 append_note_response_status = append_note_response['status']
                 if append_note_response_status not in range(200, 300):
                     await self._notify_http_error_when_appending_note_to_ticket(ticket_id, append_note_response)
+                self._logger.info(f'Triage appended to ticket {ticket_id}!')
             else:
                 self._logger.info(f'Not going to append a new triage note to ticket {ticket_id} as current environment '
                                   f'is {working_environment.upper()}. Triage note: {triage_note_contents}')
@@ -617,6 +649,8 @@ class Triage:
         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
     async def _process_tickets_without_triage(self, tickets, edges_data_by_serial):
+        self._logger.info('Processing tickets without triage...')
+
         for ticket in tickets:
             ticket_id = ticket['ticket_id']
 
@@ -676,6 +710,8 @@ class Triage:
                 append_note_response_status = append_note_response['status']
                 if append_note_response_status not in range(200, 300):
                     await self._notify_http_error_when_appending_note_to_ticket(ticket_id, append_note_response)
+
+        self._logger.info('Finished processing tickets without triage!')
 
     def _gather_relevant_data_for_first_triage_note(self, edge_data, edge_events) -> dict:
         edge_full_id = edge_data['edge_id']
