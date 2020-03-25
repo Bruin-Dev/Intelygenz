@@ -35,7 +35,10 @@ MONITOR_CONFIG = {
     'velocloud_instances_filter': {
         "mettel.velocloud.net": [],
     },
-    'blacklisted_edges': [],
+    'blacklisted_edges': [
+        # Federal edge that is inside a non-federal Velocloud instance
+        {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
+                          ],
     'autoresolve_down_events_seconds': 45 * 60,
 }
 LOG_CONFIG = {
