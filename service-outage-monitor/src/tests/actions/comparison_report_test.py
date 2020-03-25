@@ -1447,7 +1447,7 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def is_reportable_edge_with_healthy_status_test(self):
         edge_status = {
-            'edges': {
+            'edge_info': {
                 'edgeState': 'CONNECTED',
                 'serialNumber': 'VC1234567',
                 'name': 'Saturos',
@@ -1487,7 +1487,7 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def is_reportable_edge_with_faulty_status_and_outage_ticket_found_test(self):
         edge_status = {
-            'edges': {
+            'edge_info': {
                 'edgeState': 'CONNECTED',
                 'serialNumber': 'VC1234567',
                 'name': 'Saturos',
@@ -1548,7 +1548,7 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def is_reportable_edge_with_faulty_status_and_outage_ticket_not_found_test(self):
         edge_status = {
-            'edges': {
+            'edge_info': {
                 'edgeState': 'CONNECTED',
                 'serialNumber': 'VC1234567',
                 'name': 'Saturos',
@@ -1595,7 +1595,7 @@ class TestQuarantineJob:
     @pytest.mark.asyncio
     async def is_reportable_edge_with_faulty_status_and_unexpected_outage_ticket_format_test(self):
         edge_status = {
-            'edges': {
+            'edge_info': {
                 'edgeState': 'CONNECTED',
                 'serialNumber': 'VC1234567',
                 'name': 'Saturos',
@@ -2202,7 +2202,7 @@ class TestServiceOutageReporterJob:
         }
 
         edge_1_data = {
-            'edges': {
+            'edge_info': {
                 'edgeState': 'CONNECTED',
                 'serialNumber': 'VC123456789',
                 'name': 'Saturos',
@@ -2223,7 +2223,7 @@ class TestServiceOutageReporterJob:
         }
 
         edge_2_data = {
-            'edges': {
+            'edge_info': {
                 'edgeState': 'OFFLINE',
                 'serialNumber': 'VC987654321',
                 'name': 'Menardi',
@@ -2244,7 +2244,7 @@ class TestServiceOutageReporterJob:
         }
 
         edge_3_data = {
-            'edges': {
+            'edge_info': {
                 'edgeState': 'OFFLINE',
                 'serialNumber': 'VC111122223',
                 'name': 'Isaac',
@@ -2265,7 +2265,7 @@ class TestServiceOutageReporterJob:
         }
 
         edge_4_data = {
-            'edges': {
+            'edge_info': {
                 'edgeState': 'OFFLINE',
                 'serialNumber': 'VC111122223',
                 'name': 'Nadia',

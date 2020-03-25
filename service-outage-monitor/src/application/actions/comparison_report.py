@@ -160,7 +160,7 @@ class ComparisonReport:
                     self._logger.info(
                         f"Management status is active. Checking outage state for {edge_identifier}...")
 
-                if self._outage_repository.is_there_an_outage(edge_status_response_body):
+                if self._outage_repository.is_there_an_outage(edge_status_response_body["edge_info"]):
                     await self._start_quarantine_job(edge_full_id, bruin_client_info_response_body)
                     self._add_edge_to_quarantine(edge_full_id, edge_data)
             except Exception:
@@ -371,7 +371,7 @@ class ComparisonReport:
                 self._quarantine_edge_repository.remove_edge(edge_full_id)
 
     async def _is_reportable_edge(self, edge_status):
-        outage_happened = self._outage_repository.is_there_an_outage(edge_status)
+        outage_happened = self._outage_repository.is_there_an_outage(edge_status["edge_info"])
         if not outage_happened:
             return False
 
