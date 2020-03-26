@@ -198,7 +198,7 @@ class Triage:
             for edge_full_id in edge_list_response_body
         )
         start_time = time.time()
-        self._logger.info(f"Processing {len(tasks)} edges")
+        self._logger.info(f"Processing {len(edge_list_response_body)} edges")
         try:
             await asyncio.gather(*tasks, return_exceptions=True)
         except Exception as ex:
@@ -825,27 +825,23 @@ class Triage:
 
             last_online_event_for_current_link = self._get_first_element_matching(
                 iterable=edge_events,
-                condition=lambda event: (
-                        event['event'] == 'LINK_ALIVE' and self.__event_message_contains_interface_name(
+                condition=lambda event: event['event'] == 'LINK_ALIVE' and self.__event_message_contains_interface_name(
                     event['message'], interface_name)
-                )
             )
 
             last_offline_event_for_current_link = self._get_first_element_matching(
                 iterable=edge_events,
-                condition=lambda event: (
-                        event['event'] == 'LINK_DEAD' and self.__event_message_contains_interface_name(
+                condition=lambda event: event['event'] == 'LINK_DEAD' and self.__event_message_contains_interface_name(
                     event['message'], interface_name)
-                )
             )
 
-            if last_online_event_for_current_link is not None:
-                relevant_data[last_online_key] = \
-                    parse(last_online_event_for_current_link['eventTime']).astimezone(tz_object)
+        if last_online_event_for_current_link is not None:
+            relevant_data[last_online_key] = parse(last_online_event_for_current_link['eventTime']).astimezone(
+                tz_object)
 
-            if last_offline_event_for_current_link is not None:
-                relevant_data[last_offline_key] = \
-                    parse(last_offline_event_for_current_link['eventTime']).astimezone(tz_object)
+        if last_offline_event_for_current_link is not None:
+            relevant_data[last_offline_key] = parse(last_offline_event_for_current_link['eventTime']).astimezone(
+                tz_object)
 
         return relevant_data
 
