@@ -25,7 +25,7 @@ resource "aws_ecs_task_definition" "automation-velocloud-bridge" {
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
-  cpu = "1024"
+  cpu = "2048"
   memory = "4096"
   execution_role_arn = data.aws_iam_role.ecs_execution_role.arn
   task_role_arn = data.aws_iam_role.ecs_execution_role.arn
