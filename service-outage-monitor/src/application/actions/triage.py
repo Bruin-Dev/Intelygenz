@@ -170,10 +170,10 @@ class Triage:
                     'edge_status': edge_status_data,
                 }
                 pass
-            try:
-                await process_edge_and_tickets()
-            except Exception as ex:
-                self._logger.error(f"Error: {edge_full_id}")
+        try:
+            await process_edge_and_tickets()
+        except Exception as ex:
+            self._logger.error(f"Error: {edge_full_id}")
 
     async def _map_bruin_client_ids_to_edges_serials_and_statuses(self):
         mapping = {}
