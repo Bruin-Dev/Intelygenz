@@ -71,6 +71,11 @@ class TestComparisonReport:
         edge_1_full_id = edge_1_identifier._asdict()
         edge_2_full_id = edge_2_identifier._asdict()
 
+        bruin_client_info = {
+            "client_id": 9994,
+            "client_name": "METTEL/NEW YORK"
+        }
+
         edge_1_addition_timestamp = 1234567890
         edge_2_addition_timestamp = 9876543210
         quarantine_edges = {
@@ -87,6 +92,7 @@ class TestComparisonReport:
                         {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
                     ],
                     'enterprise_name': 'EVIL-CORP|12345|',
+                    "bruin_client_info": bruin_client_info,
                 },
                 'addition_timestamp': edge_1_addition_timestamp,
             },
@@ -103,6 +109,7 @@ class TestComparisonReport:
                         {'linkId': 5678, 'link': {'state': 'DISCONNECTED', 'interface': 'GE2'}},
                     ],
                     'enterprise_name': 'EVIL-CORP|12345|',
+                    "bruin_client_info": bruin_client_info,
                 },
                 'addition_timestamp': edge_2_addition_timestamp,
             }
@@ -132,10 +139,12 @@ class TestComparisonReport:
         comparison_report._start_quarantine_job.assert_has_awaits([
             call(
                 edge_1_full_id,
+                bruin_client_info,
                 run_date=datetime.fromtimestamp(edge_1_addition_timestamp + quarantine_time)
             ),
             call(
                 edge_2_full_id,
+                bruin_client_info,
                 run_date=datetime.fromtimestamp(edge_2_addition_timestamp + quarantine_time)
             ),
         ])

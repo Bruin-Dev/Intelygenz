@@ -1,5 +1,4 @@
 import json
-import re
 
 from datetime import datetime
 from datetime import timedelta
@@ -38,9 +37,12 @@ class ComparisonReport:
             edge_full_id = edge_identifier._asdict()
             detection_timestamp = edge_data['addition_timestamp']
 
+            # Bruin client info was stored into Redis when the edge was sent to quarantine
+            bruin_client_info = edge_data['edge_status']['bruin_client_info']
+
             job_run_date = datetime.fromtimestamp(detection_timestamp) + timedelta(
                 seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
-            await self._start_quarantine_job(edge_full_id, run_date=job_run_date)
+            await self._start_quarantine_job(edge_full_id, bruin_client_info, run_date=job_run_date)
 
     async def start_service_outage_detector_job(self, exec_on_start=False):
         self._logger.info('Scheduling Service Outage Detector job...')
@@ -160,7 +162,7 @@ class ComparisonReport:
                     self._logger.info(
                         f"Management status is active. Checking outage state for {edge_identifier}...")
 
-                if self._outage_repository.is_there_an_outage(edge_status_response_body["edge_info"]):
+                if self._outage_repository.is_there_an_outage(edge_data):
                     await self._start_quarantine_job(edge_full_id, bruin_client_info_response_body)
                     self._add_edge_to_quarantine(edge_full_id, edge_data)
             except Exception:
