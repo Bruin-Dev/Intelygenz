@@ -474,7 +474,7 @@ class TestTriage:
             call(
                 "edge.list.request",
                 {'request_id': uuid_1, 'body': {'filter': config.TRIAGE_CONFIG['velo_filter']}},
-                timeout=600,
+                timeout=900,
             ),
             call(
                 "edge.status.request",
@@ -1224,7 +1224,7 @@ class TestTriage:
         event_bus.rpc_request.assert_awaited_once_with(
             'edge.list.request',
             {'request_id': uuid_, 'body': {'filter': config.TRIAGE_CONFIG['velo_filter']}},
-            timeout=600,
+            timeout=900,
         )
         assert result == edge_list_response
 

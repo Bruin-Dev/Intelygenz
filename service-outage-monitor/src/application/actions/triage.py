@@ -180,7 +180,7 @@ class Triage:
             },
         }
 
-        edge_list = await self._event_bus.rpc_request("edge.list.request", edge_list_request, timeout=600)
+        edge_list = await self._event_bus.rpc_request("edge.list.request", edge_list_request, timeout=900)
         return edge_list
 
     async def _notify_failing_rpc_request_for_edge_list(self):
