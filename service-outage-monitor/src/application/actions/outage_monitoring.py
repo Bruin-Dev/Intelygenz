@@ -806,15 +806,18 @@ class OutageMonitor:
 
         return relevant_data
 
-    def _transform_relevant_data_into_ticket_note(self, relevant_data: dict) -> str:  # pragma: no cover
-        ticket_note_lines = []
+    def _transform_relevant_data_into_ticket_note(self, relevant_data: dict) -> str:
+        ticket_note_lines = [
+            '#*Automation Engine*#',
+            'Triage',
+        ]
 
         for key, value in relevant_data.items():
             if value is empty_str:
                 ticket_note_lines.append(key)
             elif key == 'Links':
-                ticket_note_lines.append(key)
-                ticket_note_lines.append(os.linesep.join(value))
+                clickable_links = [f'[{name}|{url}]' for name, url in value.items()]
+                ticket_note_lines.append(f"Links: {' - '.join(clickable_links)}")
             else:
                 ticket_note_lines.append(f'{key}: {value}')
 
