@@ -371,7 +371,7 @@ class ComparisonReport:
                 self._quarantine_edge_repository.remove_edge(edge_full_id)
 
     async def _is_reportable_edge(self, edge_status):
-        outage_happened = self._outage_repository.is_there_an_outage(edge_status["edge_info"])
+        outage_happened = self._outage_repository.is_there_an_outage(edge_status)
         if not outage_happened:
             return False
 
