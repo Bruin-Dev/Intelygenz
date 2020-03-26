@@ -1,3 +1,5 @@
+import time
+
 import asyncio
 import os
 import re
@@ -5,6 +7,8 @@ from collections import ChainMap
 from collections import OrderedDict
 from datetime import datetime
 from datetime import timedelta
+
+from tenacity import retry, wait_exponential, stop_after_delay
 from typing import Callable
 from typing import NoReturn
 from typing import Set
@@ -35,6 +39,7 @@ class Triage:
         self._config = config
         self._template_renderer = template_renderer
         self._outage_repository = outage_repository
+        self._sempahore = asyncio.BoundedSemaphore(5)
 
         self.__reset_instance_state()
 
@@ -54,6 +59,7 @@ class Triage:
                                 replace_existing=True, id='_triage_process')
 
     async def _run_tickets_polling(self):
+        total_start_time = time.time()
         self._logger.info(f'Starting triage process...')
         self.__reset_instance_state()
 
@@ -82,7 +88,90 @@ class Triage:
             self._process_tickets_with_triage(tickets_with_triage, edges_data_by_serial),
             self._process_tickets_without_triage(tickets_without_triage, edges_data_by_serial),
         )
-        self._logger.info('Triage process finished!')
+        self._logger.info(f'Triage process finished! took {time.time() - total_start_time} seconds')
+
+    async def _process_edge_and_tickets(self, mapping, edge_full_id):
+        @retry(wait=wait_exponential(multiplier=self._config.NATS_CONFIG['multiplier'],
+                                     min=self._config.NATS_CONFIG['min']),
+               stop=stop_after_delay(self._config.NATS_CONFIG['stop_delay']), reraise=True)
+        async def process_edge_and_tickets():
+            async with self._sempahore:
+                total_start_time = time.time()
+                start_time = time.time()
+                self._logger.info(f"Processing edge {edge_full_id}")
+                edge_identifier = EdgeIdentifier(**edge_full_id)
+
+                edge_status_response = await self._get_edge_status_by_id(edge_full_id)
+
+                self._logger.info(f"Edge status retrieved {edge_full_id} "
+                                  f"took {time.time() - start_time} seconds")
+
+                edge_status_response_body = edge_status_response['body']
+                edge_status_response_status = edge_status_response['status']
+
+                if edge_status_response_status not in range(200, 300):
+                    await self._notify_http_error_when_requesting_edge_status_from_velocloud(
+                        edge_full_id, edge_status_response
+                    )
+                    return
+
+                edge_status_data = edge_status_response_body['edge_info']
+
+                serial_number = edge_status_data['edges']['serialNumber']
+                if not serial_number:
+                    self._logger.info(
+                        f"[map-bruin-client-to-edges] Edge {edge_identifier} "
+                        f"doesn't have any serial associated. Skipping... "
+                        f"took {time.time() - start_time} seconds")
+                    return
+
+                self._logger.info(f'[map-bruin-client-to-edges] '
+                                  f'Claiming Bruin client info for serial {serial_number}...')
+                start_time = time.time()
+                bruin_client_info_response = await self._get_bruin_client_info_by_serial(serial_number)
+                self._logger.info(f'[map-bruin-client-to-edges] '
+                                  f'Got Bruin client info for serial {serial_number} -> '
+                                  f'{bruin_client_info_response}.'
+                                  f' took {time.time() - start_time} seconds')
+
+                bruin_client_info_response_body = bruin_client_info_response['body']
+                bruin_client_info_response_status = bruin_client_info_response['status']
+                if bruin_client_info_response_status not in range(200, 300):
+                    err_msg = (f'Error trying to get Bruin client info from Bruin for serial {serial_number}: '
+                               f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}'
+                               f' took {time.time() - start_time} seconds')
+                    self._logger.error(err_msg)
+
+                    slack_message = {'request_id': uuid(), 'message': err_msg}
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                    return
+
+                bruin_client_id = bruin_client_info_response_body.get('client_id', False)
+                if not bruin_client_id:
+                    self._logger.info(
+                        f"[map-bruin-client-to-edges] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
+                        f'Skipping... took {time.time() - start_time} seconds')
+                    return
+
+                # Attach Bruin client info to edge_data
+                edge_status_data['bruin_client_info'] = bruin_client_info_response_body
+                self._logger.info(
+                    f"Edge with serial {serial_number} that belongs to Bruin customer {bruin_client_info_response_body} "
+                    f"Has been added to the map of devices to monitor "
+                    f"took {time.time() - total_start_time} seconds")
+
+                if bruin_client_id not in mapping:
+                    mapping.setdefault(bruin_client_id, {})
+
+                mapping[bruin_client_id][serial_number] = {
+                    'edge_id': edge_full_id,
+                    'edge_status': edge_status_data,
+                }
+                pass
+            try:
+                await process_edge_and_tickets()
+            except Exception as ex:
+                self._logger.error(f"Error: {edge_full_id}")
 
     async def _map_bruin_client_ids_to_edges_serials_and_statuses(self):
         mapping = {}
@@ -100,75 +189,90 @@ class Triage:
             await self._notify_http_error_when_requesting_edge_list_from_velocloud(edge_list_response)
             raise Exception
 
-        for edge_full_id in edge_list_response_body:
-            edge_identifier = EdgeIdentifier(**edge_full_id)
+        # mapping.setdefault(bruin_client_id, {})
 
-            try:
-                edge_status_response = await self._get_edge_status_by_id(edge_full_id)
-            except Exception:
-                await self._notify_failing_rpc_request_for_edge_status(edge_full_id)
-                continue
+        tasks = (
+            self._process_edge_and_tickets(mapping, edge_full_id)
+            for edge_full_id in edge_list_response_body
+        )
+        start_time = time.time()
+        self._logger.info(f"Processing {len(tasks)} edges")
+        try:
+            await asyncio.gather(*tasks, return_exceptions=True)
+        except Exception as ex:
+            self._logger.error(f"Error: asyncio.gather:_map_bruin_client_ids_to_edges_serials_and_statuses. "
+                               f"took {time.time() - start_time}")
+        self._logger.info(f"Processing {len(tasks)} edges took {time.time() - start_time} seconds")
 
-            edge_status_response_body = edge_status_response['body']
-            edge_status_response_status = edge_status_response['status']
-
-            if edge_status_response_status not in range(200, 300):
-                await self._notify_http_error_when_requesting_edge_status_from_velocloud(
-                    edge_full_id, edge_status_response
-                )
-                continue
-
-            edge_status_data = edge_status_response_body['edge_info']
-
-            serial_number = edge_status_data['edges']['serialNumber']
-            if not serial_number:
-                self._logger.info(
-                    f"[map-bruin-client-to-edges] Edge {edge_identifier} doesn't have any serial associated. "
-                    'Skipping...')
-                continue
-
-            self._logger.info(f'[map-bruin-client-to-edges] Claiming Bruin client info for serial {serial_number}...')
-            try:
-                bruin_client_info_response = await self._get_bruin_client_info_by_serial(serial_number)
-                self._logger.info(f'[map-bruin-client-to-edges] Got Bruin client info for serial {serial_number} -> '
-                                  f'{bruin_client_info_response}')
-            except Exception:
-                err_msg = f'An error occurred when requesting Bruin client info from Bruin for serial {serial_number}'
-
-                self._logger.error(err_msg)
-                slack_message = {'request_id': uuid(), 'message': err_msg}
-                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-                continue
-
-            bruin_client_info_response_body = bruin_client_info_response['body']
-            bruin_client_info_response_status = bruin_client_info_response['status']
-            if bruin_client_info_response_status not in range(200, 300):
-                err_msg = (f'Error trying to get Bruin client info from Bruin for serial {serial_number}: '
-                           f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}')
-                self._logger.error(err_msg)
-
-                slack_message = {'request_id': uuid(), 'message': err_msg}
-                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-                continue
-
-            bruin_client_id = bruin_client_info_response_body.get('client_id')
-            if not bruin_client_id:
-                self._logger.info(
-                    f"[map-bruin-client-to-edges] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
-                    'Skipping...')
-                continue
-
-            # Attach Bruin client info to edge_data
-            edge_status_data['bruin_client_info'] = bruin_client_info_response_body
-            self._logger.info(
-                f"Edge with serial {serial_number} that belongs to Bruin customer {bruin_client_info_response_body} "
-                f"Has been added to the map of devices to monitor")
-
-            mapping.setdefault(bruin_client_id, {})
-            mapping[bruin_client_id][serial_number] = {
-                'edge_id': edge_full_id,
-                'edge_status': edge_status_data,
-            }
+        # for edge_full_id in edge_list_response_body:
+        #     edge_identifier = EdgeIdentifier(**edge_full_id)
+        #
+        #     try:
+        #         edge_status_response = await self._get_edge_status_by_id(edge_full_id)
+        #     except Exception:
+        #         await self._notify_failing_rpc_request_for_edge_status(edge_full_id)
+        #         continue
+        #
+        #     edge_status_response_body = edge_status_response['body']
+        #     edge_status_response_status = edge_status_response['status']
+        #
+        #     if edge_status_response_status not in range(200, 300):
+        #         await self._notify_http_error_when_requesting_edge_status_from_velocloud(
+        #             edge_full_id, edge_status_response
+        #         )
+        #         continue
+        #
+        #     edge_status_data = edge_status_response_body['edge_info']
+        #
+        #     serial_number = edge_status_data['edges']['serialNumber']
+        #     if not serial_number:
+        #         self._logger.info(
+        #             f"[map-bruin-client-to-edges] Edge {edge_identifier} doesn't have any serial associated. "
+        #             'Skipping...')
+        #         continue
+        #
+        #     self._logger.info(f'[map-bruin-client-to-edges] Claiming Bruin client info for serial {serial_number}...')
+        #     try:
+        #         bruin_client_info_response = await self._get_bruin_client_info_by_serial(serial_number)
+        #         self._logger.info(f'[map-bruin-client-to-edges] Got Bruin client info for serial {serial_number} -> '
+        #                           f'{bruin_client_info_response}')
+        #     except Exception:
+        #         err_msg = f'An error occurred when requesting Bruin client info from Bruin for serial {serial_number}'
+        #
+        #         self._logger.error(err_msg)
+        #         slack_message = {'request_id': uuid(), 'message': err_msg}
+        #         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+        #         continue
+        #
+        #     bruin_client_info_response_body = bruin_client_info_response['body']
+        #     bruin_client_info_response_status = bruin_client_info_response['status']
+        #     if bruin_client_info_response_status not in range(200, 300):
+        #         err_msg = (f'Error trying to get Bruin client info from Bruin for serial {serial_number}: '
+        #                    f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}')
+        #         self._logger.error(err_msg)
+        #
+        #         slack_message = {'request_id': uuid(), 'message': err_msg}
+        #         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+        #         continue
+        #
+        #     bruin_client_id = bruin_client_info_response_body.get('client_id')
+        #     if not bruin_client_id:
+        #         self._logger.info(
+        #             f"[map-bruin-client-to-edges] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
+        #             'Skipping...')
+        #         continue
+        #
+        #     # Attach Bruin client info to edge_data
+        #     edge_status_data['bruin_client_info'] = bruin_client_info_response_body
+        #     self._logger.info(
+        #         f"Edge with serial {serial_number} that belongs to Bruin customer {bruin_client_info_response_body} "
+        #         f"Has been added to the map of devices to monitor")
+        #
+        #     mapping.setdefault(bruin_client_id, {})
+        #     mapping[bruin_client_id][serial_number] = {
+        #         'edge_id': edge_full_id,
+        #         'edge_status': edge_status_data,
+        #     }
 
         return mapping
 
@@ -180,7 +284,7 @@ class Triage:
             },
         }
 
-        edge_list = await self._event_bus.rpc_request("edge.list.request", edge_list_request, timeout=900)
+        edge_list = await self._event_bus.rpc_request("edge.list.request", edge_list_request, timeout=300)
         return edge_list
 
     async def _notify_failing_rpc_request_for_edge_list(self):
