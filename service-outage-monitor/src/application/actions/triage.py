@@ -204,7 +204,8 @@ class Triage:
         except Exception as ex:
             self._logger.error(f"Error: asyncio.gather:_map_bruin_client_ids_to_edges_serials_and_statuses. "
                                f"took {time.time() - start_time}")
-        self._logger.info(f"Processing {len(tasks)} edges took {time.time() - start_time} seconds")
+        self._logger.info(f"Processing {len(edge_list_response_body)} edges "
+                          f"took {time.time() - start_time} seconds")
 
         return mapping
 
