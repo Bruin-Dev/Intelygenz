@@ -149,14 +149,16 @@ class Triage:
                 bruin_client_id = bruin_client_info_response_body.get('client_id', False)
                 if not bruin_client_id:
                     self._logger.info(
-                        f"[map-bruin-client-to-edges] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
+                        f"[map-bruin-client-to-edges] Edge {edge_identifier} "
+                        f"doesn't have any Bruin client ID associated. "
                         f'Skipping... took {time.time() - start_time} seconds')
                     return
 
                 # Attach Bruin client info to edge_data
                 edge_status_data['bruin_client_info'] = bruin_client_info_response_body
                 self._logger.info(
-                    f"Edge with serial {serial_number} that belongs to Bruin customer {bruin_client_info_response_body} "
+                    f"Edge with serial {serial_number} that belongs to Bruin customer "
+                    f"{bruin_client_info_response_body} "
                     f"Has been added to the map of devices to monitor "
                     f"took {time.time() - total_start_time} seconds")
 
@@ -203,76 +205,6 @@ class Triage:
             self._logger.error(f"Error: asyncio.gather:_map_bruin_client_ids_to_edges_serials_and_statuses. "
                                f"took {time.time() - start_time}")
         self._logger.info(f"Processing {len(tasks)} edges took {time.time() - start_time} seconds")
-
-        # for edge_full_id in edge_list_response_body:
-        #     edge_identifier = EdgeIdentifier(**edge_full_id)
-        #
-        #     try:
-        #         edge_status_response = await self._get_edge_status_by_id(edge_full_id)
-        #     except Exception:
-        #         await self._notify_failing_rpc_request_for_edge_status(edge_full_id)
-        #         continue
-        #
-        #     edge_status_response_body = edge_status_response['body']
-        #     edge_status_response_status = edge_status_response['status']
-        #
-        #     if edge_status_response_status not in range(200, 300):
-        #         await self._notify_http_error_when_requesting_edge_status_from_velocloud(
-        #             edge_full_id, edge_status_response
-        #         )
-        #         continue
-        #
-        #     edge_status_data = edge_status_response_body['edge_info']
-        #
-        #     serial_number = edge_status_data['edges']['serialNumber']
-        #     if not serial_number:
-        #         self._logger.info(
-        #             f"[map-bruin-client-to-edges] Edge {edge_identifier} doesn't have any serial associated. "
-        #             'Skipping...')
-        #         continue
-        #
-        #     self._logger.info(f'[map-bruin-client-to-edges] Claiming Bruin client info for serial {serial_number}...')
-        #     try:
-        #         bruin_client_info_response = await self._get_bruin_client_info_by_serial(serial_number)
-        #         self._logger.info(f'[map-bruin-client-to-edges] Got Bruin client info for serial {serial_number} -> '
-        #                           f'{bruin_client_info_response}')
-        #     except Exception:
-        #         err_msg = f'An error occurred when requesting Bruin client info from Bruin for serial {serial_number}'
-        #
-        #         self._logger.error(err_msg)
-        #         slack_message = {'request_id': uuid(), 'message': err_msg}
-        #         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-        #         continue
-        #
-        #     bruin_client_info_response_body = bruin_client_info_response['body']
-        #     bruin_client_info_response_status = bruin_client_info_response['status']
-        #     if bruin_client_info_response_status not in range(200, 300):
-        #         err_msg = (f'Error trying to get Bruin client info from Bruin for serial {serial_number}: '
-        #                    f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}')
-        #         self._logger.error(err_msg)
-        #
-        #         slack_message = {'request_id': uuid(), 'message': err_msg}
-        #         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-        #         continue
-        #
-        #     bruin_client_id = bruin_client_info_response_body.get('client_id')
-        #     if not bruin_client_id:
-        #         self._logger.info(
-        #             f"[map-bruin-client-to-edges] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
-        #             'Skipping...')
-        #         continue
-        #
-        #     # Attach Bruin client info to edge_data
-        #     edge_status_data['bruin_client_info'] = bruin_client_info_response_body
-        #     self._logger.info(
-        #         f"Edge with serial {serial_number} that belongs to Bruin customer {bruin_client_info_response_body} "
-        #         f"Has been added to the map of devices to monitor")
-        #
-        #     mapping.setdefault(bruin_client_id, {})
-        #     mapping[bruin_client_id][serial_number] = {
-        #         'edge_id': edge_full_id,
-        #         'edge_status': edge_status_data,
-        #     }
 
         return mapping
 
@@ -612,7 +544,8 @@ class Triage:
                     await self._notify_http_error_when_appending_note_to_ticket(ticket_id, append_note_response)
                 self._logger.info(f'Triage appended to ticket {ticket_id}!')
             else:
-                self._logger.info(f'Not going to append a new triage note to ticket {ticket_id} as current environment '
+                self._logger.info(f'Not going to append a new triage note to ticket {ticket_id} '
+                                  f'as current environment '
                                   f'is {working_environment.upper()}. Triage note: {triage_note_contents}')
 
             notes_were_appended = True
@@ -892,23 +825,27 @@ class Triage:
 
             last_online_event_for_current_link = self._get_first_element_matching(
                 iterable=edge_events,
-                condition=lambda event: event['event'] == 'LINK_ALIVE' and self.__event_message_contains_interface_name(
+                condition=lambda event: (
+                        event['event'] == 'LINK_ALIVE' and self.__event_message_contains_interface_name(
                     event['message'], interface_name)
+                )
             )
 
             last_offline_event_for_current_link = self._get_first_element_matching(
                 iterable=edge_events,
-                condition=lambda event: event['event'] == 'LINK_DEAD' and self.__event_message_contains_interface_name(
+                condition=lambda event: (
+                        event['event'] == 'LINK_DEAD' and self.__event_message_contains_interface_name(
                     event['message'], interface_name)
+                )
             )
 
             if last_online_event_for_current_link is not None:
-                relevant_data[last_online_key] = parse(last_online_event_for_current_link['eventTime']).astimezone(
-                    tz_object)
+                relevant_data[last_online_key] = \
+                    parse(last_online_event_for_current_link['eventTime']).astimezone(tz_object)
 
             if last_offline_event_for_current_link is not None:
-                relevant_data[last_offline_key] = parse(last_offline_event_for_current_link['eventTime']).astimezone(
-                    tz_object)
+                relevant_data[last_offline_key] = \
+                    parse(last_offline_event_for_current_link['eventTime']).astimezone(tz_object)
 
         return relevant_data
 
