@@ -82,7 +82,7 @@ class Container:
 
     async def start(self):
         self._velocloud_repository.connect_to_all_servers()
-        self._ids_by_serial_repository.start_ids_by_serial_storage_job(exec_on_start=True)
+        # self._ids_by_serial_repository.start_ids_by_serial_storage_job(exec_on_start=True)
         await self._event_bus.connect()
         self._scheduler.start()
         await self._event_bus.subscribe_consumer(consumer_name="list", topic="edge.list.request",
