@@ -733,12 +733,12 @@ class OutageMonitor:
 
         relevant_data["Orchestrator Instance"] = host
         relevant_data["Edge Name"] = edge_name
-        relevant_data["Links"] = [
-            f'[Edge|{velocloud_edge_base_url}/]',
-            f'[QoE|{velocloud_edge_base_url}/qoe/]',
-            f'[Transport|{velocloud_edge_base_url}/links/]',
-            f'[Events|{velocloud_base_url}/events/]',
-        ]
+        relevant_data["Links"] = {
+            'Edge': f'{velocloud_edge_base_url}/',
+            'QoE': f'{velocloud_edge_base_url}/qoe/',
+            'Transport': f'{velocloud_edge_base_url}/links/',
+            'Events': f'{velocloud_base_url}/events/',
+        }
 
         relevant_data["Edge Status"] = edge_state
         relevant_data["Serial"] = edge_serial
@@ -806,7 +806,7 @@ class OutageMonitor:
 
         return relevant_data
 
-    def _transform_relevant_data_into_ticket_note(self, relevant_data: dict) -> str:
+    def _transform_relevant_data_into_ticket_note(self, relevant_data: dict) -> str:  # pragma: no cover
         ticket_note_lines = [
             '#*Automation Engine*#',
             'Triage',
