@@ -33,17 +33,6 @@ devices_by_id = [
 
     },
     {
-        # TA FL - Deerfield Beach
-        "serial": 'VC05400001548',
-        "host": "mettel.velocloud.net",
-        "enterprise_id": 137,
-        "edge_id": 1502,
-        "email": "DBern@titanamerica.com",
-        "phone": "954-425-4167",
-        "name": "David Bern"
-
-    },
-    {
         # TA FL - Deerfield Beach BACKUP
         "serial": 'VC05400001485',
         "host": "mettel.velocloud.net",
@@ -107,17 +96,6 @@ devices_by_id = [
         "email": "jaylor@titanamerica.com",
         "phone": "540-512-7663",
         "name": "Jennifer Aylor"
-
-    },
-    {
-        # # TA Corp - QTS Data Center
-        "serial": 'VCE20000000940',
-        "host": "mettel.velocloud.net",
-        "enterprise_id": 137,
-        "edge_id": 2419,
-        "email": "jrossi@west.com ",
-        "phone": "502-618-5535",
-        "name": "Justin Rossi"
 
     },
     {
@@ -208,17 +186,7 @@ devices_by_id = [
         "name": "David Lindsey"
 
     },
-    {
-        # Powhatan
-        "serial": 'VC05200033602',
-        "host": "mettel.velocloud.net",
-        "enterprise_id": 137,
-        "edge_id": 1747,
-        "email": "jgarner@powmix.com",
-        "phone": "804-338-5855",
-        "name": "Jeff Garner"
 
-    },
     {
         # Essex
         "serial": 'VC05200037434',
@@ -608,16 +576,7 @@ devices_by_id = [
         "phone": "Off # 781-972-2386 Cell # 813-526-0989",
         "name": "Kevin Brooks"
     },
-    {
-        # Tavares Block and RM
-        "serial": 'VC05200016367',
-        "host": "mettel.velocloud.net",
-        "enterprise_id": 137,
-        "edge_id": 1844,
-        "email": "ndoezier@titanamerica.com",
-        "phone": "352-516-2615",
-        "name": "Nakeia Dozier"
-    },
+
     {
         # Castle Haynes Cement Terminal (Rocky Point)
         "serial": 'VC05200014851',
@@ -1128,16 +1087,7 @@ devices_by_id = [
         "phone": "910-864-0138",
         "name": "Tony Lee"
     },
-    {
-        # SnW - P-10 Burgaw
-        "serial": 'VC05200051218',
-        "host": "mettel.velocloud.net",
-        "enterprise_id": 137,
-        "edge_id": 2533,
-        "email": "sgrover@snwreadymix.com",
-        "phone": "Off: 910-259-4650 Cell: 910-520-3647",
-        "name": "Stephen (Steve) Grover"
-    },
+
     {
         # SnW - P-24 Spring Lake
         "serial": 'VC05200048451',
