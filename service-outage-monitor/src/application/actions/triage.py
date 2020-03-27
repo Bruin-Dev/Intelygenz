@@ -676,14 +676,14 @@ class Triage:
                 await self._notify_http_error_when_requesting_edge_events_from_velocloud(
                     edge_full_id, recent_events_response
                 )
-                return
+                continue
 
             if not recent_events_response_body:
                 self._logger.info(
                     f'No events were found for edge {edge_identifier} starting from {past_moment_for_events_lookup}. '
                     f'Not appending the first triage note to ticket {ticket_id}.'
                 )
-                return
+                continue
 
             recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
 
