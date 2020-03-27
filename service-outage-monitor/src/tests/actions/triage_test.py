@@ -5089,8 +5089,8 @@ class TestTriage:
             'eventTime': '2019-07-30 07:38:00+00:00',
             'message': 'Link GE2 is now DEAD'
         }
-        events_1 = [event_1]
-        events_2 = []
+        events_1 = []
+        events_2 = [event_1]
 
         last_events_response_1 = {'body': events_1, 'status': 200}
         last_events_response_2 = {'body': events_2, 'status': 200}
@@ -5140,9 +5140,9 @@ class TestTriage:
             call(edge_1_full_id, since=past_moment_for_events_lookup),
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
-        triage._gather_relevant_data_for_first_triage_note.assert_called_once_with(edge_1_data, events_1)
+        triage._gather_relevant_data_for_first_triage_note.assert_called_once_with(edge_2_data, events_2)
         triage._transform_relevant_data_into_ticket_note.assert_called_once_with(relevant_data_for_triage_note_1)
-        triage._append_note_to_ticket.assert_awaited_once_with(ticket_1_id, ticket_note_1)
+        triage._append_note_to_ticket.assert_awaited_once_with(ticket_2_id, ticket_note_1)
 
     @pytest.mark.asyncio
     async def process_tickets_without_triage_with_request_to_append_note_to_tickets_failing_test(self):
