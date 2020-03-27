@@ -16,6 +16,7 @@ from application.actions.triage import Triage
 from application.repositories.comparison_report_renderer import ComparisonReportRenderer
 from application.repositories.edge_redis_repository import EdgeRedisRepository
 from application.repositories.outage_repository import OutageRepository
+from application.repositories.monitoring_map_repository import MonitoringMapRepository
 from application.repositories.triage_report_renderer import TriageReportRenderer
 from config import config
 
@@ -37,19 +38,20 @@ class Container:
         # HEALTHCHECK ENDPOINT
         self._server = QuartServer(config)
 
+        # EVENT BUS
+        self._publisher = NATSClient(config, logger=self._logger)
+        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
+        self._event_bus.set_producer(self._publisher)
+
         # REPOSITORIES
         self._quarantine_edge_repository = EdgeRedisRepository(redis_client=self._redis_client,
                                                                keys_prefix='EDGES_QUARANTINE', logger=self._logger)
         self._reporting_edge_repository = EdgeRedisRepository(redis_client=self._redis_client,
                                                               keys_prefix='EDGES_TO_REPORT', logger=self._logger)
-
+        self._monitoring_map_repository = MonitoringMapRepository(config=config, scheduler=self._scheduler,
+                                                                  event_bus=self._event_bus, logger=self._logger)
         # MESSAGES STORAGE MANAGER
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
-
-        # EVENT BUS
-        self._publisher = NATSClient(config, logger=self._logger)
-        self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
-        self._event_bus.set_producer(self._publisher)
 
         # JINJA2 TEMPLATE ENVIRONMENTS
         self._triage_report_templates_loader = jinja2.FileSystemLoader(searchpath="src/templates/triage")
@@ -83,13 +85,13 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
 
-        await self._comparison_report.report_persisted_edges()
-        await self._comparison_report.load_persisted_quarantine()
-
-        await self._comparison_report.start_service_outage_detector_job(exec_on_start=True)
-        await self._comparison_report.start_service_outage_reporter_job(exec_on_start=False)
-
-        await self._outage_monitor.start_service_outage_monitoring(exec_on_start=True)
+        # await self._comparison_report.report_persisted_edges()
+        # await self._comparison_report.load_persisted_quarantine()
+        #
+        # await self._comparison_report.start_service_outage_detector_job(exec_on_start=True)
+        # await self._comparison_report.start_service_outage_reporter_job(exec_on_start=False)
+        #
+        # await self._outage_monitor.start_service_outage_monitoring(exec_on_start=True)
 
         await self._triage.start_triage_job(exec_on_start=True)
 

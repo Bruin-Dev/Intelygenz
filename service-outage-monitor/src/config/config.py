@@ -21,6 +21,19 @@ NATS_CONFIG = {
 }
 
 quarantine_time = 60 * 10
+
+MONITOR_MAP_CONFIG = {
+    'timezone': 'US/Eastern',
+    'multiplier': 5,
+    'min': 5,
+    'stop_delay': 300,
+    'refresh_map_time': 60 * 4,
+    'semaphores': 5,
+    'velo_filter': {},
+    'environment': os.environ["CURRENT_ENVIRONMENT"],
+
+}
+
 MONITOR_CONFIG = {
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'environment': os.environ["CURRENT_ENVIRONMENT"],
