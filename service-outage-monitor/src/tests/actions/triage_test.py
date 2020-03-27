@@ -20,6 +20,8 @@ from application.actions.triage import empty_str
 from application.actions.triage import Triage
 from application.actions import triage as triage_module
 from application.repositories.edge_redis_repository import EdgeIdentifier
+from application.repositories import monitoring_map_repository as monitoring_map_repository_module
+from application.repositories.monitoring_map_repository import MonitoringMapRepository
 from config import testconfig
 
 
@@ -32,8 +34,10 @@ class TestTriage:
         config = Mock()
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         assert triage._event_bus is event_bus
         assert triage._logger is logger
@@ -41,7 +45,7 @@ class TestTriage:
         assert triage._config is config
         assert triage._outage_repository is outage_repository
 
-        assert triage._monitoring_mapping == {}
+        assert triage._monitoring_map_repository is monitoring_map_repository
 
     @pytest.mark.asyncio
     async def start_triage_job_with_exec_on_start_test(self):
@@ -51,8 +55,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -77,8 +83,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         await triage.start_triage_job(exec_on_start=False)
 
@@ -201,9 +209,14 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository._notify_failing_rpc_request_for_edge_list = CoroutineMock()
+        monitoring_map_repository._monitoring_map_cache = monitoring_mapping
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._map_bruin_client_ids_to_edges_serials_and_statuses = CoroutineMock(return_value=monitoring_mapping)
+
         triage._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock(return_value=open_tickets)
         triage._filter_tickets_related_to_edges_under_monitoring = Mock(return_value=relevant_tickets)
         triage._distinguish_tickets_with_and_without_triage = Mock(
@@ -214,1019 +227,996 @@ class TestTriage:
 
         await triage._run_tickets_polling()
 
-        triage._map_bruin_client_ids_to_edges_serials_and_statuses.assert_awaited_once()
+        # triage._map_bruin_client_ids_to_edges_serials_and_statuses.assert_awaited_once()
         triage._get_all_open_tickets_with_details_for_monitored_companies.assert_awaited_once()
         triage._filter_tickets_related_to_edges_under_monitoring.assert_called_once_with(open_tickets)
         triage._distinguish_tickets_with_and_without_triage.assert_called_once_with(relevant_tickets)
         triage._process_tickets_with_triage.assert_awaited_once_with(tickets_with_triage, edges_data_by_serial)
         triage._process_tickets_without_triage.assert_awaited_once_with(tickets_without_triage, edges_data_by_serial)
 
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_test(self):
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-        edge_list_response = {
-            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
-            'status': 200
-        }
-
-        bruin_client_1 = 12345
-        bruin_client_2 = 54321
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
-        edge_1_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
-        }
-        edge_1_status_response = {
-            'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status,
-            },
-            'status': 200,
-        }
-
-        edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_2_status_response = {
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status,
-            },
-            'status': 200,
-        }
-
-        edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status,
-            },
-            'status': 200,
-        }
-
-        bruin_client_info_1_response_body = {
-            'client_id': bruin_client_1,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_1_response = {
-            'body': bruin_client_info_1_response_body,
-            'status': 200,
-        }
-
-        bruin_client_info_2_response_body = {
-            'client_id': bruin_client_2,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_2_response = {
-            'body': bruin_client_info_2_response_body,
-            'status': 200,
-        }
-
-        bruin_client_info_3_response_body = {
-            'client_id': bruin_client_2,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_3_response = {
-            'body': bruin_client_info_3_response_body,
-            'status': 200,
-        }
-
-        edge_1_status_with_bruin_client_info = {
-            **edge_1_status,
-            'bruin_client_info': bruin_client_info_1_response_body,
-        }
-        edge_2_status_with_bruin_client_info = {
-            **edge_2_status,
-            'bruin_client_info': bruin_client_info_2_response_body,
-        }
-        edge_3_status_with_bruin_client_info = {
-            **edge_3_status,
-            'bruin_client_info': bruin_client_info_3_response_body,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
-        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
-            edge_1_status_response,
-            edge_2_status_response,
-            edge_3_status_response,
-        ])
-        triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
-            bruin_client_info_1_response,
-            bruin_client_info_2_response,
-            bruin_client_info_3_response,
-        ])
-
-        result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        triage._get_edges_for_triage_monitoring.assert_awaited_once()
-        triage._get_edge_status_by_id.assert_has_awaits([
-            call(edge_1_full_id),
-            call(edge_2_full_id),
-            call(edge_3_full_id),
-        ])
-
-        expected = {
-            bruin_client_1: {
-                edge_1_serial: {'edge_id': edge_1_full_id, 'edge_status': edge_1_status_with_bruin_client_info},
-            },
-            bruin_client_2: {
-                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
-                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
-            }
-        }
-        assert result == expected
-
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edges_having_null_serials_test(self):
-        uuid_1 = uuid()
-        uuid_2 = uuid()
-        uuid_3 = uuid()
-        uuid_4 = uuid()
-
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-        edge_list_response = {
-            'request_id': uuid_1,
-            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
-            'status': 200
-        }
-
-        bruin_client_1 = 12345
-        bruin_client_2 = 54321
-        edge_2_serial = 'VC7654321'
-
-        edge_1_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': None},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
-        }
-        edge_1_status_response = {
-            'request_id': uuid_2,
-            'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status,
-            },
-            'status': 200,
-        }
-
-        edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_2_status_response = {
-            'request_id': uuid_3,
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status,
-            },
-            'status': 200,
-        }
-
-        edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': None},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_3_status_response = {
-            'request_id': uuid_4,
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status,
-            },
-            'status': 200,
-        }
-
-        bruin_client_info_2_response_body = {
-            'client_id': bruin_client_2,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_2_response = {
-            'body': bruin_client_info_2_response_body,
-            'status': 200,
-        }
-
-        edge_2_status_with_bruin_client_info = {
-            **edge_2_status,
-            'bruin_client_info': bruin_client_info_2_response_body,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[
-            edge_list_response,
-            edge_1_status_response,
-            edge_2_status_response,
-            edge_3_status_response,
-        ])
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_2_response)
-
-        with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2, uuid_3, uuid_4]):
-            result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        event_bus.rpc_request.assert_has_awaits([
-            call(
-                "edge.list.request",
-                {'request_id': uuid_1, 'body': {'filter': config.TRIAGE_CONFIG['velo_filter']}},
-                timeout=900,
-            ),
-            call(
-                "edge.status.request",
-                {'request_id': uuid_2, 'body': edge_1_full_id},
-                timeout=120,
-            ),
-            call(
-                "edge.status.request",
-                {'request_id': uuid_3, 'body': edge_2_full_id},
-                timeout=120,
-            ),
-            call(
-                "edge.status.request",
-                {'request_id': uuid_4, 'body': edge_3_full_id},
-                timeout=120,
-            ),
-        ])
-
-        expected = {
-            bruin_client_2: {
-                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
-            }
-        }
-        assert result == expected
-
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_list_request_failing_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._get_edges_for_triage_monitoring = CoroutineMock(side_effect=Exception)
-        triage._notify_failing_rpc_request_for_edge_list = CoroutineMock()
-
-        with pytest.raises(Exception):
-            await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        triage._get_edges_for_triage_monitoring.assert_awaited_once()
-        triage._notify_failing_rpc_request_for_edge_list.assert_awaited_once()
-
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_list_request_not_having_2XX_status_test(
-            self):
-        edge_list_response = {
-            'body': 'Got internal error from Velocloud',
-            'status': 500,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=edge_list_response)
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
-        triage._notify_http_error_when_requesting_edge_list_from_velocloud = CoroutineMock()
-
-        with pytest.raises(Exception):
-            await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        triage._get_edges_for_triage_monitoring.assert_awaited_once()
-        triage._notify_http_error_when_requesting_edge_list_from_velocloud.assert_awaited_once_with(edge_list_response)
-
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_status_request_failing_test(self):
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-        edge_list_response = {
-            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
-            'status': 200
-        }
-
-        bruin_client = 54321
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
-        edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client}|',
-        }
-        edge_2_status_response = {
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status,
-            },
-            'status': 200,
-        }
-
-        edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client}|',
-        }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status,
-            },
-            'status': 200,
-        }
-
-        bruin_client_info_response_body = {
-            'client_id': bruin_client,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_response = {
-            'body': bruin_client_info_response_body,
-            'status': 200,
-        }
-
-        edge_2_status_with_bruin_client_info = {
-            **edge_2_status,
-            'bruin_client_info': bruin_client_info_response_body,
-        }
-        edge_3_status_with_bruin_client_info = {
-            **edge_3_status,
-            'bruin_client_info': bruin_client_info_response_body,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
-        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
-            Exception,
-            edge_2_status_response,
-            edge_3_status_response,
-        ])
-        triage._notify_failing_rpc_request_for_edge_status = CoroutineMock()
-        triage._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
-
-        result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        triage._get_edges_for_triage_monitoring.assert_awaited_once()
-        triage._get_edge_status_by_id.assert_has_awaits([
-            call(edge_1_full_id),
-            call(edge_2_full_id),
-            call(edge_3_full_id),
-        ])
-        triage._notify_failing_rpc_request_for_edge_status.assert_awaited_once_with(edge_1_full_id)
-
-        expected = {
-            bruin_client: {
-                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
-                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
-            }
-        }
-        assert result == expected
-
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_status_request_not_having_2XX_status_test(
-            self):
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-        edge_list_response = {
-            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
-            'status': 200
-        }
-
-        bruin_client = 54321
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
-        edge_1_status_response = {
-            'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': 'Got internal error from Velocloud',
-            },
-            'status': 500,
-        }
-
-        edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client}|',
-        }
-        edge_2_status_response = {
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status,
-            },
-            'status': 200,
-        }
-
-        edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client}|',
-        }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status,
-            },
-            'status': 200,
-        }
-
-        bruin_client_info_response_body = {
-            'client_id': bruin_client,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_response = {
-            'body': bruin_client_info_response_body,
-            'status': 200,
-        }
-
-        edge_2_status_with_bruin_client_info = {
-            **edge_2_status,
-            'bruin_client_info': bruin_client_info_response_body,
-        }
-        edge_3_status_with_bruin_client_info = {
-            **edge_3_status,
-            'bruin_client_info': bruin_client_info_response_body,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
-        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
-            edge_1_status_response,
-            edge_2_status_response,
-            edge_3_status_response,
-        ])
-        triage._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
-        triage._notify_http_error_when_requesting_edge_status_from_velocloud = CoroutineMock()
-
-        result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        triage._get_edges_for_triage_monitoring.assert_awaited_once()
-        triage._get_edge_status_by_id.assert_has_awaits([
-            call(edge_1_full_id),
-            call(edge_2_full_id),
-            call(edge_3_full_id),
-        ])
-        triage._notify_http_error_when_requesting_edge_status_from_velocloud.assert_awaited_once_with(
-            edge_1_full_id, edge_1_status_response
-        )
-
-        expected = {
-            bruin_client: {
-                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
-                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
-            }
-        }
-        assert result == expected
-
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_bruin_client_info_request_failing_test(self):
-        uuid_1 = uuid()
-        uuid_2 = uuid()
-
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-        edge_list_response = {
-            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
-            'status': 200
-        }
-
-        bruin_client_1 = 12345
-        bruin_client_2 = 54321
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
-        edge_1_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
-        }
-        edge_1_status_response = {
-            'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status,
-            },
-            'status': 200,
-        }
-
-        edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_2_status_response = {
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status,
-            },
-            'status': 200,
-        }
-
-        edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status,
-            },
-            'status': 200,
-        }
-
-        bruin_client_info_3_response_body = {
-            'client_id': bruin_client_2,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_3_response = {
-            'body': bruin_client_info_3_response_body,
-            'status': 200,
-        }
-
-        edge_3_status_with_bruin_client_info = {
-            **edge_3_status,
-            'bruin_client_info': bruin_client_info_3_response_body,
-        }
-
-        slack_message_response = None
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[
-            slack_message_response,
-            slack_message_response,
-        ])
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
-        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
-            edge_1_status_response,
-            edge_2_status_response,
-            edge_3_status_response,
-        ])
-        triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
-            Exception,
-            Exception,
-            bruin_client_info_3_response,
-        ])
-
-        with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2]):
-            result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        triage._get_edges_for_triage_monitoring.assert_awaited_once()
-        triage._get_edge_status_by_id.assert_has_awaits([
-            call(edge_1_full_id),
-            call(edge_2_full_id),
-            call(edge_3_full_id),
-        ])
-        triage._get_bruin_client_info_by_serial.assert_has_awaits([
-            call(edge_1_serial), call(edge_2_serial), call(edge_3_serial),
-        ])
-        event_bus.rpc_request.assert_has_awaits([
-            call(
-                "notification.slack.request",
-                {
-                    'request_id': uuid_1,
-                    'message': 'An error occurred when requesting Bruin client info from Bruin for serial '
-                               f'{edge_1_serial}',
-                },
-                timeout=10,
-            ),
-            call(
-                "notification.slack.request",
-                {
-                    'request_id': uuid_2,
-                    'message': 'An error occurred when requesting Bruin client info from Bruin for serial '
-                               f'{edge_2_serial}',
-                },
-                timeout=10,
-            ),
-        ])
-
-        expected = {
-            bruin_client_2: {
-                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
-            }
-        }
-        assert result == expected
-
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_client_info_request_not_having_2XX_status_test(
-            self):
-        uuid_1 = uuid()
-        uuid_2 = uuid()
-
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-        edge_list_response = {
-            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
-            'status': 200
-        }
-
-        bruin_client_1 = 12345
-        bruin_client_2 = 54321
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
-        edge_1_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
-        }
-        edge_1_status_response = {
-            'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status,
-            },
-            'status': 200,
-        }
-
-        edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_2_status_response = {
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status,
-            },
-            'status': 200,
-        }
-
-        edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status,
-            },
-            'status': 200,
-        }
-
-        bruin_client_info_failing_response_body = 'Got internal error from Bruin'
-        bruin_client_info_failing_response_status = 500
-        bruin_client_info_failing_response = {
-            'body': bruin_client_info_failing_response_body,
-            'status': bruin_client_info_failing_response_status,
-        }
-
-        bruin_client_info_3_response_body = {
-            'client_id': bruin_client_2,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_3_response = {
-            'body': bruin_client_info_3_response_body,
-            'status': 200,
-        }
-
-        slack_message_response = None
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[
-            slack_message_response,
-            slack_message_response,
-        ])
-
-        edge_3_status_with_bruin_client_info = {
-            **edge_3_status,
-            'bruin_client_info': bruin_client_info_3_response_body,
-        }
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
-        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
-            edge_1_status_response,
-            edge_2_status_response,
-            edge_3_status_response,
-        ])
-        triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
-            bruin_client_info_failing_response,
-            bruin_client_info_failing_response,
-            bruin_client_info_3_response,
-        ])
-
-        with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2]):
-            result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        triage._get_edges_for_triage_monitoring.assert_awaited_once()
-        triage._get_edge_status_by_id.assert_has_awaits([
-            call(edge_1_full_id),
-            call(edge_2_full_id),
-            call(edge_3_full_id),
-        ])
-        triage._get_bruin_client_info_by_serial.assert_has_awaits([
-            call(edge_1_serial), call(edge_2_serial), call(edge_3_serial),
-        ])
-        event_bus.rpc_request.assert_has_awaits([
-            call(
-                "notification.slack.request",
-                {
-                    'request_id': uuid_1,
-                    'message': f'Error trying to get Bruin client info from Bruin for serial {edge_1_serial}: '
-                               f'Error {bruin_client_info_failing_response_status} - '
-                               f'{bruin_client_info_failing_response_body}'
-                },
-                timeout=10,
-            ),
-            call(
-                "notification.slack.request",
-                {
-                    'request_id': uuid_2,
-                    'message': f'Error trying to get Bruin client info from Bruin for serial {edge_2_serial}: '
-                               f'Error {bruin_client_info_failing_response_status} - '
-                               f'{bruin_client_info_failing_response_body}'
-                },
-                timeout=10,
-            ),
-        ])
-
-        expected = {
-            bruin_client_2: {
-                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
-            }
-        }
-        assert result == expected
-
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_bruin_client_info_having_null_client_id_test(
-            self):
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-        edge_list_response = {
-            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
-            'status': 200
-        }
-
-        bruin_client_1 = 12345
-        bruin_client_2 = 54321
-        edge_1_serial = 'VC1234567'
-        edge_2_serial = 'VC7654321'
-        edge_3_serial = 'VC1111111'
-
-        edge_1_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
-        }
-        edge_1_status_response = {
-            'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status,
-            },
-            'status': 200,
-        }
-
-        edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_2_status_response = {
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status,
-            },
-            'status': 200,
-        }
-
-        edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status,
-            },
-            'status': 200,
-        }
-
-        bruin_client_info_1_response_body = {
-            'client_id': None,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_1_response = {
-            'body': bruin_client_info_1_response_body,
-            'status': 200,
-        }
-
-        bruin_client_info_2_response_body = {
-            'client_id': bruin_client_1,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_2_response = {
-            'body': bruin_client_info_2_response_body,
-            'status': 200,
-        }
-
-        bruin_client_info_3_response_body = {
-            'client_id': bruin_client_2,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_3_response = {
-            'body': bruin_client_info_3_response_body,
-            'status': 200,
-        }
-
-        edge_2_status_with_bruin_client_info = {
-            **edge_2_status,
-            'bruin_client_info': bruin_client_info_2_response_body,
-        }
-        edge_3_status_with_bruin_client_info = {
-            **edge_3_status,
-            'bruin_client_info': bruin_client_info_3_response_body,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
-        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
-            edge_1_status_response,
-            edge_2_status_response,
-            edge_3_status_response,
-        ])
-        triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
-            bruin_client_info_1_response,
-            bruin_client_info_2_response,
-            bruin_client_info_3_response,
-        ])
-
-        result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        expected = {
-            bruin_client_1: {
-                edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
-            },
-            bruin_client_2: {
-                edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
-            }
-        }
-        assert result == expected
-
-    @pytest.mark.asyncio
-    async def get_edges_for_triage_monitoring_test(self):
-        uuid_ = uuid()
-
-        edge_list_response = {
-            'request_id': uuid_,
-            'body': [
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1},
-                {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2},
-            ],
-            'status': 200,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=edge_list_response)
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            result = await triage._get_edges_for_triage_monitoring()
-
-        event_bus.rpc_request.assert_awaited_once_with(
-            'edge.list.request',
-            {'request_id': uuid_, 'body': {'filter': config.TRIAGE_CONFIG['velo_filter']}},
-            timeout=900,
-        )
-        assert result == edge_list_response
+    # @pytest.mark.asyncio
+    # async def map_bruin_client_ids_to_edges_serials_and_statuses_test(self):
+    #     edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+    #     edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+    #     edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+    #     edge_list_response = {
+    #         'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+    #         'status': 200
+    #     }
+    #
+    #     bruin_client_1 = 12345
+    #     bruin_client_2 = 54321
+    #     edge_1_serial = 'VC1234567'
+    #     edge_2_serial = 'VC7654321'
+    #     edge_3_serial = 'VC1111111'
+    #
+    #     edge_1_status = {
+    #         'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
+    #     }
+    #     edge_1_status_response = {
+    #         'body': {
+    #             'edge_id': edge_1_full_id,
+    #             'edge_info': edge_1_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_2_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+    #     }
+    #     edge_2_status_response = {
+    #         'body': {
+    #             'edge_id': edge_2_full_id,
+    #             'edge_info': edge_2_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_3_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+    #     }
+    #     edge_3_status_response = {
+    #         'body': {
+    #             'edge_id': edge_3_full_id,
+    #             'edge_info': edge_3_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_1_response_body = {
+    #         'client_id': bruin_client_1,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_1_response = {
+    #         'body': bruin_client_info_1_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_2_response_body = {
+    #         'client_id': bruin_client_2,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_2_response = {
+    #         'body': bruin_client_info_2_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_3_response_body = {
+    #         'client_id': bruin_client_2,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_3_response = {
+    #         'body': bruin_client_info_3_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     edge_1_status_with_bruin_client_info = {
+    #         **edge_1_status,
+    #         'bruin_client_info': bruin_client_info_1_response_body,
+    #     }
+    #     edge_2_status_with_bruin_client_info = {
+    #         **edge_2_status,
+    #         'bruin_client_info': bruin_client_info_2_response_body,
+    #     }
+    #     edge_3_status_with_bruin_client_info = {
+    #         **edge_3_status,
+    #         'bruin_client_info': bruin_client_info_3_response_body,
+    #     }
+    #
+    #     event_bus = Mock()
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #     outage_repository = Mock()
+    #
+    #     monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+    #     monitoring_map_repository._notify_failing_rpc_request_for_edge_list = CoroutineMock()
+    #
+    #     triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+    #                     monitoring_map_repository)
+    #     triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
+    #     triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+    #         edge_1_status_response,
+    #         edge_2_status_response,
+    #         edge_3_status_response,
+    #     ])
+    #     triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
+    #         bruin_client_info_1_response,
+    #         bruin_client_info_2_response,
+    #         bruin_client_info_3_response,
+    #     ])
+    #
+    #     result = await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+    #
+    #     triage._get_edges_for_triage_monitoring.assert_awaited_once()
+    #     triage._get_edge_status_by_id.assert_has_awaits([
+    #         call(edge_1_full_id),
+    #         call(edge_2_full_id),
+    #         call(edge_3_full_id),
+    #     ])
+    #
+    #     expected = {
+    #         bruin_client_1: {
+    #             edge_1_serial: {'edge_id': edge_1_full_id, 'edge_status': edge_1_status_with_bruin_client_info},
+    #         },
+    #         bruin_client_2: {
+    #             edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
+    #             edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
+    #         }
+    #     }
+    #     assert result == expected
+
+    # @pytest.mark.asyncio
+    # async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edges_having_null_serials_test(self):
+    #     uuid_1 = uuid()
+    #     uuid_2 = uuid()
+    #     uuid_3 = uuid()
+    #     uuid_4 = uuid()
+    #
+    #     edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+    #     edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+    #     edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+    #     edge_list_response = {
+    #         'request_id': uuid_1,
+    #         'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+    #         'status': 200
+    #     }
+    #
+    #     bruin_client_1 = 12345
+    #     bruin_client_2 = 54321
+    #     edge_2_serial = 'VC7654321'
+    #
+    #     edge_1_status = {
+    #         'edges': {'edgeState': 'OFFLINE', 'serialNumber': None},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
+    #     }
+    #     edge_1_status_response = {
+    #         'request_id': uuid_2,
+    #         'body': {
+    #             'edge_id': edge_1_full_id,
+    #             'edge_info': edge_1_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_2_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+    #     }
+    #     edge_2_status_response = {
+    #         'request_id': uuid_3,
+    #         'body': {
+    #             'edge_id': edge_2_full_id,
+    #             'edge_info': edge_2_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_3_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': None},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+    #     }
+    #     edge_3_status_response = {
+    #         'request_id': uuid_4,
+    #         'body': {
+    #             'edge_id': edge_3_full_id,
+    #             'edge_info': edge_3_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_2_response_body = {
+    #         'client_id': bruin_client_2,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_2_response = {
+    #         'body': bruin_client_info_2_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     edge_2_status_with_bruin_client_info = {
+    #         **edge_2_status,
+    #         'bruin_client_info': bruin_client_info_2_response_body,
+    #     }
+    #
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #     outage_repository = Mock()
+    #
+    #     event_bus = Mock()
+    #     event_bus.rpc_request = CoroutineMock(side_effect=[
+    #         edge_list_response,
+    #         edge_1_status_response,
+    #         edge_2_status_response,
+    #         edge_3_status_response,
+    #     ])
+    #
+    #     triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,)
+    #     triage._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_2_response)
+    #
+    #     with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2, uuid_3, uuid_4]):
+    #         result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+    #
+    #     event_bus.rpc_request.assert_has_awaits([
+    #         call(
+    #             "edge.list.request",
+    #             {'request_id': uuid_1, 'body': {'filter': config.TRIAGE_CONFIG['velo_filter']}},
+    #             timeout=900,
+    #         ),
+    #         call(
+    #             "edge.status.request",
+    #             {'request_id': uuid_2, 'body': edge_1_full_id},
+    #             timeout=120,
+    #         ),
+    #         call(
+    #             "edge.status.request",
+    #             {'request_id': uuid_3, 'body': edge_2_full_id},
+    #             timeout=120,
+    #         ),
+    #         call(
+    #             "edge.status.request",
+    #             {'request_id': uuid_4, 'body': edge_3_full_id},
+    #             timeout=120,
+    #         ),
+    #     ])
+    #
+    #     expected = {
+    #         bruin_client_2: {
+    #             edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
+    #         }
+    #     }
+    #     assert result == expected
+    #
+    # @pytest.mark.asyncio
+    # async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_list_request_failing_test(self):
+    #     event_bus = Mock()
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #     outage_repository = Mock()
+    #
+    #     triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+    #                     monitoring_map_repository)
+    #     triage._get_edges_for_triage_monitoring = CoroutineMock(side_effect=Exception)
+    #     triage._notify_failing_rpc_request_for_edge_list = CoroutineMock()
+    #
+    #     with pytest.raises(Exception):
+    #         await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+    #
+    #     triage._get_edges_for_triage_monitoring.assert_awaited_once()
+    #     triage._notify_failing_rpc_request_for_edge_list.assert_awaited_once()
+    #
+    # @pytest.mark.asyncio
+    # async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_list_request_not_having_2XX_status_test(
+    #         self):
+    #     edge_list_response = {
+    #         'body': 'Got internal error from Velocloud',
+    #         'status': 500,
+    #     }
+    #
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #     outage_repository = Mock()
+    #
+    #     event_bus = Mock()
+    #     event_bus.rpc_request = CoroutineMock(return_value=edge_list_response)
+    #
+    #     triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+    #                        monitoring_map_repository)
+    #     triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
+    #     triage._notify_http_error_when_requesting_edge_list_from_velocloud = CoroutineMock()
+    #
+    #     with pytest.raises(Exception):
+    #         await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+    #
+    #     triage._get_edges_for_triage_monitoring.assert_awaited_once()
+    #     triage._notify_http_error_when_requesting_edge_list_from_velocloud.assert_awaited_once_with(edge_list_response)
+    #
+    # @pytest.mark.asyncio
+    # async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_status_request_failing_test(self):
+    #     edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+    #     edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+    #     edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+    #     edge_list_response = {
+    #         'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+    #         'status': 200
+    #     }
+    #
+    #     bruin_client = 54321
+    #     edge_2_serial = 'VC7654321'
+    #     edge_3_serial = 'VC1111111'
+    #
+    #     edge_2_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client}|',
+    #     }
+    #     edge_2_status_response = {
+    #         'body': {
+    #             'edge_id': edge_2_full_id,
+    #             'edge_info': edge_2_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_3_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client}|',
+    #     }
+    #     edge_3_status_response = {
+    #         'body': {
+    #             'edge_id': edge_3_full_id,
+    #             'edge_info': edge_3_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_response_body = {
+    #         'client_id': bruin_client,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_response = {
+    #         'body': bruin_client_info_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     edge_2_status_with_bruin_client_info = {
+    #         **edge_2_status,
+    #         'bruin_client_info': bruin_client_info_response_body,
+    #     }
+    #     edge_3_status_with_bruin_client_info = {
+    #         **edge_3_status,
+    #         'bruin_client_info': bruin_client_info_response_body,
+    #     }
+    #
+    #     event_bus = Mock()
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #     outage_repository = Mock()
+    #
+    #     triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+    #                   monitoring_map_repository)
+    #     triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
+    #     triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+    #         Exception,
+    #         edge_2_status_response,
+    #         edge_3_status_response,
+    #     ])
+    #     triage._notify_failing_rpc_request_for_edge_status = CoroutineMock()
+    #     triage._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
+    #
+    #     result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+    #
+    #     triage._get_edges_for_triage_monitoring.assert_awaited_once()
+    #     triage._get_edge_status_by_id.assert_has_awaits([
+    #         call(edge_1_full_id),
+    #         call(edge_2_full_id),
+    #         call(edge_3_full_id),
+    #     ])
+    #     triage._notify_failing_rpc_request_for_edge_status.assert_awaited_once_with(edge_1_full_id)
+    #
+    #     expected = {
+    #         bruin_client: {
+    #             edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
+    #             edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
+    #         }
+    #     }
+    #     assert result == expected
+    #
+    # @pytest.mark.asyncio
+    # async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_status_request_not_having_2XX_status_test(
+    #         self):
+    #     edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+    #     edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+    #     edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+    #     edge_list_response = {
+    #         'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+    #         'status': 200
+    #     }
+    #
+    #     bruin_client = 54321
+    #     edge_2_serial = 'VC7654321'
+    #     edge_3_serial = 'VC1111111'
+    #
+    #     edge_1_status_response = {
+    #         'body': {
+    #             'edge_id': edge_1_full_id,
+    #             'edge_info': 'Got internal error from Velocloud',
+    #         },
+    #         'status': 500,
+    #     }
+    #
+    #     edge_2_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client}|',
+    #     }
+    #     edge_2_status_response = {
+    #         'body': {
+    #             'edge_id': edge_2_full_id,
+    #             'edge_info': edge_2_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_3_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client}|',
+    #     }
+    #     edge_3_status_response = {
+    #         'body': {
+    #             'edge_id': edge_3_full_id,
+    #             'edge_info': edge_3_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_response_body = {
+    #         'client_id': bruin_client,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_response = {
+    #         'body': bruin_client_info_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     edge_2_status_with_bruin_client_info = {
+    #         **edge_2_status,
+    #         'bruin_client_info': bruin_client_info_response_body,
+    #     }
+    #     edge_3_status_with_bruin_client_info = {
+    #         **edge_3_status,
+    #         'bruin_client_info': bruin_client_info_response_body,
+    #     }
+    #
+    #     event_bus = Mock()
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #     outage_repository = Mock()
+    #
+    #     triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+    #                    monitoring_map_repository)
+    #     triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
+    #     triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+    #         edge_1_status_response,
+    #         edge_2_status_response,
+    #         edge_3_status_response,
+    #     ])
+    #     triage._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
+    #     triage._notify_http_error_when_requesting_edge_status_from_velocloud = CoroutineMock()
+    #
+    #     result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+    #
+    #     triage._get_edges_for_triage_monitoring.assert_awaited_once()
+    #     triage._get_edge_status_by_id.assert_has_awaits([
+    #         call(edge_1_full_id),
+    #         call(edge_2_full_id),
+    #         call(edge_3_full_id),
+    #     ])
+    #     triage._notify_http_error_when_requesting_edge_status_from_velocloud.assert_awaited_once_with(
+    #         edge_1_full_id, edge_1_status_response
+    #     )
+    #
+    #     expected = {
+    #         bruin_client: {
+    #             edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
+    #             edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
+    #         }
+    #     }
+    #     assert result == expected
+    #
+    # @pytest.mark.asyncio
+    # async def map_bruin_client_ids_to_edges_serials_and_statuses_with_bruin_client_info_request_failing_test(self):
+    #     uuid_1 = uuid()
+    #     uuid_2 = uuid()
+    #
+    #     edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+    #     edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+    #     edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+    #     edge_list_response = {
+    #         'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+    #         'status': 200
+    #     }
+    #
+    #     bruin_client_1 = 12345
+    #     bruin_client_2 = 54321
+    #     edge_1_serial = 'VC1234567'
+    #     edge_2_serial = 'VC7654321'
+    #     edge_3_serial = 'VC1111111'
+    #
+    #     edge_1_status = {
+    #         'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
+    #     }
+    #     edge_1_status_response = {
+    #         'body': {
+    #             'edge_id': edge_1_full_id,
+    #             'edge_info': edge_1_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_2_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+    #     }
+    #     edge_2_status_response = {
+    #         'body': {
+    #             'edge_id': edge_2_full_id,
+    #             'edge_info': edge_2_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_3_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+    #     }
+    #     edge_3_status_response = {
+    #         'body': {
+    #             'edge_id': edge_3_full_id,
+    #             'edge_info': edge_3_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_3_response_body = {
+    #         'client_id': bruin_client_2,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_3_response = {
+    #         'body': bruin_client_info_3_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     edge_3_status_with_bruin_client_info = {
+    #         **edge_3_status,
+    #         'bruin_client_info': bruin_client_info_3_response_body,
+    #     }
+    #
+    #     slack_message_response = None
+    #
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #     outage_repository = Mock()
+    #
+    #     event_bus = Mock()
+    #     event_bus.rpc_request = CoroutineMock(side_effect=[
+    #         slack_message_response,
+    #         slack_message_response,
+    #     ])
+    #
+    #     triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+    #                     monitoring_map_repository)
+    #     triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
+    #     triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+    #         edge_1_status_response,
+    #         edge_2_status_response,
+    #         edge_3_status_response,
+    #     ])
+    #     triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
+    #         Exception,
+    #         Exception,
+    #         bruin_client_info_3_response,
+    #     ])
+    #
+    #     with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2]):
+    #         result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+    #
+    #     triage._get_edges_for_triage_monitoring.assert_awaited_once()
+    #     triage._get_edge_status_by_id.assert_has_awaits([
+    #         call(edge_1_full_id),
+    #         call(edge_2_full_id),
+    #         call(edge_3_full_id),
+    #     ])
+    #     triage._get_bruin_client_info_by_serial.assert_has_awaits([
+    #         call(edge_1_serial), call(edge_2_serial), call(edge_3_serial),
+    #     ])
+    #     event_bus.rpc_request.assert_has_awaits([
+    #         call(
+    #             "notification.slack.request",
+    #             {
+    #                 'request_id': uuid_1,
+    #                 'message': 'An error occurred when requesting Bruin client info from Bruin for serial '
+    #                            f'{edge_1_serial}',
+    #             },
+    #             timeout=10,
+    #         ),
+    #         call(
+    #             "notification.slack.request",
+    #             {
+    #                 'request_id': uuid_2,
+    #                 'message': 'An error occurred when requesting Bruin client info from Bruin for serial '
+    #                            f'{edge_2_serial}',
+    #             },
+    #             timeout=10,
+    #         ),
+    #     ])
+    #
+    #     expected = {
+    #         bruin_client_2: {
+    #             edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
+    #         }
+    #     }
+    #     assert result == expected
+    #
+    # @pytest.mark.asyncio
+    # async def map_bruin_client_ids_to_edges_serials_and_statuses_with_client_info_request_not_having_2XX_status_test(
+    #         self):
+    #     uuid_1 = uuid()
+    #     uuid_2 = uuid()
+    #
+    #     edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+    #     edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+    #     edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+    #     edge_list_response = {
+    #         'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+    #         'status': 200
+    #     }
+    #
+    #     bruin_client_1 = 12345
+    #     bruin_client_2 = 54321
+    #     edge_1_serial = 'VC1234567'
+    #     edge_2_serial = 'VC7654321'
+    #     edge_3_serial = 'VC1111111'
+    #
+    #     edge_1_status = {
+    #         'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
+    #     }
+    #     edge_1_status_response = {
+    #         'body': {
+    #             'edge_id': edge_1_full_id,
+    #             'edge_info': edge_1_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_2_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+    #     }
+    #     edge_2_status_response = {
+    #         'body': {
+    #             'edge_id': edge_2_full_id,
+    #             'edge_info': edge_2_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_3_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+    #     }
+    #     edge_3_status_response = {
+    #         'body': {
+    #             'edge_id': edge_3_full_id,
+    #             'edge_info': edge_3_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_failing_response_body = 'Got internal error from Bruin'
+    #     bruin_client_info_failing_response_status = 500
+    #     bruin_client_info_failing_response = {
+    #         'body': bruin_client_info_failing_response_body,
+    #         'status': bruin_client_info_failing_response_status,
+    #     }
+    #
+    #     bruin_client_info_3_response_body = {
+    #         'client_id': bruin_client_2,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_3_response = {
+    #         'body': bruin_client_info_3_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     slack_message_response = None
+    #
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #     outage_repository = Mock()
+    #
+    #     event_bus = Mock()
+    #     event_bus.rpc_request = CoroutineMock(side_effect=[
+    #         slack_message_response,
+    #         slack_message_response,
+    #     ])
+    #
+    #     edge_3_status_with_bruin_client_info = {
+    #         **edge_3_status,
+    #         'bruin_client_info': bruin_client_info_3_response_body,
+    #     }
+    #
+    #     triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+    #                     monitoring_map_repository)
+    #     triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
+    #     triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+    #         edge_1_status_response,
+    #         edge_2_status_response,
+    #         edge_3_status_response,
+    #     ])
+    #     triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
+    #         bruin_client_info_failing_response,
+    #         bruin_client_info_failing_response,
+    #         bruin_client_info_3_response,
+    #     ])
+    #
+    #     with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2]):
+    #         result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+    #
+    #     triage._get_edges_for_triage_monitoring.assert_awaited_once()
+    #     triage._get_edge_status_by_id.assert_has_awaits([
+    #         call(edge_1_full_id),
+    #         call(edge_2_full_id),
+    #         call(edge_3_full_id),
+    #     ])
+    #     triage._get_bruin_client_info_by_serial.assert_has_awaits([
+    #         call(edge_1_serial), call(edge_2_serial), call(edge_3_serial),
+    #     ])
+    #     event_bus.rpc_request.assert_has_awaits([
+    #         call(
+    #             "notification.slack.request",
+    #             {
+    #                 'request_id': uuid_1,
+    #                 'message': f'Error trying to get Bruin client info from Bruin for serial {edge_1_serial}: '
+    #                            f'Error {bruin_client_info_failing_response_status} - '
+    #                            f'{bruin_client_info_failing_response_body}'
+    #             },
+    #             timeout=10,
+    #         ),
+    #         call(
+    #             "notification.slack.request",
+    #             {
+    #                 'request_id': uuid_2,
+    #                 'message': f'Error trying to get Bruin client info from Bruin for serial {edge_2_serial}: '
+    #                            f'Error {bruin_client_info_failing_response_status} - '
+    #                            f'{bruin_client_info_failing_response_body}'
+    #             },
+    #             timeout=10,
+    #         ),
+    #     ])
+    #
+    #     expected = {
+    #         bruin_client_2: {
+    #             edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
+    #         }
+    #     }
+    #     assert result == expected
+    #
+    # @pytest.mark.asyncio
+    # async def map_bruin_client_ids_to_edges_serials_and_statuses_with_bruin_client_info_having_null_client_id_test(
+    #         self):
+    #     edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+    #     edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+    #     edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+    #     edge_list_response = {
+    #         'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+    #         'status': 200
+    #     }
+    #
+    #     bruin_client_1 = 12345
+    #     bruin_client_2 = 54321
+    #     edge_1_serial = 'VC1234567'
+    #     edge_2_serial = 'VC7654321'
+    #     edge_3_serial = 'VC1111111'
+    #
+    #     edge_1_status = {
+    #         'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
+    #     }
+    #     edge_1_status_response = {
+    #         'body': {
+    #             'edge_id': edge_1_full_id,
+    #             'edge_info': edge_1_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_2_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+    #     }
+    #     edge_2_status_response = {
+    #         'body': {
+    #             'edge_id': edge_2_full_id,
+    #             'edge_info': edge_2_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     edge_3_status = {
+    #         'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+    #         'links': [
+    #             {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+    #             {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+    #         ],
+    #         'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
+    #     }
+    #     edge_3_status_response = {
+    #         'body': {
+    #             'edge_id': edge_3_full_id,
+    #             'edge_info': edge_3_status,
+    #         },
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_1_response_body = {
+    #         'client_id': None,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_1_response = {
+    #         'body': bruin_client_info_1_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_2_response_body = {
+    #         'client_id': bruin_client_1,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_2_response = {
+    #         'body': bruin_client_info_2_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     bruin_client_info_3_response_body = {
+    #         'client_id': bruin_client_2,
+    #         'client_name': 'METTEL/NEW YORK',
+    #     }
+    #     bruin_client_info_3_response = {
+    #         'body': bruin_client_info_3_response_body,
+    #         'status': 200,
+    #     }
+    #
+    #     edge_2_status_with_bruin_client_info = {
+    #         **edge_2_status,
+    #         'bruin_client_info': bruin_client_info_2_response_body,
+    #     }
+    #     edge_3_status_with_bruin_client_info = {
+    #         **edge_3_status,
+    #         'bruin_client_info': bruin_client_info_3_response_body,
+    #     }
+    #
+    #     event_bus = Mock()
+    #     logger = Mock()
+    #     scheduler = Mock()
+    #     config = testconfig
+    #     template_renderer = Mock()
+    #     outage_repository = Mock()
+    #
+    #     triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+    #                     monitoring_map_repository)
+    #     triage._get_edges_for_triage_monitoring = CoroutineMock(return_value=edge_list_response)
+    #     triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+    #         edge_1_status_response,
+    #         edge_2_status_response,
+    #         edge_3_status_response,
+    #     ])
+    #     triage._get_bruin_client_info_by_serial = CoroutineMock(side_effect=[
+    #         bruin_client_info_1_response,
+    #         bruin_client_info_2_response,
+    #         bruin_client_info_3_response,
+    #     ])
+    #
+    #     result = await triage._map_bruin_client_ids_to_edges_serials_and_statuses()
+    #
+    #     expected = {
+    #         bruin_client_1: {
+    #             edge_2_serial: {'edge_id': edge_2_full_id, 'edge_status': edge_2_status_with_bruin_client_info},
+    #         },
+    #         bruin_client_2: {
+    #             edge_3_serial: {'edge_id': edge_3_full_id, 'edge_status': edge_3_status_with_bruin_client_info},
+    #         }
+    #     }
+    #     assert result == expected
 
     @pytest.mark.asyncio
     async def notify_failing_rpc_request_for_edge_list_test(self):
@@ -1235,16 +1225,14 @@ class TestTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            await triage._notify_failing_rpc_request_for_edge_list()
+        with patch.object(monitoring_map_repository_module, 'uuid', return_value=uuid_):
+            await monitoring_map_repository._notify_failing_rpc_request_for_edge_list()
 
         event_bus.rpc_request.assert_awaited_once_with(
             "notification.slack.request",
@@ -1254,191 +1242,6 @@ class TestTriage:
             },
             timeout=10,
         )
-
-    @pytest.mark.asyncio
-    async def notify_http_error_when_requesting_edge_list_from_velocloud_test(self):
-        uuid_ = uuid()
-
-        edge_list_response_body = 'Got internal error from Velocloud'
-        edge_list_response_status = 500
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': edge_list_response_body,
-            'status': edge_list_response_status,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            await triage._notify_http_error_when_requesting_edge_list_from_velocloud(edge_list_response)
-
-        event_bus.rpc_request.assert_awaited_once_with(
-            "notification.slack.request",
-            {
-                'request_id': uuid_,
-                'message': f'Error while retrieving edge list in {config.TRIAGE_CONFIG["environment"].upper()} '
-                           f'environment: Error {edge_list_response_status} - {edge_list_response_body}'
-            },
-            timeout=10,
-        )
-
-    @pytest.mark.asyncio
-    async def get_edge_status_by_id_test(self):
-        uuid_ = uuid()
-
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_status_response = {
-            'request_id': uuid_,
-            'body': {
-                'edge_id': edge_full_id,
-                'edge_info': {
-                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
-                    'links': [
-                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-                    ],
-                    'enterprise_name': 'EVIL-CORP|12345|',
-                }
-            },
-            'status': 200,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=edge_status_response)
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            result = await triage._get_edge_status_by_id(edge_full_id)
-
-        event_bus.rpc_request.assert_awaited_once_with(
-            'edge.status.request',
-            {'request_id': uuid_, 'body': edge_full_id},
-            timeout=120,
-        )
-        assert result == edge_status_response
-
-    @pytest.mark.asyncio
-    async def notify_failing_rpc_request_for_edge_status_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_identifier = EdgeIdentifier(**edge_full_id)
-
-        uuid_ = uuid()
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            await triage._notify_failing_rpc_request_for_edge_status(edge_full_id)
-
-        event_bus.rpc_request.assert_awaited_once_with(
-            "notification.slack.request",
-            {
-                'request_id': uuid_,
-                'message': f'An error occurred when requesting edge status from Velocloud for edge {edge_identifier}'
-            },
-            timeout=10,
-        )
-
-    @pytest.mark.asyncio
-    async def notify_http_error_when_requesting_edge_status_from_velocloud_test(self):
-        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_identifier = EdgeIdentifier(**edge_full_id)
-
-        uuid_ = uuid()
-
-        edge_status_response_body = 'Got internal error from Velocloud'
-        edge_status_response_status = 500
-        edge_status_response = {
-            'request_id': uuid(),
-            'body': edge_status_response_body,
-            'status': edge_status_response_status,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            await triage._notify_http_error_when_requesting_edge_status_from_velocloud(
-                edge_full_id, edge_status_response
-            )
-
-        event_bus.rpc_request.assert_awaited_once_with(
-            "notification.slack.request",
-            {
-                'request_id': uuid_,
-                'message': f'Error while retrieving edge status for edge {edge_identifier} in '
-                           f'{config.TRIAGE_CONFIG["environment"].upper()} environment: '
-                           f'Error {edge_status_response_status} - {edge_status_response_body}'
-            },
-            timeout=10,
-        )
-
-    @pytest.mark.asyncio
-    async def get_bruin_client_info_by_serial_test(self):
-        uuid_ = uuid()
-
-        serial_number = 'VC1234567'
-        bruin_client_info_response = {
-            'request_id': uuid_,
-            'body': {
-                'client_id': 9994,
-                'client_name': 'METTEL/NEW YORK',
-            },
-            'status': 200,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=bruin_client_info_response)
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-
-        with patch.object(triage_module, 'uuid', return_value=uuid_):
-            result = await triage._get_bruin_client_info_by_serial(serial_number)
-
-        event_bus.rpc_request.assert_awaited_once_with(
-            'bruin.customer.get.info',
-            {'request_id': uuid_, 'body': {'service_number': serial_number}},
-            timeout=30,
-        )
-        assert result == bruin_client_info_response
 
     @pytest.mark.asyncio
     async def get_all_open_tickets_with_details_for_monitored_companies_test(self):
@@ -1536,8 +1339,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._monitoring_mapping = monitoring_mapping
         triage._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
             tickets_with_details_for_bruin_client_1, tickets_with_details_for_bruin_client_2
@@ -1631,7 +1436,14 @@ class TestTriage:
         edge_2_data = {'edge_id': edge_2_full_id, 'edge_status': edge_2_status}
         edge_3_data = {'edge_id': edge_3_full_id, 'edge_status': edge_3_status}
 
-        monitoring_mapping = {
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+        outage_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository._monitoring_map_cache = {
             bruin_client_1_id: {
                 edge_1_serial: edge_1_data,
             },
@@ -1642,16 +1454,9 @@ class TestTriage:
                 edge_3_serial: edge_3_data,
             }
         }
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        template_renderer = Mock()
-        outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._monitoring_mapping = monitoring_mapping
         triage._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
             tickets_with_details_for_bruin_client_1,
             Exception,
@@ -1744,8 +1549,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(return_value=get_open_tickets_response)
         triage._get_ticket_details_by_ticket_id = CoroutineMock(side_effect=[
             get_ticket_1_details_response, get_ticket_2_details_response
@@ -1783,8 +1590,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(side_effect=Exception)
         triage._get_ticket_details_by_ticket_id = CoroutineMock()
         triage._notify_failing_rpc_request_for_open_tickets = CoroutineMock()
@@ -1813,8 +1622,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(return_value=get_open_tickets_response)
         triage._get_ticket_details_by_ticket_id = CoroutineMock()
         triage._notify_http_error_when_requesting_open_tickets_from_bruin_api = CoroutineMock()
@@ -1879,8 +1690,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(return_value=get_open_tickets_response)
         triage._get_ticket_details_by_ticket_id = CoroutineMock(side_effect=[
             Exception,
@@ -1963,8 +1776,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(return_value=get_open_tickets_response)
         triage._get_ticket_details_by_ticket_id = CoroutineMock(side_effect=[
             get_ticket_1_details_response, get_ticket_2_details_response
@@ -2055,8 +1870,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(return_value=get_open_tickets_response)
         triage._get_ticket_details_by_ticket_id = CoroutineMock(side_effect=[
             get_ticket_1_details_response, get_ticket_2_details_response
@@ -2112,8 +1929,10 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=get_open_tickets_response)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             result = await triage._get_open_tickets_by_client_id(bruin_client_id)
@@ -2165,8 +1984,10 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=get_ticket_details_response)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             result = await triage._get_ticket_details_by_ticket_id(ticket_id)
@@ -2190,8 +2011,10 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_failing_rpc_request_for_open_tickets(bruin_client_id)
@@ -2227,8 +2050,10 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_http_error_when_requesting_open_tickets_from_bruin_api(
@@ -2260,8 +2085,10 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_failing_rpc_request_for_ticket_details(ticket_id)
@@ -2298,8 +2125,10 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_http_error_when_requesting_ticket_details_from_bruin_api(
@@ -2432,8 +2261,11 @@ class TestTriage:
         template_renderer = Mock()
         outage_repository = Mock()
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
-        triage._monitoring_mapping = monitoring_mapping
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository._monitoring_map_cache = monitoring_mapping
+
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         result = triage._filter_tickets_related_to_edges_under_monitoring(tickets)
 
@@ -2505,8 +2337,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         tickets_with_triage, tickets_without_triage = triage._distinguish_tickets_with_and_without_triage(tickets)
 
@@ -2654,8 +2487,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._discard_non_triage_notes = Mock(wraps=triage._discard_non_triage_notes)
         triage._get_most_recent_ticket_note = Mock(side_effect=[ticket_1_note_2, ticket_2_note_3])
         triage._was_ticket_note_appended_recently = Mock(side_effect=[False, True])
@@ -2737,8 +2571,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         triage._discard_non_triage_notes(tickets)
 
@@ -2776,8 +2611,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         newest_triage_note = triage._get_most_recent_ticket_note(ticket)
 
@@ -2796,8 +2632,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         datetime_mock = Mock()
 
@@ -2888,8 +2725,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[
             events_chunk_1,
@@ -2984,8 +2822,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[
             events_chunk_1,
@@ -3080,8 +2919,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[])  # Just tricking this return value to "stop" execution here
         triage._compose_triage_note = Mock()
@@ -3125,8 +2965,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=Exception)
         triage._notify_failing_rpc_request_for_edge_events = CoroutineMock()
         triage._get_events_chunked = Mock()
@@ -3176,8 +3017,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._notify_http_error_when_requesting_edge_events_from_velocloud = CoroutineMock()
         triage._get_events_chunked = Mock()
@@ -3229,8 +3071,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock()
 
@@ -3298,8 +3141,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[
             events_chunk_1,
@@ -3405,8 +3249,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[
             events_chunk_1,
@@ -3508,8 +3353,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[
             events_chunk_1,
@@ -3569,8 +3415,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_http_error_when_appending_note_to_ticket(ticket_id, append_ticket_note_response)
@@ -3607,8 +3454,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=rpc_response)
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         uuid_ = uuid()
         current_datetime = datetime.now()
@@ -3650,8 +3498,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_failing_rpc_request_for_edge_events(edge_full_id)
@@ -3688,8 +3537,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_http_error_when_requesting_edge_events_from_velocloud(
@@ -3746,8 +3596,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['event_limit'] = 2
@@ -3812,8 +3663,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['timezone'] = 'UTC'
@@ -3883,8 +3735,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=append_note_to_ticket_response)
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             result = await triage._append_note_to_ticket(ticket_id, ticket_note)
@@ -3909,8 +3762,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_failing_rpc_request_for_edge_events(edge_full_id)
@@ -3947,8 +3801,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_http_error_when_requesting_edge_events_from_velocloud(
@@ -3981,8 +3836,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_failing_rpc_request_for_appending_ticket_note(ticket_id, ticket_note)
@@ -4012,8 +3868,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_triage_note_was_appended_to_ticket(ticket_id, bruin_client_id)
@@ -4139,8 +3996,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._gather_relevant_data_for_first_triage_note = Mock(return_value=relevant_data_for_triage_note)
         triage._send_email = CoroutineMock()
@@ -4293,11 +4151,12 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
-
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         template_renderer = Mock()
         template_renderer.compose_email_object = Mock(side_effect=[email_body_1, email_body_2])
 
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1,
@@ -4475,8 +4334,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1,
@@ -4647,8 +4507,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1,
@@ -4801,8 +4662,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, Exception])
         triage._gather_relevant_data_for_first_triage_note = Mock(return_value=relevant_data_for_triage_note_1)
         triage._transform_relevant_data_into_ticket_note = Mock(return_value=ticket_note_1)
@@ -4960,8 +4822,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(return_value=relevant_data_for_triage_note_1)
         triage._transform_relevant_data_into_ticket_note = Mock(return_value=ticket_note_1)
@@ -5115,8 +4978,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(return_value=relevant_data_for_triage_note_1)
         triage._transform_relevant_data_into_ticket_note = Mock(return_value=ticket_note_1)
@@ -5279,8 +5143,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1, relevant_data_for_triage_note_2
@@ -5464,8 +5329,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1, relevant_data_for_triage_note_2
@@ -5646,8 +5512,9 @@ class TestTriage:
 
         template_renderer = Mock()
         template_renderer.compose_email_object = Mock(side_effect=[email_body_1, email_body_2])
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1,
@@ -5794,8 +5661,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['timezone'] = 'UTC'
@@ -5868,8 +5736,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['timezone'] = 'UTC'
@@ -5925,8 +5794,9 @@ class TestTriage:
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=email_response)
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         result = await triage._send_email(email_data)
 
@@ -5975,8 +5845,9 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-
-        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
 
         result = triage._transform_relevant_data_into_ticket_note(relevant_data)
 

@@ -29,7 +29,8 @@ class MonitoringMapRepository:
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_MAP_CONFIG['semaphore'])
 
     async def start_create_monitoring_map_job(self, exec_on_start=False):
-        self._logger.info(f'Scheduled task: _map_bruin_client_ids_to_edges_serials_and_statuses configured to run every'
+        self._logger.info(f'Scheduled task: _map_bruin_client_ids_to_edges_serials_and_statuses'
+                          f' configured to run every'
                           f' {self._config.MONITOR_MAP_CONFIG["refresh_map_time"]} minutes')
         next_run_time = undefined
         if exec_on_start:
@@ -51,7 +52,6 @@ class MonitoringMapRepository:
         except Exception:
             await self._notify_failing_rpc_request_for_edge_list()
             raise
-
         edge_list_response_body = edge_list_response['body']
         edge_list_response_status = edge_list_response['status']
 
@@ -72,7 +72,7 @@ class MonitoringMapRepository:
                                f"took {time.time() - start_time}")
         self._logger.info(f"Processing {len(tasks)} edges took {time.time() - start_time} seconds")
 
-        self._monitoring_map_cache = mapping
+        self._monitoring_map_cache = mapping.copy()
 
     async def _process_edge_and_tickets(self, mapping, edge_full_id):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_MAP_CONFIG['multiplier'],
@@ -102,6 +102,7 @@ class MonitoringMapRepository:
                 edge_status_data = edge_status_response_body['edge_info']
 
                 serial_number = edge_status_data['edges']['serialNumber']
+
                 if not serial_number:
                     self._logger.info(
                         f"[map-bruin-client-to-edges] Edge {edge_identifier} "
@@ -113,6 +114,7 @@ class MonitoringMapRepository:
                                   f'Claiming Bruin client info for serial {serial_number}...')
                 start_time = time.time()
                 bruin_client_info_response = await self._get_bruin_client_info_by_serial(serial_number)
+
                 self._logger.info(f'[map-bruin-client-to-edges] '
                                   f'Got Bruin client info for serial {serial_number} -> '
                                   f'{bruin_client_info_response}.'
@@ -169,12 +171,12 @@ class MonitoringMapRepository:
         return edge_list
 
     async def _get_edge_status_by_id(self, edge_full_id):
-        edge_list_request = {
+        edge_status_request = {
             "request_id": uuid(),
             "body": edge_full_id,
         }
 
-        edge_list = await self._event_bus.rpc_request("edge.status.request", edge_list_request, timeout=120)
+        edge_list = await self._event_bus.rpc_request("edge.status.request", edge_status_request, timeout=120)
         return edge_list
 
     async def _get_bruin_client_info_by_serial(self, serial_number):
@@ -200,7 +202,8 @@ class MonitoringMapRepository:
         edge_list_response_status = edge_list_response['status']
 
         err_msg = (
-            f'Error while retrieving edge list in {self._config.MONITOR_MAP_CONFIG["environment"].upper()} environment:'
+            f'Error while retrieving edge list in {self._config.MONITOR_MAP_CONFIG["environment"].upper()} '
+            f'environment:'
             f' Error {edge_list_response_status} - {edge_list_response_body}'
         )
 

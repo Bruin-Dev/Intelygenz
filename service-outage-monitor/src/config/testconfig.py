@@ -1,6 +1,7 @@
 # You must replicate the structure of config.py, changing os.environ calls for mock values
 import logging
 import sys
+import os
 
 NATS_CONFIG = {
     'servers': 'nats://nats-server:4222',
@@ -14,6 +15,18 @@ NATS_CONFIG = {
 }
 
 quarantine_time = 60 * 10
+
+MONITOR_MAP_CONFIG = {
+    'timezone': 'US/Eastern',
+    'multiplier': 2,
+    'min': 2,
+    'stop_delay': 30,
+    'refresh_map_time': 60 * 1,
+    'semaphore': 5,
+    'velo_filter': {},
+    'environment': os.environ.get("CURRENT_ENVIRONMENT", "dev"),
+}
+
 MONITOR_CONFIG = {
     'recipient': "some.recipient@email.com",
     'environment': "dev",

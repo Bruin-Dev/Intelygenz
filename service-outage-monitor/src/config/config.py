@@ -28,7 +28,7 @@ MONITOR_MAP_CONFIG = {
     'min': 5,
     'stop_delay': 300,
     'refresh_map_time': 60 * 4,
-    'semaphores': 5,
+    'semaphore': 5,
     'velo_filter': {},
     'environment': os.environ["CURRENT_ENVIRONMENT"],
 

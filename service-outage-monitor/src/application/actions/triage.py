@@ -62,7 +62,7 @@ class Triage:
         total_start_time = time.time()
         self._logger.info(f'Starting triage process...')
 
-        if len(self._monitoring_mapping) == 0:
+        if len(self._monitoring_map_repository._monitoring_map_cache) == 0:
             self._logger.info('Creating map with all customers and all their devices...')
             await self._monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
             await self._monitoring_map_repository.start_create_monitoring_map_job(exec_on_start=False)
