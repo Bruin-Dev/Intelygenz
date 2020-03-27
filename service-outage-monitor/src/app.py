@@ -81,7 +81,8 @@ class Container:
         self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
                                              config, self._outage_repository)
         self._triage = Triage(self._event_bus, self._logger, self._scheduler,
-                              config, self._triage_report_renderer, self._outage_repository)
+                              config, self._triage_report_renderer, self._outage_repository,
+                              self._monitoring_map_repository)
 
     async def _start(self):
         await self._event_bus.connect()
