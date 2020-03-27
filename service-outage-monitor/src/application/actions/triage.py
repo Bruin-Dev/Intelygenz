@@ -648,13 +648,13 @@ class Triage:
                     event['message'], interface_name)
             )
 
-        if last_online_event_for_current_link is not None:
-            relevant_data[last_online_key] = parse(last_online_event_for_current_link['eventTime']).astimezone(
-                tz_object)
+            if last_online_event_for_current_link is not None:
+                relevant_data[last_online_key] = parse(last_online_event_for_current_link['eventTime']).astimezone(
+                    tz_object)
 
-        if last_offline_event_for_current_link is not None:
-            relevant_data[last_offline_key] = parse(last_offline_event_for_current_link['eventTime']).astimezone(
-                tz_object)
+            if last_offline_event_for_current_link is not None:
+                relevant_data[last_offline_key] = parse(last_offline_event_for_current_link['eventTime']).astimezone(
+                    tz_object)
 
         return relevant_data
 
