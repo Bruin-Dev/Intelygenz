@@ -38,6 +38,9 @@ class Container:
         # HEALTHCHECK ENDPOINT
         self._server = QuartServer(config)
 
+        # MESSAGES STORAGE MANAGER
+        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
+
         # EVENT BUS
         self._publisher = NATSClient(config, logger=self._logger)
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
@@ -50,8 +53,6 @@ class Container:
                                                               keys_prefix='EDGES_TO_REPORT', logger=self._logger)
         self._monitoring_map_repository = MonitoringMapRepository(config=config, scheduler=self._scheduler,
                                                                   event_bus=self._event_bus, logger=self._logger)
-        # MESSAGES STORAGE MANAGER
-        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
         # JINJA2 TEMPLATE ENVIRONMENTS
         self._triage_report_templates_loader = jinja2.FileSystemLoader(searchpath="src/templates/triage")

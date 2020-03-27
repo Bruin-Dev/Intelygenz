@@ -148,7 +148,8 @@ class MonitoringMapRepository:
                     f"Has been added to the map of devices to monitor "
                     f"took {time.time() - total_start_time} seconds")
 
-                mapping.setdefault(bruin_client_id, {})
+                if bruin_client_id not in mapping.keys():
+                    mapping.setdefault(bruin_client_id, {})
 
                 mapping[bruin_client_id][serial_number] = {
                     'edge_id': edge_full_id,
