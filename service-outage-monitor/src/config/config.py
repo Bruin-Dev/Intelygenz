@@ -78,4 +78,8 @@ TRIAGE_CONFIG = {
     'monitoring_seconds': 120,
     'event_limit': 15,
     'velo_filter': {},
+    'multiplier': 5,
+    'min': 5,
+    'stop_delay': 300,
+    'semaphore': 5,
 }
