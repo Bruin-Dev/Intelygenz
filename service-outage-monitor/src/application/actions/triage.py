@@ -100,7 +100,7 @@ class Triage:
         bruin_clients_ids: Set[int] = set(self._monitoring_mapping.keys())
         # TODO asyncio gather
         tasks = [
-            await self._get_open_tickets_with_details_by_client_id(client_id, open_tickets)
+            self._get_open_tickets_with_details_by_client_id(client_id, open_tickets)
             for client_id in bruin_clients_ids
         ]
         try:
@@ -115,7 +115,7 @@ class Triage:
         @retry(wait=wait_exponential(multiplier=self._config.TRIAGE_CONFIG['multiplier'],
                                      min=self._config.TRIAGE_CONFIG['min']),
                stop=stop_after_delay(self._config.TRIAGE_CONFIG['stop_delay']))
-        async def _get_open_tickets_with_details_by_client_id():
+        async def get_open_tickets_with_details_by_client_id():
             async with self._semaphore:
                 result = []
                 self._logger.info(f'Getting all open tickets with details for Bruin customer: {client_id}...')
@@ -123,7 +123,7 @@ class Triage:
                     open_tickets_response = await self._get_open_tickets_by_client_id(client_id)
                 except Exception:
                     await self._notify_failing_rpc_request_for_open_tickets(client_id)
-                    raise
+                    raise Exception
 
                 open_tickets_response_body = open_tickets_response['body']
                 open_tickets_response_status = open_tickets_response['status']
@@ -166,9 +166,10 @@ class Triage:
                         'ticket_notes': ticket_details_response_body['ticketNotes'],
                     })
                 self._logger.info(f'Finished getting all opened tickets for Bruin customer {client_id}!')
-                open_tickets.append(result)
+                for ticket_item in result:
+                    open_tickets.append(ticket_item)
         try:
-            await _get_open_tickets_with_details_by_client_id()
+            await get_open_tickets_with_details_by_client_id()
         except Exception as ex:
             self._logger.error(f"Error: {client_id}")
 
