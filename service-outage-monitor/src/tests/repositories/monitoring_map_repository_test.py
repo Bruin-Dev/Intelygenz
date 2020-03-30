@@ -230,7 +230,7 @@ class TestMonitoringMapRepository:
         edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
         edge_list_response = {
             'request_id': uuid_1,
-            'body': [edge_1_full_id],
+            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
             'status': 200
         }
 
@@ -311,111 +311,6 @@ class TestMonitoringMapRepository:
         event_bus.rpc_request = CoroutineMock(side_effect=[
             edge_list_response,
             edge_1_status_response,
-        ])
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
-
-        monitoring_map_repository._get_bruin_client_info_by_serial = CoroutineMock(
-            return_value=bruin_client_info_2_response)
-
-        with patch.object(monitoring_map_repository_module, 'uuid', side_effect=[uuid_1, uuid_2]):
-            await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        expected = {}
-        assert monitoring_map_repository.get_monitoring_map_cache() == expected
-
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edges_having_null_serials2_test(self):
-        uuid_1 = uuid()
-        uuid_2 = uuid()
-        uuid_3 = uuid()
-        uuid_4 = uuid()
-
-        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
-        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
-        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
-        edge_list_response = {
-            'request_id': uuid_1,
-            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
-            'status': 200
-        }
-
-        bruin_client_1 = 12345
-        bruin_client_2 = 54321
-        edge_2_serial = 'VC7654321'
-
-        edge_1_status = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': None},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_1}|',
-        }
-        edge_1_status_response = {
-            'request_id': uuid_2,
-            'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status,
-            },
-            'status': 200,
-        }
-
-        edge_2_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_2_status_response = {
-            'request_id': uuid_3,
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status,
-            },
-            'status': 200,
-        }
-
-        edge_3_status = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': None},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': f'EVIL-CORP|{bruin_client_2}|',
-        }
-        edge_3_status_response = {
-            'request_id': uuid_4,
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status,
-            },
-            'status': 200,
-        }
-
-        bruin_client_info_2_response_body = {
-            'client_id': bruin_client_2,
-            'client_name': 'METTEL/NEW YORK',
-        }
-        bruin_client_info_2_response = {
-            'body': bruin_client_info_2_response_body,
-            'status': 200,
-        }
-
-        edge_2_status_with_bruin_client_info = {
-            **edge_2_status,
-            'bruin_client_info': bruin_client_info_2_response_body,
-        }
-
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[
-            # edge_list_response,
-            edge_1_status_response,
             edge_2_status_response,
             edge_3_status_response,
         ])
@@ -424,35 +319,19 @@ class TestMonitoringMapRepository:
         monitoring_map_repository._get_bruin_client_info_by_serial = CoroutineMock(
             return_value=bruin_client_info_2_response)
 
-        with patch.object(monitoring_map_repository_module, 'uuid', side_effect=[uuid_2]):
+        async def gather_mock(*args, **kwargs):
             await monitoring_map_repository._process_edge_and_tickets(edge_1_full_id)
-
-        with patch.object(monitoring_map_repository_module, 'uuid', side_effect=[uuid_3]):
             await monitoring_map_repository._process_edge_and_tickets(edge_2_full_id)
-
-        with patch.object(monitoring_map_repository_module, 'uuid', side_effect=[uuid_4]):
             await monitoring_map_repository._process_edge_and_tickets(edge_3_full_id)
+
+        with patch.object(monitoring_map_repository_module, 'uuid', side_effect=[uuid_1, uuid_2, uuid_3, uuid_4]):
+            with patch.object(monitoring_map_repository_module.asyncio, "gather", return_value=gather_mock()):
+                await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
 
         expected = {bruin_client_2: {edge_2_serial: {'edge_id': edge_2_full_id,
                                                      'edge_status': edge_2_status_with_bruin_client_info}}}
-        assert monitoring_map_repository._monitoring_map_cache == expected
 
-    @pytest.mark.asyncio
-    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_list_request_failing_test(self):
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
-        monitoring_map_repository._get_edges_for_monitoring = CoroutineMock(side_effect=Exception)
-        monitoring_map_repository._notify_failing_rpc_request_for_edge_list = CoroutineMock()
-
-        with pytest.raises(Exception):
-            await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
-
-        monitoring_map_repository._get_edges_for_monitoring.assert_awaited_once()
-        monitoring_map_repository._notify_failing_rpc_request_for_edge_list.assert_awaited_once()
+        assert monitoring_map_repository.get_monitoring_map_cache() == expected
 
     @pytest.mark.asyncio
     async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_list_request_not_having_2XX_status_test(
