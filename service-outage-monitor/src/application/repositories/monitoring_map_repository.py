@@ -45,7 +45,7 @@ class MonitoringMapRepository:
         return self._monitoring_map_cache.copy()
 
     async def _map_bruin_client_ids_to_edges_serials_and_statuses(self):
-        mapping = {}
+        self._monitoring_map_cache = {}
 
         try:
             edge_list_response = await self._get_edges_for_monitoring()
@@ -60,7 +60,7 @@ class MonitoringMapRepository:
             raise Exception
 
         tasks = [
-            self._process_edge_and_tickets(mapping, edge_full_id)
+            self._process_edge_and_tickets(edge_full_id)
             for edge_full_id in edge_list_response_body
         ]
         start_time = time.time()
@@ -72,9 +72,7 @@ class MonitoringMapRepository:
                                f"took {time.time() - start_time}")
         self._logger.info(f"Processing {len(tasks)} edges took {time.time() - start_time} seconds")
 
-        self._monitoring_map_cache = mapping.copy()
-
-    async def _process_edge_and_tickets(self, mapping, edge_full_id):
+    async def _process_edge_and_tickets(self, edge_full_id):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_MAP_CONFIG['multiplier'],
                                      min=self._config.MONITOR_MAP_CONFIG['min']),
                stop=stop_after_delay(self._config.MONITOR_MAP_CONFIG['stop_delay']))
@@ -84,9 +82,7 @@ class MonitoringMapRepository:
                 start_time = time.time()
                 self._logger.info(f"Processing edge {edge_full_id}")
                 edge_identifier = EdgeIdentifier(**edge_full_id)
-
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
-
                 self._logger.info(f"Edge status retrieved {edge_full_id} "
                                   f"took {time.time() - start_time} seconds")
 
@@ -148,10 +144,8 @@ class MonitoringMapRepository:
                     f"Has been added to the map of devices to monitor "
                     f"took {time.time() - total_start_time} seconds")
 
-                if bruin_client_id not in mapping.keys():
-                    mapping.setdefault(bruin_client_id, {})
-
-                mapping[bruin_client_id][serial_number] = {
+                self._monitoring_map_cache.setdefault(bruin_client_id, {})
+                self._monitoring_map_cache[bruin_client_id][serial_number] = {
                     'edge_id': edge_full_id,
                     'edge_status': edge_status_data,
                 }
