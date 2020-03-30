@@ -45,7 +45,7 @@ class MonitoringMapRepository:
         return self._monitoring_map_cache.copy()
 
     async def _map_bruin_client_ids_to_edges_serials_and_statuses(self):
-        mapping = {}
+        self._monitoring_map_cache = {}
 
         try:
             edge_list_response = await self._get_edges_for_monitoring()
@@ -60,7 +60,7 @@ class MonitoringMapRepository:
             raise Exception
 
         tasks = [
-            self._process_edge_and_tickets(mapping, edge_full_id)
+            self._process_edge_and_tickets(edge_full_id)
             for edge_full_id in edge_list_response_body
         ]
         start_time = time.time()
@@ -68,13 +68,12 @@ class MonitoringMapRepository:
         try:
             await asyncio.gather(*tasks, return_exceptions=True)
         except Exception as ex:
-            self._logger.error(f"Error: asyncio.gather:_map_bruin_client_ids_to_edges_serials_and_statuses. "
-                               f"took {time.time() - start_time}")
+            self._logger.error(f"Error: asyncio.gather:_map_bruin_client_ids_to_edges_serials_and_statuses. ")
+            self._logger.error(f"took {time.time() - start_time}")
         self._logger.info(f"Processing {len(tasks)} edges took {time.time() - start_time} seconds")
+        self._logger.info(f"Processing {len(tasks)} edges")
 
-        self._monitoring_map_cache = mapping.copy()
-
-    async def _process_edge_and_tickets(self, mapping, edge_full_id):
+    async def _process_edge_and_tickets(self, edge_full_id):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_MAP_CONFIG['multiplier'],
                                      min=self._config.MONITOR_MAP_CONFIG['min']),
                stop=stop_after_delay(self._config.MONITOR_MAP_CONFIG['stop_delay']))
@@ -84,9 +83,7 @@ class MonitoringMapRepository:
                 start_time = time.time()
                 self._logger.info(f"Processing edge {edge_full_id}")
                 edge_identifier = EdgeIdentifier(**edge_full_id)
-
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
-
                 self._logger.info(f"Edge status retrieved {edge_full_id} "
                                   f"took {time.time() - start_time} seconds")
 
@@ -98,7 +95,6 @@ class MonitoringMapRepository:
                         edge_full_id, edge_status_response
                     )
                     return
-
                 edge_status_data = edge_status_response_body['edge_info']
 
                 serial_number = edge_status_data['edges']['serialNumber']
@@ -124,8 +120,7 @@ class MonitoringMapRepository:
                 bruin_client_info_response_status = bruin_client_info_response['status']
                 if bruin_client_info_response_status not in range(200, 300):
                     err_msg = (f'Error trying to get Bruin client info from Bruin for serial {serial_number}: '
-                               f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}'
-                               f' took {time.time() - start_time} seconds')
+                               f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}')
                     self._logger.error(err_msg)
 
                     slack_message = {'request_id': uuid(), 'message': err_msg}
@@ -148,10 +143,8 @@ class MonitoringMapRepository:
                     f"Has been added to the map of devices to monitor "
                     f"took {time.time() - total_start_time} seconds")
 
-                if bruin_client_id not in mapping.keys():
-                    mapping.setdefault(bruin_client_id, {})
-
-                mapping[bruin_client_id][serial_number] = {
+                self._monitoring_map_cache.setdefault(bruin_client_id, {})
+                self._monitoring_map_cache[bruin_client_id][serial_number] = {
                     'edge_id': edge_full_id,
                     'edge_status': edge_status_data,
                 }
