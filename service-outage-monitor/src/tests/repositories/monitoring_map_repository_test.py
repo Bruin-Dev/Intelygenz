@@ -377,6 +377,54 @@ class TestMonitoringMapRepository:
         monitoring_map_repository._notify_failing_rpc_request_for_edge_list.assert_awaited_once()
 
     @pytest.mark.asyncio
+    async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_list_response_with_not_2XX_test(self):
+        uuid_1 = uuid()
+
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+        edge_list_response = {
+            'request_id': uuid_1,
+            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+            'status': 500
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        err_msg = (
+            f'Error while retrieving edge list in {config.MONITOR_MAP_CONFIG["environment"].upper()} '
+            f'environment:'
+            f' Error {edge_list_response["status"]} - {edge_list_response["body"]}'
+        )
+        slack_message_response = {'request_id': uuid_1, 'message': err_msg}
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            slack_message_response,
+        ])
+
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+
+        with patch.object(monitoring_map_repository_module, 'uuid', return_value=uuid_1):
+            with pytest.raises(Exception):
+                await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+
+        monitoring_map_repository._get_edges_for_monitoring.assert_awaited_once()
+
+        event_bus.rpc_request.assert_has_awaits([
+            call(
+                "notification.slack.request",
+                {
+                    'request_id': uuid_1,
+                    'message': err_msg,
+                },
+                timeout=10,
+            ),
+        ])
+
+    @pytest.mark.asyncio
     async def map_bruin_client_ids_to_edges_serials_and_statuses_with_edge_list_request_not_having_2XX_status_test(
             self):
         edge_list_response = {

@@ -65,11 +65,9 @@ class MonitoringMapRepository:
         ]
         start_time = time.time()
         self._logger.info(f"Processing {len(edge_list_response_body)} edges")
-        try:
-            await asyncio.gather(*tasks, return_exceptions=True)
-        except Exception as ex:
-            self._logger.error(f"Error: asyncio.gather:_map_bruin_client_ids_to_edges_serials_and_statuses. ")
-            self._logger.error(f"took {time.time() - start_time}")
+
+        await asyncio.gather(*tasks, return_exceptions=True)
+
         self._logger.info(f"Processing {len(tasks)} edges took {time.time() - start_time} seconds")
         self._logger.info(f"Processing {len(tasks)} edges")
 
