@@ -691,8 +691,6 @@ class TestMonitoringMapRepository:
         monitoring_map_repository._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         monitoring_map_repository._get_edge_status_by_id = CoroutineMock(side_effect=[
             edge_1_status_response, edge_2_status_response, edge_3_status_response])
-        # monitoring_map_repository._get_bruin_client_info_by_serial = CoroutineMock(
-        #     return_value=bruin_client_info_3_response)
         monitoring_map_repository._get_bruin_client_info_by_serial = CoroutineMock(
             side_effect=[Exception, Exception, bruin_client_info_3_response])
         monitoring_map_repository._notify_http_error_when_requesting_edge_status_from_velocloud = CoroutineMock()
