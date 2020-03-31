@@ -31,7 +31,7 @@ class TestTriage:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
         monitoring_map_repository = Mock()
@@ -478,9 +478,8 @@ class TestTriage:
         result = await triage._get_all_open_tickets_with_details_for_monitored_companies()
 
         triage._get_open_tickets_with_details_by_client_id.assert_has_awaits([
-            call(bruin_client_1_id), call(bruin_client_2_id)
-        ])
-        assert result == tickets_with_details
+            call(bruin_client_1_id, []), call(bruin_client_2_id, [])
+        ], any_order=True)
 
     @pytest.mark.asyncio
     async def get_all_open_tickets_with_details_for_monitored_companies_with_some_requests_failing_test(self):
@@ -593,9 +592,8 @@ class TestTriage:
         result = await triage._get_all_open_tickets_with_details_for_monitored_companies()
 
         triage._get_open_tickets_with_details_by_client_id.assert_has_awaits([
-            call(bruin_client_1_id), call(bruin_client_2_id), call(bruin_client_3_id)
-        ])
-        assert result == tickets_with_details
+            call(bruin_client_1_id, []), call(bruin_client_2_id, []), call(bruin_client_3_id, [])
+        ], any_order=True)
 
     @pytest.mark.asyncio
     async def get_open_tickets_with_details_by_client_id_test(self):
@@ -685,8 +683,9 @@ class TestTriage:
             get_ticket_1_details_response, get_ticket_2_details_response
         ])
 
+        result = []
         with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2, uuid_3]):
-            result = await triage._get_open_tickets_with_details_by_client_id(bruin_client_id)
+            await triage._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         triage._get_open_tickets_by_client_id.assert_awaited_once_with(bruin_client_id)
         triage._get_ticket_details_by_ticket_id.assert_has_awaits([
@@ -725,8 +724,8 @@ class TestTriage:
         triage._get_ticket_details_by_ticket_id = CoroutineMock()
         triage._notify_failing_rpc_request_for_open_tickets = CoroutineMock()
 
-        with pytest.raises(Exception):
-            await triage._get_open_tickets_with_details_by_client_id(bruin_client_id)
+        result = []
+        await triage._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         triage._get_open_tickets_by_client_id.assert_awaited_once_with(bruin_client_id)
         triage._notify_failing_rpc_request_for_open_tickets.assert_awaited_once_with(bruin_client_id)
@@ -757,9 +756,9 @@ class TestTriage:
         triage._get_ticket_details_by_ticket_id = CoroutineMock()
         triage._notify_http_error_when_requesting_open_tickets_from_bruin_api = CoroutineMock()
 
+        result = []
         with patch.object(triage_module, 'uuid', return_value=uuid_):
-            with pytest.raises(Exception):
-                await triage._get_open_tickets_with_details_by_client_id(bruin_client_id)
+            await triage._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         triage._get_open_tickets_by_client_id.assert_awaited_once_with(bruin_client_id)
         triage._notify_http_error_when_requesting_open_tickets_from_bruin_api.assert_awaited_once_with(
@@ -828,8 +827,9 @@ class TestTriage:
         ])
         triage._notify_failing_rpc_request_for_ticket_details = CoroutineMock()
 
+        result = []
         with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2]):
-            result = await triage._get_open_tickets_with_details_by_client_id(bruin_client_id)
+            await triage._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         triage._get_open_tickets_by_client_id.assert_awaited_once_with(bruin_client_id)
         triage._get_ticket_details_by_ticket_id.assert_has_awaits([
@@ -913,8 +913,9 @@ class TestTriage:
         ])
         triage._notify_http_error_when_requesting_ticket_details_from_bruin_api = CoroutineMock()
 
+        result = []
         with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2, uuid_3]):
-            result = await triage._get_open_tickets_with_details_by_client_id(bruin_client_id)
+            await triage._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         triage._get_open_tickets_by_client_id.assert_awaited_once_with(bruin_client_id)
         triage._get_ticket_details_by_ticket_id.assert_has_awaits([
@@ -1007,8 +1008,9 @@ class TestTriage:
         ])
         triage._notify_http_error_when_requesting_ticket_details_from_bruin_api = CoroutineMock()
 
+        result = []
         with patch.object(triage_module, 'uuid', side_effect=[uuid_1, uuid_2, uuid_3]):
-            result = await triage._get_open_tickets_with_details_by_client_id(bruin_client_id)
+            await triage._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
 
         triage._get_open_tickets_by_client_id.assert_awaited_once_with(bruin_client_id)
         triage._get_ticket_details_by_ticket_id.assert_has_awaits([

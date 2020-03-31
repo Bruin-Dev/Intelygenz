@@ -65,4 +65,8 @@ TRIAGE_CONFIG = {
     'monitoring_seconds': 120,
     'event_limit': 15,
     'velo_filter': {"mettel.velocloud.net": []},
+    'multiplier': 1,
+    'min': 1,
+    'stop_delay': 0,
+    'semaphore': 1,
 }

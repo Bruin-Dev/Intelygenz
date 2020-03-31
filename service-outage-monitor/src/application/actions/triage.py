@@ -98,7 +98,6 @@ class Triage:
         open_tickets = []
 
         bruin_clients_ids: Set[int] = set(self._monitoring_mapping.keys())
-        # TODO asyncio gather
         tasks = [
             self._get_open_tickets_with_details_by_client_id(client_id, open_tickets)
             for client_id in bruin_clients_ids
@@ -111,7 +110,6 @@ class Triage:
         return open_tickets
 
     async def _get_open_tickets_with_details_by_client_id(self, client_id, open_tickets):
-        # TODO asyncio semamphore
         @retry(wait=wait_exponential(multiplier=self._config.TRIAGE_CONFIG['multiplier'],
                                      min=self._config.TRIAGE_CONFIG['min']),
                stop=stop_after_delay(self._config.TRIAGE_CONFIG['stop_delay']))

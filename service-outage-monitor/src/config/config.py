@@ -81,5 +81,5 @@ TRIAGE_CONFIG = {
     'multiplier': 5,
     'min': 5,
     'stop_delay': 300,
-    'semaphore': 5,
+    'semaphore': 10,
 }
