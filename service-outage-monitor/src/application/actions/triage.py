@@ -102,11 +102,7 @@ class Triage:
             self._get_open_tickets_with_details_by_client_id(client_id, open_tickets)
             for client_id in bruin_clients_ids
         ]
-        try:
-            await asyncio.gather(*tasks, return_exceptions=True)
-        except Exception as ex:
-            self._logger.error("Error: asyncio.gather:_get_all_open_tickets_with_details_for_monitored_companies. ")
-
+        await asyncio.gather(*tasks, return_exceptions=True)
         return open_tickets
 
     async def _get_open_tickets_with_details_by_client_id(self, client_id, open_tickets):
@@ -119,7 +115,9 @@ class Triage:
                 self._logger.info(f'Getting all open tickets with details for Bruin customer: {client_id}...')
                 try:
                     open_tickets_response = await self._get_open_tickets_by_client_id(client_id)
-                except Exception:
+                except Exception as err:
+                    self._logger.error(f"Error getting open tickets with client_id {client_id}")
+                    self._logger.error(err)
                     await self._notify_failing_rpc_request_for_open_tickets(client_id)
                     raise Exception
 
