@@ -45,8 +45,6 @@ class MonitoringMapRepository:
         return self._monitoring_map_cache.copy()
 
     async def map_bruin_client_ids_to_edges_serials_and_statuses(self):
-        self._monitoring_map_cache = {}
-
         try:
             edge_list_response = await self._get_edges_for_monitoring()
         except Exception:
