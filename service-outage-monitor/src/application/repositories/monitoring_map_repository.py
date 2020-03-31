@@ -29,14 +29,14 @@ class MonitoringMapRepository:
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_MAP_CONFIG['semaphore'])
 
     async def start_create_monitoring_map_job(self, exec_on_start=False):
-        self._logger.info(f'Scheduled task: _map_bruin_client_ids_to_edges_serials_and_statuses'
+        self._logger.info(f'Scheduled task: map_bruin_client_ids_to_edges_serials_and_statuses'
                           f' configured to run every'
                           f' {self._config.MONITOR_MAP_CONFIG["refresh_map_time"]} minutes')
         next_run_time = undefined
         if exec_on_start:
             next_run_time = datetime.now(timezone(self._config.MONITOR_MAP_CONFIG['timezone']))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self._map_bruin_client_ids_to_edges_serials_and_statuses, 'interval',
+        self._scheduler.add_job(self.map_bruin_client_ids_to_edges_serials_and_statuses, 'interval',
                                 minutes=self._config.MONITOR_MAP_CONFIG["refresh_map_time"],
                                 next_run_time=next_run_time,
                                 replace_existing=True, id='_create_client_id_to_dict_of_serials_dict')
@@ -44,7 +44,7 @@ class MonitoringMapRepository:
     def get_monitoring_map_cache(self):
         return self._monitoring_map_cache.copy()
 
-    async def _map_bruin_client_ids_to_edges_serials_and_statuses(self):
+    async def map_bruin_client_ids_to_edges_serials_and_statuses(self):
         self._monitoring_map_cache = {}
 
         try:

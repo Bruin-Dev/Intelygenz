@@ -65,7 +65,7 @@ class Triage:
 
         if len(self._monitoring_map_repository._monitoring_map_cache) == 0:
             self._logger.info('Creating map with all customers and all their devices...')
-            await self._monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+            await self._monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
             await self._monitoring_map_repository.start_create_monitoring_map_job(exec_on_start=False)
             self._logger.info('Map of devices by customer created')
 
@@ -259,6 +259,9 @@ class Triage:
         for ticket in tickets:
             self._logger.info(f'Checking if ticket {ticket["ticket_id"]} has a triage note already...')
             for note in ticket['ticket_notes']:
+                if type(note['noteValue']) != str:
+                    self._logger.info(f'Type of note value is {type(note["noteValue"])} and the content is'
+                                      f'{note["noteValue"]}')
                 if self.__triage_note_regex.match(note['noteValue']):
                     self._logger.info(f'Ticket {ticket["ticket_id"]} has a triage already!')
                     tickets_with_triage.append(ticket)
@@ -304,6 +307,9 @@ class Triage:
             ticket_notes = ticket['ticket_notes']
 
             for index, note in enumerate(ticket['ticket_notes']):
+                if type(note['noteValue']) != str:
+                    self._logger.info(f'Type of note value is {type(note["noteValue"])} and the content is'
+                                      f'{note["noteValue"]}')
                 is_triage_note = bool(self.__triage_note_regex.match(note['noteValue']))
                 if not is_triage_note:
                     del ticket_notes[index]

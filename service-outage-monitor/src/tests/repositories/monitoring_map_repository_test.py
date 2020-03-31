@@ -61,7 +61,7 @@ class TestMonitoringMapRepository:
         await monitoring_map_repository.start_create_monitoring_map_job(exec_on_start=False)
 
         scheduler.add_job.assert_called_once_with(
-            monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses,
+            monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses,
             'interval',
             minutes=config.MONITOR_MAP_CONFIG["refresh_map_time"],
             next_run_time=undefined,
@@ -87,7 +87,7 @@ class TestMonitoringMapRepository:
                 await monitoring_map_repository.start_create_monitoring_map_job(exec_on_start=True)
 
         scheduler.add_job.assert_called_once_with(
-            monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses,
+            monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses,
             'interval',
             minutes=config.MONITOR_MAP_CONFIG["refresh_map_time"],
             next_run_time=next_run_time,
@@ -214,7 +214,7 @@ class TestMonitoringMapRepository:
         monitoring_map_repository._get_bruin_client_info_by_serial = \
             CoroutineMock(return_value=bruin_client_info_2_response)
 
-        await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+        await monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
 
         assert monitoring_map_repository._monitoring_map_cache is not edge_list_response
         assert id(monitoring_map_repository._monitoring_map_cache) != id(edge_list_response)
@@ -327,7 +327,7 @@ class TestMonitoringMapRepository:
 
         with patch.object(monitoring_map_repository_module, 'uuid', side_effect=[uuid_1, uuid_2, uuid_3, uuid_4]):
             with patch.object(monitoring_map_repository_module.asyncio, "gather", return_value=gather_mock()):
-                await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+                await monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
 
         expected = {bruin_client_2: {edge_2_serial: {'edge_id': edge_2_full_id,
                                                      'edge_status': edge_2_status_with_bruin_client_info}}}
@@ -371,7 +371,7 @@ class TestMonitoringMapRepository:
         monitoring_map_repository._notify_failing_rpc_request_for_edge_list = CoroutineMock()
 
         with pytest.raises(Exception):
-            await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+            await monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
 
         monitoring_map_repository._get_edges_for_monitoring.assert_awaited_once()
         monitoring_map_repository._notify_failing_rpc_request_for_edge_list.assert_awaited_once()
@@ -409,7 +409,7 @@ class TestMonitoringMapRepository:
 
         with patch.object(monitoring_map_repository_module, 'uuid', return_value=uuid_1):
             with pytest.raises(Exception):
-                await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+                await monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
 
         monitoring_map_repository._get_edges_for_monitoring.assert_awaited_once()
 
@@ -444,7 +444,7 @@ class TestMonitoringMapRepository:
         monitoring_map_repository._notify_http_error_when_requesting_edge_list_from_velocloud = CoroutineMock()
 
         with pytest.raises(Exception):
-            await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+            await monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
 
         monitoring_map_repository._get_edges_for_monitoring.assert_awaited_once()
         monitoring_map_repository._notify_http_error_when_requesting_edge_list_from_velocloud.assert_awaited_once_with(
@@ -555,7 +555,7 @@ class TestMonitoringMapRepository:
 
         with patch.object(monitoring_map_repository_module, 'uuid', side_effect=[uuid_1, uuid_2, uuid_3, uuid_4]):
             with patch.object(monitoring_map_repository_module.asyncio, "gather", return_value=gather_mock()):
-                await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+                await monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
 
         monitoring_map_repository._notify_http_error_when_requesting_edge_status_from_velocloud. \
             assert_awaited_once_with(edge_1_full_id, edge_1_status_response)
@@ -702,7 +702,7 @@ class TestMonitoringMapRepository:
 
         with patch.object(monitoring_map_repository_module, 'uuid', side_effect=[uuid_1, uuid_2]):
             with patch.object(monitoring_map_repository_module.asyncio, "gather", return_value=gather_mock()):
-                await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+                await monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
 
         monitoring_map_repository._get_edges_for_monitoring.assert_awaited_once()
         monitoring_map_repository._get_edge_status_by_id.assert_has_awaits([
@@ -851,7 +851,7 @@ class TestMonitoringMapRepository:
             await monitoring_map_repository._process_edge_and_tickets(edge_3_full_id)
 
         with patch.object(monitoring_map_repository_module.asyncio, "gather", return_value=gather_mock()):
-            await monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses()
+            await monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
 
         expected = {
             bruin_client_1: {

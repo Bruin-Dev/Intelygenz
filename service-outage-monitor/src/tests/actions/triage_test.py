@@ -212,7 +212,7 @@ class TestTriage:
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         monitoring_map_repository._notify_failing_rpc_request_for_edge_list = CoroutineMock()
         monitoring_map_repository._monitoring_map_cache = monitoring_mapping
-        monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses = CoroutineMock()
+        monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses = CoroutineMock()
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
@@ -227,7 +227,7 @@ class TestTriage:
 
         await triage._run_tickets_polling()
 
-        monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses.assert_not_awaited()
+        monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses.assert_not_awaited()
         triage._get_all_open_tickets_with_details_for_monitored_companies.assert_awaited_once()
         triage._filter_tickets_related_to_edges_under_monitoring.assert_called_once_with(open_tickets)
         triage._distinguish_tickets_with_and_without_triage.assert_called_once_with(relevant_tickets)
@@ -347,7 +347,7 @@ class TestTriage:
         outage_repository = Mock()
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         monitoring_map_repository._notify_failing_rpc_request_for_edge_list = CoroutineMock()
-        monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses = CoroutineMock()
+        monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses = CoroutineMock()
         monitoring_map_repository.get_monitoring_map_cache = Mock(return_value=monitoring_mapping.copy())
         monitoring_map_repository.start_create_monitoring_map_job = CoroutineMock()
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
@@ -362,7 +362,7 @@ class TestTriage:
         triage._process_tickets_without_triage = CoroutineMock()
         await triage._run_tickets_polling()
 
-        monitoring_map_repository._map_bruin_client_ids_to_edges_serials_and_statuses.assert_awaited_once()
+        monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses.assert_awaited_once()
         monitoring_map_repository.start_create_monitoring_map_job.assert_awaited_once()
         triage._get_all_open_tickets_with_details_for_monitored_companies.assert_awaited_once()
         triage._filter_tickets_related_to_edges_under_monitoring.assert_called_once_with(open_tickets)
