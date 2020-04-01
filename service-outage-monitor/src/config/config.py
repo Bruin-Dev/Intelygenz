@@ -28,6 +28,10 @@ MONITOR_MAP_CONFIG = {
     'min': 5,
     'stop_delay': 300,
     'refresh_map_time': 60 * 4,
+    'blacklisted_edges': [
+        # Federal edge that is inside a non-federal Velocloud instance
+        {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
+    ],
     'semaphore': 10,
     'velo_filter': {},
     'environment': os.environ["CURRENT_ENVIRONMENT"],

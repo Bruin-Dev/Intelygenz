@@ -23,6 +23,7 @@ MONITOR_MAP_CONFIG = {
     'stop_delay': 2,
     'refresh_map_time': 60 * 1,
     'semaphore': 1,
+    'blacklisted_edges': [],
     'velo_filter': {},
     'environment': os.environ.get("CURRENT_ENVIRONMENT", "dev"),
 }
