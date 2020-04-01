@@ -1,5 +1,6 @@
 import json
 import re
+import time
 
 from collections import OrderedDict
 from datetime import datetime, timedelta
@@ -32,11 +33,45 @@ class ServiceAffectingMonitor:
                                 id='_monitor_each_edge')
 
     async def _monitor_each_edge(self):
+        start_time = time.time()
+        self._logger.info(f"[service-affecting-monitor] Processing "
+                          f"{len(self._config.MONITOR_CONFIG['device_by_id'])} edges")
         monitored_edges = [await self._service_affecting_monitor_process(device) for device in
                            self._config.MONITOR_CONFIG['device_by_id']]
+        self._logger.info(f"[service-affecting-monitor] Processing "
+                          f"{len(self._config.MONITOR_CONFIG['device_by_id'])} edges. Took "
+                          f"{time.time() - start_time} seconds")
+
+    async def _get_management_status(self, enterprise_id, serial_number):
+        management_request = {
+            "request_id": uuid(),
+            "body": {
+                "client_id": enterprise_id,
+                "status": "A",
+                "service_number": serial_number
+            }
+        }
+        management_status = await self._event_bus.rpc_request("bruin.inventory.management.status",
+                                                              management_request, timeout=30)
+        return management_status
+
+    async def _get_bruin_client_info_by_serial(self, serial_number):
+        client_info_request = {
+            "request_id": uuid(),
+            "body": {
+                "service_number": serial_number,
+            },
+        }
+
+        client_info = await self._event_bus.rpc_request("bruin.customer.get.info", client_info_request, timeout=30)
+        return client_info
+
+    def _is_management_status_active(self, management_status) -> bool:
+        return management_status in self._config.MONITOR_CONFIG["management_status_filter"]
 
     async def _service_affecting_monitor_process(self, device):
         edge_id = {"host": device['host'], "enterprise_id": device['enterprise_id'], "edge_id": device['edge_id']}
+        edge_identifier = device['edge_id']
         interval = {
             "end": datetime.now(utc),
             "start": (datetime.now(utc) - timedelta(minutes=self._monitoring_minutes))}
@@ -45,10 +80,12 @@ class ServiceAffectingMonitor:
                                }
         edge_status = await self._event_bus.rpc_request("edge.status.request", edge_status_request, timeout=60)
         self._logger.info(f'Edge received from event bus')
+        self._logger.info(f'{edge_status}')
 
-        if edge_status is None or \
-                ('edge_info' not in edge_status['body'].keys() or 'links' not in edge_status['body'][
-                                                                                 'edge_info'].keys()):
+        if edge_status is None or 'edge_info' not in edge_status['body'].keys() \
+                or 'links' not in edge_status['body']['edge_info'].keys() \
+                or 'edges' not in edge_status['body']['edge_info'].keys() \
+                or 'serialNumber' not in edge_status['body']['edge_info']['edges'].keys():
             self._logger.error(f'Data received from Velocloud is incomplete')
             self._logger.error(f'{json.dumps(edge_status, indent=2)}')
             slack_message = {'request_id': uuid(),
@@ -58,7 +95,54 @@ class ServiceAffectingMonitor:
             await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             return
 
-        self._logger.info(f'{edge_status}')
+        serial_number = edge_status['body']['edge_info']['edges']['serialNumber']
+
+        self._logger.info(f'[service-affecting-monitoring] Claiming Bruin client info for serial {serial_number}...')
+        bruin_client_info_response = await self._get_bruin_client_info_by_serial(serial_number)
+        self._logger.info(f'[service-affecting-monitoring] Got Bruin client info for serial {serial_number} -> '
+                          f'{bruin_client_info_response}')
+        bruin_client_info_response_body = bruin_client_info_response['body']
+        bruin_client_info_response_status = bruin_client_info_response['status']
+        if bruin_client_info_response_status not in range(200, 300):
+            err_msg = (f'Error trying to get Bruin client info from Bruin for serial {serial_number}: '
+                       f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}')
+            self._logger.error(err_msg)
+
+            slack_message = {'request_id': uuid(), 'message': err_msg}
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+            return
+
+        if not bruin_client_info_response_body.get('client_id'):
+            self._logger.info(
+                f"[service-affecting-monitoring] Edge {device} doesn't have any Bruin client ID associated. "
+                'Skipping...')
+            return
+
+        self._logger.info(f'[service-affecting-monitoring] Getting management status for edge {edge_identifier}...')
+        management_status_response = await self._get_management_status(
+            bruin_client_info_response_body.get('client_id'), serial_number)
+        self._logger.info(f'[service-affecting-monitoring] Got management status for edge {edge_identifier} -> '
+                          f'{management_status_response}')
+
+        management_status_response_body = management_status_response['body']
+        management_status_response_status = management_status_response['status']
+        if management_status_response_status not in range(200, 300):
+            self._logger.error(f"Management status is unknown for {edge_identifier}")
+            message = (
+                f"[service-affecting-monitoring] Management status is unknown for {edge_identifier}. "
+                f"Cause: {management_status_response_body}"
+            )
+            slack_message = {'request_id': uuid(),
+                             'message': message}
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+            return
+
+        if not self._is_management_status_active(management_status_response_body):
+            self._logger.info(
+                f'Management status is not active for {edge_identifier}. Skipping process...')
+            return
+        else:
+            self._logger.info(f'Management status for {edge_identifier} seems active.')
 
         for link in edge_status['body']['edge_info']['links']:
             if 'serviceGroups' in link.keys():

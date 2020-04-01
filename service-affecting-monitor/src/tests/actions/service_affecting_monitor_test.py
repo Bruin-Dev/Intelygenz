@@ -77,11 +77,29 @@ class TestServiceAffectingMonitor:
         )
 
     @pytest.mark.asyncio
+    async def monitor_each_edge_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_affecting_monitor._service_affecting_monitor_process = CoroutineMock(return_value=None)
+
+        await service_affecting_monitor._monitor_each_edge()
+
+        expected_calls = len(config.MONITOR_CONFIG['device_by_id'])
+        assert expected_calls == service_affecting_monitor._service_affecting_monitor_process.call_count
+
+    @pytest.mark.asyncio
     async def service_affecting_monitor_process_test(self):
         logger = Mock()
         scheduler = Mock()
         config = testconfig
 
+        client_id = 85940
+        serial_number = "VC05200028729"
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -115,23 +133,55 @@ class TestServiceAffectingMonitor:
                             },
                             "links": [link_1, link_2]
                         }
-            }
+            },
+            "status": 200
         }
+
+        management_status_response = {
+            "request_id": "uuid2",
+            "body": "Pending",
+            "status": 200
+        }
+
+        bruin_client_info_response = {
+            "request_id": "uuid2",
+            "body": {
+                "client_name": "Titan America",
+                "client_id": client_id
+            },
+            "status": 200
+        }
+
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=edges_to_report)
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            edges_to_report,
+            bruin_client_info_response,
+            management_status_response
+        ])
         template_renderer = Mock()
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_affecting_monitor._get_bruin_client_info_by_serial = CoroutineMock(
+            return_value=bruin_client_info_response)
+        service_affecting_monitor._get_management_status = CoroutineMock(
+            return_value=management_status_response)
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
 
         await service_affecting_monitor._service_affecting_monitor_process(device)
 
-        event_bus.rpc_request.assert_awaited_once()
+        event_bus.rpc_request.assert_awaited()
+
+        service_affecting_monitor._get_bruin_client_info_by_serial.assert_awaited_once()
+        service_affecting_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(serial_number)
+
+        service_affecting_monitor._get_management_status.assert_awaited_once()
+        service_affecting_monitor._get_management_status.assert_awaited_once_with(client_id, serial_number)
+
         service_affecting_monitor._latency_check.assert_has_awaits([
             call(device, edges_to_report["body"], link_1),
-            call(device, edges_to_report["body"], link_2)
+            call(device, edges_to_report["body"], link_2),
         ], any_order=True)
         service_affecting_monitor._packet_loss_check.assert_has_awaits([
             call(device, edges_to_report["body"], link_1),
@@ -141,6 +191,311 @@ class TestServiceAffectingMonitor:
             call(device, edges_to_report["body"], link_1),
             call(device, edges_to_report["body"], link_2)
         ], any_order=True)
+
+    @pytest.mark.asyncio
+    async def service_affecting_monitor_process_with_no_valid_bruin_client_info_test(self):
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        client_id = 85940
+        serial_number = "VC05200028729"
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1 = {
+            'bestLatencyMsRx': 14,
+            'bestLatencyMsTx': 121,
+            'serviceGroups': ['PUBLIC_WIRELESS']
+        }
+        link_2 = {
+            'bestLatencyMsRx': 60,
+            'bestLatencyMsTx': 20,
+            'serviceGroups': ['PUBLIC_WIRED']
+        }
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "body": {
+                "edge_id": {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1602
+                },
+                "edge_info": {
+                    "enterprise_name": "Titan America|85940|",
+                    "edges": {
+                        "name": "TEST",
+                        "edgeState": "OFFLINE",
+                        "serialNumber": "VC05200028729",
+                    },
+                    "links": [link_1, link_2]
+                }
+            },
+            "status": 200
+        }
+
+        bruin_client_info_response = {
+            "request_id": "uuid2",
+            "body": {
+                "client_name": "Titan America",
+                "client_id": client_id
+            },
+            "status": 500
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            edges_to_report,
+            bruin_client_info_response
+        ])
+        template_renderer = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_affecting_monitor._get_bruin_client_info_by_serial = CoroutineMock(
+            return_value=bruin_client_info_response)
+        service_affecting_monitor._get_management_status = CoroutineMock()
+        service_affecting_monitor._latency_check = CoroutineMock()
+        service_affecting_monitor._packet_loss_check = CoroutineMock()
+        service_affecting_monitor._jitter_check = CoroutineMock()
+
+        await service_affecting_monitor._service_affecting_monitor_process(device)
+
+        event_bus.rpc_request.assert_awaited()
+
+        service_affecting_monitor._get_bruin_client_info_by_serial.assert_awaited_once()
+        service_affecting_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(serial_number)
+
+        service_affecting_monitor._latency_check.assert_not_awaited()
+        service_affecting_monitor._packet_loss_check.assert_not_awaited()
+        service_affecting_monitor._jitter_check.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def service_affecting_monitor_process_with_no_valid_bruin_client_id_test(self):
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        client_id = 85940
+        serial_number = "VC05200028729"
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1 = {
+            'bestLatencyMsRx': 14,
+            'bestLatencyMsTx': 121,
+            'serviceGroups': ['PUBLIC_WIRELESS']
+        }
+        link_2 = {
+            'bestLatencyMsRx': 60,
+            'bestLatencyMsTx': 20,
+            'serviceGroups': ['PUBLIC_WIRED']
+        }
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "body": {
+                "edge_id": {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1602
+                },
+                "edge_info": {
+                    "enterprise_name": "Titan America|85940|",
+                    "edges": {
+                        "name": "TEST",
+                        "edgeState": "OFFLINE",
+                        "serialNumber": "VC05200028729",
+                    },
+                    "links": [link_1, link_2]
+                }
+            },
+            "status": 200
+        }
+
+        bruin_client_info_response = {
+            "request_id": "uuid2",
+            "body": {
+                "client_name": "Titan America"
+            },
+            "status": 200
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            edges_to_report,
+            bruin_client_info_response
+        ])
+        template_renderer = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_affecting_monitor._get_bruin_client_info_by_serial = CoroutineMock(
+            return_value=bruin_client_info_response)
+        service_affecting_monitor._get_management_status = CoroutineMock()
+        service_affecting_monitor._latency_check = CoroutineMock()
+        service_affecting_monitor._packet_loss_check = CoroutineMock()
+        service_affecting_monitor._jitter_check = CoroutineMock()
+
+        await service_affecting_monitor._service_affecting_monitor_process(device)
+
+        event_bus.rpc_request.assert_awaited()
+
+        service_affecting_monitor._get_bruin_client_info_by_serial.assert_awaited_once()
+        service_affecting_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(serial_number)
+
+        service_affecting_monitor._latency_check.assert_not_awaited()
+        service_affecting_monitor._packet_loss_check.assert_not_awaited()
+        service_affecting_monitor._jitter_check.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def service_affecting_monitor_process_with_no_valid_management_status_test(self):
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        client_id = 85940
+        serial_number = "VC05200028729"
+        device = {
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1602
+        }
+
+        link_1 = {
+            'bestLatencyMsRx': 14,
+            'bestLatencyMsTx': 121,
+            'serviceGroups': ['PUBLIC_WIRELESS']
+        }
+        link_2 = {
+            'bestLatencyMsRx': 60,
+            'bestLatencyMsTx': 20,
+            'serviceGroups': ['PUBLIC_WIRED']
+        }
+        edges_to_report = {
+            "request_id": "E4irhhgzqTxmSMFudJSF5Z",
+            "body": {
+                "edge_id": {
+                    "host": "mettel.velocloud.net",
+                    "enterprise_id": 137,
+                    "edge_id": 1602
+                },
+                "edge_info": {
+                    "enterprise_name": "Titan America|85940|",
+                    "edges": {
+                        "name": "TEST",
+                        "edgeState": "OFFLINE",
+                        "serialNumber": "VC05200028729",
+                    },
+                    "links": [link_1, link_2]
+                }
+            },
+            "status": 200
+        }
+
+        management_status_response = {
+            "request_id": "uuid2",
+            "body": "NOT VALID STATUS",
+            "status": 500
+        }
+
+        bruin_client_info_response = {
+            "request_id": "uuid2",
+            "body": {
+                "client_name": "Titan America",
+                "client_id": client_id
+            },
+            "status": 200
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            edges_to_report,
+            bruin_client_info_response,
+            management_status_response
+        ])
+        template_renderer = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+        service_affecting_monitor._get_bruin_client_info_by_serial = CoroutineMock(
+            return_value=bruin_client_info_response)
+        service_affecting_monitor._get_management_status = CoroutineMock(
+            return_value=management_status_response)
+        service_affecting_monitor._latency_check = CoroutineMock()
+        service_affecting_monitor._packet_loss_check = CoroutineMock()
+        service_affecting_monitor._jitter_check = CoroutineMock()
+
+        await service_affecting_monitor._service_affecting_monitor_process(device)
+
+        event_bus.rpc_request.assert_awaited()
+
+        service_affecting_monitor._get_bruin_client_info_by_serial.assert_awaited_once()
+        service_affecting_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(serial_number)
+
+        service_affecting_monitor._get_management_status.assert_awaited_once()
+        service_affecting_monitor._get_management_status.assert_awaited_once_with(client_id, serial_number)
+
+        service_affecting_monitor._latency_check.assert_not_awaited()
+        service_affecting_monitor._packet_loss_check.assert_not_awaited()
+        service_affecting_monitor._jitter_check.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def get_management_status_test(self):
+        uuid_1 = uuid()
+        client_id = 85940
+        serial_number = "VC05200028729"
+        management_status = {
+            "body": "Pending",
+            "status": 200
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=management_status)
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+
+        management_status_response = await service_affecting_monitor._get_management_status(client_id, serial_number)
+        expected = {
+            "body": "Pending",
+            "status": 200
+        }
+
+        assert expected == management_status_response
+
+    @pytest.mark.asyncio
+    async def get_bruin_client_info_by_serial_test(self):
+        uuid_1 = uuid()
+        client_id = 85940
+        serial_number = "VC05200028729"
+
+        bruin_client_info_response = {
+            "request_id": "uuid2",
+            "body": {
+                "client_name": "Titan America",
+                "client_id": client_id
+            },
+            "status": 200
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=bruin_client_info_response)
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        template_renderer = Mock()
+
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer)
+
+        bruin_info_response = await service_affecting_monitor._get_bruin_client_info_by_serial(serial_number)
+
+        assert bruin_client_info_response == bruin_info_response
 
     @pytest.mark.asyncio
     async def service_affecting_monitor_process_no_edge_test(self):
@@ -214,6 +569,8 @@ class TestServiceAffectingMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        client_id = 85940
+        serial_number = "VC05200028729"
         device = {
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
@@ -245,21 +602,52 @@ class TestServiceAffectingMonitor:
                             },
                             "links": [link_1, link_2]
                         }
-            }
+            },
+            "status": 200
         }
+        management_status_response = {
+            "request_id": "uuid2",
+            "body": "NOT VALID STATUS",
+            "status": 200
+        }
+
+        bruin_client_info_response = {
+            "request_id": "uuid2",
+            "body": {
+                "client_name": "Titan America",
+                "client_id": client_id
+            },
+            "status": 200
+        }
+
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=edges_to_report)
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            edges_to_report,
+            bruin_client_info_response,
+            management_status_response
+        ])
         template_renderer = Mock()
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler,
                                                             config, template_renderer)
+        service_affecting_monitor._get_bruin_client_info_by_serial = CoroutineMock(
+            return_value=bruin_client_info_response)
+        service_affecting_monitor._get_management_status = CoroutineMock(
+            return_value=management_status_response)
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
 
         await service_affecting_monitor._service_affecting_monitor_process(device)
 
-        event_bus.rpc_request.assert_awaited_once()
+        event_bus.rpc_request.assert_awaited()
+
+        service_affecting_monitor._get_bruin_client_info_by_serial.assert_awaited_once()
+        service_affecting_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(serial_number)
+
+        service_affecting_monitor._get_management_status.assert_awaited_once()
+        service_affecting_monitor._get_management_status.assert_awaited_once_with(client_id, serial_number)
+
         service_affecting_monitor._latency_check.assert_not_awaited()
         service_affecting_monitor._packet_loss_check.assert_not_awaited()
         service_affecting_monitor._jitter_check.assert_not_awaited()
