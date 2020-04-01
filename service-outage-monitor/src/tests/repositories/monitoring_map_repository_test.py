@@ -65,7 +65,7 @@ class TestMonitoringMapRepository:
             'interval',
             minutes=config.MONITOR_MAP_CONFIG["refresh_map_time"],
             next_run_time=undefined,
-            replace_existing=True,
+            replace_existing=False,
             id='_create_client_id_to_dict_of_serials_dict',
         )
 
@@ -91,7 +91,7 @@ class TestMonitoringMapRepository:
             'interval',
             minutes=config.MONITOR_MAP_CONFIG["refresh_map_time"],
             next_run_time=next_run_time,
-            replace_existing=True,
+            replace_existing=False,
             id='_create_client_id_to_dict_of_serials_dict',
         )
 

@@ -5,6 +5,7 @@ from datetime import datetime
 
 import asyncio
 from application.repositories.edge_redis_repository import EdgeIdentifier
+from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone
 from shortuuid import uuid
@@ -26,7 +27,9 @@ class MonitoringMapRepository:
         self._event_bus = event_bus
         self._logger = logger
         self._monitoring_map_cache = {}
+        self._temp_monitoring_map = {}
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_MAP_CONFIG['semaphore'])
+        self._blacklisted_edges = self._config.MONITOR_MAP_CONFIG['blacklisted_edges']
 
     async def start_create_monitoring_map_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: map_bruin_client_ids_to_edges_serials_and_statuses'
@@ -36,15 +39,20 @@ class MonitoringMapRepository:
         if exec_on_start:
             next_run_time = datetime.now(timezone(self._config.MONITOR_MAP_CONFIG['timezone']))
             self._logger.info(f'It will be executed now')
-        self._scheduler.add_job(self.map_bruin_client_ids_to_edges_serials_and_statuses, 'interval',
-                                minutes=self._config.MONITOR_MAP_CONFIG["refresh_map_time"],
-                                next_run_time=next_run_time,
-                                replace_existing=True, id='_create_client_id_to_dict_of_serials_dict')
+        try:
+            self._scheduler.add_job(self.map_bruin_client_ids_to_edges_serials_and_statuses, 'interval',
+                                    minutes=self._config.MONITOR_MAP_CONFIG["refresh_map_time"],
+                                    next_run_time=next_run_time,
+                                    replace_existing=False, id='_create_client_id_to_dict_of_serials_dict')
+        except ConflictingIdError:
+            self._logger.info(f'There is a recheck job scheduled for creating monitoring map already. No new job '
+                              'is going to be scheduled.')
 
     def get_monitoring_map_cache(self):
         return self._monitoring_map_cache.copy()
 
     async def map_bruin_client_ids_to_edges_serials_and_statuses(self):
+        self._temp_monitoring_map = {}
         try:
             edge_list_response = await self._get_edges_for_monitoring()
         except Exception:
@@ -60,13 +68,17 @@ class MonitoringMapRepository:
         tasks = [
             self._process_edge_and_tickets(edge_full_id)
             for edge_full_id in edge_list_response_body
+            if edge_full_id not in self._blacklisted_edges
         ]
         start_time = time.time()
         self._logger.info(f"Processing {len(edge_list_response_body)} edges")
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
-        self._logger.info(f"Processing {len(tasks)} edges took {time.time() - start_time} seconds")
+        self._monitoring_map_cache = self._temp_monitoring_map
+        self._temp_monitoring_map = {}
+
+        self._logger.info(f"Mapping {len(tasks)} edges took {time.time() - start_time} seconds")
         self._logger.info(f"Processing {len(tasks)} edges")
 
     async def _process_edge_and_tickets(self, edge_full_id):
@@ -139,11 +151,12 @@ class MonitoringMapRepository:
                     f"Has been added to the map of devices to monitor "
                     f"took {time.time() - total_start_time} seconds")
 
-                self._monitoring_map_cache.setdefault(bruin_client_id, {})
-                self._monitoring_map_cache[bruin_client_id][serial_number] = {
+                self._temp_monitoring_map.setdefault(bruin_client_id, {})
+                self._temp_monitoring_map[bruin_client_id][serial_number] = {
                     'edge_id': edge_full_id,
                     'edge_status': edge_status_data,
                 }
+
         try:
             await process_edge_and_tickets()
         except Exception as ex:
