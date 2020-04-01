@@ -225,11 +225,112 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edge_status_by_id.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def outage_monitoring_process_with_retrieval_of_last_edge_events_returning_non_2XX_status_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edges_for_monitoring = [edge_full_id]
+
+        edge_list_response = {
+            'request_id': uuid(),
+            'body': edges_for_monitoring,
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': 'Got internal error from Velocloud',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
+        outage_monitor._get_edge_status_by_id = CoroutineMock()
+
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            await outage_monitor._outage_monitoring_process()
+
+        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
+        outage_monitor._get_last_events_for_edge.assert_awaited_once_with(
+            edge_full_id,
+            since=current_time - timedelta(days=7),
+        )
+        outage_monitor._get_edge_status_by_id.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def outage_monitoring_process_with_no_edge_events_during_last_week_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edges_for_monitoring = [edge_full_id]
+
+        edge_list_response = {
+            'request_id': uuid(),
+            'body': edges_for_monitoring,
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [],
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
+        outage_monitor._get_edge_status_by_id = CoroutineMock()
+
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            await outage_monitor._outage_monitoring_process()
+
+        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
+        outage_monitor._get_last_events_for_edge.assert_awaited_once_with(
+            edge_full_id,
+            since=current_time - timedelta(days=7),
+        )
+        outage_monitor._get_edge_status_by_id.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def outage_monitoring_process_with_edge_having_a_null_serial_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
         edge_list_response = {
             'request_id': uuid(),
             'body': [edge_full_id],
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
             'status': 200,
         }
 
@@ -256,6 +357,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_management_status = CoroutineMock()
 
@@ -273,6 +375,25 @@ class TestServiceOutageMonitor:
         edge_list_response = {
             'request_id': uuid(),
             'body': [edge_full_id],
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
             'status': 200,
         }
 
@@ -302,6 +423,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_management_status = CoroutineMock()
 
@@ -318,6 +440,25 @@ class TestServiceOutageMonitor:
         edge_list_response = {
             'request_id': uuid(),
             'body': [edge_full_id],
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
             'status': 200,
         }
 
@@ -366,6 +507,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock()
@@ -385,6 +527,25 @@ class TestServiceOutageMonitor:
         edge_list_response = {
             'request_id': uuid(),
             'body': [edge_full_id],
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
             'status': 200,
         }
 
@@ -424,6 +585,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock()
@@ -441,6 +603,25 @@ class TestServiceOutageMonitor:
         edge_list_response = {
             'request_id': uuid(),
             'body': [edge_full_id],
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
             'status': 200,
         }
 
@@ -500,6 +681,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -521,6 +703,25 @@ class TestServiceOutageMonitor:
         edge_list_response = {
             'request_id': uuid(),
             'body': [edge_full_id],
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
             'status': 200,
         }
 
@@ -569,6 +770,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -591,6 +793,25 @@ class TestServiceOutageMonitor:
         edge_list_response = {
             'request_id': uuid(),
             'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
             'status': 200,
         }
 
@@ -687,6 +908,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -717,6 +939,25 @@ class TestServiceOutageMonitor:
         edge_list_response = {
             'request_id': uuid(),
             'body': [edge_full_id],
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
             'status': 200,
         }
 
@@ -765,6 +1006,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -794,6 +1036,25 @@ class TestServiceOutageMonitor:
         edge_list_response = {
             'request_id': uuid(),
             'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
+            'status': 200,
+        }
+
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
             'status': 200,
         }
 
@@ -878,6 +1139,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -935,6 +1197,25 @@ class TestServiceOutageMonitor:
             'status': 200,
         }
 
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
+            'status': 200,
+        }
+
         edge_1_serial = 'VC1234567'
         edge_1_status_data = {
             'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
@@ -1076,6 +1357,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
@@ -1110,6 +1392,25 @@ class TestServiceOutageMonitor:
             'status': 200,
         }
 
+        edge_events_response = {
+            'request_id': uuid(),
+            'body': [
+                {
+                    'event': 'EDGE_NEW_DEVICE',
+                    'category': 'EDGE',
+                    'eventTime': '2019-07-30 07:38:00+00:00',
+                    'message': 'New or updated client device'
+                },
+                {
+                    'event': 'EDGE_INTERFACE_UP',
+                    'category': 'SYSTEM',
+                    'eventTime': '2019-07-29 07:38:00+00:00',
+                    'message': 'Interface GE1 is up'
+                }
+            ],
+            'status': 200,
+        }
+
         edge_1_serial = 'VC1234567'
         edge_1_status_data = {
             'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
@@ -1251,6 +1552,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)

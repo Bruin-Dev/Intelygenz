@@ -77,6 +77,23 @@ class OutageMonitor:
                                   'Skipping...')
                 continue
 
+            past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
+            recent_events_response = await self._get_last_events_for_edge(
+                edge_full_id, since=past_moment_for_events_lookup
+            )
+
+            recent_events_response_status = recent_events_response['status']
+            if recent_events_response_status not in range(200, 300):
+                continue
+
+            recent_events_response_body = recent_events_response['body']
+            if not recent_events_response_body:
+                self._logger.info(
+                    f'[outage-monitoring] No events were found for edge {edge_identifier} starting from '
+                    f'{past_moment_for_events_lookup}. Skipping...'
+                )
+                continue
+
             self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
             edge_status_response = await self._get_edge_status_by_id(edge_full_id)
             self._logger.info(f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
@@ -616,23 +633,15 @@ class OutageMonitor:
 
             past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
 
-            try:
-                recent_events_response = await self._get_last_events_for_edge(
-                    edge_full_id, since=past_moment_for_events_lookup
-                )
-            except Exception:
-                await self._notify_failing_rpc_request_for_edge_events(edge_full_id)
+            recent_events_response = await self._get_last_events_for_edge(
+                edge_full_id, since=past_moment_for_events_lookup
+            )
+
+            recent_events_response_status = recent_events_response['status']
+            if recent_events_response_status not in range(200, 300):
                 continue
 
             recent_events_response_body = recent_events_response['body']
-            recent_events_response_status = recent_events_response['status']
-
-            if recent_events_response_status not in range(200, 300):
-                await self._notify_http_error_when_requesting_edge_events_from_velocloud(
-                    edge_full_id, recent_events_response
-                )
-                continue
-
             if not recent_events_response_body:
                 self._logger.info(
                     f'No events were found for edge {edge_identifier} starting from {past_moment_for_events_lookup}. '
@@ -671,45 +680,52 @@ class OutageMonitor:
         self._logger.info('Finished processing tickets without triage!')
 
     async def _get_last_events_for_edge(self, edge_full_id, since: datetime):  # pragma: no cover
-        current_datetime = datetime.now(utc)
+        until = datetime.now(utc)
+        filters = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
 
-        last_events_request = {
+        err_msg = None
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+
+        request = {
             'request_id': uuid(),
             'body': {
                 'edge': edge_full_id,
                 'start_date': since,
-                'end_date': current_datetime,
-                'filter': ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD'],
+                'end_date': until,
+                'filter': filters,
             },
         }
-        events = await self._event_bus.rpc_request(
-            "alert.request.event.edge", last_events_request, timeout=180
-        )
-        return events
 
-    async def _notify_failing_rpc_request_for_edge_events(self, edge_full_id):  # pragma: no cover
-        edge_identifier = EdgeIdentifier(**edge_full_id)
-        err_msg = f'An error occurred when requesting edge events from Velocloud for edge {edge_identifier}'
+        try:
+            self._logger.info(
+                f"Getting events of edge {edge_identifier} having any type of {filters} that took place "
+                f"between {since} and {until} from Velocloud..."
+            )
+            response = await self._event_bus.rpc_request("alert.request.event.edge", request, timeout=180)
+            self._logger.info(
+                f"Got events of edge {edge_identifier} having any type in {filters} that took place "
+                f"between {since} and {until} from Velocloud!"
+            )
+        except Exception as e:
+            err_msg = f'An error occurred when requesting edge events from Velocloud for edge {edge_identifier} -> {e}'
+            response = {'body': None, 'status': 503}
+        else:
+            response_body = response['body']
+            response_status = response['status']
 
-        self._logger.error(err_msg)
-        slack_message = {'request_id': uuid(), 'message': err_msg}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while retrieving events of edge {edge_identifier} having any type in {filters} that '
+                    f'took place between {since} and {until} in {self._config.TRIAGE_CONFIG["environment"].upper()}'
+                    f'environment: Error {response_status} - {response_body}'
+                )
 
-    async def _notify_http_error_when_requesting_edge_events_from_velocloud(self, edge_full_id, edge_events_response):
-        edge_identifier = EdgeIdentifier(**edge_full_id)
+        if err_msg:
+            self._logger.error(err_msg)
+            slack_message = {'request_id': uuid(), 'message': err_msg}
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
-        edge_events_response_body = edge_events_response['body']
-        edge_events_response_status = edge_events_response['status']
-
-        err_msg = (
-            f'Error while retrieving edge events for edge {edge_identifier} in '
-            f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
-            f'Error {edge_events_response_status} - {edge_events_response_body}'
-        )
-
-        self._logger.error(err_msg)
-        slack_message = {'request_id': uuid(), 'message': err_msg}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+        return response
 
     def _gather_relevant_data_for_first_triage_note(self, edge_data, edge_events) -> dict:  # pragma: no cover
         edge_full_id = edge_data['edge_id']
