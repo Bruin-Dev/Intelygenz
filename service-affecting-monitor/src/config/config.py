@@ -32,11 +32,11 @@ MONITOR_CONFIG = {
     "packet_loss_wired": 5,
     "jitter": 30,
     'monitoring_minutes': 10,
-    "management_status_filter": [
+    "management_status_filter": {
         "Pending",
         "Active – Gold Monitoring",
         "Active – Platinum Monitoring"
-    ]
+    }
 }
 LOG_CONFIG = {
     'name': 'service-affecting-monitor',
