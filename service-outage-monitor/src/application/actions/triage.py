@@ -262,6 +262,7 @@ class Triage:
                 if type(note['noteValue']) != str:
                     self._logger.info(f'Type of note value is {type(note["noteValue"])} and the content is'
                                       f'{note["noteValue"]}')
+                    continue
                 if self.__triage_note_regex.match(note['noteValue']):
                     self._logger.info(f'Ticket {ticket["ticket_id"]} has a triage already!')
                     tickets_with_triage.append(ticket)
@@ -307,9 +308,6 @@ class Triage:
             ticket_notes = ticket['ticket_notes']
 
             for index, note in enumerate(ticket['ticket_notes']):
-                if type(note['noteValue']) != str:
-                    self._logger.info(f'Type of note value is {type(note["noteValue"])} and the content is'
-                                      f'{note["noteValue"]}')
                 is_triage_note = bool(self.__triage_note_regex.match(note['noteValue']))
                 if not is_triage_note:
                     del ticket_notes[index]

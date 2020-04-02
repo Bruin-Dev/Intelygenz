@@ -1424,6 +1424,11 @@ class TestTriage:
             },
             'ticket_notes': [
                 {
+                    "noteId": 41894042,
+                    "noteValue": None,
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
                     "noteId": 41894041,
                     "noteValue": 'This not is not a triage',
                     "createdDate": "2020-02-24T10:07:13.503-05:00",
