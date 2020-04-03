@@ -269,9 +269,9 @@ class Triage:
                         tickets_with_triage.append(ticket)
                         break
                 except Exception as ex:
-                    self._logger.error(note)
-                    self._logger.error(f"Error ocurred in _distinguish_tickets_with_and_without_triage {ex}")
-
+                    self._logger.error(f"[triage] Error occurs on _distinguish_tickets_with_and_without_triage "
+                                       f"with note {note}")
+                    self._logger.error(ex)
         tickets_without_triage = [
             ticket
             for ticket in tickets
@@ -314,14 +314,16 @@ class Triage:
             for index, note in enumerate(ticket['ticket_notes']):
                 try:
                     if type(note['noteValue']) != str:
-                        self._logger.info(f'Type of note value is {type(note["noteValue"])} and the content is'
-                                          f' {note["noteValue"]}')
+                        self._logger.info(f'[triage] Type of note value is {type(note["noteValue"])} '
+                                          f' and the content is {note["noteValue"]}')
+                        continue
                     is_triage_note = bool(self.__triage_note_regex.match(note['noteValue']))
                     if not is_triage_note:
                         del ticket_notes[index]
                 except Exception as ex:
-                    self._logger.error(note)
-                    self._logger.error(f"Error ocurred in _discard_non_triage_notes {ex}")
+                    self._logger.error(f"[triage] Error occurs on _discard_non_triage_notes "
+                                       f"with note {note}")
+                    self._logger.error(ex)
 
     def _get_most_recent_ticket_note(self, ticket):
         sorted_notes = sorted(ticket['ticket_notes'], key=lambda note: note['createdDate'])
