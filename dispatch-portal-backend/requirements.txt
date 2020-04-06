@@ -4,3 +4,4 @@ swagger-ui-py==0.2.1
 quart-openapi==1.4.3
 -f https://d3nllpcjtts00v.cloudfront.net/igzpackages/index.html
 igzpackages==1.0.9
+Quart-CORS==0.1.3

@@ -6,6 +6,7 @@ import json
 import jsonschema
 from jsonschema import validate
 from quart import jsonify, request
+from quart_cors import cors
 from hypercorn.asyncio import serve
 from hypercorn.config import Config as HyperCornConfig
 from quart.exceptions import HTTPException
@@ -32,6 +33,7 @@ class DispatchServer:
         self._new_bind = f'0.0.0.0:{self._port}'
         self._app = Pint(__name__, title=self._title, no_openapi=True,
                          base_model_schema=config.DISPATCH_PORTAL_CONFIG['schema_path'])
+        self._app = cors(self._app, allow_origin="*")
         self._app.config['MAX_CONTENT_LENGTH'] = self._max_content_length
         self._redis_client = redis_client
         self._event_bus = event_bus

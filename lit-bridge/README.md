@@ -431,7 +431,8 @@ binary data with file content
   "status": 200
 }
 
-```
+
+### Session Expired - 401
 
 # Common Errors
 

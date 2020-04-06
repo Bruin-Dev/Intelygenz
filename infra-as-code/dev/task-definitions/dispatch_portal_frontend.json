@@ -26,7 +26,17 @@
       "retries": 3,
       "startPeriod": 30,
       "timeout": 5
-    }
+    },
+    "environment": [
+      {
+        "name": "BASE_API_URL",
+        "value": "${BASE_API_URL}"
+      },
+      {
+        "name": "DISPATCH_BACKEND_PORTAL_PORT",
+        "value": "${DISPATCH_BACKEND_PORTAL_PORT}"
+      }
+    ]
   },
   {
     "name": "dispatch-portal-frontend-nginx",

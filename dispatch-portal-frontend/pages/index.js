@@ -79,7 +79,7 @@ function Index({ authToken }) {
       <Menu authToken={authToken} />
       <Link href={Routes.NEW_DISPATCH()}>
         <button className="new" type="button">
-          Create new dispatch
+          Create new dispatch ||{config.basePath}||
         </button>
       </Link>
       {isLoading ? (

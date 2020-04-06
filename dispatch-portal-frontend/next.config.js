@@ -14,7 +14,6 @@ module.exports = phase => {
   /* const isStaging =
     phase === PHASE_PRODUCTION_BUILD && process.env.NODE_ENV !== 'production';
   */
-
   console.log(`isDev:${isDev}  isProd:${isProd}`);
 
   const MOCKS_SERVICES = {
@@ -38,7 +37,8 @@ module.exports = phase => {
     ACTIVATED_MOCKS: (() => {
       if (isDev)
         return [MOCKS_SERVICES.LOGIN, MOCKS_SERVICES.GET_ALL_DISPATCHES];
-      if (isProd) return false;
+      if (isProd)
+        return [MOCKS_SERVICES.LOGIN, MOCKS_SERVICES.GET_ALL_DISPATCHES];
       return 'MOCKS:not SET';
     })(),
     MOCKS_SERVICES
