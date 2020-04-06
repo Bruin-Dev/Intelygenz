@@ -93,6 +93,8 @@ class OutageMonitor:
                     f'{past_moment_for_events_lookup}. Skipping...'
                 )
                 continue
+            self._logger.info(
+                f'[outage-monitoring] Got link and edge events activity in the last week for edge {edge_identifier}!')
 
             self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
             edge_status_response = await self._get_edge_status_by_id(edge_full_id)
@@ -281,7 +283,7 @@ class OutageMonitor:
         detail_for_ticket_resolution = self._get_first_element_matching(
             details_from_ticket,
             lambda detail: detail['detailValue'] == serial_number,
-         )
+        )
 
         self._logger.info(f'Autoresolving ticket {outage_ticket_id} linked to edge {edge_identifier}...')
         await self._resolve_outage_ticket(outage_ticket_id, detail_for_ticket_resolution['detailID'])
