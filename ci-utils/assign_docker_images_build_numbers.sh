@@ -2,6 +2,8 @@
     
 export TF_VAR_BRUIN_BRIDGE_BUILD_NUMBER=$(cat /tmp/automation-bruin-bridge.json| jq -r .tag)
 echo "TF_VAR_BRUIN_BRIDGE_BUILD_NUMBER is ${TF_VAR_BRUIN_BRIDGE_BUILD_NUMBER}"
+export TF_VAR_LIT_BRIDGE_BUILD_NUMBER=$(cat /tmp/automation-lit-bridge.json| jq -r .tag)
+echo "TF_VAR_LIT_BRIDGE_BUILD_NUMBER is ${TF_VAR_LIT_BRIDGE_BUILD_NUMBER}"
 export TF_VAR_LAST_CONTACT_REPORT_BUILD_NUMBER=$(cat /tmp/automation-last-contact-report.json| jq -r .tag)
 echo "TF_VAR_LAST_CONTACT_REPORT_BUILD_NUMBER is ${TF_VAR_LAST_CONTACT_REPORT_BUILD_NUMBER}"
 export TF_VAR_GRAFANA_BUILD_NUMBER=$(cat /tmp/grafana.json | jq -r .tag)

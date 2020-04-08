@@ -48,6 +48,15 @@ locals {
   automation-bruin-bridge-task_definition = "${aws_ecs_task_definition.automation-bruin-bridge.family}:${aws_ecs_task_definition.automation-bruin-bridge.revision}"
   automation-bruin-bridge-service_discovery_service-name = "bruin-bridge-${var.ENVIRONMENT}"
 
+  // lit-brige local vars
+  automation-lit-bridge-image = "${data.aws_ecr_repository.automation-lit-bridge.repository_url}:${var.LIT_BRIDGE_BUILD_NUMBER}"
+  automation-lit-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge_service-security_group-name = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge-resource-name = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge-task_definition = "${aws_ecs_task_definition.automation-lit-bridge.family}:${aws_ecs_task_definition.automation-lit-bridge.revision}"
+  automation-lit-bridge-service_discovery_service-name = "lit-bridge-${var.ENVIRONMENT}"
+
   // t7-brige local vars
   automation-t7-bridge-image = "${data.aws_ecr_repository.automation-t7-bridge.repository_url}:${var.T7_BRIDGE_BUILD_NUMBER}"
   automation-t7-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-t7-bridge"

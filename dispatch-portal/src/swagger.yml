@@ -1,0 +1,390 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: dispatch-portal
+  description: Dispatch portal for Mettel
+  termsOfService: http://swagger.io/terms/
+  contact:
+    name: Swagger API Team
+    email: apiteam@swagger.io
+    url: http://swagger.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: http://127.0.0.1:5000
+tags:
+  - name: lit
+    description: Lit API
+  - name: cts
+    description: CTS API
+paths:
+  /lit/dispatch/{dispatch_number}:
+    get:
+      description: Returns all dispatches from LIT that match a filter
+      tags:
+        - lit
+      operationId: dispatch
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+          description: The number of items to skip before starting to collect the result set
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          description: The numbers of items to return
+        - name: dispatch_number
+          in: path
+          schema:
+            type: string
+          description: ID of the dispatch
+
+      responses:
+        '200':
+          description: Dispatches response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/dispatch_lit'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  '/lit/dispatch':
+    post:
+      description: Creates a new dispatch for LIT
+      tags:
+        - lit
+      operationId: add_dispatch_lit
+      requestBody:
+        description: New dispatch to add to a vendor
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/new_dispatch_lit'
+      responses:
+        '200':
+          description: New dispatch response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/new_dispatch_response'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    patch:
+      description: Updates a existing dispatch for LIT
+      tags:
+        - lit
+      operationId: update_dispatch_lit
+      requestBody:
+        description: New dispatch to add to a vendor
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update_dispatch_lit'
+      responses:
+        '200':
+          description: Update dispatch response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dispatch_response'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /cts/dispatch:
+      get:
+        description: Returns all dispatches from CTS that match a filter
+        tags:
+          - cts
+        operationId: get_dispatch_cts
+        parameters:
+
+          - name: offset
+            in: query
+            schema:
+              type: integer
+            description: The number of items to skip before starting to collect the result set
+          - name: limit
+            in: query
+            schema:
+              type: integer
+            description: The numbers of items to return
+          - name: id
+            in: query
+            schema:
+              type: string
+            description: ID of the dispatch
+
+        responses:
+          '200':
+            description: Dispatches response
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/dispatch_cts'
+          default:
+            description: unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+      post:
+        description: Creates a new dispatch for LIT
+        tags:
+          - cts
+        operationId: add_dispatch_cts
+        requestBody:
+          description: New dispatch to add to a vendor
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/new_dispatch_cts'
+        responses:
+          '200':
+            description: New dispatch response
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/new_dispatch_response'
+          default:
+            description: unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+
+
+components:
+  schemas:
+
+    new_dispatch_response:
+            type: object
+            required:
+              - id
+              - vendor
+            properties:
+              id:
+                type: string
+                example: "DS1208"
+
+    dispatch_cts:
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+        - $ref: '#/components/schemas/new_dispatch_cts'
+
+
+    new_dispatch_cts:
+      type: object
+      required:
+        - provider
+      properties:
+        vendor:
+          enum: ["CTS"]
+          type: string
+
+    dispatch_lit:
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+        - $ref: '#/components/schemas/new_dispatch_lit'
+
+
+    new_dispatch_lit:
+      type: object
+      required:
+        - date_of_dispatch
+        - time_of_dispatch
+        - time_zone
+        - mettel_bruin_ticket_id
+        - job_site
+        - job_site_street
+        - job_site_city
+        - job_site_state
+        - job_site_zip_code
+        - job_site_contact_name
+        - job_site_contact_number
+        - materials_needed_for_dispatch
+        - scope_of_work
+        - mettel_tech_call_in_instructions
+        - name_of_mettel_requester
+        - mettel_department
+        - mettel_requester_email
+
+      properties:
+        date_of_dispatch:
+          type: string
+          example: "2019-11-14"
+        site_survey_quote_required:
+          type: boolean
+          example: false
+        time_of_dispatch:
+          type: string
+          description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
+          example: "6PM-8PM"
+        time_zone:
+          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time"]
+          type: string
+        mettel_bruin_ticket_id:
+          type: integer
+        job_site:
+          type: string
+          example: "Red Rose Inn"
+        job_site_street:
+          type: string
+          example: "123 Fake Street"
+        job_site_city:
+          type: string
+          example: "Pleasantown"
+        job_site_state:
+          type: string
+          example: "CA"
+        job_site_zip_code:
+          type: string
+          example: "99088"
+        job_site_contact_name:
+          type: string
+          example: "Jane Doe"
+        job_site_contact_number:
+          type: string
+          example: "+1 666 6666 666"
+        materials_needed_for_dispatch:
+          type: string
+          example: "Laptop, cable, tuner, ladder,internet hotspot"
+        scope_of_work:
+          type: string
+          example: "Device is bouncing constantly"
+        mettel_tech_call_in_instructions:
+          type: string
+          example: "When arriving to the site call HOLMDEL NOC for telematic assistance"
+        name_of_mettel_requester:
+          type: string
+          example: "Karen Doe"
+        mettel_department:
+          enum: ["Customer Care","DSL","T1 Repair","POTs Repair","Provisioning","Advanced Services Engineering", "Wireless", "Holmdel Network Engineering","Advanced Services Implementations","Other"]
+          type: string
+        mettel_requester_email:
+          type: string
+          example: "karen.doe@mettel.net"
+
+    update_dispatch_lit:
+      type: object
+      required:
+        - dispatch_number
+        - date_of_dispatch
+        - time_of_dispatch
+        - time_zone
+        - mettel_bruin_ticket_id
+        - job_site
+        - job_site_street
+        - job_site_city
+        - job_site_state
+        - job_site_zip_code
+        - job_site_contact_name
+        - job_site_contact_number
+        - materials_needed_for_dispatch
+        - scope_of_work
+        - mettel_tech_call_in_instructions
+        - name_of_mettel_requester
+        - mettel_department
+        - mettel_requester_email
+
+      properties:
+        dispatch_number:
+          type: string
+          example: "DIS"
+        date_of_dispatch:
+          type: string
+          example: "11/14/2019"
+        site_survey_quote_required:
+          type: boolean
+          example: false
+        time_of_dispatch:
+          type: string
+          description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
+          example: "6PM-8PM"
+        time_zone:
+          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time"]
+          type: string
+        mettel_bruin_ticket_id:
+          type: integer
+        job_site:
+          type: string
+          example: "Red Rose Inn"
+        job_site_street:
+          type: string
+          example: "123 Fake Street"
+        job_site_city:
+          type: string
+          example: "Pleasantown"
+        job_site_state:
+          type: string
+          example: "CA"
+        job_site_zip_code:
+          type: string
+          example: "99088"
+        job_site_contact_name:
+          type: string
+          example: "Jane Doe"
+        job_site_contact_number:
+          type: string
+          example: "+1 666 6666 666"
+        materials_needed_for_dispatch:
+          type: string
+          example: "Laptop, cable, tuner, ladder,internet hotspot"
+        scope_of_work:
+          type: string
+          example: "Device is bouncing constantly"
+        mettel_tech_call_in_instructions:
+          type: string
+          example: "When arriving to the site call HOLMDEL NOC for telematic assistance"
+        name_of_mettel_requester:
+          type: string
+          example: "Karen Doe"
+        mettel_department:
+          enum: ["Customer Care","DSL","T1 Repair","POTs Repair","Provisioning","Advanced Services Engineering", "Wireless", "Holmdel Network Engineering","Advanced Services Implementations","Other"]
+          type: string
+        mettel_requester_email:
+          type: string
+          example: "karen.doe@mettel.net"
+
+
+    error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

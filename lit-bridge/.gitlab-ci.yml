@@ -12,7 +12,7 @@ lit-bridge-linter:
 lit-bridge-test:
   variables:
     MODULE: lit-bridge
-  extends: .unittest_module_python_alpine
+  extends: .unittest_module_python
 
 # ==========================================
 # Images builds jobs for lit-bridge module

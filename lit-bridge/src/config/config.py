@@ -27,9 +27,14 @@ LIT_CONFIG = {
     'client_password': os.environ["LIT_CLIENT_PASSWORD"],
     'client_security_token': os.environ["LIT_CLIENT_SECURITY_TOKEN"],
     'login_url': os.environ["LIT_LOGIN_URL"],
+    'domain': os.environ["LIT_DOMAIN"],
+    'attempts': 5,
+    'wait_fixed': 3,
     'multiplier': 5,
     'min': 5,
-    'stop_delay': 18000
+    'stop_delay': 18000,
+    'timezone': 'US/Eastern',
+    'login_ttl': 90
 }
 
 LOG_CONFIG = {

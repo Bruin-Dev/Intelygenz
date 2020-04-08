@@ -85,6 +85,7 @@ check-ecs-resources-branches:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
+    - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
     - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
     - export TF_VAR_nats_server_desired_tasks=${nats_server_desired_tasks}
     - export TF_VAR_nats_server_1_desired_tasks=${nats_server_1_desired_tasks}
@@ -111,6 +112,7 @@ check-ecs-resources-master:
     - export ENVIRONMENT_SLUG=master
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
+    - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
     - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
     - export TF_VAR_nats_server_desired_tasks=${nats_server_desired_tasks}
     - export TF_VAR_nats_server_1_desired_tasks=${nats_server_1_desired_tasks}
@@ -145,6 +147,13 @@ deploy-branches:
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_LIT_CLIENT_ID=${LIT_CLIENT_ID_DEV}
+    - export TF_VAR_LIT_CLIENT_SECRET=${LIT_CLIENT_SECRET_DEV}
+    - export TF_VAR_LIT_USERNAME=${LIT_CLIENT_USERNAME_DEV}
+    - export TF_VAR_LIT_PASSWORD_ID=${LIT_CLIENT_PASSWORD_DEV}
+    - export TF_VAR_LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_DEV}
+    - export TF_VAR_LIT_LOGIN_URL=${LIT_LOGIN_URL_DEV}
+    - export TF_VAR_LIT_DOMAIN=${LIT_DOMAIN_DEV}
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
@@ -152,6 +161,7 @@ deploy-branches:
     - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
+    - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
     - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
     - export TF_VAR_nats_server_desired_tasks=${nats_server_desired_tasks}
     - export TF_VAR_nats_server_1_desired_tasks=${nats_server_1_desired_tasks}
@@ -193,6 +203,13 @@ deploy-master:
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
     - export TF_VAR_BRUIN_LOGIN_URL=${BRUIN_LOGIN_URL_PRO}
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
+    - export TF_VAR_LIT_CLIENT_ID=${LIT_CLIENT_ID_DEV}
+    - export TF_VAR_LIT_CLIENT_SECRET=${LIT_CLIENT_SECRET_DEV}
+    - export TF_VAR_LIT_USERNAME=${LIT_CLIENT_USERNAME_DEV}
+    - export TF_VAR_LIT_PASSWORD_ID=${LIT_CLIENT_PASSWORD_DEV}
+    - export TF_VAR_LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_DEV}
+    - export TF_VAR_LIT_LOGIN_URL=${LIT_LOGIN_URL_DEV}
+    - export TF_VAR_LIT_DOMAIN=${LIT_DOMAIN_DEV}
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_PRO}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=production
@@ -200,6 +217,7 @@ deploy-master:
     - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
+    - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
     - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
     - export TF_VAR_nats_server_desired_tasks=${nats_server_desired_tasks}
     - export TF_VAR_nats_server_1_desired_tasks=${nats_server_1_desired_tasks}

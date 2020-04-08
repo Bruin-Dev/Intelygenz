@@ -92,6 +92,16 @@
                     ],
                     [
                         "...",
+                        "${ENVIRONMENT}-lit-bridge",
+                        ".",
+                        ".",
+                        {
+                            "period":300,
+                            "stat":"Sum"
+                        }
+                    ],
+                    [
+                        "...",
                         "${ENVIRONMENT}-bruin-bridge",
                         ".",
                         ".",
@@ -210,6 +220,12 @@
                     ],
                     [
                         "...",
+                        "${ENVIRONMENT}-lit-bridge",
+                        ".",
+                        "."
+                    ],
+                    [
+                        "...",
                         "${ENVIRONMENT}-velocloud-bridge",
                         ".",
                         "."
@@ -302,6 +318,12 @@
                     [
                         "...",
                         "${ENVIRONMENT}-last-contact-report",
+                        ".",
+                        "."
+                    ],
+                    [
+                        "...",
+                        "${ENVIRONMENT}-lit-bridge",
                         ".",
                         "."
                     ],

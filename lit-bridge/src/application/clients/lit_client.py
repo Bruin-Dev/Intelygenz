@@ -1,9 +1,6 @@
-import base64
 import json
-import datetime
 
-import humps
-import requests
+from simple_salesforce import Salesforce, SalesforceGeneralError, SalesforceAuthenticationFailed, SalesforceError
 from tenacity import retry, wait_exponential, stop_after_delay, stop_after_attempt, wait_fixed
 
 
@@ -11,39 +8,29 @@ class LitClient:
     def __init__(self, logger, config):
         self._config = config
         self._logger = logger
-        self._bearer_token = ""
-        self._last_token_expires = None
-        self._base_url = ""
+        self._salesforce_sdk = None
 
     def login(self):
-        @retry(stop=stop_after_attempt(5), wait=wait_fixed(3))
+        @retry(stop=stop_after_attempt(self._config.LIT_CONFIG["attempts"]),
+               wait=wait_fixed(self._config.LIT_CONFIG["wait_fixed"]),
+               reraise=True)
         def login():
             self._logger.info("Logging into Lit...")
-            headers = {
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
-            grant_type = 'password'
-            form_data = f'grant_type={grant_type}' \
-                        f'&client_id={self._config.LIT_CONFIG["client_id"]}' \
-                        f'&client_secret={self._config.LIT_CONFIG["client_secret"]}' \
-                        f'&username={self._config.LIT_CONFIG["client_username"]}' \
-                        f'&password={self._config.LIT_CONFIG["client_password"]}' \
-                        f'{self._config.LIT_CONFIG["client_security_token"]}'
-
             try:
-                response = requests.post(f'{self._config.LIT_CONFIG["login_url"]}',
-                                         data=form_data,
-                                         headers=headers)
-                data = response.json()
-                if "access_token" not in data.keys():
-                    raise Exception("Not access_token")
-                if "instance_url" not in data.keys():
-                    raise Exception("Not instance_url")
-                self._bearer_token = data["access_token"]
-                self._base_url = data["instance_url"]
-                self._last_token_expires = datetime.datetime.now()
+                self._salesforce_sdk = Salesforce(username=self._config.LIT_CONFIG["client_username"],
+                                                  password=self._config.LIT_CONFIG["client_password"],
+                                                  security_token=self._config.LIT_CONFIG["client_security_token"],
+                                                  client_id=self._config.LIT_CONFIG["client_id"],
+                                                  domain=self._config.LIT_CONFIG["domain"])
                 self._logger.info("Logged into Lit!")
-
+            except SalesforceAuthenticationFailed as sfaf:
+                self._logger.error("SalesforceAuthenticationFailed trying to login to Lit")
+                self._logger.error(f"{sfaf}")
+                raise sfaf
+            except SalesforceGeneralError as sfge:
+                self._logger.error("SalesforceGeneralError trying to login to Lit")
+                self._logger.error(f"{sfge}")
+                raise sfge
             except Exception as err:
                 self._logger.error("An error occurred while trying to login to Lit")
                 self._logger.error(f"{err}")
@@ -56,17 +43,7 @@ class LitClient:
             return e.args[0]
 
     def _get_request_headers(self):
-        if not self._bearer_token:
-            raise Exception("Missing BEARER token")
-
-        # TODO: check if there is a better way
-        if self._last_token_expires < datetime.datetime.now() - datetime.timedelta(minutes=110):
-            self._logger.error("Token expired, relogin to Lit")
-            self.login()
-
         headers = {
-            "authorization": f"Bearer {self._bearer_token}",
-            "Content-Type": "application/json",
             "Cache-control": "no-cache, no-store, no-transform, max-age=0, only-if-cached",
         }
 
@@ -79,46 +56,25 @@ class LitClient:
         def create_dispatch():
             self._logger.info(f'Creating dispatch...')
             self._logger.info(f'Payload that will be applied : {payload}')
-
-            response = requests.post(f'{self._base_url}/services/apexrest/NewDispatch/',
-                                     headers=self._get_request_headers(),
-                                     json=payload,
-                                     verify=False)
-
             return_response = dict.fromkeys(["body", "status"])
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            try:
+                response = self._salesforce_sdk.apexecute('NewDispatch', method='POST',
+                                                          headers=self._get_request_headers(),
+                                                          data=payload,
+                                                          verify=False)
+                return_response["body"] = response
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Lit {response.json()}")
-
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Lit, re-login")
-                self.login()
-                return_response["body"] = "Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Lit, resource not posted for payload of {payload}")
-                return_response["body"] = "Resource not found"
-                return_response["status"] = 404
-
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
-                return_response["body"] = "Got internal error from Lit"
-                return_response["status"] = 500
-                raise Exception(return_response)
-
-            return return_response
-
+                if response["Status"] == "Success":
+                    return_response["status"] = 200
+                if response["Status"] == "error":
+                    return_response["status"] = 400
+                return return_response
+            except SalesforceError as sfe:
+                raise sfe
         try:
             return create_dispatch()
-        except Exception as e:
+        except SalesforceError as e:
             return e.args[0]
 
     def get_dispatch(self, dispatch_number):
@@ -129,45 +85,23 @@ class LitClient:
             self._logger.info(f'Getting dispatch...')
             self._logger.info(f'Getting the dispatch of dispatch number : {dispatch_number}')
 
-            response = requests.get(f'{self._base_url}/services/apexrest/GetDispatch/{dispatch_number}',
-                                    headers=self._get_request_headers(),
-                                    verify=False)
-
             return_response = dict.fromkeys(["body", "status"])
-
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Lit {response.json()}")
-
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Lit, re-login")
-                self.login()
-                return_response["body"] = "Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Lit, resource not got for dispatch number: {dispatch_number}")
-                return_response["body"] = "Resource not found"
-                return_response["status"] = 404
-
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
-                return_response["body"] = "Got internal error from Lit"
-                return_response["status"] = 500
-                raise Exception(return_response)
-
-            return return_response
-
+            try:
+                response = self._salesforce_sdk.apexecute(f'GetDispatch/{dispatch_number}', method='GET',
+                                                          headers=self._get_request_headers(),
+                                                          verify=False)
+                return_response["body"] = response
+                if response["Status"] == "Success":
+                    return_response["status"] = 200
+                if response["Status"] == "error":
+                    return_response["status"] = 400
+                return return_response
+            except SalesforceError as sfe:
+                raise sfe
         try:
             return get_dispatch()
         except Exception as e:
-            return e.args[0]
+            return e
 
     def update_dispatch(self, payload):
         @retry(wait=wait_exponential(multiplier=self._config.LIT_CONFIG['multiplier'],
@@ -177,41 +111,20 @@ class LitClient:
             self._logger.info(f'Updating dispatch...')
             self._logger.info(f'Payload that will be applied : {json.dumps(payload, indent=2)}')
 
-            response = requests.post(f'{self._base_url}/services/apexrest/UpdateDispatch/',
-                                     headers=self._get_request_headers(),
-                                     json=payload,
-                                     verify=False)
-
             return_response = dict.fromkeys(["body", "status"])
-
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Lit {response.json()}")
-
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Lit, re-login")
-                self.login()
-                return_response["body"] = "Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Lit, resource not updated for payload of {payload}")
-                return_response["body"] = "Resource not found"
-                return_response["status"] = 404
-
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
-                return_response["body"] = "Got internal error from Lit"
-                return_response["status"] = 500
-                raise Exception(return_response)
-
-            return return_response
+            try:
+                response = self._salesforce_sdk.apexecute('UpdateDispatch', method='POST',
+                                                          data=payload,
+                                                          headers=self._get_request_headers(),
+                                                          verify=False)
+                return_response["body"] = response
+                if response["Status"] == "Success":
+                    return_response["status"] = 200
+                if response["Status"] == "error":
+                    return_response["status"] = 400
+                return return_response
+            except SalesforceError as sfe:
+                raise sfe
 
         try:
             return update_dispatch()
@@ -233,45 +146,23 @@ class LitClient:
             # Mandatory field
             headers["filename"] = file_name
 
-            if 'application/pdf' == file_content_type:
-                raw_data = base64.b64encode(payload)
-            else:
-                raw_data = payload.decode()
-
-            response = requests.request("POST",
-                                        f'{self._base_url}/services/apexrest/UploadDispatchFile/{dispatch_id}',
-                                        headers=headers, data=raw_data, verify=False)
+            # TODO: check if the backend send it to me already in the proper format
+            # raw_data = base64.b64encode(payload).decode('utf-8')
+            raw_data = payload
 
             return_response = dict.fromkeys(["body", "status"])
+            try:
+                response = self._salesforce_sdk.apexecute(f'UploadDispatchFile/{dispatch_id}', method='POST',
+                                                          data=raw_data, verify=False, headers=headers)
+                return_response["body"] = response
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Lit {response.json()}")
-
-            if response.status_code == 401:
-                self._logger.error(f"Got 401 from Lit, re-login")
-                self.login()
-                return_response["body"] = "Maximum retries while relogin"
-                return_response["status"] = 401
-                raise Exception(return_response)
-
-            if response.status_code == 404:
-                self._logger.error(f"Got 404 from Lit, resource not updated for payload of {payload}")
-                return_response["body"] = "Resource not found"
-                return_response["status"] = 404
-
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
-                return_response["body"] = "Got internal error from Lit"
-                return_response["status"] = 500
-                raise Exception(return_response)
-
-            return return_response
+                if response["Status"] == "Success":
+                    return_response["status"] = 200
+                if response["Status"] == "error":
+                    return_response["status"] = 400
+                return return_response
+            except SalesforceError as sfe:
+                raise sfe
 
         try:
             return upload_file()

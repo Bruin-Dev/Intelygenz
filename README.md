@@ -11,6 +11,7 @@
 | bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | igzpackages |[![igzpackages-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=igzpackages-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| lit-bridge|[![lit-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lit-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -22,6 +23,7 @@
 
 - [Project structure](#project-structure)
   - [Naming conventions](#naming-conventions)
+  - [Adding new microservice to the system](#adding-new-microservices-to-the-system)
 - [Technologies used](#technologies-used)
 - [Developing flow](#developing-flow)
   - [Deploying just a subset of microservices](#deploying-just-a-subset-of-microservices)
@@ -61,6 +63,58 @@ it should be `package-example-env`
 
 From [PEP-0008](https://www.python.org/dev/peps/pep-0008/#package-and-module-names)
 Also check this, more synthesized [Python naming conventions](https://visualgit.readthedocs.io/en/latest/pages/naming_convention.html) 
+
+## Adding new microservices to the system
+In addition to creating the microservice folder and all the standards files inside that folder, you must add this
+new microservice and any new env variables to the system's files. This is done inorder to add 
+it to both the infrastructure and the pipeline.
+You will need to add/modify files in the folders of the 
+- [automation-engine](#automation-engine),  
+- [ci-utils](#ci-utils),
+- [gitlab-ci](#gitlab-ci), 
+- [infra-as-code](#infra-as-code), 
+- and [installation-utils](#installation-utils)
+
+Any new env variables should be added to the gitlab. And if there are two different var for PRO and DEV
+specify it by appending `_PRO` or `_DEV` to the variable name on the gitlab.
+
+### automation-engine
+In the automation-engine folder you will need to update the:
+- [.gitlab-ci.yml](.gitlab-ci.yml)
+- [README.md](README.md)
+- [docker-compose.yml](docker-compose.yml)
+
+### ci-utils
+In ci-utils you will need to makes changes to the following files:
+-  [assign_docker_images_build_numbers.sh](ci-utils/assign_docker_images_build_numbers.sh) 
+-  [manage_ecr_docker_images.py](ci-utils/manage_ecr_docker_images.py)
+
+### gitlab-ci
+If your microservices adds any new env variables you will need to make changes to the following file:
+- [terraform-templates/.gitlab-ci-terraform-basic-templates.yml](gitlab-ci/terraform-templates/.gitlab-ci-terraform-basic-templates.yml)
+
+### infra-as-code
+In infra-as-code you will need to make the changes to the following locations:
+- Add desired amount and any new env variables here: [.gitlab-ci.yml](infra-as-code/.gitlab-ci.yml)
+
+- basic infra folder    
+    - [ecr_repositories.tf](infra-as-code/basic-infra/ecr_repositories.tf)
+- dev folder
+    - Create a new file called `[new microservice name].tf`
+    - If the microservice is a capability then it goes in the `depends_on` sections of the use cases' terraform file
+    - [locals.tf](infra-as-code/dev/locals.tf)
+    - [metrics-prometheus.tf](infra-as-code/dev/metrics-prometheus.tf)
+    - In [variable.tf](infra-as-code/dev/variables.tf) Copy the other services' variable `[microservice name]_BUILD_NUMBER` 
+      for the new microservice and swap the name. Also copy the format for the desired amount and make one for the new service.
+      Any new env variables will be placed here as well.
+    - dashboard-definitions folder
+        -   [dashboard_cluster_definition.json](infra-as-code/dev/dashboards-definitions/dashboard_cluster_definition.json)
+    - task-definitions folder
+        -   Create a new file called `[new microservice name].json`
+ 
+### installation-utils
+In installation-utils you will need to make changes to the following files:
+- [environment_files_generator.py](installation-utils/environment_files_generator.py)
 
 # Technologies used
 
@@ -117,6 +171,7 @@ variables:
   . . .
   bruin_bridge_desired_tasks: 0
   last_contact_report_desired_tasks: 1
+  lit_bridge_desired_tasks: 1
   metrics_prometheus_desired_tasks: 0
   nats_server_desired_tasks: 0
   nats_server_1_desired_tasks: 1
@@ -370,3 +425,4 @@ to the prometheus app can be found at `http://localhost:9090/targets`.
   - The docker_compose should include the credentials above,specifically the password, in the`GF_SECURITY_ADMIN_PASSWORD` 
     area for the [local docker-compose](docker-compose.yml). Also the `GF_INSTALL_PLUGINS` field can be used to add any plugins you want to add to the
     grafana dashboard.
+
