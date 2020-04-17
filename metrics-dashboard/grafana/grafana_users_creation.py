@@ -7,11 +7,14 @@ from tenacity import retry, wait_exponential, stop_after_delay
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectionError
 from sys import exit
-import time
+from config import config
+from igz.packages.Logger.logger_client import LoggerClient
 
-ENV_SLUG = os.environ.get("ENVIRONMENT_SLUG")
 GF_ADMIN = os.environ.get("GRAFANA_ADMIN_USER")
-GF_PASS = os.environ.get("GRAFANA_ADMIN_PASSWORD")
+GF_PASS = os.environ.get("GF_SECURITY_ADMIN_PASSWORD")
+GF_PORT = int(os.environ.get("GRAFANA_PORT"))
+
+logger = LoggerClient(config).get_logger()
 
 
 def get_users():
@@ -23,7 +26,7 @@ def get_users():
     u_companies = os.environ.get("GRAFANA_USER_COMPANY").split(',')
 
     if not len(u_mails) == len(u_logins) == len(u_names) == len(u_passwords) == len(u_roles) == len(u_companies):
-        print('User variables have different length; aborting process.')
+        logger.error('User variables have different length; aborting process.')
         exit(1)
 
     users = []
@@ -48,39 +51,39 @@ def run():
 
 @retry(wait=wait_exponential(multiplier=5,
                              min=5),
-       stop=stop_after_delay(300))
+       stop=stop_after_delay(900))
 def check_user_existence():
     for u in get_users():
         try:
             response = requests.get(
-                f'https://admin:admin@{ENV_SLUG}.'
-                f'mettel-automation.net/api/users/search?'
+                f'http://admin:admin@localhost:{GF_PORT}'
+                f'/api/users/search?'
                 f'query={u["login"]}',
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
             )
 
             if response.json().get("totalCount") == 0:
-                print(f'User {u["login"]} does not exist yet.')
+                logger.info(f'User {u["login"]} does not exist yet.')
                 create_user(u)
             elif response.json().get("totalCount") >= 1:
-                print(
+                logger.info(
                     f'User {u["login"]} already exists. '
                     f'ID: {response.json().get("users")[0]["id"]}'
                 )
             else:
-                print(response.text)
-                print(f'Error searching for user {u["login"]}.')
+                logger.error(response.text)
+                logger.error(f'Error searching for user {u["login"]}.')
 
         except ConnectionError as e:
-            print(e)
-            exit(1)
+            logger.error(e)
+            raise Exception
 
 
 @retry(wait=wait_exponential(multiplier=5,
                              min=5),
        stop=stop_after_delay(300))
 def create_user(user):
-    print(f'Creating user {user["login"]}.')
+    logger.info(f'Creating user {user["login"]}.')
     user_data = {
         'name': user["name"],
         'email': user["email"],
@@ -90,13 +93,13 @@ def create_user(user):
 
     try:
         response = requests.post(
-            f'https://admin:admin@{ENV_SLUG}.'
-            f'mettel-automation.net/api/admin/users',
+            f'http://admin:admin@localhost:{GF_PORT}'
+            f'/api/admin/users',
             data=user_data,
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
         if response.status_code == 200:
-            print(f'Successfully created user {user["login"]}.')
+            logger.info(f'Successfully created user {user["login"]}.')
             user_id = response.json().get("id")
             if user["role"] == 'editor':
                 assign_editor_permissions(user, user_id)
@@ -104,11 +107,11 @@ def create_user(user):
             else:
                 assign_viewer_permissions(user, user_id)
         else:
-            print(response.text)
-            print(f'Error creating user {user["login"]}.')
+            logger.error(response.text)
+            logger.error(f'Error creating user {user["login"]}.')
             raise Exception
     except ConnectionError as e:
-        print(e)
+        logger.error(e)
         exit(1)
 
 
@@ -133,26 +136,26 @@ def assign_viewer_permissions(user, user_id):
     folder_uid = get_folder_uid(user["company"])
 
     if folder_uid is None:
-        print(f'Error updating permissions for user {user["login"]}.')
+        logger.error(f'Error updating permissions for user {user["login"]}.')
         raise Exception
     else:
         try:
             response = requests.post(
-                f'https://admin:admin@{ENV_SLUG}.'
-                f'mettel-automation.net/api/folders/'
+                f'http://admin:admin@localhost:{GF_PORT}'
+                f'/api/folders/'
                 f'{folder_uid}/permissions',
                 json=user_data,
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
             )
 
             if response.status_code == 200:
-                print(f'Updated permissions for user {user["login"]}.')
+                logger.info(f'Updated permissions for user {user["login"]}.')
             else:
-                print(response.text)
-                print(f'Error updating permissions for user {user["login"]}.')
+                logger.error(response.text)
+                logger.error(f'Error updating permissions for user {user["login"]}.')
                 raise Exception
         except ConnectionError as e:
-            print(e)
+            logger.error(e)
             exit(1)
 
 
@@ -164,20 +167,20 @@ def assign_editor_permissions(user, user_id):
 
     try:
         response = requests.patch(
-            f'https://admin:admin@{ENV_SLUG}.'
-            f'mettel-automation.net/api/org/users/{user_id}',
+            f'http://admin:admin@localhost:{GF_PORT}'
+            f'/api/org/users/{user_id}',
             json=user_data,
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
 
         if response.status_code == 200:
-            print(f'Updated permissions for user {user["login"]}.')
+            logger.info(f'Updated permissions for user {user["login"]}.')
         else:
-            print(response.text)
-            print(f'Error updating permissions for user {user["login"]}.')
+            logger.error(response.text)
+            logger.error(f'Error updating permissions for user {user["login"]}.')
             raise Exception
     except ConnectionError as e:
-        print(e)
+        logger.error(e)
         exit(1)
 
 
@@ -193,8 +196,8 @@ def get_folder_uid(user_company, main_folder=False):
         folder_name = user_company.split("|")[0].replace(" ", "-").lower()
     try:
         response = requests.get(
-            f'https://admin:admin@{ENV_SLUG}.'
-            f'mettel-automation.net/api/folders',
+            f'http://admin:admin@localhost:{GF_PORT}'
+            f'/api/folders',
             auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
         )
         if response.status_code == 200:
@@ -202,12 +205,12 @@ def get_folder_uid(user_company, main_folder=False):
             for f in folders:
                 if f["title"] == folder_name:
                     return f["uid"]
-            print(f'There isn\'t a specific folder for the company {user_company}')
+            logger.error(f'There isn\'t a specific folder for the company {user_company}')
             return None
         else:
             raise Exception
     except ConnectionError as e:
-        print(e)
+        logger.error(e)
         exit(1)
 
 
@@ -230,25 +233,25 @@ def update_main_folder_permissions():
     main_folder_uid = get_folder_uid(None, True)
 
     if main_folder_uid is None:
-        print(f'Error updating permissions of the main folder because it doesn\'t exists.')
+        logger.error(f'Error updating permissions of the main folder because it doesn\'t exists.')
         raise Exception
     else:
         try:
             response = requests.post(
-                f'https://admin:admin@{ENV_SLUG}.'
-                f'mettel-automation.net/api/folders/'
+                f'http://admin:admin@localhost:{GF_PORT}'
+                f'/api/folders/'
                 f'{main_folder_uid}/permissions',
                 json=main_data,
                 auth=HTTPBasicAuth(GF_ADMIN, GF_PASS)
             )
             if response.status_code == 200:
-                print(f'Updated permissions of the main folder.')
+                logger.info(f'Updated permissions of the main folder.')
             else:
-                print(response.text)
-                print(f'Error updating permissions of the main folder.')
+                logger.error(response.text)
+                logger.error(f'Error updating permissions of the main folder.')
                 raise Exception
         except ConnectionError as e:
-            print(e)
+            logger.error(e)
             exit(1)
 
 

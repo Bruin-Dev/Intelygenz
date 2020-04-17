@@ -335,16 +335,8 @@ variable "velocloud-bridge-task-definition-json" {
   default = "/tmp/velocloud-bridge-task-definition.json"
 }
 
-variable "ENVIRONMENT_SLUG" {
-  description = "Identifier of current environment"
-}
-
-variable "GRAFANA_ADMIN_USER" {
-  description = "Username of Grafana admin's account"
-}
-
 variable "GRAFANA_USER_EMAIL" {
-  description = "Comma-separated list of Grafana users' emails"
+  description = "Comma-separated list of emails for Grafana users"
 }
 
 variable "GRAFANA_USER_LOGIN" {
@@ -355,14 +347,16 @@ variable "GRAFANA_USER_NAME" {
   description = "Comma-separated list of usernames for Grafana users"
 }
 
-variable "GRAFANA_USER_PASSWORD" {
-  description = "Comma-separated list of passwords for Grafana users"
-}
-
 variable "GRAFANA_USER_ROLE" {
   description = "Comma-separated list of roles for Grafana users"
 }
 
 variable "GRAFANA_USER_COMPANY" {
   description = "Company name to assign to Grafana users"
+}
+
+variable "GRAFANA_PORT" {
+  description = "Grafana port to communications"
+  type = number
+  default = 3000
 }

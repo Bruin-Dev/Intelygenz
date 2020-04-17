@@ -140,7 +140,5 @@ Also, resources of type `null_resource` are created to execute some Python scrip
 
    >This procedure has been done to ensure that use case microservices are not created in ECS until new versions of the capability-type microservices are properly deployed, as use case microservices need to use capability-type microservices.
 
-4. Once all the services have been created following the dependencies explained above, a `null_resource` will be used to execute the [script in charge of creating the Grafana users](../ci-utils/grafana_users_creation.py) in the environment where the deployment is taking place.
-
 ---
 With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2019

@@ -126,12 +126,9 @@ deploy-branches:
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-    - export TF_VAR_ENVIRONMENT_SLUG=${ENVIRONMENT_SLUG}
-    - export TF_VAR_GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}
     - export TF_VAR_GRAFANA_USER_EMAIL=${GRAFANA_USER_EMAIL}
     - export TF_VAR_GRAFANA_USER_LOGIN=${GRAFANA_USER_LOGIN}
     - export TF_VAR_GRAFANA_USER_NAME=${GRAFANA_USER_NAME}
-    - export TF_VAR_GRAFANA_USER_PASSWORD=${GRAFANA_USER_PASSWORD}
     - export TF_VAR_GRAFANA_USER_ROLE=${GRAFANA_USER_ROLE}
     - export TF_VAR_GRAFANA_USER_COMPANY=${GRAFANA_USER_COMPANY}
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
@@ -178,12 +175,9 @@ deploy-master:
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=master
-    - export TF_VAR_ENVIRONMENT_SLUG=${ENVIRONMENT_SLUG}
-    - export TF_VAR_GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}
     - export TF_VAR_GRAFANA_USER_EMAIL=${GRAFANA_USER_EMAIL}
     - export TF_VAR_GRAFANA_USER_LOGIN=${GRAFANA_USER_LOGIN}
     - export TF_VAR_GRAFANA_USER_NAME=${GRAFANA_USER_NAME}
-    - export TF_VAR_GRAFANA_USER_PASSWORD=${GRAFANA_USER_PASSWORD}
     - export TF_VAR_GRAFANA_USER_ROLE=${GRAFANA_USER_ROLE}
     - export TF_VAR_GRAFANA_USER_COMPANY=${GRAFANA_USER_COMPANY}
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
@@ -230,6 +224,12 @@ destroy-branches:
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export TF_VAR_GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}
+    - export TF_VAR_GRAFANA_USER_EMAIL=${GRAFANA_USER_EMAIL}
+    - export TF_VAR_GRAFANA_USER_LOGIN=${GRAFANA_USER_LOGIN}
+    - export TF_VAR_GRAFANA_USER_NAME=${GRAFANA_USER_NAME}
+    - export TF_VAR_GRAFANA_USER_ROLE=${GRAFANA_USER_ROLE}
+    - export TF_VAR_GRAFANA_USER_COMPANY=${GRAFANA_USER_COMPANY}
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
@@ -262,6 +262,11 @@ destroy-master:
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=master
+    - export TF_VAR_GRAFANA_USER_EMAIL=${GRAFANA_USER_EMAIL}
+    - export TF_VAR_GRAFANA_USER_LOGIN=${GRAFANA_USER_LOGIN}
+    - export TF_VAR_GRAFANA_USER_NAME=${GRAFANA_USER_NAME}
+    - export TF_VAR_GRAFANA_USER_ROLE=${GRAFANA_USER_ROLE}
+    - export TF_VAR_GRAFANA_USER_COMPANY=${GRAFANA_USER_COMPANY}
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_CURRENT_ENVIRONMENT=production

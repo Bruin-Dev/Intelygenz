@@ -22,7 +22,7 @@ NATS_CONFIG = {
 }
 
 LOG_CONFIG = {
-    'name': 'base-microservice',
+    'name': 'metrics-grafana',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'

@@ -16,12 +16,11 @@ resource "aws_security_group" "automation-dev-inbound" {
       "76.102.161.105/32", // KEKO HOME
       "76.103.237.82/32", // SANCHO HOME
       "73.158.200.161/32", // BRANDON HOME
+      "37.134.83.253/32", // XOAN HOME
       "83.61.20.90/32", // IGZ CALLAO OFFICE 1
       "83.61.8.95/32",  // IGZ CALLAO OFFICE 2
       "83.56.7.26/32",   // IGZ CALLAO OFFICE 3
       "52.51.50.68/32", // IGZ VPN
-      "88.22.100.205/32", // XOAN HOME MADRID
-      "87.219.160.222/32" // XOAN HOME GALICIA
     ]
   }
 
@@ -38,10 +37,8 @@ resource "aws_security_group" "automation-dev-inbound" {
       "83.61.8.95/32",  // IGZ CALLAO OFFICE 2
       "83.56.7.26/32",  // IGZ CALLAO OFFICE 3
       "52.51.50.68/32", // IGZ VPN
-      "88.22.100.205/32", // XOAN HOME MADRID
-      "87.219.160.222/32", // XOAN HOME GALICIA
+      "37.134.83.253/32", // XOAN HOME
       "54.73.0.183/32", // IGZ GITLAB RUNNERS
-      "10.2.0.0/16", // AUTOMATION ENGINE DEV VPN
       "216.194.50.82/32", // Brian Sullivan's IP
       "216.194.28.12/32", // Joseph Degeorge's IP
       "216.194.50.83/32",  // MetTel Office IP
@@ -62,8 +59,6 @@ resource "aws_security_group" "automation-dev-inbound" {
       "83.61.8.95/32",  // IGZ CALLAO OFFICE 2
       "83.56.7.26/32",  // IGZ CALLAO OFFICE 3
       "52.51.50.68/32", // IGZ VPN
-      "88.22.100.205/32", // XOAN HOME MADRID
-      "87.219.160.222/32", // XOAN HOME GALICIA
       "54.73.0.183/32", // IGZ GITLAB RUNNERS
       "216.194.50.82/32", // Brian Sullivan's IP
       "216.194.28.12/32", // Joseph Degeorge's IP
