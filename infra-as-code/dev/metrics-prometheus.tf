@@ -45,6 +45,14 @@ data "template_file" "automation-metrics-prometheus" {
     REDIS_HOSTNAME = local.redis-hostname
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
+    ENVIRONMENT_SLUG = var.ENVIRONMENT_SLUG
+    GRAFANA_ADMIN_USER = var.GRAFANA_ADMIN_USER
+    GRAFANA_USER_EMAIL = var.GRAFANA_USER_EMAIL
+    GRAFANA_USER_LOGIN = var.GRAFANA_USER_LOGIN
+    GRAFANA_USER_NAME = var.GRAFANA_USER_NAME
+    GRAFANA_USER_PASSWORD = var.GRAFANA_USER_PASSWORD
+    GRAFANA_USER_ROLE = var.GRAFANA_USER_ROLE
+    GRAFANA_USER_COMPANY = var.GRAFANA_USER_COMPANY
   }
 }
 
@@ -203,7 +211,7 @@ resource "null_resource" "metrics-prometheus-healthcheck" {
   }
 }
 
-resource "null_resource" "grafana-user-creation" {
+/*resource "null_resource" "grafana-user-creation" {
   count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
 
   depends_on = [null_resource.metrics-prometheus-healthcheck,
@@ -222,7 +230,7 @@ resource "null_resource" "grafana-user-creation" {
     always_run = timestamp()
   }
 
-}
+}*/
 
 resource "aws_s3_bucket" "prometheus-storage" {
   count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0

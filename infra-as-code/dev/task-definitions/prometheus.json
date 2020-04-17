@@ -223,6 +223,38 @@
       {
         "name": "REDIS_HOSTNAME",
         "value": "${REDIS_HOSTNAME}"
+      },
+      {
+        "name": "GRAFANA_ADMIN_USER",
+        "value": "${GRAFANA_ADMIN_USER}"
+      },
+      {
+        "name": "ENVIRONMENT_SLUG",
+        "value": "${ENVIRONMENT_SLUG}"
+      },
+      {
+        "name": "GRAFANA_USER_EMAIL",
+        "value": "${GRAFANA_USER_EMAIL}"
+      },
+      {
+        "name": "GRAFANA_USER_LOGIN",
+        "value": "${GRAFANA_USER_LOGIN}"
+      },
+      {
+        "name": "GRAFANA_USER_NAME",
+        "value": "${GRAFANA_USER_NAME}"
+      },
+      {
+        "name": "GRAFANA_USER_PASSWORD",
+        "value": "${GRAFANA_USER_PASSWORD}"
+      },
+      {
+        "name": "GRAFANA_USER_ROLE",
+        "value": "${GRAFANA_USER_ROLE}"
+      },
+      {
+        "name": "GRAFANA_USER_COMPANY",
+        "value": "${GRAFANA_USER_COMPANY}"
       }
     ],
     "dependsOn": [

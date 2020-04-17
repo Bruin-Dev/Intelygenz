@@ -41,6 +41,7 @@ resource "aws_security_group" "automation-dev-inbound" {
       "88.22.100.205/32", // XOAN HOME MADRID
       "87.219.160.222/32", // XOAN HOME GALICIA
       "54.73.0.183/32", // IGZ GITLAB RUNNERS
+      "10.2.0.0/16", // AUTOMATION ENGINE DEV VPN
       "216.194.50.82/32", // Brian Sullivan's IP
       "216.194.28.12/32", // Joseph Degeorge's IP
       "216.194.50.83/32",  // MetTel Office IP
