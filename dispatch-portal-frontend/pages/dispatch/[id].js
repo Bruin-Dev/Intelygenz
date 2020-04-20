@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { dispatchService } from '../../services/dispatch/dispatch.service';
 import { privateRoute } from '../../components/privateRoute/PrivateRoute';
 import Menu from '../../components/menu/Menu';
+import Loading from '../../components/loading/Loading';
+import './id.scss';
 
 function Dispatch({ authToken }) {
   const router = useRouter();
@@ -25,76 +27,91 @@ function Dispatch({ authToken }) {
     <div>
       <Menu authToken={authToken} />
       {isLoading ? (
-        <p>Loading...</p>
+        <Loading />
       ) : (
         <>
-          <h3>Info dispatch: {data.id}</h3>
-          <p>
-            <b>Vendor:</b> {data.vendor}
-          </p>
-          <p>
-            <b>SLA Level:</b> {data.slaLevel}
-          </p>
-          <p>
-            <b>Mettel Id:</b> {data.mettelId}
-          </p>
-          <p>
-            <b>Local time of dispatch:</b> {data.timeDispatch}
-          </p>
-          <p>
-            <b>Time Zone Local:</b> {data.timeZone}
-          </p>
-          <br />
-          <h3>Requester</h3>
-          <p>
-            <b>Name:</b> {data.requester.name}
-          </p>
-          <p>
-            <b>Email:</b> {data.requester.email}
-          </p>
-          <p>
-            <b>Department:</b> {data.requester.department}
-          </p>
-          <p>
-            <b>Phone number:</b> {data.requester.phoneNumber}
-          </p>
-          <br />
-          <h3>On-Site Contact</h3>
-          <p>
-            <b>Site:</b> {data.onSiteContact.site}
-          </p>
-          <p>
-            <b>Street:</b> {data.onSiteContact.street}
-          </p>
-          <p>
-            <b>City:</b> {data.onSiteContact.city}
-          </p>
-          <p>
-            <b>State:</b> {data.onSiteContact.state}
-          </p>
-          <p>
-            <b>Zip:</b> {data.onSiteContact.zip}
-          </p>
-          <p>
-            <b>Phone number:</b> {data.onSiteContact.phoneNumber}
-          </p>
-          <br />
-          <h3>Details</h3>
-          <p>
-            <b>Service type:</b> {data.details.serviceType}
-          </p>
-          <p>
-            <b>Instructions:</b> {data.details.instructions}
-          </p>
-          <p>
-            <b>Information:</b> {data.details.information}
-          </p>
-          <p>
-            <b>Special Materials:</b> {data.details.specialMaterials}
-          </p>
-          <p>
-            <b>Sercive type:</b> {data.details.serviceType}
-          </p>
+          <div className="wrapper-dispatch">
+            <div className="brick">
+              <h3>Info dispatch: {data.id}</h3>
+              <ul>
+                <li>
+                  <b>Vendor:</b> {data.vendor}
+                </li>
+                <li>
+                  <b>SLA Level:</b> {data.slaLevel}
+                </li>
+                <li>
+                  <b>Mettel Id:</b> {data.mettelId}
+                </li>
+                <li>
+                  <b>Local time of dispatch:</b> {data.timeDispatch}
+                </li>
+                <li>
+                  <b>Time Zone Local:</b> {data.timeZone}
+                </li>
+              </ul>
+            </div>
+            <div className="brick">
+              <h3>Requester</h3>
+              <ul>
+                <li>
+                  <b>Name:</b> {data.requester.name}
+                </li>
+                <li>
+                  <b>Email:</b> {data.requester.email}
+                </li>
+                <li>
+                  <b>Department:</b> {data.requester.department}
+                </li>
+                <li>
+                  <b>Phone number:</b> {data.requester.phoneNumber}
+                </li>
+              </ul>
+            </div>
+            <div className="brick">
+              <h3>On-Site Contact</h3>
+              <ul>
+                <li>
+                  <b>Site:</b> {data.onSiteContact.site}
+                </li>
+                <li>
+                  <b>Street:</b> {data.onSiteContact.street}
+                </li>
+                <li>
+                  <b>City:</b> {data.onSiteContact.city}
+                </li>
+                <li>
+                  <b>State:</b> {data.onSiteContact.state}
+                </li>
+                <li>
+                  <b>Zip:</b> {data.onSiteContact.zip}
+                </li>
+                <li>
+                  <b>Phone number:</b> {data.onSiteContact.phoneNumber}
+                </li>
+              </ul>
+            </div>
+            <div className="brick">
+              <h3>Details</h3>
+              <ul>
+                <li>
+                  <b>Service type:</b> {data.details.serviceType}
+                </li>
+                <li>
+                  <b>Instructions:</b> {data.details.instructions}
+                </li>
+                <li>
+                  <b>Information:</b> {data.details.information}
+                </li>
+                <li>
+                  <b>Special Materials:</b> {data.details.specialMaterials}
+                </li>
+                <li>
+                  <b>Sercive type:</b> {data.details.serviceType}
+                </li>
+              </ul>
+            </div>
+          </div>
         </>
       )}
     </div>

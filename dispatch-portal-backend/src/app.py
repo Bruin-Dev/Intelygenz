@@ -10,15 +10,12 @@ from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
 
-# blueprints
-from application.blueprints.lit import lit_bp
-
 
 class Container:
 
     def __init__(self):
         self._logger = LoggerClient(config).get_logger()
-        self._logger.info("Lit bridge starting...")
+        self._logger.info("Dispatch portal backend starting...")
 
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
@@ -35,11 +32,8 @@ class Container:
 
         self._event_bus.add_consumer(consumer=self._client2, consumer_name="consumer2")
 
-        self._dispatch_api_server = DispatchServer(config, self._redis_client, self._event_bus,
-                                                   self._logger)
-
-        self._dispatch_api_server.attach_swagger()
-        self._dispatch_api_server.register_blueprint(lit_bp)
+        self._dispatch_api_server = DispatchServer(config, self._redis_client,
+                                                   self._event_bus, self._logger)
         self._logger.info("Container created")
 
     async def start(self):
@@ -53,7 +47,6 @@ class Container:
 
 
 if __name__ == '__main__':
-    print("Dispatch Portal starting...")
     container = Container()
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(container.run(), loop=loop)

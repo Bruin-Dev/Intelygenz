@@ -9,6 +9,7 @@
 | Module      | Coverage |
 |:-----------:|:--------:|
 | bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| dispatch-portal-backend |[![dispatch-portal-backend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-backend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | igzpackages |[![igzpackages-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=igzpackages-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lit-bridge|[![lit-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lit-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -170,6 +171,7 @@ The following example shows how to configure `<service_name>_desired_tasks` vari
 variables:
   . . .
   bruin_bridge_desired_tasks: 0
+  dispatch_portal_backend_desired_tasks: 1
   last_contact_report_desired_tasks: 1
   lit_bridge_desired_tasks: 1
   metrics_prometheus_desired_tasks: 0

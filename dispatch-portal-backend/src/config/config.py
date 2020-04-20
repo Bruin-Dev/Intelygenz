@@ -24,22 +24,17 @@ NATS_CONFIG = {
 DISPATCH_PORTAL_CONFIG = {
     'title': 'Dispatch Portal API',
     'port': os.environ['DISPATCH_PORTAL_SERVER_PORT'],
-    'schema_path': './schema.json',
-    'swagger_path': './swagger.yml',
+    'schema_path': './src/schema.json',
+    'swagger_path': './src/swagger.yml',
     'swagger_url_prefix': '/api/doc',
     'swagger_title': 'Dispatch Portal API doc'
 }
 
 LOG_CONFIG = {
-    'name': 'dispatch-portal',
+    'name': 'dispatch-portal-backend',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
-}
-
-QUART_CONFIG = {
-    'title': 'dispatch-portal',
-    'port': 5000
 }
 
 REDIS = {

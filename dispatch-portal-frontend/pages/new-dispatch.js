@@ -1,25 +1,54 @@
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
+import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { privateRoute } from '../components/privateRoute/PrivateRoute';
 import Menu from '../components/menu/Menu';
 import Loading from '../components/loading/Loading';
 import { dispatchService } from '../services/dispatch/dispatch.service';
+import { Routes } from '../config/routes';
 import './new-dispatch.scss';
 
 function NewDispatch({ authToken }) {
+  const router = useRouter();
   const { register, handleSubmit, errors } = useForm();
   const [response, setResponse] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [files, setFiles] = useState([]);
+
+  const deleteFile = async index => {
+    const auxArraySlice = [...files]; // For react state
+    auxArraySlice.splice(index, 1);
+    setFiles(auxArraySlice);
+  };
+
+  const onChangeHandlerFiles = async e => {
+    e.preventDefault();
+    setFiles([...files, ...e.target.files]);
+  };
+
+  const uploadFiles = async dispatchId => {
+    const data = new FormData();
+    files.map((file, index) => data.append('file', files[index]));
+
+    const res = await dispatchService.uploadFiles(dispatchId, data);
+    return res;
+  };
 
   const onSubmit = async data => {
     setIsLoading(true);
+
     const res = await dispatchService.newDispatch(data);
-    if (!res.error) {
-      // Go to details
-      alert('Go gogogogogogo!');
-      return;
+    if (!res.error && res.data && res.data.id) {
+      // Upload files
+      const resFiles = await uploadFiles(res.data.id);
+      if (resFiles) {
+        // Go to details
+        router.push(`${Routes.DISPATCH()}/${res.data.id}`);
+        return;
+      }
     }
+    // Todo: show/add upload error
     setResponse(res);
     setIsLoading(false);
   };
@@ -49,7 +78,6 @@ function NewDispatch({ authToken }) {
               Time of dispatch (Local)
               <br />
               <select
-                type="select"
                 name="timeDispatch"
                 id="timeDispatch"
                 ref={register({ required: true })}
@@ -69,7 +97,6 @@ function NewDispatch({ authToken }) {
               Time Zone (Local)
               <br />
               <select
-                type="select"
                 name="timeZone"
                 id="timeZone"
                 ref={register({ required: true })}
@@ -119,7 +146,6 @@ function NewDispatch({ authToken }) {
               SLA Level
               <br />
               <select
-                type="select"
                 name="slaLevel"
                 id="slaLevel"
                 ref={register({ required: true })}
@@ -209,7 +235,6 @@ function NewDispatch({ authToken }) {
               State
               <br />
               <select
-                type="select"
                 name="state"
                 id="state"
                 ref={register({ required: true })}
@@ -388,16 +413,34 @@ function NewDispatch({ authToken }) {
           </div>
           <p className="section-title">Attachments</p>
           <div className="brick">
-            <button className="file" type="submit">
-              Choose File
-            </button>
-            <p>No File Chosen</p>
-          </div>
-          <div className="brick">
-            <button className="file" type="submit">
-              Choose File
-            </button>
-            <p>No File Chosen</p>
+            <div className="file">
+              <label htmlFor="files" className="btn">
+                Add File/s
+                <input
+                  id="files"
+                  style={{ visibility: 'hidden' }}
+                  type="file"
+                  multiple
+                  onChange={onChangeHandlerFiles}
+                />
+              </label>
+              {files.length ? (
+                <div>
+                  <ol>
+                    {files.map((file, index) => (
+                      <li key={`file-name-${index}`}>
+                        {file.name}{' '}
+                        <button type="button" onClick={() => deleteFile(index)}>
+                          Delete file
+                        </button>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : (
+                <p>No Files Chosen</p>
+              )}
+            </div>
           </div>
           <p className="section-title">Requester</p>
           <div className="brick">
@@ -434,7 +477,6 @@ function NewDispatch({ authToken }) {
               MelTel Department
               <br />
               <select
-                type="select"
                 name="department"
                 id="department"
                 ref={register({ required: true })}

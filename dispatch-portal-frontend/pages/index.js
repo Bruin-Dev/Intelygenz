@@ -6,6 +6,8 @@ import { dispatchService } from '../services/dispatch/dispatch.service';
 import { privateRoute } from '../components/privateRoute/PrivateRoute';
 import Menu from '../components/menu/Menu';
 import Loading from '../components/loading/Loading';
+import { config } from '../config/config';
+import { Routes } from '../config/routes';
 
 const columns = [
   {
@@ -26,7 +28,7 @@ const columns = [
     selector: 'id',
     sortable: true,
     cell: row => (
-      <a className="link" href={`/dispatch/${row.id}`}>
+      <a className="link" href={`${Routes.DISPATCH()}/${row.id}`}>
         {row.id}
       </a>
     )
@@ -75,7 +77,7 @@ function Index({ authToken }) {
   return (
     <div>
       <Menu authToken={authToken} />
-      <Link href="/new-dispatch">
+      <Link href={Routes.NEW_DISPATCH()}>
         <button className="new" type="button">
           Create new dispatch
         </button>

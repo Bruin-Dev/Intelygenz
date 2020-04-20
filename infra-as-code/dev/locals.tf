@@ -66,6 +66,15 @@ locals {
   automation-t7-bridge-task_definition = "${aws_ecs_task_definition.automation-t7-bridge.family}:${aws_ecs_task_definition.automation-t7-bridge.revision}"
   automation-t7-bridge-service_discovery_service-name = "t7-bridge-${var.ENVIRONMENT}"
 
+  // automation-dispatch-portal-backend local vars
+  automation-dispatch-portal-backend-ecs_task_definition-family = "${var.ENVIRONMENT}-dispatch-portal-backend"
+  automation-dispatch-portal-backend-image = "${data.aws_ecr_repository.automation-dispatch-portal-backend.repository_url}:${var.DISPATCH_PORTAL_BACKEND_BUILD_NUMBER}"
+  automation-dispatch-portal-backend-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-backend"
+  automation-dispatch-portal-backend-service-security_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal-backend"
+  automation-dispatch-portal-backend-resource-name = "${var.ENVIRONMENT}-dispatch-portal-backend"
+  automation-dispatch-portal-backend-task_definition = "${aws_ecs_task_definition.automation-dispatch-portal-backend.family}:${aws_ecs_task_definition.automation-dispatch-portal-backend.revision}"
+  automation-dispatch-portal-backend-service_discovery_service-name = "dispatch-portal-backend-${var.ENVIRONMENT}"
+
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${var.LAST_CONTACT_REPORT_BUILD_NUMBER}"
@@ -200,6 +209,21 @@ locals {
   automation-sites-monitor-ecs_service-name = "${var.ENVIRONMENT}-sites-monitor"
   automation-sites-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-sites-monitor.family}:${aws_ecs_task_definition.automation-sites-monitor.revision}"
   automation-sites-monitor-service_discovery_service-name = "sites-monitor-${var.ENVIRONMENT}"
+
+  // automation-dispatch-portal-frontend local vars
+  automation-dispatch-portal-frontend-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nextjs.repository_url}:${var.DISPATCH_PORTAL_FRONTEND_BUILD_NUMBER}"
+  automation-dispatch-portal-frontend-nginx-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nginx.repository_url}:${var.DISPATCH_PORTAL_FRONTEND_NGINX_BUILD_NUMBER}"
+  automation-dispatch-portal-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-dispatch-portal-frontend-ecs_task_definition-family = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-ecs_task_definition = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-service-security_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-ecs_service-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-ecs_service-task_definition = "${aws_ecs_task_definition.automation-dispatch-portal-frontend.family}:${aws_ecs_task_definition.automation-dispatch-portal-frontend.revision}"
+  automation-dispatch-portal-frontend-service_discovery_service-name = "dispatch-portal-frontend-${var.ENVIRONMENT}"
+  automation-dispatch-portal-target_group-name = "${var.ENVIRONMENT}-disp-prtl"
+  automation-dispatch-portal-target_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal"
 
   // metrics local variables
   exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"

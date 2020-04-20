@@ -1,0 +1,66 @@
+[
+  {
+    "name": "dispatch-portal-frontend",
+    "image": "${dispatch_portal_frontend_image}",
+    "portMappings": [
+      {
+        "containerPort": 3000,
+        "hostPort": 3000
+      }
+    ],
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:3000 || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    }
+  },
+  {
+    "name": "dispatch-portal-frontend-nginx",
+    "image": "${dispatch_portal_frontend_nginx_image}",
+    "portMappings": [
+      {
+        "containerPort": 8080,
+        "hostPort": 8080
+      }
+    ],
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:8080/health-check || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
+    "dependsOn": [
+      {
+          "containerName": "dispatch-portal-frontend",
+          "condition": "HEALTHY"
+      }
+    ]
+  }
+]

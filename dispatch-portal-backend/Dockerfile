@@ -4,10 +4,10 @@ ARG DOCKER_BASE_IMAGE_VERSION
 FROM ${REPOSITORY_URL}-python-3.6:${DOCKER_BASE_IMAGE_VERSION}
 
 RUN pip install --upgrade pip
-COPY dispatch-portal/requirements.txt /service/app/requirements.txt
+COPY dispatch-portal-backend/requirements.txt /service/app/requirements.txt
 RUN pip install -r requirements.txt
 
-COPY dispatch-portal/ /service/app
+COPY dispatch-portal-backend/ /service/app
 
 ENV PYTHONUNBUFFERED 1
 

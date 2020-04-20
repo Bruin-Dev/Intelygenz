@@ -54,6 +54,9 @@ LIT_CLIENT_SECURITY_TOKEN = var_dict["LIT_CLIENT_SECURITY_TOKEN_DEV"]
 LIT_LOGIN_URL = var_dict["LIT_LOGIN_URL_DEV"]
 LIT_DOMAIN = var_dict["LIT_DOMAIN_DEV"]
 
+# Dispatch portal backend variable
+DISPATCH_PORTAL_SERVER_PORT = var_dict["DISPATCH_PORTAL_SERVER_PORT"]
+
 # Mail variables
 EMAIL_ACC_PWD = var_dict["EMAIL_ACC_PWD"]
 LAST_CONTACT_RECIPIENT = var_dict["LAST_CONTACT_RECIPIENT_DEV"]
@@ -107,6 +110,10 @@ env_dict = {
         f'BRUIN_CLIENT_SECRET={BRUIN_CLIENT_SECRET}\n'
         f'BRUIN_LOGIN_URL={BRUIN_LOGIN_URL}\n'
         f'BRUIN_BASE_URL={BRUIN_BASE_URL}',
+    os.path.join('dispatch-portal-backend', 'src', 'config', 'env'):
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'DISPATCH_PORTAL_SERVER_PORT={DISPATCH_PORTAL_SERVER_PORT}',
     os.path.join('metrics-dashboard', 'grafana', 'config', 'env'):
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}',

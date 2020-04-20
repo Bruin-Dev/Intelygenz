@@ -1,6 +1,14 @@
+# Dispatch Portal(Backend) API
+
+This microservice will unify the dispatch operations over N remote APIs:
+
+- LIT
+- CTS
+
 # Table of contents
 - [Workflow](#workflow)
   * [Get an instance of NATS cluster up in local environment](#get-an-instance-of-nats-cluster-up-in-local-environment)
+  * [Swagger & Schema](#swagger--schema)
   * [Configuration, environment variables and configuration files](#configuration-environment-variables-and-configuration-files)
   * [Testing](#testing)
   * [Adding new libraries to the project](#adding-new-libraries-to-the-project)
@@ -14,25 +22,49 @@
 - Add the [precommit hook for PEP8](https://github.com/cbrueffer/pep8-git-hook) to automation-engine/.git/hooks/
 
 Then create and activate the virtualenv like this:
-````
-python3 -m venv base-microservice-env
-source ./base-microservice-env/bin/activate
+
+```
+python3 -m venv dispatch-portal-backend-env
+source ./dispatch-portal-backend-env/bin/activate
 pip install -r requirements.txt
-````
-## Get an instance of NATS cluster up in local environment
+```
 
-- [JUST ONCE] Go to /etc/hosts and add ``127.0.0.1	nats-server``
-- Go to project root
-- Type the following ``docker-compose up nats-server``
+## Get an instance of NATS cluster, redis, lit-bridge, cts-bridge and dispatch-portal-backend
 
-Now you can execute your python code related to NATS connections, using nats-server as host name
+```bash
+# env file
+NATS_SERVER1=nats://nats-server:4222
+REDIS_HOSTNAME=redis
+DISPATCH_PORTAL_SERVER_PORT=5000
+```
 
+- Type the following ``docker-compose up --build nats-server redis lit-bridge dispatch-portal-backend``
 
-## Get an instance of Redis up in local environment
-- [JUST ONCE] Go to /etc/hosts and add ``127.0.0.1  redis``
-- Go to project root
-- Type the following ``docker-compose up redis``
+Local development and debugging
 
+```bash
+cd dispatch-portal-backend/src
+export NATS_SERVER1="nats://localhost:4222"
+export REDIS_HOSTNAME="localhost"
+export DISPATCH_PORTAL_SERVER_PORT=5000
+python app.py
+```
+
+## Swagger & Schema
+
+To achieve validation we use the schema, and to generate the schema we create de swagger.
+To generate the schema from the swagger, we need to go to this url: `http://127.0.0.1:5000/api/doc/swagger.json`, 
+then copy the content to the file `schema.json`.
+At this point the self-generated openapi schema.json from the library `quart-openapi` is not working.
+So we are using the following library `swagger-ui-py`.
+
+To see the API definition:
+
+- Swagger file: [swagger.yml](<./src/swagger.yml>)
+
+To check the schema:
+
+- Schema file: [schema.json](<./src/schema.json>)
 
 ## Configuration, environment variables and configuration files
 Some of the configuration parameters can change between environments.
@@ -82,6 +114,9 @@ pip freeze | grep -v "pkg-resources" > requirements.txt #The grep -v is needed o
 
 - [Asyncio nats client](https://github.com/nats-io/asyncio-nats)
 - [ASGI library for async](https://pypi.org/project/asgiref/)
+- [ASGI library for quart](https://pgjones.gitlab.io/quart/)
+- [Quart openapi](https://github.com/factset/quart-openapi)
+- [Swagger UI](https://pypi.org/project/swagger-ui-py/)
 
 # Useful documentation
 - [Python async simplified with asgiref and asyncio](https://www.aeracode.org/2018/02/19/python-async-simplified/)

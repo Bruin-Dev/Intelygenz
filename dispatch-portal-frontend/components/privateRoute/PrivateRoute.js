@@ -1,5 +1,6 @@
 import ServerCookie from 'next-cookies';
 import React, { Component } from 'react';
+import { Routes } from '../../config/routes';
 import { TOKEN_STORAGE_KEY } from '../../services/auth/login.service';
 
 export function privateRoute(WrappedComponent) {
@@ -9,7 +10,7 @@ export function privateRoute(WrappedComponent) {
       const initialProps = { authToken: token };
       if (!token) {
         ctx.res.writeHead(302, {
-          Location: '/login?redirected=true'
+          Location: `${Routes.LOGIN()}?redirected=true`
         });
         ctx.res.end();
       }

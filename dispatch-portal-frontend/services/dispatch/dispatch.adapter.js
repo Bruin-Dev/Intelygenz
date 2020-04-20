@@ -1,4 +1,4 @@
-export const dispatchAdapter = data => ({
+export const dispatchLitInAdapter = data => ({
   id: data.Dispatch_Number,
   vendor: data.vendor,
   slaLevel: data.slaLevel,
@@ -32,4 +32,26 @@ export const dispatchAdapter = data => ({
     information: data.Information_for_Tech,
     specialMaterials: data.Special_Materials_Needed_for_Dispatch
   }
+});
+
+export const dispatchLitOutAdapter = data => ({
+  date_of_dispatch: data.dateDispatch,
+  site_survey_quote_required: false,
+  time_of_dispatch: data.timeDispatch,
+  time_zone: data.timeZone,
+  mettel_bruin_ticket_id: data.mettelId,
+  job_site: data.address1,
+  job_site_street: data.address2,
+  job_site_city: data.city,
+  job_site_state: data.state,
+  job_site_zip_code: data.zip,
+  job_site_contact_name: `${data.firstName} ${data.lastName}`,
+  job_site_contact_number: data.phoneNumberRequester,
+  materials_needed_for_dispatch: data.materials,
+  scope_of_work: data.serviceType,
+  mettel_tech_call_in_instructions: data.instructions,
+  name_of_mettel_requester: `${data.firstNameRequester} ${data.lastNameRequester}`,
+  mettel_department: data.department,
+  mettel_requester_email: data.emailRequester
+  // slaLevel, vendor, phoneNumber, owner, email, issues
 });

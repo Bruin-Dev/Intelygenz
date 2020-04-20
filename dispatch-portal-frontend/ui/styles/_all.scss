@@ -3,22 +3,22 @@
 
 @font-face {
   font-family: 'ubuntu';
-  src: url("/assets/typography/ubuntu-regular.ttf");
+  src: ("/assets/typography/ubuntu-regular.ttf");
   font-weight: 400;
 }
 @font-face {
   font-family: 'ubuntu-medium';
-  src: url("/assets/typography/ubuntu-medium.ttf");
+  src: ("/assets/typography/ubuntu-medium.ttf");
   font-weight: 400;
 }
 @font-face {
   font-family: 'ubuntu-light';
-  src: url("/assets/typography/ubuntu-light.ttf");
+  src: ("/assets/typography/ubuntu-light.ttf");
   font-weight: 400;
 }
 @font-face {
   font-family: 'ubuntu-bold';
-  src: url("/assets/typography/ubuntu-bold.ttf");
+  src: ("/assets/typography/ubuntu-bold.ttf");
   font-weight: 400;
 }
 
@@ -388,9 +388,15 @@ html body button.new {
 @media screen and (max-width: 960px) {
   html{
     body {
-      .new-dispatch-wrapper{
+      .new-dispatch-wrapper,
+      .wrapper-dispatch{
         .brick{
           width: 90%;
+        }
+      }
+      .wrapper-dispatch{
+        .brick{
+          min-height: auto;
         }
       }
     }

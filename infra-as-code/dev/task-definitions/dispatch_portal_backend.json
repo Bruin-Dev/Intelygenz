@@ -1,0 +1,53 @@
+[
+  {
+    "name": "dispatch-portal-backend",
+    "image": "${image}",
+    "portMappings": [
+      {
+        "containerPort": 5000,
+        "hostPort": 5000
+      },
+      {
+        "containerPort": 9090,
+        "hostPort": 9090
+      }
+    ],
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:5000/_health || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
+    "environment": [
+      {
+        "name": "PYTHONUNBUFFERED",
+        "value": "${PYTHONUNBUFFERED}"
+      },
+      {
+        "name": "NATS_SERVER1",
+        "value": "${NATS_SERVER1}"
+      },
+      {
+        "name": "REDIS_HOSTNAME",
+        "value": "${REDIS_HOSTNAME}"
+      },
+      {
+        "name": "DISPATCH_PORTAL_SERVER_PORT",
+        "value": "${DISPATCH_PORTAL_SERVER_PORT}"
+      }
+    ]
+  }
+]

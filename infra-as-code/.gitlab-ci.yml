@@ -84,6 +84,7 @@ check-ecs-resources-branches:
   before_script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
+    - export TF_VAR_dispatch_portal_backend_desired_tasks=${dispatch_portal_backend_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
     - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
     - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
@@ -111,6 +112,7 @@ check-ecs-resources-master:
   before_script:
     - export ENVIRONMENT_SLUG=master
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
+    - export TF_VAR_dispatch_portal_backend_desired_tasks=${dispatch_portal_backend_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
     - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
     - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
@@ -142,6 +144,7 @@ deploy-branches:
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
+    - export TF_VAR_DISPATCH_PORTAL_SERVER_PORT=${DISPATCH_PORTAL_SERVER_PORT}
     - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_DEV}
     - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
@@ -149,8 +152,8 @@ deploy-branches:
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_LIT_CLIENT_ID=${LIT_CLIENT_ID_DEV}
     - export TF_VAR_LIT_CLIENT_SECRET=${LIT_CLIENT_SECRET_DEV}
-    - export TF_VAR_LIT_USERNAME=${LIT_CLIENT_USERNAME_DEV}
-    - export TF_VAR_LIT_PASSWORD_ID=${LIT_CLIENT_PASSWORD_DEV}
+    - export TF_VAR_LIT_CLIENT_USERNAME=${LIT_CLIENT_USERNAME_DEV}
+    - export TF_VAR_LIT_CLIENT_PASSWORD=${LIT_CLIENT_PASSWORD_DEV}
     - export TF_VAR_LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_DEV}
     - export TF_VAR_LIT_LOGIN_URL=${LIT_LOGIN_URL_DEV}
     - export TF_VAR_LIT_DOMAIN=${LIT_DOMAIN_DEV}
@@ -160,6 +163,7 @@ deploy-branches:
     - export TF_VAR_SLACK_URL=${SLACK_URL_DEV}
     - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
+    - export TF_VAR_dispatch_portal_backend_desired_tasks=${dispatch_portal_backend_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
     - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
     - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
@@ -198,6 +202,7 @@ deploy-master:
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
     - export TF_VAR_EMAIL_ACC_PWD=${EMAIL_ACC_PWD}
     - export TF_VAR_MONITORING_SECONDS=${MONITORING_SECONDS}
+    - export TF_VAR_DISPATCH_PORTAL_SERVER_PORT=${DISPATCH_PORTAL_SERVER_PORT}
     - export TF_VAR_LAST_CONTACT_RECIPIENT=${LAST_CONTACT_RECIPIENT_PRO}
     - export TF_VAR_BRUIN_CLIENT_ID=${BRUIN_CLIENT_ID_PRO}
     - export TF_VAR_BRUIN_CLIENT_SECRET=${BRUIN_CLIENT_SECRET_PRO}
@@ -205,8 +210,8 @@ deploy-master:
     - export TF_VAR_BRUIN_BASE_URL=${BRUIN_BASE_URL_PRO}
     - export TF_VAR_LIT_CLIENT_ID=${LIT_CLIENT_ID_DEV}
     - export TF_VAR_LIT_CLIENT_SECRET=${LIT_CLIENT_SECRET_DEV}
-    - export TF_VAR_LIT_USERNAME=${LIT_CLIENT_USERNAME_DEV}
-    - export TF_VAR_LIT_PASSWORD_ID=${LIT_CLIENT_PASSWORD_DEV}
+    - export TF_VAR_LIT_CLIENT_USERNAME=${LIT_CLIENT_USERNAME_DEV}
+    - export TF_VAR_LIT_CLIENT_PASSWORD=${LIT_CLIENT_PASSWORD_DEV}
     - export TF_VAR_LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_DEV}
     - export TF_VAR_LIT_LOGIN_URL=${LIT_LOGIN_URL_DEV}
     - export TF_VAR_LIT_DOMAIN=${LIT_DOMAIN_DEV}
@@ -216,6 +221,7 @@ deploy-master:
     - export TF_VAR_SLACK_URL=${SLACK_URL_PRO}
     - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
+    - export TF_VAR_dispatch_portal_backend_desired_tasks=${dispatch_portal_backend_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
     - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
     - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
@@ -238,6 +244,7 @@ deploy-master:
     on_stop: destroy-master
   only:
     - master
+
 
 # ===============================================
 # Terraform destroy jobs for infra-as-code module

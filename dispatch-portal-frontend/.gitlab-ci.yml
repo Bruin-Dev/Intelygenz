@@ -46,3 +46,20 @@ dispatch-portal-frontend-test:
     - dispatch-portal-frontend-linter
   tags:
     - kubernetes
+
+# =================================================================
+# Images builds jobs for dispatch-portal-frontend module components
+# =================================================================
+dispatch-portal-frontend-nextjs-build:
+  stage: build
+  variables:
+    MODULE_NAME: dispatch-portal-frontend
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  extends: .build_app_image
+
+dispatch-portal-frontend-nginx-build:
+  stage: build
+  variables:
+    MODULE_NAME: dispatch-portal-frontend/nginx
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  extends: .build_app_image

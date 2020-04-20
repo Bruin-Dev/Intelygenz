@@ -31,13 +31,13 @@
     }
   ],
   "paths": {
-    "/lit/dispatch": {
+    "/lit/dispatch/{dispatch_number}": {
       "get": {
         "description": "Returns all dispatches from LIT that match a filter",
         "tags": [
           "lit"
         ],
-        "operationId": "get_dispatch_lit",
+        "operationId": "dispatch",
         "parameters": [
           {
             "name": "offset",
@@ -58,6 +58,7 @@
           {
             "name": "dispatch_number",
             "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             },
@@ -70,10 +71,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/dispatch_lit"
-                  }
+                  "$ref": "#/components/schemas/dispatch_lit"
                 }
               }
             }
@@ -89,7 +87,9 @@
             }
           }
         }
-      },
+      }
+    },
+    "/lit/dispatch": {
       "post": {
         "description": "Creates a new dispatch for LIT",
         "tags": [
@@ -137,7 +137,7 @@
         ],
         "operationId": "update_dispatch_lit",
         "requestBody": {
-          "description": "New dispatch to add to a vendor",
+          "description": "Update dispatch with dispatch number",
           "required": true,
           "content": {
             "application/json": {
@@ -153,7 +153,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/dispatch_response"
+                  "$ref": "#/components/schemas/update_dispatch_response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lit/dispatch/<dispatch_number>/upload-file": {
+      "post": {
+        "description": "Upload file to dispatch for LIT",
+        "tags": [
+          "lit"
+        ],
+        "operationId": "upload_file_dispatch_lit",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "filename",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "dispatch_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the dispatch"
+          }
+        ],
+        "requestBody": {
+          "description": "New dispatch to add to a vendor",
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New dispatch response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/upload_file_dispatch_response"
                 }
               }
             }
@@ -287,55 +349,59 @@
           }
         }
       },
-      "dispatch_cts": {
-        "allOf": [
-          {
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "$ref": "#/components/schemas/new_dispatch_cts"
-          }
-        ]
-      },
-      "new_dispatch_cts": {
+      "update_dispatch_response": {
         "type": "object",
         "required": [
-          "provider"
+          "id",
+          "vendor"
         ],
         "properties": {
+          "id": {
+            "type": "string",
+            "example": "DS1208"
+          }
+        }
+      },
+      "upload_file_dispatch_response": {
+        "type": "object",
+        "required": [
+          "id",
+          "vendor",
+          "file_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "DS1208"
+          },
           "vendor": {
-            "enum": [
-              "CTS"
-            ],
-            "type": "string"
+            "type": "string",
+            "example": "lit"
+          },
+          "file_id": {
+            "type": "string",
+            "example": "00P0v000004ti3AEAQ"
           }
         }
       },
       "dispatch_lit": {
-        "allOf": [
-          {
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "DS1208"
           },
-          {
+          "vendor": {
+            "type": "string",
+            "example": "lit"
+          },
+          "dispatch": {
             "$ref": "#/components/schemas/new_dispatch_lit"
           }
-        ]
+        }
       },
       "new_dispatch_lit": {
         "type": "object",
@@ -361,7 +427,7 @@
         "properties": {
           "date_of_dispatch": {
             "type": "string",
-            "example": "11/14/2019"
+            "example": "2019-11-14"
           },
           "site_survey_quote_required": {
             "type": "boolean",
@@ -453,29 +519,12 @@
       "update_dispatch_lit": {
         "type": "object",
         "required": [
-          "dispatch_number",
-          "date_of_dispatch",
-          "time_of_dispatch",
-          "time_zone",
-          "mettel_bruin_ticket_id",
-          "job_site",
-          "job_site_street",
-          "job_site_city",
-          "job_site_state",
-          "job_site_zip_code",
-          "job_site_contact_name",
-          "job_site_contact_number",
-          "materials_needed_for_dispatch",
-          "scope_of_work",
-          "mettel_tech_call_in_instructions",
-          "name_of_mettel_requester",
-          "mettel_department",
-          "mettel_requester_email"
+          "dispatch_number"
         ],
         "properties": {
           "dispatch_number": {
             "type": "string",
-            "example": "DIS"
+            "example": "DISXXXXX"
           },
           "date_of_dispatch": {
             "type": "string",
@@ -565,6 +614,38 @@
           "mettel_requester_email": {
             "type": "string",
             "example": "karen.doe@mettel.net"
+          }
+        }
+      },
+      "dispatch_cts": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/new_dispatch_cts"
+          }
+        ]
+      },
+      "new_dispatch_cts": {
+        "type": "object",
+        "required": [
+          "provider"
+        ],
+        "properties": {
+          "vendor": {
+            "enum": [
+              "CTS"
+            ],
+            "type": "string"
           }
         }
       },

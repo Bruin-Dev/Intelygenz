@@ -114,6 +114,22 @@ services:
     ports:
       - 5003:5000
 
+  dispatch-portal-backend:
+    build:
+      # Context must be the root of the monorepo
+      context: .
+      dockerfile: dispatch-portal-backend/Dockerfile
+      args:
+        REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
+        DOCKER_BASE_IMAGE_VERSION: 1.0.7
+    env_file:
+      - dispatch-portal-backend/src/config/env
+    depends_on:
+      - "nats-server"
+      - redis
+    ports:
+      - 5004:5000
+
   lit-bridge:
     build:
       # Context must be the root of the monorepo
@@ -340,3 +356,19 @@ services:
       - '--store=thanos-sidecar:10091'
     ports:
       - 19091:19091
+
+  nextjs:
+    build:
+      context: .
+      dockerfile: dispatch-portal-frontend/Dockerfile
+    ports:
+      - 3000:3000
+  nginx:
+    build:
+      context: .
+      dockerfile: dispatch-portal-frontend/nginx/Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - nextjs
+    network_mode: "host"

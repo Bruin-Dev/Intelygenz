@@ -37,8 +37,6 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   before_script:
-    - apk add --no-cache curl jq python3 py-pip
-    - pip3 install awscli
     - source ci-utils/environment_assign.sh
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:

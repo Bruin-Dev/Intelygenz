@@ -82,6 +82,16 @@
                     ],
                     [
                         "...",
+                        "${ENVIRONMENT}-dispatch-portal-backend",
+                        ".",
+                        ".",
+                        {
+                            "period":300,
+                            "stat":"Sum"
+                        }
+                    ],
+                    [
+                        "...",
                         "${ENVIRONMENT}-last-contact-report",
                         ".",
                         ".",
@@ -214,6 +224,12 @@
                     ],
                     [
                         "...",
+                        "${ENVIRONMENT}-dispatch-portal-backend",
+                        ".",
+                        "."
+                    ],
+                    [
+                        "...",
                         "${ENVIRONMENT}-last-contact-report",
                         ".",
                         "."
@@ -324,6 +340,18 @@
                     [
                         "...",
                         "${ENVIRONMENT}-lit-bridge",
+                        ".",
+                        "."
+                    ],
+                                        [
+                        "...",
+                        "${ENVIRONMENT}-dispatch-portal",
+                        ".",
+                        "."
+                    ],
+                    [
+                        "...",
+                        "${ENVIRONMENT}-dispatch-portal-backend",
                         ".",
                         "."
                     ],

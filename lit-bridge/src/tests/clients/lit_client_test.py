@@ -3,7 +3,6 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 from application.clients.lit_client import LitClient
-from pytest import raises
 from simple_salesforce import SalesforceGeneralError, SalesforceAuthenticationFailed, SalesforceError
 
 from application.clients import lit_client as lit_client_module
@@ -222,6 +221,59 @@ class TestLitClient:
             assert post_response["body"] == expected_dispatch_response
             assert post_response["status"] == HTTPStatus.BAD_REQUEST
 
+    def post_create_dispatch_with_error_500_test(self):
+        logger = Mock()
+        config = testconfig
+        logger.error = Mock()
+
+        dipatch_contents = {
+            "RequestDispatch": {
+                "Date_of_Dispatch": "2016-11-16",
+                "Site_Survey_Quote_Required": False,
+                "Local_Time_of_Dispatch": "7AM-9AM",
+                "Time_Zone_Local": "Pacific Time",
+                "Turn_Up": "Yes",
+                "Hard_Time_of_Dispatch_Local": "7AM-9AM",
+                "Hard_Time_of_Dispatch_Time_Zone_Local": "Eastern Time",
+                "Name_of_MetTel_Requester": "Test User1",
+                "MetTel_Group_Email": "test@mettel.net",
+                "MetTel_Requester_Email": "test@mettel.net",
+                "MetTel_Department": "Customer Care",
+                "MetTel_Department_Phone_Number": "1233211234",
+                "Backup_MetTel_Department_Phone_Number": "1233211234",
+                "Job_Site": "test",
+                "Job_Site_Street": "test street",
+                "Job_Site_City": "test city",
+                "Job_Site_State": "test state2",
+                "Job_Site_Zip_Code": "123321",
+                "Scope_of_Work": "test",
+                "MetTel_Tech_Call_In_Instructions": "test",
+                "Special_Dispatch_Notes": "Test Create No Special Dispatch Notes to Pass Forward",
+                "Job_Site_Contact_Name_and_Phone_Number": "test",
+                "Information_for_Tech": "test",
+                "Special_Materials_Needed_for_Dispatch": "test"
+            }
+        }
+        expected_dispatch_response = {
+            "Message": None,
+            "Status": "error"
+        }
+        lit_client = LitClient(logger, config)
+        lit_client._bearer_token = "Someverysecretaccesstoken"
+        lit_client._base_url = "https://cs66.salesforce.com"
+        lit_client._salesforce_sdk = Mock()
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=expected_dispatch_response)
+        response_mock.status_code = 500
+
+        with patch.object(lit_client._salesforce_sdk, 'apexecute',
+                          side_effect=Exception("Error")) as mock_apexecute:
+            post_response = lit_client.create_dispatch(dipatch_contents)
+            mock_apexecute.assert_called()
+            assert mock_apexecute.call_count == 3
+            assert post_response == "Error"
+
     def post_create_dispatch_with_error_salesforce_sdk_test(self):
         logger = Mock()
         config = testconfig
@@ -362,6 +414,25 @@ class TestLitClient:
             mock_apexecute.assert_called_once()
             assert response["body"] == expected_dispatch_response
             assert response["status"] == HTTPStatus.BAD_REQUEST
+
+    def get_dispatch_with_error_500_test(self):
+        logger = Mock()
+        config = testconfig
+        logger.error = Mock()
+
+        dipatch_number = "DIS37330"
+
+        lit_client = LitClient(logger, config)
+        lit_client._bearer_token = "Someverysecretaccesstoken"
+        lit_client._base_url = "https://cs66.salesforce.com"
+        lit_client._salesforce_sdk = Mock()
+
+        with patch.object(lit_client._salesforce_sdk, 'apexecute',
+                          side_effect=Exception("Error")) as mock_apexecute:
+            response = lit_client.get_dispatch(dipatch_number)
+            mock_apexecute.assert_called()
+            assert mock_apexecute.call_count == 3
+            assert response == "Error"
 
     def get_dispatch_with_error_salesforce_sdk_test(self):
         logger = Mock()
@@ -526,6 +597,54 @@ class TestLitClient:
             assert response["body"] == expected_dispatch_response
             assert response["status"] == HTTPStatus.BAD_REQUEST
 
+    def post_update_dispatch_with_error_500_test(self):
+        logger = Mock()
+        config = testconfig
+        logger.error = Mock()
+
+        dispatch_number = "DIS37330"
+        dipatch_contents = {
+            "RequestDispatch": {
+                "Date_of_Dispatch": "2016-11-16",
+                "Site_Survey_Quote_Required": False,
+                "Local_Time_of_Dispatch": "7AM-9AM",
+                "Time_Zone_Local": "Pacific Time",
+                "Turn_Up": "Yes",
+                "Hard_Time_of_Dispatch_Local": "7AM-9AM",
+                "Hard_Time_of_Dispatch_Time_Zone_Local": "Eastern Time",
+                "Name_of_MetTel_Requester": "Test User1",
+                "MetTel_Group_Email": "test@mettel.net",
+                "MetTel_Requester_Email": "test@mettel.net",
+                "MetTel_Department": "Customer Care",
+                "MetTel_Department_Phone_Number": "1233211234",
+                "Backup_MetTel_Department_Phone_Number": "1233211234",
+                "Job_Site": "test",
+                "Job_Site_Street": "test street",
+                "Job_Site_City": "test city",
+                "Job_Site_State": "test state2",
+                "Job_Site_Zip_Code": "123321",
+                "Scope_of_Work": "test",
+                "MetTel_Tech_Call_In_Instructions": "test",
+                "Special_Dispatch_Notes": "Test Create No Special Dispatch Notes to Pass Forward",
+                "Job_Site_Contact_Name_and_Phone_Number": "test",
+                "Information_for_Tech": "test",
+                "Special_Materials_Needed_for_Dispatch": "test"
+            }
+        }
+
+        lit_client = LitClient(logger, config)
+        lit_client._bearer_token = "Someverysecretaccesstoken"
+        lit_client._base_url = "https://cs66.salesforce.com"
+
+        lit_client._salesforce_sdk = Mock()
+
+        with patch.object(lit_client._salesforce_sdk, 'apexecute',
+                          side_effect=Exception("Error")) as mock_apexecute:
+            response = lit_client.update_dispatch(dipatch_contents)
+            mock_apexecute.assert_called()
+            assert mock_apexecute.call_count == 3
+            assert response == "Error"
+
     def post_update_dispatch_with_error_salesforce_sdk_test(self):
         logger = Mock()
         config = testconfig
@@ -560,10 +679,7 @@ class TestLitClient:
                 "Special_Materials_Needed_for_Dispatch": "test"
             }
         }
-        expected_dispatch_response = {
-            "Message": None,
-            "Status": "error"
-        }
+
         lit_client = LitClient(logger, config)
         lit_client._bearer_token = "Someverysecretaccesstoken"
         lit_client._base_url = "https://cs66.salesforce.com"
@@ -664,6 +780,29 @@ class TestLitClient:
             assert response["body"] == expected_dispatch_response
             assert response["status"] == HTTPStatus.BAD_REQUEST
 
+    def post_upload_file_dispatch_with_error_500_test(self):
+        logger = Mock()
+        config = testconfig
+        logger.error = Mock()
+
+        file_name = "test.txt"
+        file_content_type = "application/octet-stream"
+        dispatch_number = "DIS37330"
+        dipatch_contents = b"bytes from the file"
+
+        lit_client = LitClient(logger, config)
+        lit_client._bearer_token = "Someverysecretaccesstoken"
+        lit_client._base_url = "https://cs66.salesforce.com"
+        lit_client._salesforce_sdk = Mock()
+
+        with patch.object(lit_client._salesforce_sdk, 'apexecute',
+                          side_effect=Exception("Error")) as mock_apexecute:
+            response = lit_client.upload_file(
+                dispatch_number, dipatch_contents, file_name, file_content_type)
+            mock_apexecute.assert_called()
+            assert mock_apexecute.call_count == 3
+            assert response == "Error"
+
     def post_upload_file_dispatch_with_error_salesforce_sdk_test(self):
         logger = Mock()
         config = testconfig
@@ -673,12 +812,7 @@ class TestLitClient:
         file_content_type = "application/octet-stream"
         dispatch_number = "DIS37330"
         dipatch_contents = b"bytes from the file"
-        expected_dispatch_response = {
-            "Status": "error",
-            "Message": "Insert failed",
-            "Dispatch": None,
-            "APIRequestID": None
-        }
+
         lit_client = LitClient(logger, config)
         lit_client._bearer_token = "Someverysecretaccesstoken"
         lit_client._base_url = "https://cs66.salesforce.com"

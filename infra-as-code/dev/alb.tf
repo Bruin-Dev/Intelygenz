@@ -142,8 +142,7 @@ resource "aws_lb_target_group" "automation-front_end" {
     enabled = false
   }
 
-  depends_on = [
-    "aws_lb.automation-alb"]
+  depends_on = [ "aws_lb.automation-alb" ]
 
   lifecycle {
     create_before_destroy = true

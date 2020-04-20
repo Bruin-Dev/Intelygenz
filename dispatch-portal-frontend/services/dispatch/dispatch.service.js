@@ -1,6 +1,8 @@
-import React from 'react';
 import { API_URLS, axiosInstance } from '../api';
-import { dispatchAdapter } from './dispatch.adapter';
+import {
+  dispatchLitInAdapter,
+  dispatchLitOutAdapter
+} from './dispatch.adapter';
 
 export const dispatchService = {
   getAll: async () => {
@@ -13,8 +15,12 @@ export const dispatchService = {
     return res;
   },
   newDispatch: async data => {
-    // data adapter
-    const res = await axiosInstance.post(API_URLS.DISPATCH, data);
+    const res = await axiosInstance.post(
+      API_URLS.DISPATCH,
+      dispatchLitOutAdapter(data)
+    );
+
+    console.log(res);
 
     if (res.error) {
       return res.error;
@@ -29,6 +35,15 @@ export const dispatchService = {
       return res.error;
     }
 
-    return dispatchAdapter(res.data);
+    return dispatchLitInAdapter(res.data);
+  },
+  uploadFiles: async (id, data) => {
+    const res = await axiosInstance.post(API_URLS.UPLOAD_FILES, data);
+
+    if (res.error) {
+      return false;
+    }
+
+    return true;
   }
 };

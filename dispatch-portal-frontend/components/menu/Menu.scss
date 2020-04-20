@@ -18,7 +18,7 @@
       &.right{
         float: right;
       }
-      a{
+      a:not(.logo__link){
         text-decoration: none;
         padding: 1em;
         display: inline-block;

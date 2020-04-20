@@ -64,17 +64,19 @@ class LitClient:
                                                           data=payload,
                                                           verify=False)
                 return_response["body"] = response
-
                 if response["Status"] == "Success":
                     return_response["status"] = 200
                 if response["Status"] == "error":
                     return_response["status"] = 400
                 return return_response
             except SalesforceError as sfe:
-                raise sfe
+                self._logger.error(f"SFE Error {sfe}")
+                return_response["body"] = sfe
+                return_response["status"] = 500
+                return return_response
         try:
             return create_dispatch()
-        except SalesforceError as e:
+        except Exception as e:
             return e.args[0]
 
     def get_dispatch(self, dispatch_number):
@@ -97,11 +99,14 @@ class LitClient:
                     return_response["status"] = 400
                 return return_response
             except SalesforceError as sfe:
-                raise sfe
+                self._logger.error(f"SFE Error {sfe}")
+                return_response["body"] = sfe
+                return_response["status"] = 500
+                return return_response
         try:
             return get_dispatch()
         except Exception as e:
-            return e
+            return e.args[0]
 
     def update_dispatch(self, payload):
         @retry(wait=wait_exponential(multiplier=self._config.LIT_CONFIG['multiplier'],
@@ -124,7 +129,10 @@ class LitClient:
                     return_response["status"] = 400
                 return return_response
             except SalesforceError as sfe:
-                raise sfe
+                self._logger.error(f"SFE Error {sfe}")
+                return_response["body"] = sfe
+                return_response["status"] = 500
+                return return_response
 
         try:
             return update_dispatch()
@@ -162,7 +170,10 @@ class LitClient:
                     return_response["status"] = 400
                 return return_response
             except SalesforceError as sfe:
-                raise sfe
+                self._logger.error(f"SFE Error {sfe}")
+                return_response["body"] = sfe
+                return_response["status"] = 500
+                return return_response
 
         try:
             return upload_file()

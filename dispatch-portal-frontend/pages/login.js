@@ -5,8 +5,9 @@ import {
   loginService,
   TOKEN_STORAGE_KEY
 } from '../services/auth/login.service';
-import './login.scss';
 import Loading from '../components/loading/Loading';
+import { Routes } from '../config/routes';
+import './login.scss';
 
 function Login() {
   const router = useRouter();
@@ -26,14 +27,14 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async e => {
-    setIsLoading(true);
     e.preventDefault();
+    setIsLoading(true);
     const loginResponse = await loginService.postLogin(inputs);
     setResponse({ ...response, ...loginResponse });
 
     // Redirect to dashboard page
     if (loginResponse.data) {
-      router.push('/?redirect=?true'); // Todo not working, problem with webpack, in build pro everythings is "OK"
+      router.push(`${Routes.BASE()}?redirect=?true`); // Todo not working, problem with webpack, in build pro everythings is "OK"
       // eslint-disable-next-line no-restricted-globals
       location.reload(); // Todo review parche
     } else {

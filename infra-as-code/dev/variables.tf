@@ -30,6 +30,11 @@ variable "BRUIN_BRIDGE_BUILD_NUMBER" {
   default = "automation-master-latest"
 }
 
+variable "DISPATCH_PORTAL_BACKEND_BUILD_NUMBER" {
+  description = "Docker build number of image for microservice dispatch-portal-backend"
+  default = "automation-master-latest"
+}
+
 variable "LAST_CONTACT_REPORT_BUILD_NUMBER" {
   description = "Docker build number of image for microservice last-contact-report"
   default = "automation-master-latest"
@@ -97,6 +102,16 @@ variable "T7_BRIDGE_BUILD_NUMBER" {
 
 variable "VELOCLOUD_BRIDGE_BUILD_NUMBER" {
   description = "Docker build number of image for velocloud-bridge microservice"
+  default = "automation-master-latest"
+}
+
+variable "DISPATCH_PORTAL_FRONTEND_BUILD_NUMBER" {
+  description = "Docker build number of image for dispatch-portal-frontend microservice"
+  default = "automation-master-latest"
+}
+
+variable "DISPATCH_PORTAL_FRONTEND_NGINX_BUILD_NUMBER" {
+  description = "Docker build number of image for dispatch-portal-frontend-nginx microservice"
   default = "automation-master-latest"
 }
 
@@ -191,6 +206,10 @@ variable "BRUIN_LOGIN_URL" {
 }
 
 variable "BRUIN_BASE_URL" {
+  default = ""
+}
+
+variable "DISPATCH_PORTAL_SERVER_PORT" {
   default = ""
 }
 
@@ -298,6 +317,12 @@ variable "bruin_bridge_desired_tasks" {
   default = 2
   type = number
   description = "Number of desired tasks of microservice bruin-bridge"
+}
+
+variable "dispatch_portal_backend_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice dispatch-portal-backend"
 }
 
 variable "last_contact_report_desired_tasks" {
