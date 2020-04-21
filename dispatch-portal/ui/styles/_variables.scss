@@ -1,0 +1,63 @@
+//     FONT SIZE
+$xxs: 0.5em; //8px
+$xs: 0.562em; //.5em  .562  9px
+$sm: 0.625em; //.6em  .625  10px
+$md: 0.75em; //.7em  .75   12px
+$lg: 0.875em; //.8em  .875  14px
+$xl: $xxs * 2; //1em         16px
+$xxl: $sm * 2; //1.25em      20px
+
+//     colours
+$metTel-primary: rgb(9, 35, 64);
+
+$white: #FFFFFF;
+$success: #28a745;
+$warning: #FF8800;
+$danger: #e34c26;
+
+$blue: #1f78d1;
+$cts-row: #aa66cc;
+$lit-row: #FF8800;
+
+$bg-general: #ccc;
+$bg-asideMenu: #ccc;
+$bg-primary: #ccc;
+
+
+$bg-requested: #e34c26;
+$bg-confirmed: #1f78d1;
+$bg-in_progress: #FF8800;
+$bg-completed: #28a745;
+
+
+//=====ESTADOS
+
+
+.danger{
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(255, 0, 0,0.75);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(255, 0, 0,0.75);
+  box-shadow: 0px 0px 5px 0px rgba(255, 0, 0,0.75);
+}
+.warning{
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(255, 193, 7, 0.75);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(255, 193, 7, 0.75);
+  box-shadow: 0px 0px 5px 0px rgba(255, 193, 7, 0.75);
+}
+.success{
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(40, 167, 69, 0.75);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(40, 167, 69, 0.75);
+  box-shadow: 0px 0px 5px 0px rgba(40, 167, 69, 0.75);
+}
+.disabled{
+  background-color: #ccc;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+//=====TRANSICIONES
+.trans {
+  -webkit-transition:   all 0.3s ease-in-out;
+  -moz-transition:      all 0.3s ease-in-out;
+  -o-transition:        all 0.3s ease-in-out;
+  transition:           all 0.3s ease-in-out;
+}

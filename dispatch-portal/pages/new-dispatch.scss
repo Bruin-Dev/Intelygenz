@@ -1,0 +1,17 @@
+@import '../ui/styles/variables';
+
+.new-dispatch-wrapper{
+  padding: 3%;
+}
+.form-title{
+  font-size: 3em;
+  text-align: center;
+}
+.brick{
+  margin: 0 4%;
+  width: 40%;
+  float: left;
+  p{
+    display: inline-block;
+  }
+}

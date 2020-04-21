@@ -1,0 +1,47 @@
+@import '../../ui/styles/variables';
+
+.wrapper-menu{
+  background: linear-gradient(110deg,#47b585 0%,#47b585 38%,#406bc9 50%,#693a77 62%,#693a77 100%);
+  background: $metTel-primary;
+
+  padding: .5em;
+  ul{
+    margin: 0;
+    padding: 0;
+    li.logo{
+      padding: 10px 2em 5px 1em;
+    }
+    li{
+      list-style: none;
+      display: inline-block;
+      overflow: hidden;
+      &.right{
+        float: right;
+      }
+      a{
+        text-decoration: none;
+        padding: 1em;
+        display: inline-block;
+        color: #FFF;
+
+        margin: .5em;
+        padding: .5em;
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      button{
+        margin: .8em 1em;
+        font-size: .8em;
+        border-radius: 5px;
+        border: solid #FFF 1px;
+        background-color: transparent;
+        color: #FFF;
+        padding: .5em;
+        box-sizing: border-box;
+        cursor: pointer;
+
+
+      }
+    }
+  }
+}
