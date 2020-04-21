@@ -50,7 +50,7 @@ MONITOR_CONFIG = {
     },
     'quarantine_key_ttl': quarantine_time + 60 * 5,
     'velocloud_instances_filter': {
-        "mettel.velocloud.net": [193, 191, 170, 74, 120],
+        "mettel.velocloud.net": [193, 191, 170, 74, 120, 60, 46, 37, 166, 113, 68],
     },
     'blacklisted_edges': [
         # Federal edge that is inside a non-federal Velocloud instance
