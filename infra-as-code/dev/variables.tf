@@ -334,29 +334,3 @@ variable "velocloud-bridge-task-definition-json" {
   description = "Task definition arn output in rendered json for velocloud-bridge"
   default = "/tmp/velocloud-bridge-task-definition.json"
 }
-
-variable "GRAFANA_USER_EMAIL" {
-  description = "Comma-separated list of emails for Grafana users"
-}
-
-variable "GRAFANA_USER_LOGIN" {
-  description = "Comma-separated list of logins for Grafana users"
-}
-
-variable "GRAFANA_USER_NAME" {
-  description = "Comma-separated list of usernames for Grafana users"
-}
-
-variable "GRAFANA_USER_ROLE" {
-  description = "Comma-separated list of roles for Grafana users"
-}
-
-variable "GRAFANA_USER_COMPANY" {
-  description = "Company name to assign to Grafana users"
-}
-
-variable "GRAFANA_PORT" {
-  description = "Grafana port to communications"
-  type = number
-  default = 3000
-}

@@ -45,12 +45,6 @@ data "template_file" "automation-metrics-prometheus" {
     REDIS_HOSTNAME = local.redis-hostname
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
-    GRAFANA_USER_EMAIL = var.GRAFANA_USER_EMAIL
-    GRAFANA_USER_LOGIN = var.GRAFANA_USER_LOGIN
-    GRAFANA_USER_NAME = var.GRAFANA_USER_NAME
-    GRAFANA_USER_ROLE = var.GRAFANA_USER_ROLE
-    GRAFANA_USER_COMPANY = var.GRAFANA_USER_COMPANY
-    GRAFANA_PORT = var.GRAFANA_PORT
   }
 }
 
