@@ -34,7 +34,9 @@ class EdgeMonitoring:
                 self._logger.info('Time since current cycle exceeds threshold, triggering process again')
             else:
                 self._logger.error('Edge monitoring process won\'t be triggered again')
-        if "IDLE" in self._status_repository.get_status():
+
+        if "IDLE" in self._status_repository.get_status() \
+                or "REQUESTING_VELOCLOUD_EDGES" in self._status_repository.get_status():
             self._logger.info("IDLE status: asking edge list. Sites Monitor status = REQUESTING_VELOCLOUD_EDGES...")
             self._status_repository.set_status("REQUESTING_VELOCLOUD_EDGES")
             self._status_repository.set_edges_processed(0)
