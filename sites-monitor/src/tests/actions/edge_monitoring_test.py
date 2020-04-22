@@ -688,7 +688,7 @@ class TestEdgeMonitoring:
             edge_monitoring._edge_monitoring_process, 'interval',
             seconds=testconfig.SITES_MONITOR_CONFIG['monitoring_seconds'],
             next_run_time=next_run_time,
-            replace_existing=True,
+            replace_existing=False,
             id='_edge_monitoring_process',
         )
 
@@ -713,7 +713,7 @@ class TestEdgeMonitoring:
             edge_monitoring._edge_monitoring_process, 'interval',
             seconds=testconfig.SITES_MONITOR_CONFIG['monitoring_seconds'],
             next_run_time=apscheduler_undefined,
-            replace_existing=True,
+            replace_existing=False,
             id='_edge_monitoring_process',
         )
 

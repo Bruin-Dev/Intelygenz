@@ -53,7 +53,7 @@ class EdgeMonitoring:
             next_run_time = datetime.now(timezone(self._config.SITES_MONITOR_CONFIG['timezone']))
             self._logger.info(f'It will be executed now')
         self._scheduler.add_job(self._edge_monitoring_process, 'interval', seconds=seconds, next_run_time=next_run_time,
-                                replace_existing=True, id='_edge_monitoring_process')
+                                replace_existing=False, id='_edge_monitoring_process')
 
     async def _process_all_edges(self, request_id):
         msg = {
