@@ -1,0 +1,48 @@
+# ===========================================================
+# Linter validation jobs for dispatch-portal-frontend module
+# ===========================================================
+dispatch-portal-frontend-linter:
+  stage: validation
+  image: node:10
+  before_script:
+    - npm install --prefix dispatch-portal-frontend
+  script:
+    - npm run lint --prefix dispatch-portal-frontend
+  cache:
+    policy: push
+    key: "dispatch-portal-frontend-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - dispatch-portal-frontend/node_modules
+  only:
+    - master
+    - /^*feature/.*$/
+    - /^*fix/.*$/
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
+  tags:
+    - kubernetes
+
+# ===================================================
+# Unit tests jobs for dispatch-portal-frontend module
+# ===================================================
+dispatch-portal-frontend-test:
+  stage: unit_test
+  image: node:10
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  script:
+    - npm run test --prefix dispatch-portal-frontend
+  cache:
+    policy: pull
+    key: "dispatch-portal-frontend-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - dispatch-portal-frontend/node_modules
+  only:
+    - master
+    - /^*feature/.*$/
+    - /^*fix/.*$/
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
+  dependencies:
+    - dispatch-portal-frontend-linter
+  tags:
+    - kubernetes

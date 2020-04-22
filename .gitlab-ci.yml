@@ -40,6 +40,7 @@ include:
   # Gitlab-CI jobs declaration for each microservice/module
   - local: 'bruin-bridge/.gitlab-ci.yml'
   - local: 'ci-utils/.gitlab-ci.yml'
+  - local: 'dispatch-portal-frontend/.gitlab-ci.yml'
   - local: 'infra-as-code/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'
   - local: 'metrics-dashboard/.gitlab-ci.yml'
