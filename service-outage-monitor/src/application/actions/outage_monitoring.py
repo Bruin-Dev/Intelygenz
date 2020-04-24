@@ -285,6 +285,10 @@ class OutageMonitor:
             lambda detail: detail['detailValue'] == serial_number,
         )
 
+        if self._is_detail_resolved(detail_for_ticket_resolution):
+            self._logger.info(f'Ticket {outage_ticket_id} is already resolved. Skipping autoresolve...')
+            return
+
         self._logger.info(f'Autoresolving ticket {outage_ticket_id} linked to edge {edge_identifier}...')
         await self._resolve_outage_ticket(outage_ticket_id, detail_for_ticket_resolution['detailID'])
         await self._append_autoresolve_note_to_ticket(outage_ticket_id)
@@ -293,6 +297,10 @@ class OutageMonitor:
         await self._notify_successful_autoresolve(outage_ticket_id, bruin_client_id)
 
         self._logger.info(f'Ticket {outage_ticket_id} linked to edge {edge_identifier} was autoresolved!')
+
+    @staticmethod
+    def _is_detail_resolved(ticket_detail: dict):
+        return ticket_detail['detailStatus'] == 'R'
 
     @staticmethod
     def _get_first_element_matching(iterable, condition: Callable, fallback=None):
