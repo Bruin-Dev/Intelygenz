@@ -1,21 +1,21 @@
 import json
+import os
 import re
-
+import time
+from collections import OrderedDict
 from datetime import datetime
 from datetime import timedelta
 from typing import Callable
 
+import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
-from pytz import timezone
-from shortuuid import uuid
-
-from igz.packages.repositories.edge_repository import EdgeIdentifier
-
-import os
-from collections import OrderedDict
 from dateutil.parser import parse
+from igz.packages.repositories.edge_repository import EdgeIdentifier
+from pytz import timezone
 from pytz import utc
+from shortuuid import uuid
+from tenacity import retry, wait_exponential, stop_after_delay
 
 empty_str = str()
 
@@ -49,6 +49,7 @@ class OutageMonitor:
 
     async def _outage_monitoring_process(self):
         self.__reset_instance_state()
+        total_start_time = time.time()
 
         try:
             self._logger.info('[outage-monitoring] Claiming edges under monitoring...')
@@ -68,7 +69,7 @@ class OutageMonitor:
             slack_message = {'request_id': uuid(), 'message': err_msg}
             await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             return
-
+        edge_status_dict = {}
         for edge_full_id in edges_to_monitor_response_body:
             edge_identifier = EdgeIdentifier(**edge_full_id)
 
@@ -98,6 +99,7 @@ class OutageMonitor:
 
             self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
             edge_status_response = await self._get_edge_status_by_id(edge_full_id)
+
             self._logger.info(f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
 
             edge_status_response_body = edge_status_response['body']
@@ -113,14 +115,28 @@ class OutageMonitor:
                                  'message': err_msg}
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                 continue
+            edge_status_dict[edge_full_id] = edge_status_response_body
+        tasks = [
+            self._process_edges(edge_full_id, edge_status_dict[edge_full_id])
+            for edge_full_id in edge_status_dict
+        ]
+        await asyncio.gather(*tasks, return_exceptions=True)
+        self._logger.info(f'Triage process finished! took {time.time() - total_start_time} seconds')
 
-            edge_data = edge_status_response_body["edge_info"]
+    async def _process_edges(self, edge_full_id, edge_status):
+        @retry(wait=wait_exponential(multiplier=self._config.MONITOR_CONFIG['multiplier'],
+                                     min=self._config.MONITOR_CONFIG['min']),
+               stop=stop_after_delay(self._config.TRIAGE_CONFIG['stop_delay']))
+        async def _process_edges():
+            edge_identifier = EdgeIdentifier(**edge_full_id)
+
+            edge_data = edge_status["edge_info"]
 
             edge_serial = edge_data['edges']['serialNumber']
             if not edge_serial:
                 self._logger.info(f"[outage-monitoring] Edge {edge_identifier} doesn't have any serial associated. "
                                   'Skipping...')
-                continue
+                return
 
             self._logger.info(f'[outage-monitoring] Claiming Bruin client info for serial {edge_serial}...')
             bruin_client_info_response = await self._get_bruin_client_info_by_serial(edge_serial)
@@ -136,13 +152,13 @@ class OutageMonitor:
 
                 slack_message = {'request_id': uuid(), 'message': err_msg}
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-                continue
+                return
 
             if not bruin_client_info_response_body.get('client_id'):
                 self._logger.info(
                     f"[outage-monitoring] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
                     'Skipping...')
-                continue
+                return
 
             # Attach Bruin client info to edge_data
             edge_data['bruin_client_info'] = bruin_client_info_response_body
@@ -163,12 +179,12 @@ class OutageMonitor:
                 slack_message = {'request_id': uuid(),
                                  'message': message}
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
-                continue
+                return
 
             if not self._is_management_status_active(management_status_response_body):
                 self._logger.info(
                     f'Management status is not active for {edge_identifier}. Skipping process...')
-                continue
+                return
             else:
                 self._logger.info(f'Management status for {edge_identifier} seems active.')
 
@@ -206,6 +222,10 @@ class OutageMonitor:
             else:
                 self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state.')
                 await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
+        try:
+            await _process_edges()
+        except Exception as ex:
+            self._logger.error(f"Error: {edge_full_id}")
 
     def __reset_instance_state(self):
         self._autoresolve_serials_whitelist = set()
