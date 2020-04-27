@@ -108,6 +108,34 @@ class LitClient:
         except Exception as e:
             return e.args[0]
 
+    def get_all_dispatches(self):
+        @retry(wait=wait_exponential(multiplier=self._config.LIT_CONFIG['multiplier'],
+                                     min=self._config.LIT_CONFIG['min']),
+               stop=stop_after_delay(self._config.LIT_CONFIG['stop_delay']), reraise=True)
+        def get_all_dispatches():
+            self._logger.info(f'Getting all dispatches...')
+
+            return_response = dict.fromkeys(["body", "status"])
+            try:
+                response = self._salesforce_sdk.apexecute('GetOpenDispatchList', method='GET',
+                                                          headers=self._get_request_headers(),
+                                                          verify=False)
+                return_response["body"] = response
+                if response["Status"] == "Success":
+                    return_response["status"] = 200
+                if response["Status"] == "error":
+                    return_response["status"] = 400
+                return return_response
+            except SalesforceError as sfe:
+                self._logger.error(f"SFE Error {sfe}")
+                return_response["body"] = sfe
+                return_response["status"] = 500
+                return return_response
+        try:
+            return get_all_dispatches()
+        except Exception as e:
+            return e.args[0]
+
     def update_dispatch(self, payload):
         @retry(wait=wait_exponential(multiplier=self._config.LIT_CONFIG['multiplier'],
                                      min=self._config.LIT_CONFIG['min']),

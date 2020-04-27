@@ -7,7 +7,67 @@ import Menu from '../components/menu/Menu';
 import Loading from '../components/loading/Loading';
 import { dispatchService } from '../services/dispatch/dispatch.service';
 import { Routes } from '../config/routes';
+import { states } from '../config/constants/states';
 import './new-dispatch.scss';
+import { config } from '../config/config';
+
+// Todo: refactor constant
+const timeZoneOptions = [
+  'Eastern Time',
+  'Pacific Time',
+  'Mountain Time',
+  'Central Time',
+  'Hawaii Time',
+  'Alaska Time'
+];
+
+const departmentOptions = [
+  'Customer Care',
+  'DSL',
+  'T1 Repair',
+  'POTs Repair',
+  'Provisioning',
+  'Advanced Services Engineering',
+  'Wireless',
+  'Holmdel Network Engineering',
+  'Advanced Services Implementations',
+  'Other'
+];
+
+const slaOptions = ['Pre-Planned', 'Next Business Day', '4-Hour'];
+const vendorsOptions = [
+  // Todo: review
+  { name: config.VENDORS.LIT, value: config.VENDORS.LIT },
+  { name: config.VENDORS.CTS, value: config.VENDORS.CTS }
+];
+const serviceTypesOptions = [
+  { name: 'Troubleshoot', value: 'troubleshoot' },
+  { name: 'Part Replacement', value: 'replacement' },
+  { name: 'Cable Run', value: 'cable' }
+];
+
+const getTimeOptions = () => {
+  // Format required: XX.XXAM
+  const timeOptions = [];
+
+  timeOptions.push(`12.00AM`);
+  timeOptions.push(`12.30AM`);
+
+  for (let i = 1; i <= 11; i + 1) {
+    timeOptions.push(`${i}.00AM`);
+    timeOptions.push(`${i}.30AM`);
+  }
+
+  timeOptions.push(`12.00PM`);
+  timeOptions.push(`12.30PM`);
+
+  for (let i = 1; i <= 11; i + 1) {
+    timeOptions.push(`${i}.00PM`);
+    timeOptions.push(`${i}.30PM`);
+  }
+
+  return timeOptions;
+};
 
 function NewDispatch({ authToken }) {
   const router = useRouter();
@@ -15,6 +75,7 @@ function NewDispatch({ authToken }) {
   const [response, setResponse] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState([]);
+  const [selectedVendor, setSelectedVendor] = useState([]); // Note: ['CTS'] ['LIT'] ['CTS', 'LIT']
 
   const deleteFile = async index => {
     const auxArraySlice = [...files]; // For react state
@@ -39,26 +100,42 @@ function NewDispatch({ authToken }) {
     setIsLoading(true);
 
     const res = await dispatchService.newDispatch(data);
-    if (!res.error && res.data && res.data.id) {
+    if (res && !res.error && res.data && res.data.id) {
       // Upload files
-      const resFiles = await uploadFiles(res.data.id);
-      if (resFiles) {
-        // Go to details
-        router.push(`${Routes.DISPATCH()}/${res.data.id}`);
-        return;
-      }
+      // const resFiles = await uploadFiles(res.data.id);
+      // if (resFiles) {
+      // Go to details
+      router.push(`${Routes.DISPATCH()}/${res.data.id}`);
+      return;
+      // }
     }
     // Todo: show/add upload error
     setResponse(res);
     setIsLoading(false);
   };
 
+  const changeVendor = event => {
+    const index = selectedVendor.indexOf(event.target.value);
+    if (index > -1) {
+      const auxSelectedVendors = [...selectedVendor];
+      auxSelectedVendors.splice(index, 1);
+      setSelectedVendor(auxSelectedVendors);
+    } else {
+      setSelectedVendor([...selectedVendor, event.target.value]);
+    }
+  };
+
+  const showFieldByVendor = vendor => selectedVendor.includes(vendor);
+
   return (
     <>
       <Menu authToken={authToken} />
       <div className="new-dispatch-wrapper">
         <p className="form-title">New Dispatch Request</p>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="max-w-full rounded shadow-lg"
+        >
           <div className="brick">
             <label htmlFor="dateDispatch">
               Date of dispatch <br />
@@ -83,10 +160,11 @@ function NewDispatch({ authToken }) {
                 ref={register({ required: true })}
                 className={errors.timeDispatch && 'error'}
               >
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
-                <option value="option4">Option 4</option>
+                {getTimeOptions().map(time => (
+                  <option value={time} key={`time-${time}`}>
+                    {time}
+                  </option>
+                ))}
               </select>
               {errors.timeDispatch && (
                 <p className="error">This field is required</p>
@@ -102,10 +180,11 @@ function NewDispatch({ authToken }) {
                 ref={register({ required: true })}
                 className={errors.timeZone && 'error'}
               >
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
-                <option value="option4">Option 4</option>
+                {timeZoneOptions.map((zone, index) => (
+                  <option key={`timeZone-${index}`} value={zone}>
+                    {zone}
+                  </option>
+                ))}
               </select>
               {errors.timeZone && (
                 <p className="error">This field is required</p>
@@ -113,56 +192,32 @@ function NewDispatch({ authToken }) {
             </label>
           </div>
           <div className="brick">
-            <div className="line">
-              <p className="brick-title">Vendor</p>
-              <label className="checkbox" htmlFor="vendor">
-                CTS
-                <input
-                  type="radio"
-                  name="vendor"
-                  value="cts"
-                  id="cts"
-                  ref={register({ required: true })}
-                  className={errors.vendor && 'error'}
-                />
-                <span className="checkmark" />
-              </label>
-              <label className="checkbox" htmlFor="lit">
-                LIT
-                <input
-                  type="radio"
-                  name="vendor"
-                  value="lit"
-                  id="lit"
-                  ref={register({ required: true })}
-                  className={errors.vendor && 'error'}
-                />
-                <span className="checkmark" />
-              </label>
-              {errors.vendor && <p className="error">This field is required</p>}
-            </div>
-            <br />
-            <label htmlFor="slaLevel">
-              SLA Level
-              <br />
-              <select
-                name="slaLevel"
-                id="slaLevel"
-                ref={register({ required: true })}
-                className={errors.slaLevel && 'error'}
-              >
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
-                <option value="option4">Option 4</option>
-              </select>
-              {errors.slaLevel && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-            <br />
+            {showFieldByVendor(vendorsOptions[1].value) && (
+              <>
+                <label htmlFor="slaLevel">
+                  SLA Level
+                  <br />
+                  <select
+                    name="slaLevel"
+                    id="slaLevel"
+                    ref={register({ required: true })}
+                    className={errors.slaLevel && 'error'}
+                  >
+                    {slaOptions.map(slaOption => (
+                      <option value={slaOption} key={`slaOption-${slaOption}`}>
+                        {slaOption}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.slaLevel && (
+                    <p className="error">This field is required</p>
+                  )}
+                </label>
+                <br />
+              </>
+            )}
             <label htmlFor="mettelId">
-              MetTel Ticket ID <br />
+              Bruin Ticket ID <br />
               <input
                 type="text"
                 name="mettelId"
@@ -174,6 +229,31 @@ function NewDispatch({ authToken }) {
                 <p className="error">This field is required</p>
               )}
             </label>
+            <br />
+            <div htmlFor="vendor">
+              Vendor
+              <br />
+              {vendorsOptions.map(vendorsOption => (
+                <label
+                  className="checkbox"
+                  htmlFor="vendor"
+                  key={`vendorsOption-${vendorsOption.value}`}
+                >
+                  {vendorsOption.name}
+                  <input
+                    type="checkbox"
+                    name="vendor"
+                    value={vendorsOption.value}
+                    id={vendorsOption.value}
+                    ref={register({ required: true })}
+                    className={errors.vendor && 'error'}
+                    onChange={changeVendor}
+                  />
+                  <span className="checkmark" />
+                </label>
+              ))}
+              {errors.vendor && <p className="error">This field is required</p>}
+            </div>
           </div>
           <p className="section-title">Location</p>
           <div className="brick">
@@ -240,10 +320,11 @@ function NewDispatch({ authToken }) {
                 ref={register({ required: true })}
                 className={errors.state && 'error'}
               >
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
-                <option value="option4">Option 4</option>
+                {states.map(state => (
+                  <option value={state.name} key={state.abbreviation}>
+                    {state.name}
+                  </option>
+                ))}
               </select>
               {errors.state && <p className="error">This field is required</p>}
             </label>
@@ -283,11 +364,16 @@ function NewDispatch({ authToken }) {
                 type="text"
                 name="lastName"
                 id="lastName"
-                ref={register({ required: true })}
+                ref={register({ required: true, maxLength: 6 })}
                 className={errors.lastName && 'error'}
               />
               {errors.lastName && (
-                <p className="error">This field is required</p>
+                <p className="error">
+                  {errors.lastName?.type === 'required' &&
+                    'This field is required'}
+                  {errors.lastName?.type === 'maxLength' &&
+                    'This input exceed maxLength'}
+                </p>
               )}
             </label>
             <br />
@@ -321,49 +407,34 @@ function NewDispatch({ authToken }) {
           </div>
           <p className="section-title">Details</p>
           <div className="brick">
-            <p>Service Type</p>
-            {errors.serviceType && (
-              <p className="error">This field is required</p>
+            {showFieldByVendor(vendorsOptions[1].value) && (
+              <>
+                <p>Service Type</p>
+                {errors.serviceType && (
+                  <p className="error">This field is required</p>
+                )}
+
+                {serviceTypesOptions.map(serviceTypesOption => (
+                  <label
+                    className="radio"
+                    htmlFor="vendor"
+                    key={`serviceTypes-${serviceTypesOption.value}`}
+                  >
+                    {serviceTypesOption.name}
+                    <input
+                      type="radio"
+                      name="vendor"
+                      value={serviceTypesOption.value}
+                      id={serviceTypesOption.value}
+                      ref={register({ required: true })}
+                      className={errors.serviceType ? 'radio error' : 'radio'}
+                    />
+                    <span className="checkmark" />
+                  </label>
+                ))}
+              </>
             )}
-            <label className="radio" htmlFor="serviceType">
-              Troubleshoot
-              <input
-                type="radio"
-                name="serviceType"
-                value="troubleshoot"
-                id="serviceType"
-                ref={register({ required: true })}
-                className={errors.serviceType ? 'radio error' : 'radio'}
-              />
-              <span className="checkmark" />
-            </label>
-            <br />
-            <label className="radio" htmlFor="serviceType">
-              Part Replacement
-              <input
-                type="radio"
-                name="serviceType"
-                value="replacement"
-                id="serviceType"
-                ref={register({ required: true })}
-                className={errors.serviceType ? 'radio error' : 'radio'}
-              />
-              <span className="checkmark" />
-            </label>
-            <br />
-            <label className="radio" htmlFor="serviceType">
-              Cable Run
-              <input
-                type="radio"
-                name="serviceType"
-                value="cable"
-                id="service-type"
-                ref={register({ required: true })}
-                className={errors.serviceType ? 'radio error' : 'radio'}
-              />
-              <span className="checkmark" />
-            </label>
-            <br />
+
             <label htmlFor="issues">
               Issue(s) Experienced
               <br />
@@ -411,6 +482,7 @@ function NewDispatch({ authToken }) {
               )}
             </label>
           </div>
+          {/*
           <p className="section-title">Attachments</p>
           <div className="brick">
             <div className="file">
@@ -442,6 +514,7 @@ function NewDispatch({ authToken }) {
               )}
             </div>
           </div>
+          */}
           <p className="section-title">Requester</p>
           <div className="brick">
             <label className="half" htmlFor="firstNameRequester">
@@ -465,11 +538,16 @@ function NewDispatch({ authToken }) {
                 type="text"
                 name="lastNameRequester"
                 id="lastNameRequester"
-                ref={register({ required: true })}
+                ref={register({ required: true, maxLength: 6 })}
                 className={errors.lastNameRequester && 'error'}
               />
               {errors.lastNameRequester && (
-                <p className="error">This field is required</p>
+                <p className="error">
+                  {errors.lastNameRequester?.type === 'required' &&
+                    'This field is required'}
+                  {errors.lastNameRequester?.type === 'maxLength' &&
+                    'This input exceed maxLength'}
+                </p>
               )}
             </label>
             <br />
@@ -482,10 +560,11 @@ function NewDispatch({ authToken }) {
                 ref={register({ required: true })}
                 className={errors.department && 'error'}
               >
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
-                <option value="option4">Option 4</option>
+                {departmentOptions.map((deparmentOption, index) => (
+                  <option key={`department-${index}`} value={deparmentOption}>
+                    {deparmentOption}
+                  </option>
+                ))}
               </select>
               {errors.department && (
                 <p className="error">This field is required</p>
@@ -530,7 +609,7 @@ function NewDispatch({ authToken }) {
               Submit
             </button>
           )}
-          {response.error && (
+          {response && response.error && (
             <p className="error">Error, please try again later</p>
           )}
         </form>

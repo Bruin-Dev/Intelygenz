@@ -17,7 +17,7 @@
   },
   "servers": [
     {
-      "url": "http://127.0.0.1:5000/"
+      "url": "http://127.0.0.1:5004/"
     }
   ],
   "tags": [
@@ -33,11 +33,11 @@
   "paths": {
     "/lit/dispatch/{dispatch_number}": {
       "get": {
-        "description": "Returns all dispatches from LIT that match a filter",
+        "description": "Returns dispatch from LIT that match a filter",
         "tags": [
           "lit"
         ],
-        "operationId": "dispatch",
+        "operationId": "get_dispatch",
         "parameters": [
           {
             "name": "offset",
@@ -67,7 +67,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Dispatches response",
+            "description": "Dispatch response",
             "content": {
               "application/json": {
                 "schema": {
@@ -90,6 +90,53 @@
       }
     },
     "/lit/dispatch": {
+      "get": {
+        "description": "Returns all dispatches from LIT that match a filter",
+        "tags": [
+          "lit"
+        ],
+        "operationId": "get_all_dispatches",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The number of items to skip before starting to collect the result set"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The numbers of items to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dispatches response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/list_dispatch_lit"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "description": "Creates a new dispatch for LIT",
         "tags": [
@@ -171,7 +218,7 @@
         }
       }
     },
-    "/lit/dispatch/<dispatch_number>/upload-file": {
+    "/lit/dispatch/{dispatch_number}/upload-file": {
       "post": {
         "description": "Upload file to dispatch for LIT",
         "tags": [
@@ -233,9 +280,9 @@
         }
       }
     },
-    "/cts/dispatch": {
+    "/cts/dispatch/{dispatch_number}": {
       "get": {
-        "description": "Returns all dispatches from CTS that match a filter",
+        "description": "Returns dispatch from CTS that match a filter",
         "tags": [
           "cts"
         ],
@@ -258,8 +305,9 @@
             "description": "The numbers of items to return"
           },
           {
-            "name": "id",
-            "in": "query",
+            "name": "dispatch_number",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             },
@@ -268,14 +316,60 @@
         ],
         "responses": {
           "200": {
+            "description": "Dispatch response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dispatch_cts"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cts/dispatch": {
+      "get": {
+        "description": "Returns all dispatches from CTS that match a filter",
+        "tags": [
+          "cts"
+        ],
+        "operationId": "get_all_dispatch_cts",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The number of items to skip before starting to collect the result set"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The numbers of items to return"
+          }
+        ],
+        "responses": {
+          "200": {
             "description": "Dispatches response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/dispatch_cts"
-                  }
+                  "$ref": "#/components/schemas/list_dispatch_cts"
                 }
               }
             }
@@ -403,6 +497,21 @@
           }
         }
       },
+      "list_dispatch_lit": {
+        "type": "object",
+        "properties": {
+          "vendor": {
+            "type": "string",
+            "example": "lit"
+          },
+          "list_dispatch": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/new_dispatch_lit"
+            }
+          }
+        }
+      },
       "new_dispatch_lit": {
         "type": "object",
         "required": [
@@ -449,7 +558,7 @@
             "type": "string"
           },
           "mettel_bruin_ticket_id": {
-            "type": "integer"
+            "type": "string"
           },
           "job_site": {
             "type": "string",
@@ -528,7 +637,7 @@
           },
           "date_of_dispatch": {
             "type": "string",
-            "example": "11/14/2019"
+            "example": "2019-11-14"
           },
           "site_survey_quote_required": {
             "type": "boolean",
@@ -550,7 +659,7 @@
             "type": "string"
           },
           "mettel_bruin_ticket_id": {
-            "type": "integer"
+            "type": "string"
           },
           "job_site": {
             "type": "string",
@@ -618,34 +727,149 @@
         }
       },
       "dispatch_cts": {
-        "allOf": [
-          {
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "DS1208"
           },
-          {
+          "vendor": {
+            "type": "string",
+            "example": "cts"
+          },
+          "dispatch": {
             "$ref": "#/components/schemas/new_dispatch_cts"
           }
-        ]
+        }
+      },
+      "list_dispatch_cts": {
+        "type": "object",
+        "properties": {
+          "vendor": {
+            "type": "string",
+            "example": "cts"
+          },
+          "list_dispatch": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/new_dispatch_cts"
+            }
+          }
+        }
       },
       "new_dispatch_cts": {
         "type": "object",
         "required": [
-          "provider"
+          "date_of_dispatch",
+          "time_of_dispatch",
+          "time_zone",
+          "mettel_bruin_ticket_id",
+          "job_site",
+          "job_site_street",
+          "job_site_city",
+          "job_site_state",
+          "job_site_zip_code",
+          "job_site_contact_name",
+          "job_site_contact_number",
+          "materials_needed_for_dispatch",
+          "scope_of_work",
+          "mettel_tech_call_in_instructions",
+          "name_of_mettel_requester",
+          "mettel_department",
+          "mettel_requester_email"
         ],
         "properties": {
-          "vendor": {
+          "date_of_dispatch": {
+            "type": "string",
+            "example": "2019-11-14"
+          },
+          "site_survey_quote_required": {
+            "type": "boolean",
+            "example": false
+          },
+          "time_of_dispatch": {
+            "type": "string",
+            "description": "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on",
+            "example": "6PM-8PM"
+          },
+          "time_zone": {
             "enum": [
-              "CTS"
+              "Pacific Time",
+              "Eastern Time",
+              "Mountain Time",
+              "Hawaii Time",
+              "Alaska Time"
             ],
             "type": "string"
+          },
+          "mettel_bruin_ticket_id": {
+            "type": "string"
+          },
+          "job_site": {
+            "type": "string",
+            "example": "Red Rose Inn"
+          },
+          "job_site_street": {
+            "type": "string",
+            "example": "123 Fake Street"
+          },
+          "job_site_city": {
+            "type": "string",
+            "example": "Pleasantown"
+          },
+          "job_site_state": {
+            "type": "string",
+            "example": "CA"
+          },
+          "job_site_zip_code": {
+            "type": "string",
+            "example": "99088"
+          },
+          "job_site_contact_name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "job_site_contact_number": {
+            "type": "string",
+            "example": "+1 666 6666 666"
+          },
+          "materials_needed_for_dispatch": {
+            "type": "string",
+            "example": "Laptop, cable, tuner, ladder,internet hotspot"
+          },
+          "scope_of_work": {
+            "type": "string",
+            "example": "Device is bouncing constantly"
+          },
+          "mettel_tech_call_in_instructions": {
+            "type": "string",
+            "example": "When arriving to the site call HOLMDEL NOC for telematic assistance"
+          },
+          "name_of_mettel_requester": {
+            "type": "string",
+            "example": "Karen Doe"
+          },
+          "mettel_department": {
+            "enum": [
+              "Customer Care",
+              "DSL",
+              "T1 Repair",
+              "POTs Repair",
+              "Provisioning",
+              "Advanced Services Engineering",
+              "Wireless",
+              "Holmdel Network Engineering",
+              "Advanced Services Implementations",
+              "Other"
+            ],
+            "type": "string"
+          },
+          "mettel_requester_email": {
+            "type": "string",
+            "example": "karen.doe@mettel.net"
           }
         }
       },

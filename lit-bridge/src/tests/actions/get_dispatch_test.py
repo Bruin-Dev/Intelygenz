@@ -79,12 +79,19 @@ class TestGetDispatch:
         event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
 
     @pytest.mark.asyncio
-    async def get_dispatch_no_dispatch_number_ko_test(self):
+    async def get_dispatch_no_dispatch_number_ok_test(self):
         configs = config
         logger = Mock()
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
+
+        return_body = {'DispatchList': [{'Dispatch_Number': 123}]}
+        return_status = 200
+        get_dispatch_return = {'body': return_body, 'status': return_status}
+
         lit_repo = Mock()
+        lit_repo.get_dispatch = Mock()
+        lit_repo.get_all_dispatches = Mock(return_value=get_dispatch_return)
 
         request_id = '123'
         response_topic = 'some.response.topic'
@@ -95,11 +102,13 @@ class TestGetDispatch:
         }
         expected_return = {
             'request_id': request_id,
-            'body': 'Must include "dispatch_number" in request',
-            'status': 400
+            'body': return_body,
+            'status': return_status
 
         }
         get_dispatch_action = GetDispatch(logger, configs, event_bus, lit_repo)
         await get_dispatch_action.get_dispatch(msg)
+
         lit_repo.get_dispatch.assert_not_called()
+        lit_repo.get_all_dispatches.assert_called_once()
         event_bus.publish_message.assert_called_once_with(response_topic, expected_return)

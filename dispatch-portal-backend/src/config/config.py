@@ -21,6 +21,13 @@ NATS_CONFIG = {
 
 }
 
+DISPATCH_MONITOR_CONFIG = {
+    'timezone': 'US/Eastern',
+    'jobs_intervals': {
+        'dispatch_monitor': 60 * 3
+    },
+}
+
 DISPATCH_PORTAL_CONFIG = {
     'title': 'Dispatch Portal API',
     'port': os.environ['DISPATCH_PORTAL_SERVER_PORT'],

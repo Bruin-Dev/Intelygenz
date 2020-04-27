@@ -14,8 +14,6 @@ data "template_file" "automation-dispatch-portal-frontend" {
     dispatch_portal_frontend_nginx_image = local.automation-dispatch-portal-frontend-nginx-image
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
-    BASE_API_URL = local.automation-dispatch-portal-backend-base_url
-    DISPATCH_BACKEND_PORTAL_PORT = local.automation-dispatch-portal-backend-port
   }
 }
 

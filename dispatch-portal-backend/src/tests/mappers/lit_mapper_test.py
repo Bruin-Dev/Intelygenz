@@ -24,7 +24,7 @@ class TestMappers:
             "MetTel_Group_Email": None,
             "MetTel_Department_Phone_Number": None,
             "MetTel_Department": "Customer Care",
-            "MetTel_Bruin_TicketID": None,
+            "MetTel_Bruin_TicketID": "T-12345",
             "Local_Time_of_Dispatch": None,
             "Job_Site_Zip_Code": "99088",
             "Job_Site_Street": "123 Fake Street",
@@ -39,7 +39,8 @@ class TestMappers:
             "Dispatch_Number": "DIS37450",
             "Date_of_Dispatch": "2019-11-14",
             "Close_Out_Notes": None,
-            "Backup_MetTel_Department_Phone_Number": None
+            "Backup_MetTel_Department_Phone_Number": None,
+            "dispatch_status": "New Dispatch"
         }
 
         expected_map = {
@@ -48,6 +49,7 @@ class TestMappers:
             "site_survey_quote_required": False,
             "time_of_dispatch": None,
             "time_zone": "Pacific Time",
+            "mettel_bruin_ticket_id": "T-12345",
             "job_site": "test street",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -60,7 +62,8 @@ class TestMappers:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "dispatch_status": "New Dispatch"
         }
 
         assert expected_map == map_get_dispatch(content)
@@ -71,7 +74,7 @@ class TestMappers:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
-            "mettel_bruin_ticket_id": 123,
+            "mettel_bruin_ticket_id": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -92,6 +95,7 @@ class TestMappers:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",

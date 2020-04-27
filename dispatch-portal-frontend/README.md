@@ -52,6 +52,7 @@ At the time of writing this document we are using the following global versions:
 - [React-data-table-component](https://www.npmjs.com/package/react-data-table-component)
 - [styled-components](https://styled-components.com/), only used to react data table.
 - [axios-mock-adapter](https://www.npmjs.com/package/axios-mock-adapter) For init project mocks, Axios adapter that allows to easily mock requests.
+- [tailwindcss](https://tailwindcss.com/docs) For css help.
 
 # Developing flow
 
@@ -80,3 +81,10 @@ If any of the next requirements is not fulfilled in a merge request, merge reque
 - Developers should take care of notify the devops/tech lead of putting in the pipeline env any environment variable needed in the pipeline's execution.
 
 
+## Work locally
+
+Start docker and the back images:
+``docker-compose up --build redis nats-server lit-bridge cts-bridge dispatch-portal-backend nginx bruin-bridge``
+
+and to login or renew the AWS token:
+``echo $(aws ecr get-login-password --profile mettel)|docker login --password-stdin --username AWS 374050862540.dkr.ecr.us-east-1.amazonaws.com``

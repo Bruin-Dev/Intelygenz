@@ -6,8 +6,8 @@ import { dispatchService } from '../services/dispatch/dispatch.service';
 import { privateRoute } from '../components/privateRoute/PrivateRoute';
 import Menu from '../components/menu/Menu';
 import Loading from '../components/loading/Loading';
-import { config } from '../config/config';
 import { Routes } from '../config/routes';
+import { config } from '../config/config';
 
 const columns = [
   {
@@ -15,46 +15,53 @@ const columns = [
     selector: 'color',
     sortable: true,
     cell: row => (
-      <span className={row.system === 'LIT' ? 'lit-row' : 'cts-row'} />
+      <span
+        className={row.vendor === config.VENDORS.CTS ? 'cts-row' : 'lit-row'}
+      />
     )
   },
   {
     name: 'System',
-    selector: 'system',
+    selector: 'vendor',
     sortable: true
   },
   {
-    name: 'Dispatch ID', // Todo: link to...
-    selector: 'id',
+    name: 'Dispatch ID',
+    selector: 'dispatch_number',
     sortable: true,
     cell: row => (
-      <a className="link" href={`${Routes.DISPATCH()}/${row.id}`}>
-        {row.id}
+      <a className="link" href={`${Routes.DISPATCH()}/${row.dispatch_number}`}>
+        {row.dispatch_number}
       </a>
     )
   },
   {
     name: 'Customer/Location',
     selector: 'customerLocation',
-    sortable: true
+    sortable: true,
+    cell: row => (
+      <span>{`${row.job_site_street} ${row.job_site_city} ${row.job_site_state} ${row.job_site_zip_code}`}</span>
+    )
   },
   {
-    name: 'Bruin Ticket ID', // Todo: link to...
-    selector: 'bruinTicketId',
+    name: 'Bruin Ticket ID',
+    selector: 'mettel_bruin_ticket_id',
     sortable: true
   },
   {
     name: 'Time Scheduled',
-    selector: 'timeScheduled',
+    selector: 'date_of_dispatch',
     sortable: true
   },
   {
     name: 'Dispatch Status',
-    selector: 'status',
+    selector: 'dispatch_status',
     sortable: true,
-    cell: row => (
-      <button type="button" className={row.status.replace(' ', '_')}>
-        {row.status}
+    cell: (
+      row // Todo: review status states
+    ) => (
+      <button type="button" className={row.dispatch_status.replace(' ', '_')}>
+        {row.dispatch_status}
       </button>
     )
   }
@@ -64,11 +71,16 @@ function Index({ authToken }) {
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [apiError, setApiError] = useState(false);
 
   useEffect(() => {
     async function getAllDispatches() {
       const response = await dispatchService.getAll();
-      setData(response.data);
+      if (response && response.data) {
+        setData(response.data);
+      } else {
+        setApiError(true);
+      }
       setIsLoading(false);
     }
     getAllDispatches();
@@ -79,11 +91,13 @@ function Index({ authToken }) {
       <Menu authToken={authToken} />
       <Link href={Routes.NEW_DISPATCH()}>
         <button className="new" type="button">
-          Create new dispatch ||{config.basePath}||
+          Create new dispatch
         </button>
       </Link>
-      {isLoading ? (
-        <Loading />
+      {isLoading && <Loading />}
+
+      {!(isLoading && apiError) ? (
+        <p>Error!</p>
       ) : (
         <DataTable
           title="Dispatches List"

@@ -32,6 +32,8 @@ class Container:
         self._lit_client = LitClient(self._logger, config)
         self._lit_repository = LitRepository(self._lit_client, self._logger, self._scheduler, config)
 
+        self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
+
         # NATS clients
         self._publisher = NATSClient(config, logger=self._logger)
         self._subscriber_create_dispatch = NATSClient(config, logger=self._logger)

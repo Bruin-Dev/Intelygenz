@@ -74,8 +74,6 @@ locals {
   automation-dispatch-portal-backend-resource-name = "${var.ENVIRONMENT}-dispatch-portal-backend"
   automation-dispatch-portal-backend-task_definition = "${aws_ecs_task_definition.automation-dispatch-portal-backend.family}:${aws_ecs_task_definition.automation-dispatch-portal-backend.revision}"
   automation-dispatch-portal-backend-service_discovery_service-name = "dispatch-portal-backend-${var.ENVIRONMENT}"
-  automation-dispatch-portal-backend-base_url = "dispatch-portal-backend-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local"
-  automation-dispatch-portal-backend-port = 5000
 
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"

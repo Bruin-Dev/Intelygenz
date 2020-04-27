@@ -97,8 +97,10 @@ Response with invalid login data or invalid grant_type - 400
 ```
 
 # Request New Dispatch
+
 ### Description
-Not working now.
+
+Create a new dispatch for LIT
 
 ### Request message
 ```
@@ -239,7 +241,66 @@ Get dispatch from LIT API
     "status": 200
 }
 ```
-
+Response message with empty body returns a list of all dispatches
+### Request message
+```
+{
+  "request_id": "c68EW1c72a-9c52-4c74-bd99-53c2c973b037" (per-request generated UUID),
+  "body":{}
+}
+```
+### Response message
+```
+{   
+    "request_id": "c68EW1c72a-9c52-4c74-bd99-53c2c973b037"
+    "body":
+            {
+                "Status": "Success",
+                "Message": "Total Number of Dispatches: 1",
+                "DispatchList": [ 
+                  {
+                    "turn_up": "Yes",
+                    "Time_Zone_Local": "Pacific Time",
+                    "Time_of_Check_Out": null,
+                    "Time_of_Check_In": null,
+                    "Tech_Off_Site": false,
+                    "Tech_Mobile_Number": null,
+                    "Tech_First_Name": null,
+                    "Tech_Arrived_On_Site": false,
+                    "Special_Materials_Needed_for_Dispatch": "test",
+                    "Special_Dispatch_Notes": "Test Create No Special Dispatch Notes to Pass Forward",
+                    "Site_Survey_Quote_Required": false,
+                    "Scope_of_Work": "test",
+                    "Name_of_MetTel_Requester": "Test User11111",
+                    "MetTel_Tech_Call_In_Instructions": "test",
+                    "MetTel_Requester_Email": "test@mettel.net",
+                    "MetTel_Note_Updates": null,
+                    "MetTel_Group_Email": "test@mettel.net",
+                    "MetTel_Department_Phone_Number": "1233211234",
+                    "MetTel_Department": "Customer Care",
+                    "MetTel_Bruin_TicketID": null,
+                    "Local_Time_of_Dispatch": null,
+                    "Job_Site_Zip_Code": "123321",
+                    "Job_Site_Street": "test street test 1111",
+                    "Job_Site_State": "test state2",
+                    "Job_Site_Contact_Name_and_Phone_Number": "test",
+                    "Job_Site_City": "test city",
+                    "Job_Site": "test",
+                    "Information_for_Tech": "test",
+                    "Hard_Time_of_Dispatch_Time_Zone_Local": "Eastern Time",
+                    "Hard_Time_of_Dispatch_Local": "7AM-9AM",
+                    "Dispatch_Status": "New Dispatch",
+                    "Dispatch_Number": "DIS37290",
+                    "Date_of_Dispatch": "2016-11-16",
+                    "Close_Out_Notes": null,
+                    "Backup_MetTel_Department_Phone_Number": "1233211234"
+                  }
+                ],
+                "APIRequestID": "a130v000001hIprAAE"
+            }
+    "status": 200
+}
+```
 Response message with invalid Dispatch_ID - 200
 
 ```
@@ -252,7 +313,7 @@ Response message with invalid Dispatch_ID - 200
                 "Dispatch": null,
                 "APIRequestID": "a130v000001hOk9AAE"
             }
-    "status": 400 //TODO check if status code is accurate for this error return 
+    "status": 400 
 }  
 ```
 
@@ -450,6 +511,3 @@ binary data with file content
 
 # Running in docker-compose 
 `docker-compose up --build redis nats-server lit-bridge`
-
-# Resources
-<https://medium.com/@hkaraoguz/using-swaggerui-with-quart-72a3dab19273>

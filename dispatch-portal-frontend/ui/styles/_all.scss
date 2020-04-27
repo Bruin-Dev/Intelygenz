@@ -317,31 +317,31 @@ html{
           span.cts-row{
             background-color: $cts-row;
           }
-          button.requested,
-          button.confirmed,
-          button.in_progress,
-          button.completed{
-            color: $white;
-            border-radius: 5px;
-            background-color: $bg-general;
-            margin: 0 auto;
-            padding: 5px 10px;
-            font-size: 1em;
-          }
-          button.requested{
-            background-color: $bg-requested;
-          }
-          button.confirmed{
-            background-color: $bg-confirmed;
-          }
-          button.in_progress{
-            background-color: $bg-in_progress;
-          }
-          button.completed{
-            background-color: $bg-completed;
-          }
         }
       }
+    }
+    button.requested,
+    button.confirmed,
+    button.in_progress,
+    button.completed{
+      color: $white;
+      border-radius: 5px;
+      background-color: $bg-general;
+      margin: 0 auto;
+      padding: 5px 10px;
+      font-size: 1em;
+    }
+    button.requested{
+      background-color: $bg-requested;
+    }
+    button.confirmed{
+      background-color: $bg-confirmed;
+    }
+    button.in_progress{
+      background-color: $bg-in_progress;
+    }
+    button.completed{
+      background-color: $bg-completed;
     }
   }
 }

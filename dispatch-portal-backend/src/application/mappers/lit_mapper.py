@@ -8,6 +8,7 @@ def map_get_dispatch(body):
         "date_of_dispatch": body['date_of_dispatch'],
         "site_survey_quote_required": body['site_survey_quote_required'],
         "time_of_dispatch": body['local_time_of_dispatch'],
+        "mettel_bruin_ticket_id": body["mettel_bruin_ticketid"],
         "time_zone": body['time_zone_local'],
         "job_site": body["job_site"],
         "job_site_street": body["job_site_street"],
@@ -22,8 +23,7 @@ def map_get_dispatch(body):
         "name_of_mettel_requester": body["name_of_mettel_requester"],
         "mettel_department": body["mettel_department"],
         "mettel_requester_email": body["mettel_requester_email"],
-        # The Lit API doesn`t accept this parameter
-        # "mettel_bruin_ticketid": str(body["mettel_bruin_ticket_id"]),
+        "dispatch_status": body['dispatch_status'],
     }
     return dispatch_request
 
@@ -38,6 +38,7 @@ def map_create_dispatch(body):
         "site_survey_quote_required": body['site_survey_quote_required'],
         "local_time_of_dispatch": body['time_of_dispatch'],
         "time_zone_local": body['time_zone'],
+        "mettel_bruin_ticketid": body["mettel_bruin_ticket_id"],
         "job_site": body["job_site"],
         "job_site_street": body["job_site_street"],
         "job_site_city": body["job_site_city"],
@@ -51,8 +52,6 @@ def map_create_dispatch(body):
         "name_of_mettel_requester": body["name_of_mettel_requester"],
         "mettel_department": body["mettel_department"],
         "mettel_requester_email": body["mettel_requester_email"],
-        # The Lit API doesn`t accept this parameter
-        # "mettel_bruin_ticketid": str(body["mettel_bruin_ticket_id"]),
     }
     return dispatch_request
 
@@ -69,6 +68,7 @@ def map_update_dispatch(body):
         "site_survey_quote_required": body.get('site_survey_quote_required', None),
         "local_time_of_dispatch": body.get('time_of_dispatch', None),
         "time_zone_local": body.get('time_zone', None),
+        "mettel_bruin_ticketid": body.get("mettel_bruin_ticket_id", None),
         "job_site": body.get("job_site", None),
         "job_site_street": body.get("job_site_street", None),
         "job_site_city": body.get("job_site_city", None),
@@ -80,8 +80,6 @@ def map_update_dispatch(body):
         "name_of_mettel_requester": body.get("name_of_mettel_requester", None),
         "mettel_department": body.get("mettel_department", None),
         "mettel_requester_email": body.get("mettel_requester_email", None),
-        # The Lit API doesn`t accept this parameter
-        # "mettel_bruin_ticketid": str(body.get("mettel_bruin_ticket_id", None)),
     }
 
     if "job_site_contact_name" in body and "job_site_contact_number" in body:

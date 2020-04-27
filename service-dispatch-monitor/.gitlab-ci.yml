@@ -1,0 +1,25 @@
+# =====================================================
+# Linter validation jobs for service-dispatch-monitor module
+# =====================================================
+service-dispatch-monitor-linter:
+  variables:
+    MODULE: service-dispatch-monitor
+  extends: .lint_module
+
+# =============================================
+# Unit tests jobs for service-dispatch-monitor module
+# =============================================
+service-dispatch-monitor-test:
+  variables:
+    MODULE: service-dispatch-monitor
+  extends: .unittest_module_python_alpine
+
+# ================================================
+# Images builds jobs for service-dispatch-monitor module
+# ================================================
+service-dispatch-monitor-build:
+  stage: build
+  variables:
+    MODULE_NAME: service-dispatch-monitor
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  extends: .build_app_image

@@ -46,7 +46,7 @@ Local development and debugging
 cd dispatch-portal-backend/src
 export NATS_SERVER1="nats://localhost:4222"
 export REDIS_HOSTNAME="localhost"
-export DISPATCH_PORTAL_SERVER_PORT=5000
+export DISPATCH_PORTAL_SERVER_PORT=5004
 python app.py
 ```
 
@@ -122,3 +122,7 @@ pip freeze | grep -v "pkg-resources" > requirements.txt #The grep -v is needed o
 - [Python async simplified with asgiref and asyncio](https://www.aeracode.org/2018/02/19/python-async-simplified/)
 - [Getting started with testing in Python](https://realpython.com/python-testing/#choosing-a-test-runner)
 - [Pytest documentation](https://docs.pytest.org/en/latest/getting-started.html)
+
+# Resources
+
+- [SwaggerUI Quart](https://medium.com/@hkaraoguz/using-swaggerui-with-quart-72a3dab19273)

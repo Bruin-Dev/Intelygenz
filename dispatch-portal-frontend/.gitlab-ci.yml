@@ -55,6 +55,11 @@ dispatch-portal-frontend-nextjs-build:
   variables:
     MODULE_NAME: dispatch-portal-frontend
     MODULE_VERSION: ${CI_PIPELINE_ID}
+  script:
+    - docker build --build-arg NODE_ENV="production" --build-arg DNS_ENVIRONMENT=${DNS_ENVIRONMENT_VAR} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
+    - python3 ci-utils/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   extends: .build_app_image
 
 dispatch-portal-frontend-nginx-build:
@@ -62,4 +67,11 @@ dispatch-portal-frontend-nginx-build:
   variables:
     MODULE_NAME: dispatch-portal-frontend/nginx
     MODULE_VERSION: ${CI_PIPELINE_ID}
+  script:
+    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" dispatch-portal-frontend/nginx/nginx-dev.conf
+    - mv dispatch-portal-frontend/nginx/nginx-dev.conf dispatch-portal-frontend/nginx/nginx.conf
+    - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
+    - python3 ci-utils/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
+    - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   extends: .build_app_image

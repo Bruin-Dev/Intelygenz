@@ -110,7 +110,7 @@ class TestApiServer:
                     "MetTel_Group_Email": None,
                     "MetTel_Department_Phone_Number": None,
                     "MetTel_Department": "Customer Care",
-                    "MetTel_Bruin_TicketID": None,
+                    "MetTel_Bruin_TicketID": "T-12345",
                     "Local_Time_of_Dispatch": None,
                     "Job_Site_Zip_Code": "99088",
                     "Job_Site_Street": "123 Fake Street",
@@ -125,7 +125,8 @@ class TestApiServer:
                     "Dispatch_Number": "DIS37450",
                     "Date_of_Dispatch": "2019-11-14",
                     "Close_Out_Notes": None,
-                    "Backup_MetTel_Department_Phone_Number": None
+                    "Backup_MetTel_Department_Phone_Number": None,
+                    "dispatch_status": "New Dispatch"
                 },
                 "APIRequestID": "a130v000001U6iTAAS"
             },
@@ -144,6 +145,7 @@ class TestApiServer:
                 "site_survey_quote_required": False,
                 "time_of_dispatch": None,
                 "time_zone": "Pacific Time",
+                "mettel_bruin_ticket_id": "T-12345",
                 "job_site": "test street",
                 "job_site_street": "123 Fake Street",
                 "job_site_city": "Pleasantown",
@@ -157,7 +159,8 @@ class TestApiServer:
                     "When arriving to the site call HOLMDEL NOC for telematic assistance",
                 "name_of_mettel_requester": "Karen Doe",
                 "mettel_department": "Customer Care",
-                "mettel_requester_email": "karen.doe@mettel.net"
+                "mettel_requester_email": "karen.doe@mettel.net",
+                "dispatch_status": "New Dispatch"
             }
         }
 
@@ -260,6 +263,278 @@ class TestApiServer:
             assert data['code'] == HTTPStatus.INTERNAL_SERVER_ERROR
 
     @pytest.mark.asyncio
+    async def get_all_dispatch_test(self):
+        uuid_ = 'UUID1'
+        logger = Mock()
+        redis_client = Mock()
+
+        expected_response_lit = {
+            "request_id": uuid_,
+            "body": {
+                "Status": "Success",
+                "Message": "Total Number of Dispatches: 236",
+                "DispatchList": [
+                    {
+                        "turn_up": None,
+                        "Time_Zone_Local": "Pacific Time",
+                        "Time_of_Check_Out": None,
+                        "Time_of_Check_In": None,
+                        "Tech_Off_Site": False,
+                        "Tech_Mobile_Number": None,
+                        "Tech_First_Name": None,
+                        "Tech_Arrived_On_Site": False,
+                        "Special_Materials_Needed_for_Dispatch": "Special_Materials_Needed_for_Dispatch",
+                        "Special_Dispatch_Notes": None,
+                        "Site_Survey_Quote_Required": True,
+                        "Scope_of_Work": "Device is bouncing constantly",
+                        "Name_of_MetTel_Requester": "Karen Doe",
+                        "MetTel_Tech_Call_In_Instructions": 'MetTel_Tech_Call_In_Instructions',
+                        "MetTel_Requester_Email": "karen.doe@mettel.net",
+                        "MetTel_Note_Updates": None,
+                        "MetTel_Group_Email": "activations@mettel.net",
+                        "MetTel_Department_Phone_Number": "(111) 111-1111",
+                        "MetTel_Department": "1",
+                        "MetTel_Bruin_TicketID": "T-12345",
+                        "Local_Time_of_Dispatch": None,
+                        "Job_Site_Zip_Code": "99088",
+                        "Job_Site_Street": "123 Fake Street",
+                        "Job_Site_State": "CA",
+                        "Job_Site_Contact_Name_and_Phone_Number": "Jane Doe +1 666 6666 666",
+                        "Job_Site_City": "Pleasantown",
+                        "Job_Site": "test site",
+                        "Information_for_Tech": None,
+                        "Hard_Time_of_Dispatch_Time_Zone_Local": None,
+                        "Hard_Time_of_Dispatch_Local": "2:00pm",
+                        "Dispatch_Status": "New Dispatch",
+                        "Dispatch_Number": "DIS37263",
+                        "Date_of_Dispatch": "2019-11-14",
+                        "Close_Out_Notes": None,
+                        "Backup_MetTel_Department_Phone_Number": "(111) 111-1111"
+                    },
+                    {
+                        "turn_up": None,
+                        "Time_Zone_Local": "Pacific Time",
+                        "Time_of_Check_Out": None,
+                        "Time_of_Check_In": None,
+                        "Tech_Off_Site": False,
+                        "Tech_Mobile_Number": None,
+                        "Tech_First_Name": None,
+                        "Tech_Arrived_On_Site": False,
+                        "Special_Materials_Needed_for_Dispatch": "Special_Materials_Needed_for_Dispatch",
+                        "Special_Dispatch_Notes": None,
+                        "Site_Survey_Quote_Required": False,
+                        "Scope_of_Work": "Device is bouncing constantly",
+                        "Name_of_MetTel_Requester": "Karen Doe",
+                        "MetTel_Tech_Call_In_Instructions": "MetTel_Tech_Call_In_Instructions",
+                        "MetTel_Requester_Email": "karen.doe@mettel.net",
+                        "MetTel_Note_Updates": None,
+                        "MetTel_Group_Email": "activations@mettel.net",
+                        "MetTel_Department_Phone_Number": "(111) 111-1111",
+                        "MetTel_Department": "1",
+                        "MetTel_Bruin_TicketID": "T-12345",
+                        "Local_Time_of_Dispatch": None,
+                        "Job_Site_Zip_Code": "99088",
+                        "Job_Site_Street": "123 Fake Street",
+                        "Job_Site_State": "CA",
+                        "Job_Site_Contact_Name_and_Phone_Number": "Jane Doe +1 666 6666 666",
+                        "Job_Site_City": "Pleasantown",
+                        "Job_Site": "test site",
+                        "Information_for_Tech": None,
+                        "Hard_Time_of_Dispatch_Time_Zone_Local": None,
+                        "Hard_Time_of_Dispatch_Local": "2:00pm",
+                        "Dispatch_Status": "Request Confirmed",
+                        "Dispatch_Number": "DIS37264",
+                        "Date_of_Dispatch": "2019-11-14",
+                        "Close_Out_Notes": None,
+                        "Backup_MetTel_Department_Phone_Number": "(111) 111-1111"
+                    }
+                ]
+            },
+            "status": 200
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+
+        expected_response = {
+            "vendor": "LIT",
+            "list_dispatch": [
+                {
+                    "dispatch_number": "DIS37263",
+                    "date_of_dispatch": "2019-11-14",
+                    "site_survey_quote_required": True,
+                    "time_of_dispatch": None,
+                    "time_zone": "Pacific Time",
+                    "mettel_bruin_ticket_id": "T-12345",
+                    "job_site": "test site",
+                    "job_site_street": "123 Fake Street",
+                    "job_site_city": "Pleasantown",
+                    "job_site_state": "CA",
+                    "job_site_zip_code": "99088",
+                    "job_site_contact_name": "Jane Doe",
+                    "job_site_contact_number": "+1 666 6666 666",
+                    "materials_needed_for_dispatch": "Special_Materials_Needed_for_Dispatch",
+                    "scope_of_work": "Device is bouncing constantly",
+                    "mettel_tech_call_in_instructions": "MetTel_Tech_Call_In_Instructions",
+                    "name_of_mettel_requester": "Karen Doe",
+                    "mettel_department": "1",
+                    "mettel_requester_email": "karen.doe@mettel.net",
+                    "dispatch_status": "New Dispatch"
+                },
+                {
+                    "dispatch_number": "DIS37264",
+                    "date_of_dispatch": "2019-11-14",
+                    "site_survey_quote_required": False,
+                    "time_of_dispatch": None,
+                    "time_zone": "Pacific Time",
+                    "mettel_bruin_ticket_id": "T-12345",
+                    "job_site": "test site",
+                    "job_site_street": "123 Fake Street",
+                    "job_site_city": "Pleasantown",
+                    "job_site_state": "CA",
+                    "job_site_zip_code": "99088",
+                    "job_site_contact_name": "Jane Doe",
+                    "job_site_contact_number": "+1 666 6666 666",
+                    "materials_needed_for_dispatch": "Special_Materials_Needed_for_Dispatch",
+                    "scope_of_work": "Device is bouncing constantly",
+                    "mettel_tech_call_in_instructions": "MetTel_Tech_Call_In_Instructions",
+                    "name_of_mettel_requester": "Karen Doe",
+                    "mettel_department": "1",
+                    "mettel_requester_email": "karen.doe@mettel.net",
+                    "dispatch_status": "Request Confirmed"
+                }
+            ]
+        }
+
+        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+
+        payload = {"request_id": uuid_, "body": {}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch/')
+            data = await response.get_json()
+            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
+
+            assert response.status_code == HTTPStatus.OK
+            assert data == expected_response
+
+    @pytest.mark.asyncio
+    async def get_all_dispatch_error_500_test(self):
+        uuid_ = 'UUID1'
+        logger = Mock()
+        redis_client = Mock()
+
+        expected_response_lit = {
+            "request_id": uuid_,
+            "body": [
+                {
+                    "errorCode": "APEX_ERROR",
+                    "message": ""
+                }
+            ],
+            "status": HTTPStatus.INTERNAL_SERVER_ERROR
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+
+        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+
+        payload = {"request_id": uuid_, "body": {}}
+
+        expected_response_get_all_dispatches_error = {
+            'code': 500, 'message': [{'errorCode': 'APEX_ERROR', 'message': ''}]
+        }
+
+        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch', json=payload)
+
+            data = await response.get_json()
+            event_bus.rpc_request.assert_awaited_once()
+
+            assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+            assert data == expected_response_get_all_dispatches_error
+
+    @pytest.mark.asyncio
+    async def get_all_dispatch_error_400_test(self):
+        uuid_ = 'UUID1'
+        logger = Mock()
+        redis_client = Mock()
+
+        expected_response_lit = {
+            "request_id": uuid_,
+            "body": [
+                {
+                    "errorCode": "APEX_ERROR",
+                    "message": ""
+                }
+            ],
+            "status": 400
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+
+        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+
+        payload = {"request_id": uuid_, "body": {}}
+
+        expected_response_get_all_dispatches_error = {
+            'code': 400, 'message': [{'errorCode': 'APEX_ERROR', 'message': ''}]
+        }
+
+        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch', json=payload)
+
+            data = await response.get_json()
+            event_bus.rpc_request.assert_awaited_once()
+
+            assert response.status_code == 400
+            assert data == expected_response_get_all_dispatches_error
+
+    @pytest.mark.asyncio
+    async def get_all_dispatch_error_in_response_test(self):
+        uuid_ = 'UUID1'
+        logger = Mock()
+        redis_client = Mock()
+
+        expected_response_lit = {
+            "request_id": uuid_,
+            "body": {},
+            "status": 200
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+
+        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+
+        payload = {"request_id": uuid_, "body": {}}
+
+        expected_response_get_all_dispatches_error = {
+            'code': 200, 'message': {}
+        }
+
+        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch', json=payload)
+
+            data = await response.get_json()
+            event_bus.rpc_request.assert_awaited_once()
+
+            assert response.status_code == 200
+            assert data == expected_response_get_all_dispatches_error
+
+    @pytest.mark.asyncio
     async def create_dispatch_test(self):
         uuid_ = 'UUID1'
         logger = Mock()
@@ -325,7 +600,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
-            "mettel_bruin_ticket_id": 123,
+            "mettel_bruin_ticket_id": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -346,6 +621,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -367,10 +643,11 @@ class TestApiServer:
             }
         }
 
-        expected_response_create = {'id': 'DIS37450', 'vendor': 'lit'}
+        expected_response_create = {'id': 'DIS37450', 'vendor': 'LIT'}
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
+            api_server_test._process_note = CoroutineMock()
             response = await client.post(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
@@ -533,7 +810,7 @@ class TestApiServer:
                 "MetTel_Group_Email": None,
                 "MetTel_Department_Phone_Number": None,
                 "MetTel_Department": "Customer Care",
-                "MetTel_Bruin_TicketID": None,
+                "MetTel_Bruin_TicketID": "T-12345",
                 "Local_Time_of_Dispatch": None,
                 "Job_Site_Zip_Code": "99088",
                 "Job_Site_Street": "123 Fake Street",
@@ -573,7 +850,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
-            "mettel_bruin_ticket_id": 123,
+            "mettel_bruin_ticket_id": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -658,7 +935,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
-            "mettel_bruin_ticket_id": 123,
+            "mettel_bruin_ticket_id": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -679,6 +956,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -751,7 +1029,7 @@ class TestApiServer:
                 "MetTel_Group_Email": None,
                 "MetTel_Department_Phone_Number": None,
                 "MetTel_Department": "Customer Care",
-                "MetTel_Bruin_TicketID": None,
+                "MetTel_Bruin_TicketID": "T-12345",
                 "Local_Time_of_Dispatch": None,
                 "Job_Site_Zip_Code": "99088",
                 "Job_Site_Street": "123 Fake Street",
@@ -787,7 +1065,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
-            "mettel_bruin_ticket_id": 123,
+            "mettel_bruin_ticket_id": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street MODIFIED",
             "job_site_city": "Pleasantown",
@@ -809,6 +1087,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street MODIFIED",
             "job_site_city": "Pleasantown",
@@ -871,7 +1150,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
-            "mettel_bruin_ticket_id": 123,
+            "mettel_bruin_ticket_id": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street MODIFIED",
             "job_site_city": "Pleasantown",
@@ -932,7 +1211,7 @@ class TestApiServer:
                 "MetTel_Group_Email": None,
                 "MetTel_Department_Phone_Number": None,
                 "MetTel_Department": "Customer Care",
-                "MetTel_Bruin_TicketID": None,
+                "MetTel_Bruin_TicketID": "T-12345",
                 "Local_Time_of_Dispatch": None,
                 "Job_Site_Zip_Code": "99088",
                 "Job_Site_Street": "123 Fake Street",
@@ -968,7 +1247,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
-            "mettel_bruin_ticket_id": 123,
+            "mettel_bruin_ticket_id": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street MODIFIED",
             "job_site_city": "Pleasantown",
@@ -1140,7 +1419,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
-            "mettel_bruin_ticket_id": 123,
+            "mettel_bruin_ticket_id": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -1162,6 +1441,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",

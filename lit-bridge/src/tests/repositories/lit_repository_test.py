@@ -95,7 +95,20 @@ class TestLitRepository:
         lit_repo = LitRepository(lit_client, logger, scheduler, config)
         lit_repo.get_dispatch(dispatch_number)
 
-        lit_client.get_dispatch.aseert_called_with(dispatch_number)
+        lit_client.get_dispatch.assert_called_with(dispatch_number)
+
+    def get_all_dispatches_test(self):
+        lit_client = Mock()
+        lit_client.get_dispatch = Mock()
+
+        logger = Mock()
+        scheduler = Mock()
+        config = Mock()
+
+        lit_repo = LitRepository(lit_client, logger, scheduler, config)
+        lit_repo.get_all_dispatches()
+
+        lit_client.get_all_dispatches.assert_called_once()
 
     def update_dispatch_test(self):
         lit_client = Mock()

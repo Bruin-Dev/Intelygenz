@@ -1,36 +1,45 @@
 export const dispatchLitInAdapter = data => ({
-  id: data.Dispatch_Number,
+  // site_survey_quote_required, job_site_contact_name
+  id: data.id,
   vendor: data.vendor,
-  slaLevel: data.slaLevel,
-  dateDispatch: data.Date_of_Dispatch,
-  mettelId: data.MetTel_Max_ID,
-  timeDispatch: data.Local_Time_of_Dispatch,
-  timeZone: data.Time_Zone_Local,
-  turnUp: data.Turn_Up,
-  hardTimeDispatch: data.Hard_Time_of_Dispatch_Local,
-  hardTimeZone: data.Hard_Time_of_Dispatch_Time_Zone_Local,
+  slaLevel: '===not set===',
+  status: data.status || '===not set===',
+  dateDispatch: data.dispatch.date_of_dispatch,
+  mettelId: data.dispatch.dispatch_number,
+  timeDispatch: data.dispatch.time_of_dispatch,
+  timeZone: data.dispatch.time_zone,
+  turnUp: data.dispatch.turn_up || '===not set===',
+  hardTimeDispatch: data.dispatch.hardTimeDispatch || '===not set===',
+  hardTimeZone: data.dispatch.hardTimeZone || '===not set===',
   requester: {
-    name: data.Name_of_MetTel_Requester,
-    groupEmail: data.MetTel_Group_Email,
-    email: data.MetTel_Requester_Email,
-    department: data.MetTel_Department,
-    phoneNumber: data.MetTel_Department_Phone_Number,
-    departmentPhoneNumber: data.Backup_MetTel_Department_Phone_Number
+    name: data.dispatch.name_of_mettel_requester,
+    groupEmail: data.dispatch.mettel_group_email || '===not set===',
+    email: data.dispatch.mettel_requester_email,
+    department: data.dispatch.mettel_department,
+    phoneNumber: '===not set===',
+    departmentPhoneNumber:
+      data.dispatch.mettel_department_phone_number || '===not set==='
   },
   onSiteContact: {
-    site: data.Job_Site,
-    street: data.Job_Site_Street,
-    city: data.Job_Site_City,
-    state: data.Job_Site_State,
-    zip: data.Job_Site_Zip_Code,
-    phoneNumber: data.Job_Site_Contact_Name_and_Phone_Number
+    site: data.dispatch.job_site,
+    street: data.dispatch.job_site_street,
+    city: data.dispatch.job_site_city,
+    state: data.dispatch.job_site_state,
+    zip: data.dispatch.job_site_zip_code,
+    phoneNumber: data.dispatch.job_site_contact_number
   },
   details: {
-    serviceType: data.Scope_of_Work,
-    instructions: data.MetTel_Tech_Call_In_Instructions,
-    materials: data.Special_Dispatch_Notes,
-    information: data.Information_for_Tech,
-    specialMaterials: data.Special_Materials_Needed_for_Dispatch
+    serviceType: data.dispatch.scope_of_work,
+    instructions: data.dispatch.mettel_tech_call_in_instructions,
+    materials: data.dispatch.materials_needed_for_dispatch,
+    information: '===not set===',
+    specialMaterials: '===not set===',
+    fieldEngineer:
+      data.dispatch.field_engineer_name ||
+      data.dispatch.field_engineer_last_name
+        ? `${data.dispatch.field_engineer_name} ${data.dispatch.field_engineer_last_name}`
+        : '===not set===',
+    fieldEngineerContactNumber: data.dispatch.field_engineer_contact_number
   }
 });
 
@@ -48,10 +57,10 @@ export const dispatchLitOutAdapter = data => ({
   job_site_contact_name: `${data.firstName} ${data.lastName}`,
   job_site_contact_number: data.phoneNumberRequester,
   materials_needed_for_dispatch: data.materials,
-  scope_of_work: data.serviceType,
+  scope_of_work: data.issues,
   mettel_tech_call_in_instructions: data.instructions,
   name_of_mettel_requester: `${data.firstNameRequester} ${data.lastNameRequester}`,
   mettel_department: data.department,
   mettel_requester_email: data.emailRequester
-  // slaLevel, vendor, phoneNumber, owner, email, issues
+  // slaLevel, vendor, phoneNumber, owner, email, serviceType
 });

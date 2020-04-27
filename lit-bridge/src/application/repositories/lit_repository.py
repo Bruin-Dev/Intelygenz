@@ -31,6 +31,10 @@ class LitRepository:
         response = self._lit_client.get_dispatch(dispatch_number)
         return response
 
+    def get_all_dispatches(self):
+        response = self._lit_client.get_all_dispatches()
+        return response
+
     def update_dispatch(self, payload):
         response = self._lit_client.update_dispatch(payload)
         return response

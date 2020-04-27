@@ -22,7 +22,9 @@ class GetDispatch:
             get_dispatch_response["status"] = get_dispatch["status"]
 
         else:
-            get_dispatch_response["status"] = 400
-            get_dispatch_response["body"] = 'Must include "dispatch_number" in request'
+            self._logger.info("Getting all dispatches")
+            get_all_dispatches = self._lit_repository.get_all_dispatches()
+            get_dispatch_response["body"] = get_all_dispatches["body"]
+            get_dispatch_response["status"] = get_all_dispatches["status"]
 
         await self._event_bus.publish_message(msg['response_topic'], get_dispatch_response)

@@ -21,7 +21,6 @@ class Container:
         self._redis_client.ping()
 
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
-        self._my_scheduler = AsyncIOScheduler(timezone=timezone('US/Eastern'))
 
         self._client1 = NATSClient(config, logger=self._logger)
         self._client2 = NATSClient(config, logger=self._logger)
@@ -32,8 +31,8 @@ class Container:
 
         self._event_bus.add_consumer(consumer=self._client2, consumer_name="consumer2")
 
-        self._dispatch_api_server = DispatchServer(config, self._redis_client,
-                                                   self._event_bus, self._logger)
+        self._dispatch_api_server = DispatchServer(config, self._redis_client, self._event_bus,
+                                                   self._logger)
         self._logger.info("Container created")
 
     async def start(self):

@@ -37,6 +37,7 @@ class TestCreateDispatch:
         dipatch_contents = {
             "RequestDispatch": {
                 "Date_of_Dispatch": "2016-11-16",
+                "MetTel_Bruin_TicketID": "D123",
                 "Site_Survey_Quote_Required": False,
                 "Local_Time_of_Dispatch": "7AM-9AM",
                 "Time_Zone_Local": "Pacific Time",
@@ -96,6 +97,7 @@ class TestCreateDispatch:
         dipatch_contents = {
             "RequestDispatch": {
                 "Date_of_Dispatch": "2016-11-16",
+                "MetTel_Bruin_TicketID": "D123",
                 "Site_Survey_Quote_Required": False,
                 "Local_Time_of_Dispatch": "7AM-9AM",
                 "Time_Zone_Local": "Pacific Time",
@@ -153,12 +155,12 @@ class TestCreateDispatch:
                 "Special_Materials_Needed_for_Dispatch": "test"
             }
         }
-        dispatch_required_keys = ["date_of_dispatch", "site_survey_quote_required", "local_time_of_dispatch",
-                                  "time_zone_local", "job_site", "job_site_street", "job_site_city",
-                                  "job_site_state", "job_site_zip_code", "job_site_contact_name_and_phone_number",
-                                  "special_materials_needed_for_dispatch", "scope_of_work",
-                                  "mettel_tech_call_in_instructions", "name_of_mettel_requester", "mettel_department",
-                                  "mettel_requester_email"]
+        dispatch_required_keys = ["date_of_dispatch", "mettel_bruin_ticketid", "site_survey_quote_required",
+                                  "local_time_of_dispatch", "time_zone_local", "job_site", "job_site_street",
+                                  "job_site_city", "job_site_state", "job_site_zip_code",
+                                  "job_site_contact_name_and_phone_number", "special_materials_needed_for_dispatch",
+                                  "scope_of_work", "mettel_tech_call_in_instructions", "name_of_mettel_requester",
+                                  "mettel_department", "mettel_requester_email"]
         request_id = '123'
         response_topic = 'some.response.topic'
 

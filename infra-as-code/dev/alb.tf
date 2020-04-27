@@ -37,7 +37,9 @@ resource "aws_security_group" "automation-dev-inbound" {
       "83.61.8.95/32",  // IGZ CALLAO OFFICE 2
       "83.56.7.26/32",  // IGZ CALLAO OFFICE 3
       "52.51.50.68/32", // IGZ VPN
-      "37.134.83.253/32", // XOAN HOME
+      "37.134.194.81/32", // XOAN HOME
+      "79.146.229.176/32",   // JESUS HOME
+      "139.47.71.34/32",    // JC HOME
       "54.73.0.183/32", // IGZ GITLAB RUNNERS
       "216.194.50.82/32", // Brian Sullivan's IP
       "216.194.28.12/32", // Joseph Degeorge's IP

@@ -1,4 +1,5 @@
 import { API_URLS, axiosInstance } from '../api';
+import { axiosInstanceMocks } from '../mocks/mocks';
 import {
   dispatchLitInAdapter,
   dispatchLitOutAdapter
@@ -6,44 +7,86 @@ import {
 
 export const dispatchService = {
   getAll: async () => {
-    const res = await axiosInstance.get(API_URLS.DISPATCH);
+    try {
+      const res = await axiosInstance.get(API_URLS.DISPATCH);
 
-    if (res.error) {
-      return res.error;
+      if (res.error) {
+        return { error: res.error };
+      }
+
+      return {
+        data: res.data.list_dispatch.map(dispatch => ({
+          ...dispatch,
+          vendor: res.data.vendor
+        }))
+      };
+    } catch (error) {
+      return dispatchService.captureErrorGeneric(error);
     }
-
-    return res;
   },
   newDispatch: async data => {
-    const res = await axiosInstance.post(
-      API_URLS.DISPATCH,
-      dispatchLitOutAdapter(data)
-    );
+    try {
+      const res = await axiosInstance.post(
+        API_URLS.DISPATCH,
+        dispatchLitOutAdapter(data)
+      );
 
-    console.log(res);
+      if (res.error) {
+        return res.error;
+      }
 
-    if (res.error) {
-      return res.error;
+      return res;
+    } catch (error) {
+      return dispatchService.captureErrorGeneric(error);
     }
-
-    return res;
   },
   get: async id => {
-    const res = await axiosInstance.get(`${API_URLS.DISPATCH}/${id}`);
+    try {
+      const res = await axiosInstance.get(`${API_URLS.DISPATCH}/${id}`);
 
-    if (res.error) {
-      return res.error;
+      if (res.error) {
+        return res.error;
+      }
+      return dispatchLitInAdapter(res.data);
+    } catch (error) {
+      return dispatchService.captureErrorGeneric(error);
     }
-
-    return dispatchLitInAdapter(res.data);
   },
   uploadFiles: async (id, data) => {
-    const res = await axiosInstance.post(API_URLS.UPLOAD_FILES, data);
+    try {
+      const res = await axiosInstanceMocks.post(API_URLS.UPLOAD_FILES, data);
 
-    if (res.error) {
-      return false;
+      if (res.error) {
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      return dispatchService.captureErrorGeneric(error);
     }
-
-    return true;
+  },
+  captureErrorGeneric: error => {
+    if (error.response) {
+      /*
+       * The request was made and the server responded with a
+       * status code that falls out of the range of 2xx
+       */
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+      return { error };
+    }
+    if (error.request) {
+      /*
+       * The request was made but no response was received, `error.request`
+       * is an instance of XMLHttpRequest in the browser and an instance
+       * of http.ClientRequest in Node.js
+       */
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request and triggered an Error
+      console.log('Error', error.message);
+    }
+    console.log(error);
   }
 };

@@ -4,32 +4,4 @@
     background-color: $metTel-primary;
     min-height: 100vh;
     padding-top: 10%;
-    .login-card{
-        display: flex;
-        flex-direction: column;
-        border: 1px solid rgba(0, 0, 0, 0.3);
-        border-radius: 5px;
-        padding: 30px;
-        width: 40%;
-        font-size: $xxl;
-        margin: 0 30%;
-        box-sizing: border-box;
-        background-color: #FFF;
-        p.title{
-        font-size: 2em;
-        text-align: center;
-        margin: 0 0 0.5em 0;
-        }
-        form{
-            button.login{
-                width: 60%;
-                margin-left: 20%;
-            }
-        }
-    }
-    .footer{
-        background-color: lightgrey;
-        padding: 30px;
-        box-sizing: border-box;
-    }
 }
