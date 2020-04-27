@@ -16,36 +16,39 @@ class ChangeDetailWorkQueue:
             'body': None,
             'status': None
         }
-        if not msg.get("filters"):
-            self._logger.error(f'Cannot get management status using {json.dumps(msg)}. '
-                               f'JSON malformed')
+
+        msg_body = msg.get('body')
+        if not msg_body:
+            self._logger.error(f'Cannot change detail work queue using {json.dumps(msg)}. JSON malformed')
+            response["body"] = (
+                'You must specify {.."body": {"service_number", "ticket_id", "detail_id", "queue_name"}..} '
+                'in the request'
+            )
             response["status"] = 400
-            response["error_message"] = 'You must specify ' \
-                                        '{.."filters":{"service_number", "ticket_id",' \
-                                        ' "detail_id","queue_name"}...} in the request'
             await self._event_bus.publish_message(response_topic, response)
             return
 
-        filters = msg['filters']
-
-        if not all(key in filters.keys() for key in ("service_number", "ticket_id", "detail_id", "queue_name")):
-            self._logger.error(f'Cannot get management status using {json.dumps(filters)}. '
-                               f'Need "client_id", "status", "service_number"')
+        if not all(key in msg_body.keys() for key in ("service_number", "ticket_id", "detail_id", "queue_name")):
+            self._logger.error(f'Cannot change detail work queue using {json.dumps(msg_body)}. '
+                               f'Need all these parameters: "service_number", "ticket_id", "detail_id", "queue_name"')
+            response["body"] = (
+                'You must specify {.."body": {"service_number", "ticket_id", "detail_id", "queue_name"}..} '
+                'in the request'
+            )
             response["status"] = 400
-            response["error_message"] = 'You must specify ' \
-                                        '{.."filter":{"service_number", "ticket_id",' \
-                                        ' "detail_id","queue_name"}...} in the request'
             await self._event_bus.publish_message(response_topic, response)
             return
 
-        self._logger.info(
-            f'Changing work queue with filters: {json.dumps(filters)}'
-        )
+        ticket_id = msg_body.pop('ticket_id')
+        self._logger.info(f'Changing work queue of ticket {ticket_id} with filters: {json.dumps(msg_body)}')
 
-        result = self._bruin_repository.change_detail_work_queue(filters)
+        result = self._bruin_repository.change_detail_work_queue(ticket_id, filters=msg_body)
 
-        response["status"] = result["status_code"]
         response["body"] = result["body"]
+        response["status"] = result["status_code"]
         await self._event_bus.publish_message(response_topic, response)
 
-        self._logger.info(f'Result of changing work queue published in event bus {json.dumps(msg)}')
+        self._logger.info(
+            f'Result of changing work queue of ticket {ticket_id} with filters {json.dumps(msg_body)} '
+            'published in event bus!'
+        )

@@ -532,13 +532,11 @@ class BruinClient:
         except Exception as e:
             return e.args[0]
 
-    def change_detail_work_queue(self, filters):
+    def change_detail_work_queue(self, ticket_id, filters):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
         def change_detail_work_queue():
-            ticket_id = filters["ticket_id"]
-            del filters["ticket_id"]
             self._logger.info(f'Changing work queue for ticket detail: {filters} and ticket id : {ticket_id}')
             response = requests.put(
                 f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
@@ -577,14 +575,12 @@ class BruinClient:
         except Exception as e:
             return e.args[0]
 
-    def get_possible_detail_next_result(self, filters):
+    def get_possible_detail_next_result(self, ticket_id, filters):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
         def get_possible_detail_next_result():
             self._logger.info(f'Getting work queues for ticket detail: {filters}')
-            ticket_id = filters["ticket_id"]
-            del filters["ticket_id"]
             response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
                                     headers=self._get_request_headers(),
                                     params=filters,

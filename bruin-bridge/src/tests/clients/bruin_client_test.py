@@ -930,7 +930,6 @@ class TestBruinClient:
 
         ticket_id = 99
         filters = {
-            "ticket_id": ticket_id,
             "ServiceNumber": "VCO10199919",
             "DetailId": 191919
         }
@@ -972,7 +971,7 @@ class TestBruinClient:
             bruin_client = BruinClient(logger, config)
             bruin_client.login = Mock()
             bruin_client._bearer_token = "Someverysecretaccesstoken"
-            next_result = bruin_client.get_possible_detail_next_result(filters)
+            next_result = bruin_client.get_possible_detail_next_result(ticket_id, filters)
             bruin_client_module.requests.get.assert_called_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
                 headers=bruin_client._get_request_headers(),
@@ -988,7 +987,6 @@ class TestBruinClient:
 
         ticket_id = 99
         filters = {
-            "ticket_id": ticket_id,
             "ServiceNumber": "",
             "DetailId": None
         }
@@ -1014,7 +1012,7 @@ class TestBruinClient:
             bruin_client = BruinClient(logger, config)
             bruin_client.login = Mock()
             bruin_client._bearer_token = "Someverysecretaccesstoken"
-            next_result = bruin_client.get_possible_detail_next_result(filters)
+            next_result = bruin_client.get_possible_detail_next_result(ticket_id, filters)
             bruin_client_module.requests.get.assert_called_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
                 headers=bruin_client._get_request_headers(),
@@ -1031,7 +1029,6 @@ class TestBruinClient:
 
         ticket_id = 99
         filters = {
-            "ticket_id": ticket_id,
             "ServiceNumber": "VCO10199919",
             "DetailId": 191919
         }
@@ -1047,7 +1044,7 @@ class TestBruinClient:
             bruin_client.login = Mock()
             bruin_client._bearer_token = "Someverysecretaccesstoken"
             with raises(Exception):
-                bruin_client.get_possible_detail_next_result(filters)
+                bruin_client.get_possible_detail_next_result(ticket_id, filters)
                 bruin_client_module.requests.get.assert_called_once_with(
                     f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
                     headers=bruin_client._get_request_headers(),
@@ -1063,7 +1060,6 @@ class TestBruinClient:
 
         ticket_id = 99
         filters = {
-            "ticket_id": ticket_id,
             "ServiceNumber": "VCO10199919",
             "DetailId": 191919
         }
@@ -1081,7 +1077,7 @@ class TestBruinClient:
             bruin_client.login = Mock()
             bruin_client._bearer_token = "Someverysecretaccesstoken"
             with raises(Exception):
-                bruin_client.get_possible_detail_next_result(filters)
+                bruin_client.get_possible_detail_next_result(ticket_id, filters)
                 bruin_client_module.requests.get.assert_called_once_with(
                     f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
                     headers=bruin_client._get_request_headers(),
@@ -1096,7 +1092,6 @@ class TestBruinClient:
 
         ticket_id = 99
         filters = {
-            "ticket_id": ticket_id,
             "details": [
                 {
                     "detailId": 123,
@@ -1124,7 +1119,7 @@ class TestBruinClient:
             bruin_client = BruinClient(logger, config)
             bruin_client.login = Mock()
             bruin_client._bearer_token = "Someverysecretaccesstoken"
-            put_result = bruin_client.change_detail_work_queue(filters)
+            put_result = bruin_client.change_detail_work_queue(ticket_id, filters)
             bruin_client_module.requests.put.assert_called_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
                 headers=bruin_client._get_request_headers(),
@@ -1140,7 +1135,6 @@ class TestBruinClient:
 
         ticket_id = 99
         filters = {
-            "ticket_id": ticket_id,
             "details": [
                 {
                     "detailId": None,
@@ -1178,7 +1172,7 @@ class TestBruinClient:
             bruin_client = BruinClient(logger, config)
             bruin_client.login = Mock()
             bruin_client._bearer_token = "Someverysecretaccesstoken"
-            put_result = bruin_client.change_detail_work_queue(filters)
+            put_result = bruin_client.change_detail_work_queue(ticket_id, filters)
             bruin_client_module.requests.put.assert_called_once_with(
                 f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
                 headers=bruin_client._get_request_headers(),
@@ -1194,7 +1188,6 @@ class TestBruinClient:
 
         ticket_id = 99
         filters = {
-            "ticket_id": ticket_id,
             "details": [
                 {
                     "detailId": 123,
@@ -1216,7 +1209,7 @@ class TestBruinClient:
             bruin_client.login = Mock()
             bruin_client._bearer_token = "Someverysecretaccesstoken"
             with raises(Exception):
-                bruin_client.change_detail_work_queue(filters)
+                bruin_client.change_detail_work_queue(ticket_id, filters)
                 bruin_client_module.requests.put.assert_called_once_with(
                     f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
                     headers=bruin_client._get_request_headers(),
@@ -1231,7 +1224,6 @@ class TestBruinClient:
 
         ticket_id = 99
         filters = {
-            "ticket_id": ticket_id,
             "details": [
                 {
                     "detailId": 123,
@@ -1253,7 +1245,7 @@ class TestBruinClient:
             bruin_client.login = Mock()
             bruin_client._bearer_token = "Someverysecretaccesstoken"
             with raises(Exception):
-                bruin_client.change_detail_work_queue(filters)
+                bruin_client.change_detail_work_queue(ticket_id, filters)
                 bruin_client_module.requests.put.assert_called_once_with(
                     f'{bruin_client._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
                     headers=bruin_client._get_request_headers(),
@@ -1262,6 +1254,7 @@ class TestBruinClient:
                 )
                 self.assertRaises(Exception, bruin_client.change_detail_work_queue)
                 bruin_client.login.assert_called()
+
 
 class TestPostOutageTicket:
     def post_outage_ticket_with_connection_error_test(self):

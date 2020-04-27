@@ -1251,126 +1251,228 @@ class TestBruinRepository:
         bruin_client.get_client_info.assert_called_once_with(filters)
         assert result == expected_result
 
-    def change_detail_work_queue_ok_test(self):
-        logger = Mock()
+    def change_detail_work_queue_with_retrieval_of_possible_work_queues_returning_non_2xx_status_test(self):
+        ticket_id = 4503440
+        detail_id = 4806634
+        service_number = 'VC05400002265'
         filters = {
-            "service_number": "VC05400002265",
-            "ticket_id": 4503440,
-            "detail_id": 4806634,
+            "service_number": service_number,
+            "detail_id": detail_id,
             "queue_name": "Repair Completed",
         }
 
         work_queue_filters = {
-            "ticket_id": filters["ticket_id"],
-            "ServiceNumber": filters["service_number"],
-            "DetailId": filters["detail_id"]
+            "ServiceNumber": service_number,
+            "DetailId": detail_id,
         }
 
-        possible_work_queues = {
+        possible_work_queues_response_body = 'Got internal error from Bruin'
+        possible_work_queues_response_status = 500
+        possible_work_queues_response = {
+            "body": possible_work_queues_response_body,
+            "status_code": possible_work_queues_response_status,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_possible_detail_next_result = Mock(return_value=possible_work_queues_response)
+        bruin_client.change_detail_work_queue = Mock()
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.change_detail_work_queue(ticket_id, filters)
+
+        bruin_client.get_possible_detail_next_result.assert_called_once_with(ticket_id, work_queue_filters)
+        bruin_client.change_detail_work_queue.assert_not_called()
+
+        expected = {
+            'body': f'Error while claiming possible work queues for ticket {ticket_id} and filters '
+                    f'{work_queue_filters}: {possible_work_queues_response_body}',
+            'status_code': possible_work_queues_response_status,
+        }
+        assert result == expected
+
+    def change_detail_work_queue_with_no_work_queues_found_test(self):
+        ticket_id = 4503440
+        detail_id = 4806634
+        service_number = 'VC05400002265'
+        filters = {
+            "service_number": service_number,
+            "detail_id": detail_id,
+            "queue_name": "Repair Completed",
+        }
+
+        work_queue_filters = {
+            "ServiceNumber": service_number,
+            "DetailId": detail_id,
+        }
+
+        possible_work_queues_response = {
+            "body": {
+                "currentTaskId": 10398903,
+                "currentTaskKey": "344",
+                "currentTaskName": "Holmdel NOC Investigate ",
+                "nextResults": []
+            },
+            "status_code": 200
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_possible_detail_next_result = Mock(return_value=possible_work_queues_response)
+        bruin_client.change_detail_work_queue = Mock()
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.change_detail_work_queue(ticket_id, filters)
+
+        bruin_client.get_possible_detail_next_result.assert_called_once_with(ticket_id, work_queue_filters)
+        bruin_client.change_detail_work_queue.assert_not_called()
+
+        expected = {
+            'body': f'No work queues were found for ticket {ticket_id} and filters {work_queue_filters}',
+            'status_code': 404,
+        }
+        assert result == expected
+
+    def change_detail_work_queue_with_possible_work_queues_not_containing_target_queue_test(self):
+        ticket_id = 4503440
+        detail_id = 4806634
+        service_number = 'VC05400002265'
+
+        target_queue_name = "Repair Completed"
+        filters = {
+            "service_number": service_number,
+            "detail_id": detail_id,
+            "queue_name": target_queue_name,
+        }
+
+        work_queue_filters = {
+            "ServiceNumber": service_number,
+            "DetailId": detail_id,
+        }
+
+        work_queue = {
+            "resultTypeId": 139,
+            "resultName": "Another Queue",
+            "notes": [
+                {
+                    "noteType": "RFO",
+                    "noteDescription": "Reason for Outage",
+                    "availableValueOptions": [
+                        {
+                            "text": "Area Wide Outage",
+                            "value": "Area Wide Outage"
+                        },
+                    ]
+                }
+            ]
+        }
+        possible_work_queues_response = {
             "body": {
                 "currentTaskId": 10398903,
                 "currentTaskKey": "344",
                 "currentTaskName": "Holmdel NOC Investigate ",
                 "nextResults": [
-                    {
-                        "resultTypeId": 139,
-                        "resultName": "Repair Completed",
-                        "notes": [
-                            {
-                                "noteType": "RFO",
-                                "noteDescription": "Reason for Outage",
-                                "availableValueOptions": [
-                                    {
-                                        "text": "Area Wide Outage",
-                                        "value": "Area Wide Outage"
-                                    },
-                                ]
-                            }
-                        ]
-                    }
+                    work_queue
                 ]
             },
             "status_code": 200
         }
 
-        put_work_queue_payload = {
-            "ticket_id": filters["ticket_id"],
-            "details": [
-                {"detailId": filters["detail_id"],
-                 "serviceNumber": filters["service_number"],
-                 }
-            ],
-            "notes": [],
-            "resultTypeId": possible_work_queues["body"]["nextResults"][0]["resultTypeId"]
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_possible_detail_next_result = Mock(return_value=possible_work_queues_response)
+        bruin_client.change_detail_work_queue = Mock()
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.change_detail_work_queue(ticket_id, filters)
+
+        bruin_client.get_possible_detail_next_result.assert_called_once_with(ticket_id, work_queue_filters)
+        bruin_client.change_detail_work_queue.assert_not_called()
+
+        expected = {
+            "body": f'No work queue with name {target_queue_name} was found using ticket ID {ticket_id} and '
+                    f'filters {work_queue_filters}',
+            "status_code": 404
+        }
+        assert result == expected
+
+    def change_detail_work_queue_with_all_conditions_met_test(self):
+        ticket_id = 4503440
+        detail_id = 4806634
+        service_number = 'VC05400002265'
+        filters = {
+            "service_number": service_number,
+            "detail_id": detail_id,
+            "queue_name": "Repair Completed",
         }
 
-        put_response = {
+        work_queue_filters = {
+            "ServiceNumber": service_number,
+            "DetailId": detail_id,
+        }
+
+        work_queue_id = 139
+        work_queue = {
+            "resultTypeId": work_queue_id,
+            "resultName": "Repair Completed",
+            "notes": [
+                {
+                    "noteType": "RFO",
+                    "noteDescription": "Reason for Outage",
+                    "availableValueOptions": [
+                        {
+                            "text": "Area Wide Outage",
+                            "value": "Area Wide Outage"
+                        },
+                    ]
+                }
+            ]
+        }
+        possible_work_queues_response = {
+            "body": {
+                "currentTaskId": 10398903,
+                "currentTaskKey": "344",
+                "currentTaskName": "Holmdel NOC Investigate ",
+                "nextResults": [
+                    work_queue
+                ]
+            },
+            "status_code": 200
+        }
+
+        change_work_queue_payload = {
+            "details": [
+                {
+                    "detailId": detail_id,
+                    "serviceNumber": service_number,
+                }
+            ],
+            "notes": [],
+            "resultTypeId": work_queue_id,
+        }
+        change_work_queue_response = {
             "body": {
                 "message": "success"
             },
             "status_code": 200
         }
 
-        bruin_client = Mock()
-        bruin_client.get_possible_detail_next_result = Mock(return_value=possible_work_queues)
-        bruin_client.change_detail_work_queue = Mock(return_value=put_response)
-        bruin_repository = BruinRepository(logger, bruin_client)
-        result = bruin_repository.change_detail_work_queue(filters)
-        bruin_client.get_possible_detail_next_result.assert_called_once_with(work_queue_filters)
-        bruin_client.change_detail_work_queue.assert_called_once_with(put_work_queue_payload)
-        assert result == put_response
-
-    def change_detail_work_queue_ko_test(self):
         logger = Mock()
-        filters = {
-            "service_number": "VC05400002265",
-            "ticket_id": 4503440,
-            "detail_id": 4806634,
-            "queue_name": "Some Queue",
-        }
-
-        work_queue_filters = {
-            "ticket_id": filters["ticket_id"],
-            "ServiceNumber": filters["service_number"],
-            "DetailId": filters["detail_id"]
-        }
-
-        possible_work_queues = {
-            "body": {
-                "currentTaskId": 10398903,
-                "currentTaskKey": "344",
-                "currentTaskName": "Holmdel NOC Investigate ",
-                "nextResults": [
-                    {
-                        "resultTypeId": 139,
-                        "resultName": "Repair Completed",
-                        "notes": [
-                            {
-                                "noteType": "RFO",
-                                "noteDescription": "Reason for Outage",
-                                "availableValueOptions": [
-                                    {
-                                        "text": "Area Wide Outage",
-                                        "value": "Area Wide Outage"
-                                    },
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            },
-            "status_code": 200
-        }
-
-        expected_result = {
-            "body": f'Any possible work queue for '
-                    f'filters: {work_queue_filters} and queue: {filters["queue_name"]} was found',
-            "status_code": 400
-        }
 
         bruin_client = Mock()
-        bruin_client.get_possible_detail_next_result = Mock(return_value=possible_work_queues)
+        bruin_client.get_possible_detail_next_result = Mock(return_value=possible_work_queues_response)
+        bruin_client.change_detail_work_queue = Mock(return_value=change_work_queue_response)
+
         bruin_repository = BruinRepository(logger, bruin_client)
-        result = bruin_repository.change_detail_work_queue(filters)
-        bruin_client.get_possible_detail_next_result.assert_called_once_with(work_queue_filters)
-        assert result == expected_result
+
+        result = bruin_repository.change_detail_work_queue(ticket_id, filters)
+
+        bruin_client.get_possible_detail_next_result.assert_called_once_with(ticket_id, work_queue_filters)
+        bruin_client.change_detail_work_queue.assert_called_once_with(ticket_id, change_work_queue_payload)
+        assert result == change_work_queue_response

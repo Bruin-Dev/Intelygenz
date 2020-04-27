@@ -20,7 +20,7 @@ class TestChangeDetailWorkQueue:
         assert change_detail_work_queue._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
-    async def get_management_status_ok_test(self):
+    async def change_detail_work_queue_ok_test(self):
         logger = Mock()
         logger.info = Mock()
         event_bus = Mock()
@@ -35,16 +35,22 @@ class TestChangeDetailWorkQueue:
         }
         bruin_repository.change_detail_work_queue = Mock(return_value=put_response)
 
+        ticket_id = 4503440
+        msg_body = {
+            "service_number": "VC05400002265",
+            "ticket_id": ticket_id,
+            "detail_id": 4806634,
+            "queue_name": "Repair Completed",
+        }
         filters = {
             "service_number": "VC05400002265",
-            "ticket_id": 4503440,
             "detail_id": 4806634,
             "queue_name": "Repair Completed",
         }
 
         event_bus_request = {
             "request_id": 19,
-            "filters": filters,
+            "body": msg_body,
             "response_topic": "some.topic"
         }
 
@@ -56,11 +62,11 @@ class TestChangeDetailWorkQueue:
 
         change_detail_work_queue = ChangeDetailWorkQueue(logger, event_bus, bruin_repository)
         await change_detail_work_queue.change_detail_work_queue(event_bus_request)
-        bruin_repository.change_detail_work_queue.assert_called_once_with(filters)
+        bruin_repository.change_detail_work_queue.assert_called_once_with(ticket_id, filters=filters)
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
 
     @pytest.mark.asyncio
-    async def get_management_status_400_no_filter_test(self):
+    async def change_detail_work_queue_400_no_body_test(self):
         logger = Mock()
         logger.error = Mock()
         event_bus = Mock()
@@ -74,10 +80,10 @@ class TestChangeDetailWorkQueue:
 
         event_bus_response = {
             "request_id": 19,
-            "body": None,
-            'error_message': 'You must specify '
-                             '{.."filters":{"service_number", "ticket_id",'
-                             ' "detail_id","queue_name"}...} in the request',
+            "body": (
+                'You must specify {.."body": {"service_number", "ticket_id", "detail_id", "queue_name"}..} '
+                'in the request'
+            ),
             'status': 400
         }
 
@@ -87,7 +93,7 @@ class TestChangeDetailWorkQueue:
         logger.error.assert_called()
 
     @pytest.mark.asyncio
-    async def get_management_status_400_not_all_filters_test(self):
+    async def change_detail_work_queue_400_body_with_not_all_filters_test(self):
         logger = Mock()
         logger.error = Mock()
         event_bus = Mock()
@@ -102,16 +108,16 @@ class TestChangeDetailWorkQueue:
 
         event_bus_request = {
             "request_id": 19,
-            "filters": filters,
+            "body": filters,
             "response_topic": "some.topic"
         }
 
         event_bus_response = {
             "request_id": 19,
-            "body": None,
-            'error_message': 'You must specify '
-                             '{.."filter":{"service_number", "ticket_id",'
-                             ' "detail_id","queue_name"}...} in the request',
+            "body": (
+                'You must specify {.."body": {"service_number", "ticket_id", "detail_id", "queue_name"}..} '
+                'in the request'
+            ),
             'status': 400
         }
 
