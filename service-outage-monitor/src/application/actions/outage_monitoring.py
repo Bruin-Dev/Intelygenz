@@ -115,10 +115,11 @@ class OutageMonitor:
                                  'message': err_msg}
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                 continue
-            edge_status_dict[edge_full_id] = edge_status_response_body
+            edge_status_dict[edge_identifier]["edge_id"] = edge_full_id
+            edge_status_dict[edge_identifier]["edge_status"] = edge_status_response_body
         tasks = [
-            self._process_edges(edge_full_id, edge_status_dict[edge_full_id])
-            for edge_full_id in edge_status_dict
+            self._process_edges(edge_status_dict[edge_id]["edge_id"], edge_status_dict[edge_id]["edge_status"])
+            for edge_id in edge_status_dict
         ]
         await asyncio.gather(*tasks, return_exceptions=True)
         self._logger.info(f'Triage process finished! took {time.time() - total_start_time} seconds')
