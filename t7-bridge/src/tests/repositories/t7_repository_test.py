@@ -15,41 +15,33 @@ class TestT7Repository:
         assert t7_repository._t7_client is t7_client
 
     def get_prediction_test(self):
-        logger = Mock()
         ticket_id = 123
+        assets = [
+            {
+                "assetId": "some_serial_number",
+                "predictions": [
+                    {
+                        "name": "Some action",
+                        "probability": 0.9484384655952454
+                    },
+                ]
+            }
+        ]
+
         raw_predictions = {
             "body": {
-                "assets": [
-                    {
-                        "assetId": "some_serial_number",
-                        "predictions": [
-                            {
-                                "name": "Some action",
-                                "probability": 0.9484384655952454
-                            },
-                        ]
-                    }
-                ],
+                "assets": assets,
                 "requestId": "e676150a-73b9-412b-8207-ac2a3bbc9cbc"
             },
             "status_code": 200
         }
 
         expected_predictions = {
-            "body":
-                [
-                    {
-                        "assetId": "some_serial_number",
-                        "predictions": [
-                            {
-                                "name": "Some action",
-                                "probability": 0.9484384655952454
-                            },
-                        ]
-                    }
-                ],
+            "body": assets,
             "status_code": 200
         }
+
+        logger = Mock()
 
         t7_client = Mock()
         t7_client.get_prediction = Mock(return_value=raw_predictions)
@@ -61,14 +53,13 @@ class TestT7Repository:
         assert predictions == expected_predictions
 
     def get_prediction_not_200_test(self):
-        logger = Mock()
         ticket_id = 123
         raw_predictions = {
-            "body": {
-                "Some error ocurred"
-            },
+            "body": "Got internal error from Bruin",
             "status_code": 500
         }
+
+        logger = Mock()
 
         t7_client = Mock()
         t7_client.get_prediction = Mock(return_value=raw_predictions)

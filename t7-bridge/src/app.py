@@ -49,10 +49,6 @@ class Container:
                                                  action_wrapper=self._action_get_prediction,
                                                  queue="t7_bridge")
 
-        ticket_id = 4669614
-        t7_prediction = self._t7_client.get_prediction(ticket_id)
-        self._logger.info(f'Prediction for ticket {ticket_id} is {t7_prediction}')
-
     async def start_server(self):
         await self._server.run_server()
 
