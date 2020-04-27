@@ -2,6 +2,10 @@ resource "aws_ecr_repository" "automation-nats-server" {
   name = "automation-nats-server"
 }
 
+resource "aws_ecr_repository" "automation-dispatch-portal-backend" {
+  name = "automation-dispatch-portal-backend"
+}
+
 resource "aws_ecr_repository" "automation-sites-monitor" {
   name = "automation-sites-monitor"
 }
@@ -24,6 +28,10 @@ resource "aws_ecr_repository" "automation-velocloud-bridge" {
 
 resource "aws_ecr_repository" "automation-bruin-bridge" {
   name = "automation-bruin-bridge"
+}
+
+resource "aws_ecr_repository" "automation-lit-bridge" {
+  name = "automation-lit-bridge"
 }
 
 resource "aws_ecr_repository" "automation-t7-bridge" {
@@ -52,4 +60,16 @@ resource "aws_ecr_repository" "automation-metrics-thanos-store-gateway" {
 
 resource "aws_ecr_repository" "automation-metrics-thanos-querier" {
   name = "automation-metrics-dashboard/thanos-querier"
+}
+
+resource "aws_ecr_repository" "automation-dispatch-portal-frontend-nextjs" {
+  name = "automation-dispatch-portal-frontend"
+}
+
+resource "aws_ecr_repository" "automation-dispatch-portal-frontend-nginx" {
+  name = "automation-dispatch-portal-frontend/nginx"
+}
+
+resource "aws_ecr_repository" "automation-tnba-monitor" {
+  name = "automation-tnba-monitor"
 }
