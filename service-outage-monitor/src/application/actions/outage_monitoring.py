@@ -122,7 +122,7 @@ class OutageMonitor:
             for edge_id in edge_status_dict
         ]
         await asyncio.gather(*tasks, return_exceptions=True)
-        self._logger.info(f'Triage process finished! took {time.time() - total_start_time} seconds')
+        self._logger.info(f'Outage monitoring process finished! took {time.time() - total_start_time} seconds')
 
     async def _process_edges(self, edge_full_id, edge_status):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_CONFIG['multiplier'],
