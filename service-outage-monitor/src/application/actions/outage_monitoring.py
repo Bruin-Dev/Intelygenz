@@ -69,7 +69,7 @@ class OutageMonitor:
             slack_message = {'request_id': uuid(), 'message': err_msg}
             await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             return
-        edge_status_list = []
+        filtered_edge_id_list = []
         for edge_full_id in edges_to_monitor_response_body:
             edge_identifier = EdgeIdentifier(**edge_full_id)
 
@@ -94,47 +94,50 @@ class OutageMonitor:
                     f'{past_moment_for_events_lookup}. Skipping...'
                 )
                 continue
-            self._logger.info(
-                f'[outage-monitoring] Got link and edge events activity in the last week for edge {edge_identifier}!')
+            filtered_edge_id_list.append(edge_full_id)
 
-            self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
-            edge_status_response = await self._get_edge_status_by_id(edge_full_id)
-
-            self._logger.info(f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
-
-            edge_status_response_body = edge_status_response['body']
-            edge_status_response_status = edge_status_response['status']
-            if edge_status_response_status not in range(200, 300):
-                err_msg = (
-                    f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
-                    f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
-                )
-
-                self._logger.error(err_msg)
-                slack_message = {'request_id': uuid(),
-                                 'message': err_msg}
-                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
-                continue
-            edge_status_list.append(edge_status_response_body)
         tasks = [
             self._process_edges(edge)
-            for edge in edge_status_list
+            for edge in filtered_edge_id_list
         ]
         await asyncio.gather(*tasks, return_exceptions=True)
         self._logger.info(f'Outage monitoring process finished! took {time.time() - total_start_time} seconds')
 
-    async def _process_edges(self, edge_status):
+    async def _process_edges(self, edge_full_id):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_CONFIG['multiplier'],
                                      min=self._config.MONITOR_CONFIG['min']),
                stop=stop_after_delay(self._config.TRIAGE_CONFIG['stop_delay']))
         async def _process_edges():
             async with self._semaphore:
-                edge_full_id = edge_status["edge_id"]
-
                 self._logger.info("[outage-monitoring]Starting process_edges job")
+
                 edge_identifier = EdgeIdentifier(**edge_full_id)
 
-                edge_data = edge_status["edge_info"]
+                self._logger.info(
+                    f'[outage-monitoring] Got link and edge events activity in the last week for edge'
+                    f' {edge_identifier}!')
+
+                self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
+                edge_status_response = await self._get_edge_status_by_id(edge_full_id)
+
+                self._logger.info(
+                    f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
+
+                edge_status_response_body = edge_status_response['body']
+                edge_status_response_status = edge_status_response['status']
+                if edge_status_response_status not in range(200, 300):
+                    err_msg = (
+                        f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
+                        f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
+                    )
+
+                    self._logger.error(err_msg)
+                    slack_message = {'request_id': uuid(),
+                                     'message': err_msg}
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+                    return
+
+                edge_data = edge_status_response_body["edge_info"]
 
                 edge_serial = edge_data['edges'].get('serialNumber')
                 if not edge_serial:

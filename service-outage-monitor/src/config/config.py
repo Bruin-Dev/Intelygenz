@@ -62,7 +62,7 @@ MONITOR_CONFIG = {
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
     ],
     'autoresolve_down_events_seconds': 45 * 60,
-    'semaphore': 20,
+    'semaphore': 10,
 
 }
 LOG_CONFIG = {
