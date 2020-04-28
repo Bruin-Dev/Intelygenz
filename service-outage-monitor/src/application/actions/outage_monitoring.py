@@ -121,8 +121,7 @@ class OutageMonitor:
                 self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
 
-                self._logger.info(
-                    f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
+            self._logger.info(f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
 
                 edge_status_response_body = edge_status_response['body']
                 edge_status_response_status = edge_status_response['status']
