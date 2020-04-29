@@ -29,6 +29,9 @@ MONITOR_MAP_CONFIG = {
 }
 
 MONITOR_CONFIG = {
+    'multiplier': 1,
+    'min': 1,
+    'stop_delay': 0,
     'recipient': "some.recipient@email.com",
     'environment': "dev",
     'timezone': "US/Eastern",
@@ -44,6 +47,7 @@ MONITOR_CONFIG = {
     },
     'blacklisted_edges': [],
     'autoresolve_down_events_seconds': 45 * 60,
+    'semaphore': 1,
 }
 
 LOG_CONFIG = {
