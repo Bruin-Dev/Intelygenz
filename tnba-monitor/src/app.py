@@ -1,10 +1,7 @@
-import json
-
 import asyncio
 import redis
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
-from shortuuid import uuid
 
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
@@ -12,6 +9,11 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
+
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.monitoring_map_repository import MonitoringMapRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.velocloud_repository import VelocloudRepository
 
 from application.repositories.ticket_repository import TicketRepository
 from application.repositories.prediction_repository import PredictionRepository
@@ -37,8 +39,19 @@ class Container:
 
         self._ticket_repo = TicketRepository(config, self._logger, self._event_bus)
         self._prediction_repo = PredictionRepository(config, self._logger, self._event_bus)
-        self._tnba_monitor = TNBAMonitor(config, self._logger, self._event_bus, self._scheduler, self._prediction_repo,
-                                         self._ticket_repo)
+        self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
+        self._velocloud_repository = VelocloudRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                                         notifications_repository=self._notifications_repository)
+        self._bruin_repository = BruinRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                                 notifications_repository=self._notifications_repository)
+        self._monitoring_map_repository = MonitoringMapRepository(config=config, scheduler=self._scheduler,
+                                                                  event_bus=self._event_bus, logger=self._logger,
+                                                                  velocloud_repository=self._velocloud_repository,
+                                                                  bruin_repository=self._bruin_repository)
+
+        self._tnba_monitor = TNBAMonitor(self._event_bus, self._logger, self._scheduler, config, self._prediction_repo,
+                                         self._ticket_repo, self._monitoring_map_repository, self._bruin_repository,
+                                         self._velocloud_repository)
 
     async def _start(self):
         await self._event_bus.connect()

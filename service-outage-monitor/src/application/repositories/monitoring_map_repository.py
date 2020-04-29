@@ -1,5 +1,3 @@
-import logging
-import sys
 import time
 from datetime import datetime
 
@@ -15,13 +13,7 @@ from tenacity import retry, wait_exponential, stop_after_delay
 class MonitoringMapRepository:
 
     def __init__(self, config, scheduler, event_bus, logger=None):
-        if logger is None:
-            logger = logging.getLogger('autoresolve')
-            logger.setLevel(logging.DEBUG)
-            log_handler = logging.StreamHandler(sys.stdout)
-            formatter = logging.Formatter('%(asctime)s: %(module)s: %(levelname)s: %(message)s')
-            log_handler.setFormatter(formatter)
-            logger.addHandler(log_handler)
+        self._logger = logger
         self._config = config
         self._scheduler = scheduler
         self._event_bus = event_bus
@@ -90,10 +82,10 @@ class MonitoringMapRepository:
             async with self._semaphore:
                 total_start_time = time.time()
                 start_time = time.time()
-                self._logger.info(f"Processing edge {edge_full_id}")
+                self._logger.info(f"[map-bruin-client-to-edges]Processing edge {edge_full_id}")
                 edge_identifier = EdgeIdentifier(**edge_full_id)
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
-                self._logger.info(f"Edge status retrieved {edge_full_id} "
+                self._logger.info(f"[map-bruin-client-to-edges]Edge status retrieved {edge_full_id} "
                                   f"took {time.time() - start_time} seconds")
 
                 edge_status_response_body = edge_status_response['body']
@@ -146,8 +138,29 @@ class MonitoringMapRepository:
 
                 # Attach Bruin client info to edge_data
                 edge_status_data['bruin_client_info'] = bruin_client_info_response_body
+
+                self._logger.info(f'[map-bruin-client-to-edges]Getting management status for edge {edge_identifier}...')
+                management_status_response = await self._get_management_status(edge_status_data)
+                self._logger.info(f'[map-bruin-client-to-edges]Got management status for edge {edge_identifier} -> '
+                                  f'{management_status_response}')
+
+                management_status_response_body = management_status_response['body']
+                management_status_response_status = management_status_response['status']
+                if management_status_response_status not in range(200, 300):
+                    self._logger.error(f"[map-bruin-client-to-edges]Management status is unknown for {edge_identifier}")
+                    return
+
+                if not self._is_management_status_active(management_status_response_body):
+                    self._logger.info(
+                        f'[map-bruin-client-to-edges]Management status is not active for {edge_identifier}. '
+                        'Skipping process...')
+                    return
+                else:
+                    self._logger.info(f'[map-bruin-client-to-edges]Management status for {edge_identifier}'
+                                      ' seems active.')
+
                 self._logger.info(
-                    f"Edge with serial {serial_number} that belongs to Bruin customer "
+                    f"[map-bruin-client-to-edges]Edge with serial {serial_number} that belongs to Bruin customer "
                     f"{bruin_client_info_response_body} "
                     f"Has been added to the map of devices to monitor "
                     f"took {time.time() - total_start_time} seconds")
@@ -230,3 +243,23 @@ class MonitoringMapRepository:
         self._logger.error(err_msg)
         slack_message = {'request_id': uuid(), 'message': err_msg}
         await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
+    async def _get_management_status(self, edge_status):
+        bruin_client_id = edge_status['bruin_client_info']['client_id']
+        serial_number = edge_status['edges']['serialNumber']
+        management_request = {
+            "request_id": uuid(),
+            "body": {
+                "client_id": bruin_client_id,
+                "status": "A",
+                "service_number": serial_number
+            }
+        }
+
+        management_status = await self._event_bus.rpc_request("bruin.inventory.management.status",
+                                                              management_request, timeout=30)
+
+        return management_status
+
+    def _is_management_status_active(self, management_status) -> bool:
+        return management_status in {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"}

@@ -10,8 +10,29 @@ NATS_CONFIG = {
     },
     'publisher': {
         'max_pub_acks_inflight': 6000
-    }
+    },
+    'multiplier': 5,
+    'min': 5,
+    'stop_delay': 300,
+    'reconnects': 150
 }
+
+MONITOR_CONFIG = {
+    'refresh_map_time': 60 * 4,
+    'blacklisted_edges': [
+        {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+    ],
+    'semaphore': 10,
+    'velo_filter': {
+        "some-host": [],
+    },
+}
+
+ENVIRONMENT = 'dev'
+
+TIMEZONE = 'US/Eastern'
+
+MONITORING_INTERVAL_SECONDS = 60 * 20
 
 LOG_CONFIG = {
     'name': 'test-name',

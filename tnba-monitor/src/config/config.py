@@ -4,7 +4,6 @@
 import os
 import logging
 import sys
-from config.customer_list import customer_list as CUSTOMER_LIST
 
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
@@ -21,9 +20,21 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+MONITOR_CONFIG = {
+    'refresh_map_time': 60 * 4,
+    'blacklisted_edges': [
+        # Federal edge that is inside a non-federal Velocloud instance
+        {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
+    ],
+    'semaphore': 10,
+    'velo_filter': {},
+}
+
+ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
+
 TIMEZONE = 'US/Eastern'
 
-MONITORING_INTERVAL_SECONDS = 60 * 10
+MONITORING_INTERVAL_SECONDS = 60 * 20
 
 LOG_CONFIG = {
     'name': 'tnba-monitor',
@@ -58,8 +69,6 @@ TRANSITION_MAP = {
              "Request Completed"],
     "Holmdel NOC Investigate ": ["Wireless Repair Intervention Needed", "Repair Completed", "Request Completed"]
 }
-
-CUSTOMER_LIST = CUSTOMER_LIST
 
 REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
