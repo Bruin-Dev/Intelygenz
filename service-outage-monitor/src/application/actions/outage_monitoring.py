@@ -618,11 +618,14 @@ class OutageMonitor:
             'request_id': uuid(),
             'body': edge_full_id,
         }
-        edge_status_response = await self._event_bus.rpc_request(
-            'edge.status.request', edge_status_request_dict, timeout=120,
-        )
+        try:
+            edge_status_response = await self._event_bus.rpc_request(
+                'edge.status.request', edge_status_request_dict, timeout=120,
+            )
 
-        return edge_status_response
+            return edge_status_response
+        except Exception as e:
+            raise e
 
     async def _get_management_status(self, edge_status):
         bruin_client_id = edge_status['bruin_client_info']['client_id']
