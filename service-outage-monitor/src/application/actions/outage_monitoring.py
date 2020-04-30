@@ -419,7 +419,7 @@ class OutageMonitor:
             },
         }
 
-        edge_list = await self._event_bus.rpc_request("edge.list.request", edge_list_request, timeout=600)
+        edge_list = await self._event_bus.rpc_request("edge.list.request", edge_list_request, timeout=300)
         return edge_list
 
     async def _recheck_edge_for_ticket_creation(self, edge_full_id, bruin_client_info):

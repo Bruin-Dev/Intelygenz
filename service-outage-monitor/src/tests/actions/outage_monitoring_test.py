@@ -1932,7 +1932,7 @@ class TestServiceOutageMonitor:
                     'filter': config.MONITOR_CONFIG['velocloud_instances_filter']
                 }
             },
-            timeout=600,
+            timeout=300,
         )
         assert result == edge_list_response
 
