@@ -179,8 +179,8 @@ class MonitoringMapRepository:
             "body": edge_full_id,
         }
 
-        edge_list = await self._event_bus.rpc_request("edge.status.request", edge_status_request, timeout=120)
-        return edge_list
+        edge_status = await self._event_bus.rpc_request("edge.status.request", edge_status_request, timeout=120)
+        return edge_status
 
     async def _get_bruin_client_info_by_serial(self, serial_number):
         client_info_request = {

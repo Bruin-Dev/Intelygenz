@@ -25,7 +25,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = Mock()
+        config = testconfig
         outage_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
@@ -149,7 +149,8 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_edge_status_by_id = CoroutineMock()
+        outage_monitor._get_last_events_for_edge = CoroutineMock()
+        outage_monitor._process_edge = CoroutineMock()
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
             await outage_monitor._outage_monitoring_process()
@@ -165,7 +166,8 @@ class TestServiceOutageMonitor:
             },
             timeout=10,
         )
-        outage_monitor._get_edge_status_by_id.assert_not_awaited()
+        outage_monitor._get_last_events_for_edge.assert_not_awaited()
+        outage_monitor._process_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_no_edges_test(self):
@@ -185,12 +187,14 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_edge_status_by_id = CoroutineMock()
+        outage_monitor._get_last_events_for_edge = CoroutineMock()
+        outage_monitor._process_edge = CoroutineMock()
 
         await outage_monitor._outage_monitoring_process()
 
         outage_monitor._get_edges_for_monitoring.assert_awaited_once()
-        outage_monitor._get_edge_status_by_id.assert_not_awaited()
+        outage_monitor._get_last_events_for_edge.assert_not_awaited()
+        outage_monitor._process_edge.assert_not_awaited()
         outage_repository.is_there_an_outage.assert_not_called()
         scheduler.add_job.assert_not_called()
 
@@ -216,13 +220,15 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_edge_status_by_id = CoroutineMock()
+        outage_monitor._get_last_events_for_edge = CoroutineMock()
+        outage_monitor._process_edge = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._outage_monitoring_process()
 
         outage_monitor._get_edges_for_monitoring.assert_awaited_once()
-        outage_monitor._get_edge_status_by_id.assert_not_awaited()
+        outage_monitor._get_last_events_for_edge.assert_not_awaited()
+        outage_monitor._process_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_retrieval_of_last_edge_events_returning_non_2XX_status_test(self):
@@ -250,7 +256,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
-        outage_monitor._get_edge_status_by_id = CoroutineMock()
+        outage_monitor._process_edge = CoroutineMock()
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -263,7 +269,7 @@ class TestServiceOutageMonitor:
             edge_full_id,
             since=current_time - timedelta(days=7),
         )
-        outage_monitor._get_edge_status_by_id.assert_not_awaited()
+        outage_monitor._process_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_no_edge_events_during_last_week_test(self):
@@ -291,7 +297,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
-        outage_monitor._get_edge_status_by_id = CoroutineMock()
+        outage_monitor._process_edge = CoroutineMock()
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -304,14 +310,16 @@ class TestServiceOutageMonitor:
             edge_full_id,
             since=current_time - timedelta(days=7),
         )
-        outage_monitor._get_edge_status_by_id.assert_not_awaited()
+        outage_monitor._process_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_edge_having_a_null_serial_test(self):
+    async def outage_monitoring_process_ok_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edges_for_monitoring = [edge_full_id]
+
         edge_list_response = {
             'request_id': uuid(),
-            'body': [edge_full_id],
+            'body': edges_for_monitoring,
             'status': 200,
         }
 
@@ -333,6 +341,34 @@ class TestServiceOutageMonitor:
             ],
             'status': 200,
         }
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
+        outage_monitor._process_edge = CoroutineMock()
+
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            await outage_monitor._outage_monitoring_process()
+
+        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
+        outage_monitor._get_last_events_for_edge.assert_awaited_once_with(
+            edge_full_id,
+            since=current_time - timedelta(days=7),
+        )
+        outage_monitor._process_edge.assert_awaited_with(edge_full_id)
+
+    @pytest.mark.asyncio
+    async def process_edge_having_a_null_serial_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_status_response = {
             'body': {
@@ -356,46 +392,18 @@ class TestServiceOutageMonitor:
         outage_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_management_status = CoroutineMock()
 
-        await outage_monitor._outage_monitoring_process()
+        await outage_monitor._process_edge(edge_full_id)
 
-        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_management_status.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_retrieval_of_edge_status_returning_non_2XX_status_test(self):
+    async def process_edge_with_retrieval_of_edge_status_returning_non_2XX_status_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
         edge_identifier = EdgeIdentifier(**edge_full_id)
-
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_full_id],
-            'status': 200,
-        }
-
-        edge_events_response = {
-            'request_id': uuid(),
-            'body': [
-                {
-                    'event': 'EDGE_NEW_DEVICE',
-                    'category': 'EDGE',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'New or updated client device'
-                },
-                {
-                    'event': 'EDGE_INTERFACE_UP',
-                    'category': 'SYSTEM',
-                    'eventTime': '2019-07-29 07:38:00+00:00',
-                    'message': 'Interface GE1 is up'
-                }
-            ],
-            'status': 200,
-        }
 
         edge_status_response_body = 'Got internal error from Velocloud'
         edge_status_response_status = 500
@@ -422,45 +430,19 @@ class TestServiceOutageMonitor:
         event_bus.rpc_request = CoroutineMock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_management_status = CoroutineMock()
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
-            await outage_monitor._outage_monitoring_process()
+            await outage_monitor._process_edge(edge_full_id)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         event_bus.rpc_request.assert_awaited_with("notification.slack.request", slack_message, timeout=30)
         outage_monitor._get_management_status.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_retrieval_of_bruin_client_info_returning_non_2XX_status_test(self):
+    async def process_edge_with_retrieval_of_bruin_client_info_returning_non_2XX_status_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_full_id],
-            'status': 200,
-        }
-
-        edge_events_response = {
-            'request_id': uuid(),
-            'body': [
-                {
-                    'event': 'EDGE_NEW_DEVICE',
-                    'category': 'EDGE',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'New or updated client device'
-                },
-                {
-                    'event': 'EDGE_INTERFACE_UP',
-                    'category': 'SYSTEM',
-                    'eventTime': '2019-07-29 07:38:00+00:00',
-                    'message': 'Interface GE1 is up'
-                }
-            ],
-            'status': 200,
-        }
 
         edge_serial = 'VC1234567'
         edge_status_data = {
@@ -506,48 +488,21 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock()
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
-            await outage_monitor._outage_monitoring_process()
+            await outage_monitor._process_edge(edge_full_id)
 
-        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
         event_bus.rpc_request.assert_awaited_with("notification.slack.request", slack_message, timeout=10)
         outage_monitor._get_management_status.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_bruin_client_info_having_null_client_id_test(self):
+    async def process_edge_with_bruin_client_info_having_null_client_id_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_full_id],
-            'status': 200,
-        }
-
-        edge_events_response = {
-            'request_id': uuid(),
-            'body': [
-                {
-                    'event': 'EDGE_NEW_DEVICE',
-                    'category': 'EDGE',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'New or updated client device'
-                },
-                {
-                    'event': 'EDGE_INTERFACE_UP',
-                    'category': 'SYSTEM',
-                    'eventTime': '2019-07-29 07:38:00+00:00',
-                    'message': 'Interface GE1 is up'
-                }
-            ],
-            'status': 200,
-        }
 
         edge_serial = 'VC1234567'
         edge_status_data = {
@@ -584,46 +539,19 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock()
 
-        await outage_monitor._outage_monitoring_process()
+        await outage_monitor._process_edge(edge_full_id)
 
-        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
         outage_monitor._get_management_status.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_retrieval_of_management_status_returning_non_2XX_status_test(self):
+    async def process_edge_with_retrieval_of_management_status_returning_non_2XX_status_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_full_id],
-            'status': 200,
-        }
-
-        edge_events_response = {
-            'request_id': uuid(),
-            'body': [
-                {
-                    'event': 'EDGE_NEW_DEVICE',
-                    'category': 'EDGE',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'New or updated client device'
-                },
-                {
-                    'event': 'EDGE_INTERFACE_UP',
-                    'category': 'SYSTEM',
-                    'eventTime': '2019-07-29 07:38:00+00:00',
-                    'message': 'Interface GE1 is up'
-                }
-            ],
-            'status': 200,
-        }
 
         edge_serial = 'VC1234567'
         edge_data = {
@@ -680,17 +608,14 @@ class TestServiceOutageMonitor:
         event_bus.rpc_request = CoroutineMock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
         outage_monitor._is_management_status_active = Mock()
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
-            await outage_monitor._outage_monitoring_process()
+            await outage_monitor._process_edge(edge_full_id)
 
-        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
         outage_monitor._get_management_status.assert_awaited_once_with(edge_data_with_bruin_info)
@@ -698,32 +623,8 @@ class TestServiceOutageMonitor:
         outage_monitor._is_management_status_active.assert_not_called()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_management_status_inactive_test(self):
+    async def process_edge_with_management_status_inactive_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_full_id],
-            'status': 200,
-        }
-
-        edge_events_response = {
-            'request_id': uuid(),
-            'body': [
-                {
-                    'event': 'EDGE_NEW_DEVICE',
-                    'category': 'EDGE',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'New or updated client device'
-                },
-                {
-                    'event': 'EDGE_INTERFACE_UP',
-                    'category': 'SYSTEM',
-                    'eventTime': '2019-07-29 07:38:00+00:00',
-                    'message': 'Interface GE1 is up'
-                }
-            ],
-            'status': 200,
-        }
 
         edge_serial = 'VC1234567'
         edge_data = {
@@ -769,16 +670,13 @@ class TestServiceOutageMonitor:
         outage_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
         outage_monitor._is_management_status_active = Mock(return_value=False)
 
-        await outage_monitor._outage_monitoring_process()
+        await outage_monitor._process_edge(edge_full_id)
 
-        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
         outage_monitor._get_management_status.assert_awaited_once_with(edge_data_with_bruin_info)
@@ -786,36 +684,10 @@ class TestServiceOutageMonitor:
         outage_repository._is_there_an_outage.assert_not_called()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_edges_and_no_outages_detected_test(self):
-        edge_1_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-        edge_2_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 5678}
-        edge_3_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 9012}
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
-            'status': 200,
-        }
+    async def process_edge_and_no_outages_detected_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        edge_events_response = {
-            'request_id': uuid(),
-            'body': [
-                {
-                    'event': 'EDGE_NEW_DEVICE',
-                    'category': 'EDGE',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'New or updated client device'
-                },
-                {
-                    'event': 'EDGE_INTERFACE_UP',
-                    'category': 'SYSTEM',
-                    'eventTime': '2019-07-29 07:38:00+00:00',
-                    'message': 'Interface GE1 is up'
-                }
-            ],
-            'status': 200,
-        }
-
-        edge_1_status_data = {
+        edge_status_data = {
             'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1234567'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
@@ -823,46 +695,13 @@ class TestServiceOutageMonitor:
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
         }
-        edge_1_status_response = {
+        edge_status_response = {
             'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status_data,
+                'edge_id': edge_full_id,
+                'edge_info': edge_status_data,
             },
             'status': 200,
         }
-
-        edge_2_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC7654321'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_2_status_response = {
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status_data,
-            },
-            'status': 200,
-        }
-
-        edge_3_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1122334'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status_data,
-            },
-            'status': 200,
-        }
-        edges_statuses_responses = [edge_1_status_response, edge_2_status_response, edge_3_status_response]
 
         bruin_client_info_response_body = {
             'client_id': 9994,
@@ -878,24 +717,10 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        edge_1_data_with_bruin_info = {
-            **edge_1_status_data,
+        edge_data_with_bruin_info = {
+            **edge_status_data,
             'bruin_client_info': bruin_client_info_response_body,
         }
-        edge_2_data_with_bruin_info = {
-            **edge_2_status_data,
-            'bruin_client_info': bruin_client_info_response_body,
-        }
-        edge_3_data_with_bruin_info = {
-            **edge_3_status_data,
-            'bruin_client_info': bruin_client_info_response_body,
-        }
-
-        is_there_an_outage_side_effect = [
-            False,  # Edge 1
-            False,  # Edge 2
-            False,  # Edge 3
-        ]
 
         event_bus = Mock()
         scheduler = Mock()
@@ -903,63 +728,27 @@ class TestServiceOutageMonitor:
         config = testconfig
 
         outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=is_there_an_outage_side_effect)
+        outage_repository.is_there_an_outage = Mock(return_value=False)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
-        outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
         outage_monitor._is_management_status_active = Mock(return_value=True)
 
-        await outage_monitor._outage_monitoring_process()
+        await outage_monitor._process_edge(edge_full_id)
 
-        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
-
-        outage_monitor._get_edge_status_by_id.assert_has_awaits([
-            call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
-        ])
-        outage_repository.is_there_an_outage.assert_has_calls([
-            call(edge_1_status_data), call(edge_2_status_data), call(edge_3_status_data)
-        ])
-        outage_monitor._run_ticket_autoresolve_for_edge.assert_has_awaits([
-            call(edge_1_full_id, edge_1_data_with_bruin_info),
-            call(edge_2_full_id, edge_2_data_with_bruin_info),
-            call(edge_3_full_id, edge_3_data_with_bruin_info),
-        ])
+        outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edge_full_id, edge_data_with_bruin_info)
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_edges_and_some_outages_detected_and_recheck_job_not_scheduled_test(self):
+    async def process_with_edge_with_outages_detected_and_recheck_job_not_scheduled_test(self):
         job_id = 'some-duplicated-id'
         exception_instance = ConflictingIdError(job_id)
 
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_full_id],
-            'status': 200,
-        }
-
-        edge_events_response = {
-            'request_id': uuid(),
-            'body': [
-                {
-                    'event': 'EDGE_NEW_DEVICE',
-                    'category': 'EDGE',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'New or updated client device'
-                },
-                {
-                    'event': 'EDGE_INTERFACE_UP',
-                    'category': 'SYSTEM',
-                    'eventTime': '2019-07-29 07:38:00+00:00',
-                    'message': 'Interface GE1 is up'
-                }
-            ],
-            'status': 200,
-        }
 
         edge_status_data = {
             'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
@@ -1005,15 +794,13 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
         outage_monitor._is_management_status_active = Mock()
 
         try:
-            await outage_monitor._outage_monitoring_process()
+            await outage_monitor._process_edge(edge_full_id)
             # TODO: The test should fail at this point if no exception was raised
         except ConflictingIdError:
             scheduler.add_job.assert_called_once_with(
@@ -1024,41 +811,14 @@ class TestServiceOutageMonitor:
                 kwargs={'edge_full_id': edge_full_id}
             )
 
-        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_with_edges_and_some_outages_detected_and_recheck_job_scheduled_test(self):
-        edge_1_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-        edge_2_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 5678}
-        edge_3_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 9012}
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [edge_1_full_id, edge_2_full_id, edge_3_full_id],
-            'status': 200,
-        }
+    async def process_edge_with_outages_detected_and_recheck_job_scheduled_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        edge_events_response = {
-            'request_id': uuid(),
-            'body': [
-                {
-                    'event': 'EDGE_NEW_DEVICE',
-                    'category': 'EDGE',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'New or updated client device'
-                },
-                {
-                    'event': 'EDGE_INTERFACE_UP',
-                    'category': 'SYSTEM',
-                    'eventTime': '2019-07-29 07:38:00+00:00',
-                    'message': 'Interface GE1 is up'
-                }
-            ],
-            'status': 200,
-        }
-
-        edge_1_status_data = {
+        edge_status_data = {
             'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
@@ -1066,47 +826,13 @@ class TestServiceOutageMonitor:
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
         }
-        edge_1_status_response = {
+        edge_status_response = {
             'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status_data,
+                'edge_id': edge_full_id,
+                'edge_info': edge_status_data,
             },
             'status': 200,
         }
-
-        edge_2_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC7654321'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_2_status_response = {
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status_data,
-            },
-            'status': 200,
-        }
-
-        edge_3_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': 'VC1122334'},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status_data,
-            },
-            'status': 200,
-        }
-
-        edges_statuses_responses = [edge_1_status_response, edge_2_status_response, edge_3_status_response]
 
         bruin_client_info_response_body = {
             'client_id': 9994,
@@ -1122,25 +848,17 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        is_there_an_outage_side_effect = [
-            True,  # Edge 1
-            False,  # Edge 2
-            True,  # Edge 3
-        ]
-
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
         config = testconfig
 
         outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=is_there_an_outage_side_effect)
+        outage_repository.is_there_an_outage = Mock(return_value=True)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
-        outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
         outage_monitor._is_management_status_active = Mock(return_value=True)
@@ -1149,179 +867,42 @@ class TestServiceOutageMonitor:
         current_time = datetime.now()
         datetime_mock.now = Mock(return_value=current_time)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            await outage_monitor._outage_monitoring_process()
+            await outage_monitor._process_edge(edge_full_id)
 
-        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
-        outage_monitor._get_edge_status_by_id.assert_has_awaits([
-            call(edge_1_full_id), call(edge_2_full_id), call(edge_3_full_id)
-        ])
-        outage_repository.is_there_an_outage.assert_has_calls([
-            call(edge_1_status_data), call(edge_2_status_data), call(edge_3_status_data)
-        ])
+        outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
         run_date = current_time + timedelta(
             seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
-        scheduler.add_job.assert_has_calls([
-            call(
+        scheduler.add_job.assert_called_once_with(
                 outage_monitor._recheck_edge_for_ticket_creation, 'date',
                 run_date=run_date,
                 replace_existing=False,
                 misfire_grace_time=9999,
-                id=f'_ticket_creation_recheck_{json.dumps(edge_1_full_id)}',
-                kwargs={'edge_full_id': edge_1_full_id, 'bruin_client_info': bruin_client_info_response_body}
-            ),
-            call(
-                outage_monitor._recheck_edge_for_ticket_creation, 'date',
-                run_date=run_date,
-                replace_existing=False,
-                misfire_grace_time=9999,
-                id=f'_ticket_creation_recheck_{json.dumps(edge_3_full_id)}',
-                kwargs={'edge_full_id': edge_3_full_id, 'bruin_client_info': bruin_client_info_response_body}
-            ),
-        ])
-        outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edge_2_full_id, edge_2_status_data)
+                id=f'_ticket_creation_recheck_{json.dumps(edge_full_id)}',
+                kwargs={'edge_full_id': edge_full_id, 'bruin_client_info': bruin_client_info_response_body}
+            )
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_side_effects_over_autoresolve_whitelist_with_autoresolve_filter_test(self):
-        edge_1_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-        edge_2_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 5678}
-        edge_3_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 2, "edge_id": 1234}
-        edge_4_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 2, "edge_id": 5678}
-        edge_5_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 3, "edge_id": 1234}
-        edge_6_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 3, "edge_id": 5678}
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [
-                edge_1_full_id, edge_2_full_id, edge_3_full_id,
-                edge_4_full_id, edge_5_full_id, edge_6_full_id,
-            ],
-            'status': 200,
-        }
+    async def process_edge_side_effects_over_autoresolve_whitelist_with_autoresolve_filter_test(self):
+        edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        edge_events_response = {
-            'request_id': uuid(),
-            'body': [
-                {
-                    'event': 'EDGE_NEW_DEVICE',
-                    'category': 'EDGE',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'New or updated client device'
-                },
-                {
-                    'event': 'EDGE_INTERFACE_UP',
-                    'category': 'SYSTEM',
-                    'eventTime': '2019-07-29 07:38:00+00:00',
-                    'message': 'Interface GE1 is up'
-                }
-            ],
-            'status': 200,
-        }
-
-        edge_1_serial = 'VC1234567'
-        edge_1_status_data = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+        edge_serial = 'VC1234567'
+        edge_status_data = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
         }
-        edge_1_status_response = {
+        edge_status_response = {
             'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status_data,
+                'edge_id': edge_full_id,
+                'edge_info': edge_status_data,
             },
             'status': 200,
         }
-
-        edge_2_serial = 'VC7654321'
-        edge_2_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_2_status_response = {
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status_data,
-            },
-            'status': 200,
-        }
-
-        edge_3_serial = 'VC1122334'
-        edge_3_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status_data,
-            },
-            'status': 200,
-        }
-
-        edge_4_serial = 'VC9999999'
-        edge_4_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_4_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_4_status_response = {
-            'body': {
-                'edge_id': edge_4_full_id,
-                'edge_info': edge_4_status_data,
-            },
-            'status': 200,
-        }
-
-        edge_5_serial = 'VC7777777'
-        edge_5_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_5_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_5_status_response = {
-            'body': {
-                'edge_id': edge_5_full_id,
-                'edge_info': edge_5_status_data,
-            },
-            'status': 200,
-        }
-
-        edge_6_serial = 'VC5555555'
-        edge_6_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_6_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_6_status_response = {
-            'body': {
-                'edge_id': edge_6_full_id,
-                'edge_info': edge_6_status_data,
-            },
-            'status': 200,
-        }
-
-        edges_statuses_responses = [
-            edge_1_status_response, edge_2_status_response, edge_3_status_response,
-            edge_4_status_response, edge_5_status_response, edge_6_status_response,
-        ]
 
         bruin_client_info_response_body = {
             'client_id': 9994,
@@ -1337,28 +918,17 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        is_there_an_outage_side_effect = [
-            True,   # Edge 1
-            False,  # Edge 2
-            True,   # Edge 3
-            False,  # Edge 4
-            True,   # Edge 5
-            False,  # Edge 6
-        ]
-
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
         config = testconfig
 
         outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=is_there_an_outage_side_effect)
+        outage_repository.is_there_an_outage = Mock(return_value=True)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
-        outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
         outage_monitor._is_management_status_active = Mock(return_value=True)
@@ -1370,153 +940,30 @@ class TestServiceOutageMonitor:
             "metvco02.mettel.net": [],
         }
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._outage_monitoring_process()
+            await outage_monitor._process_edge(edge_full_id)
 
-        expected_whitelist = {edge_1_serial, edge_2_serial, edge_3_serial}
-        assert outage_monitor._autoresolve_serials_whitelist == expected_whitelist
+        assert outage_monitor._autoresolve_serials_whitelist == {edge_serial}
 
     @pytest.mark.asyncio
-    async def outage_monitoring_process_side_effects_over_autoresolve_whitelist_without_autoresolve_filter_test(self):
-        edge_1_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-        edge_2_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 5678}
-        edge_3_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 2, "edge_id": 1234}
-        edge_4_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 2, "edge_id": 5678}
-        edge_5_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 3, "edge_id": 1234}
-        edge_6_full_id = {"host": "metvco03.mettel.net", "enterprise_id": 3, "edge_id": 5678}
-        edge_list_response = {
-            'request_id': uuid(),
-            'body': [
-                edge_1_full_id, edge_2_full_id, edge_3_full_id,
-                edge_4_full_id, edge_5_full_id, edge_6_full_id,
-            ],
-            'status': 200,
-        }
+    async def process_edge_side_effects_over_autoresolve_whitelist_without_autoresolve_filter_test(self):
+        edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        edge_events_response = {
-            'request_id': uuid(),
-            'body': [
-                {
-                    'event': 'EDGE_NEW_DEVICE',
-                    'category': 'EDGE',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'New or updated client device'
-                },
-                {
-                    'event': 'EDGE_INTERFACE_UP',
-                    'category': 'SYSTEM',
-                    'eventTime': '2019-07-29 07:38:00+00:00',
-                    'message': 'Interface GE1 is up'
-                }
-            ],
-            'status': 200,
-        }
-
-        edge_1_serial = 'VC1234567'
-        edge_1_status_data = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+        edge_serial = 'VC1234567'
+        edge_status_data = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
             ],
             'enterprise_name': 'EVIL-CORP|12345|',
         }
-        edge_1_status_response = {
+        edge_status_response = {
             'body': {
-                'edge_id': edge_1_full_id,
-                'edge_info': edge_1_status_data,
+                'edge_id': edge_full_id,
+                'edge_info': edge_status_data,
             },
             'status': 200,
         }
-
-        edge_2_serial = 'VC7654321'
-        edge_2_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_2_status_response = {
-            'body': {
-                'edge_id': edge_2_full_id,
-                'edge_info': edge_2_status_data,
-            },
-            'status': 200,
-        }
-
-        edge_3_serial = 'VC1122334'
-        edge_3_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_3_status_response = {
-            'body': {
-                'edge_id': edge_3_full_id,
-                'edge_info': edge_3_status_data,
-            },
-            'status': 200,
-        }
-
-        edge_4_serial = 'VC9999999'
-        edge_4_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_4_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_4_status_response = {
-            'body': {
-                'edge_id': edge_4_full_id,
-                'edge_info': edge_4_status_data,
-            },
-            'status': 200,
-        }
-
-        edge_5_serial = 'VC7777777'
-        edge_5_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_5_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_5_status_response = {
-            'body': {
-                'edge_id': edge_5_full_id,
-                'edge_info': edge_5_status_data,
-            },
-            'status': 200,
-        }
-
-        edge_6_serial = 'VC5555555'
-        edge_6_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_6_serial},
-            'links': [
-                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-            ],
-            'enterprise_name': 'EVIL-CORP|12345|',
-        }
-        edge_6_status_response = {
-            'body': {
-                'edge_id': edge_6_full_id,
-                'edge_info': edge_6_status_data,
-            },
-            'status': 200,
-        }
-
-        edges_statuses_responses = [
-            edge_1_status_response, edge_2_status_response, edge_3_status_response,
-            edge_4_status_response, edge_5_status_response, edge_6_status_response,
-        ]
 
         bruin_client_info_response_body = {
             'client_id': 9994,
@@ -1532,28 +979,17 @@ class TestServiceOutageMonitor:
             "status": 200,
         }
 
-        is_there_an_outage_side_effect = [
-            True,   # Edge 1
-            False,  # Edge 2
-            True,   # Edge 3
-            False,  # Edge 4
-            True,   # Edge 5
-            False,  # Edge 6
-        ]
-
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
         config = testconfig
 
         outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(side_effect=is_there_an_outage_side_effect)
+        outage_repository.is_there_an_outage = Mock(return_value=True)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
-        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
-        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
-        outage_monitor._get_edge_status_by_id = CoroutineMock(side_effect=edges_statuses_responses)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
         outage_monitor._is_management_status_active = Mock(return_value=True)
@@ -1562,13 +998,9 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['velocloud_instances_filter'] = {}
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._outage_monitoring_process()
+            await outage_monitor._process_edge(edge_full_id)
 
-        expected_whitelist = {
-            edge_1_serial, edge_2_serial, edge_3_serial,
-            edge_4_serial, edge_5_serial, edge_6_serial,
-        }
-        assert outage_monitor._autoresolve_serials_whitelist == expected_whitelist
+        assert outage_monitor._autoresolve_serials_whitelist == {edge_serial}
 
     @pytest.mark.asyncio
     async def run_ticket_autoresolve_with_non_whitelisted_edge_test(self):
