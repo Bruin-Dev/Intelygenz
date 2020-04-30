@@ -87,11 +87,11 @@ class Container:
     async def _start(self):
         await self._event_bus.connect()
 
-        await self._comparison_report.report_persisted_edges()
-        await self._comparison_report.load_persisted_quarantine()
-
-        await self._comparison_report.start_service_outage_detector_job(exec_on_start=True)
-        await self._comparison_report.start_service_outage_reporter_job(exec_on_start=False)
+        # await self._comparison_report.report_persisted_edges()
+        # await self._comparison_report.load_persisted_quarantine()
+        #
+        # await self._comparison_report.start_service_outage_detector_job(exec_on_start=True)
+        # await self._comparison_report.start_service_outage_reporter_job(exec_on_start=False)
 
         await self._outage_monitor.start_service_outage_monitoring(exec_on_start=True)
 
