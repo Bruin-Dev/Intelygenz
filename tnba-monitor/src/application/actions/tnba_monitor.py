@@ -1,28 +1,27 @@
 import asyncio
 
 from datetime import datetime
-from typing import Callable
 from typing import Set
 
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone
-from shortuuid import uuid
 from tenacity import retry, wait_exponential, stop_after_delay
 
 
 class TNBAMonitor:
-    def __init__(self, event_bus, logger, scheduler, config, prediction_repository, ticket_repository,
-                 monitoring_map_repository, bruin_repository, velocloud_repository):
+    def __init__(self, event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                 monitoring_map_repository, bruin_repository, velocloud_repository, prediction_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
-        self._prediction_repository = prediction_repository
+        self._t7_repository = t7_repository
         self._ticket_repository = ticket_repository
         self._monitoring_map_repository = monitoring_map_repository
         self._bruin_repository = bruin_repository
         self._velocloud_repository = velocloud_repository
+        self._prediction_repository = prediction_repository
 
         self._monitoring_mapping = {}
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
@@ -48,7 +47,7 @@ class TNBAMonitor:
             self._logger.info(f'Skipping start of TNBA automated process job. Reason: {conflict}')
 
     async def _tnba_automated_process(self):
-        self._logger.info(f'Starting TNBA process...')
+        self._logger.info('Starting TNBA process...')
         if not self._monitoring_mapping:
             self._logger.info('Creating map with all customers and all their devices...')
             await self._monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
@@ -59,18 +58,12 @@ class TNBAMonitor:
 
         tickets = await self._get_relevant_tickets()
         for ticket in tickets:
-            ticket_id = ticket["ticket_id"]
-            serial_number = ticket['ticket_detail']['detailValue']
-            detail_id = ticket["ticket_detail"]['detailID']
-            prediction = await self._prediction_repository.get_prediction(ticket_id, serial_number)
-            self._logger.info(f'Checking if a prediction is automatable for ticket {ticket_id}')
-            # Check if ticket was resolved between getting the ticket and making the prediction
-            ticket_resolved = await self._ticket_repository.ticket_is_resolved(ticket_id)
-            if prediction and not ticket_resolved:
-                current_task = await self._ticket_repository.get_ticket_current_task(ticket_id, serial_number)
-                can_automate = self._prediction_repository.can_automate_transition(current_task, prediction)
-                if can_automate:
-                    await self._change_detail_work_queue(ticket_id, detail_id, serial_number, prediction, current_task)
+            ticket_id = ticket['ticket_id']
+            self._logger.info(f'Processing ticket with ID {ticket_id}...')
+            await self._process_ticket(ticket)
+            self._logger.info(f'Finished processing ticket with ID {ticket_id}!')
+
+        self._logger.info('TNBA process finished!')
 
     async def _get_relevant_tickets(self) -> list:
         self._logger.info('Getting all open tickets for all customers...')
@@ -166,18 +159,65 @@ class TNBAMonitor:
             if ticket['ticket_detail']['detailValue'] in serials_under_monitoring
         ]
 
-    @staticmethod
-    def _get_first_element_matching(iterable, condition: Callable, fallback=None):
-        try:
-            return next(elem for elem in iterable if condition(elem))
-        except StopIteration:
-            return fallback
+    async def _process_ticket(self, ticket: dict):
+        ticket_id = ticket["ticket_id"]
+        serial_number = ticket['ticket_detail']['detailValue']
 
-    async def _change_detail_work_queue(self, ticket_id, detail_id, serial_number, queue_name, current_queue):
-        # If production or development do things here
-        message = f'Transition {current_queue} ---> {queue_name} would have been applied to ticket {ticket_id} ' \
-                  f'with serial {serial_number}'
-        self._logger.info(f'{message}')
-        slack_message = {'request_id': uuid(),
-                         'message': "##ST-TNBA##" + message}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+        self._logger.info(f'Looking for the last TNBA note appended to ticket {ticket_id}...')
+        ticket_notes = ticket['ticket_notes']
+        newest_tnba_note = self._ticket_repository.find_newest_tnba_note(ticket_notes)
+        if not newest_tnba_note:
+            self._logger.info(f"Looks like ticket {ticket_id} doesn't have any TNBA note yet")
+
+            t7_prediction_response = await self._t7_repository.get_prediction(ticket_id)
+            t7_prediction_response_body = t7_prediction_response['body']
+            t7_prediction_response_status = t7_prediction_response['status']
+            if t7_prediction_response_status not in range(200, 300):
+                return
+
+            prediction_object_for_serial: dict = self._prediction_repository.find_prediction_object_by_serial(
+                t7_prediction_response_body, serial_number
+            )
+            if not prediction_object_for_serial:
+                self._logger.info(f"No predictions were found for serial {serial_number} and ticket {ticket_id}!")
+                return
+
+            self._logger.info(
+                f"Building TNBA note from predictions found for serial {serial_number} and ticket {ticket_id}..."
+            )
+            predictions: list = prediction_object_for_serial['predictions']
+        else:
+            self._logger.info(f"TNBA note found for ticket {ticket_id}")
+            if not self._ticket_repository.is_tnba_note_old_enough(newest_tnba_note):
+                self._logger.info(f'TNBA note found for ticket {ticket_id} is too recent. Skipping ticket...')
+                return
+
+            t7_prediction_response = await self._t7_repository.get_prediction(ticket_id)
+            t7_prediction_response_body = t7_prediction_response['body']
+            t7_prediction_response_status = t7_prediction_response['status']
+            if t7_prediction_response_status not in range(200, 300):
+                return
+
+            prediction_object_for_serial: dict = self._prediction_repository.find_prediction_object_by_serial(
+                t7_prediction_response_body, serial_number
+            )
+            if not prediction_object_for_serial:
+                self._logger.info(f"No predictions were found for serial {serial_number} and ticket {ticket_id}!")
+                return
+
+            predictions: list = prediction_object_for_serial['predictions']
+            if not self._prediction_repository.are_predictions_different_from_predictions_in_tnba_note(
+                    newest_tnba_note, predictions):
+                self._logger.info(
+                    f"Predictions for serial {serial_number} and ticket {ticket_id} didn't change since the last TNBA"
+                    f"note was appended. Skipping ticket..."
+                )
+                return
+
+        self._logger.info(
+            f"Building TNBA note from predictions found for serial {serial_number} and ticket {ticket_id}..."
+        )
+        tnba_note: str = self._ticket_repository.build_tnba_note_from_predictions(predictions)
+
+        self._logger.info(f'Appending TNBA note to ticket {ticket_id}...')
+        await self._bruin_repository.append_note_to_ticket(ticket_id, tnba_note, is_private=True)

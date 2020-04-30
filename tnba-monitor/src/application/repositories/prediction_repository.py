@@ -1,57 +1,43 @@
-from shortuuid import uuid
+import os
+import re
+
+from functools import partial
+from typing import List
+
+
+TNBA_NOTE_PREDICTION_LINE_REGEX = re.compile(
+    r'^\d{1,2}\) (?P<prediction_name>\w+(\s\w+)*) \| '
+    r'Confidence: (?P<prediction_probability>(100\.0)|(\d|[1-9]\d)\.\d{1,14}) %$'
+)
 
 
 class PredictionRepository:
+    def __init__(self, utils_repository):
+        self._utils_repository = utils_repository
 
-    def __init__(self, config, logger, event_bus):
-        self._config = config
-        self._logger = logger
-        self._event_bus = event_bus
+    @staticmethod
+    def __prediction_belongs_to_serial(prediction: dict, serial_number: str) -> bool:
+        return prediction['assetId'] == serial_number
 
-    async def get_prediction(self, ticket_id, serial_number):
-        best_prediction = None
-        prediction_request = {
-            "request_id": uuid(),
-            "ticket_id": ticket_id
-        }
-        prediction = await self._event_bus.rpc_request("t7.prediction.request", prediction_request, timeout=60)
+    def find_prediction_object_by_serial(self, predictions: List[dict], serial_number: str) -> dict:
+        prediction_lookup_fn = partial(self.__prediction_belongs_to_serial, serial_number=serial_number)
+        return self._utils_repository.get_first_element_matching(predictions, prediction_lookup_fn)
 
-        if prediction["status"] == 200:
-            assets = prediction["prediction"]
-            for asset in assets:
-                asset_serial = asset.get('assetId')
-                # If there is an error, there is no predictions field but status code is still 200 from them
-                # Service affecting tickets normally have that problem
-                predictions = asset.get('predictions')
-                if predictions and asset_serial in serial_number:
-                    return await self._get_best_automatable(predictions)
+    @staticmethod
+    def are_predictions_different_from_predictions_in_tnba_note(tnba_note: dict, predictions: List[dict]) -> bool:
+        tnba_note_predictions: List[dict] = []
 
-        return best_prediction
+        tnba_note_lines = tnba_note['noteValue'].split(os.linesep)
+        for line in tnba_note_lines:
+            prediction_match = TNBA_NOTE_PREDICTION_LINE_REGEX.match(line)
+            if prediction_match:
+                prediction_name = prediction_match.group('prediction_name')
+                prediction_probability = round(float(prediction_match.group('prediction_probability')) / 100, 16)
 
-    async def _get_best_automatable(self, predictions):
-        best_prediction = {"name": "", "probability": 0.00}
-        # probability % and name, gets an array
-        automatable_tasks = self._config.CONDITIONS["automatable_task_list"]
-        min_probability_threshold = self._config.CONDITIONS["min_probability_threshold"]
-        for prediction in predictions:
-            if prediction["name"] in automatable_tasks and prediction["probability"] > min_probability_threshold:
-                if best_prediction["probability"] < prediction["probability"]:
-                    best_prediction = prediction
+                prediction = {
+                    'name': prediction_name,
+                    'probability': prediction_probability,
+                }
+                tnba_note_predictions.append(prediction)
 
-        if best_prediction["name"] == "":
-            return None
-
-        return best_prediction["name"]
-
-    def can_automate_transition(self, origin_transition_name, target_transition_name):
-        transition_map = self._config.TRANSITION_MAP
-        allowed_target_transitions = transition_map.get(origin_transition_name)
-
-        self._logger.info(f'Checking if can automate transition {origin_transition_name} ---> {target_transition_name}')
-
-        if not allowed_target_transitions:
-            return False
-
-        if target_transition_name in allowed_target_transitions:
-            return True
-        return False
+        return not (predictions == tnba_note_predictions)

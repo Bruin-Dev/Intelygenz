@@ -26,6 +26,7 @@ MONITOR_CONFIG = {
     'velo_filter': {
         "some-host": [],
     },
+    'tnba_notes_age_for_new_appends_in_minutes': 30,
 }
 
 ENVIRONMENT = 'dev'

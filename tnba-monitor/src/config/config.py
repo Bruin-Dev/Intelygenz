@@ -28,6 +28,7 @@ MONITOR_CONFIG = {
     ],
     'semaphore': 10,
     'velo_filter': {},
+    'tnba_notes_age_for_new_appends_in_minutes': 30,
 }
 
 ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
