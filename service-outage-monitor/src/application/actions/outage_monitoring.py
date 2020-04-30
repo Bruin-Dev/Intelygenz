@@ -101,12 +101,13 @@ class OutageMonitor:
             for edge in filtered_edge_id_list
         ]
         await asyncio.gather(*tasks, return_exceptions=True)
-        self._logger.info(f'Outage monitoring process finished! took {time.time() - total_start_time} seconds')
+        self._logger.info(f'[outage-monitoring]Outage monitoring process finished! '
+                          f'took {time.time() - total_start_time} seconds')
 
     async def _process_edge(self, edge_full_id):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_CONFIG['multiplier'],
                                      min=self._config.MONITOR_CONFIG['min']),
-               stop=stop_after_delay(self._config.TRIAGE_CONFIG['stop_delay']))
+               stop=stop_after_delay(self._config.MONITOR_CONFIG['stop_delay']))
         async def _process_edge():
             async with self._semaphore:
                 self._logger.info("[outage-monitoring]Starting process_edges job")
@@ -232,7 +233,7 @@ class OutageMonitor:
         try:
             await _process_edge()
         except Exception as ex:
-            self._logger.error(f"Error: {edge_full_id}")
+            self._logger.error(f"Error: {edge_full_id} raised a {ex} exception")
 
     def __reset_instance_state(self):
         self._autoresolve_serials_whitelist = set()
