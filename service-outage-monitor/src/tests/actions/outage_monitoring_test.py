@@ -741,7 +741,8 @@ class TestServiceOutageMonitor:
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
-        outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edge_full_id, edge_data_with_bruin_info)
+        outage_monitor._run_ticket_autoresolve_for_edge.assert_awaited_once_with(edge_full_id,
+                                                                                 edge_data_with_bruin_info)
 
     @pytest.mark.asyncio
     async def process_with_edge_with_outages_detected_and_recheck_job_not_scheduled_test(self):
