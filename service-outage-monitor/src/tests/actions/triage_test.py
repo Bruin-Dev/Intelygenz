@@ -3157,7 +3157,7 @@ class TestTriage:
         )
 
     @pytest.mark.asyncio
-    async def process_tickets_without_triage_with_dev_environment_email_sent_test(self):
+    async def process_tickets_without_triage_with_dev_environment_no_email_sent_test(self):
         edge_1_serial = 'VC1234567'
         edge_2_serial = 'VC7654321'
         edge_3_serial = 'VC1111111'
@@ -3326,7 +3326,7 @@ class TestTriage:
         triage._append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_tickets_without_triage_with_dev_environment_no_email_sent_test(self):
+    async def process_tickets_without_triage_with_dev_environment_email_sent_test(self):
         edge_1_serial = 'VC1234567'
         edge_2_serial = 'VC7654321'
         edge_3_serial = 'VC1111111'

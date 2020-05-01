@@ -194,7 +194,7 @@ class MonitoringMapRepository:
         return client_info
 
     async def _notify_failing_rpc_request_for_edge_list(self):
-        err_msg = 'An error occurred when requesting edge list from Velocloud'
+        err_msg = 'Monitor Map process:An error occurred when requesting edge list from Velocloud'
 
         self._logger.error(err_msg)
         slack_message = {'request_id': uuid(), 'message': err_msg}
@@ -205,7 +205,8 @@ class MonitoringMapRepository:
         edge_list_response_status = edge_list_response['status']
 
         err_msg = (
-            f'Error while retrieving edge list in {self._config.MONITOR_MAP_CONFIG["environment"].upper()} '
+            f'Monitor Map process:Error while retrieving edge list '
+            f'in {self._config.MONITOR_MAP_CONFIG["environment"].upper()} '
             f'environment:'
             f' Error {edge_list_response_status} - {edge_list_response_body}'
         )
@@ -220,7 +221,7 @@ class MonitoringMapRepository:
 
         edge_identifier = EdgeIdentifier(**edge_full_id)
         err_msg = (
-            f'Error while retrieving edge status for edge {edge_identifier} in '
+            f'Monitor Map process:Error while retrieving edge status for edge {edge_identifier} in '
             f'{self._config.MONITOR_MAP_CONFIG["environment"].upper()} environment: '
             f'Error {edge_status_response_status} - {edge_status_response_body}'
         )

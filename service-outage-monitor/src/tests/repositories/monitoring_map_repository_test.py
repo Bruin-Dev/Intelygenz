@@ -394,7 +394,8 @@ class TestMonitoringMapRepository:
         config = testconfig
 
         err_msg = (
-            f'Error while retrieving edge list in {config.MONITOR_MAP_CONFIG["environment"].upper()} '
+            f'Monitor Map process:Error while retrieving edge list '
+            f'in {config.MONITOR_MAP_CONFIG["environment"].upper()} '
             f'environment:'
             f' Error {edge_list_response["status"]} - {edge_list_response["body"]}'
         )
@@ -967,7 +968,7 @@ class TestMonitoringMapRepository:
     async def notify_failing_rpc_request_for_edge_list_test(self):
         uuid_ = uuid()
 
-        error_message = 'An error occurred when requesting edge list from Velocloud'
+        error_message = 'Monitor Map process:An error occurred when requesting edge list from Velocloud'
         bruin_info_response = {
             'request_id': uuid_,
             'message': error_message,
@@ -994,7 +995,7 @@ class TestMonitoringMapRepository:
     async def notify_http_error_when_requesting_edge_list_from_velocloud_test(self):
         uuid_ = uuid()
 
-        error_message = 'An error occurred when requesting edge list from Velocloud'
+        error_message = 'Monitor Map process:An error occurred when requesting edge list from Velocloud'
         bruin_info_response = {
             'request_id': uuid_,
             'message': error_message,
