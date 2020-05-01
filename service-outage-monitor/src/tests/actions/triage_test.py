@@ -3157,7 +3157,7 @@ class TestTriage:
         )
 
     @pytest.mark.asyncio
-    async def process_tickets_without_triage_with_dev_environment_test(self):
+    async def process_tickets_without_triage_with_dev_environment_email_sent_test(self):
         edge_1_serial = 'VC1234567'
         edge_2_serial = 'VC7654321'
         edge_3_serial = 'VC1111111'
@@ -3284,6 +3284,176 @@ class TestTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        outage_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        template_renderer = Mock()
+        template_renderer.compose_email_object = Mock(side_effect=[email_body_1, email_body_2])
+
+        triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
+                        monitoring_map_repository)
+        triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
+        triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
+            relevant_data_for_triage_note_1,
+            relevant_data_for_triage_note_2,
+        ])
+        triage._send_email = CoroutineMock()
+        triage._append_note_to_ticket = CoroutineMock()
+
+        current_datetime = datetime.now()
+        past_moment_for_events_lookup = current_datetime - timedelta(days=7)
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+
+        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config['environment'] = 'dev'
+        custom_triage_config['send_email'] = False
+        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            with patch.object(triage_module, 'datetime', new=datetime_mock):
+                with patch.object(triage_module, 'utc', new=Mock()):
+                    await triage._process_tickets_without_triage(tickets, edges_data_by_serial)
+
+        triage._get_last_events_for_edge.assert_has_awaits([
+            call(edge_1_full_id, since=past_moment_for_events_lookup),
+            call(edge_2_full_id, since=past_moment_for_events_lookup),
+        ])
+        triage._gather_relevant_data_for_first_triage_note.assert_has_calls([
+            call(edge_1_data, events_1),
+            call(edge_2_data, events_2),
+        ])
+        template_renderer.compose_email_object.assert_not_called()
+        triage._send_email.assert_not_awaited()
+        triage._append_note_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_tickets_without_triage_with_dev_environment_no_email_sent_test(self):
+        edge_1_serial = 'VC1234567'
+        edge_2_serial = 'VC7654321'
+        edge_3_serial = 'VC1111111'
+
+        edge_1_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+        edge_2_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 2}
+        edge_3_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 3}
+
+        edge_1_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_1_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
+        }
+        edge_2_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_2_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
+        }
+        edge_3_status = {
+            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_3_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|67890|',
+            'bruin_client_info': {
+                'client_id': 67890,
+                'client_name': 'METTEL/NEW YORK',
+            },
+        }
+
+        edge_1_data = {'edge_id': edge_1_full_id, 'edge_status': edge_1_status}
+        edge_2_data = {'edge_id': edge_2_full_id, 'edge_status': edge_2_status}
+        edge_3_data = {'edge_id': edge_3_full_id, 'edge_status': edge_3_status}
+        edges_data_by_serial = {
+            edge_1_serial: edge_1_data,
+            edge_2_serial: edge_2_data,
+            edge_3_serial: edge_3_data,
+        }
+
+        ticket_1_id = 12345
+        ticket_1_detail = {
+            "detailID": 2746930,
+            "detailValue": edge_1_serial,
+        }
+        ticket_1_note = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nAuto-resolving ticket\nTimeStamp: 2019-07-30T06:38:13.503-05:00',
+            "createdDate": '2019-07-30T06:38:13.503-05:00',
+        }
+        ticket_1 = {
+            'ticket_id': ticket_1_id,
+            'ticket_detail': ticket_1_detail,
+            'ticket_notes': [ticket_1_note]
+        }
+
+        ticket_2_id = 67890
+        ticket_2_detail = {
+            "detailID": 2746931,
+            "detailValue": edge_2_serial,
+        }
+        ticket_2_note = {
+            "noteId": 41894043,
+            "noteValue": f'#*Automation Engine*#\nAuto-resolving ticket\nTimeStamp: 2019-04-30T06:38:13.503-05:00',
+            "createdDate": '2019-04-30T06:38:13.503-05:00',
+        }
+        ticket_2 = {
+            'ticket_id': ticket_2_id,
+            'ticket_detail': ticket_2_detail,
+            'ticket_notes': [ticket_2_note]
+        }
+
+        tickets = [ticket_1, ticket_2]
+
+        event_1 = {
+            'event': 'LINK_DEAD',
+            'category': 'NETWORK',
+            'eventTime': '2019-07-30 07:38:00+00:00',
+            'message': 'Link GE2 is now DEAD'
+        }
+        event_2 = {
+            'event': 'LINK_DEAD',
+            'category': 'NETWORK',
+            'eventTime': '2019-07-30 07:40:00+00:00',
+            'message': 'Link GE1 is now DEAD'
+        }
+        events_1 = [event_1]
+        events_2 = [event_2]
+
+        last_events_response_1 = {'body': events_1, 'status': 200}
+        last_events_response_2 = {'body': events_2, 'status': 200}
+
+        relevant_data_for_triage_note_1 = {
+            'data-1': 'some-data-1',
+            'data-2': 'some-more-data-1',
+            'data-3': 42,
+            'data-4': 'Travis Touchdown',
+        }
+        relevant_data_for_triage_note_2 = {
+            'data-1': 'some-data-2',
+            'data-2': 'some-more-data-2',
+            'data-3': 42,
+            'data-4': 'Yagami Light',
+        }
+
+        email_body_1 = {'request_id': uuid(), 'email_data': {'subject': 'some-subject', 'html': 'some-html'}}
+        email_body_2 = {'request_id': uuid(), 'email_data': {'subject': 'some-subject2', 'html': 'some-html2'}}
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
         outage_repository = Mock()
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         template_renderer = Mock()
