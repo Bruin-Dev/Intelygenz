@@ -79,6 +79,7 @@ REDIS = {
 
 TRIAGE_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"],
+    'send_email': False,
     'polling_minutes': 10,
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'timezone': 'US/Eastern',

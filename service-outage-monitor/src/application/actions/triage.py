@@ -571,6 +571,10 @@ class Triage:
             )
 
             if self._config.TRIAGE_CONFIG['environment'] == 'dev':
+                # bool here
+                if self._config.TRIAGE_CONFIG['send_email'] is False:
+                    self._logger.info("Skipping sending triage email")
+                    continue
                 email_data = self._template_renderer.compose_email_object(relevant_info_for_triage_note)
 
                 try:
