@@ -48,6 +48,8 @@ MONITOR_CONFIG = {
     'blacklisted_edges': [],
     'autoresolve_down_events_seconds': 45 * 60,
     'semaphore': 1,
+    'process_semaphore': 1,
+    'events_semaphore': 1
 }
 
 LOG_CONFIG = {

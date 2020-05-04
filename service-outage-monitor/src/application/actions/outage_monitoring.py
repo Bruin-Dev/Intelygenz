@@ -91,9 +91,6 @@ class OutageMonitor:
             if edge_full_id not in self._config.MONITOR_CONFIG['blacklisted_edges']
         ]
 
-        # TODO: remove
-        # edges_to_monitor_response_body = edges_to_monitor_response_body[:5]
-
         past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
         events_tasks = [
             self._get_last_events_for_edge(edge_full_id, since=past_moment_for_events_lookup)
@@ -105,7 +102,7 @@ class OutageMonitor:
         stop = perf_counter()
 
         self._logger.info(f"[EVENTS] Elapsed time: {stop} - {start}")
-        self._logger.info(f"[EVENTS] Elapsed time during the whole program in seconds: {stop - start}")
+        self._logger.info(f"[EVENTS] Elapsed time during the whole program in minutes: {(stop - start)/60}")
 
         # Remove not valid edges or without events
         filtered_edge_id_list = [
@@ -122,8 +119,8 @@ class OutageMonitor:
         await asyncio.gather(*tasks, return_exceptions=True)
         stop = perf_counter()
 
-        self._logger.info(f"[PROCESS_EDGES] Elapsed time: {stop} - {start}")
-        self._logger.info(f"[PROCESS_EDGES] Elapsed time during the whole program in seconds: {stop - start}")
+        self._logger.info(f"[PROCESS_EDGE] Elapsed time: {stop} - {start}")
+        self._logger.info(f"[PROCESS_EDGE] Elapsed time during the whole program in minutes: {(stop - start)/60}")
 
         self._monitoring_map_cache = self._temp_monitoring_map
         self._temp_monitoring_map = []
@@ -144,13 +141,14 @@ class OutageMonitor:
         self.__reset_instance_state()
 
         self._logger.info(f"[PROCESS] Start with map cache!")
-        # TODO: split cache by velocloud host and process concurrent
+
         split_cache = defaultdict(list)
         self._logger.info("Splitting cache by host")
 
         for edge_info in self._monitoring_map_cache:
             split_cache[edge_info['edge_full_id']['host']].append(edge_info)
         self._logger.info('Cache split')
+
         process_tasks = [
             self._process_host_with_cache(host, split_cache[host])
             for host in split_cache
@@ -159,13 +157,14 @@ class OutageMonitor:
         await asyncio.gather(*process_tasks, return_exceptions=True)
         stop = perf_counter()
 
-        self._logger.info(f"[PROCESS] Elapsed time: {stop} - {start}")
-        self._logger.info(f"[PROCESS] Elapsed time during the whole program in seconds: {stop - start}")
+        self._logger.info(f"[PROCESS_HOST_WITH_CACHE] Elapsed time: {stop} - {start}")
+        self._logger.info(f"[PROCESS_HOST_WITH_CACHE] Elapsed time during the whole program in minutes"
+                          f": {(stop - start)/60}")
 
         self._logger.info(f'Outage monitoring process finished! took {time.time() - total_start_time} seconds')
 
     async def _process_host_with_cache(self, host, host_cache):
-        self._logger.info(f"[PROCESS]{host} starting '_process_edge_with_cache' task for edges")
+        self._logger.info(f"[PROCESS_HOST_WITH_CACHE]{host} starting '_process_edge_with_cache' task for edges")
         process_tasks = [
             self._process_edge_with_cache(edge_info['edge_full_id'], edge_info['bruin_client_info'])
             for edge_info in host_cache
@@ -174,8 +173,9 @@ class OutageMonitor:
         await asyncio.gather(*process_tasks, return_exceptions=True)
         stop = perf_counter()
 
-        self._logger.info(f"[PROCESS] Elapsed time: {stop} - {start}")
-        self._logger.info(f"[PROCESS] Elapsed time during the whole program for {host} in seconds: {stop - start}")
+        self._logger.info(f"[PROCESS_EDGE_WITH_CACHE] Elapsed time: {stop} - {start}")
+        self._logger.info(f"[PROCESS_EDGE_WITH_CACHE] Elapsed time during the whole program for {host} in minutes: "
+                          f"{(stop - start)/60}")
 
     async def _process_edge_with_cache(self, edge_full_id, bruin_client_info_response_body):
         async with self._process_semaphore:
