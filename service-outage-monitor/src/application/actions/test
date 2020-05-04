@@ -1,0 +1,80 @@
+
+Create cache:
+
+requirements:
+- No serial
+- No management status in an active status
+- No events in the last 7 days.
+
+[
+    {
+        edge_full_id: {"host": "mettel.velocloud.net", "enterprise_id": 6, "edge_id": 315},
+        bruin_client_info: { client_id, client_name }
+        management_status: "STATUS",
+    },
+    ...
+]
+
+For processing:
+Reask for edge status
+and update the cache and use it
+
+'''
+            max (1h)
+            1 - self._get_last_events_for_edge (1 request)
+
+            3 - self._get_management_status_with_edge_full_id (2 requests)
+                2 - self._get_edge_status_by_id (1 - request)
+                - bruin_client_info (serialNumber)
+                - if serial_number:
+                    - self._get_management_status
+
+            * Process the edge using cache - (should last 10 - 20 minutes)
+                2 - self._get_edge_status_by_id (1 - request)
+                - create ticket
+                - reopen
+                - resolve
+                - ...
+            '''
+
+ # All together - overload
+ #######
+        # this should be concurrent - 20
+        loop = asyncio.get_event_loop()
+        for edge_full_id in edges_to_monitor_response_body:
+            edge_identifier = EdgeIdentifier(**edge_full_id)
+
+            # Chain - priority - with semaphores on each part or the chain
+
+            results = loop.run_until_complete(asyncio.gather(
+                self._get_last_events_for_edge(edge_full_id, since=datetime.now(utc) - timedelta(days=7)),
+                self._get_edge_status_by_id(edge_full_id),
+                # (with serial) (bruin_client_info, management_status)
+                self._get_management_status_with_edge_full_id(edge_full_id)
+            ))
+            # check serialNumber from results
+            edge_serial = None
+            if edge_serial:
+                bruin_client_info_response = await self._get_bruin_client_info_by_serial(edge_serial)
+                bruin_client_info_response_body = bruin_client_info_response['body']
+                bruin_client_info_response_status = bruin_client_info_response['status']
+                if bruin_client_info_response_status not in range(200, 300):
+                    pass
+                if bruin_client_info_response_body.get('client_id', None) is not None:
+                    # get management status
+                    edge_data = bruin_client_info_response_body
+                    management_status_response = await self._get_management_status(edge_data)
+
+                    management_status_response_body = management_status_response['body']
+                    management_status_response_status = management_status_response['status']
+
+                    if not self._is_management_status_active(management_status_response_body):
+                        self._logger.info(
+                            f'Management status is not active for {edge_identifier}. Skipping process...')
+                        return
+                    else:
+                        self._logger.info(f'Management status for {edge_identifier} seems active.')
+        #######
+
+
+

@@ -2,6 +2,7 @@ import json
 import os
 import re
 import time
+from time import perf_counter
 from collections import OrderedDict
 from datetime import datetime
 from datetime import timedelta
@@ -28,7 +29,15 @@ class OutageMonitor:
         self._config = config
         self._outage_repository = outage_repository
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
+        self._process_semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
+        self._events_semaphore = asyncio.BoundedSemaphore(5)
+        self._temp_monitoring_map = []
+        self._monitoring_map_cache = []
         self.__reset_instance_state()
+        self._cache_time = datetime.now() + timedelta(hours=4)
+
+    def __reset_instance_state(self):
+        self._autoresolve_serials_whitelist = set()
 
     async def start_service_outage_monitoring(self, exec_on_start):
         self._logger.info('Scheduling Service Outage Monitor job...')
@@ -47,62 +56,170 @@ class OutageMonitor:
         except ConflictingIdError as conflict:
             self._logger.info(f'Skipping start of Service Outage Monitoring job. Reason: {conflict}')
 
-    async def _outage_monitoring_process(self):
-        self.__reset_instance_state()
-        start_time = time.time()
+    async def _build_cache(self):
+        cache_start = perf_counter()
+        self._temp_monitoring_map = []
+
+        self._logger.info('[outage-monitoring] Building cache...')
 
         try:
             self._logger.info('[outage-monitoring] Claiming edges under monitoring...')
             edges_to_monitor_response = await self._get_edges_for_monitoring()
             self._logger.info('[outage-monitoring] Got edges under monitoring from Velocloud')
         except Exception as e:
-            self._logger.error(f'[outage-monitoring] An error occurred while claiming edges for outage monitoring: {e}')
+            self._logger.error(
+                f'[outage-monitoring] An error occurred while claiming edges for outage monitoring: {e}')
             raise
 
         edges_to_monitor_response_body = edges_to_monitor_response['body']
         edges_to_monitor_response_status = edges_to_monitor_response['status']
         if edges_to_monitor_response_status not in range(200, 300):
-            err_msg = ('[outage-monitoring] Something happened while retrieving edges under monitoring from Velocloud. '
-                       f'Reason: Error {edges_to_monitor_response_status} - {edges_to_monitor_response_body}')
+            err_msg = (
+                '[outage-monitoring] Something happened while retrieving edges under monitoring from Velocloud. '
+                f'Reason: Error {edges_to_monitor_response_status} - {edges_to_monitor_response_body}')
             self._logger.error(err_msg)
 
             slack_message = {'request_id': uuid(), 'message': err_msg}
             await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             return
-        filtered_edge_id_list = []
-        for edge_full_id in edges_to_monitor_response_body:
-            edge_identifier = EdgeIdentifier(**edge_full_id)
 
-            if edge_full_id in self._config.MONITOR_CONFIG['blacklisted_edges']:
-                self._logger.info(f'[outage-monitoring] Edge {edge_identifier} is blacklisted at this moment. '
-                                  'Skipping...')
-                continue
+        # Remove blacklisted
+        edges_to_monitor_response_body = [
+            edge_full_id
+            for edge_full_id in edges_to_monitor_response_body
+            if edge_full_id not in self._config.MONITOR_CONFIG['blacklisted_edges']
+        ]
 
-            past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
-            recent_events_response = await self._get_last_events_for_edge(
-                edge_full_id, since=past_moment_for_events_lookup
-            )
+        # TODO: remove
+        # edges_to_monitor_response_body = edges_to_monitor_response_body[:5]
 
-            recent_events_response_status = recent_events_response['status']
-            if recent_events_response_status not in range(200, 300):
-                continue
+        past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
+        events_tasks = [
+            self._get_last_events_for_edge(edge_full_id, since=past_moment_for_events_lookup)
+            for edge_full_id in edges_to_monitor_response_body
+        ]
 
-            recent_events_response_body = recent_events_response['body']
-            if not recent_events_response_body:
-                self._logger.info(
-                    f'[outage-monitoring] No events were found for edge {edge_identifier} starting from '
-                    f'{past_moment_for_events_lookup}. Skipping...'
-                )
-                continue
-            filtered_edge_id_list.append(edge_full_id)
+        start = perf_counter()
+        events_results = await asyncio.gather(*events_tasks, return_exceptions=True)
+        stop = perf_counter()
+
+        self._logger.info(f"[EVENTS] Elapsed time: {stop} - {start}")
+        self._logger.info(f"[EVENTS] Elapsed time during the whole program in seconds: {stop - start}")
+
+        # Remove not valid edges or without events
+        filtered_edge_id_list = [
+            edge_full_id
+            for (edge_full_id, result) in zip(edges_to_monitor_response_body, events_results)
+            if result['status'] in range(200, 300) and result['body'] is not None and len(result['body']) > 0
+        ]
 
         tasks = [
             self._process_edge(edge)
             for edge in filtered_edge_id_list
         ]
+        start = perf_counter()
         await asyncio.gather(*tasks, return_exceptions=True)
-        self._logger.info(f'[outage-monitoring]Outage monitoring process finished! '
-                          f'took {(time.time() - start_time)/60} minutes')
+        stop = perf_counter()
+
+        self._logger.info(f"[PROCESS_EDGES] Elapsed time: {stop} - {start}")
+        self._logger.info(f"[PROCESS_EDGES] Elapsed time during the whole program in seconds: {stop - start}")
+
+        self._monitoring_map_cache = self._temp_monitoring_map
+        self._temp_monitoring_map = []
+        cache_stop = perf_counter()
+        self._logger.info(f'Create cache finished! took {cache_stop - cache_start} seconds')
+
+    async def _outage_monitoring_process(self):
+
+        total_start_time = time.time()
+
+        if len(self._monitoring_map_cache) == 0 or datetime.now() > self._cache_time:
+            await self._build_cache()
+
+            # update cache time
+            self._cache_time = datetime.now() + timedelta(hours=4)
+            self._logger.info("Updated time cache for another 4 hours")
+
+        self.__reset_instance_state()
+
+        self._logger.info(f"[PROCESS] Start with map cache!")
+        # TODO: split cache by velocloud host and process concurrent
+        process_tasks = [
+            self._process_edge_with_cache(edge_info['edge_full_id'], edge_info['bruin_client_info'])
+            for edge_info in self._monitoring_map_cache
+        ]
+        start = perf_counter()
+        await asyncio.gather(*process_tasks, return_exceptions=True)
+        stop = perf_counter()
+
+        self._logger.info(f"[PROCESS] Elapsed time: {stop} - {start}")
+        self._logger.info(f"[PROCESS] Elapsed time during the whole program in seconds: {stop - start}")
+
+        self._logger.info(f'Outage monitoring process finished! took {time.time() - total_start_time} seconds')
+
+    async def _process_edge_with_cache(self, edge_full_id, bruin_client_info_response_body):
+        async with self._process_semaphore:
+            edge_identifier = EdgeIdentifier(**edge_full_id)
+
+            self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
+            edge_status_response = await self._get_edge_status_by_id(edge_full_id)
+
+            self._logger.info(
+                f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
+
+            edge_status_response_body = edge_status_response['body']
+            edge_status_response_status = edge_status_response['status']
+            if edge_status_response_status not in range(200, 300):
+                err_msg = (
+                    f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
+                    f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
+                )
+
+                self._logger.error(err_msg)
+                slack_message = {'request_id': uuid(),
+                                 'message': err_msg}
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+                return
+
+            edge_data = edge_status_response_body["edge_info"]
+            edge_serial = edge_data['edges'].get('serialNumber')
+            # Attach Bruin client info to edge_data
+            edge_data['bruin_client_info'] = bruin_client_info_response_body
+
+            autoresolve_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter'].keys()
+            autoresolve_filter_enabled = len(autoresolve_filter) > 0
+            if (autoresolve_filter_enabled and edge_full_id['host'] in autoresolve_filter) or \
+                    not autoresolve_filter_enabled:
+                self._autoresolve_serials_whitelist.add(edge_serial)
+
+            outage_happened = self._outage_repository.is_there_an_outage(edge_data)
+            if outage_happened:
+                self._logger.info(
+                    f'[outage-monitoring] Outage detected for {edge_identifier}. '
+                    'Scheduling edge to re-check it in a few moments.'
+                )
+
+                try:
+                    tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+                    current_datetime = datetime.now(tz)
+                    run_date = current_datetime + timedelta(
+                        seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
+                    self._scheduler.add_job(self._recheck_edge_for_ticket_creation, 'date',
+                                            run_date=run_date,
+                                            replace_existing=False,
+                                            misfire_grace_time=9999,
+                                            id=f'_ticket_creation_recheck_{json.dumps(edge_full_id)}',
+                                            kwargs={
+                                                'edge_full_id': edge_full_id,
+                                                'bruin_client_info': bruin_client_info_response_body
+                                            })
+                    self._logger.info(f'[outage-monitoring] {edge_identifier} successfully scheduled for re-check.')
+                except ConflictingIdError:
+                    self._logger.info(f'There is a recheck job scheduled for {edge_identifier} already. No new job '
+                                      'is going to be scheduled.')
+            else:
+                self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state.')
+                await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
 
     async def _process_edge(self, edge_full_id):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_CONFIG['multiplier'],
@@ -110,7 +227,7 @@ class OutageMonitor:
                stop=stop_after_delay(self._config.MONITOR_CONFIG['stop_delay']))
         async def _process_edge():
             async with self._semaphore:
-                self._logger.info("[outage-monitoring]Starting process_edges job")
+                self._logger.info("[outage-monitoring] Starting process_edges job")
 
                 edge_identifier = EdgeIdentifier(**edge_full_id)
 
@@ -121,7 +238,8 @@ class OutageMonitor:
                 self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
 
-            self._logger.info(f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
+                self._logger.info(
+                    f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
 
                 edge_status_response_body = edge_status_response['body']
                 edge_status_response_status = edge_status_response['status']
@@ -194,48 +312,15 @@ class OutageMonitor:
                     return
                 else:
                     self._logger.info(f'Management status for {edge_identifier} seems active.')
-
-                autoresolve_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter'].keys()
-                autoresolve_filter_enabled = len(autoresolve_filter) > 0
-                if (autoresolve_filter_enabled and edge_full_id['host'] in autoresolve_filter) or \
-                        not autoresolve_filter_enabled:
-                    self._autoresolve_serials_whitelist.add(edge_serial)
-
-                outage_happened = self._outage_repository.is_there_an_outage(edge_data)
-                if outage_happened:
-                    self._logger.info(
-                        f'[outage-monitoring] Outage detected for {edge_identifier}. '
-                        'Scheduling edge to re-check it in a few moments.'
-                    )
-
-                    try:
-                        tz = timezone(self._config.MONITOR_CONFIG['timezone'])
-                        current_datetime = datetime.now(tz)
-                        run_date = current_datetime + timedelta(
-                            seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
-                        self._scheduler.add_job(self._recheck_edge_for_ticket_creation, 'date',
-                                                run_date=run_date,
-                                                replace_existing=False,
-                                                misfire_grace_time=9999,
-                                                id=f'_ticket_creation_recheck_{json.dumps(edge_full_id)}',
-                                                kwargs={
-                                                    'edge_full_id': edge_full_id,
-                                                    'bruin_client_info': bruin_client_info_response_body
-                                                })
-                        self._logger.info(f'[outage-monitoring] {edge_identifier} successfully scheduled for re-check.')
-                    except ConflictingIdError:
-                        self._logger.info(f'There is a recheck job scheduled for {edge_identifier} already. No new job '
-                                          'is going to be scheduled.')
-                else:
-                    self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state.')
-                    await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
+                self._temp_monitoring_map.append({
+                    'edge_full_id': edge_full_id,
+                    'edge_data': edge_data,
+                    'bruin_client_info': bruin_client_info_response_body
+                })
         try:
             await _process_edge()
         except Exception as ex:
             self._logger.error(f"Error: {edge_full_id} raised a {ex} exception")
-
-    def __reset_instance_state(self):
-        self._autoresolve_serials_whitelist = set()
 
     async def _run_ticket_autoresolve_for_edge(self, edge_full_id, edge_status):
         edge_identifier = EdgeIdentifier(**edge_full_id)
@@ -717,52 +802,56 @@ class OutageMonitor:
         self._logger.info('Finished processing tickets without triage!')
 
     async def _get_last_events_for_edge(self, edge_full_id, since: datetime):  # pragma: no cover
-        until = datetime.now(utc)
-        filters = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
+        async with self._events_semaphore:
+            await asyncio.sleep(0.25)
+            until = datetime.now(utc)
+            filters = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
 
-        err_msg = None
-        edge_identifier = EdgeIdentifier(**edge_full_id)
+            err_msg = None
+            edge_identifier = EdgeIdentifier(**edge_full_id)
 
-        request = {
-            'request_id': uuid(),
-            'body': {
-                'edge': edge_full_id,
-                'start_date': since,
-                'end_date': until,
-                'filter': filters,
-            },
-        }
+            request = {
+                'request_id': uuid(),
+                'body': {
+                    'edge': edge_full_id,
+                    'start_date': since,
+                    'end_date': until,
+                    'filter': filters,
+                },
+            }
 
-        try:
-            self._logger.info(
-                f"Getting events of edge {edge_identifier} having any type of {filters} that took place "
-                f"between {since} and {until} from Velocloud..."
-            )
-            response = await self._event_bus.rpc_request("alert.request.event.edge", request, timeout=180)
-            self._logger.info(
-                f"Got events of edge {edge_identifier} having any type in {filters} that took place "
-                f"between {since} and {until} from Velocloud!"
-            )
-        except Exception as e:
-            err_msg = f'An error occurred when requesting edge events from Velocloud for edge {edge_identifier} -> {e}'
-            response = {'body': None, 'status': 503}
-        else:
-            response_body = response['body']
-            response_status = response['status']
-
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f'Error while retrieving events of edge {edge_identifier} having any type in {filters} that '
-                    f'took place between {since} and {until} in {self._config.TRIAGE_CONFIG["environment"].upper()}'
-                    f'environment: Error {response_status} - {response_body}'
+            try:
+                self._logger.info(
+                    f"Getting events of edge {edge_identifier} having any type of {filters} that took place "
+                    f"between {since} and {until} from Velocloud..."
                 )
+                # response = await self._event_bus.rpc_request("alert.request.event.edge", request, timeout=180)
+                response = await self._event_bus.rpc_request("alert.request.event.edge", request, timeout=30)
+                self._logger.info(
+                    f"Got events of edge {edge_identifier} having any type in {filters} that took place "
+                    f"between {since} and {until} from Velocloud!"
+                )
+            except Exception as e:
+                err_msg = f'An error occurred when requesting edge events ' \
+                          f'from Velocloud for edge {edge_identifier} -> {e}'
+                response = {'body': None, 'status': 503}
+            else:
+                response_body = response['body']
+                response_status = response['status']
 
-        if err_msg:
-            self._logger.error(err_msg)
-            slack_message = {'request_id': uuid(), 'message': err_msg}
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                if response_status not in range(200, 300):
+                    err_msg = (
+                        f'Error while retrieving events of edge {edge_identifier} having any type in {filters} that '
+                        f'took place between {since} and {until} in {self._config.TRIAGE_CONFIG["environment"].upper()}'
+                        f'environment: Error {response_status} - {response_body}'
+                    )
 
-        return response
+            if err_msg:
+                self._logger.error(err_msg)
+                slack_message = {'request_id': uuid(), 'message': err_msg}
+                await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
+            return response
 
     def _gather_relevant_data_for_first_triage_note(self, edge_data, edge_events) -> dict:  # pragma: no cover
         edge_full_id = edge_data['edge_id']
