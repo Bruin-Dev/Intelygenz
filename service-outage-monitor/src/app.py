@@ -95,7 +95,7 @@ class Container:
 
         await self._outage_monitor.start_service_outage_monitoring(exec_on_start=True)
 
-        # await self._triage.start_triage_job(exec_on_start=True)
+        await self._triage.start_triage_job(exec_on_start=True)
 
         self._scheduler.start()
 

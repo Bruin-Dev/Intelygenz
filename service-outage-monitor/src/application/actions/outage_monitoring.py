@@ -17,6 +17,7 @@ from pytz import timezone
 from pytz import utc
 from shortuuid import uuid
 from tenacity import retry, wait_exponential, stop_after_delay
+from collections import defaultdict
 
 empty_str = str()
 
@@ -29,8 +30,8 @@ class OutageMonitor:
         self._config = config
         self._outage_repository = outage_repository
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
-        self._process_semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
-        self._events_semaphore = asyncio.BoundedSemaphore(5)
+        self._process_semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['process_semaphore'])
+        self._events_semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['events_semaphore'])
         self._temp_monitoring_map = []
         self._monitoring_map_cache = []
         self.__reset_instance_state()
@@ -144,9 +145,15 @@ class OutageMonitor:
 
         self._logger.info(f"[PROCESS] Start with map cache!")
         # TODO: split cache by velocloud host and process concurrent
+        split_cache = defaultdict(list)
+        self._logger.info("Splitting cache by host")
+
+        for edge_info in self._monitoring_map_cache:
+            split_cache[edge_info['edge_full_id']['host']].append(edge_info)
+        self._logger.info('Cache split')
         process_tasks = [
-            self._process_edge_with_cache(edge_info['edge_full_id'], edge_info['bruin_client_info'])
-            for edge_info in self._monitoring_map_cache
+            self._process_host_with_cache(host, split_cache[host])
+            for host in split_cache
         ]
         start = perf_counter()
         await asyncio.gather(*process_tasks, return_exceptions=True)
@@ -156,6 +163,19 @@ class OutageMonitor:
         self._logger.info(f"[PROCESS] Elapsed time during the whole program in seconds: {stop - start}")
 
         self._logger.info(f'Outage monitoring process finished! took {time.time() - total_start_time} seconds')
+
+    async def _process_host_with_cache(self, host, host_cache):
+        self._logger.info(f"[PROCESS]{host} starting '_process_edge_with_cache' task for edges")
+        process_tasks = [
+            self._process_edge_with_cache(edge_info['edge_full_id'], edge_info['bruin_client_info'])
+            for edge_info in host_cache
+        ]
+        start = perf_counter()
+        await asyncio.gather(*process_tasks, return_exceptions=True)
+        stop = perf_counter()
+
+        self._logger.info(f"[PROCESS] Elapsed time: {stop} - {start}")
+        self._logger.info(f"[PROCESS] Elapsed time during the whole program for {host} in seconds: {stop - start}")
 
     async def _process_edge_with_cache(self, edge_full_id, bruin_client_info_response_body):
         async with self._process_semaphore:

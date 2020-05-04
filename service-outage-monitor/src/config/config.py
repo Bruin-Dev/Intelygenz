@@ -59,7 +59,8 @@ MONITOR_CONFIG = {
     ],
     'autoresolve_down_events_seconds': 45 * 60,
     'semaphore': 10,
-
+    'process_semaphore': 10,
+    'events_semaphore': 5
 }
 LOG_CONFIG = {
     'name': 'service-outage-monitor',
