@@ -20,7 +20,7 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-quarantine_time = 5
+quarantine_time = 60 * 5
 
 MONITOR_MAP_CONFIG = {
     'timezone': 'US/Eastern',
