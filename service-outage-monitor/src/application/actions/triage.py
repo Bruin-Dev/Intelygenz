@@ -564,10 +564,27 @@ class Triage:
                 )
                 continue
 
+            self._logger.info(f'Claiming edge status from Velocloud for edge {edge_identifier}...')
+            try:
+                edge_status_response = await self._get_edge_status_by_id(edge_full_id)
+            except Exception as e:
+                self._logger.error(f'An error occurred while claiming edge status for edge {edge_identifier} -> {e}')
+                continue
+            self._logger.info(f'Got edge status from Velocloud for edge {edge_identifier}!')
+
+            edge_status_response_status = edge_status_response['status']
+            if edge_status_response_status not in range(200, 300):
+                await self._notify_http_error_when_requesting_edge_status_from_velocloud(
+                    edge_full_id, edge_status_response
+                )
+                continue
+
+            edge_status = edge_status_response['body']['edge_info']
+
             recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
 
             relevant_info_for_triage_note = self._gather_relevant_data_for_first_triage_note(
-                edge_data, recent_events_response_body
+                edge_full_id, edge_status, recent_events_response_body
             )
 
             if self._config.TRIAGE_CONFIG['environment'] == 'dev':
@@ -595,10 +612,31 @@ class Triage:
 
         self._logger.info('Finished processing tickets without triage!')
 
-    def _gather_relevant_data_for_first_triage_note(self, edge_data, edge_events) -> dict:
-        edge_full_id = edge_data['edge_id']
-        edge_status = edge_data['edge_status']
+    async def _get_edge_status_by_id(self, edge_full_id):  # pragma: no cover
+        edge_status_request = {
+            "request_id": uuid(),
+            "body": edge_full_id,
+        }
 
+        edge_status = await self._event_bus.rpc_request("edge.status.request", edge_status_request, timeout=120)
+        return edge_status
+
+    async def _notify_http_error_when_requesting_edge_status_from_velocloud(self, edge_full_id, edge_status_response):
+        edge_status_response_body = edge_status_response['body']
+        edge_status_response_status = edge_status_response['status']
+
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+        err_msg = (
+            f'Monitor Map process:Error while retrieving edge status for edge {edge_identifier} in '
+            f'{self._config.MONITOR_MAP_CONFIG["environment"].upper()} environment: '
+            f'Error {edge_status_response_status} - {edge_status_response_body}'
+        )
+
+        self._logger.error(err_msg)
+        slack_message = {'request_id': uuid(), 'message': err_msg}
+        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+
+    def _gather_relevant_data_for_first_triage_note(self, edge_full_id, edge_status, edge_events) -> dict:
         host = edge_full_id['host']
         enterprise_id = edge_full_id['enterprise_id']
         edge_id = edge_full_id['edge_id']

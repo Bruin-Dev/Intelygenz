@@ -20,7 +20,6 @@ from application.actions.triage import empty_str
 from application.actions.triage import Triage
 from application.actions import triage as triage_module
 from application.repositories.edge_redis_repository import EdgeIdentifier
-from application.repositories import monitoring_map_repository as monitoring_map_repository_module
 from application.repositories.monitoring_map_repository import MonitoringMapRepository
 from config import testconfig
 
@@ -3133,6 +3132,11 @@ class TestTriage:
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
+            {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
+            {'body': {'edge_id': edge_3_full_id, 'edge_info': edge_3_status}, 'status': 200},
+        ])
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._gather_relevant_data_for_first_triage_note = Mock(return_value=relevant_data_for_triage_note)
         triage._send_email = CoroutineMock()
@@ -3153,7 +3157,7 @@ class TestTriage:
 
         triage._get_last_events_for_edge.assert_awaited_once_with(edge_1_full_id, since=past_moment_for_events_lookup)
         triage._gather_relevant_data_for_first_triage_note.assert_called_once_with(
-            edge_1_data, events_sorted_by_event_time
+            edge_1_full_id, edge_1_status, events_sorted_by_event_time
         )
 
     @pytest.mark.asyncio
@@ -3291,6 +3295,11 @@ class TestTriage:
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
+            {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
+            {'body': {'edge_id': edge_3_full_id, 'edge_info': edge_3_status}, 'status': 200},
+        ])
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1,
@@ -3318,8 +3327,8 @@ class TestTriage:
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
         triage._gather_relevant_data_for_first_triage_note.assert_has_calls([
-            call(edge_1_data, events_1),
-            call(edge_2_data, events_2),
+            call(edge_1_full_id, edge_1_status, events_1),
+            call(edge_2_full_id, edge_2_status, events_2),
         ])
         template_renderer.compose_email_object.assert_not_called()
         triage._send_email.assert_not_awaited()
@@ -3461,6 +3470,11 @@ class TestTriage:
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
+            {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
+            {'body': {'edge_id': edge_3_full_id, 'edge_info': edge_3_status}, 'status': 200},
+        ])
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1,
@@ -3487,8 +3501,8 @@ class TestTriage:
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
         triage._gather_relevant_data_for_first_triage_note.assert_has_calls([
-            call(edge_1_data, events_1),
-            call(edge_2_data, events_2),
+            call(edge_1_full_id, edge_1_status, events_1),
+            call(edge_2_full_id, edge_2_status, events_2),
         ])
         template_renderer.compose_email_object.assert_has_calls([
             call(relevant_data_for_triage_note_1),
@@ -3641,6 +3655,11 @@ class TestTriage:
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
+            {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
+            {'body': {'edge_id': edge_3_full_id, 'edge_info': edge_3_status}, 'status': 200},
+        ])
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1,
@@ -3671,8 +3690,8 @@ class TestTriage:
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
         triage._gather_relevant_data_for_first_triage_note.assert_has_calls([
-            call(edge_1_data, events_1),
-            call(edge_2_data, events_2),
+            call(edge_1_full_id, edge_1_status, events_1),
+            call(edge_2_full_id, edge_2_status, events_2),
         ])
         triage._transform_relevant_data_into_ticket_note.assert_has_calls([
             call(relevant_data_for_triage_note_1),
@@ -3814,6 +3833,11 @@ class TestTriage:
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
+            {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
+            {'body': {'edge_id': edge_3_full_id, 'edge_info': edge_3_status}, 'status': 200},
+        ])
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1,
@@ -3840,8 +3864,8 @@ class TestTriage:
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
         triage._gather_relevant_data_for_first_triage_note.assert_has_calls([
-            call(edge_1_data, events_1),
-            call(edge_2_data, events_2),
+            call(edge_1_full_id, edge_1_status, events_1),
+            call(edge_2_full_id, edge_2_status, events_2),
         ])
         triage._append_note_to_ticket.assert_not_awaited()
         triage._send_triage_info_via_email.assert_not_awaited()
@@ -3969,6 +3993,9 @@ class TestTriage:
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(return_value={
+            'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200
+        })
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, Exception])
         triage._gather_relevant_data_for_first_triage_note = Mock(return_value=relevant_data_for_triage_note_1)
         triage._transform_relevant_data_into_ticket_note = Mock(return_value=ticket_note_1)
@@ -3993,7 +4020,9 @@ class TestTriage:
             call(edge_1_full_id, since=past_moment_for_events_lookup),
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
-        triage._gather_relevant_data_for_first_triage_note.assert_called_once_with(edge_1_data, events_1)
+        triage._gather_relevant_data_for_first_triage_note.assert_called_once_with(
+            edge_1_full_id, edge_1_status, events_1
+        )
         triage._transform_relevant_data_into_ticket_note.assert_called_once_with(relevant_data_for_triage_note_1)
         triage._append_note_to_ticket.assert_awaited_once_with(ticket_1_id, ticket_note_1)
         triage._notify_failing_rpc_request_for_edge_events.assert_awaited_once_with(edge_2_full_id)
@@ -4129,6 +4158,9 @@ class TestTriage:
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(return_value={
+            'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200
+        })
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(return_value=relevant_data_for_triage_note_1)
         triage._transform_relevant_data_into_ticket_note = Mock(return_value=ticket_note_1)
@@ -4153,7 +4185,9 @@ class TestTriage:
             call(edge_1_full_id, since=past_moment_for_events_lookup),
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
-        triage._gather_relevant_data_for_first_triage_note.assert_called_once_with(edge_1_data, events_1)
+        triage._gather_relevant_data_for_first_triage_note.assert_called_once_with(
+            edge_1_full_id, edge_1_status, events_1
+        )
         triage._transform_relevant_data_into_ticket_note.assert_called_once_with(relevant_data_for_triage_note_1)
         triage._append_note_to_ticket.assert_awaited_once_with(ticket_1_id, ticket_note_1)
         triage._notify_http_error_when_requesting_edge_events_from_velocloud.assert_awaited_once_with(
@@ -4285,6 +4319,9 @@ class TestTriage:
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(return_value={
+            'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200
+        })
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(return_value=relevant_data_for_triage_note_1)
         triage._transform_relevant_data_into_ticket_note = Mock(return_value=ticket_note_1)
@@ -4308,7 +4345,9 @@ class TestTriage:
             call(edge_1_full_id, since=past_moment_for_events_lookup),
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
-        triage._gather_relevant_data_for_first_triage_note.assert_called_once_with(edge_2_data, events_2)
+        triage._gather_relevant_data_for_first_triage_note.assert_called_once_with(
+            edge_2_full_id, edge_2_status, events_2
+        )
         triage._transform_relevant_data_into_ticket_note.assert_called_once_with(relevant_data_for_triage_note_1)
         triage._append_note_to_ticket.assert_awaited_once_with(ticket_2_id, ticket_note_1)
 
@@ -4450,6 +4489,10 @@ class TestTriage:
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
+            {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
+        ])
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1, relevant_data_for_triage_note_2
@@ -4479,8 +4522,8 @@ class TestTriage:
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
         triage._gather_relevant_data_for_first_triage_note.assert_has_calls([
-            call(edge_1_data, events_1),
-            call(edge_2_data, events_2),
+            call(edge_1_full_id, edge_1_status, events_1),
+            call(edge_2_full_id, edge_2_status, events_2),
         ])
         triage._transform_relevant_data_into_ticket_note.assert_has_calls([
             call(relevant_data_for_triage_note_1),
@@ -4636,6 +4679,10 @@ class TestTriage:
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
+            {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
+        ])
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1, relevant_data_for_triage_note_2
@@ -4669,8 +4716,8 @@ class TestTriage:
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
         triage._gather_relevant_data_for_first_triage_note.assert_has_calls([
-            call(edge_1_data, events_1),
-            call(edge_2_data, events_2),
+            call(edge_1_full_id, edge_1_status, events_1),
+            call(edge_2_full_id, edge_2_status, events_2),
         ])
         triage._transform_relevant_data_into_ticket_note.assert_has_calls([
             call(relevant_data_for_triage_note_1),
@@ -4819,6 +4866,10 @@ class TestTriage:
         monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
                         monitoring_map_repository)
+        triage._get_edge_status_by_id = CoroutineMock(side_effect=[
+            {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
+            {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
+        ])
         triage._get_last_events_for_edge = CoroutineMock(side_effect=[last_events_response_1, last_events_response_2])
         triage._gather_relevant_data_for_first_triage_note = Mock(side_effect=[
             relevant_data_for_triage_note_1,
@@ -4845,8 +4896,8 @@ class TestTriage:
             call(edge_2_full_id, since=past_moment_for_events_lookup),
         ])
         triage._gather_relevant_data_for_first_triage_note.assert_has_calls([
-            call(edge_1_data, events_1),
-            call(edge_2_data, events_2),
+            call(edge_1_full_id, edge_1_status, events_1),
+            call(edge_2_full_id, edge_2_status, events_2),
         ])
         template_renderer.compose_email_object.assert_has_calls([
             call(relevant_data_for_triage_note_1),
@@ -4873,7 +4924,6 @@ class TestTriage:
                 'client_name': 'METTEL/NEW YORK',
             },
         }
-        edge_data = {'edge_id': edge_full_id, 'edge_status': edge_status}
 
         event_1 = {
             'event': 'LINK_DEAD',
@@ -4977,7 +5027,7 @@ class TestTriage:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(triage_module, 'datetime', new=datetime_mock):
-                relevant_info = triage._gather_relevant_data_for_first_triage_note(edge_data, events)
+                relevant_info = triage._gather_relevant_data_for_first_triage_note(edge_full_id, edge_status, events)
 
         assert relevant_info == OrderedDict({
             'Orchestrator Instance': 'some-host',
@@ -5052,7 +5102,7 @@ class TestTriage:
         datetime_mock.now = Mock(return_value=current_datetime)
         with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
             with patch.object(triage_module, 'datetime', new=datetime_mock):
-                relevant_info = triage._gather_relevant_data_for_first_triage_note(edge_data, events)
+                relevant_info = triage._gather_relevant_data_for_first_triage_note(edge_full_id, edge_status, events)
 
         assert relevant_info == OrderedDict({
             'Orchestrator Instance': 'some-host',
