@@ -111,6 +111,93 @@ class TestServiceOutageMonitor:
             )
 
     @pytest.mark.asyncio
+    async def outage_monitoring_process_no_rebuild_cache_test(self):
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        outage_repository = Mock()
+
+        fake_response = {'body': [], 'status': 200}
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=fake_response)
+        outage_monitor._cache_time = datetime.now() + timedelta(hours=3)
+        outage_monitor._monitoring_map_cache = [
+            {'edge_full_id': {'host': 'mettel.velocloud.net', 'enterprise_id': 6, 'edge_id': 315}}
+        ]
+
+        await outage_monitor._outage_monitoring_process()
+
+        outage_monitor._get_edges_for_monitoring.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_host_with_cache_test(self):
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        outage_repository = Mock()
+
+        fake_response = {
+            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
+            'body': [{'host': 'mettel.velocloud.net', 'enterprise_id': 6, 'edge_id': 315}],
+            'status': 200
+        }
+
+        fake_events_response = {
+            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
+            'body': [],
+            'status': 200
+        }
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=fake_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
+        outage_monitor._monitoring_map_cache = [
+            {
+                'edge_full_id': {'host': 'mettel.velocloud.net', 'enterprise_id': 6, 'edge_id': 315},
+                'bruin_client_info': {
+                    'client_id': 'AAAA', 'client_name': 'TESTNAME'
+                }
+            }
+        ]
+
+        await outage_monitor._outage_monitoring_process()
+
+        outage_monitor._get_edges_for_monitoring.assert_not_awaited()
+        outage_monitor._get_last_events_for_edge.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_edge_exception_test(self):
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+        outage_repository = Mock()
+
+        fake_response = {
+            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
+            'body': [{'host': 'mettel.velocloud.net', 'enterprise_id': 6, 'edge_id': 315}],
+            'status': 200
+        }
+
+        fake_events_response = {
+            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
+            'body': {'edges': {'serialNumber': 'testSN'}},
+            'status': 200
+        }
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=fake_response)
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
+
+        await outage_monitor._outage_monitoring_process()
+
+        outage_monitor._get_edges_for_monitoring.assert_awaited_once()
+        outage_monitor._get_last_events_for_edge.assert_awaited_once()
+
+    @pytest.mark.asyncio
     async def outage_monitoring_process_with_failure_in_rpc_request_for_retrieval_of_edges_under_monitoring_test(self):
         event_bus = Mock()
         scheduler = Mock()
@@ -2079,6 +2166,54 @@ class TestServiceOutageMonitor:
         outage_monitor._create_outage_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def recheck_edge_for_ticket_creation_with_status_200_response_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        bruin_client_info = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
+        edge_status_data = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': 'VC1234567'},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_status_response = {
+            'body': {
+                'edge_id': edge_full_id,
+                'edge_info': edge_status_data,
+            },
+            'status': 200,
+        }
+
+        outage_happened = True
+
+        event_bus = Mock()
+        scheduler = Mock()
+        logger = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(return_value=outage_happened)
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'dev'
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
+        outage_monitor._create_outage_ticket = CoroutineMock()
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await outage_monitor._recheck_edge_for_ticket_creation(edge_full_id, bruin_client_info)
+
+        outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
+        outage_monitor._create_outage_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def recheck_edge_with_outage_detected_and_production_env_and_failing_ticket_creation_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
         edge_identifier = EdgeIdentifier(**edge_full_id)
@@ -2460,6 +2595,98 @@ class TestServiceOutageMonitor:
         await outage_monitor._append_triage_note_to_new_ticket(ticket_id, edge_full_id, edge_status)
 
         outage_monitor._process_tickets_without_triage.assert_awaited_once_with(tickets, edges_data_by_serial)
+
+    @pytest.mark.asyncio
+    async def append_triage_note_to_new_ticket_with_response_status_error_test(self):
+        ticket_id = 12345
+
+        edge_full_id = {'host': 'some-host', 'enterprise_id': 1, 'edge_id': 1}
+
+        serial_number = 'VC1234567'
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 9994,
+                'client_name': 'METTEL/NEW YORK',
+            }
+        }
+
+        tickets = [
+            {
+                'ticket_id': ticket_id,
+                'ticket_detail': {
+                    'detailValue': serial_number,
+                }
+            }
+        ]
+
+        edges_data_by_serial = {
+            serial_number: {
+                'edge_id': edge_full_id,
+                'edge_status': edge_status,
+            }
+        }
+
+        bruin_client_id = 9994
+
+        uuid_ = uuid()
+        config = testconfig
+        slack_message = \
+            (f'Triage appended to ticket {ticket_id} in '
+             f'{config.TRIAGE_CONFIG["environment"].upper()} environment. Details at '
+             f'https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}')
+        slack_msg = {
+            'request_id': uuid_,
+            'body': (
+                f'Outage ticket {ticket_id} reopened. Ticket details at '
+                f'https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}.')
+        }
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            slack_msg
+        ])
+        scheduler = Mock()
+        logger = Mock()
+
+        outage_repository = Mock()
+
+        config.TRIAGE_CONFIG['environment'] = 'production'
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        # outage_monitor._process_tickets_without_triage = CoroutineMock()
+        outage_monitor._get_last_events_for_edge = CoroutineMock(return_value={
+            'status': 200,
+            'body': [{'eventTime': '2020-01-01 00:00:000'}]
+        })
+        outage_monitor._gather_relevant_data_for_first_triage_note = CoroutineMock(return_value=None)
+        outage_monitor._append_note_to_ticket = CoroutineMock(return_value={'status': 400, 'body': 'error'})
+        outage_monitor._transform_relevant_data_into_ticket_note = Mock()
+        # outage_monitor._notify_http_error_when_appending_note_to_ticket = CoroutineMock()
+        outage_monitor._notify_failing_rpc_request_for_appending_ticket_note = CoroutineMock()
+
+        with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+            await outage_monitor._append_triage_note_to_new_ticket(ticket_id, edge_full_id, edge_status)
+
+        # outage_monitor._process_tickets_without_triage.assert_awaited_once_with(tickets, edges_data_by_serial)
+        # outage_monitor._notify_http_error_when_appending_note_to_ticket.assert_called_once()
+        event_bus.rpc_request.assert_has_awaits([
+            call(
+                "notification.slack.request",
+                {
+                    'request_id': uuid_,
+                    'message': (
+                        f'Error while appending note to ticket {ticket_id} in '
+                        f'{config.TRIAGE_CONFIG["environment"].upper()} environment: Error 400 - error')
+                },
+                timeout=10
+            )
+        ])
 
     @pytest.mark.asyncio
     async def reopen_outage_ticket_with_failing_reopening_test(self):
