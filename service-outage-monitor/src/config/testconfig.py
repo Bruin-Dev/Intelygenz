@@ -14,7 +14,7 @@ NATS_CONFIG = {
     }
 }
 
-quarantine_time = 60 * 10
+quarantine_time = 5
 
 MONITOR_MAP_CONFIG = {
     'timezone': 'US/Eastern',
@@ -40,6 +40,7 @@ MONITOR_CONFIG = {
         'outage_monitor': 60 * 3,
         'outage_reporter': 60 * 60,
         'quarantine': quarantine_time,
+        'build_cache': 60 * 60
     },
     'quarantine_key_ttl': quarantine_time + 60 * 5,
     'velocloud_instances_filter': {

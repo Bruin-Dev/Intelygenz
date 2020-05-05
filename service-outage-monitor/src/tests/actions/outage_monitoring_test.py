@@ -111,6 +111,78 @@ class TestServiceOutageMonitor:
             )
 
     @pytest.mark.asyncio
+    async def start_build_cache_job_with_exec_on_start_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+
+        next_run_time = datetime.now()
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=next_run_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
+                await outage_monitor._start_build_cache_job(exec_on_start=True)
+
+        scheduler.add_job.assert_called_once_with(
+            outage_monitor._build_cache, 'interval',
+            seconds=config.MONITOR_CONFIG['jobs_intervals']['build_cache'],
+            next_run_time=next_run_time,
+            replace_existing=False,
+            id='_build_cache',
+        )
+
+    @pytest.mark.asyncio
+    async def start_build_cache_job_with_no_exec_on_start_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+
+        await outage_monitor._start_build_cache_job(exec_on_start=False)
+
+        scheduler.add_job.assert_called_once_with(
+            outage_monitor._build_cache, 'interval',
+            seconds=config.MONITOR_CONFIG['jobs_intervals']['build_cache'],
+            next_run_time=undefined,
+            replace_existing=False,
+            id='_build_cache',
+        )
+
+    @pytest.mark.asyncio
+    async def start_build_cache_job_with_job_id_already_executing_test(self):
+        job_id = 'some-duplicated-id'
+        exception_instance = ConflictingIdError(job_id)
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        outage_repository = Mock()
+
+        scheduler = Mock()
+        scheduler.add_job = Mock(side_effect=exception_instance)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+
+        try:
+            await outage_monitor._start_build_cache_job(exec_on_start=False)
+            # TODO: The test should fail at this point if no exception was raised
+        except ConflictingIdError:
+            scheduler.add_job.assert_called_once_with(
+                outage_monitor._build_cache, 'interval',
+                seconds=config.MONITOR_CONFIG['jobs_intervals']['build_cache'],
+                next_run_time=undefined,
+                replace_existing=False,
+                id='_build_cache',
+            )
+
+    @pytest.mark.asyncio
     async def outage_monitoring_process_no_rebuild_cache_test(self):
         event_bus = Mock()
         scheduler = Mock()
@@ -122,7 +194,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=fake_response)
-        outage_monitor._cache_time = datetime.now() + timedelta(hours=3)
+        outage_monitor._start_build_cache_job = CoroutineMock()
         outage_monitor._monitoring_map_cache = [
             {'edge_full_id': {'host': 'mettel.velocloud.net', 'enterprise_id': 6, 'edge_id': 315}}
         ]
@@ -130,6 +202,7 @@ class TestServiceOutageMonitor:
         await outage_monitor._outage_monitoring_process()
 
         outage_monitor._get_edges_for_monitoring.assert_not_awaited()
+        outage_monitor._start_build_cache_job.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_host_with_cache_test(self):
@@ -154,6 +227,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=fake_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
+        outage_monitor._start_build_cache_job = CoroutineMock()
         outage_monitor._monitoring_map_cache = [
             {
                 'edge_full_id': {'host': 'mettel.velocloud.net', 'enterprise_id': 6, 'edge_id': 315},
@@ -167,6 +241,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor._get_edges_for_monitoring.assert_not_awaited()
         outage_monitor._get_last_events_for_edge.assert_not_awaited()
+        outage_monitor._start_build_cache_job.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_edge_exception_test(self):
@@ -191,11 +266,13 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=fake_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
+        outage_monitor._start_build_cache_job = CoroutineMock()
 
         await outage_monitor._outage_monitoring_process()
 
         outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         outage_monitor._get_last_events_for_edge.assert_awaited_once()
+        outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_failure_in_rpc_request_for_retrieval_of_edges_under_monitoring_test(self):
@@ -207,12 +284,14 @@ class TestServiceOutageMonitor:
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(side_effect=Exception)
+        outage_monitor._start_build_cache_job = CoroutineMock()
 
         with pytest.raises(Exception):
             await outage_monitor._outage_monitoring_process()
 
         outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         logger.error.assert_called_once()
+        outage_monitor._start_build_cache_job.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_retrieval_of_edges_under_monitoring_returning_non_2XX_status_test(self):
@@ -238,6 +317,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock()
         outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._start_build_cache_job = CoroutineMock()
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
             await outage_monitor._outage_monitoring_process()
@@ -255,6 +335,7 @@ class TestServiceOutageMonitor:
         )
         outage_monitor._get_last_events_for_edge.assert_not_awaited()
         outage_monitor._process_edge.assert_not_awaited()
+        outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_no_edges_test(self):
@@ -276,6 +357,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock()
         outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._start_build_cache_job = CoroutineMock()
 
         await outage_monitor._outage_monitoring_process()
 
@@ -283,7 +365,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_last_events_for_edge.assert_not_awaited()
         outage_monitor._process_edge.assert_not_awaited()
         outage_repository.is_there_an_outage.assert_not_called()
-        scheduler.add_job.assert_not_called()
+        outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_edge_list_not_empty_and_edge_in_blacklist_test(self):
@@ -309,6 +391,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock()
         outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._start_build_cache_job = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._outage_monitoring_process()
@@ -316,6 +399,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         outage_monitor._get_last_events_for_edge.assert_not_awaited()
         outage_monitor._process_edge.assert_not_awaited()
+        outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_retrieval_of_last_edge_events_returning_non_2XX_status_test(self):
@@ -344,6 +428,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._start_build_cache_job = CoroutineMock()
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -357,6 +442,7 @@ class TestServiceOutageMonitor:
             since=current_time - timedelta(days=7),
         )
         outage_monitor._process_edge.assert_not_awaited()
+        outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_with_no_edge_events_during_last_week_test(self):
@@ -385,6 +471,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._start_build_cache_job = CoroutineMock()
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -398,6 +485,7 @@ class TestServiceOutageMonitor:
             since=current_time - timedelta(days=7),
         )
         outage_monitor._process_edge.assert_not_awaited()
+        outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def outage_monitoring_process_ok_test(self):
@@ -439,6 +527,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
         outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._start_build_cache_job = CoroutineMock()
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -452,6 +541,7 @@ class TestServiceOutageMonitor:
             since=current_time - timedelta(days=7),
         )
         outage_monitor._process_edge.assert_awaited_with(edge_full_id)
+        outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def process_edge_having_a_null_serial_test(self):

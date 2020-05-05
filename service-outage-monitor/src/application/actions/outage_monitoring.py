@@ -35,7 +35,6 @@ class OutageMonitor:
         self._temp_monitoring_map = []
         self._monitoring_map_cache = []
         self.__reset_instance_state()
-        self._cache_time = datetime.now() + timedelta(hours=4)
 
     def __reset_instance_state(self):
         self._autoresolve_serials_whitelist = set()
@@ -57,16 +56,32 @@ class OutageMonitor:
         except ConflictingIdError as conflict:
             self._logger.info(f'Skipping start of Service Outage Monitoring job. Reason: {conflict}')
 
+    async def _start_build_cache_job(self, exec_on_start):
+        self._logger.info('Scheduling build_cache job...')
+        next_run_time = undefined
+
+        if exec_on_start:
+            tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+            next_run_time = datetime.now(tz)
+            self._logger.info('Build_cache job is going to be executed immediately')
+
+        try:
+            self._scheduler.add_job(self._build_cache, 'interval',
+                                    seconds=self._config.MONITOR_CONFIG['jobs_intervals']['build_cache'],
+                                    next_run_time=next_run_time, replace_existing=False,
+                                    id='_build_cache')
+        except ConflictingIdError as conflict:
+            self._logger.info(f'Skipping start of build_cache job. Reason: {conflict}')
+
     async def _outage_monitoring_process(self):
 
         total_start_time = time.time()
 
-        if len(self._monitoring_map_cache) == 0 or datetime.now() > self._cache_time:
+        if len(self._monitoring_map_cache) == 0:
+            self._logger.info(f"Starting initial build of cache and scheduling job to refresh cache every "
+                              f"{self._config.MONITOR_CONFIG['jobs_intervals']['build_cache']/3600} hours")
             await self._build_cache()
-
-            # update cache time
-            self._cache_time = datetime.now() + timedelta(hours=4)
-            self._logger.info("Updated time cache for another 4 hours")
+            await self._start_build_cache_job(exec_on_start=False)
 
         self.__reset_instance_state()
 
