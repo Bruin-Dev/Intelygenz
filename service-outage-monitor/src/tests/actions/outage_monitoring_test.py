@@ -681,10 +681,120 @@ class TestServiceOutageMonitor:
         outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
         outage_monitor._get_management_status.assert_awaited_once_with(edge_data_with_bruin_info)
         outage_monitor._is_management_status_active.assert_called_once_with(management_status_response_body)
-        outage_repository._is_there_an_outage.assert_not_called()
 
     @pytest.mark.asyncio
-    async def process_edge_and_no_outages_detected_test(self):
+    async def process_edge_with_management_status_active_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+
+        edge_serial = 'VC1234567'
+        edge_data = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        edge_status_response = {
+            'body': {
+                'edge_id': edge_full_id,
+                'edge_info': edge_data,
+            },
+            'status': 200,
+        }
+
+        bruin_client_info_response_body = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+        bruin_client_info_response = {
+            "body": bruin_client_info_response_body,
+            'status': 200,
+        }
+
+        management_status_response_body = 'Fake status'
+        management_status_response = {
+            "body": management_status_response_body,
+            "status": 200,
+        }
+
+        edge_data_with_bruin_info = {
+            **edge_data,
+            'bruin_client_info': bruin_client_info_response_body,
+        }
+
+        expected_outcome = {
+                            'edge_full_id': edge_full_id,
+                            'edge_data': edge_data,
+                            'bruin_client_info': bruin_client_info_response_body
+        }
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        scheduler = Mock()
+        outage_repository = Mock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
+        outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
+        outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
+        outage_monitor._is_management_status_active = Mock(return_value=True)
+
+        await outage_monitor._process_edge(edge_full_id)
+
+        outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
+        outage_monitor._get_management_status.assert_awaited_once_with(edge_data_with_bruin_info)
+        outage_monitor._is_management_status_active.assert_called_once_with(management_status_response_body)
+        assert expected_outcome in outage_monitor._temp_monitoring_map
+
+    @pytest.mark.asyncio
+    async def process_edge_with_cache_retrieval_of_edge_status_returning_non_2XX_status_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+
+        bruin_client_info_response_body = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+
+        edge_status_response_body = 'Got internal error from Velocloud'
+        edge_status_response_status = 500
+        edge_status_response = {
+            'body': edge_status_response_body,
+            'status': edge_status_response_status,
+        }
+        uuid_ = uuid()
+        message = (
+            f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
+            f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
+        )
+        slack_message = {
+            'request_id': uuid_,
+            'message': message
+        }
+
+        logger = Mock()
+        config = testconfig
+        scheduler = Mock()
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(return_value=False)
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
+        with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
+
+        outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
+        event_bus.rpc_request.assert_awaited_with("notification.slack.request", slack_message, timeout=30)
+        outage_repository.is_there_an_outage.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def process_edge_with_cache_and_no_outages_detected_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_status_data = {
@@ -707,15 +817,6 @@ class TestServiceOutageMonitor:
             'client_id': 9994,
             'client_name': 'METTEL/NEW YORK',
         }
-        bruin_client_info_response = {
-            "body": bruin_client_info_response_body,
-            'status': 200,
-        }
-
-        management_status_response = {
-            "body": "Active – Gold Monitoring",
-            "status": 200,
-        }
 
         edge_data_with_bruin_info = {
             **edge_status_data,
@@ -733,11 +834,8 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
-        outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
-        outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
-        outage_monitor._is_management_status_active = Mock(return_value=True)
 
-        await outage_monitor._process_edge(edge_full_id)
+        await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
@@ -745,7 +843,7 @@ class TestServiceOutageMonitor:
                                                                                  edge_data_with_bruin_info)
 
     @pytest.mark.asyncio
-    async def process_with_edge_with_outages_detected_and_recheck_job_not_scheduled_test(self):
+    async def process_with_edge_with_cache_outages_detected_and_recheck_job_not_scheduled_test(self):
         job_id = 'some-duplicated-id'
         exception_instance = ConflictingIdError(job_id)
 
@@ -771,15 +869,6 @@ class TestServiceOutageMonitor:
             'client_id': 9994,
             'client_name': 'METTEL/NEW YORK',
         }
-        bruin_client_info_response = {
-            "body": bruin_client_info_response_body,
-            'status': 200,
-        }
-
-        management_status_response = {
-            "body": "Active – Gold Monitoring",
-            "status": 200,
-        }
 
         is_there_an_outage = True
 
@@ -796,12 +885,9 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
-        outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
-        outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
-        outage_monitor._is_management_status_active = Mock()
 
         try:
-            await outage_monitor._process_edge(edge_full_id)
+            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
             # TODO: The test should fail at this point if no exception was raised
         except ConflictingIdError:
             scheduler.add_job.assert_called_once_with(
@@ -816,7 +902,7 @@ class TestServiceOutageMonitor:
         outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
 
     @pytest.mark.asyncio
-    async def process_edge_with_outages_detected_and_recheck_job_scheduled_test(self):
+    async def process_edge_with_cache_outages_detected_and_recheck_job_scheduled_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_status_data = {
@@ -839,15 +925,6 @@ class TestServiceOutageMonitor:
             'client_id': 9994,
             'client_name': 'METTEL/NEW YORK',
         }
-        bruin_client_info_response = {
-            "body": bruin_client_info_response_body,
-            'status': 200,
-        }
-
-        management_status_response = {
-            "body": "Active – Gold Monitoring",
-            "status": 200,
-        }
 
         event_bus = Mock()
         scheduler = Mock()
@@ -860,15 +937,12 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
-        outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
-        outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
-        outage_monitor._is_management_status_active = Mock(return_value=True)
 
         datetime_mock = Mock()
         current_time = datetime.now()
         datetime_mock.now = Mock(return_value=current_time)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            await outage_monitor._process_edge(edge_full_id)
+            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
@@ -885,7 +959,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_edge_side_effects_over_autoresolve_whitelist_with_autoresolve_filter_test(self):
+    async def process_edge_with_cache_side_effects_over_autoresolve_whitelist_with_autoresolve_filter_test(self):
         edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_serial = 'VC1234567'
@@ -909,15 +983,6 @@ class TestServiceOutageMonitor:
             'client_id': 9994,
             'client_name': 'METTEL/NEW YORK',
         }
-        bruin_client_info_response = {
-            "body": bruin_client_info_response_body,
-            'status': 200,
-        }
-
-        management_status_response = {
-            "body": "Active – Gold Monitoring",
-            "status": 200,
-        }
 
         event_bus = Mock()
         scheduler = Mock()
@@ -930,9 +995,6 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
-        outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
-        outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
-        outage_monitor._is_management_status_active = Mock(return_value=True)
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
@@ -941,12 +1003,12 @@ class TestServiceOutageMonitor:
             "metvco02.mettel.net": [],
         }
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._process_edge(edge_full_id)
+            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
 
         assert outage_monitor._autoresolve_serials_whitelist == {edge_serial}
 
     @pytest.mark.asyncio
-    async def process_edge_side_effects_over_autoresolve_whitelist_without_autoresolve_filter_test(self):
+    async def process_edge_with_cache_side_effects_over_autoresolve_whitelist_without_autoresolve_filter_test(self):
         edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_serial = 'VC1234567'
@@ -970,15 +1032,6 @@ class TestServiceOutageMonitor:
             'client_id': 9994,
             'client_name': 'METTEL/NEW YORK',
         }
-        bruin_client_info_response = {
-            "body": bruin_client_info_response_body,
-            'status': 200,
-        }
-
-        management_status_response = {
-            "body": "Active – Gold Monitoring",
-            "status": 200,
-        }
 
         event_bus = Mock()
         scheduler = Mock()
@@ -991,15 +1044,12 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
-        outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
-        outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
-        outage_monitor._is_management_status_active = Mock(return_value=True)
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['velocloud_instances_filter'] = {}
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._process_edge(edge_full_id)
+            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
 
         assert outage_monitor._autoresolve_serials_whitelist == {edge_serial}
 

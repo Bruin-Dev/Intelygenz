@@ -6,13 +6,13 @@ service-outage-monitor-linter:
     MODULE: service-outage-monitor
   extends: .lint_module
 
-## =================================================
-## Unit tests jobs for service-outage-monitor module
-## =================================================
-#service-outage-monitor-test:
-# variables:
-#   MODULE: service-outage-monitor
-# extends: .unittest_module_python
+# =================================================
+# Unit tests jobs for service-outage-monitor module
+# =================================================
+service-outage-monitor-test:
+ variables:
+   MODULE: service-outage-monitor
+ extends: .unittest_module_python
 
 # ====================================================
 # Images builds jobs for service-outage-monitor module
