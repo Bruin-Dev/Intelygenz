@@ -78,6 +78,10 @@ class OutageMonitor:
     async def _start_edge_after_error_process(self, edge_full_id, bruin_client_info, run_date: datetime = None):
         self._logger.info('Scheduling process_edge_after_error job...')
         edge_identifier = EdgeIdentifier(**edge_full_id)
+        if run_date is None:
+            tz = timezone(self._config.MONITOR_CONFIG['timezone'])
+            current_datetime = datetime.now(tz)
+            run_date = current_datetime + timedelta(seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
         try:
             params = {
                 'edge_full_id': edge_full_id,
@@ -447,7 +451,11 @@ class OutageMonitor:
             self._logger.error(f"Error process_edge_after_error ({edge_full_id, bruin_client_info}): {ex}")
             slack_message = f"Maximum retries happened while trying to process edge {edge_full_id} "
             # f"with serial {serial_number}"
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+            slack_message_dict = {
+                'request_id': uuid(),
+                'message': slack_message
+            }
+            await self._event_bus.rpc_request("notification.slack.request", slack_message_dict, timeout=30)
 
     async def _run_ticket_autoresolve_for_edge(self, edge_full_id, edge_status):
         edge_identifier = EdgeIdentifier(**edge_full_id)

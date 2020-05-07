@@ -51,7 +51,7 @@ MONITOR_CONFIG = {
     'semaphore': 1,
     'process_semaphore': 1,
     'events_semaphore': 1,
-    'process_errors_semaphore': 10
+    'process_errors_semaphore': 1
 }
 
 LOG_CONFIG = {
