@@ -75,6 +75,22 @@ class OutageMonitor:
         except ConflictingIdError as conflict:
             self._logger.info(f'Skipping start of build_cache job. Reason: {conflict}')
 
+    async def _start_edge_after_error_process(self, edge_full_id, bruin_client_info, run_date: datetime = None):
+        self._logger.info('Scheduling process_edge_after_error job...')
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+        try:
+            params = {
+                'edge_full_id': edge_full_id,
+                'bruin_client_info': bruin_client_info
+            }
+            self._scheduler.add_job(self._process_edge_after_error, 'date', run_date=run_date,
+                                    replace_existing=False, misfire_grace_time=9999,
+                                    id=f'_error_process_{json.dumps(edge_full_id)}',
+                                    kwargs=params)
+        except ConflictingIdError as conflict:
+            self._logger.error(f'Job: process_edge_after_error for edge "{edge_identifier}" '
+                               f'will not be scheduled. Reason: {conflict}')
+
     async def _outage_monitoring_process(self):
 
         total_start_time = time.time()
@@ -104,7 +120,7 @@ class OutageMonitor:
         await asyncio.gather(*process_tasks, return_exceptions=True)
         stop = perf_counter()
 
-        self._logger.info(f"[PROCESS_HOST_WITH_CACHE] Elapsed time processing host with cache"
+        self._logger.info(f"[PROCESS_HOSTS_WITH_CACHE] Elapsed time processing hosts with cache"
                           f": {(stop - start)/60}")
 
         self._logger.info(f'Outage monitoring process finished! Elapsed time:'
@@ -170,7 +186,7 @@ class OutageMonitor:
         await asyncio.gather(*tasks, return_exceptions=True)
         stop = perf_counter()
 
-        self._logger.info(f"[PROCESS_EDGE] Elapsed time processing edges: {(stop - start)/60}")
+        self._logger.info(f"[PROCESS_EDGES] Elapsed time processing edges: {(stop - start)/60}")
         self._monitoring_map_cache = self._temp_monitoring_map
         self._temp_monitoring_map = []
         cache_stop = perf_counter()
@@ -186,7 +202,7 @@ class OutageMonitor:
         await asyncio.gather(*process_tasks, return_exceptions=True)
         stop = perf_counter()
 
-        self._logger.info(f"[PROCESS_EDGE_WITH_CACHE] Elapsed time processing host - {host} in minutes: "
+        self._logger.info(f"[PROCESS_EDGES_WITH_CACHE] Elapsed time processing host - {host} edges in minutes: "
                           f"{(stop - start)/60}")
 
     async def _process_edge_with_cache(self, edge_full_id, bruin_client_info):
@@ -255,32 +271,7 @@ class OutageMonitor:
                     await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
             except Exception as ex:
                 self._logger.error(f"Error processing_edge_with_cache: {ex}")
-                try:
-                    params = {
-                        'edge_full_id': edge_full_id,
-                        'bruin_client_info': bruin_client_info
-                    }
-                    # Try to remove current scheduled child jobs
-                    try:
-                        self._scheduler.remove_job(f'_ticket_creation_recheck_{json.dumps(edge_full_id)}')
-                    except JobLookupError as je:
-                        self._logger.error(f"Error removing child job "
-                                           f"_ticket_creation_recheck_{json.dumps(edge_full_id)}: {je}")
-                    # Try to remove current scheduled job
-                    try:
-                        self._scheduler.remove_job(f'_error_process_{json.dumps(edge_full_id)}')
-                    except JobLookupError as je:
-                        self._logger.error(f"Error removing job _error_process_{json.dumps(edge_full_id)}: {je}")
-                    tz = timezone(self._config.MONITOR_CONFIG['timezone'])
-                    current_datetime = datetime.now(tz)
-                    run_date = current_datetime + timedelta(
-                        seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
-                    self._scheduler.add_job(self._process_edge_after_error, 'date', run_date=run_date,
-                                            replace_existing=True, misfire_grace_time=9999,
-                                            id=f'_error_process_{json.dumps(edge_full_id)}',
-                                            kwargs=params)
-                except ConflictingIdError:
-                    self._logger.error("Job: process_edge_after_error couldn't be added alreay existing")
+                await self._start_edge_after_error_process(edge_full_id, bruin_client_info)
 
     async def _process_edge(self, edge_full_id):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_CONFIG['multiplier'],
@@ -384,7 +375,9 @@ class OutageMonitor:
             self._logger.error(f"Error: {edge_full_id} raised a {ex} exception")
 
     async def _process_edge_after_error(self, edge_full_id, bruin_client_info):
-        @retry(stop=stop_after_attempt(self._config.MONITOR_CONFIG['stop_after_attempt']))
+        @retry(wait=wait_exponential(multiplier=self._config.MONITOR_CONFIG['multiplier'],
+                                     min=self._config.MONITOR_CONFIG['min']),
+               stop=stop_after_delay(self._config.MONITOR_CONFIG['stop_delay']))
         async def _process_edge_after_error():
             async with self._process_errors_semaphore:
                 edge_identifier = EdgeIdentifier(**edge_full_id)
@@ -455,7 +448,6 @@ class OutageMonitor:
             slack_message = f"Maximum retries happened while trying to process edge {edge_full_id} "
             # f"with serial {serial_number}"
             await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
-            return
 
     async def _run_ticket_autoresolve_for_edge(self, edge_full_id, edge_status):
         edge_identifier = EdgeIdentifier(**edge_full_id)
