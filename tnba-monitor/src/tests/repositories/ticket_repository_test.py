@@ -166,25 +166,22 @@ class TestTicketRepository:
                 result = ticket_repository.is_tnba_note_old_enough(ticket_note)
                 assert result is False
 
-    def build_tnba_note_from_predictions_test(self):
-        predictions = [
-            {
-                'name': 'Repair Completed',
-                'probability': 0.9484384655952454
-            },
-            {
-                'name': 'Holmdel NOC Investigate',
-                'probability': 0.1234567890123456
-            },
-        ]
+    def build_tnba_note_from_prediction_test(self):
+        prediction = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
 
-        result = TicketRepository.build_tnba_note_from_predictions(predictions)
+        config = testconfig
+        utils_repository = UtilsRepository()
+
+        ticket_repository = TicketRepository(config, utils_repository)
+
+        result = ticket_repository.build_tnba_note_from_prediction(prediction)
 
         assert result == os.linesep.join([
             '#*Automation Engine*#',
             'TNBA',
             '',
-            'The following are the next best actions for this ticket with corresponding confidence levels:',
-            '1) Repair Completed | Confidence: 94.84384655952454 %',
-            '2) Holmdel NOC Investigate | Confidence: 12.34567890123456 %',
+            f'The ticket next best action should be Holmdel NOC Investigate. Confidence: 12.3456 %'
         ])

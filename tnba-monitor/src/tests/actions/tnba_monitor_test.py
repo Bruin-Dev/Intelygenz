@@ -1550,7 +1550,7 @@ class TestTNBAMonitor:
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=None)
-        ticket_repository.build_tnba_note_from_predictions = Mock()
+        ticket_repository.build_tnba_note_from_prediction = Mock()
 
         bruin_repository = Mock()
         bruin_repository.append_note_to_ticket = CoroutineMock()
@@ -1565,7 +1565,7 @@ class TestTNBAMonitor:
         await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
-        ticket_repository.build_tnba_note_from_predictions.assert_not_called()
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -1654,7 +1654,7 @@ class TestTNBAMonitor:
         await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
-        ticket_repository.build_tnba_note_from_predictions.assert_not_called()
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -1686,15 +1686,18 @@ class TestTNBAMonitor:
                 },
             ]
         }
+
+        predictions_1_item_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        predictions_1_item_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
         predictions_1 = [
-            {
-                'name': 'Repair Completed',
-                'probability': 0.9484384655952454
-            },
-            {
-                'name': 'Holmdel NOC Investigate',
-                'probability': 0.1234567890123456
-            },
+            predictions_1_item_1,
+            predictions_1_item_2,
         ]
         predictions_2 = [
             {
@@ -1733,10 +1736,11 @@ class TestTNBAMonitor:
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=None)
-        ticket_repository.build_tnba_note_from_predictions = Mock(return_value=tnba_note)
+        ticket_repository.build_tnba_note_from_prediction = Mock(return_value=tnba_note)
 
         prediction_repository = Mock()
         prediction_repository.find_prediction_object_by_serial = Mock(return_value=prediction_object_1)
+        prediction_repository.get_best_prediction = Mock(return_value=predictions_1_item_1)
 
         bruin_repository = Mock()
         bruin_repository.append_note_to_ticket = CoroutineMock()
@@ -1751,7 +1755,7 @@ class TestTNBAMonitor:
         await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
-        ticket_repository.build_tnba_note_from_predictions.assert_called_once_with(predictions_1)
+        ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(predictions_1_item_1)
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, tnba_note, is_private=True)
 
     @pytest.mark.asyncio
@@ -1798,7 +1802,7 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
         ticket_repository.is_tnba_note_old_enough = Mock(return_value=False)
-        ticket_repository.build_tnba_note_from_predictions = Mock()
+        ticket_repository.build_tnba_note_from_prediction = Mock()
 
         bruin_repository = Mock()
         bruin_repository.append_note_to_ticket = CoroutineMock()
@@ -1813,7 +1817,7 @@ class TestTNBAMonitor:
         await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_not_awaited()
-        ticket_repository.build_tnba_note_from_predictions.assert_not_called()
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -1864,7 +1868,7 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
         ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-        ticket_repository.build_tnba_note_from_predictions = Mock()
+        ticket_repository.build_tnba_note_from_prediction = Mock()
 
         bruin_repository = Mock()
         bruin_repository.append_note_to_ticket = CoroutineMock()
@@ -1879,7 +1883,7 @@ class TestTNBAMonitor:
         await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
-        ticket_repository.build_tnba_note_from_predictions.assert_not_called()
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -1955,7 +1959,7 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
         ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-        ticket_repository.build_tnba_note_from_predictions = Mock()
+        ticket_repository.build_tnba_note_from_prediction = Mock()
 
         prediction_repository = Mock()
         prediction_repository.find_prediction_object_by_serial = Mock(return_value=None)
@@ -1973,7 +1977,7 @@ class TestTNBAMonitor:
         await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
-        ticket_repository.build_tnba_note_from_predictions.assert_not_called()
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -2054,11 +2058,11 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
         ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-        ticket_repository.build_tnba_note_from_predictions = Mock()
+        ticket_repository.build_tnba_note_from_prediction = Mock()
 
         prediction_repository = Mock()
         prediction_repository.find_prediction_object_by_serial = Mock(return_value=prediction_object_1)
-        prediction_repository.are_predictions_different_from_predictions_in_tnba_note = Mock(return_value=False)
+        prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(return_value=False)
 
         bruin_repository = Mock()
         bruin_repository.append_note_to_ticket = CoroutineMock()
@@ -2073,7 +2077,7 @@ class TestTNBAMonitor:
         await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
-        ticket_repository.build_tnba_note_from_predictions.assert_not_called()
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_note_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -2107,15 +2111,18 @@ class TestTNBAMonitor:
                 ticket_note_3,
             ]
         }
+
+        predictions_1_item_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        predictions_1_item_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
         predictions_1 = [
-            {
-                'name': 'Repair Completed',
-                'probability': 0.9484384655952454
-            },
-            {
-                'name': 'Holmdel NOC Investigate',
-                'probability': 0.1234567890123456
-            },
+            predictions_1_item_1,
+            predictions_1_item_2,
         ]
         predictions_2 = [
             {
@@ -2155,11 +2162,12 @@ class TestTNBAMonitor:
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
         ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
-        ticket_repository.build_tnba_note_from_predictions = Mock(return_value=tnba_note)
+        ticket_repository.build_tnba_note_from_prediction = Mock(return_value=tnba_note)
 
         prediction_repository = Mock()
         prediction_repository.find_prediction_object_by_serial = Mock(return_value=prediction_object_1)
-        prediction_repository.are_predictions_different_from_predictions_in_tnba_note = Mock(return_value=True)
+        prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(return_value=True)
+        prediction_repository.get_best_prediction = Mock(return_value=predictions_1_item_1)
 
         bruin_repository = Mock()
         bruin_repository.append_note_to_ticket = CoroutineMock()
@@ -2174,5 +2182,5 @@ class TestTNBAMonitor:
         await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
-        ticket_repository.build_tnba_note_from_predictions.assert_called_once_with(predictions_1)
+        ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(predictions_1_item_1)
         bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, tnba_note, is_private=True)

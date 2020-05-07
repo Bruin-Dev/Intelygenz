@@ -186,6 +186,7 @@ class TNBAMonitor:
                 f"Building TNBA note from predictions found for serial {serial_number} and ticket {ticket_id}..."
             )
             predictions: list = prediction_object_for_serial['predictions']
+            best_prediction: dict = self._prediction_repository.get_best_prediction(predictions)
         else:
             self._logger.info(f"TNBA note found for ticket {ticket_id}")
             if not self._ticket_repository.is_tnba_note_old_enough(newest_tnba_note):
@@ -206,8 +207,9 @@ class TNBAMonitor:
                 return
 
             predictions: list = prediction_object_for_serial['predictions']
-            if not self._prediction_repository.are_predictions_different_from_predictions_in_tnba_note(
-                    newest_tnba_note, predictions):
+            best_prediction: dict = self._prediction_repository.get_best_prediction(predictions)
+            if not self._prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note(
+                    newest_tnba_note, best_prediction):
                 self._logger.info(
                     f"Predictions for serial {serial_number} and ticket {ticket_id} didn't change since the last TNBA"
                     f"note was appended. Skipping ticket..."
@@ -217,7 +219,7 @@ class TNBAMonitor:
         self._logger.info(
             f"Building TNBA note from predictions found for serial {serial_number} and ticket {ticket_id}..."
         )
-        tnba_note: str = self._ticket_repository.build_tnba_note_from_predictions(predictions)
+        tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
 
         self._logger.info(f'Appending TNBA note to ticket {ticket_id}...')
         await self._bruin_repository.append_note_to_ticket(ticket_id, tnba_note, is_private=True)

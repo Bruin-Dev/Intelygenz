@@ -6,8 +6,8 @@ from typing import List
 
 
 TNBA_NOTE_PREDICTION_LINE_REGEX = re.compile(
-    r'^\d{1,2}\) (?P<prediction_name>\w+(\s\w+)*) \| '
-    r'Confidence: (?P<prediction_probability>(100\.0)|(\d|[1-9]\d)\.\d{1,14}) %$'
+    r'^The ticket next best action should be (?P<prediction_name>\w+(\s\w+)*)\. '
+    r'Confidence: (?P<prediction_probability>(100\.0)|(\d|[1-9]\d)\.\d{1,4}) %$'
 )
 
 
@@ -23,21 +23,37 @@ class PredictionRepository:
         prediction_lookup_fn = partial(self.__prediction_belongs_to_serial, serial_number=serial_number)
         return self._utils_repository.get_first_element_matching(predictions, prediction_lookup_fn)
 
-    @staticmethod
-    def are_predictions_different_from_predictions_in_tnba_note(tnba_note: dict, predictions: List[dict]) -> bool:
-        tnba_note_predictions: List[dict] = []
+    def get_best_prediction(self, predictions: List[dict]) -> dict:
+        highest_probability = max(prediction['probability'] for prediction in predictions)
 
+        return self._utils_repository.get_first_element_matching(
+            predictions,
+            lambda action: action['probability'] == highest_probability
+        )
+
+    def is_best_prediction_different_from_prediction_in_tnba_note(self, tnba_note: dict, best_prediction: dict) -> bool:
         tnba_note_lines = tnba_note['noteValue'].split(os.linesep)
-        for line in tnba_note_lines:
-            prediction_match = TNBA_NOTE_PREDICTION_LINE_REGEX.match(line)
-            if prediction_match:
-                prediction_name = prediction_match.group('prediction_name')
-                prediction_probability = round(float(prediction_match.group('prediction_probability')) / 100, 16)
+        tnba_note_prediction_line = self._utils_repository.get_first_element_matching(
+            tnba_note_lines,
+            lambda line: TNBA_NOTE_PREDICTION_LINE_REGEX.match(line) is not None,
+        )
 
-                prediction = {
-                    'name': prediction_name,
-                    'probability': prediction_probability,
-                }
-                tnba_note_predictions.append(prediction)
+        if not tnba_note_prediction_line:
+            # If no prediction with the expected format is found in the note, let's consider the prediction "changed"
+            return True
 
-        return not (predictions == tnba_note_predictions)
+        prediction_match = TNBA_NOTE_PREDICTION_LINE_REGEX.match(tnba_note_prediction_line)
+        tnba_note_prediction = {
+            'name': prediction_match.group('prediction_name'),
+            'probability': float(prediction_match.group('prediction_probability')),
+        }
+
+        # Since the prediction within the TNBA note is a percentage, let's turn the probability of the best prediction
+        # into a percentage with a fixed amount of decimals
+        best_prediction_copy = best_prediction.copy()
+        best_prediction_probability = best_prediction_copy['probability'] * 100
+        best_prediction_copy['probability'] = self._utils_repository.truncate_float(
+            best_prediction_probability, decimals=4
+        )
+
+        return not (tnba_note_prediction == best_prediction_copy)
