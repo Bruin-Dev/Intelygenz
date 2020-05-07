@@ -43,6 +43,7 @@ MONITOR_CONFIG = {
     'multiplier': 5,
     'min': 5,
     'stop_delay': 300,
+    'stop_after_attempt': 2,
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
@@ -62,7 +63,8 @@ MONITOR_CONFIG = {
     'autoresolve_down_events_seconds': 45 * 60,
     'semaphore': 10,
     'process_semaphore': 10,
-    'events_semaphore': 5
+    'events_semaphore': 5,
+    'process_errors_semaphore': 10
 }
 LOG_CONFIG = {
     'name': 'service-outage-monitor',
