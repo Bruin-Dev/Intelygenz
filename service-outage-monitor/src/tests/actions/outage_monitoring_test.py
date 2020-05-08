@@ -211,12 +211,10 @@ class TestServiceOutageMonitor:
             with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
                 await outage_monitor._start_edge_after_error_process(edge_full_id, bruin_client_info_response_body)
 
-        job_run_date = next_run_time + timedelta(seconds=config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
-
         scheduler.add_job.assert_called_once_with(
                                     outage_monitor._process_edge_after_error,
                                     'date',
-                                    run_date=job_run_date,
+                                    run_date=next_run_time,
                                     replace_existing=False, misfire_grace_time=9999,
                                     id=f'_error_process_{json.dumps(edge_full_id)}',
                                     kwargs=params)
@@ -1725,7 +1723,8 @@ class TestServiceOutageMonitor:
 
         expected_slack_message = {
             'request_id': uuid_,
-            'message': f"Maximum retries happened while trying to process edge {edge_full_id} "
+            'message': f"Maximum retries happened while trying to process edge {edge_full_id} with "
+                       f"serial {edge_serial}"
         }
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -1740,6 +1739,61 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=Exception)
         outage_monitor._start_edge_after_error_process = CoroutineMock()
+        outage_monitor._monitoring_map_cache = [
+            {'edge_full_id': edge_full_id,
+             'edge_data': edge_status_data}
+        ]
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['velocloud_instances_filter'] = {}
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+                await outage_monitor._process_edge_after_error(edge_full_id, bruin_client_info_response_body)
+
+        event_bus.rpc_request.assert_awaited_once_with("notification.slack.request", expected_slack_message, timeout=30)
+
+    @pytest.mark.asyncio
+    async def process_edge_after_error_exception_no_serial_test(self):
+        edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+
+        edge_serial = 'VC1234567'
+        edge_status_data = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+        }
+        uuid_ = uuid()
+
+        bruin_client_info_response_body = {
+            'client_id': 9994,
+            'client_name': 'METTEL/NEW YORK',
+        }
+
+        expected_slack_message = {
+            'request_id': uuid_,
+            'message': f"Maximum retries happened while trying to process edge {edge_full_id} with "
+                       f"serial {None}"
+        }
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+        scheduler = Mock()
+        logger = Mock()
+        config = testconfig
+
+        outage_repository = Mock()
+        outage_repository.is_there_an_outage = Mock(return_value=True)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
+        outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=Exception)
+        outage_monitor._start_edge_after_error_process = CoroutineMock()
+        outage_monitor._monitoring_map_cache = [
+            {'edge_full_id': {'host': 'mettel.velocloud.net', 'enterprise_id': 6, 'edge_id': 315}}
+        ]
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()

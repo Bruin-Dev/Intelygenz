@@ -2,22 +2,22 @@ import json
 import os
 import re
 import time
-from time import perf_counter
 from collections import OrderedDict
+from collections import defaultdict
 from datetime import datetime
 from datetime import timedelta
+from time import perf_counter
 from typing import Callable
 
 import asyncio
-from apscheduler.jobstores.base import ConflictingIdError, JobLookupError
+from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse
 from igz.packages.repositories.edge_repository import EdgeIdentifier
 from pytz import timezone
 from pytz import utc
 from shortuuid import uuid
-from tenacity import retry, wait_exponential, stop_after_delay, stop_after_attempt
-from collections import defaultdict
+from tenacity import retry, wait_exponential, stop_after_delay
 
 empty_str = str()
 
@@ -80,8 +80,7 @@ class OutageMonitor:
         edge_identifier = EdgeIdentifier(**edge_full_id)
         if run_date is None:
             tz = timezone(self._config.MONITOR_CONFIG['timezone'])
-            current_datetime = datetime.now(tz)
-            run_date = current_datetime + timedelta(seconds=self._config.MONITOR_CONFIG['jobs_intervals']['quarantine'])
+            run_date = datetime.now(tz)
         try:
             params = {
                 'edge_full_id': edge_full_id,
@@ -381,7 +380,8 @@ class OutageMonitor:
     async def _process_edge_after_error(self, edge_full_id, bruin_client_info):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_CONFIG['multiplier'],
                                      min=self._config.MONITOR_CONFIG['min']),
-               stop=stop_after_delay(self._config.MONITOR_CONFIG['stop_delay']))
+               stop=stop_after_delay(self._config.MONITOR_CONFIG['stop_delay']),
+               reraise=True)
         async def _process_edge_after_error():
             async with self._process_errors_semaphore:
                 edge_identifier = EdgeIdentifier(**edge_full_id)
@@ -448,9 +448,13 @@ class OutageMonitor:
         try:
             await _process_edge_after_error()
         except Exception as ex:
+            serial_number = None
+            for edge in self._monitoring_map_cache:
+                if edge['edge_full_id'] == edge_full_id:
+                    serial_number = edge['edge_data']['edges'].get('serialNumber')
             self._logger.error(f"Error process_edge_after_error ({edge_full_id, bruin_client_info}): {ex}")
-            slack_message = f"Maximum retries happened while trying to process edge {edge_full_id} "
-            # f"with serial {serial_number}"
+            slack_message = f"Maximum retries happened while trying to process edge {edge_full_id} with " \
+                            f"serial {serial_number}"
             slack_message_dict = {
                 'request_id': uuid(),
                 'message': slack_message
