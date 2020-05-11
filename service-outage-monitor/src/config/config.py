@@ -20,7 +20,6 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
-
 quarantine_time = 5
 
 MONITOR_MAP_CONFIG = {
@@ -54,7 +53,9 @@ MONITOR_CONFIG = {
         'build_cache': 60 * 240
     },
     'quarantine_key_ttl': quarantine_time + 60 * 5,
-    'velocloud_instances_filter': {},
+    'velocloud_instances_filter': {
+        os.environ["VELOCLOUD_HOST"]: [],
+    },
     'blacklisted_edges': [
         # Federal edge that is inside a non-federal Velocloud instance
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
@@ -86,6 +87,7 @@ TRIAGE_CONFIG = {
     'send_email': False,
     'polling_minutes': 10,
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
+    'enable_triage': bool(int(os.environ['ENABLE_TRIAGE_MONITORING'])),
     'timezone': 'US/Eastern',
     'monitoring_seconds': 120,
     'event_limit': 15,

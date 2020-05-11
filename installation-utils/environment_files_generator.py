@@ -23,6 +23,12 @@ BRUIN_CLIENT_SECRET = var_dict["BRUIN_CLIENT_SECRET_PRO"]
 BRUIN_LOGIN_URL = var_dict["BRUIN_LOGIN_URL_PRO"]
 BRUIN_BASE_URL = var_dict["BRUIN_BASE_URL_PRO"]
 
+# Velocloud hosts variables
+VELOCLOUD_HOST_1 = var_dict["VELOCLOUD_HOST_1"]
+VELOCLOUD_HOST_2 = var_dict["VELOCLOUD_HOST_2"]
+VELOCLOUD_HOST_3 = var_dict["VELOCLOUD_HOST_3"]
+VELOCLOUD_HOST_4 = var_dict["VELOCLOUD_HOST_4"]
+
 # Mail variables
 EMAIL_ACC_PWD = var_dict["EMAIL_ACC_PWD"]
 LAST_CONTACT_RECIPIENT = var_dict["LAST_CONTACT_RECIPIENT_DEV"]
@@ -110,12 +116,45 @@ env_dict = {
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}',
-    os.path.join('service-outage-monitor', 'src', 'config', 'env'):
+    os.path.join('service-outage-monitor', 'src', 'config', 'env-velo1'):
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
-        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}',
+        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
+        f'VELOCLOUD_HOST={VELOCLOUD_HOST_1}\n'
+        f'ENABLE_TRIAGE_MONITORING=0',
+    os.path.join('service-outage-monitor', 'src', 'config', 'env-velo2'):
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
+        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
+        f'VELOCLOUD_HOST={VELOCLOUD_HOST_2}\n'
+        f'ENABLE_TRIAGE_MONITORING=0',
+    os.path.join('service-outage-monitor', 'src', 'config', 'env-velo3'):
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
+        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
+        f'VELOCLOUD_HOST={VELOCLOUD_HOST_3}\n'
+        f'ENABLE_TRIAGE_MONITORING=0',
+    os.path.join('service-outage-monitor', 'src', 'config', 'env-velo4'):
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
+        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
+        f'VELOCLOUD_HOST={VELOCLOUD_HOST_4}\n'
+        f'ENABLE_TRIAGE_MONITORING=0',
+    os.path.join('service-outage-monitor', 'src', 'config', 'env-triage'):
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
+        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
+        f'ENABLE_TRIAGE_MONITORING=1',
     os.path.join('t7-bridge', 'src', 'config', 'env'):
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'

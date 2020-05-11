@@ -51,6 +51,14 @@
       {
         "name": "REDIS_HOSTNAME",
         "value": "${REDIS_HOSTNAME}"
+      },
+      {
+        "name": "VELOCLOUD_HOST",
+        "value": "${VELOCLOUD_HOST}"
+      },
+      {
+        "name": "ENABLE_TRIAGE_MONITORING",
+        "value": "${ENABLE_TRIAGE_MONITORING}"
       }
     ]
   }

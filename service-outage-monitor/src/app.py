@@ -93,9 +93,15 @@ class Container:
         # await self._comparison_report.start_service_outage_detector_job(exec_on_start=True)
         # await self._comparison_report.start_service_outage_reporter_job(exec_on_start=False)
 
-        await self._outage_monitor.start_service_outage_monitoring(exec_on_start=True)
-
-        await self._triage.start_triage_job(exec_on_start=True)
+        if config.TRIAGE_CONFIG['enable_triage']:
+            self._logger.info('Triage monitoring enabled in config file')
+            await self._triage.start_triage_job(exec_on_start=True)
+        else:
+            self._logger.info(
+                f'Outage monitoring enabled for host '
+                f'{list(config.MONITOR_CONFIG["velocloud_instances_filter"].keys())[0]} in config file'
+            )
+            await self._outage_monitor.start_service_outage_monitoring(exec_on_start=True)
 
         self._scheduler.start()
 

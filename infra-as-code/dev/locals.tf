@@ -123,14 +123,49 @@ locals {
   automation-service-affecting-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-affecting-monitor.family}:${aws_ecs_task_definition.automation-service-affecting-monitor.revision}"
   automation-service-affecting-monitor-service_discovery_service-name = "service-affecting-monitor-${var.ENVIRONMENT}"
 
-  // automation-service-outage-monitor local vars
+  // automation-service-outage-monitor local vars (for all service-outage-monitor services)
   automation-service-outage-monitor-image = "${data.aws_ecr_repository.automation-service-outage-monitor.repository_url}:${var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
-  automation-service-outage-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor"
-  automation-service-outage-monitor-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor"
-  automation-service-outage-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-monitor"
-  automation-service-outage-monitor-ecs_service-name = "${var.ENVIRONMENT}-service-outage-monitor"
-  automation-service-outage-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-monitor.family}:${aws_ecs_task_definition.automation-service-outage-monitor.revision}"
-  automation-service-outage-monitor-service_discovery_service-name = "service-outage-monitor-${var.ENVIRONMENT}"
+  automation-service-outage-monitor-velocloud_host_triage = ""
+
+  // automation-service-outage-monitor-velo1 local vars
+  automation-service-outage-monitor-velo1-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-velo1"
+  automation-service-outage-monitor-velo1-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-velo1"
+  automation-service-outage-monitor-velo1-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-monitor-velo1"
+  automation-service-outage-monitor-velo1-ecs_service-name = "${var.ENVIRONMENT}-service-outage-monitor-velo1"
+  automation-service-outage-monitor-velo1-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-monitor-velo1.family}:${aws_ecs_task_definition.automation-service-outage-monitor-velo1.revision}"
+  automation-service-outage-monitor-velo1-service_discovery_service-name = "service-outage-monitor-velo1-${var.ENVIRONMENT}"
+
+  // automation-service-outage-monitor-velo2 local vars
+  automation-service-outage-monitor-velo2-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-velo2"
+  automation-service-outage-monitor-velo2-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-velo2"
+  automation-service-outage-monitor-velo2-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-monitor-velo2"
+  automation-service-outage-monitor-velo2-ecs_service-name = "${var.ENVIRONMENT}-service-outage-monitor-velo2"
+  automation-service-outage-monitor-velo2-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-monitor-velo2.family}:${aws_ecs_task_definition.automation-service-outage-monitor-velo2.revision}"
+  automation-service-outage-monitor-velo2-service_discovery_service-name = "service-outage-monitor-velo2-${var.ENVIRONMENT}"
+
+  // automation-service-outage-monitor-velo3 local vars
+  automation-service-outage-monitor-velo3-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-velo3"
+  automation-service-outage-monitor-velo3-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-velo3"
+  automation-service-outage-monitor-velo3-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-monitor-velo3"
+  automation-service-outage-monitor-velo3-ecs_service-name = "${var.ENVIRONMENT}-service-outage-monitor-velo3"
+  automation-service-outage-monitor-velo3-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-monitor-velo3.family}:${aws_ecs_task_definition.automation-service-outage-monitor-velo3.revision}"
+  automation-service-outage-monitor-velo3-service_discovery_service-name = "service-outage-monitor-velo3-${var.ENVIRONMENT}"
+
+  // automation-service-outage-monitor-velo4 local vars
+  automation-service-outage-monitor-velo4-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-velo4"
+  automation-service-outage-monitor-velo4-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-velo4"
+  automation-service-outage-monitor-velo4-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-monitor-velo4"
+  automation-service-outage-monitor-velo4-ecs_service-name = "${var.ENVIRONMENT}-service-outage-monitor-velo4"
+  automation-service-outage-monitor-velo4-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-monitor-velo4.family}:${aws_ecs_task_definition.automation-service-outage-monitor-velo4.revision}"
+  automation-service-outage-monitor-velo4-service_discovery_service-name = "service-outage-monitor-velo4-${var.ENVIRONMENT}"
+
+  // automation-service-outage-monitor-triage local vars
+  automation-service-outage-monitor-triage-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-triage"
+  automation-service-outage-monitor-triage-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-triage"
+  automation-service-outage-monitor-triage-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-outage-monitor-triage"
+  automation-service-outage-monitor-triage-ecs_service-name = "${var.ENVIRONMENT}-service-outage-monitor-triage"
+  automation-service-outage-monitor-triage-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-monitor-triage.family}:${aws_ecs_task_definition.automation-service-outage-monitor-triage.revision}"
+  automation-service-outage-monitor-triage-service_discovery_service-name = "service-outage-monitor-triage-${var.ENVIRONMENT}"
 
   // automation-velocloud-bridge local vars
   automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.VELOCLOUD_BRIDGE_BUILD_NUMBER}"
@@ -219,9 +254,25 @@ locals {
   running_task_count_nats-server-2_alarm-name = "Running tasks count of nats-server-2 service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_nats-server-2_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_nats-server-2"
 
-  // alarm running_task_count_service-outage-monitor local variables
-  running_task_count_service-outage-monitor_alarm-name = "Running tasks count of service-outage-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_service-outage-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-monitor"
+  // alarm running_task_count_service-outage-monitor (Velocloud host# 1) local variables
+  running_task_count_service-outage-monitor-velo1_alarm-name = "Running tasks count of service-outage-monitor service for Velocloud host# 1 in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_service-outage-monitor-velo1_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-monitor-velo1"
+
+  // alarm running_task_count_service-outage-monitor (Velocloud host# 2) local variables
+  running_task_count_service-outage-monitor-velo2_alarm-name = "Running tasks count of service-outage-monitor service for Velocloud host# 2 in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_service-outage-monitor-velo2_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-monitor-velo2"
+
+  // alarm running_task_count_service-outage-monitor (Velocloud host# 3) local variables
+  running_task_count_service-outage-monitor-velo3_alarm-name = "Running tasks count of service-outage-monitor service for Velocloud host# 3 in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_service-outage-monitor-velo3_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-monitor-velo3"
+
+  // alarm running_task_count_service-outage-monitor (Velocloud host# 4) local variables
+  running_task_count_service-outage-monitor-velo4_alarm-name = "Running tasks count of service-outage-monitor service for Velocloud host# 4 in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_service-outage-monitor-velo4_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-monitor-velo4"
+
+  // alarm running_task_count_service-outage-monitor (triage monitoring) local variables
+  running_task_count_service-outage-monitor-triage_alarm-name = "Running tasks count of service-outage-monitor service for triage in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_service-outage-monitor-triage_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-monitor-triage"
 
   // alarm running_task_count_last-contact-report local variables
   running_task_count_last-contact-report_alarm-name = "Running tasks count of last-contact-report service in ECS cluster with name ${var.ENVIRONMENT}"

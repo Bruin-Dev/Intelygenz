@@ -1,8 +1,4 @@
-data "aws_ecr_repository" "automation-service-outage-monitor" {
-  name = "automation-service-outage-monitor"
-}
-
-data "template_file" "automation-service-outage-monitor" {
+data "template_file" "automation-service-outage-monitor-velo2" {
   template = file("${path.module}/task-definitions/service_outage_monitor.json")
 
   vars = {
@@ -15,12 +11,14 @@ data "template_file" "automation-service-outage-monitor" {
     CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
     LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
     REDIS_HOSTNAME = local.redis-hostname
+    VELOCLOUD_HOST = var.VELOCLOUD_HOST_2
+    ENABLE_TRIAGE_MONITORING = var.VELOCLOUD_HOST_2 == "" ? 1 : 0
   }
 }
 
-resource "aws_ecs_task_definition" "automation-service-outage-monitor" {
-  family = local.automation-service-outage-monitor-ecs_task_definition-family
-  container_definitions = data.template_file.automation-service-outage-monitor.rendered
+resource "aws_ecs_task_definition" "automation-service-outage-monitor-velo2" {
+  family = local.automation-service-outage-monitor-velo2-ecs_task_definition-family
+  container_definitions = data.template_file.automation-service-outage-monitor-velo2.rendered
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
@@ -30,9 +28,9 @@ resource "aws_ecs_task_definition" "automation-service-outage-monitor" {
   task_role_arn = data.aws_iam_role.ecs_execution_role.arn
 }
 
-resource "aws_security_group" "automation-service-outage-monitor_service" {
+resource "aws_security_group" "automation-service-outage-monitor-velo2_service" {
   vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
-  name = local.automation-service-outage-monitor-service-security_group-name
+  name = local.automation-service-outage-monitor-velo2-service-security_group-name
   description = "Allow egress from container"
 
   egress {
@@ -70,13 +68,13 @@ resource "aws_security_group" "automation-service-outage-monitor_service" {
   }
 
   tags = {
-    Name = local.automation-service-outage-monitor-service-security_group-tag-Name
+    Name = local.automation-service-outage-monitor-velo2-service-security_group-tag-Name
     Environment = var.ENVIRONMENT
   }
 }
 
-resource "aws_service_discovery_service" "service-outage-monitor" {
-  name = local.automation-service-outage-monitor-service_discovery_service-name
+resource "aws_service_discovery_service" "service-outage-monitor-velo2" {
+  name = local.automation-service-outage-monitor-velo2-service_discovery_service-name
 
   dns_config {
     namespace_id = aws_service_discovery_private_dns_namespace.automation-zone.id
@@ -94,17 +92,17 @@ resource "aws_service_discovery_service" "service-outage-monitor" {
   }
 }
 
-resource "aws_ecs_service" "automation-service-outage-monitor" {
-  name = local.automation-service-outage-monitor-ecs_service-name
-  task_definition = local.automation-service-outage-monitor-ecs_service-task_definition
-  desired_count = var.service_outage_monitor_desired_tasks
+resource "aws_ecs_service" "automation-service-outage-monitor-velo2" {
+  name = local.automation-service-outage-monitor-velo2-ecs_service-name
+  task_definition = local.automation-service-outage-monitor-velo2-ecs_service-task_definition
+  desired_count = var.service_outage_monitor_velo2_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
-  count = var.service_outage_monitor_desired_tasks != 0 ? 1 : 0
+  count = var.service_outage_monitor_velo2_desired_tasks > 0 ? 1 : 0
 
   network_configuration {
     security_groups = [
-      aws_security_group.automation-service-outage-monitor_service.id]
+      aws_security_group.automation-service-outage-monitor-velo2_service.id]
     subnets = [
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
@@ -112,7 +110,7 @@ resource "aws_ecs_service" "automation-service-outage-monitor" {
   }
 
   service_registries {
-    registry_arn = aws_service_discovery_service.service-outage-monitor.arn
+    registry_arn = aws_service_discovery_service.service-outage-monitor-velo2.arn
   }
 
   depends_on = [ null_resource.bruin-bridge-healthcheck,

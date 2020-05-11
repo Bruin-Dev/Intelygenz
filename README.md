@@ -123,7 +123,11 @@ variables:
   nats_server_2_desired_tasks: 1
   notifier_desired_tasks: 1
   service_affecting_monitor_desired_tasks: 1
-  service_outage_monitor_desired_tasks: 0
+  service_outage_monitor_velo1_desired_tasks: 0
+  service_outage_monitor_velo2_desired_tasks: 0
+  service_outage_monitor_velo3_desired_tasks: 0
+  service_outage_monitor_velo4_desired_tasks: 0
+  service_outage_monitor_triage_desired_tasks: 0
   sites_monitor_desired_tasks: 0
   t7_bridge_desired_tasks: 0
   velocloud_bridge_desired_tasks: 5

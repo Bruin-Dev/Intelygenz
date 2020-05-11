@@ -71,6 +71,7 @@ TRIAGE_CONFIG = {
     'polling_minutes': 10,
     'send_email': True,
     'recipient': "some.recipient@email.com",
+    'enable_triage': True,
     'timezone': 'US/Eastern',
     'monitoring_seconds': 120,
     'event_limit': 15,

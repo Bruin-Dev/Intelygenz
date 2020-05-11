@@ -269,9 +269,9 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server-2_alarm" 
 }
 
 
-resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor_alarm" {
-  count = var.service_outage_monitor_desired_tasks != 0 ? 1 : 0
-  alarm_name = local.running_task_count_service-outage-monitor_alarm-name
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-velo1_alarm" {
+  count = var.service_outage_monitor_velo1_desired_tasks != 0 ? 1 : 0
+  alarm_name = local.running_task_count_service-outage-monitor-velo1_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
   metric_name = local.running_task_count-metric_transformation-name
@@ -280,15 +280,111 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
   statistic = "Sum"
   threshold = local.running_task_count_service-alarm-threshold
   insufficient_data_actions = []
-  alarm_description = "This metric monitors the number of running tasks of service-outage-monitor service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_description = "This metric monitors the number of running tasks of service-outage-monitor service for Velocloud host# 1 in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
     aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
   dimensions = {
-    ServiceName = "${var.ENVIRONMENT}-service-outage-monitor"
+    ServiceName = "${var.ENVIRONMENT}-service-outage-monitor-velo1"
     ClusterName = var.ENVIRONMENT
   }
   tags = {
-    Name = local.running_task_count_service-outage-monitor_alarm-tag-Name
+    Name = local.running_task_count_service-outage-monitor-velo1_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-velo2_alarm" {
+  count = var.service_outage_monitor_velo2_desired_tasks != 0 ? 1 : 0
+  alarm_name = local.running_task_count_service-outage-monitor-velo2_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of service-outage-monitor service for Velocloud host# 1 in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-service-outage-monitor-velo2"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_service-outage-monitor-velo2_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-velo3_alarm" {
+  count = var.service_outage_monitor_velo3_desired_tasks != 0 ? 1 : 0
+  alarm_name = local.running_task_count_service-outage-monitor-velo3_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of service-outage-monitor service for Velocloud host# 1 in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-service-outage-monitor-velo3"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_service-outage-monitor-velo3_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-velo4_alarm" {
+  count = var.service_outage_monitor_velo4_desired_tasks != 0 ? 1 : 0
+  alarm_name = local.running_task_count_service-outage-monitor-velo4_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of service-outage-monitor service for Velocloud host# 1 in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-service-outage-monitor-velo4"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_service-outage-monitor-velo4_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-triage_alarm" {
+  count = var.service_outage_monitor_triage_desired_tasks != 0 ? 1 : 0
+  alarm_name = local.running_task_count_service-outage-monitor-triage_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of service-outage-monitor service for Velocloud host# 1 in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-service-outage-monitor-triage"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_service-outage-monitor-triage_alarm-tag-Name
     Environment = var.ENVIRONMENT
   }
 }
