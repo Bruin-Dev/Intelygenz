@@ -45,7 +45,7 @@ try:
     velocloud_hosts_filter = os.environ["VELOCLOUD_HOSTS_FILTER"].replace(' ', '').split(':')
     velocloud_hosts_filter = [json.loads(velo_filter) for velo_filter in velocloud_hosts_filter]
     velocloud_hosts_and_filters = [
-        (velocloud_hosts[i], json.loads(velocloud_hosts_filter[i]))
+        (velocloud_hosts[i], velocloud_hosts_filter[i])
         for i in range(len(velocloud_hosts))
     ]
     velocloud_hosts_and_filters = dict(velocloud_hosts_and_filters)
