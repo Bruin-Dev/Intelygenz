@@ -1415,7 +1415,7 @@ class TestServiceOutageMonitor:
         }
         uuid_ = uuid()
         message = (
-            f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
+            f"[process_edge_after_error] An error occurred while trying to retrieve edge status for edge "
             f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
         )
         slack_message = {
@@ -2371,7 +2371,7 @@ class TestServiceOutageMonitor:
         )
 
         outage_monitor._resolve_outage_ticket.assert_awaited_once_with(outage_ticket_id, outage_ticket_detail_id)
-        outage_monitor._append_autoresolve_note_to_ticket.assert_awaited_once_with(outage_ticket_id)
+        outage_monitor._append_autoresolve_note_to_ticket.assert_awaited_once_with(outage_ticket_id, serial_number)
         outage_monitor._notify_successful_autoresolve.assert_awaited_once_with(outage_ticket_id, client_id)
 
     @pytest.mark.asyncio
@@ -2597,10 +2597,11 @@ class TestServiceOutageMonitor:
     @pytest.mark.asyncio
     async def append_autoresolve_note_to_ticket_test(self):
         ticket_id = 12345
+        serial_number = 'VC1234567'
 
         current_datetime = datetime.now()
         autoresolve_note = (
-            f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: '
+            f'#*Automation Engine*#\nAuto-resolving detail for serial: {serial_number}\nTimeStamp: '
             f'{current_datetime + timedelta(seconds=1)}'
         )
 
@@ -2620,7 +2621,7 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             with patch.object(outage_monitoring_module, 'timezone', new=Mock()):
                 with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
-                    await outage_monitor._append_autoresolve_note_to_ticket(ticket_id)
+                    await outage_monitor._append_autoresolve_note_to_ticket(ticket_id, serial_number)
 
         event_bus.rpc_request.assert_awaited_once_with(
             "bruin.ticket.note.append.request",

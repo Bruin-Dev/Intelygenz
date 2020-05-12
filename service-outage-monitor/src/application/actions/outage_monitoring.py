@@ -105,8 +105,6 @@ class OutageMonitor:
             await self._build_cache()
             await self._start_build_cache_job(exec_on_start=False)
 
-        self.__reset_instance_state()
-
         self._logger.info(f"[outage_monitoring_process] Start with map cache!")
 
         split_cache = defaultdict(list)
@@ -191,6 +189,7 @@ class OutageMonitor:
         stop = perf_counter()
 
         self._logger.info(f"[build_cache] Elapsed time processing edges: {(stop - start)/60}")
+        self.__reset_instance_state()
         self._monitoring_map_cache = self._temp_monitoring_map
         self._temp_monitoring_map = []
         cache_stop = perf_counter()
@@ -274,7 +273,8 @@ class OutageMonitor:
                     self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state.')
                     await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
             except Exception as ex:
-                self._logger.error(f"Error processing_edge_with_cache: {ex}")
+                self._logger.error(f"Error: {ex} processing edge: {edge_full_id}. "
+                                   f"Scheduling retries in a separated process...")
                 await self._start_edge_after_error_process(edge_full_id, bruin_client_info)
 
     async def _add_edge_to_temp_cache(self, edge_full_id):
@@ -288,7 +288,7 @@ class OutageMonitor:
                 edge_identifier = EdgeIdentifier(**edge_full_id)
 
                 self._logger.info(
-                    f'[outage-monitoring] Got link and edge events activity in the last week for edge'
+                    f'[outage-monitoring] Got link and edge events activity in the last 7 days'
                     f' {edge_identifier}!')
 
                 self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
@@ -387,17 +387,17 @@ class OutageMonitor:
             async with self._process_errors_semaphore:
                 edge_identifier = EdgeIdentifier(**edge_full_id)
 
-                self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
+                self._logger.info(f'[process_edge_after_error] Checking status of {edge_identifier}...')
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
 
                 self._logger.info(
-                    f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
+                    f'[process_edge_after_error] Got status for edge {edge_identifier} -> {edge_status_response}')
 
                 edge_status_response_body = edge_status_response['body']
                 edge_status_response_status = edge_status_response['status']
                 if edge_status_response_status not in range(200, 300):
                     err_msg = (
-                        f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
+                        f"[process_edge_after_error] An error occurred while trying to retrieve edge status for edge "
                         f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
                     )
 
@@ -421,7 +421,7 @@ class OutageMonitor:
                 outage_happened = self._outage_repository.is_there_an_outage(edge_data)
                 if outage_happened:
                     self._logger.info(
-                        f'[outage-monitoring] Outage detected for {edge_identifier}. '
+                        f'[process_edge_after_error] Outage detected for {edge_identifier}. '
                         'Scheduling edge to re-check it in a few moments.'
                     )
 
@@ -439,12 +439,13 @@ class OutageMonitor:
                                                     'edge_full_id': edge_full_id,
                                                     'bruin_client_info': bruin_client_info
                                                 })
-                        self._logger.info(f'[outage-monitoring] {edge_identifier} successfully scheduled for re-check.')
+                        self._logger.info(f'[process_edge_after_error] {edge_identifier} successfully '
+                                          f'scheduled for re-check.')
                     except ConflictingIdError:
-                        self._logger.info(f'There is a recheck job scheduled for {edge_identifier} already. No new job '
-                                          'is going to be scheduled.')
+                        self._logger.info(f'[process_edge_after_error] There is a recheck job scheduled for '
+                                          f'{edge_identifier} already. No new job is going to be scheduled.')
                 else:
-                    self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state.')
+                    self._logger.info(f'[process_edge_after_error] {edge_identifier} is in healthy state.')
                     await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
         try:
             await _process_edge_after_error()
@@ -453,7 +454,8 @@ class OutageMonitor:
             for edge in self._monitoring_map_cache:
                 if edge['edge_full_id'] == edge_full_id:
                     serial_number = edge['edge_data']['edges'].get('serialNumber')
-            self._logger.error(f"Error process_edge_after_error ({edge_full_id, bruin_client_info}): {ex}")
+            self._logger.error(f"[process_edge_after_error] Maximum retries in process_edge_after_error "
+                               f"for edge: ({edge_full_id, bruin_client_info}). Error: {ex}")
             slack_message = f"Maximum retries happened while trying to process edge {edge_full_id} with " \
                             f"serial {serial_number}"
             slack_message_dict = {
@@ -541,9 +543,10 @@ class OutageMonitor:
             self._logger.info(f'Ticket {outage_ticket_id} is already resolved. Skipping autoresolve...')
             return
 
-        self._logger.info(f'Autoresolving ticket {outage_ticket_id} linked to edge {edge_identifier}...')
+        self._logger.info(f'Autoresolving ticket {outage_ticket_id} linked to edge {edge_identifier} '
+                          f' with serial number {serial_number}...')
         await self._resolve_outage_ticket(outage_ticket_id, detail_for_ticket_resolution['detailID'])
-        await self._append_autoresolve_note_to_ticket(outage_ticket_id)
+        await self._append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
 
         bruin_client_id = edge_status['bruin_client_info']['client_id']
         await self._notify_successful_autoresolve(outage_ticket_id, bruin_client_id)
@@ -588,10 +591,10 @@ class OutageMonitor:
         }
         await self._event_bus.rpc_request("bruin.ticket.status.resolve", resolve_ticket_request, timeout=15)
 
-    async def _append_autoresolve_note_to_ticket(self, ticket_id):
+    async def _append_autoresolve_note_to_ticket(self, ticket_id, serial_number):
         current_datetime = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
         autoresolve_note = (
-            f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: '
+            f'#*Automation Engine*#\nAuto-resolving detail for serial: {serial_number}\nTimeStamp: '
             f'{current_datetime + timedelta(seconds=1)}'
         )
 
