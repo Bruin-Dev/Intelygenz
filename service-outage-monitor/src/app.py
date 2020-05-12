@@ -99,7 +99,7 @@ class Container:
         else:
             self._logger.info(
                 f'Outage monitoring enabled for host '
-                f'{list(config.MONITOR_CONFIG["velocloud_instances_filter"].keys())[0]} in config file'
+                f'{config.MONITOR_CONFIG["velocloud_instances_filter"]} in config file'
             )
             await self._outage_monitor.start_service_outage_monitoring(exec_on_start=True)
 

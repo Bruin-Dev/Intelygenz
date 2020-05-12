@@ -138,7 +138,7 @@ class OutageMonitor:
         try:
             self._logger.info('[build_cache] Claiming edges under monitoring...')
             edges_to_monitor_response = await self._get_edges_for_monitoring()
-            self._logger.info('[build_cache] Got edges under monitoring from Velocloud')
+            self._logger.info('[build_cache] Got edges under monitoring from Velocloud ')
         except Exception as e:
             self._logger.error(
                 f'[build_cache] An error occurred while claiming edges for outage monitoring: {e}')
