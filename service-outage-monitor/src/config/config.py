@@ -4,6 +4,8 @@
 import os
 import logging
 import sys
+import json
+
 
 NATS_CONFIG = {
     'servers': [os.environ["NATS_SERVER1"]],
@@ -38,6 +40,19 @@ MONITOR_MAP_CONFIG = {
 
 }
 
+try:
+    velocloud_hosts = os.environ["VELOCLOUD_HOSTS"].replace(' ', '').split(':')
+    velocloud_hosts_filter = os.environ["VELOCLOUD_HOSTS_FILTER"].replace(' ', '').split(':')
+    velocloud_hosts_filter = [json.loads(velo_filter) for velo_filter in velocloud_hosts_filter]
+    velocloud_hosts_and_filters = [
+        (velocloud_hosts[i], json.loads(velocloud_hosts_filter[i]))
+        for i in range(len(velocloud_hosts))
+    ]
+    velocloud_hosts_and_filters = dict(velocloud_hosts_and_filters)
+except Exception as ex:
+    print(f"Error loading velocloud hosts and filters {ex}")
+    velocloud_hosts_and_filters = {}
+
 MONITOR_CONFIG = {
     'multiplier': 5,
     'min': 5,
@@ -53,9 +68,12 @@ MONITOR_CONFIG = {
         'build_cache': 60 * 240
     },
     'quarantine_key_ttl': quarantine_time + 60 * 5,
-    'velocloud_instances_filter': {
-        os.environ["VELOCLOUD_HOST"]: [],
-    },
+    # 'velocloud_instances_filter': {
+    #    os.environ["VELOCLOUD_HOST"]: [],
+    #    "mettel.velocloud.net": [],
+    #    "mettel.velocloud1.net": []
+    # },
+    'velocloud_instances_filter': velocloud_hosts_and_filters,
     'blacklisted_edges': [
         # Federal edge that is inside a non-federal Velocloud instance
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}

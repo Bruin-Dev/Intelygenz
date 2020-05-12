@@ -24,6 +24,37 @@ The outage report process aims to detect faulty edges which are not linked in an
 Bruin ticket and send a report with all those edges via e-mail. Note that edges targeted at testing purposes are
 not included.
 
+#### Setup velocloud hosts and filters
+
+For development, you can change depending on each instance the different hosts and filters associated to them.
+Also it is necessary to change the desired tasks for each instance.
+The values should be separated by `:` character `host1:host2`, `filter1:filter2`
+
+```yml
+# gitlab-ci/terraform-templates/.gitlab-ci-deploy-templates.yml
+
+- export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS=${VELOCLOUD_HOST_1}
+- export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS_FILTER=${VELOCLOUD_HOST_1_FILTER}
+- export TF_VAR_SERVICE_OUTAGE_MONITOR_2_HOSTS=${VELOCLOUD_HOST_2}
+- export TF_VAR_SERVICE_OUTAGE_MONITOR_2_HOSTS_FILTER=${VELOCLOUD_HOST_2_FILTER}
+- export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS="${VELOCLOUD_HOST_3}:${VELOCLOUD_HOST_4}"
+- export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER="${VELOCLOUD_HOST_3_FILTER}:${VELOCLOUD_HOST_4_FILTER}"
+- export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS=""
+- export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER=""
+````
+
+Example values for velocloud host and filter
+
+```
+# Gitlab settings CI/CD
+VELOCLOUD_HOST_1=mettel.velocloud.net
+VELOCLOUD_HOST_1_FILTER=[1, 2, 3]
+
+# Local development to add more hosts and filters to a concrete instance
+- export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS="${VELOCLOUD_HOST_3}:${VELOCLOUD_HOST_4}"
+- export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER="${VELOCLOUD_HOST_3_FILTER}:${VELOCLOUD_HOST_4_FILTER}"
+```
+
 > At this moment, this process is disabled in production environment because edges in `decomissioned` and
 `maintenance` state should not be monitored.
 
