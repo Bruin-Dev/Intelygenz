@@ -51,8 +51,21 @@ VELOCLOUD_HOST_1=mettel.velocloud.net
 VELOCLOUD_HOST_1_FILTER=[1, 2, 3]
 
 # Local development to add more hosts and filters to a concrete instance
-- export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS="${VELOCLOUD_HOST_3}:${VELOCLOUD_HOST_4}"
-- export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER="${VELOCLOUD_HOST_3_FILTER}:${VELOCLOUD_HOST_4_FILTER}"
+VELOCLOUD_HOSTS="mettel.velocloud.net:metvco02.mettel.net"
+VELOCLOUD_HOSTS_FILTER="[1, 2, 3]:[]"
+```
+
+For change env files values generated with [environment_files_generator.py](../installation-utils/environment_files_generator.py) it's necessary change the following section as exposed below:
+```
+# Service outage monitor hosts filter for service-outage-monitor instances
+SERVICE_OUTAGE_MONITOR_1_VELOCLOUD_HOSTS = VELOCLOUD_HOST_1
+SERVICE_OUTAGE_MONITOR_1_VELOCLOUD_HOSTS_FILTER = VELOCLOUD_HOST_1_FILTER
+SERVICE_OUTAGE_MONITOR_2_VELOCLOUD_HOSTS = VELOCLOUD_HOST_2
+SERVICE_OUTAGE_MONITOR_2_VELOCLOUD_HOSTS_FILTER = VELOCLOUD_HOST_2_FILTER
+SERVICE_OUTAGE_MONITOR_3_VELOCLOUD_HOSTS = VELOCLOUD_HOST_3 + ':' + VELOCLOUD_HOST_4
+SERVICE_OUTAGE_MONITOR_3_VELOCLOUD_HOSTS_FILTER = VELOCLOUD_HOST_3_FILTER + ':' + VELOCLOUD_HOST_4_FILTER
+SERVICE_OUTAGE_MONITOR_4_VELOCLOUD_HOSTS = ""
+SERVICE_OUTAGE_MONITOR_4_VELOCLOUD_HOSTS_FILTER = ""
 ```
 
 > At this moment, this process is disabled in production environment because edges in `decomissioned` and

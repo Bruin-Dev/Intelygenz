@@ -269,8 +269,8 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server-2_alarm" 
 }
 
 
-resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-velo1_alarm" {
-  count = var.service_outage_monitor_velo1_desired_tasks != 0 ? 1 : 0
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-1_alarm" {
+  count = var.service_outage_monitor_1_desired_tasks != 0 ? 1 : 0
   alarm_name = local.running_task_count_service-outage-monitor-velo1_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -293,8 +293,8 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-velo2_alarm" {
-  count = var.service_outage_monitor_velo2_desired_tasks != 0 ? 1 : 0
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-2_alarm" {
+  count = var.service_outage_monitor_2_desired_tasks != 0 ? 1 : 0
   alarm_name = local.running_task_count_service-outage-monitor-velo2_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -317,8 +317,8 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-velo3_alarm" {
-  count = var.service_outage_monitor_velo3_desired_tasks != 0 ? 1 : 0
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-3_alarm" {
+  count = var.service_outage_monitor_3_desired_tasks != 0 ? 1 : 0
   alarm_name = local.running_task_count_service-outage-monitor-velo3_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -341,8 +341,8 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-velo4_alarm" {
-  count = var.service_outage_monitor_velo4_desired_tasks != 0 ? 1 : 0
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-4_alarm" {
+  count = var.service_outage_monitor_4_desired_tasks != 0 ? 1 : 0
   alarm_name = local.running_task_count_service-outage-monitor-velo4_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods

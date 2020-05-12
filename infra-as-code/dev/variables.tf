@@ -221,24 +221,44 @@ variable "NATS_SERVER_1_CLUSTER_MODE" {
   description = "NATS server 1 node cluster mode"
 }
 
-variable "VELOCLOUD_HOST_1" {
+variable "SERVICE_OUTAGE_MONITOR_1_HOSTS" {
   type = string
-  description = "Velocloud host# 1 for outage monitoring"
+  description = "Velocloud hosts for outage monitoring # 1"
 }
 
-variable "VELOCLOUD_HOST_2" {
+variable "SERVICE_OUTAGE_MONITOR_1_HOSTS_FILTER" {
   type = string
-  description = "Velocloud host# 2 for outage monitoring"
+  description = "Velocloud hosts filter for outage monitoring # 1"
 }
 
-variable "VELOCLOUD_HOST_3" {
+variable "SERVICE_OUTAGE_MONITOR_2_HOSTS" {
   type = string
-  description = "Velocloud host# 3 for outage monitoring"
+  description = "Velocloud hosts for outage monitoring # 2"
 }
 
-variable "VELOCLOUD_HOST_4" {
+variable "SERVICE_OUTAGE_MONITOR_2_HOSTS_FILTER" {
   type = string
-  description = "Velocloud host# 4 for outage monitoring"
+  description = "Velocloud hosts filter for outage monitoring # 2"
+}
+
+variable "SERVICE_OUTAGE_MONITOR_3_HOSTS" {
+  type = string
+  description = "Velocloud hosts for outage monitoring # 3"
+}
+
+variable "SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER" {
+  type = string
+  description = "Velocloud hosts filter for outage monitoring # 3"
+}
+
+variable "SERVICE_OUTAGE_MONITOR_4_HOSTS" {
+  type = string
+  description = "Velocloud hosts for outage monitoring # 3"
+}
+
+variable "SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER" {
+  type = string
+  description = "Velocloud hosts filter for outage monitoring # 3"
 }
 
 variable "bruin_bridge_desired_tasks" {
@@ -295,28 +315,28 @@ variable "service_affecting_monitor_desired_tasks" {
   description = "Number of desired tasks of microservice service-affecting-monitor"
 }
 
-variable "service_outage_monitor_velo1_desired_tasks" {
+variable "service_outage_monitor_1_desired_tasks" {
   default = 0
   type = number
-  description = "Number of desired tasks of microservice service-outage-monitor for Velocloud host# 1"
+  description = "Number of desired tasks of microservice service-outage-monitor # 1"
 }
 
-variable "service_outage_monitor_velo2_desired_tasks" {
+variable "service_outage_monitor_2_desired_tasks" {
   default = 0
   type = number
-  description = "Number of desired tasks of microservice service-outage-monitor for Velocloud host# 2"
+  description = "Number of desired tasks of microservice service-outage-monitor # 2"
 }
 
-variable "service_outage_monitor_velo3_desired_tasks" {
+variable "service_outage_monitor_3_desired_tasks" {
   default = 0
   type = number
-  description = "Number of desired tasks of microservice service-outage-monitor for Velocloud host# 3"
+  description = "Number of desired tasks of microservice service-outage-monitor # 3"
 }
 
-variable "service_outage_monitor_velo4_desired_tasks" {
+variable "service_outage_monitor_4_desired_tasks" {
   default = 0
   type = number
-  description = "Number of desired tasks of microservice service-outage-monitor for Velocloud host# 4"
+  description = "Number of desired tasks of microservice service-outage-monitor # 4"
 }
 
 variable "service_outage_monitor_triage_desired_tasks" {

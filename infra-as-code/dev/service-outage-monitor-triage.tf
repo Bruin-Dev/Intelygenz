@@ -15,8 +15,9 @@ data "template_file" "automation-service-outage-monitor-triage" {
     CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
     LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
     REDIS_HOSTNAME = local.redis-hostname
-    VELOCLOUD_HOST = local.automation-service-outage-monitor-velocloud_host_triage
-    ENABLE_TRIAGE_MONITORING = local.automation-service-outage-monitor-velocloud_host_triage == "" ? 1 : 0
+    VELOCLOUD_HOSTS = local.automation-service-outage-monitor-velocloud_hosts_triage
+    VELOCLOUD_HOSTS_FILTER = local.automation-service-outage-monitor-velocloud_hosts_filter
+    ENABLE_TRIAGE_MONITORING = local.automation-service-outage-monitor-velocloud_hosts_triage == "" ? 1 : 0
   }
 }
 

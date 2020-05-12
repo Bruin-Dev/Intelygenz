@@ -5,6 +5,8 @@ FROM ${REPOSITORY_URL}-python-3.6:${DOCKER_BASE_IMAGE_VERSION}
 
 ENV PYTHONUNBUFFERED 1
 
+RUN pip install --upgrade pip
+
 COPY service-outage-monitor/ /service/app
 
 RUN pip install -r requirements.txt
