@@ -189,7 +189,8 @@ class OutageMonitor:
         await asyncio.gather(*tasks, return_exceptions=True)
         stop = perf_counter()
 
-        self._logger.info(f"[build_cache] Elapsed time processing edges: {(stop - start)/60}")
+        self._logger.info(f"[build_cache] Elapsed time building cache of edges for outage monitoring: ....: "
+                          f"{(stop - start)/60}")
         self._monitoring_map_cache = self._temp_monitoring_map
         self._temp_monitoring_map = []
         cache_stop = perf_counter()
@@ -213,17 +214,17 @@ class OutageMonitor:
             try:
                 edge_identifier = EdgeIdentifier(**edge_full_id)
 
-                self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
+                self._logger.info(f'[process_edge] Checking status of {edge_identifier}...')
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
 
                 self._logger.info(
-                    f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
+                    f'[process_edge] Got status for edge {edge_identifier} -> {edge_status_response}')
 
                 edge_status_response_body = edge_status_response['body']
                 edge_status_response_status = edge_status_response['status']
                 if edge_status_response_status not in range(200, 300):
                     err_msg = (
-                        f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
+                        f"[process_edge] An error occurred while trying to retrieve edge status for edge "
                         f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
                     )
 
@@ -241,7 +242,7 @@ class OutageMonitor:
                 outage_happened = self._outage_repository.is_there_an_outage(edge_data)
                 if outage_happened:
                     self._logger.info(
-                        f'[outage-monitoring] Outage detected for {edge_identifier}. '
+                        f'[process_edge] Outage detected for {edge_identifier}. '
                         'Scheduling edge to re-check it in a few moments.'
                     )
 
@@ -259,15 +260,15 @@ class OutageMonitor:
                                                     'edge_full_id': edge_full_id,
                                                     'bruin_client_info': bruin_client_info
                                                 })
-                        self._logger.info(f'[outage-monitoring] {edge_identifier} successfully scheduled for re-check.')
+                        self._logger.info(f'[process_edge] {edge_identifier} successfully scheduled for re-check.')
                     except ConflictingIdError:
                         self._logger.info(f'There is a recheck job scheduled for {edge_identifier} already. No new job '
                                           'is going to be scheduled.')
                 else:
-                    self._logger.info(f'[outage-monitoring] {edge_identifier} is in healthy state.')
+                    self._logger.info(f'[process_edge] {edge_identifier} is in healthy state.')
                     await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
             except Exception as ex:
-                self._logger.error(f"Error: {ex} processing edge: {edge_full_id}. "
+                self._logger.error(f"[process_edge] Error: {ex} processing edge: {edge_full_id}. "
                                    f"Scheduling retries in a separated process...")
                 await self._start_edge_after_error_process(edge_full_id, bruin_client_info)
 
@@ -277,25 +278,25 @@ class OutageMonitor:
                stop=stop_after_delay(self._config.MONITOR_CONFIG['stop_delay']))
         async def _add_edge_to_temp_cache():
             async with self._semaphore:
-                self._logger.info("[outage-monitoring] Starting process_edges job")
+                self._logger.info("[add_edge_to_temp_cache] Starting process_edges job")
 
                 edge_identifier = EdgeIdentifier(**edge_full_id)
 
                 self._logger.info(
-                    f'[outage-monitoring] Got link and edge events activity in the last 7 days'
+                    f'[add_edge_to_temp_cache] Got link and edge events activity in the last 7 days'
                     f' {edge_identifier}!')
 
                 self._logger.info(f'[outage-monitoring] Checking status of {edge_identifier}...')
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
 
                 self._logger.info(
-                    f'[outage-monitoring] Got status for edge {edge_identifier} -> {edge_status_response}')
+                    f'[add_edge_to_temp_cache] Got status for edge {edge_identifier} -> {edge_status_response}')
 
                 edge_status_response_body = edge_status_response['body']
                 edge_status_response_status = edge_status_response['status']
                 if edge_status_response_status not in range(200, 300):
                     err_msg = (
-                        f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
+                        f"[add_edge_to_temp_cache] An error occurred while trying to retrieve edge status for edge "
                         f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
                     )
 
@@ -309,8 +310,8 @@ class OutageMonitor:
 
                 edge_serial = edge_data['edges'].get('serialNumber')
                 if not edge_serial:
-                    self._logger.info(f"[outage-monitoring] Edge {edge_identifier} doesn't have any serial associated. "
-                                      'Skipping...')
+                    self._logger.info(f"[add_edge_to_temp_cache] Edge {edge_identifier} doesn't have "
+                                      f"any serial associated. Skipping...")
                     return
 
                 autoresolve_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter'].keys()
@@ -319,9 +320,9 @@ class OutageMonitor:
                         not autoresolve_filter_enabled:
                     self._autoresolve_serials_whitelist.add(edge_serial)
 
-                self._logger.info(f'[outage-monitoring] Claiming Bruin client info for serial {edge_serial}...')
+                self._logger.info(f'[add_edge_to_temp_cache] Claiming Bruin client info for serial {edge_serial}...')
                 bruin_client_info_response = await self._get_bruin_client_info_by_serial(edge_serial)
-                self._logger.info(f'[outage-monitoring] Got Bruin client info for serial {edge_serial} -> '
+                self._logger.info(f'[add_edge_to_temp_cache] Got Bruin client info for serial {edge_serial} -> '
                                   f'{bruin_client_info_response}')
 
                 bruin_client_info_response_body = bruin_client_info_response['body']
@@ -337,24 +338,24 @@ class OutageMonitor:
 
                 if not bruin_client_info_response_body.get('client_id'):
                     self._logger.info(
-                        f"[outage-monitoring] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
+                        f"[add_edge_to_temp_cache] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
                         'Skipping...')
                     return
 
                 # Attach Bruin client info to edge_data
                 edge_data['bruin_client_info'] = bruin_client_info_response_body
 
-                self._logger.info(f'[outage-monitoring] Getting management status for edge {edge_identifier}...')
+                self._logger.info(f'[add_edge_to_temp_cache] Getting management status for edge {edge_identifier}...')
                 management_status_response = await self._get_management_status(edge_data)
-                self._logger.info(f'[outage-monitoring] Got management status for edge {edge_identifier} -> '
+                self._logger.info(f'[add_edge_to_temp_cache] Got management status for edge {edge_identifier} -> '
                                   f'{management_status_response}')
 
                 management_status_response_body = management_status_response['body']
                 management_status_response_status = management_status_response['status']
                 if management_status_response_status not in range(200, 300):
-                    self._logger.error(f"Management status is unknown for {edge_identifier}")
+                    self._logger.error(f"[add_edge_to_temp_cache] Management status is unknown for {edge_identifier}")
                     message = (
-                        f"[outage-monitoring] Management status is unknown for {edge_identifier}. "
+                        f"[add_edge_to_temp_cache] Management status is unknown for {edge_identifier}. "
                         f"Cause: {management_status_response_body}"
                     )
                     slack_message = {'request_id': uuid(),
@@ -376,7 +377,7 @@ class OutageMonitor:
         try:
             await _add_edge_to_temp_cache()
         except Exception as ex:
-            self._logger.error(f"Error: {edge_full_id} raised a {ex} exception")
+            self._logger.error(f"[add_edge_to_temp_cache] Error: {edge_full_id} raised a {ex} exception")
 
     async def _process_edge_after_error(self, edge_full_id, bruin_client_info):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_CONFIG['multiplier'],

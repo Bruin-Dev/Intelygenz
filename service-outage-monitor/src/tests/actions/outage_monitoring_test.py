@@ -709,7 +709,7 @@ class TestServiceOutageMonitor:
         }
         uuid_ = uuid()
         message = (
-            f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
+            f"[add_edge_to_temp_cache] An error occurred while trying to retrieve edge status for edge "
             f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
         )
         slack_message = {
@@ -887,7 +887,7 @@ class TestServiceOutageMonitor:
 
         uuid_ = uuid()
         message = (
-            f"[outage-monitoring] Management status is unknown for {EdgeIdentifier(**edge_full_id)}. "
+            f"[add_edge_to_temp_cache] Management status is unknown for {EdgeIdentifier(**edge_full_id)}. "
             f"Cause: {management_status_response['body']}"
         )
         slack_message = {
@@ -1176,7 +1176,7 @@ class TestServiceOutageMonitor:
         }
         uuid_ = uuid()
         message = (
-            f"[outage-monitoring] An error occurred while trying to retrieve edge status for edge "
+            f"[process_edge] An error occurred while trying to retrieve edge status for edge "
             f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
         )
         slack_message = {
