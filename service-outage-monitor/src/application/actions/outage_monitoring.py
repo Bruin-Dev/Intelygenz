@@ -131,6 +131,7 @@ class OutageMonitor:
     async def _build_cache(self):
         cache_start = perf_counter()
         self._temp_monitoring_map = []
+        self.__reset_instance_state()
 
         self._logger.info('[build_cache] Building cache...')
 
@@ -189,7 +190,6 @@ class OutageMonitor:
         stop = perf_counter()
 
         self._logger.info(f"[build_cache] Elapsed time processing edges: {(stop - start)/60}")
-        self.__reset_instance_state()
         self._monitoring_map_cache = self._temp_monitoring_map
         self._temp_monitoring_map = []
         cache_stop = perf_counter()
@@ -237,12 +237,6 @@ class OutageMonitor:
                 edge_serial = edge_data['edges'].get('serialNumber')
                 # Attach Bruin client info to edge_data
                 edge_data['bruin_client_info'] = bruin_client_info
-
-                autoresolve_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter'].keys()
-                autoresolve_filter_enabled = len(autoresolve_filter) > 0
-                if (autoresolve_filter_enabled and edge_full_id['host'] in autoresolve_filter) or \
-                        not autoresolve_filter_enabled:
-                    self._autoresolve_serials_whitelist.add(edge_serial)
 
                 outage_happened = self._outage_repository.is_there_an_outage(edge_data)
                 if outage_happened:
@@ -318,6 +312,12 @@ class OutageMonitor:
                     self._logger.info(f"[outage-monitoring] Edge {edge_identifier} doesn't have any serial associated. "
                                       'Skipping...')
                     return
+
+                autoresolve_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter'].keys()
+                autoresolve_filter_enabled = len(autoresolve_filter) > 0
+                if (autoresolve_filter_enabled and edge_full_id['host'] in autoresolve_filter) or \
+                        not autoresolve_filter_enabled:
+                    self._autoresolve_serials_whitelist.add(edge_serial)
 
                 self._logger.info(f'[outage-monitoring] Claiming Bruin client info for serial {edge_serial}...')
                 bruin_client_info_response = await self._get_bruin_client_info_by_serial(edge_serial)
@@ -411,12 +411,6 @@ class OutageMonitor:
                 edge_serial = edge_data['edges'].get('serialNumber')
                 # Attach Bruin client info to edge_data
                 edge_data['bruin_client_info'] = bruin_client_info
-
-                autoresolve_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter'].keys()
-                autoresolve_filter_enabled = len(autoresolve_filter) > 0
-                if (autoresolve_filter_enabled and edge_full_id['host'] in autoresolve_filter) or \
-                        not autoresolve_filter_enabled:
-                    self._autoresolve_serials_whitelist.add(edge_serial)
 
                 outage_happened = self._outage_repository.is_there_an_outage(edge_data)
                 if outage_happened:
