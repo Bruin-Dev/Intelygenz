@@ -22,7 +22,7 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo1",
+                        "${ENVIRONMENT}-service-outage-monitor-1",
                         ".",
                         ".",
                         {
@@ -32,7 +32,7 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo2",
+                        "${ENVIRONMENT}-service-outage-monitor-2",
                         ".",
                         ".",
                         {
@@ -42,7 +42,7 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo3",
+                        "${ENVIRONMENT}-service-outage-monitor-3",
                         ".",
                         ".",
                         {
@@ -52,7 +52,7 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo4",
+                        "${ENVIRONMENT}-service-outage-monitor-4",
                         ".",
                         ".",
                         {
@@ -246,25 +246,25 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo1",
+                        "${ENVIRONMENT}-service-outage-monitor-1",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo2",
+                        "${ENVIRONMENT}-service-outage-monitor-2",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo3",
+                        "${ENVIRONMENT}-service-outage-monitor-3",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo4",
+                        "${ENVIRONMENT}-service-outage-monitor-4",
                         ".",
                         "."
                     ],
@@ -331,25 +331,25 @@
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo1",
+                        "${ENVIRONMENT}-service-outage-monitor-1",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo2",
+                        "${ENVIRONMENT}-service-outage-monitor-2",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo3",
+                        "${ENVIRONMENT}-service-outage-monitor-3",
                         ".",
                         "."
                     ],
                     [
                         "...",
-                        "${ENVIRONMENT}-service-outage-monitor-velo4",
+                        "${ENVIRONMENT}-service-outage-monitor-4",
                         ".",
                         "."
                     ],

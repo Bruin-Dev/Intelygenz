@@ -1,6 +1,6 @@
 [
   {
-    "name": "service-outage-monitor",
+    "name": "${container_name}",
     "image": "${image}",
     "portMappings": [
       {

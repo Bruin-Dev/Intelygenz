@@ -3,6 +3,7 @@ data "template_file" "automation-service-outage-monitor-3" {
   template = file("${path.module}/task-definitions/service_outage_monitor.json")
 
   vars = {
+    container_name = local.automation-service-outage-monitor-3-container_name
     image = local.automation-service-outage-monitor-image
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
