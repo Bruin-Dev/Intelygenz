@@ -344,7 +344,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=fake_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._start_build_cache_job = CoroutineMock()
-        outage_monitor._process_edge_with_cache = CoroutineMock()
+        outage_monitor._process_edge = CoroutineMock()
 
         outage_monitor._monitoring_map_cache = [
             {
@@ -360,10 +360,10 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edges_for_monitoring.assert_not_awaited()
         outage_monitor._get_last_events_for_edge.assert_not_awaited()
         outage_monitor._start_build_cache_job.assert_not_awaited()
-        outage_monitor._process_edge_with_cache.assert_awaited_once()
+        outage_monitor._process_edge.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def process_edge_exception_test(self):
+    async def add_edge_to_temp_cache_exception_test(self):
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -435,7 +435,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock()
-        outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._add_edge_to_temp_cache = CoroutineMock()
         outage_monitor._start_build_cache_job = CoroutineMock()
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
@@ -447,13 +447,13 @@ class TestServiceOutageMonitor:
             "notification.slack.request",
             {
                 'request_id': uuid_,
-                'message': f'[outage-monitoring] Something happened while retrieving edges under monitoring from '
+                'message': f'[build_cache] Something happened while retrieving edges under monitoring from '
                            f'Velocloud. Reason: Error {edge_list_response_status} - {edge_list_response_body}',
             },
             timeout=10,
         )
         outage_monitor._get_last_events_for_edge.assert_not_awaited()
-        outage_monitor._process_edge.assert_not_awaited()
+        outage_monitor._add_edge_to_temp_cache.assert_not_awaited()
         outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -475,14 +475,14 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock()
-        outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._add_edge_to_temp_cache = CoroutineMock()
         outage_monitor._start_build_cache_job = CoroutineMock()
 
         await outage_monitor._outage_monitoring_process()
 
         outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         outage_monitor._get_last_events_for_edge.assert_not_awaited()
-        outage_monitor._process_edge.assert_not_awaited()
+        outage_monitor._add_edge_to_temp_cache.assert_not_awaited()
         outage_repository.is_there_an_outage.assert_not_called()
         outage_monitor._start_build_cache_job.assert_awaited_once()
 
@@ -509,7 +509,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock()
-        outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._add_edge_to_temp_cache = CoroutineMock()
         outage_monitor._start_build_cache_job = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
@@ -517,7 +517,7 @@ class TestServiceOutageMonitor:
 
         outage_monitor._get_edges_for_monitoring.assert_awaited_once()
         outage_monitor._get_last_events_for_edge.assert_not_awaited()
-        outage_monitor._process_edge.assert_not_awaited()
+        outage_monitor._add_edge_to_temp_cache.assert_not_awaited()
         outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -546,7 +546,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
-        outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._add_edge_to_temp_cache = CoroutineMock()
         outage_monitor._start_build_cache_job = CoroutineMock()
 
         datetime_mock = Mock()
@@ -560,7 +560,7 @@ class TestServiceOutageMonitor:
             edge_full_id,
             since=current_time - timedelta(days=7),
         )
-        outage_monitor._process_edge.assert_not_awaited()
+        outage_monitor._add_edge_to_temp_cache.assert_not_awaited()
         outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -589,7 +589,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
-        outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._add_edge_to_temp_cache = CoroutineMock()
         outage_monitor._start_build_cache_job = CoroutineMock()
 
         datetime_mock = Mock()
@@ -603,7 +603,7 @@ class TestServiceOutageMonitor:
             edge_full_id,
             since=current_time - timedelta(days=7),
         )
-        outage_monitor._process_edge.assert_not_awaited()
+        outage_monitor._add_edge_to_temp_cache.assert_not_awaited()
         outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -645,7 +645,7 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=edge_events_response)
-        outage_monitor._process_edge = CoroutineMock()
+        outage_monitor._add_edge_to_temp_cache = CoroutineMock()
         outage_monitor._start_build_cache_job = CoroutineMock()
 
         datetime_mock = Mock()
@@ -659,11 +659,11 @@ class TestServiceOutageMonitor:
             edge_full_id,
             since=current_time - timedelta(days=7),
         )
-        outage_monitor._process_edge.assert_awaited_with(edge_full_id)
+        outage_monitor._add_edge_to_temp_cache.assert_awaited_with(edge_full_id)
         outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def process_edge_having_a_null_serial_test(self):
+    async def add_edge_to_temp_cache_having_a_null_serial_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_status_response = {
@@ -691,13 +691,13 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_management_status = CoroutineMock()
 
-        await outage_monitor._process_edge(edge_full_id)
+        await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_management_status.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_edge_with_retrieval_of_edge_status_returning_non_2XX_status_test(self):
+    async def add_edge_to_temp_cache_with_retrieval_of_edge_status_returning_non_2XX_status_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
@@ -730,14 +730,14 @@ class TestServiceOutageMonitor:
         outage_monitor._get_management_status = CoroutineMock()
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
-            await outage_monitor._process_edge(edge_full_id)
+            await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         event_bus.rpc_request.assert_awaited_with("notification.slack.request", slack_message, timeout=30)
         outage_monitor._get_management_status.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_edge_with_retrieval_of_bruin_client_info_returning_non_2XX_status_test(self):
+    async def add_edge_to_temp_cache_with_retrieval_of_bruin_client_info_returning_non_2XX_status_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_serial = 'VC1234567'
@@ -789,7 +789,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_management_status = CoroutineMock()
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
-            await outage_monitor._process_edge(edge_full_id)
+            await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
@@ -797,7 +797,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_management_status.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_edge_with_bruin_client_info_having_null_client_id_test(self):
+    async def add_edge_to_temp_cache_with_bruin_client_info_having_null_client_id_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_serial = 'VC1234567'
@@ -839,14 +839,14 @@ class TestServiceOutageMonitor:
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
         outage_monitor._get_management_status = CoroutineMock()
 
-        await outage_monitor._process_edge(edge_full_id)
+        await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
         outage_monitor._get_management_status.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_edge_with_retrieval_of_management_status_returning_non_2XX_status_test(self):
+    async def add_edge_to_temp_cache_with_retrieval_of_management_status_returning_non_2XX_status_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_serial = 'VC1234567'
@@ -910,7 +910,7 @@ class TestServiceOutageMonitor:
         outage_monitor._is_management_status_active = Mock()
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
-            await outage_monitor._process_edge(edge_full_id)
+            await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
@@ -919,7 +919,7 @@ class TestServiceOutageMonitor:
         outage_monitor._is_management_status_active.assert_not_called()
 
     @pytest.mark.asyncio
-    async def process_edge_with_management_status_inactive_test(self):
+    async def add_edge_to_temp_cache_with_management_status_inactive_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_serial = 'VC1234567'
@@ -971,7 +971,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
         outage_monitor._is_management_status_active = Mock(return_value=False)
 
-        await outage_monitor._process_edge(edge_full_id)
+        await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
@@ -979,7 +979,7 @@ class TestServiceOutageMonitor:
         outage_monitor._is_management_status_active.assert_called_once_with(management_status_response_body)
 
     @pytest.mark.asyncio
-    async def process_edge_with_management_status_active_test(self):
+    async def add_edge_to_temp_cache_with_management_status_active_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_serial = 'VC1234567'
@@ -1036,7 +1036,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_management_status = CoroutineMock(return_value=management_status_response)
         outage_monitor._is_management_status_active = Mock(return_value=True)
 
-        await outage_monitor._process_edge(edge_full_id)
+        await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_monitor._get_bruin_client_info_by_serial.assert_awaited_once_with(edge_serial)
@@ -1045,7 +1045,7 @@ class TestServiceOutageMonitor:
         assert expected_outcome in outage_monitor._temp_monitoring_map
 
     @pytest.mark.asyncio
-    async def process_edge_with_cache_retrieval_of_edge_status_returning_non_2XX_status_test(self):
+    async def process_edge_with_retrieval_of_edge_status_returning_non_2XX_status_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         bruin_client_info_response_body = {
@@ -1083,14 +1083,14 @@ class TestServiceOutageMonitor:
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
-            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
+            await outage_monitor._process_edge(edge_full_id, bruin_client_info_response_body)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         event_bus.rpc_request.assert_awaited_with("notification.slack.request", slack_message, timeout=30)
         outage_repository.is_there_an_outage.assert_not_called()
 
     @pytest.mark.asyncio
-    async def process_edge_with_cache_and_no_outages_detected_test(self):
+    async def process_edge_no_outages_detected_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_status_data = {
@@ -1131,7 +1131,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
 
-        await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
+        await outage_monitor._process_edge(edge_full_id, bruin_client_info_response_body)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
@@ -1139,7 +1139,7 @@ class TestServiceOutageMonitor:
                                                                                  edge_data_with_bruin_info)
 
     @pytest.mark.asyncio
-    async def process_with_edge_with_cache_outages_detected_and_recheck_job_not_scheduled_test(self):
+    async def process_edge_with_outages_detected_and_recheck_job_not_scheduled_test(self):
         job_id = 'some-duplicated-id'
         exception_instance = ConflictingIdError(job_id)
 
@@ -1183,7 +1183,7 @@ class TestServiceOutageMonitor:
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
 
         try:
-            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
+            await outage_monitor._process_edge(edge_full_id, bruin_client_info_response_body)
             # TODO: The test should fail at this point if no exception was raised
         except ConflictingIdError:
             scheduler.add_job.assert_called_once_with(
@@ -1198,7 +1198,7 @@ class TestServiceOutageMonitor:
         outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
 
     @pytest.mark.asyncio
-    async def process_edge_with_cache_outages_detected_and_recheck_job_scheduled_test(self):
+    async def process_edge_outages_detected_and_recheck_job_scheduled_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_status_data = {
@@ -1238,7 +1238,7 @@ class TestServiceOutageMonitor:
         current_time = datetime.now()
         datetime_mock.now = Mock(return_value=current_time)
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
+            await outage_monitor._process_edge(edge_full_id, bruin_client_info_response_body)
 
         outage_monitor._get_edge_status_by_id.assert_awaited_once_with(edge_full_id)
         outage_repository.is_there_an_outage.assert_called_once_with(edge_status_data)
@@ -1255,7 +1255,7 @@ class TestServiceOutageMonitor:
         outage_monitor._run_ticket_autoresolve_for_edge.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def process_edge_with_cache_side_effects_over_autoresolve_whitelist_with_autoresolve_filter_test(self):
+    async def process_edge_with_side_effects_over_autoresolve_whitelist_with_autoresolve_filter_test(self):
         edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_serial = 'VC1234567'
@@ -1299,12 +1299,12 @@ class TestServiceOutageMonitor:
             "metvco02.mettel.net": [],
         }
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
+            await outage_monitor._process_edge(edge_full_id, bruin_client_info_response_body)
 
         assert outage_monitor._autoresolve_serials_whitelist == {edge_serial}
 
     @pytest.mark.asyncio
-    async def process_edge_with_cache_side_effects_over_autoresolve_whitelist_without_autoresolve_filter_test(self):
+    async def process_edge_with_side_effects_over_autoresolve_whitelist_without_autoresolve_filter_test(self):
         edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_serial = 'VC1234567'
@@ -1345,12 +1345,12 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['velocloud_instances_filter'] = {}
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
+            await outage_monitor._process_edge(edge_full_id, bruin_client_info_response_body)
 
         assert outage_monitor._autoresolve_serials_whitelist == {edge_serial}
 
     @pytest.mark.asyncio
-    async def process_edge_with_cache_exception_test(self):
+    async def process_edge_exception_test(self):
         edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
         edge_serial = 'VC1234567'
@@ -1392,7 +1392,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['velocloud_instances_filter'] = {}
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._process_edge_with_cache(edge_full_id, bruin_client_info_response_body)
+            await outage_monitor._process_edge(edge_full_id, bruin_client_info_response_body)
 
         outage_monitor._start_edge_after_error_process.assert_awaited_once()
 

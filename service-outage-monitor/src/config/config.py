@@ -43,7 +43,6 @@ MONITOR_CONFIG = {
     'multiplier': 5,
     'min': 5,
     'stop_delay': 300,
-    'stop_after_attempt': 2,
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
