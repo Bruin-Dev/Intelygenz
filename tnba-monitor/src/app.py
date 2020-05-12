@@ -55,7 +55,8 @@ class Container:
 
         self._tnba_monitor = TNBAMonitor(self._event_bus, self._logger, self._scheduler, config, self._t7_repository,
                                          self._ticket_repo, self._monitoring_map_repository, self._bruin_repository,
-                                         self._velocloud_repository, self._prediction_repo)
+                                         self._velocloud_repository, self._prediction_repo,
+                                         self._notifications_repository)
 
     async def _start(self):
         await self._event_bus.connect()

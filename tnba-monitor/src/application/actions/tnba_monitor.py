@@ -11,7 +11,8 @@ from tenacity import retry, wait_exponential, stop_after_delay
 
 class TNBAMonitor:
     def __init__(self, event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                 monitoring_map_repository, bruin_repository, velocloud_repository, prediction_repository):
+                 monitoring_map_repository, bruin_repository, velocloud_repository, prediction_repository,
+                 notifications_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -22,6 +23,7 @@ class TNBAMonitor:
         self._bruin_repository = bruin_repository
         self._velocloud_repository = velocloud_repository
         self._prediction_repository = prediction_repository
+        self._notifications_repository = notifications_repository
 
         self._monitoring_mapping = {}
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
@@ -216,10 +218,15 @@ class TNBAMonitor:
                 )
                 return
 
-        self._logger.info(
-            f"Building TNBA note from predictions found for serial {serial_number} and ticket {ticket_id}..."
-        )
-        tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
+        if self._config.ENVIRONMENT == 'production':
+            self._logger.info(
+                f"Building TNBA note from predictions found for serial {serial_number} and ticket {ticket_id}..."
+            )
+            tnba_note: str = self._ticket_repository.build_tnba_note_from_prediction(best_prediction)
 
-        self._logger.info(f'Appending TNBA note to ticket {ticket_id}...')
-        await self._bruin_repository.append_note_to_ticket(ticket_id, tnba_note, is_private=True)
+            self._logger.info(f'Appending TNBA note to ticket {ticket_id}...')
+            await self._bruin_repository.append_note_to_ticket(ticket_id, tnba_note, is_private=True)
+        elif self._config.ENVIRONMENT == 'dev':
+            tnba_message = f'TNBA note would have been appended to ticket {ticket_id} (serial: {serial_number})'
+            self._logger.info(tnba_message)
+            await self._notifications_repository.send_slack_message(tnba_message)

@@ -27,10 +27,11 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         assert tnba_monitor._event_bus is event_bus
         assert tnba_monitor._logger is logger
@@ -42,6 +43,7 @@ class TestTNBAMonitor:
         assert tnba_monitor._bruin_repository is bruin_repository
         assert tnba_monitor._velocloud_repository is velocloud_repository
         assert tnba_monitor._prediction_repository is prediction_repository
+        assert tnba_monitor._notifications_repository is notifications_repository
 
         assert tnba_monitor._monitoring_mapping == {}
 
@@ -57,10 +59,11 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -89,10 +92,11 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         await tnba_monitor.start_tnba_automated_process(exec_on_start=False)
 
@@ -207,6 +211,7 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         monitoring_map_repository = Mock()
         monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses = CoroutineMock()
@@ -214,7 +219,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
         tnba_monitor._monitoring_mapping = {'obsolete': 'data'}
         tnba_monitor._get_relevant_tickets = CoroutineMock(return_value=relevant_tickets)
         tnba_monitor._process_ticket = CoroutineMock()
@@ -328,6 +333,7 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         monitoring_map_repository = Mock()
         monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses = CoroutineMock()
@@ -336,7 +342,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
         tnba_monitor._get_relevant_tickets = CoroutineMock(return_value=relevant_tickets)
         tnba_monitor._process_ticket = CoroutineMock()
 
@@ -363,10 +369,11 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         await tnba_monitor.start_tnba_automated_process(exec_on_start=False)
 
@@ -449,10 +456,11 @@ class TestTNBAMonitor:
         bruin_repository = Mock()
         velocloud_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
         tnba_monitor._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock(
             return_value=open_tickets_with_details)
         tnba_monitor._filter_tickets_related_to_edges_under_monitoring = Mock(return_value=relevant_open_tickets)
@@ -584,10 +592,11 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
         tnba_monitor._monitoring_mapping = monitoring_mapping
         tnba_monitor._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
             tickets_with_details_for_bruin_client_1,
@@ -702,10 +711,11 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
         tnba_monitor._monitoring_mapping = monitoring_mapping
         tnba_monitor._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
             tickets_with_details_for_bruin_client_1,
@@ -834,6 +844,7 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_outage_tickets_response)
@@ -846,7 +857,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
@@ -958,6 +969,7 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_outage_tickets_response)
@@ -969,7 +981,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
@@ -1077,6 +1089,7 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_outage_tickets_response)
@@ -1088,7 +1101,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
@@ -1206,6 +1219,7 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_outage_tickets_response)
@@ -1218,7 +1232,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
@@ -1342,6 +1356,7 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         bruin_repository = Mock()
         bruin_repository.get_open_outage_tickets = CoroutineMock(return_value=get_open_outage_tickets_response)
@@ -1354,7 +1369,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         result = []
         await tnba_monitor._get_open_tickets_with_details_by_client_id(bruin_client_id, result)
@@ -1496,10 +1511,11 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
         tnba_monitor._monitoring_mapping = monitoring_mapping
 
         result = tnba_monitor._filter_tickets_related_to_edges_under_monitoring(tickets)
@@ -1547,6 +1563,7 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=None)
@@ -1560,7 +1577,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         await tnba_monitor._process_ticket(ticket)
 
@@ -1634,6 +1651,7 @@ class TestTNBAMonitor:
         config = testconfig
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
+        notifications_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=None)
@@ -1649,11 +1667,113 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
+        bruin_repository.append_note_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_ticket_test_with_no_tnba_note_found_and_prediction_found_for_target_serial_and_dev_env_test(
+            self):
+        serial_number = 'VC1234567'
+        ticket_id = 12345
+        ticket = {
+            'ticket_id': ticket_id,
+            'ticket_detail': {
+                "detailID": 2746930,
+                "detailValue": 'VC1234567',
+            },
+            'ticket_notes': [
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+            ]
+        }
+        predictions_1_item_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        predictions_1_item_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
+        predictions_1 = [
+            predictions_1_item_1,
+            predictions_1_item_2,
+        ]
+        predictions_2 = [
+            {
+                'name': 'Request Completed',
+                'probability': 0.1111111111111111
+            },
+            {
+                'name': 'No Trouble Found - Carrier Issue',
+                'probability': 0.2222222222222222
+            },
+        ]
+        prediction_object_1 = {
+            'assetId': serial_number,
+            'predictions': predictions_1,
+        }
+        prediction_object_2 = {
+            'assetId': 'VC9999999',
+            'predictions': predictions_2,
+        }
+
+        t7_prediction_response = {
+            'body': [
+                prediction_object_1,
+                prediction_object_2,
+            ],
+            'status': 200
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        monitoring_map_repository = Mock()
+
+        ticket_repository = Mock()
+        ticket_repository.find_newest_tnba_note = Mock(return_value=None)
+
+        prediction_repository = Mock()
+        prediction_repository.find_prediction_object_by_serial = Mock(return_value=prediction_object_1)
+
+        bruin_repository = Mock()
+        bruin_repository.append_note_to_ticket = CoroutineMock()
+
+        t7_repository = Mock()
+        t7_repository.get_prediction = CoroutineMock(return_value=t7_prediction_response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   monitoring_map_repository, bruin_repository, velocloud_repository,
+                                   prediction_repository, notifications_repository)
+
+        with patch.object(config, 'ENVIRONMENT', "dev"):
+            await tnba_monitor._process_ticket(ticket)
+
+        t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
+        notifications_repository.send_slack_message.assert_awaited_once()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_note_to_ticket.assert_not_awaited()
 
@@ -1733,6 +1853,7 @@ class TestTNBAMonitor:
         config = testconfig
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
+        notifications_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=None)
@@ -1750,9 +1871,10 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
-        await tnba_monitor._process_ticket(ticket)
+        with patch.object(config, 'ENVIRONMENT', "production"):
+            await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
         ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(predictions_1_item_1)
@@ -1798,6 +1920,7 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
@@ -1812,7 +1935,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         await tnba_monitor._process_ticket(ticket)
 
@@ -1864,6 +1987,7 @@ class TestTNBAMonitor:
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
         prediction_repository = Mock()
+        notifications_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
@@ -1878,7 +2002,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         await tnba_monitor._process_ticket(ticket)
 
@@ -1955,6 +2079,7 @@ class TestTNBAMonitor:
         config = testconfig
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
+        notifications_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
@@ -1972,7 +2097,7 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         await tnba_monitor._process_ticket(ticket)
 
@@ -2054,6 +2179,7 @@ class TestTNBAMonitor:
         config = testconfig
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
+        notifications_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
@@ -2072,11 +2198,116 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
         await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
+        bruin_repository.append_note_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_ticket_test_with_tnba_note_found_and_changes_since_last_prediction_and_dev_env_test(self):
+        ticket_id = 12345
+        serial_number = 'VC1234567'
+        ticket_note_1 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+        }
+        ticket_note_2 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+        }
+        ticket_note_3 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+        }
+        ticket = {
+            'ticket_id': ticket_id,
+            'ticket_detail': {
+                "detailID": 2746930,
+                "detailValue": serial_number,
+            },
+            'ticket_notes': [
+                ticket_note_1,
+                ticket_note_2,
+                ticket_note_3,
+            ]
+        }
+
+        predictions_1_item_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        predictions_1_item_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
+        predictions_1 = [
+            predictions_1_item_1,
+            predictions_1_item_2,
+        ]
+        prediction_object_1 = {
+            'assetId': serial_number,
+            'predictions': predictions_1,
+        }
+        t7_prediction_response = {
+            'body': [
+                prediction_object_1,
+                {
+                    'assetId': 'VC9999999',
+                    'predictions': [
+                        {
+                            'name': 'Request Completed',
+                            'probability': 0.1111111111111111
+                        },
+                        {
+                            'name': 'No Trouble Found - Carrier Issue',
+                            'probability': 0.2222222222222222
+                        },
+                    ]
+                }
+            ],
+            'status': 200
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        monitoring_map_repository = Mock()
+
+        ticket_repository = Mock()
+        ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
+        ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
+        ticket_repository.build_tnba_note_from_prediction = Mock()
+
+        prediction_repository = Mock()
+        prediction_repository.find_prediction_object_by_serial = Mock(return_value=prediction_object_1)
+        prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(return_value=True)
+
+        bruin_repository = Mock()
+        bruin_repository.append_note_to_ticket = CoroutineMock()
+
+        t7_repository = Mock()
+        t7_repository.get_prediction = CoroutineMock(return_value=t7_prediction_response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   monitoring_map_repository, bruin_repository, velocloud_repository,
+                                   prediction_repository, notifications_repository)
+
+        with patch.object(config, 'ENVIRONMENT', "dev"):
+            await tnba_monitor._process_ticket(ticket)
+
+        t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
+        notifications_repository.send_slack_message.assert_awaited_once()
         ticket_repository.build_tnba_note_from_prediction.assert_not_called()
         bruin_repository.append_note_to_ticket.assert_not_awaited()
 
@@ -2158,6 +2389,7 @@ class TestTNBAMonitor:
         config = testconfig
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
+        notifications_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note = Mock(return_value=ticket_note_1)
@@ -2177,9 +2409,10 @@ class TestTNBAMonitor:
 
         tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
                                    monitoring_map_repository, bruin_repository, velocloud_repository,
-                                   prediction_repository)
+                                   prediction_repository, notifications_repository)
 
-        await tnba_monitor._process_ticket(ticket)
+        with patch.object(config, 'ENVIRONMENT', "production"):
+            await tnba_monitor._process_ticket(ticket)
 
         t7_repository.get_prediction.assert_awaited_once_with(ticket_id)
         ticket_repository.build_tnba_note_from_prediction.assert_called_once_with(predictions_1_item_1)
