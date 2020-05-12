@@ -50,8 +50,8 @@ try:
     ]
     velocloud_hosts_and_filters = dict(velocloud_hosts_and_filters)
 except Exception as ex:
-    print(f"Error loading velocloud hosts and filters {ex}")
-    velocloud_hosts_and_filters = {}
+    logging.error(f"Error loading velocloud hosts and filters: {ex}")
+    sys.exit(1)
 
 MONITOR_CONFIG = {
     'multiplier': 5,
@@ -68,11 +68,6 @@ MONITOR_CONFIG = {
         'build_cache': 60 * 240
     },
     'quarantine_key_ttl': quarantine_time + 60 * 5,
-    # 'velocloud_instances_filter': {
-    #    os.environ["VELOCLOUD_HOST"]: [],
-    #    "mettel.velocloud.net": [],
-    #    "mettel.velocloud1.net": []
-    # },
     'velocloud_instances_filter': velocloud_hosts_and_filters,
     'blacklisted_edges': [
         # Federal edge that is inside a non-federal Velocloud instance
