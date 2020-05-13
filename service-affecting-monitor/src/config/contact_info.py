@@ -541,7 +541,7 @@ devices_by_id = [
         "name": "Ron Palmer"
     },
     {
-        "serial": "VC05200037714",
+        "serial": "VC05200077430",
         "host": "mettel.velocloud.net",
         "enterprise_id": 137,
         "edge_id": 1943,
