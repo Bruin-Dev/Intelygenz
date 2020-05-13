@@ -42,13 +42,12 @@ class TicketRepository:
 
         return self.is_note_older_than(ticket_note, age=age)
 
-    def build_tnba_note_from_prediction(self, prediction: dict) -> str:
-        probability_percentage = prediction["probability"] * 100
-        fixed_probability = self._utils_repository.truncate_float(probability_percentage, decimals=4)
+    @staticmethod
+    def build_tnba_note_from_prediction(prediction: dict) -> str:
         note_lines = [
             '#*Automation Engine*#',
             'TNBA',
             '',
-            f'The ticket next best action should be {prediction["name"]}. Confidence: {fixed_probability} %'
+            f'The ticket next best action should be {prediction["name"]}'
         ]
         return os.linesep.join(note_lines)

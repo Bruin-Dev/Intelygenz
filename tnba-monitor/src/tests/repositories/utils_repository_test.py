@@ -69,24 +69,3 @@ class TestUtilsRepository:
         result = UtilsRepository.get_last_element_matching(iterable=payload, condition=cond, fallback=fallback_value)
 
         assert result == fallback_value
-
-    def truncate_float_test(self):
-        float_ = 1.0
-        result = UtilsRepository.truncate_float(float_, decimals=0)
-        expected = 1.0
-        assert result == expected
-
-        float_ = 1.0
-        result = UtilsRepository.truncate_float(float_, decimals=3)
-        expected = 1.0
-        assert result == expected
-
-        float_ = 1.03865346785687
-        result = UtilsRepository.truncate_float(float_, decimals=6)
-        expected = 1.038653
-        assert result == expected
-
-        float_ = 1.03800000005687
-        result = UtilsRepository.truncate_float(float_, decimals=6)
-        expected = 1.038
-        assert result == expected

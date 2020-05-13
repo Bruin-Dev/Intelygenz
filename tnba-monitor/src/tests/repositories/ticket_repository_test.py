@@ -172,16 +172,11 @@ class TestTicketRepository:
             'probability': 0.1234567890123456
         }
 
-        config = testconfig
-        utils_repository = UtilsRepository()
-
-        ticket_repository = TicketRepository(config, utils_repository)
-
-        result = ticket_repository.build_tnba_note_from_prediction(prediction)
+        result = TicketRepository.build_tnba_note_from_prediction(prediction)
 
         assert result == os.linesep.join([
             '#*Automation Engine*#',
             'TNBA',
             '',
-            f'The ticket next best action should be Holmdel NOC Investigate. Confidence: 12.3456 %'
+            f'The ticket next best action should be Holmdel NOC Investigate'
         ])

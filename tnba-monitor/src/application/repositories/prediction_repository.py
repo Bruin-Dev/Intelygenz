@@ -5,10 +5,7 @@ from functools import partial
 from typing import List
 
 
-TNBA_NOTE_PREDICTION_LINE_REGEX = re.compile(
-    r'^The ticket next best action should be (?P<prediction_name>\w+(\s\w+)*)\. '
-    r'Confidence: (?P<prediction_probability>(100\.0)|(\d|[1-9]\d)\.\d{1,4}) %$'
-)
+TNBA_NOTE_PREDICTION_LINE_REGEX = re.compile(r'^The ticket next best action should be (?P<prediction_name>\w+(\s\w+)*)')
 
 
 class PredictionRepository:
@@ -43,17 +40,7 @@ class PredictionRepository:
             return True
 
         prediction_match = TNBA_NOTE_PREDICTION_LINE_REGEX.match(tnba_note_prediction_line)
-        tnba_note_prediction = {
-            'name': prediction_match.group('prediction_name'),
-            'probability': float(prediction_match.group('prediction_probability')),
-        }
+        prediction_name = prediction_match.group('prediction_name')
+        best_prediction_name = best_prediction['name']
 
-        # Since the prediction within the TNBA note is a percentage, let's turn the probability of the best prediction
-        # into a percentage with a fixed amount of decimals
-        best_prediction_copy = best_prediction.copy()
-        best_prediction_probability = best_prediction_copy['probability'] * 100
-        best_prediction_copy['probability'] = self._utils_repository.truncate_float(
-            best_prediction_probability, decimals=4
-        )
-
-        return not (tnba_note_prediction == best_prediction_copy)
+        return not (prediction_name == best_prediction_name)
