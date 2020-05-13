@@ -189,6 +189,17 @@ class BruinRepository:
         response["body"] = response_body
         return response
 
+    def get_next_results_for_ticket_detail(self, ticket_id, detail_id, service_number):
+        get_work_queues_filters = {
+            "ServiceNumber": service_number,
+            "DetailId": detail_id,
+        }
+
+        next_results_response = self._bruin_client.get_possible_detail_next_result(
+            ticket_id, get_work_queues_filters
+        )
+        return next_results_response
+
     def change_detail_work_queue(self, ticket_id, filters):
         service_number = filters["service_number"]
         ticket_detail_id = filters["detail_id"]

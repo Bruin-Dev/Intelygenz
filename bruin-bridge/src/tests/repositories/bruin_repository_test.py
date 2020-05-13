@@ -1251,6 +1251,47 @@ class TestBruinRepository:
         bruin_client.get_client_info.assert_called_once_with(filters)
         assert result == expected_result
 
+    def get_next_results_for_ticket_detail_test(self):
+        ticket_id = 4503440
+        detail_id = 4806634
+        service_number = 'VC05400002265'
+
+        work_queue_filters = {
+            "ServiceNumber": service_number,
+            "DetailId": detail_id,
+        }
+
+        next_results_response = {
+            'body': [
+                {
+                    "resultTypeId": 620,
+                    "resultName": "No Trouble Found - Carrier Issue",
+                    "notes": [
+                        {
+                            "noteType": "Notes",
+                            "noteDescription": "Notes",
+                            "availableValueOptions": None,
+                            "defaultValue": None,
+                            "required": False,
+                        }
+                    ]
+                }
+            ],
+            'status_code': 200,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_possible_detail_next_result = Mock(return_value=next_results_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.get_next_results_for_ticket_detail(ticket_id, detail_id, service_number)
+
+        bruin_client.get_possible_detail_next_result.assert_called_once_with(ticket_id, work_queue_filters)
+        assert result == next_results_response
+
     def change_detail_work_queue_with_retrieval_of_possible_work_queues_returning_non_2xx_status_test(self):
         ticket_id = 4503440
         detail_id = 4806634
