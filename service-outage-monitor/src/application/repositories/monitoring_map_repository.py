@@ -53,6 +53,7 @@ class MonitoringMapRepository:
 
     async def map_bruin_client_ids_to_edges_serials_and_statuses(self):
         self._temp_monitoring_map = {}
+        self._logger.info('[triage_build_cache] Building cache...')
         try:
             edge_list_response = await self._get_edges_for_monitoring()
         except Exception:
@@ -71,15 +72,15 @@ class MonitoringMapRepository:
             if edge_full_id not in self._blacklisted_edges
         ]
         start_time = time.time()
-        self._logger.info(f"Processing {len(edge_list_response_body)} edges")
+        self._logger.info(f"[triage_build_cache] Processing {len(edge_list_response_body)} edges")
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
         self._monitoring_map_cache = self._temp_monitoring_map
         self._temp_monitoring_map = {}
 
-        self._logger.info(f"Mapping {len(tasks)} edges took {time.time() - start_time} seconds")
-        self._logger.info(f"Processing {len(tasks)} edges")
+        self._logger.info(f"[triage_build_cache] Mapping finished for {len(tasks)} edges "
+                          f"took {time.time() - start_time} seconds")
 
     async def _process_edge_and_tickets(self, edge_full_id):
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_MAP_CONFIG['multiplier'],
