@@ -195,27 +195,6 @@ class OutageMonitor:
             try:
                 edge_identifier = EdgeIdentifier(**edge_full_id)
 
-                past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
-                recent_events_response = await self._get_last_events_for_edge(
-                    edge_full_id, since=past_moment_for_events_lookup
-                )
-
-                recent_events_response_status = recent_events_response['status']
-                if recent_events_response_status not in range(200, 300):
-                    return
-
-                recent_events_response_body = recent_events_response['body']
-                if not recent_events_response_body or len(recent_events_response_body) == 0:
-                    self._logger.info(
-                        f'[process_edge] No events were found for edge {edge_identifier} starting from '
-                        f'{past_moment_for_events_lookup}. Skipping...'
-                    )
-                    return
-
-                self._logger.info(
-                    f'[process_edge] Got link and edge events activity in the last 7 days'
-                    f' {edge_identifier}!')
-
                 self._logger.info(f'[process_edge] Checking status of {edge_identifier}...')
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
 
@@ -282,6 +261,27 @@ class OutageMonitor:
                 self._logger.info("[add_edge_to_temp_cache] Starting process_edges job")
 
                 edge_identifier = EdgeIdentifier(**edge_full_id)
+
+                past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
+                recent_events_response = await self._get_last_events_for_edge(
+                    edge_full_id, since=past_moment_for_events_lookup
+                )
+
+                recent_events_response_status = recent_events_response['status']
+                if recent_events_response_status not in range(200, 300):
+                    return
+
+                recent_events_response_body = recent_events_response['body']
+                if not recent_events_response_body or len(recent_events_response_body) == 0:
+                    self._logger.info(
+                        f'[add_edge_to_temp_cache] No events were found for edge {edge_identifier} starting from '
+                        f'{past_moment_for_events_lookup}. Skipping...'
+                    )
+                    return
+
+                self._logger.info(
+                    f'[add_edge_to_temp_cache] Got link and edge events activity in the last 7 days'
+                    f' {edge_identifier}!')
 
                 self._logger.info(f'[add_edge_to_temp_cache] Checking status of {edge_identifier}...')
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
@@ -384,27 +384,6 @@ class OutageMonitor:
         async def _process_edge_after_error():
             async with self._process_errors_semaphore:
                 edge_identifier = EdgeIdentifier(**edge_full_id)
-
-                past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
-                recent_events_response = await self._get_last_events_for_edge(
-                    edge_full_id, since=past_moment_for_events_lookup
-                )
-
-                recent_events_response_status = recent_events_response['status']
-                if recent_events_response_status not in range(200, 300):
-                    return
-
-                recent_events_response_body = recent_events_response['body']
-                if not recent_events_response_body or len(recent_events_response_body) == 0:
-                    self._logger.info(
-                        f'[process_edge_after_error] No events were found for edge {edge_identifier} starting from '
-                        f'{past_moment_for_events_lookup}. Skipping...'
-                    )
-                    return
-
-                self._logger.info(
-                    f'[process_edge_after_error] Got link and edge events activity in the last 7 days'
-                    f' {edge_identifier}!')
 
                 self._logger.info(f'[process_edge_after_error] Checking status of {edge_identifier}...')
                 edge_status_response = await self._get_edge_status_by_id(edge_full_id)
