@@ -63,7 +63,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_sites-monitor_alarm" 
   namespace                 = "ECS/ContainerInsights"
   period                    = local.running_task_count_service-alarm-period
   statistic                 = "Sum"
-  threshold                 = local.running_task_count_service-alarm-threshold
+  threshold                 = local.running_task_count_service-alarm-threshold * var.sites_monitor_desired_tasks
   insufficient_data_actions = []
   alarm_description         = "This metric monitors the number of running tasks of sites-monitor service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
@@ -86,7 +86,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_bruin-bridge_alarm" {
   namespace                 = "ECS/ContainerInsights"
   period                    = local.running_task_count_service-alarm-period
   statistic                 = "Sum"
-  threshold                 = local.running_task_count_service-alarm-threshold
+  threshold                 = local.running_task_count_service-alarm-threshold * var.bruin_bridge_desired_tasks
   insufficient_data_actions = []
   alarm_description         = "This metric monitors the number of running tasks of bruin-bridge service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
@@ -109,7 +109,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-affecting-mon
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.service_affecting_monitor_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of service-affecting-monitor service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -133,7 +133,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_t7-bridge_alarm" {
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.t7_bridge_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of t7-bridge service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -157,7 +157,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_notifier_alarm" {
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.notifier_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of notifier service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -181,7 +181,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_metrics-prometheus_al
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.metrics_prometheus_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of metrics-prometheus service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -205,7 +205,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server_alarm" {
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.nats_server_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of nats-server service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -229,7 +229,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server-1_alarm" 
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.nats_server_1_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of nats-server-1 service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -253,7 +253,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server-2_alarm" 
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.nats_server_2_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of nats-server-2 service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -278,7 +278,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.service_outage_monitor_1_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of service-outage-monitor-1 service for Velocloud host# 1 in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -302,7 +302,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.service_outage_monitor_2_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of service-outage-monitor-2 service for Velocloud host# 1 in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -326,7 +326,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.service_outage_monitor_3_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of service-outage-monitor-3 service for Velocloud host# 1 in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -350,7 +350,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.service_outage_monitor_4_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of service-outage-monitor-4 service for Velocloud host# 1 in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -374,7 +374,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.service_outage_monitor_triage_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of service-outage-monitor service for Velocloud host# 1 in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -398,7 +398,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_last-contact-report_a
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.last_contact_report_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of last-contact-report service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [
@@ -422,7 +422,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-bridge_alar
   namespace = "ECS/ContainerInsights"
   period = local.running_task_count_service-alarm-period
   statistic = "Sum"
-  threshold = local.running_task_count_service-alarm-threshold
+  threshold = local.running_task_count_service-alarm-threshold * var.velocloud_bridge_desired_tasks
   insufficient_data_actions = []
   alarm_description = "This metric monitors the number of running tasks of velocloud-bridge service in ECS cluster ${var.ENVIRONMENT}"
   alarm_actions = [

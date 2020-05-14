@@ -9,6 +9,15 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
+    - export ENVIRONMENT_VAR=${TF_VAR_ENVIRONMENT}
+    - export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS=${VELOCLOUD_HOST_1}
+    - export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS_FILTER=${VELOCLOUD_HOST_1_FILTER}
+    - export TF_VAR_SERVICE_OUTAGE_MONITOR_2_HOSTS=${VELOCLOUD_HOST_2}
+    - export TF_VAR_SERVICE_OUTAGE_MONITOR_2_HOSTS_FILTER=${VELOCLOUD_HOST_2_FILTER}
+    - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS=${VELOCLOUD_HOST_3}
+    - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER=${VELOCLOUD_HOST_3_FILTER}
+    - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS=${VELOCLOUD_HOST_4}
+    - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER=${VELOCLOUD_HOST_4_FILTER}
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf

@@ -204,7 +204,7 @@ locals {
   // alarms common local variables
   running_task_count_service-alarm-evaluation_periods = "2"
   running_task_count_service-alarm-period = "300"
-  running_task_count_service-alarm-threshold = "3"
+  running_task_count_service-alarm-threshold = 3
 
   // alarm exception_messages_services local variables
   exception_messages_services_alarm-evaluation_periods = "1"

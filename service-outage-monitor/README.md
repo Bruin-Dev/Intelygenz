@@ -27,8 +27,7 @@ not included.
 #### Setup velocloud hosts and filters
 
 For development, you can change depending on each instance the different hosts and filters associated to them.
-Also it is necessary to change the desired tasks for each instance.
-The values should be separated by `:` character `host1:host2`, `filter1:filter2`
+The values should be separated by `:` character `host1:host2`, `filter_host_1:filter_host_2`
 
 ```yml
 # gitlab-ci/terraform-templates/.gitlab-ci-deploy-templates.yml
@@ -46,7 +45,7 @@ The values should be separated by `:` character `host1:host2`, `filter1:filter2`
 Example values for velocloud host and filter
 
 ```
-# Gitlab settings CI/CD
+# Gitlab settings CI/CD variables
 VELOCLOUD_HOST_1=mettel.velocloud.net
 VELOCLOUD_HOST_1_FILTER=[1, 2, 3]
 
@@ -55,7 +54,7 @@ VELOCLOUD_HOSTS="mettel.velocloud.net:metvco02.mettel.net"
 VELOCLOUD_HOSTS_FILTER="[1, 2, 3]:[]"
 ```
 
-For change env files values generated with [environment_files_generator.py](../installation-utils/environment_files_generator.py) it's necessary change the following section as exposed below:
+For change env files used by [docker-compose](../.docker-compose.yml) it's necessary modify the file [environment_files_generator.py](../installation-utils/environment_files_generator.py) as exposed below:
 ```
 # Service outage monitor hosts filter for service-outage-monitor instances
 SERVICE_OUTAGE_MONITOR_1_VELOCLOUD_HOSTS = VELOCLOUD_HOST_1
@@ -67,6 +66,9 @@ SERVICE_OUTAGE_MONITOR_3_VELOCLOUD_HOSTS_FILTER = VELOCLOUD_HOST_3_FILTER + ':' 
 SERVICE_OUTAGE_MONITOR_4_VELOCLOUD_HOSTS = ""
 SERVICE_OUTAGE_MONITOR_4_VELOCLOUD_HOSTS_FILTER = ""
 ```
+
+Also it is necessary to change the desired tasks for each instance, as explained in section [Deploying just a subset of microservices](../README.md#deploying-just-a-subset-of-microservices) of the main README.
+If any `service-outage-monitor` instance is not to be used, the value of `service_outage_monitor_<X>_desired_tasks` should be set to 0, being `X` the number of the service-outage-monitor instance that is going to be disabled. 
 
 > At this moment, this process is disabled in production environment because edges in `decomissioned` and
 `maintenance` state should not be monitored.
