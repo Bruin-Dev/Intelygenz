@@ -92,9 +92,6 @@ class OutageMonitor:
                                f'will not be scheduled. Reason: {conflict}')
 
     async def _outage_monitoring_process(self):
-
-        total_start_time = time.time()
-
         if len(self._monitoring_map_cache) == 0:
             self._logger.info(f"[outage_monitoring_process] Starting initial build of cache and "
                               f"scheduling job to refresh cache every "
@@ -102,6 +99,7 @@ class OutageMonitor:
             await self._build_cache()
             await self._start_build_cache_job(exec_on_start=False)
 
+        total_start_time = time.time()
         self._logger.info(f"[outage_monitoring_process] Start with map cache!")
 
         split_cache = defaultdict(list)
