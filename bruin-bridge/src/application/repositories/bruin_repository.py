@@ -46,8 +46,7 @@ class BruinRepository:
             response['status'] = ticket_details_dict['status']
             ticket_details_items = ticket_details_dict["body"].get('ticketDetails')
             if ticket_details_items is None:
-                response['status'] = 404
-                return response
+                continue
             ticket_details_items_as_booleans = map(
                 lambda ticket_detail: ticket_detail['detailValue'] == edge_serial,
                 ticket_details_items,

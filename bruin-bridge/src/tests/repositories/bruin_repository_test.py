@@ -222,6 +222,35 @@ class TestBruinRepository:
         assert ticket_details_by_edge['body'] == expected_ticket_details_list
         assert ticket_details_by_edge['status'] == 200
 
+    def get_ticket_details_by_edge_serial_with_filtered_tickets_reutrn_non_2XX_status_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+
+        edge_serial = 'VC05200026138'
+        params = dict(client_id=123, category='SD-WAN', ticket_topic='VAS')
+        ticket_status_1 = "New"
+        ticket_status_2 = "In-Progress"
+        ticket_statuses = [ticket_status_1, ticket_status_2]
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_all_filtered_tickets = Mock(return_value={"body": [], "status": 500})
+        bruin_repository.get_ticket_details = Mock()
+
+        ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, params=params,
+            ticket_statuses=ticket_statuses,
+        )
+
+        bruin_repository.get_all_filtered_tickets.assert_called_once_with(
+            ticket_status=ticket_statuses,
+            params=params
+        )
+        bruin_repository.get_ticket_details.assert_not_called()
+
+        expected_ticket_details_list = []
+        assert ticket_details_by_edge["body"] == expected_ticket_details_list
+        assert ticket_details_by_edge['status'] == 500
+
     def get_ticket_details_by_edge_serial_with_no_filtered_tickets_test(self):
         logger = Mock()
         bruin_client = Mock()
@@ -339,20 +368,7 @@ class TestBruinRepository:
                 }
             ],
         }
-        ticket_2_details = {
-            'ticketDetails': [
-                {
-                    "detailID": 2746937,
-                    "detailValue": 'Nothing to do here!',
-                },
-            ],
-            'ticketNotes': [
-                {
-                    "noteId": 41894041,
-                    "noteValue": 'This is a meaningless detail',
-                }
-            ],
-        }
+        ticket_2_details = {}
         ticket_3_details = {
             'ticketDetails': [
                 {
@@ -546,6 +562,56 @@ class TestBruinRepository:
         )
         assert outage_ticket_details_by_edge["body"] == []
         assert outage_ticket_details_by_edge["status"] == 200
+
+    def get_outage_ticket_details_by_edge_serial_return_non_2XX_status_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+
+        edge_serial = 'VC05200026138'
+        client_id = 123
+
+        ticket_status_1 = "New"
+        ticket_status_2 = "In-Progress"
+        ticket_statuses = [ticket_status_1, ticket_status_2]
+        category = 'SD-WAN'
+        ticket_topic = 'VOO'
+
+        ticket_id = 123
+        ticket_details = {
+            'ticketID': ticket_id,
+            'ticketDetails': [
+                {
+                    "detailID": 2746999,
+                    "detailValue": 'This is a meaningless detail',
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41894999,
+                    "noteValue": 'Nothing to do here!',
+                }
+            ],
+        }
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body='Failed',
+                                                                                    status=404))
+
+        outage_ticket_details_by_edge = bruin_repository.get_outage_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, client_id=client_id,
+            category=category, ticket_statuses=ticket_statuses,
+        )
+
+        bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
+            edge_serial=edge_serial,
+            params=dict(
+                ticket_topic=ticket_topic,
+                client_id=client_id,
+                category=category),
+            ticket_statuses=ticket_statuses,
+        )
+        assert outage_ticket_details_by_edge["body"] == 'Failed'
+        assert outage_ticket_details_by_edge["status"] == 404
 
     def post_ticket_note_test(self):
         logger = Mock()
