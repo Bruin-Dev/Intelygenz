@@ -46,6 +46,45 @@ class TestPredictionRepository:
         result = prediction_repository.find_prediction_object_by_serial(predictions, serial_number)
         assert result == prediction_1
 
+    def filter_predictions_in_next_results_test(self):
+        prediction_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        prediction_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
+        prediction_3 = {
+            'name': 'Request Completed',
+            'probability': 0.1111111111111111
+        }
+        predictions = [
+            prediction_1,
+            prediction_2,
+            prediction_3,
+        ]
+
+        next_results = [
+            {
+                "resultTypeId": 620,
+                "resultName": "Request Completed",
+                "notes": [],
+            },
+            {
+                "resultTypeId": 621,
+                "resultName": "Holmdel NOC Investigate ",
+                "notes": [],
+            },
+        ]
+
+        result = PredictionRepository.filter_predictions_in_next_results(predictions, next_results)
+        expected = [
+            prediction_2,
+            prediction_3,
+        ]
+        assert result == expected
+
     def get_best_prediction_test(self):
         prediction_1 = {
             'name': 'Repair Completed',

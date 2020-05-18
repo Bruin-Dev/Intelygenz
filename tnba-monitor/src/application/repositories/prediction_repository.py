@@ -20,6 +20,15 @@ class PredictionRepository:
         prediction_lookup_fn = partial(self.__prediction_belongs_to_serial, serial_number=serial_number)
         return self._utils_repository.get_first_element_matching(predictions, prediction_lookup_fn)
 
+    @staticmethod
+    def filter_predictions_in_next_results(predictions: List[dict], next_results: List[dict]) -> List[dict]:
+        next_results_names: List[str] = [result['resultName'].strip() for result in next_results]
+        return [
+            prediction
+            for prediction in predictions
+            if prediction['name'] in next_results_names
+        ]
+
     def get_best_prediction(self, predictions: List[dict]) -> dict:
         highest_probability = max(prediction['probability'] for prediction in predictions)
 

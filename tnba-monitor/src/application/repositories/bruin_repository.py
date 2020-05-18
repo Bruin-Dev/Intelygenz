@@ -166,6 +166,50 @@ class BruinRepository:
 
         return response
 
+    async def get_next_results_for_ticket_detail(self, ticket_id: int, detail_id: int, service_number: str):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "ticket_id": ticket_id,
+                "detail_id": detail_id,
+                "service_number": service_number,
+            },
+        }
+
+        try:
+            self._logger.info(
+                f'Claiming next results for ticket {ticket_id}, detail {detail_id} and '
+                f'service number {service_number}...'
+            )
+            response = await self._event_bus.rpc_request("bruin.ticket.detail.get.next.results", request, timeout=15)
+            self._logger.info(
+                f'Got next results for ticket {ticket_id}, detail {detail_id} and service number {service_number}!'
+            )
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when claiming next results for ticket {ticket_id}, detail {detail_id} and '
+                f'service number {service_number} -> {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if not (response_status in range(200, 300) or response_status == 409 or response_status == 471):
+                err_msg = (
+                    f'Error while claiming next results for ticket {ticket_id}, detail {detail_id} and '
+                    f'service number {service_number} in {self._config.ENVIRONMENT.upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def get_outage_tickets(self, client_id: int, ticket_statuses: list):
         ticket_topic = 'VOO'
 
