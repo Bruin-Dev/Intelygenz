@@ -368,7 +368,6 @@ class TestBruinRepository:
                 }
             ],
         }
-        ticket_2_details = {}
         ticket_3_details = {
             'ticketDetails': [
                 {
@@ -392,7 +391,7 @@ class TestBruinRepository:
         ], "status": 200})
         bruin_repository.get_ticket_details = Mock(side_effect=[
             {"body": ticket_1_details, "status": 200},
-            {"body": ticket_2_details, "status": 200},
+            {"body": 'Got internal error from Bruin', "status": 500},
             {"body": ticket_3_details, "status": 200},
         ])
 
