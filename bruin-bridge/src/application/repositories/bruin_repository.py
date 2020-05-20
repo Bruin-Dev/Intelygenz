@@ -1,3 +1,6 @@
+import asyncio
+
+
 class BruinRepository:
 
     def __init__(self, logger, bruin_client):
@@ -27,7 +30,7 @@ class BruinRepository:
     def get_ticket_details(self, ticket_id):
         return self._bruin_client.get_ticket_details(ticket_id)
 
-    def get_ticket_details_by_edge_serial(self, edge_serial, params, ticket_statuses):
+    async def get_ticket_details_by_edge_serial(self, edge_serial, params, ticket_statuses):
         result = []
 
         response = dict.fromkeys(["body", "status"])
@@ -40,33 +43,44 @@ class BruinRepository:
         if filtered_tickets['status'] not in range(200, 300):
             return filtered_tickets
 
-        for ticket in filtered_tickets['body']:
-            ticket_id = ticket['ticketID']
-            ticket_details_dict = self.get_ticket_details(ticket_id)
-
-            ticket_details_response_status = ticket_details_dict['status']
-            if ticket_details_response_status not in range(200, 300):
-                continue
-
-            response['status'] = ticket_details_response_status
-            ticket_details_items = ticket_details_dict["body"]['ticketDetails']
-
-            ticket_details_items_as_booleans = map(
-                lambda ticket_detail: ticket_detail['detailValue'] == edge_serial,
-                ticket_details_items,
-            )
-            if any(ticket_details_items_as_booleans):
-                result.append({
-                    'ticketID': ticket_id,
-                    **ticket_details_dict["body"],
-                })
+        loop = asyncio.get_event_loop()
+        futures = [
+                   loop.run_in_executor(
+                                        None,
+                                        self.search_ticket_details_for_serial,
+                                        edge_serial, ticket, result, response
+                                       )
+                   for ticket in filtered_tickets['body']
+        ]
+        await asyncio.gather(*futures)
 
         response['body'] = result
 
         return response
 
-    def get_affecting_ticket_details_by_edge_serial(self, edge_serial, client_id,
-                                                    category='SD-WAN', ticket_statuses=None):
+    def search_ticket_details_for_serial(self, edge_serial, ticket, temp_response, response):
+        ticket_id = ticket['ticketID']
+        ticket_details_dict = self.get_ticket_details(ticket_id)
+
+        ticket_details_response_status = ticket_details_dict['status']
+        if ticket_details_response_status not in range(200, 300):
+            return
+
+        response['status'] = ticket_details_response_status
+        ticket_details_items = ticket_details_dict["body"]['ticketDetails']
+
+        ticket_details_items_as_booleans = map(
+            lambda ticket_detail: ticket_detail['detailValue'] == edge_serial,
+            ticket_details_items,
+        )
+        if any(ticket_details_items_as_booleans):
+            temp_response.append({
+                'ticketID': ticket_id,
+                **ticket_details_dict["body"],
+            })
+
+    async def get_affecting_ticket_details_by_edge_serial(self, edge_serial, client_id,
+                                                          category='SD-WAN', ticket_statuses=None):
         params = {}
 
         if ticket_statuses is None:
@@ -76,14 +90,14 @@ class BruinRepository:
         params['category'] = category
         params["client_id"] = client_id
 
-        ticket_details_list = self.get_ticket_details_by_edge_serial(
+        ticket_details_list = await self.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, params=params, ticket_statuses=ticket_statuses,
         )
 
         return ticket_details_list
 
-    def get_outage_ticket_details_by_edge_serial(self, edge_serial, client_id,
-                                                 category='SD-WAN', ticket_statuses=None):
+    async def get_outage_ticket_details_by_edge_serial(self, edge_serial, client_id,
+                                                       category='SD-WAN', ticket_statuses=None):
         params = {}
 
         if ticket_statuses is None:
@@ -93,8 +107,8 @@ class BruinRepository:
         params['category'] = category
         params["client_id"] = client_id
 
-        ticket_details_list = self.get_ticket_details_by_edge_serial(edge_serial=edge_serial, params=params,
-                                                                     ticket_statuses=ticket_statuses)
+        ticket_details_list = await self.get_ticket_details_by_edge_serial(edge_serial=edge_serial, params=params,
+                                                                           ticket_statuses=ticket_statuses)
 
         if len(ticket_details_list['body']) > 0 and ticket_details_list['status'] in range(200, 300):
             body = ticket_details_list['body'][0]

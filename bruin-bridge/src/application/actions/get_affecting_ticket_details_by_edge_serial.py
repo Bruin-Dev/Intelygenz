@@ -36,7 +36,7 @@ class GetAffectingTicketDetailsByEdgeSerial:
             f'(client ID: {client_id})...'
         )
 
-        ticket_details_list = self._bruin_repository.get_affecting_ticket_details_by_edge_serial(
+        ticket_details_list = await self._bruin_repository.get_affecting_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
         )
 

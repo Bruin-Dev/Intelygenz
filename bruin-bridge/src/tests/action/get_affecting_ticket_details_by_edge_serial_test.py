@@ -73,13 +73,14 @@ class TestGetAffectingTicketDetailsByEdgeSerial:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_affecting_ticket_details_by_edge_serial = Mock(return_value={'body': ticket_details_list,
-                                                                                          'status': 200})
+        bruin_repository.get_affecting_ticket_details_by_edge_serial = CoroutineMock(return_value={'body':
+                                                                                                   ticket_details_list,
+                                                                                                   'status': 200})
 
         ticket_details = GetAffectingTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
         await ticket_details.send_affecting_ticket_details_by_edge_serial(msg)
 
-        ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_not_called()
+        ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_not_awaited()
 
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
             response_topic, get_ticket_details_response
@@ -142,13 +143,14 @@ class TestGetAffectingTicketDetailsByEdgeSerial:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_affecting_ticket_details_by_edge_serial = Mock(return_value={'body': ticket_details_list,
-                                                                                          'status': 200})
+        bruin_repository.get_affecting_ticket_details_by_edge_serial = CoroutineMock(return_value={'body':
+                                                                                                   ticket_details_list,
+                                                                                                   'status': 200})
 
         ticket_details = GetAffectingTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
         await ticket_details.send_affecting_ticket_details_by_edge_serial(msg)
 
-        ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_not_called()
+        ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_not_awaited()
 
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
             response_topic, get_ticket_details_response
@@ -213,13 +215,14 @@ class TestGetAffectingTicketDetailsByEdgeSerial:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_affecting_ticket_details_by_edge_serial = Mock(return_value={'body': ticket_details_list,
-                                                                                          'status': 200})
+        bruin_repository.get_affecting_ticket_details_by_edge_serial = CoroutineMock(return_value={'body':
+                                                                                                   ticket_details_list,
+                                                                                                   'status': 200})
 
         ticket_details = GetAffectingTicketDetailsByEdgeSerial(logger, event_bus, bruin_repository)
         await ticket_details.send_affecting_ticket_details_by_edge_serial(msg)
 
-        ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_called_once_with(
+        ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_awaited_once_with(
             edge_serial=edge_serial, client_id=client_id,
         )
         ticket_details._event_bus.publish_message.assert_awaited_once_with(

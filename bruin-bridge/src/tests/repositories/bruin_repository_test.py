@@ -1,6 +1,8 @@
 from unittest.mock import Mock
 from unittest.mock import call
+from asynctest import CoroutineMock
 
+import pytest
 from application.repositories.bruin_repository import BruinRepository
 
 
@@ -128,7 +130,8 @@ class TestBruinRepository:
         bruin_repository._bruin_client.get_ticket_details.assert_called_once_with(ticket_id)
         assert ticket_details == expected_ticket_details
 
-    def get_ticket_details_by_edge_serial_test(self):
+    @pytest.mark.asyncio
+    async def get_ticket_details_by_edge_serial_test(self):
         logger = Mock()
         bruin_client = Mock()
 
@@ -195,7 +198,7 @@ class TestBruinRepository:
             {'body': ticket_1_details, 'status': 200}, {'body': ticket_2_details, 'status': 200},
             {'body': ticket_3_details, 'status': 200}])
 
-        ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
+        ticket_details_by_edge = await bruin_repository.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, params=params,
             ticket_statuses=ticket_statuses,
         )
@@ -222,7 +225,8 @@ class TestBruinRepository:
         assert ticket_details_by_edge['body'] == expected_ticket_details_list
         assert ticket_details_by_edge['status'] == 200
 
-    def get_ticket_details_by_edge_serial_with_filtered_tickets_reutrn_non_2XX_status_test(self):
+    @pytest.mark.asyncio
+    async def get_ticket_details_by_edge_serial_with_filtered_tickets_reutrn_non_2XX_status_test(self):
         logger = Mock()
         bruin_client = Mock()
 
@@ -236,7 +240,7 @@ class TestBruinRepository:
         bruin_repository.get_all_filtered_tickets = Mock(return_value={"body": [], "status": 500})
         bruin_repository.get_ticket_details = Mock()
 
-        ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
+        ticket_details_by_edge = await bruin_repository.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, params=params,
             ticket_statuses=ticket_statuses,
         )
@@ -251,7 +255,8 @@ class TestBruinRepository:
         assert ticket_details_by_edge["body"] == expected_ticket_details_list
         assert ticket_details_by_edge['status'] == 500
 
-    def get_ticket_details_by_edge_serial_with_no_filtered_tickets_test(self):
+    @pytest.mark.asyncio
+    async def get_ticket_details_by_edge_serial_with_no_filtered_tickets_test(self):
         logger = Mock()
         bruin_client = Mock()
 
@@ -265,7 +270,7 @@ class TestBruinRepository:
         bruin_repository.get_all_filtered_tickets = Mock(return_value={"body": [], "status": 200})
         bruin_repository.get_ticket_details = Mock()
 
-        ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
+        ticket_details_by_edge = await bruin_repository.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, params=params,
             ticket_statuses=ticket_statuses,
         )
@@ -280,7 +285,8 @@ class TestBruinRepository:
         assert ticket_details_by_edge["body"] == expected_ticket_details_list
         assert ticket_details_by_edge['status'] == 200
 
-    def get_ticket_details_by_edge_serial_with_filtered_tickets_and_no_ticket_details_test(self):
+    @pytest.mark.asyncio
+    async def get_ticket_details_by_edge_serial_with_filtered_tickets_and_no_ticket_details_test(self):
         logger = Mock()
         bruin_client = Mock()
 
@@ -321,7 +327,7 @@ class TestBruinRepository:
             {"body": ticket_3_details, "status": 200},
         ])
 
-        ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
+        ticket_details_by_edge = await bruin_repository.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, params=params,
             ticket_statuses=ticket_statuses,
         )
@@ -338,7 +344,8 @@ class TestBruinRepository:
         assert ticket_details_by_edge["body"] == expected_ticket_details_list
         assert ticket_details_by_edge['status'] == 200
 
-    def get_ticket_details_by_edge_serial_with_filtered_tickets_and_ticket_details_and_no_serial_coincidence_test(self):
+    @pytest.mark.asyncio
+    async def get_ticket_details_by_edge_serial_with_no_serial_coincidence_test(self):
         logger = Mock()
         bruin_client = Mock()
 
@@ -395,7 +402,7 @@ class TestBruinRepository:
             {"body": ticket_3_details, "status": 200},
         ])
 
-        ticket_details_by_edge = bruin_repository.get_ticket_details_by_edge_serial(
+        ticket_details_by_edge = await bruin_repository.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, params=params,
             ticket_statuses=ticket_statuses,
         )
@@ -412,7 +419,8 @@ class TestBruinRepository:
         assert ticket_details_by_edge["body"] == expected_ticket_details_list
         assert ticket_details_by_edge['status'] == 200
 
-    def get_affecting_ticket_details_by_edge_serial_test(self):
+    @pytest.mark.asyncio
+    async def get_affecting_ticket_details_by_edge_serial_test(self):
         logger = Mock()
         bruin_client = Mock()
 
@@ -443,15 +451,56 @@ class TestBruinRepository:
         }]
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body=ticket_details,
-                                                                                    status=200))
+        bruin_repository.search_ticket_details_for_serial = Mock()
 
-        affecting_ticket_details_by_edge = bruin_repository.get_affecting_ticket_details_by_edge_serial(
+        affecting_ticket_details_by_edge = await bruin_repository.get_affecting_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
             category=category, ticket_statuses=ticket_statuses,
         )
 
-        bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
+        bruin_repository.search_ticket_details_for_serial.ase
+
+    @pytest.mark.asyncio
+    async def get_affecting_ticket_details_by_edge_serial_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+
+        edge_serial = 'VC05200026138'
+        client_id = 123
+
+        ticket_status_1 = "New"
+        ticket_status_2 = "In-Progress"
+        ticket_statuses = [ticket_status_1, ticket_status_2]
+        category = 'SD-WAN'
+        ticket_topic = 'VAS'
+
+        ticket_id = 123
+        ticket_details = [{
+            'ticketID': ticket_id,
+            'ticketDetails': [
+                {
+                    "detailID": 2746999,
+                    "detailValue": 'This is a meaningless detail',
+                },
+            ],
+            'ticketNotes': [
+                {
+                    "noteId": 41894999,
+                    "noteValue": 'Nothing to do here!',
+                }
+            ],
+        }]
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        bruin_repository.get_ticket_details_by_edge_serial = CoroutineMock(return_value=dict(body=ticket_details,
+                                                                                             status=200))
+
+        affecting_ticket_details_by_edge = await bruin_repository.get_affecting_ticket_details_by_edge_serial(
+            edge_serial=edge_serial, client_id=client_id,
+            category=category, ticket_statuses=ticket_statuses,
+        )
+
+        bruin_repository.get_ticket_details_by_edge_serial.awaited_once_with(
             edge_serial=edge_serial,
             params=dict(
                 ticket_topic=ticket_topic,
@@ -462,7 +511,8 @@ class TestBruinRepository:
         assert affecting_ticket_details_by_edge["body"] == ticket_details
         assert affecting_ticket_details_by_edge["status"] == 200
 
-    def get_outage_ticket_details_by_edge_serial_test(self):
+    @pytest.mark.asyncio
+    async def get_outage_ticket_details_by_edge_serial_test(self):
         logger = Mock()
         bruin_client = Mock()
 
@@ -493,15 +543,15 @@ class TestBruinRepository:
         }
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body=[ticket_details],
-                                                                                    status=200))
+        bruin_repository.get_ticket_details_by_edge_serial = CoroutineMock(return_value=dict(body=[ticket_details],
+                                                                                             status=200))
 
-        outage_ticket_details_by_edge = bruin_repository.get_outage_ticket_details_by_edge_serial(
+        outage_ticket_details_by_edge = await bruin_repository.get_outage_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
             category=category, ticket_statuses=ticket_statuses,
         )
 
-        bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
+        bruin_repository.get_ticket_details_by_edge_serial.assert_awaited_once_with(
             edge_serial=edge_serial,
             params=dict(
                 ticket_topic=ticket_topic,
@@ -512,7 +562,8 @@ class TestBruinRepository:
         assert outage_ticket_details_by_edge["body"] == ticket_details
         assert outage_ticket_details_by_edge["status"] == 200
 
-    def get_outage_ticket_details_by_edge_serial_empty_return_test(self):
+    @pytest.mark.asyncio
+    async def get_outage_ticket_details_by_edge_serial_empty_return_test(self):
         logger = Mock()
         bruin_client = Mock()
 
@@ -543,15 +594,15 @@ class TestBruinRepository:
         }
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body=[],
-                                                                                    status=200))
+        bruin_repository.get_ticket_details_by_edge_serial = CoroutineMock(return_value=dict(body=[],
+                                                                                             status=200))
 
-        outage_ticket_details_by_edge = bruin_repository.get_outage_ticket_details_by_edge_serial(
+        outage_ticket_details_by_edge = await bruin_repository.get_outage_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
             category=category, ticket_statuses=ticket_statuses,
         )
 
-        bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
+        bruin_repository.get_ticket_details_by_edge_serial.assert_awaited_once_with(
             edge_serial=edge_serial,
             params=dict(
                 ticket_topic=ticket_topic,
@@ -562,7 +613,8 @@ class TestBruinRepository:
         assert outage_ticket_details_by_edge["body"] == []
         assert outage_ticket_details_by_edge["status"] == 200
 
-    def get_outage_ticket_details_by_edge_serial_return_non_2XX_status_test(self):
+    @pytest.mark.asyncio
+    async def get_outage_ticket_details_by_edge_serial_return_non_2XX_status_test(self):
         logger = Mock()
         bruin_client = Mock()
 
@@ -593,15 +645,15 @@ class TestBruinRepository:
         }
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.get_ticket_details_by_edge_serial = Mock(return_value=dict(body='Failed',
-                                                                                    status=404))
+        bruin_repository.get_ticket_details_by_edge_serial = CoroutineMock(return_value=dict(body='Failed',
+                                                                                             status=404))
 
-        outage_ticket_details_by_edge = bruin_repository.get_outage_ticket_details_by_edge_serial(
+        outage_ticket_details_by_edge = await bruin_repository.get_outage_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
             category=category, ticket_statuses=ticket_statuses,
         )
 
-        bruin_repository.get_ticket_details_by_edge_serial.assert_called_once_with(
+        bruin_repository.get_ticket_details_by_edge_serial.assert_awaited_once_with(
             edge_serial=edge_serial,
             params=dict(
                 ticket_topic=ticket_topic,
