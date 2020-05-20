@@ -38,6 +38,17 @@ class OutageMonitor:
         self._temp_autoresolve_serials_whitelist = set()
         self._autoresolve_serials_whitelist = set()
 
+    async def test_rpc(self):
+        while True:
+            self._logger.info('making rpc')
+            outage_ticket_request = {'request_id': uuid(), 'body': {'edge_serial': 'VC05200040315', 'client_id': 86937}}
+
+            outage_ticket = await self._event_bus.rpc_request(
+                'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=180,
+            )
+            self._logger.info('sleeping')
+            asyncio.sleep(60)
+
     async def start_service_outage_monitoring(self, exec_on_start):
         self._logger.info('Scheduling Service Outage Monitor job...')
         next_run_time = undefined
