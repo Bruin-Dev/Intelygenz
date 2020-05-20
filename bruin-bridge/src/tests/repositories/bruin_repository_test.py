@@ -1517,3 +1517,351 @@ class TestBruinRepository:
         bruin_client.get_possible_detail_next_result.assert_called_once_with(ticket_id, work_queue_filters)
         bruin_client.change_detail_work_queue.assert_called_once_with(ticket_id, change_work_queue_payload)
         assert result == change_work_queue_response
+
+    def post_multiple_ticket_notes_with_response_not_having_2xx_code_test(self):
+        ticket_id = 12345
+        notes = [
+            {
+                'text': 'Test note 1',
+                'service_number': 'VC1234567',
+            },
+            {
+                'text': 'Test note 2',
+                'detail_id': 999,
+            },
+            {
+                'text': 'Test note 3',
+                'service_number': 'VC99999999',
+                'detail_id': 888,
+            },
+            {
+                'text': 'Test note 4',
+                'service_number': 'VC12312312',
+                'detail_id': 777,
+                'is_private': True,
+            },
+        ]
+
+        payload = {
+            "notes": [
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 1',
+                    'serviceNumber': 'VC1234567',
+                },
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 2',
+                    'detailId': 999,
+                },
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 3',
+                    'serviceNumber': 'VC99999999',
+                    'detailId': 888,
+                },
+                {
+                    'noteType': 'CON',
+                    'noteValue': 'Test note 4',
+                    'serviceNumber': 'VC12312312',
+                    'detailId': 777,
+                },
+            ],
+        }
+
+        client_response = {
+            "body": 'Got internal error from Bruin',
+            "status": 500,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_multiple_ticket_notes = Mock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.post_multiple_ticket_notes(ticket_id, notes)
+
+        bruin_client.post_multiple_ticket_notes.assert_called_once_with(ticket_id, payload)
+        assert result == client_response
+
+    def post_multiple_ticket_notes_with_all_conditions_met_test(self):
+        ticket_id = 12345
+        notes = [
+            {
+                'text': 'Test note 1',
+                'service_number': 'VC1234567',
+            },
+            {
+                'text': 'Test note 2',
+                'detail_id': 999,
+            },
+            {
+                'text': 'Test note 3',
+                'service_number': 'VC99999999',
+                'detail_id': 888,
+            },
+            {
+                'text': 'Test note 4',
+                'service_number': 'VC12312312',
+                'detail_id': 777,
+                'is_private': True,
+            },
+        ]
+
+        payload = {
+            "notes": [
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 1',
+                    'serviceNumber': 'VC1234567',
+                },
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 2',
+                    'detailId': 999,
+                },
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 3',
+                    'serviceNumber': 'VC99999999',
+                    'detailId': 888,
+                },
+                {
+                    'noteType': 'CON',
+                    'noteValue': 'Test note 4',
+                    'serviceNumber': 'VC12312312',
+                    'detailId': 777,
+                },
+            ],
+        }
+
+        note_1_from_client_response = {
+          "noteID": 70646090,
+          "noteType": "ADN",
+          "noteValue": "Test note 1",
+          "actionID": None,
+          "detailID": 5002307,
+          "enteredBy": 442301,
+          "enteredDate": "2020-05-20T06:00:38.803-04:00",
+          "lastViewedBy": None,
+          "lastViewedDate": None,
+          "refNoteID": None,
+          "noteStatus": None,
+          "noteText": None,
+          "childNotes": None,
+          "documents": None,
+          "alerts": None,
+          "taggedUserDirIDs": None,
+        }
+        note_2_from_client_response = {
+            "noteID": 70646091,
+            "noteType": "ADN",
+            "noteValue": "Test note 2",
+            "actionID": None,
+            "detailID": 999,
+            "enteredBy": 442301,
+            "enteredDate": "2020-05-20T06:00:38.803-04:00",
+            "lastViewedBy": None,
+            "lastViewedDate": None,
+            "refNoteID": None,
+            "noteStatus": None,
+            "noteText": None,
+            "childNotes": None,
+            "documents": None,
+            "alerts": None,
+            "taggedUserDirIDs": None,
+        }
+        note_3_from_client_response = {
+            "noteID": 70646091,
+            "noteType": "ADN",
+            "noteValue": "Test note 3",
+            "actionID": None,
+            "detailID": 888,
+            "enteredBy": 442301,
+            "enteredDate": "2020-05-20T06:00:38.803-04:00",
+            "lastViewedBy": None,
+            "lastViewedDate": None,
+            "refNoteID": None,
+            "noteStatus": None,
+            "noteText": None,
+            "childNotes": None,
+            "documents": None,
+            "alerts": None,
+            "taggedUserDirIDs": None,
+        }
+        note_4_from_client_response = {
+            "noteID": 70646091,
+            "noteType": "CON",
+            "noteValue": "Test note 4",
+            "actionID": None,
+            "detailID": 888,
+            "enteredBy": 442301,
+            "enteredDate": "2020-05-20T06:00:38.803-04:00",
+            "lastViewedBy": None,
+            "lastViewedDate": None,
+            "refNoteID": None,
+            "noteStatus": None,
+            "noteText": None,
+            "childNotes": None,
+            "documents": None,
+            "alerts": None,
+            "taggedUserDirIDs": None,
+        }
+        client_response = {
+            "body": {
+                "ticketNotes": [
+                    note_1_from_client_response,
+                    note_2_from_client_response,
+                    note_3_from_client_response,
+                    note_4_from_client_response,
+                ],
+            },
+            "status": 200,
+        }
+        repository_response = {
+            "body": [
+                note_1_from_client_response,
+                note_2_from_client_response,
+                note_3_from_client_response,
+                note_4_from_client_response,
+            ],
+            "status": 200,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_multiple_ticket_notes = Mock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.post_multiple_ticket_notes(ticket_id, notes)
+
+        bruin_client.post_multiple_ticket_notes.assert_called_once_with(ticket_id, payload)
+        assert result == repository_response
+
+    def post_multiple_ticket_notes_with_all_conditions_met_test(self):
+        ticket_id = 12345
+        notes = [
+            {
+                'text': 'Test note 1',
+                'service_number': 'VC1234567',
+            },
+            {
+                'text': 'Test note 2',
+                'detail_id': 999,
+            },
+            {
+                'text': 'Test note 3',
+                'service_number': 'VC99999999',
+                'detail_id': 888,
+            },
+        ]
+
+        payload = {
+            "notes": [
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 1',
+                    'serviceNumber': 'VC1234567',
+                },
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 2',
+                    'detailId': 999,
+                },
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 3',
+                    'serviceNumber': 'VC99999999',
+                    'detailId': 888,
+                },
+            ],
+        }
+
+        note_1_from_client_response = {
+          "noteID": 70646090,
+          "noteType": "ADN",
+          "noteValue": "Test note 1",
+          "actionID": None,
+          "detailID": 5002307,
+          "enteredBy": 442301,
+          "enteredDate": "2020-05-20T06:00:38.803-04:00",
+          "lastViewedBy": None,
+          "lastViewedDate": None,
+          "refNoteID": None,
+          "noteStatus": None,
+          "noteText": None,
+          "childNotes": None,
+          "documents": None,
+          "alerts": None,
+          "taggedUserDirIDs": None,
+        }
+        note_2_from_client_response = {
+            "noteID": 70646091,
+            "noteType": "ADN",
+            "noteValue": "Test note 2",
+            "actionID": None,
+            "detailID": 999,
+            "enteredBy": 442301,
+            "enteredDate": "2020-05-20T06:00:38.803-04:00",
+            "lastViewedBy": None,
+            "lastViewedDate": None,
+            "refNoteID": None,
+            "noteStatus": None,
+            "noteText": None,
+            "childNotes": None,
+            "documents": None,
+            "alerts": None,
+            "taggedUserDirIDs": None,
+        }
+        note_3_from_client_response = {
+            "noteID": 70646091,
+            "noteType": "ADN",
+            "noteValue": "Test note 3",
+            "actionID": None,
+            "detailID": 888,
+            "enteredBy": 442301,
+            "enteredDate": "2020-05-20T06:00:38.803-04:00",
+            "lastViewedBy": None,
+            "lastViewedDate": None,
+            "refNoteID": None,
+            "noteStatus": None,
+            "noteText": None,
+            "childNotes": None,
+            "documents": None,
+            "alerts": None,
+            "taggedUserDirIDs": None,
+        }
+        client_response = {
+            "body": {
+                "ticketNotes": [
+                    note_1_from_client_response,
+                    note_2_from_client_response,
+                    note_3_from_client_response,
+                ],
+            },
+            "status": 200,
+        }
+        repository_response = {
+            "body": [
+                note_1_from_client_response,
+                note_2_from_client_response,
+                note_3_from_client_response,
+            ],
+            "status": 200,
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.post_multiple_ticket_notes = Mock(return_value=client_response)
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.post_multiple_ticket_notes(ticket_id, notes)
+
+        bruin_client.post_multiple_ticket_notes.assert_called_once_with(ticket_id, payload)
+        assert result == repository_response

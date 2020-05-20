@@ -1634,6 +1634,8 @@ class TestPostOutageTicket:
         }
         assert result == expected
 
+
+class TestGetClientInfo:
     def get_client_info_200_test(self):
         service_number = "VC01919"
 
@@ -1895,3 +1897,301 @@ class TestPostOutageTicket:
             )
 
             assert result == message
+
+
+class TestPostMultipleTicketNotes:
+    def post_multiple_ticket_notes_with_connection_error_test(self):
+        ticket_id = 12345
+        payload = {
+            "notes": [
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 1',
+                    'serviceNumber': 'VC1234567',
+                },
+            ],
+        }
+        connection_error_cause = 'Connection timed out'
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', side_effect=ConnectionError(connection_error_cause)):
+            result = bruin_client.post_multiple_ticket_notes(ticket_id, payload)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/notes/advanced',
+                headers=bruin_client._get_request_headers(),
+                json=payload,
+                verify=False
+            )
+
+        expected = {
+            "body": f"Connection error in Bruin API. Cause: {connection_error_cause}",
+            "status": 500
+        }
+        assert result == expected
+
+    def post_multiple_ticket_notes_with_http_2xx_response_test(self):
+        ticket_id = 12345
+        payload = {
+            "notes": [
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 1',
+                    'serviceNumber': 'VC1234567',
+                },
+            ],
+        }
+
+        bruin_response_body = {
+            "ticketNotes": [
+                {
+                    "noteID": 70646090,
+                    "noteType": "ADN",
+                    "noteValue": "Test note 1",
+                    "actionID": None,
+                    "detailID": 5002307,
+                    "enteredBy": 442301,
+                    "enteredDate": "2020-05-20T06:00:38.803-04:00",
+                    "lastViewedBy": None,
+                    "lastViewedDate": None,
+                    "refNoteID": None,
+                    "noteStatus": None,
+                    "noteText": None,
+                    "childNotes": None,
+                    "documents": None,
+                    "alerts": None,
+                    "taggedUserDirIDs": None,
+                },
+            ],
+        }
+        bruin_response_status_code = 200
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_multiple_ticket_notes(ticket_id, payload)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/notes/advanced',
+                headers=bruin_client._get_request_headers(),
+                json=payload,
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def post_multiple_ticket_notes_with_http_400_response_test(self):
+        ticket_id = 12345
+        payload = {
+            "notes": [
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 1',
+                    'serviceNumber': 'VC1234567',
+                },
+            ],
+        }
+
+        bruin_response_body = 'Error in request'
+        bruin_response_status_code = 400
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_multiple_ticket_notes(ticket_id, payload)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/notes/advanced',
+                headers=bruin_client._get_request_headers(),
+                json=payload,
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def post_multiple_ticket_notes_with_http_401_response_test(self):
+        ticket_id = 12345
+        payload = {
+            "notes": [
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 1',
+                    'serviceNumber': 'VC1234567',
+                },
+            ],
+        }
+
+        bruin_response_body = 'Maximum retries while relogin'
+        bruin_response_status_code = 401
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client.login = Mock()
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_multiple_ticket_notes(ticket_id, payload)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/notes/advanced',
+                headers=bruin_client._get_request_headers(),
+                json=payload,
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def post_multiple_ticket_notes_with_http_403_response_test(self):
+        ticket_id = 12345
+        payload = {
+            "notes": [
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 1',
+                    'serviceNumber': 'VC1234567',
+                },
+            ],
+        }
+
+        bruin_response_body = 'Forbidden'
+        bruin_response_status_code = 403
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_multiple_ticket_notes(ticket_id, payload)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/notes/advanced',
+                headers=bruin_client._get_request_headers(),
+                json=payload,
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def post_multiple_ticket_notes_with_http_404_response_test(self):
+        ticket_id = 12345
+        payload = {
+            "notes": [
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 1',
+                    'serviceNumber': 'VC1234567',
+                },
+            ],
+        }
+
+        bruin_response_body = 'Resource not found'
+        bruin_response_status_code = 404
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_multiple_ticket_notes(ticket_id, payload)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/notes/advanced',
+                headers=bruin_client._get_request_headers(),
+                json=payload,
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def post_multiple_ticket_notes_with_http_5xx_response_test(self):
+        ticket_id = 12345
+        payload = {
+            "notes": [
+                {
+                    'noteType': 'ADN',
+                    'noteValue': 'Test note 1',
+                    'serviceNumber': 'VC1234567',
+                },
+            ],
+        }
+
+        bruin_response_body = 'Error in request'
+        bruin_response_status_code = 400
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'post', return_value=bruin_response):
+            result = bruin_client.post_multiple_ticket_notes(ticket_id, payload)
+
+            bruin_client_module.requests.post.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/notes/advanced',
+                headers=bruin_client._get_request_headers(),
+                json=payload,
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status_code,
+        }
+        assert result == expected

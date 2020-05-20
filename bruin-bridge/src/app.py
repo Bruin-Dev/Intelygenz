@@ -12,6 +12,7 @@ from application.actions.get_ticket_task_history import GetTicketTaskHistory
 from application.actions.change_detail_work_queue import ChangeDetailWorkQueue
 from application.actions.get_management_status import GetManagementStatus
 from application.actions.post_note import PostNote
+from application.actions.post_multiple_notes import PostMultipleNotes
 from application.actions.open_ticket import OpenTicket
 from application.actions.post_outage_ticket import PostOutageTicket
 from application.actions.resolve_ticket import ResolveTicket
@@ -48,6 +49,7 @@ class Container:
         self._subscriber_affecting_details_by_edge_serial = NATSClient(config, logger=self._logger)
         self._subscriber_outage_details_by_edge_serial = NATSClient(config, logger=self._logger)
         self._subscriber_post_note = NATSClient(config, logger=self._logger)
+        self._subscriber_post_multiple_notes = NATSClient(config, logger=self._logger)
         self._subscriber_post_ticket = NATSClient(config, logger=self._logger)
         self._subscriber_open_ticket = NATSClient(config, logger=self._logger)
         self._subscriber_resolve_ticket = NATSClient(config, logger=self._logger)
@@ -70,6 +72,7 @@ class Container:
             consumer_name="outage_ticket_details_by_edge_serial"
         )
         self._event_bus.add_consumer(self._subscriber_post_note, consumer_name="post_note")
+        self._event_bus.add_consumer(self._subscriber_post_multiple_notes, consumer_name="post_multiple_notes")
         self._event_bus.add_consumer(self._subscriber_post_ticket, consumer_name="post_ticket")
         self._event_bus.add_consumer(self._subscriber_open_ticket, consumer_name="open_ticket")
         self._event_bus.add_consumer(self._subscriber_resolve_ticket, consumer_name="resolve_ticket")
@@ -95,6 +98,7 @@ class Container:
             self._logger, self._event_bus, self._bruin_repository
         )
         self._post_note = PostNote(self._logger, self._event_bus, self._bruin_repository)
+        self._post_multiple_notes = PostMultipleNotes(self._logger, self._event_bus, self._bruin_repository)
         self._post_ticket = PostTicket(self._logger, self._event_bus, self._bruin_repository)
         self._open_ticket = OpenTicket(self._logger, self._event_bus, self._bruin_repository)
         self._resolve_ticket = ResolveTicket(self._logger, self._event_bus, self._bruin_repository)
@@ -121,6 +125,8 @@ class Container:
         )
         self._action_post_note = ActionWrapper(self._post_note, "post_note",
                                                is_async=True, logger=self._logger)
+        self._action_post_multiple_notes = ActionWrapper(self._post_multiple_notes, "post_multiple_notes",
+                                                         is_async=True, logger=self._logger)
         self._action_post_ticket = ActionWrapper(self._post_ticket, "post_ticket",
                                                  is_async=True, logger=self._logger)
         self._action_open_ticket = ActionWrapper(self._open_ticket, "open_ticket",
@@ -169,6 +175,10 @@ class Container:
                                                  queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="post_note", topic="bruin.ticket.note.append.request",
                                                  action_wrapper=self._action_post_note,
+                                                 queue="bruin_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="post_multiple_notes",
+                                                 topic="bruin.ticket.multiple.notes.append.request",
+                                                 action_wrapper=self._action_post_multiple_notes,
                                                  queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="post_ticket", topic="bruin.ticket.creation.request",
                                                  action_wrapper=self._action_post_ticket,

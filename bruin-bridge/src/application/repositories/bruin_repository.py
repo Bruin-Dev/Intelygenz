@@ -1,5 +1,7 @@
 import asyncio
 
+from typing import List
+
 
 class BruinRepository:
 
@@ -125,6 +127,37 @@ class BruinRepository:
     def post_ticket_note(self, ticket_id, note):
         payload = {"note": note}
         return self._bruin_client.post_ticket_note(ticket_id, payload)
+
+    def post_multiple_ticket_notes(self, ticket_id: int, notes: List[dict]) -> dict:
+        payload = {
+            'notes': [],
+        }
+
+        for note in notes:
+            note_for_payload = {
+                'noteValue': note['text'],
+            }
+
+            if 'service_number' in note.keys():
+                note_for_payload['serviceNumber'] = note['service_number']
+
+            if 'detail_id' in note.keys():
+                note_for_payload['detailId'] = note['detail_id']
+
+            if note.get('is_private'):
+                note_for_payload['noteType'] = 'CON'  # Private note
+            else:
+                note_for_payload['noteType'] = 'ADN'  # Public, standard note
+
+            payload['notes'].append(note_for_payload)
+
+        response = self._bruin_client.post_multiple_ticket_notes(ticket_id, payload)
+
+        if response['status'] not in range(200, 300):
+            return response
+
+        response['body'] = response['body']['ticketNotes']
+        return response
 
     def post_ticket(self, payload):
         return self._bruin_client.post_ticket(payload)
