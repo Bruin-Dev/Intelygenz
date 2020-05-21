@@ -83,7 +83,7 @@ class TestOutageRepository:
 
     def is_outage_ticket_auto_resolvable_test(self):
         text_identifier = ("#*Automation Engine*#\n"
-                           "Auto-resolving ticket.\n")
+                           "Auto-resolving detail for serial\n")
 
         note_value1 = f"{text_identifier}TimeStamp: 2021-01-02 10:18:16-05:00"
         note_value2 = f"{text_identifier}TimeStamp: 2020-01-02 10:18:16-05:00"

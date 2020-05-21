@@ -33,7 +33,7 @@ class OutageRepository:
         return link_state == 'DISCONNECTED'
 
     def is_outage_ticket_auto_resolvable(self, ticket_notes: list, max_autoresolves: int) -> bool:
-        regex = re.compile(r"^#\*Automation Engine\*#\s*Auto-resolving ticket\.")
+        regex = re.compile(r"^#\*Automation Engine\*#\nAuto-resolving detail for serial")
         times_autoresolved = 0
 
         for ticket_note in ticket_notes:
