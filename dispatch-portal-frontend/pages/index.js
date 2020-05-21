@@ -78,8 +78,10 @@ function Index({ authToken }) {
       const response = await dispatchService.getAll();
       if (response && response.data) {
         setData(response.data);
-      } else {
-        setApiError(true);
+      }
+
+      if (response && response.error) {
+        setApiError(response.error);
       }
       setIsLoading(false);
     }
@@ -96,18 +98,16 @@ function Index({ authToken }) {
       </Link>
       {isLoading && <Loading />}
 
-      {!(isLoading && apiError) ? (
-        <p>Error!</p>
-      ) : (
-        <DataTable
-          title="Dispatches List"
-          columns={columns}
-          data={data}
-          fixedHeader
-          pagination
-          className="dataTable"
-        />
-      )}
+      {apiError && <p>Error!</p>}
+
+      <DataTable
+        title="Dispatches List"
+        columns={columns}
+        data={data}
+        fixedHeader
+        pagination
+        className="dataTable"
+      />
     </div>
   );
 }
