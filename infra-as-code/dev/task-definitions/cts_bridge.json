@@ -54,6 +54,10 @@
       },
       {
         "name": "CTS_CLIENT_USERNAME",
+        "value": "${CTS_CLIENT_USERNAME}"
+      },
+      {
+        "name": "CTS_CLIENT_PASSWORD",
         "value": "${CTS_CLIENT_PASSWORD}"
       },
       {

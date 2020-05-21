@@ -8,6 +8,8 @@ from apscheduler.util import undefined
 from pytz import timezone
 from shortuuid import uuid
 
+from application.templates.dispatch_confirmed import get_dispatch_confirmed_note
+
 
 class LitDispatchMonitor:
     def __init__(self, config, redis_client, event_bus, scheduler, logger):
@@ -99,8 +101,25 @@ class LitDispatchMonitor:
                         else:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"- Adding confirm note")
-                            # TODO: call add note
-                            # await
+                            # TODO: retrieve from response_body
+                            note_data = {
+                                'vendor': 'LIT',
+                                'date_of_dispatch': 'date_of_dispatch',
+                                'time_of_dispatch': 'time_of_dispatch',
+                                'am_pm': 'am_pm',
+                                'time_zone': 'time_zone'
+                            }
+                            note = get_dispatch_confirmed_note(note_data)
+                            append_note_response = await self._append_note_to_ticket(ticket_id, note)
+                            append_note_response_status = append_note_response['status']
+                            append_note_response_body = append_note_response['body']
+                            if append_note_response_status not in range(200, 300):
+                                self._logger.info(f"[process_note] Note: `{note}` Dispatch: {dispatch_number} "
+                                                  f"Ticket_id: {ticket_id} - Not appended")
+                                return
+                            self._logger.info(f"[process_note] Note: `{note}` Dispatch: {dispatch_number} "
+                                              f"Ticket_id: {ticket_id} - Appended")
+                            self._logger.info(f"[process_note] Note appended. Response {append_note_response_body}")
                     else:
                         self._logger.warn(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"- Watermark not found, ticket does not belong to us")

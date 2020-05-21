@@ -9,14 +9,12 @@ Date of Dispatch: 2019-11-14
 Time of Dispatch (Local): 6PM-8PM
 Time Zone (Local): Pacific Time
 Vendor: LIT
-SLA Level: None
 
-Location Owner/Name: Pacific Time
+Location Owner/Name: Red Rose Inn
 Address: 123 Fake Street, Pleasantown, CA, 99088
 On-Site Contact: Jane Doe
 Phone: +1 666 6666 666
 
-Service Type: None
 Issues Experienced:
 Device is bouncing constantly
 Arrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance
@@ -25,7 +23,7 @@ Laptop, cable, tuner, ladder,internet hotspot
 
 Requester
 Name: Karen Doe
-Phone: None
+Phone: +1 666 6666 666
 Email: karen.doe@mettel.net
 Department: Customer Care
 """
@@ -50,7 +48,8 @@ def get_dispatch_requested_note_test():
       'mettel_tech_call_in_instructions': 'When arriving to the site call HOLMDEL NOC for telematic assistance',
       'name_of_mettel_requester': 'Karen Doe',
       'mettel_department': 'Customer Care',
-      'mettel_requester_email': 'karen.doe@mettel.net'
+      'mettel_requester_email': 'karen.doe@mettel.net',
+      'mettel_department_phone_number': '+1 666 6666 666'
     }
     dispatch_request_note = get_dispatch_requested_note(body)
 

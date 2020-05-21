@@ -87,7 +87,8 @@ class TestMappers:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         expected_map = {
@@ -107,7 +108,8 @@ class TestMappers:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
         assert expected_map == map_create_dispatch(content)
 

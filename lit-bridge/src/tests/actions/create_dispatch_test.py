@@ -160,7 +160,7 @@ class TestCreateDispatch:
                                   "job_site_city", "job_site_state", "job_site_zip_code",
                                   "job_site_contact_name_and_phone_number", "special_materials_needed_for_dispatch",
                                   "scope_of_work", "mettel_tech_call_in_instructions", "name_of_mettel_requester",
-                                  "mettel_department", "mettel_requester_email"]
+                                  "mettel_department", "mettel_requester_email", "mettel_department_phone_number"]
         request_id = '123'
         response_topic = 'some.response.topic'
 

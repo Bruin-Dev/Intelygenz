@@ -613,7 +613,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "mettel_department_phone_number"
         }
 
         payload_lit_mapped = {
@@ -633,7 +634,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "mettel_department_phone_number"
         }
 
         payload_request = {
@@ -735,7 +737,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "mettel_department_phone_number"
         }
 
         payload_lit_mapped = {
@@ -754,7 +757,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "mettel_department_phone_number"
         }
 
         payload_request = {
@@ -863,7 +867,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "mettel_department_phone_number"
         }
 
         payload_lit_mapped = {
@@ -882,7 +887,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "mettel_department_phone_number"
         }
 
         payload_request = {
@@ -948,7 +954,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         payload_lit_mapped = {
@@ -968,7 +975,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         payload_request = {
@@ -1078,7 +1086,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         payload_lit_mapped = {
@@ -1099,7 +1108,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         payload_request = {
@@ -1163,7 +1173,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         expected_response_create = {
@@ -1260,7 +1271,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         expected_response_create = {'code': 400, 'message': "'dispatch_number' is a required property"}
@@ -1355,7 +1367,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         payload_lit_mapped = {
@@ -1375,7 +1388,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         expected_response_create = {'code': 400, 'message': "'dispatch_number' is a required property"}
@@ -1432,7 +1446,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         payload_lit_mapped = {
@@ -1453,7 +1468,8 @@ class TestApiServer:
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
-            "mettel_requester_email": "karen.doe@mettel.net"
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
         }
 
         payload_request = {

@@ -77,12 +77,12 @@ class DispatchServer:
         self._app.add_url_rule("/lit/dispatch/<dispatch_number>/upload-file", None,
                                self.lit_upload_file_to_dispatch, methods=['POST'], strict_slashes=False)
 
-        self._app.add_url_rule("/cts/dispatch/<dispatch_number>", None, self.cts_get_dispatch,
-                               methods=['GET'], strict_slashes=False)
-        self._app.add_url_rule("/cts/dispatch", None, self.cts_get_all_dispatches,
-                               methods=['GET'], strict_slashes=False)
-        self._app.add_url_rule("/cts/dispatch", None, self.cts_create_dispatch,
-                               methods=['POST'], strict_slashes=False)
+        # self._app.add_url_rule("/cts/dispatch/<dispatch_number>", None, self.cts_get_dispatch,
+        #                        methods=['GET'], strict_slashes=False)
+        # self._app.add_url_rule("/cts/dispatch", None, self.cts_get_all_dispatches,
+        #                        methods=['GET'], strict_slashes=False)
+        # self._app.add_url_rule("/cts/dispatch", None, self.cts_create_dispatch,
+        #                        methods=['POST'], strict_slashes=False)
 
     def _health(self):
         return jsonify(None), self._status, None
@@ -173,7 +173,6 @@ class DispatchServer:
         self._logger.info(f"payload: {body}")
 
         dispatch_request = lit_mapper.map_create_dispatch(body)
-
         request_body = dict()
         request_body['RequestDispatch'] = dispatch_request
 
@@ -313,112 +312,112 @@ class DispatchServer:
 
     # CTS endpoints
     # Get Dispatch - GET - /lit/dispatch/<dispatch_number>
-    async def cts_get_dispatch(self, dispatch_number):
-        self._logger.info(f"--> Dispatch [{dispatch_number}] from cts-bridge")
-        start_time = time.time()
-        payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
-        response = await self._event_bus.rpc_request("cts.dispatch.get", payload, timeout=30)
-        self._logger.info(response)
-        response_dispatch = dict()
-        if response['status'] == 500:
-            error_response = {
-                'code': response['status'], 'message': response['body']
-            }
-            return jsonify(error_response), response['status'], None
-        if 'body' not in response or 'Id' not in response['body'] \
-                or response['body'] is None:
-            self._logger.error(f"Could not retrieve dispatch, reason: {response['body']}")
-            error_response = {
-                'code': response['status'], 'message': response['body']
-            }
-            return jsonify(error_response), response['status'], None
-
-        self._logger.info(f"<-- Dispatch [{dispatch_number}] - {response['body']} "
-                          f"- took {time.time() - start_time}")
-        response_dispatch['id'] = response['body']['Id']
-        response_dispatch['vendor'] = 'cts'
-        response_dispatch['dispatch'] = cts_mapper.map_get_dispatch(response['body'])
-
-        return jsonify(response_dispatch), response["status"], None
+    # async def cts_get_dispatch(self, dispatch_number):
+    #     self._logger.info(f"--> Dispatch [{dispatch_number}] from cts-bridge")
+    #     start_time = time.time()
+    #     payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
+    #     response = await self._event_bus.rpc_request("cts.dispatch.get", payload, timeout=30)
+    #     self._logger.info(response)
+    #     response_dispatch = dict()
+    #     if response['status'] == 500:
+    #         error_response = {
+    #             'code': response['status'], 'message': response['body']
+    #         }
+    #         return jsonify(error_response), response['status'], None
+    #     if 'body' not in response or 'Id' not in response['body'] \
+    #             or response['body'] is None:
+    #         self._logger.error(f"Could not retrieve dispatch, reason: {response['body']}")
+    #         error_response = {
+    #             'code': response['status'], 'message': response['body']
+    #         }
+    #         return jsonify(error_response), response['status'], None
+    #
+    #     self._logger.info(f"<-- Dispatch [{dispatch_number}] - {response['body']} "
+    #                       f"- took {time.time() - start_time}")
+    #     response_dispatch['id'] = response['body']['Id']
+    #     response_dispatch['vendor'] = 'cts'
+    #     response_dispatch['dispatch'] = cts_mapper.map_get_dispatch(response['body'])
+    #
+    #     return jsonify(response_dispatch), response["status"], None
 
     # Get All Dispatches - GET - /cts/dispatch
-    async def cts_get_all_dispatches(self):
-        self._logger.info(f"--> Getting all dispatches from cts-bridge")
-        start_time = time.time()
-        payload = {"request_id": uuid(), "body": {}}
-        response = await self._event_bus.rpc_request("cts.dispatch.get", payload, timeout=30)
-        self._logger.info(response)
-        response_dispatch = dict()
-        if response['status'] == 500:
-            error_response = {
-                'code': response['status'], 'message': response['body']
-            }
-            return jsonify(error_response), response['status'], None
-
-        if 'body' not in response \
-                or 'Status' not in response['body'] \
-                or 'DispatchList' not in response['body'] \
-                or response['body']['DispatchList'] is None:
-            self._logger.error(f"Could not retrieve dispatch, reason: {response['body']}")
-            error_response = {
-                'code': response['status'], 'message': response['body']
-            }
-            return jsonify(error_response), response['status'], None
-
-        self._logger.info(f"<-- All Dispatches - {response['body']} - took {time.time() - start_time}")
-        response_dispatch['vendor'] = 'cts'
-        # TODO: check what we retrieve
-        response_dispatch['list_dispatch'] = [
-            cts_mapper.map_get_dispatch(d) for d in response['body']['DispatchList']]
-
-        return jsonify(response_dispatch), response["status"], None
+    # async def cts_get_all_dispatches(self):
+    #     self._logger.info(f"--> Getting all dispatches from cts-bridge")
+    #     start_time = time.time()
+    #     payload = {"request_id": uuid(), "body": {}}
+    #     response = await self._event_bus.rpc_request("cts.dispatch.get", payload, timeout=30)
+    #     self._logger.info(response)
+    #     response_dispatch = dict()
+    #     if response['status'] == 500:
+    #         error_response = {
+    #             'code': response['status'], 'message': response['body']
+    #         }
+    #         return jsonify(error_response), response['status'], None
+    #
+    #     if 'body' not in response \
+    #             or 'Status' not in response['body'] \
+    #             or 'DispatchList' not in response['body'] \
+    #             or response['body']['DispatchList'] is None:
+    #         self._logger.error(f"Could not retrieve dispatch, reason: {response['body']}")
+    #         error_response = {
+    #             'code': response['status'], 'message': response['body']
+    #         }
+    #         return jsonify(error_response), response['status'], None
+    #
+    #     self._logger.info(f"<-- All Dispatches - {response['body']} - took {time.time() - start_time}")
+    #     response_dispatch['vendor'] = 'cts'
+    #     # TODO: check what we retrieve
+    #     response_dispatch['list_dispatch'] = [
+    #         cts_mapper.map_get_dispatch(d) for d in response['body']['DispatchList']]
+    #
+    #     return jsonify(response_dispatch), response["status"], None
 
     # Create Dispatch - POST - /cts/dispatch
-    async def cts_create_dispatch(self):
-        self._logger.info(f"Creating new dispatch from cts-bridge")
-        start_time = time.time()
-        body = await request.get_json()
-
-        try:
-            validate(body, self._schema['components']['schemas']['new_dispatch_cts'])
-        except jsonschema.exceptions.ValidationError as ve:
-            self._logger.error(ve)
-            error_message = "Schema not valid."
-            self._logger.error(error_message)
-            error_response = {'code': HTTPStatus.BAD_REQUEST, 'message': ve.message}
-            return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
-
-        self._logger.info(f"payload: {body}")
-
-        dispatch_request = cts_mapper.map_create_dispatch(body)
-
-        request_body = dict()
-        request_body['RequestDispatch'] = dispatch_request
-
-        payload = {"request_id": uuid(), "body": request_body}
-        response = await self._event_bus.rpc_request("cts.dispatch.post", payload, timeout=30)
-        self._logger.info(response)
-
-        if response['status'] == 500:
-            error_response = {
-                'code': response['status'], 'message': response['body']
-            }
-            return jsonify(error_response), response['status'], None
-
-        response_dispatch = dict()
-        if 'body' in response and response['body'] is not None and 'Dispatch' in response['body'] \
-                and response['body']['Dispatch'] is not None \
-                and 'Dispatch_Number' in response['body']['Dispatch']:
-            dispatch_num = response['body']['Dispatch']['Dispatch_Number']
-            response_dispatch['id'] = dispatch_num
-            response_dispatch['vendor'] = 'CTS'
-            self._logger.info(
-                f"Dispatch retrieved: {dispatch_num} - took {time.time() - start_time}")
-        else:
-            self._logger.info(f"Dispatch not created - {payload} - took {time.time() - start_time}")
-            error_response = {'code': response['status'], 'message': response['body']}
-            return jsonify(error_response), response['status'], None
-        return jsonify(response_dispatch), HTTPStatus.OK, None
+    # async def cts_create_dispatch(self):
+    #     self._logger.info(f"Creating new dispatch from cts-bridge")
+    #     start_time = time.time()
+    #     body = await request.get_json()
+    #
+    #     try:
+    #         validate(body, self._schema['components']['schemas']['new_dispatch_cts'])
+    #     except jsonschema.exceptions.ValidationError as ve:
+    #         self._logger.error(ve)
+    #         error_message = "Schema not valid."
+    #         self._logger.error(error_message)
+    #         error_response = {'code': HTTPStatus.BAD_REQUEST, 'message': ve.message}
+    #         return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
+    #
+    #     self._logger.info(f"payload: {body}")
+    #
+    #     dispatch_request = cts_mapper.map_create_dispatch(body)
+    #
+    #     request_body = dict()
+    #     request_body['RequestDispatch'] = dispatch_request
+    #
+    #     payload = {"request_id": uuid(), "body": request_body}
+    #     response = await self._event_bus.rpc_request("cts.dispatch.post", payload, timeout=30)
+    #     self._logger.info(response)
+    #
+    #     if response['status'] == 500:
+    #         error_response = {
+    #             'code': response['status'], 'message': response['body']
+    #         }
+    #         return jsonify(error_response), response['status'], None
+    #
+    #     response_dispatch = dict()
+    #     if 'body' in response and response['body'] is not None and 'Dispatch' in response['body'] \
+    #             and response['body']['Dispatch'] is not None \
+    #             and 'Dispatch_Number' in response['body']['Dispatch']:
+    #         dispatch_num = response['body']['Dispatch']['Dispatch_Number']
+    #         response_dispatch['id'] = dispatch_num
+    #         response_dispatch['vendor'] = 'CTS'
+    #         self._logger.info(
+    #             f"Dispatch retrieved: {dispatch_num} - took {time.time() - start_time}")
+    #     else:
+    #         self._logger.info(f"Dispatch not created - {payload} - took {time.time() - start_time}")
+    #         error_response = {'code': response['status'], 'message': response['body']}
+    #         return jsonify(error_response), response['status'], None
+    #     return jsonify(response_dispatch), HTTPStatus.OK, None
 
     async def _append_note_to_ticket(self, ticket_id, ticket_note):
         append_note_to_ticket_request = {
@@ -446,19 +445,20 @@ class DispatchServer:
                 watermark_found = True
         return watermark_found
 
+    async def _get_ticket_details(self, ticket_id):
+        ticket_request_msg = {'request_id': uuid(),
+                              'body': {'ticket_id': ticket_id}}
+        ticket = await self._event_bus.rpc_request("bruin.ticket.details.request", ticket_request_msg, timeout=200)
+        return ticket
+
     async def _process_note(self, dispatch_number, body):
         try:
             ticket_note = get_dispatch_requested_note(body)
-
-            # TODO: Split note string in array to avoid max length error
-            if len(ticket_note) > self.MAX_TICKET_NOTE:
-                self._logger.info("TODO: recheck note length")
-                return
-            else:
-                ticket_notes = [ticket_note]
-            # ticket_notes = textwrap.wrap(ticket_note, self.MAX_TICKET_NOTE)
+            # Split the note if needed
+            ticket_notes = textwrap.wrap(ticket_note, self.MAX_TICKET_NOTE, replace_whitespace=False)
 
             # TODO: get from bruin
+            # pre_existing_ticket_notes = self._get_ticket_details(body['mettel_bruin_ticket_id'])
             pre_existing_ticket_notes = []
 
             watermark_found = self._exists_watermark_in_ticket('Dispatch Management - Dispatch Requested',

@@ -357,6 +357,7 @@ components:
         - name_of_mettel_requester
         - mettel_department
         - mettel_requester_email
+        - mettel_department_phone_number
 
       properties:
         date_of_dispatch:
@@ -413,6 +414,9 @@ components:
         mettel_requester_email:
           type: string
           example: "karen.doe@mettel.net"
+        mettel_department_phone_number:
+          type: string
+          example: "+1 666 6666 666"
 
     update_dispatch_lit:
       type: object
@@ -476,6 +480,9 @@ components:
         mettel_requester_email:
           type: string
           example: "karen.doe@mettel.net"
+        mettel_department_phone_number:
+          type: string
+          example: "+1 666 6666 666"
 
     dispatch_cts:
       type: object

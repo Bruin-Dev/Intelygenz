@@ -17,7 +17,7 @@
   },
   "servers": [
     {
-      "url": "http://127.0.0.1:5004/"
+      "url": "http://127.0.0.1:5000/"
     }
   ],
   "tags": [
@@ -531,7 +531,8 @@
           "mettel_tech_call_in_instructions",
           "name_of_mettel_requester",
           "mettel_department",
-          "mettel_requester_email"
+          "mettel_requester_email",
+          "mettel_department_phone_number"
         ],
         "properties": {
           "date_of_dispatch": {
@@ -622,6 +623,10 @@
           "mettel_requester_email": {
             "type": "string",
             "example": "karen.doe@mettel.net"
+          },
+          "mettel_department_phone_number": {
+            "type": "string",
+            "example": "+1 666 6666 666"
           }
         }
       },
@@ -723,6 +728,10 @@
           "mettel_requester_email": {
             "type": "string",
             "example": "karen.doe@mettel.net"
+          },
+          "mettel_department_phone_number": {
+            "type": "string",
+            "example": "+1 666 6666 666"
           }
         }
       },

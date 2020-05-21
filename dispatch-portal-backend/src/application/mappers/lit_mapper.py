@@ -23,6 +23,8 @@ def map_get_dispatch(body):
         "name_of_mettel_requester": body["name_of_mettel_requester"],
         "mettel_department": body["mettel_department"],
         "mettel_requester_email": body["mettel_requester_email"],
+        # TODO: get from lit
+        # "mettel_requester_phone_number": body["mettel_requester_phone_number"]
         "dispatch_status": body['dispatch_status'],
     }
     return dispatch_request
@@ -52,6 +54,7 @@ def map_create_dispatch(body):
         "name_of_mettel_requester": body["name_of_mettel_requester"],
         "mettel_department": body["mettel_department"],
         "mettel_requester_email": body["mettel_requester_email"],
+        "mettel_department_phone_number": body["mettel_department_phone_number"],
     }
     return dispatch_request
 
@@ -80,6 +83,7 @@ def map_update_dispatch(body):
         "name_of_mettel_requester": body.get("name_of_mettel_requester", None),
         "mettel_department": body.get("mettel_department", None),
         "mettel_requester_email": body.get("mettel_requester_email", None),
+        "mettel_department_phone_number": body.get("mettel_department_phone_number", None),
     }
 
     if "job_site_contact_name" in body and "job_site_contact_number" in body:
