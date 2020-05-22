@@ -3,6 +3,7 @@ from http import HTTPStatus
 
 import pytest
 from unittest.mock import Mock, patch
+from unittest.mock import call
 
 from quart.exceptions import HTTPException
 
@@ -647,13 +648,46 @@ class TestApiServer:
 
         expected_response_create = {'id': 'DIS37450', 'vendor': 'LIT'}
 
+        ticket_note = '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n' \
+                      'A dispatch has been requested with LIT. Please see the summary below.\n' \
+                      '--\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n' \
+                      'Time Zone (Local): Pacific Time\n' \
+                      'Vendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n' \
+                      'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n' \
+                      'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n' \
+                      'Arrival Instructions: When arriving to the site call ' \
+                      'HOLMDEL NOC for telematic assistance\nMaterials Needed:\n' \
+                      'Laptop, cable, tuner, ladder,internet hotspot\n\nRequester\n' \
+                      'Name: Karen Doe\nPhone: mettel_department_phone_number\n' \
+                      'Email: karen.doe@mettel.net\nDepartment: Customer Care'
+
+        append_note_to_ticket_request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': 'T-12345',
+                'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
+                        'A dispatch has been requested with LIT. Please see the summary below.\n--\n'
+                        'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
+                        'Time Zone (Local): Pacific Time\nVendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n'
+                        'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
+                        'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n'
+                        'Arrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\n'
+                        'Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n'
+                        'Requester\nName: Karen Doe\nPhone: mettel_department_phone_number\n'
+                        'Email: karen.doe@mettel.net\nDepartment: Customer Care'
+            },
+        }
+
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            api_server_test._process_note = CoroutineMock()
             response = await client.post(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.post", payload_request, timeout=30)
+
+            event_bus.rpc_request.assert_has_awaits([
+                call("lit.dispatch.post", payload_request, timeout=30),
+                call("bruin.ticket.note.append.request", append_note_to_ticket_request, timeout=15)
+            ])
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_create

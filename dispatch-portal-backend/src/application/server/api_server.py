@@ -433,17 +433,17 @@ class DispatchServer:
         )
         return append_ticket_to_note
 
-    def _exists_watermark_in_ticket(self, watermark, ticket_notes):
-        watermark_found = False
-
-        for ticket_note_data in ticket_notes:
-            self._logger.info(ticket_note_data)
-            ticket_note = ticket_note_data.get('noteValue')
-
-            if '#*Automation Engine*#' in ticket_note \
-                    and watermark in ticket_note:
-                watermark_found = True
-        return watermark_found
+    # def _exists_watermark_in_ticket(self, watermark, ticket_notes):
+    #     watermark_found = False
+    #
+    #     for ticket_note_data in ticket_notes:
+    #         self._logger.info(ticket_note_data)
+    #         ticket_note = ticket_note_data.get('noteValue')
+    #
+    #         if '#*Automation Engine*#' in ticket_note \
+    #                 and watermark in ticket_note:
+    #             watermark_found = True
+    #     return watermark_found
 
     async def _get_ticket_details(self, ticket_id):
         ticket_request_msg = {'request_id': uuid(),
@@ -459,11 +459,11 @@ class DispatchServer:
 
             # TODO: get from bruin
             # pre_existing_ticket_notes = self._get_ticket_details(body['mettel_bruin_ticket_id'])
-            pre_existing_ticket_notes = []
+            # pre_existing_ticket_notes = []
 
-            watermark_found = self._exists_watermark_in_ticket('Dispatch Management - Dispatch Requested',
-                                                               pre_existing_ticket_notes)
-
+            # watermark_found = self._exists_watermark_in_ticket('Dispatch Management - Dispatch Requested',
+            #                                                    pre_existing_ticket_notes)
+            watermark_found = False
             if watermark_found is True:
                 # TODO: decide what to do
                 self._logger(f"Not adding note")
