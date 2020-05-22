@@ -73,3 +73,7 @@ resource "aws_ecr_repository" "automation-dispatch-portal-frontend-nginx" {
 resource "aws_ecr_repository" "automation-tnba-monitor" {
   name = "automation-tnba-monitor"
 }
+
+resource "aws_ecr_repository" "automation-cts-bridge" {
+  name = "automation-cts-bridge"
+}

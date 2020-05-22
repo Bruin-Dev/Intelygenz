@@ -120,6 +120,8 @@ resource "aws_ecs_service" "automation-service-outage-monitor-1" {
   }
 
   depends_on = [ null_resource.bruin-bridge-healthcheck,
+                 null_resource.cts-bridge-healthcheck,
+                 null_resource.lit-bridge-healthcheck,
                  null_resource.velocloud-bridge-healthcheck,
                  null_resource.t7-bridge-healthcheck,
                  null_resource.notifier-healthcheck,

@@ -76,6 +76,7 @@ resource "aws_security_group" "automation-bruin-bridge_service" {
     Environment = var.ENVIRONMENT
   }
 }
+
 resource "aws_service_discovery_service" "bruin-bridge" {
   name = local.automation-bruin-bridge-service_discovery_service-name
 
