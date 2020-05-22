@@ -92,7 +92,10 @@ function Index({ authToken }) {
     <div>
       <Menu authToken={authToken} />
       <Link href={Routes.NEW_DISPATCH()}>
-        <button className="new" type="button">
+        <button
+          type="button"
+          className="float-right bg-transparent hover:bg-teal-500 text-teal-700 hover:text-white py-2 px-4 m-4 border border-teal-500 hover:border-transparent rounded"
+        >
           Create new dispatch
         </button>
       </Link>

@@ -18,22 +18,23 @@ variables:
   bruin_bridge_desired_tasks: 5
   cts_bridge_desired_tasks: 1
   dispatch_portal_backend_desired_tasks: 1
-  last_contact_report_desired_tasks: 1
+  dispatch_portal_frontend_desired_tasks: 1
+  last_contact_report_desired_tasks: 0
   lit_bridge_desired_tasks: 1
-  metrics_prometheus_desired_tasks: 1
+  metrics_prometheus_desired_tasks: 0
   nats_server_desired_tasks: 1
   nats_server_1_desired_tasks: 1
   nats_server_2_desired_tasks: 1
   notifier_desired_tasks: 1
-  service_affecting_monitor_desired_tasks: 1
-  service_outage_monitor_1_desired_tasks: 1
-  service_outage_monitor_2_desired_tasks: 1
-  service_outage_monitor_3_desired_tasks: 1
-  service_outage_monitor_4_desired_tasks: 1
-  service_outage_monitor_triage_desired_tasks: 1
-  sites_monitor_desired_tasks: 1
-  t7_bridge_desired_tasks: 1
-  velocloud_bridge_desired_tasks: 5
+  service_affecting_monitor_desired_tasks: 0
+  service_outage_monitor_1_desired_tasks: 0
+  service_outage_monitor_2_desired_tasks: 0
+  service_outage_monitor_3_desired_tasks: 0
+  service_outage_monitor_4_desired_tasks: 0
+  service_outage_monitor_triage_desired_tasks: 0
+  sites_monitor_desired_tasks: 0
+  t7_bridge_desired_tasks: 0
+  velocloud_bridge_desired_tasks: 0
 
 include:
   # Templates used in Gitlab-CI jobs

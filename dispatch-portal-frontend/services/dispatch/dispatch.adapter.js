@@ -49,18 +49,20 @@ export const dispatchLitOutAdapter = data => ({
   time_of_dispatch: data.timeDispatch,
   time_zone: data.timeZone,
   mettel_bruin_ticket_id: data.mettelId,
-  job_site: data.address1,
-  job_site_street: data.address2,
+  job_site: data.owner,
+  job_site_street: `${data.address1} ${data.address2}`,
   job_site_city: data.city,
   job_site_state: data.state,
   job_site_zip_code: data.zip,
   job_site_contact_name: `${data.firstName} ${data.lastName}`,
-  job_site_contact_number: data.phoneNumberRequester,
+  job_site_contact_number: data.phoneNumber,
   materials_needed_for_dispatch: data.materials,
   scope_of_work: data.issues,
   mettel_tech_call_in_instructions: data.instructions,
   name_of_mettel_requester: `${data.firstNameRequester} ${data.lastNameRequester}`,
   mettel_department: data.department,
-  mettel_requester_email: data.emailRequester
-  // slaLevel, vendor, phoneNumber, owner, email, serviceType
+  mettel_requester_email: data.emailRequester,
+  mettel_requester_phone_number: data.phoneNumberRequester,
+  mettel_department_phone_number: data.phoneNumber
+  // Only CTS: serviceType, slaLevel, email(site contact)
 });

@@ -107,10 +107,10 @@ resource "aws_alb_listener_rule" "automation-dispatch-portal-path" {
 resource "aws_ecs_service" "automation-dispatch-portal-frontend" {
   name = local.automation-dispatch-portal-frontend-ecs_service-name
   task_definition = local.automation-dispatch-portal-frontend-ecs_task_definition
-  desired_count = var.metrics_prometheus_desired_tasks
+  desired_count = var.dispatch_portal_backend_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
-  count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
+  count = var.dispatch_portal_backend_desired_tasks > 0 ? 1 : 0
 
   network_configuration {
     security_groups = [

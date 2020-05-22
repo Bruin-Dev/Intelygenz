@@ -71,6 +71,10 @@
       {
         "name": "CTS_DOMAIN",
         "value": "${CTS_DOMAIN}"
+      },
+      {
+        "name": "CURRENT_ENVIRONMENT",
+        "value": "${CURRENT_ENVIRONMENT}"
       }
     ]
   }

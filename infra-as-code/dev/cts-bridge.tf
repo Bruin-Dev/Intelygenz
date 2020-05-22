@@ -20,6 +20,7 @@ data "template_file" "automation-cts-bridge" {
     NATS_SERVER1 = local.nats_server1
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     REDIS_HOSTNAME = local.redis-hostname
+    CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
   }
 }
 

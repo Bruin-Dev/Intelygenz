@@ -420,18 +420,22 @@ function NewDispatch({ authToken }) {
               )}
             </label>
             <br />
-            <label htmlFor="email">
-              Email
-              <br />
-              <input
-                type="email"
-                name="email"
-                id="email"
-                ref={register({ required: true })}
-                className={errors.email && 'error'}
-              />
-              {errors.email && <p className="error">This field is required</p>}
-            </label>
+            {showFieldByVendor(vendorsOptions[1].value) && (
+              <label htmlFor="email">
+                Email
+                <br />
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  ref={register({ required: true })}
+                  className={errors.email && 'error'}
+                />
+                {errors.email && (
+                  <p className="error">This field is required</p>
+                )}
+              </label>
+            )}
           </div>
           <p className="section-title">Details</p>
           <div className="brick">
