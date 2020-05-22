@@ -80,7 +80,6 @@ services:
       - redis
     ports:
       - 5001:5000
-      - 9120:9090
 
   notifier:
     build:
@@ -213,6 +212,7 @@ services:
       - redis
     ports:
       - 5107:5000
+      - 9140:9090
 
   service-outage-monitor-2:
     build:
@@ -229,6 +229,7 @@ services:
       - redis
     ports:
       - 5207:5000
+      - 9150:9090
 
   service-outage-monitor-3:
     build:
@@ -245,6 +246,7 @@ services:
       - redis
     ports:
       - 5307:5000
+      - 9160:9090
 
   service-outage-monitor-4:
     build:
@@ -261,6 +263,7 @@ services:
       - redis
     ports:
       - 5407:5000
+      - 9170:9090
 
   service-outage-monitor-triage:
     build:
@@ -277,6 +280,7 @@ services:
       - redis
     ports:
       - 5007:5000
+      - 9180:9090
 
   service-affecting-monitor:
     build:
@@ -293,6 +297,7 @@ services:
       - redis
     ports:
       - 5008:5000
+      - 9130:9090
 
   tnba-monitor:
     build:

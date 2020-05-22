@@ -27,14 +27,16 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         assert outage_monitor._event_bus is event_bus
         assert outage_monitor._logger is logger
         assert outage_monitor._scheduler is scheduler
         assert outage_monitor._config is config
         assert outage_monitor._outage_repository is outage_repository
+        assert outage_monitor._metrics_repository is metrics_repository
 
         assert outage_monitor._autoresolve_serials_whitelist == set()
 
@@ -45,8 +47,9 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -70,8 +73,9 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         await outage_monitor.start_service_outage_monitoring(exec_on_start=False)
 
@@ -92,11 +96,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         try:
             await outage_monitor.start_service_outage_monitoring(exec_on_start=False)
@@ -117,8 +122,9 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -142,8 +148,9 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         await outage_monitor._start_build_cache_job(exec_on_start=False)
 
@@ -164,11 +171,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         try:
             await outage_monitor._start_build_cache_job(exec_on_start=False)
@@ -190,6 +198,7 @@ class TestServiceOutageMonitor:
         scheduler.add_job = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
@@ -198,7 +207,7 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         params = {
             'edge_full_id': edge_full_id,
@@ -227,6 +236,7 @@ class TestServiceOutageMonitor:
         scheduler.add_job = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
@@ -235,7 +245,7 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         params = {
             'edge_full_id': edge_full_id,
@@ -272,6 +282,7 @@ class TestServiceOutageMonitor:
 
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
@@ -280,7 +291,7 @@ class TestServiceOutageMonitor:
             'client_name': 'METTEL/NEW YORK',
         }
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         params = {
             'edge_full_id': edge_full_id,
@@ -305,10 +316,11 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         fake_response = {'body': [], 'status': 200}
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=fake_response)
         outage_monitor._start_build_cache_job = CoroutineMock()
         outage_monitor._monitoring_map_cache = [
@@ -327,6 +339,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         fake_response = {
             'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
@@ -340,7 +353,7 @@ class TestServiceOutageMonitor:
             'status': 200
         }
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=fake_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._start_build_cache_job = CoroutineMock()
@@ -369,6 +382,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         fake_response = {
             'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
@@ -376,7 +390,7 @@ class TestServiceOutageMonitor:
             'status': 200
         }
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=fake_response)
         outage_monitor._start_build_cache_job = CoroutineMock()
 
@@ -392,8 +406,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(side_effect=Exception)
         outage_monitor._start_build_cache_job = CoroutineMock()
 
@@ -420,11 +435,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock()
         outage_monitor._add_edge_to_temp_cache = CoroutineMock()
@@ -460,11 +476,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock()
         outage_monitor._add_edge_to_temp_cache = CoroutineMock()
@@ -493,12 +510,13 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['blacklisted_edges'] = [edge_full_id]
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._get_last_events_for_edge = CoroutineMock()
         outage_monitor._add_edge_to_temp_cache = CoroutineMock()
@@ -527,8 +545,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         outage_monitor._add_edge_to_temp_cache = CoroutineMock()
         outage_monitor._start_build_cache_job = CoroutineMock()
@@ -573,8 +592,9 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         event_bus = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_management_status = CoroutineMock()
@@ -622,8 +642,9 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         event_bus = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_management_status = CoroutineMock()
@@ -671,8 +692,9 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         event_bus = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_management_status = CoroutineMock()
@@ -721,11 +743,12 @@ class TestServiceOutageMonitor:
         config = testconfig
         scheduler = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_management_status = CoroutineMock()
@@ -793,11 +816,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
@@ -859,11 +883,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
@@ -944,11 +969,12 @@ class TestServiceOutageMonitor:
         config = testconfig
         scheduler = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
@@ -1024,8 +1050,9 @@ class TestServiceOutageMonitor:
         config = testconfig
         scheduler = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
@@ -1104,8 +1131,9 @@ class TestServiceOutageMonitor:
         config = testconfig
         scheduler = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
@@ -1174,6 +1202,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
@@ -1181,7 +1210,7 @@ class TestServiceOutageMonitor:
             "mettel.velocloud.net": [],
             "metvco02.mettel.net": [],
         }
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
@@ -1239,11 +1268,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['velocloud_instances_filter'] = {}
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value=fake_events_response)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._get_bruin_client_info_by_serial = CoroutineMock(return_value=bruin_client_info_response)
@@ -1285,13 +1315,15 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         scheduler = Mock()
+        metrics_repository = Mock()
+
         outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(return_value=False)
+        outage_repository.is_there_an_outage = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
@@ -1335,11 +1367,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=False)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
 
@@ -1383,6 +1416,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
@@ -1390,7 +1424,7 @@ class TestServiceOutageMonitor:
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=is_there_an_outage)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
 
@@ -1438,11 +1472,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=True)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
 
@@ -1479,11 +1514,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=True)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=Exception)
         outage_monitor._start_edge_after_error_process = CoroutineMock()
@@ -1527,13 +1563,15 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         scheduler = Mock()
+        metrics_repository = Mock()
+
         outage_repository = Mock()
-        outage_repository.is_there_an_outage = Mock(return_value=False)
+        outage_repository.is_there_an_outage = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
@@ -1577,11 +1615,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=False)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
 
@@ -1625,6 +1664,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         scheduler = Mock()
         scheduler.add_job = Mock(side_effect=exception_instance)
@@ -1632,7 +1672,7 @@ class TestServiceOutageMonitor:
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=is_there_an_outage)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
 
@@ -1680,11 +1720,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=True)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
 
@@ -1738,11 +1779,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=True)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=Exception)
         outage_monitor._start_edge_after_error_process = CoroutineMock()
@@ -1782,11 +1824,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=True)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=Exception)
         outage_monitor._start_edge_after_error_process = CoroutineMock()
@@ -1824,8 +1867,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = set()
         outage_monitor._get_last_down_events_for_edge = CoroutineMock()
 
@@ -1855,12 +1899,13 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'dev'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock()
 
@@ -1896,6 +1941,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -1904,7 +1950,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
@@ -1951,12 +1997,13 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
@@ -2007,6 +2054,7 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -2015,7 +2063,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
@@ -2078,12 +2126,13 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
@@ -2162,6 +2211,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=False)
@@ -2170,7 +2220,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
@@ -2253,6 +2303,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
@@ -2261,7 +2312,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
@@ -2351,6 +2402,7 @@ class TestServiceOutageMonitor:
         event_bus.rpc_request = CoroutineMock()
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
@@ -2359,7 +2411,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
@@ -2458,6 +2510,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
@@ -2466,7 +2519,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
             'body': last_down_events_response_body, 'status': last_down_events_response_status
@@ -2540,12 +2593,13 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=outage_ticket)
         outage_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         uuid_ = uuid()
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
@@ -2606,12 +2660,13 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=outage_ticket)
         outage_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         uuid_ = uuid()
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
@@ -2650,11 +2705,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         outage_repository = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=rpc_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         seconds_ago_for_down_events_lookup = timedelta(config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
 
@@ -2693,11 +2749,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         outage_repository = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         uuid_ = uuid()
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
@@ -2730,11 +2787,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         outage_repository = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         uuid_ = uuid()
         datetime_mock = Mock()
@@ -2765,11 +2823,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         outage_repository = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         uuid_ = uuid()
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
@@ -2838,11 +2897,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edge_list_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
             result = await outage_monitor._get_edges_for_monitoring()
@@ -2889,11 +2949,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=outage_happened)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
 
@@ -2932,6 +2993,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=outage_happened)
@@ -2940,7 +3002,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'dev'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._create_outage_ticket = CoroutineMock()
 
@@ -2980,6 +3042,7 @@ class TestServiceOutageMonitor:
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_there_an_outage = Mock(return_value=outage_happened)
@@ -2988,7 +3051,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'dev'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._create_outage_ticket = CoroutineMock()
 
@@ -3038,6 +3101,7 @@ class TestServiceOutageMonitor:
 
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -3049,7 +3113,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._create_outage_ticket = CoroutineMock(return_value=outage_ticket_creation_response)
 
@@ -3115,6 +3179,7 @@ class TestServiceOutageMonitor:
 
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -3126,7 +3191,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._create_outage_ticket = CoroutineMock(return_value=outage_ticket_creation_response)
         outage_monitor._append_triage_note_to_new_ticket = CoroutineMock()
@@ -3191,6 +3256,7 @@ class TestServiceOutageMonitor:
 
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -3202,7 +3268,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._create_outage_ticket = CoroutineMock(return_value=outage_ticket_creation_response)
 
@@ -3258,6 +3324,7 @@ class TestServiceOutageMonitor:
 
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
@@ -3269,7 +3336,7 @@ class TestServiceOutageMonitor:
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_edge_status_by_id = CoroutineMock(return_value=edge_status_response)
         outage_monitor._create_outage_ticket = CoroutineMock(return_value=outage_ticket_creation_response)
         outage_monitor._reopen_outage_ticket = CoroutineMock()
@@ -3315,11 +3382,12 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=post_ticket_result)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._generate_outage_ticket = Mock(return_value=ticket_creation_details)
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
@@ -3374,8 +3442,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._process_tickets_without_triage = CoroutineMock()
 
         await outage_monitor._append_triage_note_to_new_ticket(ticket_id, edge_full_id, edge_status)
@@ -3439,12 +3508,13 @@ class TestServiceOutageMonitor:
         ])
         scheduler = Mock()
         logger = Mock()
+        metrics_repository = Mock()
 
         outage_repository = Mock()
 
         config.TRIAGE_CONFIG['environment'] = 'production'
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         # outage_monitor._process_tickets_without_triage = CoroutineMock()
         outage_monitor._get_last_events_for_edge = CoroutineMock(return_value={
             'status': 200,
@@ -3538,6 +3608,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
@@ -3546,7 +3617,7 @@ class TestServiceOutageMonitor:
             slack_message_post_result,
         ])
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
             await outage_monitor._reopen_outage_ticket(ticket_id, edge_status)
@@ -3622,6 +3693,7 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
@@ -3630,7 +3702,7 @@ class TestServiceOutageMonitor:
             slack_message_post_result
         ])
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         outage_monitor._post_note_in_outage_ticket = CoroutineMock()
 
@@ -3691,11 +3763,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
 
         datetime_mock = Mock()
@@ -3754,11 +3827,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
 
         datetime_mock = Mock()
@@ -3821,11 +3895,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
 
         datetime_mock = Mock()
@@ -3893,11 +3968,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
         outage_monitor._get_outage_causes = Mock(return_value=outage_causes)
 
         datetime_mock = Mock()
@@ -3935,8 +4011,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         outage_ticket_data = outage_monitor._generate_outage_ticket(edge_status)
 
@@ -3974,12 +4051,13 @@ class TestServiceOutageMonitor:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edge_status_response)
         outage_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
             result = await outage_monitor._get_edge_status_by_id(edge_full_id)
@@ -4045,12 +4123,13 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         event_bus = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
         outage_repository.is_faulty_edge = Mock(side_effect=[False, True, True])
         outage_repository.is_faulty_link = Mock(side_effect=[False, False, True, True, False, True])
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         result = outage_monitor._get_outage_causes(edge_status_1)
         assert result is None
@@ -4071,8 +4150,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
             is_management_status_active = outage_monitor._is_management_status_active(management_status_str)
@@ -4089,8 +4169,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
             is_management_status_active = outage_monitor._is_management_status_active(management_status_str)
@@ -4127,8 +4208,9 @@ class TestServiceOutageMonitor:
         logger = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         event_bus.rpc_request = CoroutineMock(return_value=management_status_rpc)
 
@@ -4157,11 +4239,12 @@ class TestServiceOutageMonitor:
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=bruin_client_info_response)
 
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository, metrics_repository)
 
         with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
             result = await outage_monitor._get_bruin_client_info_by_serial(serial_number)

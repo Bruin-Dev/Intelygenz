@@ -9,14 +9,18 @@ from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
+from prometheus_client import start_http_server
 
 from application.actions.comparison_report import ComparisonReport
 from application.actions.outage_monitoring import OutageMonitor
 from application.actions.triage import Triage
 from application.repositories.comparison_report_renderer import ComparisonReportRenderer
 from application.repositories.edge_redis_repository import EdgeRedisRepository
-from application.repositories.outage_repository import OutageRepository
+from application.repositories.outage_monitoring_metrics_repository import OutageMonitoringMetricsRepository
 from application.repositories.monitoring_map_repository import MonitoringMapRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.outage_repository import OutageRepository
+from application.repositories.triage_metrics_repository import TriageMetricsRepository
 from application.repositories.triage_report_renderer import TriageReportRenderer
 from config import config
 
@@ -46,13 +50,18 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
 
+        # METRICS
+        self._triage_metrics_repository = TriageMetricsRepository()
+        self._outage_monitoring_metrics_repository = OutageMonitoringMetricsRepository()
+
         # REPOSITORIES
         self._quarantine_edge_repository = EdgeRedisRepository(redis_client=self._redis_client,
                                                                keys_prefix='EDGES_QUARANTINE', logger=self._logger)
         self._reporting_edge_repository = EdgeRedisRepository(redis_client=self._redis_client,
                                                               keys_prefix='EDGES_TO_REPORT', logger=self._logger)
         self._monitoring_map_repository = MonitoringMapRepository(config=config, scheduler=self._scheduler,
-                                                                  event_bus=self._event_bus, logger=self._logger)
+                                                                  event_bus=self._event_bus, logger=self._logger,
+                                                                  metrics_repository=self._triage_metrics_repository)
 
         # JINJA2 TEMPLATE ENVIRONMENTS
         self._triage_report_templates_loader = jinja2.FileSystemLoader(searchpath="src/templates/triage")
@@ -82,9 +91,13 @@ class Container:
                                              config, self._outage_repository)
         self._triage = Triage(self._event_bus, self._logger, self._scheduler,
                               config, self._triage_report_renderer, self._outage_repository,
-                              self._monitoring_map_repository)
+                              self._monitoring_map_repository, self._triage_metrics_repository)
+        self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
+                                             config, self._outage_repository,
+                                             self._outage_monitoring_metrics_repository)
 
     async def _start(self):
+        self._start_prometheus_metrics_server()
         await self._event_bus.connect()
 
         # await self._comparison_report.report_persisted_edges()
@@ -104,6 +117,9 @@ class Container:
             await self._outage_monitor.start_service_outage_monitoring(exec_on_start=True)
 
         self._scheduler.start()
+
+    def _start_prometheus_metrics_server(self):
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

@@ -24,15 +24,19 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
         monitoring_map_cache = {}
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         assert monitoring_map_repository._monitoring_map_cache == monitoring_map_cache
         assert monitoring_map_repository._event_bus is event_bus
         assert monitoring_map_repository._logger is logger
         assert monitoring_map_repository._scheduler is scheduler
         assert monitoring_map_repository._config is config
+        assert monitoring_map_repository._metrics_repository is metrics_repository
+
+        assert monitoring_map_repository._monitoring_map_cache == {}
 
     @pytest.mark.asyncio
     async def start_create_monitoring_map_job_test(self):
@@ -40,8 +44,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         await monitoring_map_repository.start_create_monitoring_map_job(exec_on_start=False)
 
@@ -60,8 +65,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -85,8 +91,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         monitoring_map_cache = {}
 
@@ -184,8 +191,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._notify_failing_rpc_request_for_edge_list = CoroutineMock()
         monitoring_map_repository._notify_http_error_when_requesting_edge_list_from_velocloud = CoroutineMock()
 
@@ -300,6 +308,7 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[
@@ -308,7 +317,7 @@ class TestMonitoringMapRepository:
             edge_2_status_response,
             edge_3_status_response,
         ])
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         monitoring_map_repository._get_bruin_client_info_by_serial = CoroutineMock(
             return_value=bruin_client_info_2_response)
@@ -374,8 +383,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._get_edges_for_monitoring = CoroutineMock(side_effect=Exception)
         monitoring_map_repository._notify_failing_rpc_request_for_edge_list = CoroutineMock()
 
@@ -409,6 +419,7 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         err_msg = (
             f'Monitor Map process:Error while retrieving edge list '
@@ -422,7 +433,7 @@ class TestMonitoringMapRepository:
             slack_message_response,
         ])
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
 
         management_status_response_body = 'Fake status'
@@ -461,11 +472,12 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=edge_list_response)
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         monitoring_map_repository._notify_http_error_when_requesting_edge_list_from_velocloud = CoroutineMock()
 
@@ -576,8 +588,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._notify_http_error_when_requesting_edge_status_from_velocloud = CoroutineMock()
         monitoring_map_repository._get_bruin_client_info_by_serial = CoroutineMock(
             return_value=bruin_client_info_response)
@@ -720,6 +733,7 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         event_bus = Mock()
 
@@ -729,7 +743,7 @@ class TestMonitoringMapRepository:
             slack_message_response,
         ])
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         monitoring_map_repository._get_edge_status_by_id = CoroutineMock(side_effect=[
             edge_1_status_response, edge_2_status_response, edge_3_status_response])
@@ -894,8 +908,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         monitoring_map_repository._get_edge_status_by_id = CoroutineMock(side_effect=[
             edge_1_status_response, edge_2_status_response, edge_3_status_response])
@@ -1038,8 +1053,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         monitoring_map_repository._get_edge_status_by_id = CoroutineMock(side_effect=[
             edge_1_status_response, edge_2_status_response, edge_3_status_response])
@@ -1188,8 +1204,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._get_edges_for_monitoring = CoroutineMock(return_value=edge_list_response)
         monitoring_map_repository._get_edge_status_by_id = CoroutineMock(side_effect=[
             edge_1_status_response, edge_2_status_response, edge_3_status_response])
@@ -1238,8 +1255,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         with patch.object(monitoring_map_repository_module, 'uuid', return_value=uuid_):
             result = await monitoring_map_repository._get_edges_for_monitoring()
@@ -1278,8 +1296,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         with patch.object(monitoring_map_repository_module, 'uuid', return_value=uuid_):
             result = await monitoring_map_repository._get_edge_status_by_id(edge_1_full_id)
@@ -1307,8 +1326,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         with patch.object(monitoring_map_repository_module, 'uuid', return_value=uuid_):
             result = await monitoring_map_repository._get_bruin_client_info_by_serial(edge_1_serial)
@@ -1335,8 +1355,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         with patch.object(monitoring_map_repository_module, 'uuid', return_value=uuid_):
             await monitoring_map_repository._notify_failing_rpc_request_for_edge_list()
@@ -1362,8 +1383,9 @@ class TestMonitoringMapRepository:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         with patch.object(monitoring_map_repository_module, 'uuid', return_value=uuid_):
             await monitoring_map_repository._notify_failing_rpc_request_for_edge_list()

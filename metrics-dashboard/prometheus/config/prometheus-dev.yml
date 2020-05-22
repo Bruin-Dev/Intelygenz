@@ -15,3 +15,39 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['sites-monitor-ENVIRONMENT.ENVIRONMENT.local:9090']
+
+  - job_name: 'service-affecting-monitor'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-affecting-monitor-ENVIRONMENT.ENVIRONMENT.local:9090']
+
+  - job_name: 'service-outage-monitor-1'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-1-ENVIRONMENT.ENVIRONMENT.local:9090']
+
+  - job_name: 'service-outage-monitor-2'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-2-ENVIRONMENT.ENVIRONMENT.local:9090']
+
+  - job_name: 'service-outage-monitor-3'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-3-ENVIRONMENT.ENVIRONMENT.local:9090']
+
+  - job_name: 'service-outage-monitor-4'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-4-ENVIRONMENT.ENVIRONMENT.local:9090']
+
+  - job_name: 'service-outage-monitor-triage'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-triage-ENVIRONMENT.ENVIRONMENT.local:9090']

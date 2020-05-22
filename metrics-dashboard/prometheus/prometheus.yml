@@ -14,10 +14,46 @@ scrape_configs:
 
     scrape_interval: 5s
     static_configs:
-      - targets: ['base-microservice:9100']
+      - targets: ['base-microservice:9090']
 
   - job_name: 'sites-monitor'
 
     scrape_interval: 5s
     static_configs:
       - targets: ['sites-monitor:9090']
+
+  - job_name: 'service-affecting-monitor'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-affecting-monitor:9090']
+
+  - job_name: 'service-outage-monitor-1'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-1:9090']
+
+  - job_name: 'service-outage-monitor-2'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-2:9090']
+
+  - job_name: 'service-outage-monitor-3'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-3:9090']
+
+  - job_name: 'service-outage-monitor-4'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-4:9090']
+
+  - job_name: 'service-outage-monitor-triage'
+
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['service-outage-monitor-triage:9090']

@@ -2,6 +2,7 @@ import json
 import os
 import re
 import time
+
 from collections import OrderedDict
 from collections import defaultdict
 from datetime import datetime
@@ -23,12 +24,14 @@ empty_str = str()
 
 
 class OutageMonitor:
-    def __init__(self, event_bus, logger, scheduler, config, outage_repository):
+    def __init__(self, event_bus, logger, scheduler, config, outage_repository, metrics_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._outage_repository = outage_repository
+        self._metrics_repository = metrics_repository
+
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
         self._process_semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['process_semaphore'])
         self._process_errors_semaphore = asyncio.BoundedSemaphore(
@@ -122,6 +125,7 @@ class OutageMonitor:
 
         self._logger.info(f'[outage_monitoring_process] Outage monitoring process finished! Elapsed time:'
                           f'{(time.time() - total_start_time) / 60} minutes')
+        self._metrics_repository.set_last_cycle_duration((time.time() - total_start_time) // 60)
 
     async def _build_cache(self):
         cache_start = perf_counter()
@@ -245,6 +249,7 @@ class OutageMonitor:
                 else:
                     self._logger.info(f'[process_edge] {edge_identifier} is in healthy state.')
                     await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
+                self._metrics_repository.increment_edges_processed()
             except Exception as ex:
                 self._logger.error(f"[process_edge] Error: {ex} processing edge: {edge_full_id}. "
                                    f"Scheduling retries in a separated process...")
@@ -372,6 +377,7 @@ class OutageMonitor:
         try:
             await _add_edge_to_temp_cache()
         except Exception as ex:
+            self._metrics_repository.increment_temp_cache_errors()
             self._logger.error(f"[add_edge_to_temp_cache] Error: {edge_full_id} raised a {ex} exception")
 
     async def _process_edge_after_error(self, edge_full_id, bruin_client_info):
@@ -439,6 +445,7 @@ class OutageMonitor:
         try:
             await _process_edge_after_error()
         except Exception as ex:
+            self._metrics_repository.increment_retry_errors()
             serial_number = None
             for edge in self._monitoring_map_cache:
                 if edge['edge_full_id'] == edge_full_id:
@@ -554,7 +561,7 @@ class OutageMonitor:
 
         bruin_client_id = edge_status['bruin_client_info']['client_id']
         await self._notify_successful_autoresolve(outage_ticket_id, bruin_client_id)
-
+        self._metrics_repository.increment_tickets_autoresolved()
         self._logger.info(f'Ticket {outage_ticket_id} linked to edge {edge_identifier} was autoresolved!')
 
     @staticmethod
@@ -684,7 +691,7 @@ class OutageMonitor:
                 ticket_creation_response_status = ticket_creation_response['status']
                 if ticket_creation_response_status in range(200, 300):
                     self._logger.info(f'Successfully created outage ticket for edge {edge_identifier}.')
-
+                    self._metrics_repository.increment_tickets_created()
                     bruin_client_id = bruin_client_info['client_id']
                     slack_message = {
                         'request_id': uuid(),
@@ -787,6 +794,7 @@ class OutageMonitor:
             }
             await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             await self._post_note_in_outage_ticket(ticket_id, edge_status)
+            self._metrics_repository.increment_tickets_reopened()
         else:
             self._logger.error(
                 f'[outage-ticket-creation] Outage ticket {ticket_id} reopening failed.'

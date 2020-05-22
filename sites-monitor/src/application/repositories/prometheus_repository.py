@@ -68,4 +68,4 @@ class PrometheusRepository:
         self._link_status_gauge._metrics.clear()
 
     def start_prometheus_metrics_server(self):
-        start_http_server(self._config.GRAFANA_CONFIG['port'])
+        start_http_server(self._config.METRICS_SERVER_CONFIG['port'])

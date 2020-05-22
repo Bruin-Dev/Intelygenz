@@ -37,8 +37,3 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
-
-GRAFANA_CONFIG = {
-    'port': 9090,
-    'time': 1
-}

@@ -71,15 +71,6 @@ resource "aws_security_group" "automation-cts-bridge_service" {
     ]
   }
 
-  ingress {
-    from_port = 9090
-    to_port = 9090
-    protocol = "TCP"
-    cidr_blocks = [
-      var.cidr_base[var.CURRENT_ENVIRONMENT]
-    ]
-  }
-
   tags = {
     Name = local.automation-cts-bridge-service-security_group-tag-Name
     Environment = var.ENVIRONMENT

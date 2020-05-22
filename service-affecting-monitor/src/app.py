@@ -10,6 +10,9 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
+from prometheus_client import start_http_server
+
+from application.repositories.metrics_repository import MetricsRepository
 from application.repositories.template_management import TemplateRenderer
 
 
@@ -31,16 +34,23 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
         self._template_renderer = TemplateRenderer(config)
+        self._metrics_repository = MetricsRepository()
 
         self._service_affecting_monitor = ServiceAffectingMonitor(self._event_bus, self._logger, self._scheduler,
-                                                                  config, self._template_renderer)
+                                                                  config, self._template_renderer,
+                                                                  self._metrics_repository)
 
     async def _start(self):
+        self._start_prometheus_metrics_server()
+
         await self._event_bus.connect()
 
         await self._service_affecting_monitor.start_service_affecting_monitor_job(exec_on_start=True)
 
         self._scheduler.start()
+
+    def _start_prometheus_metrics_server(self):
+        start_http_server(config.METRICS_SERVER_CONFIG['port'])
 
     async def start_server(self):
         await self._server.run_server()

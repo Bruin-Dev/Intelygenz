@@ -64,15 +64,6 @@ resource "aws_security_group" "automation-tnba-monitor_service" {
     ]
   }
 
-  ingress {
-    from_port = 9090
-    to_port = 9090
-    protocol = "TCP"
-    cidr_blocks = [
-      var.cidr_base[var.CURRENT_ENVIRONMENT]
-    ]
-  }
-
   tags = {
     Name = local.automation-tnba-monitor-service-security_group-tag-Name
     Environment = var.ENVIRONMENT

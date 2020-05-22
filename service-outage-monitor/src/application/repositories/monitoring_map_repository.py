@@ -12,12 +12,14 @@ from tenacity import retry, wait_exponential, stop_after_delay
 
 class MonitoringMapRepository:
 
-    def __init__(self, config, scheduler, event_bus, logger=None):
+    def __init__(self, config, scheduler, event_bus, logger, metrics_repository):
         self._logger = logger
         self._config = config
         self._scheduler = scheduler
         self._event_bus = event_bus
         self._logger = logger
+        self._metrics_repository = metrics_repository
+
         self._monitoring_map_cache = {}
         self._temp_monitoring_map = {}
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_MAP_CONFIG['semaphore'])
@@ -175,6 +177,7 @@ class MonitoringMapRepository:
             await process_edge_and_tickets()
         except Exception as ex:
             self._logger.error(f"Error: {edge_full_id}")
+            self._metrics_repository.increment_monitoring_map_errors()
 
     async def _get_edges_for_monitoring(self):
         edge_list_request = {

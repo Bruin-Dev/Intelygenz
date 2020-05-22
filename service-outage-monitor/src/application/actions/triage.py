@@ -33,7 +33,7 @@ class Triage:
     )
 
     def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, outage_repository,
-                 monitoring_map_repository):
+                 monitoring_map_repository, metrics_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -41,6 +41,9 @@ class Triage:
         self._template_renderer = template_renderer
         self._outage_repository = outage_repository
         self._monitoring_map_repository = monitoring_map_repository
+        self._metrics_repository = metrics_repository
+
+        self._monitoring_mapping = {}
         self._semaphore = asyncio.BoundedSemaphore(self._config.TRIAGE_CONFIG['semaphore'])
         self.__reset_instance_state()
 
@@ -127,6 +130,7 @@ class Triage:
                 if open_tickets_response_status not in range(200, 300):
                     await self._notify_http_error_when_requesting_open_tickets_from_bruin_api(client_id,
                                                                                               open_tickets_response)
+                    self._metrics_repository.increment_open_tickets_errors()
                     raise Exception
 
                 open_tickets_ids = (ticket['ticketID'] for ticket in open_tickets_response_body)
@@ -304,6 +308,7 @@ class Triage:
                 ticket_id, newest_triage_note_timestamp, edge_data
             )
             self._logger.info(f'Events appended to ticket {ticket["ticket_id"]}!')
+            self._metrics_repository.increment_tickets_with_triage_processed()
 
         self._logger.info('Finished processing tickets with triage!')
 
@@ -379,12 +384,16 @@ class Triage:
                     append_note_response = await self._append_note_to_ticket(ticket_id, triage_note_contents)
                 except Exception:
                     await self._notify_failing_rpc_request_for_appending_ticket_note(ticket_id, triage_note_contents)
+                    self._metrics_repository.increment_note_append_errors()
                     continue
 
                 append_note_response_status = append_note_response['status']
                 if append_note_response_status not in range(200, 300):
                     await self._notify_http_error_when_appending_note_to_ticket(ticket_id, append_note_response)
+                    continue
+
                 self._logger.info(f'Triage appended to ticket {ticket_id}!')
+                self._metrics_repository.increment_notes_appended()
             else:
                 self._logger.info(f'Not going to append a new triage note to ticket {ticket_id} '
                                   f'as current environment '
@@ -604,11 +613,15 @@ class Triage:
                     append_note_response = await self._append_note_to_ticket(ticket_id, ticket_note)
                 except Exception:
                     await self._notify_failing_rpc_request_for_appending_ticket_note(ticket_id, ticket_note)
+                    self._metrics_repository.increment_note_append_errors()
                     continue
 
                 append_note_response_status = append_note_response['status']
                 if append_note_response_status not in range(200, 300):
                     await self._notify_http_error_when_appending_note_to_ticket(ticket_id, append_note_response)
+                    continue
+
+                self._metrics_repository.increment_tickets_without_triage_processed()
 
         self._logger.info('Finished processing tickets without triage!')
 

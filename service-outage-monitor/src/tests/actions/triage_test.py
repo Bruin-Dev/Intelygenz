@@ -34,15 +34,17 @@ class TestTriage:
         template_renderer = Mock()
         outage_repository = Mock()
         monitoring_map_repository = Mock()
+        metrics_repository = Mock()
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         assert triage._event_bus is event_bus
         assert triage._logger is logger
         assert triage._scheduler is scheduler
         assert triage._config is config
         assert triage._outage_repository is outage_repository
+        assert triage._metrics_repository is metrics_repository
 
         assert triage._monitoring_map_repository is monitoring_map_repository
 
@@ -55,9 +57,10 @@ class TestTriage:
         template_renderer = Mock()
         outage_repository = Mock()
         monitoring_map_repository = Mock()
+        metrics_repository = Mock()
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         next_run_time = datetime.now()
         datetime_mock = Mock()
@@ -83,9 +86,10 @@ class TestTriage:
         template_renderer = Mock()
         outage_repository = Mock()
         monitoring_map_repository = Mock()
+        metrics_repository = Mock()
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         await triage.start_triage_job(exec_on_start=False)
 
@@ -208,13 +212,14 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._notify_failing_rpc_request_for_edge_list = CoroutineMock()
         monitoring_map_repository._monitoring_map_cache = monitoring_mapping
         monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses = CoroutineMock()
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         triage._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock(return_value=open_tickets)
         triage._filter_tickets_related_to_edges_under_monitoring = Mock(return_value=relevant_tickets)
@@ -344,13 +349,14 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._notify_failing_rpc_request_for_edge_list = CoroutineMock()
         monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses = CoroutineMock()
         monitoring_map_repository.get_monitoring_map_cache = Mock(return_value=monitoring_mapping.copy())
         monitoring_map_repository.start_create_monitoring_map_job = CoroutineMock()
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         triage._get_all_open_tickets_with_details_for_monitored_companies = CoroutineMock(return_value=open_tickets)
         triage._filter_tickets_related_to_edges_under_monitoring = Mock(return_value=relevant_tickets)
@@ -465,10 +471,11 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._monitoring_mapping = monitoring_mapping
         triage._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
             tickets_with_details_for_bruin_client_1, tickets_with_details_for_bruin_client_2
@@ -567,7 +574,8 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._monitoring_map_cache = {
             bruin_client_1_id: {
                 edge_1_serial: edge_1_data,
@@ -580,7 +588,7 @@ class TestTriage:
             }
         }
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         triage._get_open_tickets_with_details_by_client_id = CoroutineMock(side_effect=[
             tickets_with_details_for_bruin_client_1,
@@ -673,10 +681,11 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(return_value=get_open_tickets_response)
         triage._get_ticket_details_by_ticket_id = CoroutineMock(side_effect=[
             get_ticket_1_details_response, get_ticket_2_details_response
@@ -715,10 +724,11 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(side_effect=Exception)
         triage._get_ticket_details_by_ticket_id = CoroutineMock()
         triage._notify_failing_rpc_request_for_open_tickets = CoroutineMock()
@@ -747,10 +757,11 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(return_value=get_open_tickets_response)
         triage._get_ticket_details_by_ticket_id = CoroutineMock()
         triage._notify_http_error_when_requesting_open_tickets_from_bruin_api = CoroutineMock()
@@ -815,10 +826,11 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(return_value=get_open_tickets_response)
         triage._get_ticket_details_by_ticket_id = CoroutineMock(side_effect=[
             Exception,
@@ -902,10 +914,11 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(return_value=get_open_tickets_response)
         triage._get_ticket_details_by_ticket_id = CoroutineMock(side_effect=[
             get_ticket_1_details_response, get_ticket_2_details_response
@@ -997,10 +1010,11 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_open_tickets_by_client_id = CoroutineMock(return_value=get_open_tickets_response)
         triage._get_ticket_details_by_ticket_id = CoroutineMock(side_effect=[
             get_ticket_1_details_response, get_ticket_2_details_response
@@ -1054,13 +1068,14 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=get_open_tickets_response)
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             result = await triage._get_open_tickets_by_client_id(bruin_client_id)
@@ -1109,13 +1124,14 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=get_ticket_details_response)
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             result = await triage._get_ticket_details_by_ticket_id(ticket_id)
@@ -1136,13 +1152,14 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_failing_rpc_request_for_open_tickets(bruin_client_id)
@@ -1175,13 +1192,14 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_http_error_when_requesting_open_tickets_from_bruin_api(
@@ -1210,13 +1228,14 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_failing_rpc_request_for_ticket_details(ticket_id)
@@ -1250,13 +1269,14 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_http_error_when_requesting_ticket_details_from_bruin_api(
@@ -1388,12 +1408,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         monitoring_map_repository._monitoring_map_cache = monitoring_mapping
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         result = triage._filter_tickets_related_to_edges_under_monitoring(tickets)
 
@@ -1470,9 +1491,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         tickets_with_triage, tickets_without_triage = triage._distinguish_tickets_with_and_without_triage(tickets)
 
@@ -1620,9 +1642,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._discard_non_triage_notes = Mock(wraps=triage._discard_non_triage_notes)
         triage._get_most_recent_ticket_note = Mock(side_effect=[ticket_1_note_2, ticket_2_note_3])
         triage._was_ticket_note_appended_recently = Mock(side_effect=[False, True])
@@ -1704,9 +1727,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         triage._discard_non_triage_notes(tickets)
 
@@ -1744,9 +1768,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         newest_triage_note = triage._get_most_recent_ticket_note(ticket)
 
@@ -1765,9 +1790,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         datetime_mock = Mock()
 
@@ -1858,9 +1884,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[
             events_chunk_1,
@@ -1955,9 +1982,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[
             events_chunk_1,
@@ -2052,9 +2080,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[])  # Just tricking this return value to "stop" execution here
         triage._compose_triage_note = Mock()
@@ -2098,9 +2127,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_last_events_for_edge = CoroutineMock(side_effect=Exception)
         triage._notify_failing_rpc_request_for_edge_events = CoroutineMock()
         triage._get_events_chunked = Mock()
@@ -2150,9 +2180,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._notify_http_error_when_requesting_edge_events_from_velocloud = CoroutineMock()
         triage._get_events_chunked = Mock()
@@ -2204,9 +2235,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock()
 
@@ -2274,9 +2306,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[
             events_chunk_1,
@@ -2382,9 +2415,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[
             events_chunk_1,
@@ -2486,9 +2520,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_last_events_for_edge = CoroutineMock(return_value=last_events_response)
         triage._get_events_chunked = Mock(return_value=[
             events_chunk_1,
@@ -2545,12 +2580,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_http_error_when_appending_note_to_ticket(ticket_id, append_ticket_note_response)
@@ -2584,12 +2620,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=rpc_response)
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         uuid_ = uuid()
         current_datetime = datetime.now()
@@ -2628,12 +2665,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_failing_rpc_request_for_edge_events(edge_full_id)
@@ -2667,12 +2705,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_http_error_when_requesting_edge_events_from_velocloud(
@@ -2729,9 +2768,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['event_limit'] = 2
@@ -2796,9 +2836,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['timezone'] = 'UTC'
@@ -2865,12 +2906,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=append_note_to_ticket_response)
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             result = await triage._append_note_to_ticket(ticket_id, ticket_note)
@@ -2892,12 +2934,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_failing_rpc_request_for_edge_events(edge_full_id)
@@ -2931,12 +2974,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_http_error_when_requesting_edge_events_from_velocloud(
@@ -2966,12 +3010,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_failing_rpc_request_for_appending_ticket_note(ticket_id, ticket_note)
@@ -2998,12 +3043,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         with patch.object(triage_module, 'uuid', return_value=uuid_):
             await triage._notify_triage_note_was_appended_to_ticket(ticket_id, bruin_client_id)
@@ -3129,9 +3175,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(side_effect=[
             {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
             {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
@@ -3289,12 +3336,13 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         template_renderer = Mock()
         template_renderer.compose_email_object = Mock(side_effect=[email_body_1, email_body_2])
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(side_effect=[
             {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
             {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
@@ -3462,14 +3510,15 @@ class TestTriage:
         logger = Mock()
         scheduler = Mock()
         config = testconfig
+        metrics_repository = Mock()
 
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         template_renderer = Mock()
         template_renderer.compose_email_object = Mock(side_effect=[email_body_1, email_body_2])
 
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(side_effect=[
             {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
             {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
@@ -3652,9 +3701,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(side_effect=[
             {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
             {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
@@ -3830,9 +3880,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(side_effect=[
             {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
             {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
@@ -3990,9 +4041,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(return_value={
             'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200
         })
@@ -4155,9 +4207,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(return_value={
             'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200
         })
@@ -4316,9 +4369,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(return_value={
             'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200
         })
@@ -4486,9 +4540,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(side_effect=[
             {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
             {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
@@ -4676,9 +4731,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(side_effect=[
             {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
             {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
@@ -4860,12 +4916,13 @@ class TestTriage:
         scheduler = Mock()
         config = testconfig
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         template_renderer = Mock()
         template_renderer.compose_email_object = Mock(side_effect=[email_body_1, email_body_2])
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
         triage._get_edge_status_by_id = CoroutineMock(side_effect=[
             {'body': {'edge_id': edge_1_full_id, 'edge_info': edge_1_status}, 'status': 200},
             {'body': {'edge_id': edge_2_full_id, 'edge_info': edge_2_status}, 'status': 200},
@@ -5015,9 +5072,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['timezone'] = 'UTC'
@@ -5090,9 +5148,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         custom_triage_config = config.TRIAGE_CONFIG.copy()
         custom_triage_config['timezone'] = 'UTC'
@@ -5145,12 +5204,13 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
+        metrics_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=email_response)
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         result = await triage._send_email(email_data)
 
@@ -5199,9 +5259,10 @@ class TestTriage:
         config = testconfig
         template_renderer = Mock()
         outage_repository = Mock()
-        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger)
+        metrics_repository = Mock()
+        monitoring_map_repository = MonitoringMapRepository(config, scheduler, event_bus, logger, metrics_repository)
         triage = Triage(event_bus, logger, scheduler, config, template_renderer, outage_repository,
-                        monitoring_map_repository)
+                        monitoring_map_repository, metrics_repository)
 
         result = triage._transform_relevant_data_into_ticket_note(relevant_data)
 

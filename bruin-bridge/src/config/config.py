@@ -50,11 +50,6 @@ QUART_CONFIG = {
     'port': 5000
 }
 
-GRAFANA_CONFIG = {
-    'port': 9090,
-    'time': 1500
-}
-
 REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
 }

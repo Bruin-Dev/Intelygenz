@@ -14,13 +14,14 @@ from igz.packages.eventbus.eventbus import EventBus
 
 class ServiceAffectingMonitor:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer):
+    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, metrics_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._monitoring_minutes = config.MONITOR_CONFIG["monitoring_minutes"]
         self._template_renderer = template_renderer
+        self._metrics_repository = metrics_repository
 
     async def start_service_affecting_monitor_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service affecting')
@@ -182,15 +183,16 @@ class ServiceAffectingMonitor:
                                        'Jitter', 30)
 
     async def _notify_trouble(self, device, edge_status, link, input, output, trouble, threshold):
-        ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
         self._logger.info(f'Service affecting trouble {trouble} detected in edge with data {edge_status}')
 
-        if self._config.MONITOR_CONFIG['environment'] == 'production':
-            client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]
-            ticket_exists = await self._ticket_existence(client_id, edge_status['edge_info']['edges']['serialNumber'],
-                                                         trouble)
-            if ticket_exists is False:
+        client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]
+        ticket_exists = await self._ticket_existence(client_id, edge_status['edge_info']['edges']['serialNumber'],
+                                                     trouble)
+
+        if ticket_exists is False:
+            if self._config.MONITOR_CONFIG['environment'] == 'production':
                 # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact change here
+                ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
                 ticket_note = self._ticket_object_to_string(ticket_dict)
                 ticket_details = {
                     "request_id": uuid(),
@@ -220,6 +222,9 @@ class ServiceAffectingMonitor:
                 }
                 ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
                                                               ticket_details, timeout=30)
+                if ticket_id["status"] in range(200, 300):
+                    self._metrics_repository.increment_tickets_created()
+
                 ticket_append_note_msg = {'request_id': uuid(),
                                           'body': {
                                           'ticket_id': ticket_id["body"]["ticketIds"][0],

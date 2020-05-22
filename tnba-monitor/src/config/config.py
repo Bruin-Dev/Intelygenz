@@ -57,10 +57,6 @@ QUART_CONFIG = {
     'port': 5000
 }
 
-GRAFANA_CONFIG = {
-    'port': 9090
-}
-
 CONDITIONS = {
     "ticket_min_age_minutes": 45,
     "automatable_task_list": ["Repair Completed",

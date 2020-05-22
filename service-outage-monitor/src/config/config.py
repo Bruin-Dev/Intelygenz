@@ -118,3 +118,7 @@ TRIAGE_CONFIG = {
     'stop_delay': 300,
     'semaphore': 1,
 }
+
+METRICS_SERVER_CONFIG = {
+    'port': 9090,
+}

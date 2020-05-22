@@ -64,15 +64,6 @@ resource "aws_security_group" "automation-service-dispatch-monitor_service" {
     ]
   }
 
-  ingress {
-    from_port = 9090
-    to_port = 9090
-    protocol = "TCP"
-    cidr_blocks = [
-      var.cidr_base[var.CURRENT_ENVIRONMENT]
-    ]
-  }
-
   tags = {
     Name = local.automation-service-dispatch-monitor-service-security_group-tag-Name
     Environment = var.ENVIRONMENT

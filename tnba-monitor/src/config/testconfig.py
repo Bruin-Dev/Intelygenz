@@ -42,10 +42,6 @@ LOG_CONFIG = {
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
 
-GRAFANA_CONFIG = {
-    'port': 9090
-}
-
 QUART_CONFIG = {
     'title': 'tnba-monitor',
     'port': 5000
