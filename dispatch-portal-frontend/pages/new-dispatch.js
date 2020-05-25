@@ -989,6 +989,7 @@ function NewDispatch({ authToken }) {
               <button
                 className="bg-teal-500 hover:bg-teal-700 text-white center py-2 px-4 rounded"
                 type="submit"
+                data-test-id="new-dispatch-submit"
               >
                 Submit
               </button>

@@ -39,6 +39,7 @@ function Login() {
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+            data-test-id="login-form"
           >
             <div className="mb-4">
               <label
@@ -64,7 +65,10 @@ function Login() {
                   name="email"
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-xs italic">
+                  <p
+                    className="text-red-500 text-xs italic"
+                    data-test-id="error-email-login-form"
+                  >
                     {errors.email.message}
                   </p>
                 )}
@@ -91,7 +95,10 @@ function Login() {
                   name="password"
                 />
                 {errors.password && (
-                  <p className="text-red-500 text-xs italic">
+                  <p
+                    className="text-red-500 text-xs italic"
+                    data-test-id="error-password-login-form"
+                  >
                     Password is required
                   </p>
                 )}
@@ -99,7 +106,10 @@ function Login() {
             </div>
             <div className="flex items-center justify-between">
               {response.error && (
-                <p className="text-red-500 text-xs italic">
+                <p
+                  className="text-red-500 text-xs italic"
+                  data-test-id="error-api-login-form"
+                >
                   The data entered is not correct.
                 </p>
               )}
@@ -109,6 +119,7 @@ function Login() {
                 <button
                   type="submit"
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  data-test-id="login-submit"
                 >
                   Login
                 </button>

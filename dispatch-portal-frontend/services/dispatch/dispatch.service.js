@@ -26,7 +26,7 @@ export const dispatchService = {
   },
   newDispatch: async data => {
     try {
-      const res = await axiosInstance.post(
+      const res = await axiosInstanceMocks.post(
         API_URLS.DISPATCH,
         dispatchLitOutAdapter(data)
       );
@@ -42,7 +42,7 @@ export const dispatchService = {
   },
   get: async id => {
     try {
-      const res = await axiosInstance.get(`${API_URLS.DISPATCH}/${id}`);
+      const res = await axiosInstanceMocks.get(`${API_URLS.DISPATCH}/${id}`);
 
       if (res.error) {
         return res.error;
