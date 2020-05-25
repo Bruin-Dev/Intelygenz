@@ -45,7 +45,7 @@ class PredictionRepository:
         )
 
         if not tnba_note_prediction_line:
-            # If no prediction with the expected format is found in the note, let's consider the prediction "changed"
+            # Let's consider the prediction has changed if no prediction with the expected format is found in the note
             return True
 
         prediction_match = TNBA_NOTE_PREDICTION_LINE_REGEX.match(tnba_note_prediction_line)

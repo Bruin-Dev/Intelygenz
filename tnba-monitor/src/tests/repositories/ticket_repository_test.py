@@ -71,6 +71,42 @@ class TestTicketRepository:
         result = TicketRepository.is_tnba_note(ticket_note)
         assert result is True
 
+    def has_tnba_note_test(self):
+        utils_repository = UtilsRepository()
+        config = testconfig
+
+        ticket_repository = TicketRepository(config, utils_repository)
+
+        ticket_notes = [
+            {
+                "noteId": 41894040,
+                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "createdDate": "2020-02-24T10:07:13.503-05:00",
+            },
+            {
+                "noteId": 41894041,
+                "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "createdDate": "2020-02-24T10:08:13.503-05:00",
+            }
+        ]
+        result = ticket_repository.has_tnba_note(ticket_notes)
+        assert result is True
+
+        ticket_notes = [
+            {
+                "noteId": 41894040,
+                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "createdDate": "2020-02-24T10:07:13.503-05:00",
+            },
+            {
+                "noteId": 41894041,
+                "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                "createdDate": "2020-02-24T10:08:13.503-05:00",
+            }
+        ]
+        result = ticket_repository.has_tnba_note(ticket_notes)
+        assert result is False
+
     def find_newest_tnba_note_test(self):
         ticket_note_1 = {
             "noteId": 41894040,

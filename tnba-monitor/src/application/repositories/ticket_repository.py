@@ -25,6 +25,9 @@ class TicketRepository:
     def is_tnba_note(ticket_note: dict) -> bool:
         return bool(TNBA_NOTE_REGEX.match(ticket_note['noteValue']))
 
+    def has_tnba_note(self, ticket_notes: List[dict]) -> bool:
+        return bool(self._utils_repository.get_first_element_matching(ticket_notes, self.is_tnba_note))
+
     def find_newest_tnba_note(self, ticket_notes: List[dict]) -> dict:
         # Ticket notes should have been sorted by "createdDate" already but let's make sure...
         ticket_notes = sorted(ticket_notes, key=lambda note: note['createdDate'])

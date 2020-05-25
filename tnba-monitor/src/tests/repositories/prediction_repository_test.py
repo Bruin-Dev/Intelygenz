@@ -159,7 +159,7 @@ class TestPredictionRepository:
 
         assert result is False
 
-    def are_predictions_different_from_predictions_in_tnba_note_with_changes_in_prediction_name_test(self):
+    def is_best_prediction_different_from_prediction_in_tnba_note_with_changes_in_prediction_name_test(self):
         tnba_note = {
             "noteId": 41894040,
             "noteValue": os.linesep.join([
