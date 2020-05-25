@@ -9,7 +9,6 @@
     - cd ${MODULE}
     - pip install -r requirements.txt
   script:
-    - pip freeze
     - pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
   only:

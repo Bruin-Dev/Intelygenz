@@ -160,490 +160,845 @@ function NewDispatch({ authToken }) {
       <Menu authToken={authToken} />
       <div className="new-dispatch-wrapper">
         <p className="form-title">New Dispatch Request</p>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="max-w-full rounded shadow-lg"
-        >
-          <div className="brick">
-            <label htmlFor="dateDispatch">
-              Date of dispatch <br />
-              <input
-                type="date"
-                name="dateDispatch"
-                id="dateDispatch"
-                ref={register({ required: true })}
-                className={errors.dateDispatch && 'error'}
-              />
-              {errors.dateDispatch && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-            <br />
-            <label htmlFor="timeDispatch">
-              Time of dispatch (Local)
-              <br />
-              <select
-                name="timeDispatch"
-                id="timeDispatch"
-                ref={register({ required: true })}
-                className={errors.timeDispatch && 'error'}
-              >
-                {timeOptions.map(time => (
-                  <option value={time} key={`time-${time}`}>
-                    {time}
-                  </option>
-                ))}
-              </select>
-              {errors.timeDispatch && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-            <br />
-            <label htmlFor="timeZone">
-              Time Zone (Local)
-              <br />
-              <select
-                name="timeZone"
-                id="timeZone"
-                ref={register({ required: true })}
-                className={errors.timeZone && 'error'}
-              >
-                {timeZoneOptions.map((zone, index) => (
-                  <option key={`timeZone-${index}`} value={zone}>
-                    {zone}
-                  </option>
-                ))}
-              </select>
-              {errors.timeZone && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-          </div>
-          <div className="brick">
-            {showFieldByVendor(vendorsOptions[1].value) && (
-              <>
-                <label htmlFor="slaLevel">
-                  SLA Level
-                  <br />
-                  <select
-                    name="slaLevel"
-                    id="slaLevel"
-                    ref={register({ required: true })}
-                    className={errors.slaLevel && 'error'}
-                  >
-                    {slaOptions.map(slaOption => (
-                      <option value={slaOption} key={`slaOption-${slaOption}`}>
-                        {slaOption}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.slaLevel && (
-                    <p className="error">This field is required</p>
-                  )}
-                </label>
-                <br />
-              </>
-            )}
-            <label htmlFor="mettelId">
-              Bruin Ticket ID <br />
-              <input
-                type="text"
-                name="mettelId"
-                id="mettelId"
-                ref={register({ required: true })}
-                className={errors.mettelId && 'error'}
-              />
-              {errors.mettelId && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-            <br />
-            <div htmlFor="vendor">
-              Vendor
-              <br />
-              {vendorsOptions.map(vendorsOption => (
-                <label
-                  className="checkbox"
-                  htmlFor="vendor"
-                  key={`vendorsOption-${vendorsOption.value}`}
-                >
-                  {vendorsOption.name}
-                  <input
-                    type="checkbox"
-                    name="vendor"
-                    value={vendorsOption.value}
-                    id={vendorsOption.value}
-                    ref={register({ required: true })}
-                    className={errors.vendor && 'error'}
-                    onChange={changeVendor}
-                  />
-                  <span className="checkmark" />
-                </label>
-              ))}
-              {errors.vendor && <p className="error">This field is required</p>}
-            </div>
-          </div>
-          <p className="section-title">Location</p>
-          <div className="brick">
-            <label htmlFor="owner">
-              Name / Owner
-              <br />
-              <input
-                type="text"
-                name="owner"
-                id="owner"
-                ref={register({ required: true })}
-                className={errors.owner && 'error'}
-              />
-              {errors.owner && <p className="error">This field is required</p>}
-            </label>
-            <br />
-            <label htmlFor="address1">
-              Address Line 1<br />
-              <input
-                type="text"
-                name="address1"
-                id="address1"
-                ref={register({ required: true })}
-                className={errors.address1 && 'error'}
-              />
-              {errors.address1 && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-            <br />
-            <label htmlFor="address2">
-              Address Line 2<br />
-              <input
-                type="text"
-                name="address2"
-                id="address2"
-                ref={register({ required: true })}
-                className={errors.address2 && 'error'}
-              />
-              {errors.address2 && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-            <br />
-            <label htmlFor="city">
-              City
-              <br />
-              <input
-                type="text"
-                name="city"
-                id="city"
-                ref={register({ required: true })}
-                className={errors.city && 'error'}
-              />
-              {errors.city && <p className="error">This field is required</p>}
-            </label>
-            <br />
-            <label className="half" htmlFor="state">
-              State
-              <br />
-              <select
-                name="state"
-                id="state"
-                ref={register({ required: true })}
-                className={errors.state && 'error'}
-              >
-                {states.map(state => (
-                  <option value={state.name} key={state.abbreviation}>
-                    {state.name}
-                  </option>
-                ))}
-              </select>
-              {errors.state && <p className="error">This field is required</p>}
-            </label>
-            <label className="half right" htmlFor="zip">
-              Zip Code
-              <br />
-              <input
-                type="text"
-                name="zip"
-                id="zip"
-                ref={register({ required: true })}
-                className={errors.zip && 'error'}
-              />
-              {errors.zip && <p className="error">This field is required</p>}
-            </label>
-          </div>
-          <div className="brick">
-            <p className="brick-title">On-Site Contact</p>
-            <label className="half" htmlFor="firstName">
-              First Name
-              <br />
-              <input
-                type="text"
-                name="firstName"
-                id="firstName"
-                ref={register({ required: true })}
-                className={errors.firstName && 'error'}
-              />
-              {errors.firstName && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-            <label className="half right" htmlFor="lastName">
-              Last Name
-              <br />
-              <input
-                type="text"
-                name="lastName"
-                id="lastName"
-                ref={register({ required: true, maxLength: 6 })}
-                className={errors.lastName && 'error'}
-              />
-              {errors.lastName && (
-                <p className="error">
-                  {errors.lastName?.type === 'required' &&
-                    'This field is required'}
-                  {errors.lastName?.type === 'maxLength' &&
-                    'This input exceed maxLength'}
-                </p>
-              )}
-            </label>
-            <br />
-            <label htmlFor="phoneNumber">
-              Phone Number
-              <br />
-              <input
-                type="number"
-                name="phoneNumber"
-                id="phoneNumber"
-                ref={register({ required: true })}
-                className={errors.phoneNumber && 'error'}
-              />
-              {errors.phoneNumber && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-            <br />
-            {showFieldByVendor(vendorsOptions[1].value) && (
-              <label htmlFor="email">
-                Email
-                <br />
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  ref={register({ required: true })}
-                  className={errors.email && 'error'}
-                />
-                {errors.email && (
-                  <p className="error">This field is required</p>
-                )}
-              </label>
-            )}
-          </div>
-          <p className="section-title">Details</p>
-          <div className="brick">
-            {showFieldByVendor(vendorsOptions[1].value) && (
-              <>
-                <p>Service Type</p>
-                {errors.serviceType && (
-                  <p className="error">This field is required</p>
-                )}
 
-                {serviceTypesOptions.map(serviceTypesOption => (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex">
+            <div className="w-full md:w-1/2 p-8">
+              <div className="flex flex-col">
+                <div className="-mx-3 md:flex mb-6">
+                  <div className="md:w-1/2 px-3 mb-6 md:mb-0">
+                    <label
+                      className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                      htmlFor="dateDispatch"
+                    >
+                      Date of dispatch
+                      <input
+                        className={
+                          errors.dateDispatch
+                            ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                            : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                        }
+                        type="date"
+                        name="dateDispatch"
+                        id="dateDispatch"
+                        ref={register({ required: true })}
+                      />
+                      {errors.dateDispatch && (
+                        <p className="text-red-500 text-xs italic">
+                          This field is required
+                        </p>
+                      )}
+                    </label>
+                  </div>
+                  <div className="md:w-1/2 px-3">
+                    <label
+                      className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                      htmlFor="timeDispatch"
+                    >
+                      Time of dispatch (Local)
+                      <div className="relative">
+                        <select
+                          name="timeDispatch"
+                          id="timeDispatch"
+                          ref={register({ required: true })}
+                          className={
+                            errors.timeDispatch
+                              ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
+                              : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
+                          }
+                        >
+                          {timeOptions.map(time => (
+                            <option value={time} key={`time-${time}`}>
+                              {time}
+                            </option>
+                          ))}
+                        </select>
+                        <div
+                          className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker"
+                          style={{ top: '13px', right: '0px' }}
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                          </svg>
+                        </div>
+                      </div>
+                      {errors.timeDispatch && (
+                        <p className="text-red-500 text-xs italic">
+                          This field is required
+                        </p>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <div className="md:w-1/2 pr-3 mb-6 md:mb-0">
                   <label
-                    className="radio"
-                    htmlFor="vendor"
-                    key={`serviceTypes-${serviceTypesOption.value}`}
+                    className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                    htmlFor="timeZone"
                   >
-                    {serviceTypesOption.name}
-                    <input
-                      type="radio"
-                      name="vendor"
-                      value={serviceTypesOption.value}
-                      id={serviceTypesOption.value}
-                      ref={register({ required: true })}
-                      className={errors.serviceType ? 'radio error' : 'radio'}
-                    />
-                    <span className="checkmark" />
+                    Time Zone (Local)
+                    <div className="relative">
+                      <select
+                        name="timeZone"
+                        id="timeZone"
+                        ref={register({ required: true })}
+                        className={
+                          errors.timeZone
+                            ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
+                            : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
+                        }
+                      >
+                        {timeZoneOptions.map((zone, index) => (
+                          <option key={`timeZone-${index}`} value={zone}>
+                            {zone}
+                          </option>
+                        ))}
+                      </select>
+                      <div
+                        className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker"
+                        style={{ top: '13px', right: '0px' }}
+                      >
+                        <svg
+                          className="h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                        </svg>
+                      </div>
+                    </div>
+                    {errors.timeZone && (
+                      <p className="text-red-500 text-xs italic">
+                        This field is required
+                      </p>
+                    )}
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full md:w-1/2 p-8">
+              <div className="flex flex-col">
+                <div className="block uppercase tracking-wide text-grey-darker text-sm mb-2">
+                  Vendor
+                </div>
+                {vendorsOptions.map(vendorsOption => (
+                  <label
+                    className="flex justify-start items-start"
+                    htmlFor="vendor"
+                    key={`vendorsOption-${vendorsOption.value}`}
+                  >
+                    <div
+                      className={
+                        errors.vendor
+                          ? 'bg-white border-2 rounded border-red-500 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 mb-4 focus-within:border-blue-500'
+                          : 'bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 mb-4 focus-within:border-blue-500'
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        name="vendor"
+                        value={vendorsOption.value}
+                        id={vendorsOption.value}
+                        ref={register({ required: true })}
+                        className="opacity-0 absolute rounded"
+                        onChange={changeVendor}
+                      />
+                      <svg
+                        className="fill-current hidden w-4 h-4 text-green-500 pointer-events-none"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
+                      </svg>
+                    </div>
+                    <div className="select-none">{vendorsOption.name}</div>
                   </label>
                 ))}
-              </>
-            )}
+                {errors.vendor && (
+                  <p className="text-red-500 text-xs italic">
+                    This field is required
+                  </p>
+                )}
+              </div>
 
-            <label htmlFor="issues">
-              Issue(s) Experienced
-              <br />
-              <textarea
-                rows="4"
-                cols="50"
-                name="issues"
-                id="issues"
-                ref={register({ required: true })}
-                className={errors.issues && 'error'}
-              />
-              {errors.issues && <p className="error">This field is required</p>}
-            </label>
-          </div>
-          <div className="brick">
-            <label htmlFor="materials">
-              Materials Needed
-              <br />
-              <textarea
-                rows="4"
-                cols="50"
-                name="materials"
-                id="materials"
-                ref={register({ required: true })}
-                className={errors.materials && 'error'}
-              />
-              {errors.materials && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-            <br />
-            <label htmlFor="instructions">
-              Arrival Instructions
-              <br />
-              <textarea
-                rows="4"
-                cols="50"
-                name="instructions"
-                id="instructions"
-                ref={register({ required: true })}
-                className={errors.instructions && 'error'}
-              />
-              {errors.instructions && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-          </div>
-          {/*
-          <p className="section-title">Attachments</p>
-          <div className="brick">
-            <div className="file">
-              <label htmlFor="files" className="btn">
-                Add File/s
-                <input
-                  id="files"
-                  style={{ visibility: 'hidden' }}
-                  type="file"
-                  multiple
-                  onChange={onChangeHandlerFiles}
-                />
-              </label>
-              {files.length ? (
-                <div>
-                  <ol>
-                    {files.map((file, index) => (
-                      <li key={`file-name-${index}`}>
-                        {file.name}{' '}
-                        <button type="button" onClick={() => deleteFile(index)}>
-                          Delete file
-                        </button>
-                      </li>
-                    ))}
-                  </ol>
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="mettelId"
+                >
+                  Bruin Ticket ID
+                  <input
+                    className={
+                      errors.mettelId
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="text"
+                    name="mettelId"
+                    id="mettelId"
+                    ref={register({ required: true })}
+                    placeholder="458788998"
+                  />
+                  {errors.mettelId && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+
+              {showFieldByVendor(vendorsOptions[1].value) && (
+                <div className="flex flex-col">
+                  <label
+                    className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                    htmlFor="slaLevel"
+                  >
+                    SLA Level
+                    <input
+                      className={
+                        errors.slaLevel
+                          ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                          : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                      }
+                      type="text"
+                      name="slaLevel"
+                      id="slaLevel"
+                      ref={register({ required: true })}
+                      placeholder="Level 1"
+                    />
+                    {errors.slaLevel && (
+                      <p className="text-red-500 text-xs italic">
+                        This field is required
+                      </p>
+                    )}
+                  </label>
                 </div>
-              ) : (
-                <p>No Files Chosen</p>
               )}
             </div>
           </div>
-          */}
-          <p className="section-title">Requester</p>
-          <div className="brick">
-            <label className="half" htmlFor="firstNameRequester">
-              First Name
-              <br />
-              <input
-                type="text"
-                name="firstNameRequester"
-                id="firstNameRequester"
-                ref={register({ required: true })}
-                className={errors.firstNameRequester && 'error'}
-              />
-              {errors.firstNameRequester && (
-                <p className="error">This field is required</p>
+
+          <div className="flex">
+            <div className="w-1/2 px-8">
+              <div className="w-full mb-4">
+                <p className="text-grey-darker text-2xl">Location</p>
+              </div>
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="owner"
+                >
+                  Name / Owner
+                  <input
+                    className={
+                      errors.owner
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="text"
+                    name="owner"
+                    id="owner"
+                    ref={register({ required: true })}
+                    placeholder="James"
+                  />
+                  {errors.owner && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="address1"
+                >
+                  Address Line 1
+                  <input
+                    className={
+                      errors.address1
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="text"
+                    name="address1"
+                    id="address1"
+                    ref={register({ required: true })}
+                    placeholder="88 St Laurent Dr"
+                  />
+                  {errors.address1 && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="address2"
+                >
+                  Address Line 2
+                  <input
+                    className={
+                      errors.address2
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="text"
+                    name="address2"
+                    id="address2"
+                    ref={register({ required: true })}
+                    placeholder="Clark"
+                  />
+                  {errors.address2 && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+              <div className="flex flex-col">
+                <div className="-mx-3 md:flex mb-2">
+                  <div className="md:w-1/2 px-3 mb-6 md:mb-0">
+                    <label
+                      className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                      htmlFor="city"
+                    >
+                      City
+                      <input
+                        className={
+                          errors.city
+                            ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                            : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                        }
+                        type="text"
+                        name="city"
+                        id="city"
+                        ref={register({ required: true })}
+                        placeholder="Nueva jersey"
+                      />
+                      {errors.city && (
+                        <p className="text-red-500 text-xs italic">
+                          This field is required
+                        </p>
+                      )}
+                    </label>
+                  </div>
+                  <div className="md:w-1/2 px-3">
+                    <label
+                      className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                      htmlFor="state"
+                    >
+                      State
+                      <div className="relative">
+                        <select
+                          name="state"
+                          id="state"
+                          ref={register({ required: true })}
+                          className={
+                            errors.state
+                              ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
+                              : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
+                          }
+                        >
+                          {states.map(state => (
+                            <option value={state.name} key={state.abbreviation}>
+                              {state.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div
+                          className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker"
+                          style={{ top: '13px', right: '0px' }}
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                          </svg>
+                        </div>
+                      </div>
+                      {errors.state && (
+                        <p className="text-red-500 text-xs italic">
+                          This field is required
+                        </p>
+                      )}
+                    </label>
+                  </div>
+                  <div className="md:w-1/2 px-3">
+                    <label
+                      className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                      htmlFor="zip"
+                    >
+                      Zip Code
+                      <input
+                        className={
+                          errors.zip
+                            ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                            : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                        }
+                        type="text"
+                        name="zip"
+                        id="zip"
+                        ref={register({ required: true })}
+                        placeholder="07097"
+                      />
+                      {errors.zip && (
+                        <p className="text-red-500 text-xs italic">
+                          This field is required
+                        </p>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-1/2 px-8">
+              <div className="w-full mb-4">
+                <p className="text-grey-darker text-2xl">On-Site Contact</p>
+              </div>
+
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="firstName"
+                >
+                  First Name
+                  <input
+                    className={
+                      errors.firstName
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="text"
+                    name="firstName"
+                    id="firstName"
+                    ref={register({ required: true })}
+                    placeholder="Helen"
+                  />
+                  {errors.firstName && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="lastName"
+                >
+                  Last Name
+                  <input
+                    className={
+                      errors.lastName
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="text"
+                    name="lastName"
+                    id="lastName"
+                    ref={register({ required: true, maxLength: 6 })}
+                    placeholder="MacLow"
+                  />
+                  {errors.lastName && (
+                    <p className="text-red-500 text-xs italic">
+                      {errors.lastName?.type === 'required' &&
+                        'This field is required'}
+                      {errors.lastName?.type === 'maxLength' &&
+                        'This input exceeds the maximum length of 6 characters'}
+                    </p>
+                  )}
+                </label>
+              </div>
+
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="phoneNumber"
+                >
+                  Phone Number
+                  <input
+                    className={
+                      errors.phoneNumber
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="text"
+                    name="phoneNumber"
+                    id="phoneNumber"
+                    ref={register({ required: true })}
+                    placeholder="+1 587897524"
+                  />
+                  {errors.phoneNumber && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+
+              {showFieldByVendor(vendorsOptions[1].value) && (
+                <div className="flex flex-col">
+                  <label
+                    className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                    htmlFor="email"
+                  >
+                    Email
+                    <input
+                      className={
+                        errors.email
+                          ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                          : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                      }
+                      type="email"
+                      name="email"
+                      id="email"
+                      ref={register({ required: true })}
+                      placeholder="example@example.com"
+                    />
+                    {/* Todo: add regex validation */}
+                    {errors.email && (
+                      <p className="text-red-500 text-xs italic">
+                        This field is required
+                      </p>
+                    )}
+                  </label>
+                </div>
               )}
-            </label>
-            <label className="half right" htmlFor="lastNameRequester">
-              Last Name
-              <br />
-              <input
-                type="text"
-                name="lastNameRequester"
-                id="lastNameRequester"
-                ref={register({ required: true, maxLength: 6 })}
-                className={errors.lastNameRequester && 'error'}
-              />
-              {errors.lastNameRequester && (
-                <p className="error">
-                  {errors.lastNameRequester?.type === 'required' &&
-                    'This field is required'}
-                  {errors.lastNameRequester?.type === 'maxLength' &&
-                    'This input exceed maxLength'}
-                </p>
+            </div>
+          </div>
+
+          <div className="flex">
+            <div className="w-full mb-2 pl-8">
+              <p className="text-grey-darker text-2xl">Details</p>
+            </div>
+          </div>
+
+          <div className="flex">
+            <div className="w-1/2 px-8">
+              {showFieldByVendor(vendorsOptions[1].value) && (
+                <div className="flex flex-col">
+                  <div className="block uppercase tracking-wide text-grey-darker text-sm mb-2">
+                    Service Type
+                  </div>
+                  {serviceTypesOptions.map(serviceTypesOption => (
+                    <label
+                      className="flex justify-start items-start"
+                      htmlFor="serviceType"
+                      key={`serviceTypes-${serviceTypesOption.value}`}
+                    >
+                      <div
+                        className={
+                          errors.vendor
+                            ? 'bg-white border-2 rounded border-red-500 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 mb-4 focus-within:border-blue-500'
+                            : 'bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 mb-4 focus-within:border-blue-500'
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          name="serviceType"
+                          value={serviceTypesOption.value}
+                          id={serviceTypesOption.value}
+                          ref={register({ required: true })}
+                          className="opacity-0 absolute rounded"
+                        />
+                        <svg
+                          className="fill-current hidden w-4 h-4 text-green-500 pointer-events-none"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
+                        </svg>
+                      </div>
+                      <div className="select-none">
+                        {serviceTypesOption.name}
+                      </div>
+                    </label>
+                  ))}
+                  {errors.serviceType && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </div>
               )}
-            </label>
-            <br />
-            <label htmlFor="department">
-              MelTel Department
-              <br />
-              <select
-                name="department"
-                id="department"
-                ref={register({ required: true })}
-                className={errors.department && 'error'}
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="issues"
+                >
+                  Issue(s) Experienced
+                  <textarea
+                    rows="4"
+                    cols="50"
+                    name="issues"
+                    id="issues"
+                    ref={register({ required: true })}
+                    placeholder="Write your issues here ...."
+                    className={
+                      errors.issues
+                        ? 'appearance-none w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                  />
+                  {errors.issues && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+            </div>
+
+            <div className="w-1/2 px-8">
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="materials"
+                >
+                  Materials Needed
+                  <textarea
+                    rows="4"
+                    cols="50"
+                    name="materials"
+                    id="materials"
+                    ref={register({ required: true })}
+                    placeholder="Write your comments here ...."
+                    className={
+                      errors.materials
+                        ? 'appearance-none w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                  />
+                  {errors.materials && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="instructions"
+                >
+                  Arrival Instructions
+                  <textarea
+                    rows="4"
+                    cols="50"
+                    name="instructions"
+                    id="instructions"
+                    placeholder="Write your instructions here ...."
+                    ref={register({ required: true })}
+                    className={
+                      errors.instructions
+                        ? 'appearance-none w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                  />
+                  {errors.instructions && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex">
+            <div className="w-full mb-2 pl-8">
+              <p className="text-grey-darker text-2xl">Requester</p>
+            </div>
+          </div>
+
+          <div className="flex pb-8">
+            <div className="w-1/2 px-8">
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="firstNameRequester"
+                >
+                  First Name
+                  <input
+                    className={
+                      errors.firstNameRequester
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="text"
+                    name="firstNameRequester"
+                    id="firstNameRequester"
+                    placeholder="Charlize"
+                    ref={register({ required: true })}
+                  />
+                  {errors.firstNameRequester && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="lastNameRequester"
+                >
+                  Last Name
+                  <input
+                    className={
+                      errors.lastNameRequester
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="text"
+                    name="lastNameRequester"
+                    id="lastNameRequester"
+                    placeholder="Kidman"
+                    ref={register({ required: true, maxLength: 6 })}
+                  />
+                  {errors.lastNameRequester && (
+                    <p className="text-red-500 text-xs italic">
+                      {errors.lastNameRequester?.type === 'required' &&
+                        'This field is required'}
+                      {errors.lastNameRequester?.type === 'maxLength' &&
+                        'This input exceeds the maximum length of 6 characters'}{' '}
+                      {/* Todo: errors array */}
+                    </p>
+                  )}
+                </label>
+              </div>
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="department"
+                >
+                  MelTel Department
+                  <div className="relative">
+                    <select
+                      name="department"
+                      id="department"
+                      ref={register({ required: true })}
+                      className={
+                        errors.department
+                          ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
+                          : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
+                      }
+                    >
+                      {departmentOptions.map((deparmentOption, index) => (
+                        <option
+                          key={`department-${index}`}
+                          value={deparmentOption}
+                        >
+                          {deparmentOption}
+                        </option>
+                      ))}
+                    </select>
+                    <div
+                      className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker"
+                      style={{ top: '13px', right: '0px' }}
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                      </svg>
+                    </div>
+                  </div>
+                  {errors.department && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+            </div>
+
+            <div className="w-1/2 px-8">
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="phoneNumberRequester"
+                >
+                  Phone Number
+                  <input
+                    className={
+                      errors.phoneNumberRequester
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="text"
+                    name="phoneNumberRequester"
+                    id="phoneNumberRequester"
+                    placeholder="+1 000000000"
+                    ref={register({ required: true })}
+                  />
+                  {errors.phoneNumberRequester && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+              <div className="flex flex-col">
+                <label
+                  className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                  htmlFor="emailRequester"
+                >
+                  Email
+                  <input
+                    className={
+                      errors.emailRequester
+                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                    }
+                    type="email"
+                    name="emailRequester"
+                    id="emailRequester"
+                    ref={register({ required: true })}
+                    placeholder="example@example.com"
+                  />
+                  {/* Todo: add regex validation */}
+                  {errors.emailRequester && (
+                    <p className="text-red-500 text-xs italic">
+                      This field is required
+                    </p>
+                  )}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex content-center">
+            {isLoading ? (
+              <Loading />
+            ) : (
+              <button
+                className="bg-teal-500 hover:bg-teal-700 text-white center py-2 px-4 rounded"
+                type="submit"
               >
-                {departmentOptions.map((deparmentOption, index) => (
-                  <option key={`department-${index}`} value={deparmentOption}>
-                    {deparmentOption}
-                  </option>
-                ))}
-              </select>
-              {errors.department && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
+                Submit
+              </button>
+            )}
+            {response && response.error && (
+              <p className="text-red-500 text-xs italic">
+                Error, please try again later
+              </p>
+            )}
           </div>
-          <div className="brick">
-            <label htmlFor="phoneNumberRequester">
-              Pnone Number
-              <br />
-              <input
-                type="number"
-                name="phoneNumberRequester"
-                id="phoneNumberRequester"
-                ref={register({ required: true })}
-                className={errors.phoneNumberRequester && 'error'}
-              />
-              {errors.phoneNumberRequester && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-            <br />
-            <label htmlFor="emailRequester">
-              Email
-              <br />
-              <input
-                type="email"
-                name="emailRequester"
-                id="emailRequester"
-                ref={register({ required: true })}
-                className={errors.emailRequester && 'error'}
-              />
-              {errors.emailRequester && (
-                <p className="error">This field is required</p>
-              )}
-            </label>
-          </div>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <button className="login" type="submit">
-              Submit
-            </button>
-          )}
-          {response && response.error && (
-            <p className="error">Error, please try again later</p>
-          )}
         </form>
       </div>
     </>

@@ -34,112 +34,118 @@ function Dispatch({ authToken }) {
       {!data ? (
         <p>Not found dispatch</p>
       ) : (
-        <>
-          <div className="wrapper-dispatch">
-            <div className="flex mb-4">
-              <div className="w-1/2 h-12">
-                <h3>Info dispatch: {data.id}</h3>
-                <ul>
-                  <li>
-                    <b>Vendor:</b> {data.vendor}
-                  </li>
-                  <li>
-                    <b>SLA Level:</b> {data.slaLevel}
-                  </li>
-                  <li>
-                    <b>Status:</b>{' '}
-                    <button type="button" className={data.status}>
-                      {data.status}
-                    </button>
-                  </li>
-                  <li>
-                    <b>Mettel Id:</b> {data.mettelId}
-                  </li>
-                  <li>
-                    <b>Local time of dispatch:</b> {data.timeDispatch}
-                  </li>
-                  <li>
-                    <b>Time Zone Local:</b> {data.timeZone}
-                  </li>
-                </ul>
+        <div className="flex m-8">
+          <div className="w-1/4 border-b border-l lg:h-auto lg:border-t lg:border-gray-400 flex-none rounded-t lg:rounded-t-none lg:rounded-l bg-gray-300 p-4 justify-between">
+            <div className="mb-8">
+              <div className="text-gray-900 font-bold text-xl mb-2">
+                Vendor Details
               </div>
-              <div className="w-1/2 h-12">
-                <h3>Requester</h3>
-                <ul>
-                  <li>
-                    <b>Name:</b> {data.requester.name}
-                  </li>
-                  <li>
-                    <b>Email:</b> {data.requester.email}
-                  </li>
-                  <li>
-                    <b>Department:</b> {data.requester.department}
-                  </li>
-                  <li>
-                    <b>Phone number:</b> {data.requester.phoneNumber}
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className="flex mb-4">
-              <div className="w-1/2 h-12">
-                <h3>On-Site Contact</h3>
-                <ul>
-                  <li>
-                    <b>Site:</b> {data.onSiteContact.site}
-                  </li>
-                  <li>
-                    <b>Street:</b> {data.onSiteContact.street}
-                  </li>
-                  <li>
-                    <b>City:</b> {data.onSiteContact.city}
-                  </li>
-                  <li>
-                    <b>State:</b> {data.onSiteContact.state}
-                  </li>
-                  <li>
-                    <b>Zip:</b> {data.onSiteContact.zip}
-                  </li>
-                  <li>
-                    <b>Phone number:</b> {data.onSiteContact.phoneNumber}
-                  </li>
-                </ul>
-              </div>
-              <div className="w-1/2 h-12">
-                <h3>Details</h3>
-                <ul>
-                  <li>
-                    <b>Service type:</b> {data.details.serviceType}
-                  </li>
-                  <li>
-                    <b>Instructions:</b> {data.details.instructions}
-                  </li>
-                  <li>
-                    <b>Information:</b> {data.details.information}
-                  </li>
-                  <li>
-                    <b>Special Materials:</b> {data.details.specialMaterials}
-                  </li>
-                  <li>
-                    <b>Sercive type:</b> {data.details.serviceType}
-                  </li>
 
-                  {data.vendor === config.VENDORS.CTS && (
-                    <>
-                      <li>
-                        <b>Field engineer:</b> {data.details.fieldEngineer}
-                      </li>
-                      <li>
-                        <b>Field engineer contact number:</b>{' '}
-                        {data.details.fieldEngineerContactNumber}
-                      </li>
-                    </>
-                  )}
-                </ul>
-              </div>
+              <p className="text-gray-700 text-sm">
+                <b>Vendor:</b> {data.vendor}
+              </p>
+              <p className="text-gray-700 text-sm">
+                <b>SLA Level:</b> {data.slaLevel}
+              </p>
+              <p className="text-gray-700 text-sm">
+                <b>Mettel Id:</b> {data.mettelId}
+              </p>
+              <p className="text-gray-700 text-sm">
+                <b>Local time of dispatch:</b> {data.timeDispatch}
+              </p>
+              <p className="text-gray-700 text-sm">
+                <b>Time Zone Local:</b> {data.timeZone}
+              </p>
+              <p className="text-gray-700 text-sm">
+                <b>Status:</b>{' '}
+                <button type="button" className={data.status}>
+                  {' '}
+                  {/* Todo: repair status button */}
+                  {data.status}
+                </button>
+              </p>
             </div>
           </div>
-        </>
+          <div className="w-2/4 border-r border-b border-l border-gray-400 lg:border-l-0 lg:border-r-0 lg:border-t lg:border-gray-400 bg-white p-4 flex flex-col justify-between leading-normal">
+            <div className="mb-8">
+              <div className="mb-4">
+                <div className="text-gray-900 font-bold text-xl mb-2">
+                  Requester
+                </div>
+                <p className="text-gray-900 text-sm">
+                  Name: {data.requester.name}
+                </p>
+                <p className="text-gray-900 text-sm">
+                  Email: {data.requester.email}
+                </p>
+                <p className="text-gray-900 text-sm">
+                  Department: {data.requester.department}
+                </p>
+                <p className="text-gray-900 text-sm">
+                  Phone number: {data.requester.phoneNumber}
+                </p>
+              </div>
+
+              <div className="text-gray-900 font-bold text-xl mb-2">
+                On-Site Contact
+              </div>
+              <p className="text-gray-900 text-sm">
+                Site: {data.onSiteContact.site}
+              </p>
+              <p className="text-gray-900 text-sm">
+                Street: {data.onSiteContact.street}
+              </p>
+              <p className="text-gray-900 text-sm">
+                City: {data.onSiteContact.city}
+              </p>
+              <p className="text-gray-900 text-sm">
+                State: {data.onSiteContact.state}
+              </p>
+              <p className="text-gray-900 text-sm">
+                Zip: {data.onSiteContact.zip}
+              </p>
+              <p className="text-gray-900 text-sm">
+                Phone number: {data.onSiteContact.phoneNumber}
+              </p>
+            </div>
+          </div>
+
+          <div className="w-2/4 border-r border-b border-l border-gray-400 lg:border-l-0 lg:border-t lg:border-gray-400 bg-white rounded-b lg:rounded-b-none lg:rounded-r p-4 flex flex-col justify-between leading-normal">
+            <div className="mb-8">
+              <div className="text-gray-900 font-bold text-xl mb-2">
+                Details
+              </div>
+
+              <p className="text-gray-900 text-sm">
+                Service type: {data.details.serviceType}
+              </p>
+              <p className="text-gray-900 text-sm">
+                Instructions: {data.details.instructions}
+              </p>
+              <p className="text-gray-900 text-sm">
+                Information: {data.details.information}
+              </p>
+              <p className="text-gray-900 text-sm">
+                Special Materials: {data.details.specialMaterials}
+              </p>
+              <p className="text-gray-900 text-sm">
+                Sercive type: {data.details.serviceType}
+              </p>
+
+              {data.vendor === config.VENDORS.CTS && (
+                <>
+                  <p className="text-gray-900 text-sm">
+                    Field engineer: {data.details.fieldEngineer}
+                  </p>
+                  <p className="text-gray-900 text-sm">
+                    Field engineer contact number:{' '}
+                    {data.details.fieldEngineerContactNumber}
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

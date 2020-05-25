@@ -40,6 +40,7 @@ class DispatchServer:
                          base_model_schema=config.DISPATCH_PORTAL_CONFIG['schema_path'])
         # self._app = cors(self._app, allow_origin="*")
         self._app.config['MAX_CONTENT_LENGTH'] = self._max_content_length
+        self.MAIN_WATERMARK = '#*Automation Engine*#'
         self._redis_client = redis_client
         self._event_bus = event_bus
         self._logger = logger
@@ -433,17 +434,18 @@ class DispatchServer:
         )
         return append_ticket_to_note
 
-    # def _exists_watermark_in_ticket(self, watermark, ticket_notes):
-    #     watermark_found = False
-    #
-    #     for ticket_note_data in ticket_notes:
-    #         self._logger.info(ticket_note_data)
-    #         ticket_note = ticket_note_data.get('noteValue')
-    #
-    #         if '#*Automation Engine*#' in ticket_note \
-    #                 and watermark in ticket_note:
-    #             watermark_found = True
-    #     return watermark_found
+    def _exists_watermark_in_ticket(self, watermark, ticket_notes):
+        watermark_found = False
+
+        for ticket_note_data in ticket_notes:
+            self._logger.info(ticket_note_data)
+            ticket_note = ticket_note_data.get('noteValue')
+
+            if self.MAIN_WATERMARK in ticket_note and watermark in ticket_note:
+                watermark_found = True
+                break
+
+        return watermark_found
 
     async def _get_ticket_details(self, ticket_id):
         ticket_request_msg = {'request_id': uuid(),
@@ -453,30 +455,37 @@ class DispatchServer:
 
     async def _process_note(self, dispatch_number, body):
         try:
+            ticket_id = body['mettel_bruin_ticket_id']
             ticket_note = get_dispatch_requested_note(body)
+
             # Split the note if needed
             ticket_notes = textwrap.wrap(ticket_note, self.MAX_TICKET_NOTE, replace_whitespace=False)
 
-            # TODO: get from bruin
-            # pre_existing_ticket_notes = self._get_ticket_details(body['mettel_bruin_ticket_id'])
-            # pre_existing_ticket_notes = []
+            pre_existing_ticket_notes_response = await self._get_ticket_details(ticket_id)
+            pre_existing_ticket_notes_status = pre_existing_ticket_notes_response['status']
 
-            # watermark_found = self._exists_watermark_in_ticket('Dispatch Management - Dispatch Requested',
-            #                                                    pre_existing_ticket_notes)
-            watermark_found = False
+            if pre_existing_ticket_notes_status not in range(200, 300):
+                self._logger.error(f"Error: could not retrieve ticket [{ticket_id}] details")
+                return
+
+            pre_existing_ticket_notes_body = pre_existing_ticket_notes_response.get('body', {})
+            pre_existing_ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
+            watermark_found = self._exists_watermark_in_ticket('Dispatch Management - Dispatch Requested',
+                                                               pre_existing_ticket_notes)
             if watermark_found is True:
                 # TODO: decide what to do
-                self._logger(f"Not adding note")
+                self._logger.info(f"Not adding note for dispatch [{dispatch_number}] to ticket {ticket_id}")
             else:
                 for i, note in enumerate(ticket_notes):
-                    self._logger.info(f"Appending note_{i} to ticket {body['mettel_bruin_ticket_id']}")
+                    self._logger.info(f"Appending note_{i} to ticket {ticket_id}")
                     append_note_response = await self._append_note_to_ticket(body['mettel_bruin_ticket_id'], note)
                     append_note_response_status = append_note_response['status']
                     append_note_response_body = append_note_response['body']
                     if append_note_response_status not in range(200, 300):
-                        self._logger.info(f"[process_note] Note: `{note}` Dispatch: {dispatch_number} "
-                                          f"Ticket_id: {body['mettel_bruin_ticket_id']} - Not appended")
-                        return
+                        self._logger.error(f"[process_note] Error appending note: `{note}` "
+                                           f"Dispatch: {dispatch_number} "
+                                           f"Ticket_id: {body['mettel_bruin_ticket_id']} - Not appended")
+                        continue
                     self._logger.info(f"[process_note] Note: `{note}` Dispatch: {dispatch_number} "
                                       f"Ticket_id: {body['mettel_bruin_ticket_id']} - Appended")
                     self._logger.info(f"[process_note] Note appended. Response {append_note_response_body}")

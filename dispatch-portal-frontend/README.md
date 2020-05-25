@@ -84,7 +84,7 @@ If any of the next requirements is not fulfilled in a merge request, merge reque
 ## Work locally
 
 Start docker and the back images:
-``docker-compose up --build redis nats-server lit-bridge cts-bridge dispatch-portal-backend nginx bruin-bridge``
+``docker-compose up --build redis nats-server lit-bridge cts-bridge dispatch-portal-frontend dispatch-portal-backend nginx bruin-bridge``
 
 and to login or renew the AWS token:
 ``echo $(aws ecr get-login-password --profile mettel)|docker login --password-stdin --username AWS 374050862540.dkr.ecr.us-east-1.amazonaws.com``

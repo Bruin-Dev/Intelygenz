@@ -9,7 +9,6 @@ export const API_URLS = {
 
 export const baseConfig = {
   baseURL: config.baseApi,
-  timeout: 10000,
   headers: {
     'Content-Type': 'application/json;charset=utf-8'
   }
