@@ -58,13 +58,13 @@ class TestGetTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_all_filtered_tickets = Mock(return_value={'body': filtered_tickets_list,
-                                                         'status': 200})
+        bruin_repository.get_all_filtered_tickets = CoroutineMock(return_value={'body': filtered_tickets_list,
+                                                                                'status': 200})
 
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(msg)
 
-        bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_called_once_with(
+        bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_awaited_once_with(
             param_copy, ticket_status_list
         )
         bruin_ticket_response._event_bus.publish_message.assert_awaited_once_with(
@@ -107,13 +107,13 @@ class TestGetTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_all_filtered_tickets = Mock(return_value={'body': filtered_tickets_list,
-                                                                       'status': 200})
+        bruin_repository.get_all_filtered_tickets = CoroutineMock(return_value={'body': filtered_tickets_list,
+                                                                                'status': 200})
 
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(msg)
 
-        bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_called_once_with(
+        bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_awaited_once_with(
             param_copy, ticket_status_list
         )
         bruin_ticket_response._event_bus.publish_message.assert_awaited_once_with(
@@ -153,13 +153,13 @@ class TestGetTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_all_filtered_tickets = Mock(return_value={'body': filtered_tickets_list,
-                                                                       'status': 200})
+        bruin_repository.get_all_filtered_tickets = CoroutineMock(return_value={'body': filtered_tickets_list,
+                                                                                'status': 200})
 
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(msg)
 
-        bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_not_called()
+        bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_not_awaited()
         bruin_ticket_response._event_bus.publish_message.assert_awaited_once_with(
             response_topic, response_to_publish_in_topic
         )
@@ -187,13 +187,13 @@ class TestGetTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_all_filtered_tickets = Mock(return_value={'body': filtered_tickets_list,
-                                                                       'status': 200})
+        bruin_repository.get_all_filtered_tickets = CoroutineMock(return_value={'body': filtered_tickets_list,
+                                                                                'status': 200})
 
         bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
         await bruin_ticket_response.get_all_tickets(msg)
 
-        bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_not_called()
+        bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_not_awaited()
         bruin_ticket_response._event_bus.publish_message.assert_awaited_once_with(
             response_topic, response_to_publish_in_topic
         )

@@ -45,7 +45,7 @@ class GetTicket:
 
         self._logger.info(f'Collecting all tickets for client id: {params["client_id"]}...')
 
-        filtered_tickets = self._bruin_repository.get_all_filtered_tickets(params, ticket_status)
+        filtered_tickets = await self._bruin_repository.get_all_filtered_tickets(params, ticket_status)
 
         filtered_tickets_response = {**filtered_tickets_response, **filtered_tickets}
 

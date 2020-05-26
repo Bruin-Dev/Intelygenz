@@ -7,38 +7,53 @@ class BruinRepository:
         self._logger = logger
         self._bruin_client = bruin_client
 
-    def get_all_filtered_tickets(self, params, ticket_status):
-        ticket_list = []
+    async def get_all_filtered_tickets(self, params, ticket_status):
         response = dict.fromkeys(["body", "status"])
         response['body'] = []
         response['status'] = 200
-        for status in ticket_status:
-            full_params = params.copy()
-            full_params["TicketStatus"] = status
-            status_ticket_list = self._bruin_client.get_all_tickets(full_params)
-            response['status'] = status_ticket_list['status']
-            if status_ticket_list["status"] not in range(200, 300):
-                return status_ticket_list
 
-            ticket_list = ticket_list + status_ticket_list["body"]
+        full_params = params.copy()
+        loop = asyncio.get_event_loop()
+        futures = [
+            loop.run_in_executor(
+                None,
+                self._get_tickets_by_status,
+                status, full_params, response
+            )
+            for status in ticket_status
+        ]
+        try:
+            results = await asyncio.gather(*futures)
+        except Exception as error:
+            for future in futures:
+                future.cancel()
+            return response
 
-        if len(ticket_list) > 0:
-            response['body'] = list({ticket_id['ticketID']: ticket_id for ticket_id in ticket_list}.values())
+        tickets = sum(results, [])  # This joins all elements in "results"
+        response['body'] = list({ticket['ticketID']: ticket for ticket in tickets}.values())
 
         return response
+
+    def _get_tickets_by_status(self, status, params, response):
+        params["TicketStatus"] = status
+        status_ticket_list = self._bruin_client.get_all_tickets(params)
+        response['status'] = status_ticket_list['status']
+        if status_ticket_list["status"] not in range(200, 300):
+            response['body'] = status_ticket_list['body']
+            raise Exception()
+
+        return status_ticket_list["body"]
 
     def get_ticket_details(self, ticket_id):
         return self._bruin_client.get_ticket_details(ticket_id)
 
     async def get_ticket_details_by_edge_serial(self, edge_serial, params, ticket_statuses):
-        result = []
-
         response = dict.fromkeys(["body", "status"])
 
         response['body'] = []
         response['status'] = 200
 
-        filtered_tickets = self.get_all_filtered_tickets(params=params, ticket_status=ticket_statuses,)
+        filtered_tickets = await self.get_all_filtered_tickets(params=params, ticket_status=ticket_statuses,)
 
         if filtered_tickets['status'] not in range(200, 300):
             return filtered_tickets
@@ -48,23 +63,26 @@ class BruinRepository:
                    loop.run_in_executor(
                                         None,
                                         self.search_ticket_details_for_serial,
-                                        edge_serial, ticket, result, response
+                                        edge_serial, ticket, response
                                        )
                    for ticket in filtered_tickets['body']
         ]
-        await asyncio.gather(*futures)
+        results = await asyncio.gather(*futures)
 
-        response['body'] = result
+        tickets = sum(results, [])
+
+        response['body'] = tickets
 
         return response
 
-    def search_ticket_details_for_serial(self, edge_serial, ticket, temp_response, response):
+    def search_ticket_details_for_serial(self, edge_serial, ticket, response):
+        results = []
         ticket_id = ticket['ticketID']
         ticket_details_dict = self.get_ticket_details(ticket_id)
 
         ticket_details_response_status = ticket_details_dict['status']
         if ticket_details_response_status not in range(200, 300):
-            return
+            return []
 
         response['status'] = ticket_details_response_status
         ticket_details_items = ticket_details_dict["body"]['ticketDetails']
@@ -74,10 +92,11 @@ class BruinRepository:
             ticket_details_items,
         )
         if any(ticket_details_items_as_booleans):
-            temp_response.append({
+            results.append({
                 'ticketID': ticket_id,
                 **ticket_details_dict["body"],
             })
+        return results
 
     async def get_affecting_ticket_details_by_edge_serial(self, edge_serial, client_id,
                                                           category='SD-WAN', ticket_statuses=None):
