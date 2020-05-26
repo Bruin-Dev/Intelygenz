@@ -30,6 +30,13 @@ EMAIL_CONFIG = {
     'password': os.environ["EMAIL_ACC_PWD"]
 }
 
+TELESTAX_CONFIG = {
+    'url': os.environ['TELESTAX_URL'],
+    'account_sid': os.environ["TELESTAX_ACCOUNT_SID"],
+    'auth_token': os.environ["TELESTAX_AUTH_TOKEN"],
+    'from': os.environ["TELESTAX_FROM_PHONE_NUMBER"],
+    'to': [os.environ["TELESTAX_FROM_TO_NUMBER"]]
+}
 
 LOG_CONFIG = {
     'name': 'notifier',

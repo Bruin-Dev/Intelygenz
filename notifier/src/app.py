@@ -1,13 +1,16 @@
 import asyncio
 import redis
+
 from config import config
 from igz.packages.nats.clients import NATSClient
 from application.clients.email_client import EmailClient
 from application.clients.slack_client import SlackClient
 from application.repositories.email_repository import EmailRepository
 from application.repositories.slack_repository import SlackRepository
+from application.repositories.telestax_repository import TeleStaxRepository
 from application.actions.send_to_email import SendToEmail
 from application.actions.send_to_slack import SendToSlack
+from application.actions.sent_to_sms import SendToSms
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.eventbus.action import ActionWrapper
@@ -29,6 +32,7 @@ class Container:
 
         self._subscriber_email = NATSClient(config, logger=self._logger)
         self._subscriber_slack = NATSClient(config, logger=self._logger)
+        self._subscriber_telestax = NATSClient(config, logger=self._logger)
         self._publisher = NATSClient(config, logger=self._logger)
 
         self._email_client = EmailClient(config, self._logger)
@@ -37,18 +41,25 @@ class Container:
         self._slack_client = SlackClient(config, self._logger)
         self._slack_repo = SlackRepository(config, self._slack_client, self._logger)
 
+        self._telestax_client = TeleStaxClient(config, self._logger)
+        self._telestax_repo = TeleStaxRepository(config, self._telestax_client, self._logger)
+
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
 
         self._event_bus.add_consumer(consumer=self._subscriber_email, consumer_name="notification_email_request")
         self._event_bus.add_consumer(consumer=self._subscriber_slack, consumer_name="notification_slack_request")
+        self._event_bus.add_consumer(consumer=self._subscriber_telestax, consumer_name="notification_sms_request")
         self._event_bus.set_producer(producer=self._publisher)
 
         self._email_notification = SendToEmail(config, self._event_bus, self._logger, self._email_repo)
         self._slack_notification = SendToSlack(config, self._event_bus, self._slack_repo, self._logger)
+        self._telestax_notification = SendToSms(config, self._event_bus, self._telestax_repo, self._logger)
 
         self._send_email_wrapper = ActionWrapper(self._email_notification, "send_to_email", is_async=True,
                                                  logger=self._logger)
         self._send_slack_wrapper = ActionWrapper(self._slack_notification, "send_to_slack", is_async=True,
+                                                 logger=self._logger)
+        self._send_sms_wrapper = ActionWrapper(self._telestax_notification, "send_to_sms", is_async=True,
                                                  logger=self._logger)
         self._server = QuartServer(config)
 

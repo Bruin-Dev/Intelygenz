@@ -24,6 +24,10 @@ EMAIL_CONFIG = {
     'recipient_email': 'fake@gmail.com'
 }
 
+TELESTAX_CONFIG = {
+    'basic_auth': "fakebase64=="
+}
+
 LOG_CONFIG = {
     'name': 'test-name',
     'level': logging.DEBUG,
