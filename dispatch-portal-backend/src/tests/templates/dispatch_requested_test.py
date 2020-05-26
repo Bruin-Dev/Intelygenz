@@ -5,6 +5,7 @@ Dispatch Management - Dispatch Requested
 
 A dispatch has been requested with LIT. Please see the summary below.
 --
+Dispatch Number: [DIS37266|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37266]
 Date of Dispatch: 2019-11-14
 Time of Dispatch (Local): 6PM-8PM
 Time Zone (Local): Pacific Time
@@ -30,6 +31,7 @@ Department: Customer Care
 
 
 def get_dispatch_requested_note_test():
+    dispatch_number = 'DIS37266'
     body = {
       'date_of_dispatch': '2019-11-14',
       'site_survey_quote_required': False,
@@ -51,6 +53,6 @@ def get_dispatch_requested_note_test():
       'mettel_requester_email': 'karen.doe@mettel.net',
       'mettel_department_phone_number': '+1 666 6666 666'
     }
-    dispatch_request_note = get_dispatch_requested_note(body)
+    dispatch_request_note = get_dispatch_requested_note(body, dispatch_number)
 
     assert dispatch_request_note == expected_dispatch_request_note

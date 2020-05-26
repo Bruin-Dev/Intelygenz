@@ -172,7 +172,6 @@ class DispatchServer:
             return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
 
         self._logger.info(f"payload: {body}")
-
         dispatch_request = lit_mapper.map_create_dispatch(body)
         request_body = dict()
         request_body['RequestDispatch'] = dispatch_request
@@ -456,7 +455,7 @@ class DispatchServer:
     async def _process_note(self, dispatch_number, body):
         try:
             ticket_id = body['mettel_bruin_ticket_id']
-            ticket_note = get_dispatch_requested_note(body)
+            ticket_note = get_dispatch_requested_note(body, dispatch_number)
 
             # Split the note if needed
             ticket_notes = textwrap.wrap(ticket_note, self.MAX_TICKET_NOTE, replace_whitespace=False)

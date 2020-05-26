@@ -685,6 +685,8 @@ class TestApiServer:
                 'ticket_id': 'T-12345',
                 'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
                         'A dispatch has been requested with LIT. Please see the summary below.\n--\n'
+                        f'Dispatch Number: [{dispatch_number}|'
+                        f'https://master.mettel-automation.net/dispatch_portal/dispatch/{dispatch_number}]\n'
                         'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
                         'Time Zone (Local): Pacific Time\nVendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n'
                         'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
@@ -761,7 +763,7 @@ class TestApiServer:
                 "Hard_Time_of_Dispatch_Time_Zone_Local": None,
                 "Hard_Time_of_Dispatch_Local": None,
                 "Dispatch_Status": "New Dispatch",
-                "Dispatch_Number": "DIS37450",
+                "Dispatch_Number": dispatch_number,
                 "Date_of_Dispatch": "2019-11-14",
                 "Close_Out_Notes": None,
                 "Backup_MetTel_Department_Phone_Number": None
@@ -847,27 +849,17 @@ class TestApiServer:
             }
         }
 
-        expected_response_create = {'id': 'DIS37450', 'vendor': 'LIT'}
-
-        ticket_note = '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n' \
-                      'A dispatch has been requested with LIT. Please see the summary below.\n' \
-                      '--\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n' \
-                      'Time Zone (Local): Pacific Time\n' \
-                      'Vendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n' \
-                      'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n' \
-                      'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n' \
-                      'Arrival Instructions: When arriving to the site call ' \
-                      'HOLMDEL NOC for telematic assistance\nMaterials Needed:\n' \
-                      'Laptop, cable, tuner, ladder,internet hotspot\n\nRequester\n' \
-                      'Name: Karen Doe\nPhone: mettel_department_phone_number\n' \
-                      'Email: karen.doe@mettel.net\nDepartment: Customer Care'
+        expected_response_create = {'id': dispatch_number, 'vendor': 'LIT'}
 
         append_note_to_ticket_request = {
             'request_id': uuid_,
             'body': {
                 'ticket_id': 'T-12345',
                 'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
-                        'A dispatch has been requested with LIT. Please see the summary below.\n--\n'
+                        'A dispatch has been requested with LIT. Please see the summary below.\n'
+                        f'--\nDispatch Number: '
+                        f'[{dispatch_number}|'
+                        f'https://master.mettel-automation.net/dispatch_portal/dispatch/{dispatch_number}]\n'
                         'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
                         'Time Zone (Local): Pacific Time\nVendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n'
                         'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
@@ -944,7 +936,7 @@ class TestApiServer:
                 "Hard_Time_of_Dispatch_Time_Zone_Local": None,
                 "Hard_Time_of_Dispatch_Local": None,
                 "Dispatch_Status": "New Dispatch",
-                "Dispatch_Number": "DIS37450",
+                "Dispatch_Number": dispatch_number,
                 "Date_of_Dispatch": "2019-11-14",
                 "Close_Out_Notes": None,
                 "Backup_MetTel_Department_Phone_Number": None
@@ -961,7 +953,9 @@ class TestApiServer:
             "request_id": uuid_,
             "body": [{'noteValue': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
                       'A dispatch has been requested with LIT. Please see the summary below.\n'
-                      '--\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
+                      f'--\nDispatch Number: '
+                      f'[{dispatch_number}|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37266]\n'
+                      'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
                       'Time Zone (Local): Pacific Time\n'
                       'Vendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n'
                       'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'

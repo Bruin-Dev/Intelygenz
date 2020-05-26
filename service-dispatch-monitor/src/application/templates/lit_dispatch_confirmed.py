@@ -9,7 +9,7 @@ Larry Andershock
 """
 
 
-def get_dispatch_confirmed_note(body):
+def lig_get_dispatch_confirmed_note(body):
     return DISPATCH_REQUESTED.format(
         vendor='LIT',
         date_of_dispatch=body.get('date_of_dispatch'),
