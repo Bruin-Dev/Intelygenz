@@ -3,8 +3,8 @@ Dispatch Management - Dispatch Confirmed
 Dispatch scheduled by {vendor} for {date_of_dispatch} @ {time_of_dispatch} {am_pm} {time_zone}
 
 Field Engineer
-Larry Andershock
-(310) 525-4183
+{tech_name}
+{tech_phone}
 """
 
 
@@ -14,5 +14,7 @@ def lit_get_dispatch_confirmed_note(body):
         date_of_dispatch=body.get('date_of_dispatch'),
         time_of_dispatch=body.get('time_of_dispatch'),
         am_pm=body.get('am_pm'),
-        time_zone=body.get('time_zone')
+        time_zone=body.get('time_zone'),
+        tech_name=body.get('tech_name'),
+        tech_phone=body.get('tech_phone')
     )

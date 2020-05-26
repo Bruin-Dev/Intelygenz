@@ -71,10 +71,16 @@ class LitDispatchMonitor:
         lit_dispatches = response['body']['DispatchList']
 
         # Filter confirmed dispatches
+        # A confirmed dispatch must have status: 'Request Confirmed'
+        # and this two fields filled Tech_First_Name, Tech_Mobile_Number
         confirmed_dispatches = [
             dispatch
             for dispatch in lit_dispatches
-            if dispatch['Dispatch_Status'] == 'Request Confirmed'
+            if dispatch.get('Dispatch_Status') == 'Request Confirmed'
+            if dispatch.get("Tech_First_Name") is not None
+            if len(dispatch.get("Tech_First_Name")) > 0
+            if dispatch.get("Tech_Mobile_Number") is not None
+            if len(dispatch.get("Tech_Mobile_Number")) > 0
         ]
         for dispatch in confirmed_dispatches:
             # TODO: post confirmed note
@@ -99,8 +105,6 @@ class LitDispatchMonitor:
 
                 if dispatch_number and ticket_notes:
                     self._logger.info(f"Checking watermark for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
-                    watermark_found = False
-                    confirmed_note_found = False
 
                     self._logger.info(ticket_notes)
 
@@ -117,7 +121,6 @@ class LitDispatchMonitor:
                         else:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"- Adding confirm note")
-                            # TODO: retrieve from response_body
                             time_of_dispatch = dispatch.get('Local_Time_of_Dispatch')
                             ampm_of_dispatch = ''
                             if time_of_dispatch is not None and time_of_dispatch != 'None':
@@ -129,7 +132,9 @@ class LitDispatchMonitor:
                                 'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
                                 'time_of_dispatch': time_of_dispatch,
                                 'am_pm': ampm_of_dispatch,
-                                'time_zone': dispatch.get('Time_Zone_Local')
+                                'time_zone': dispatch.get('Time_Zone_Local'),
+                                'tech_name': dispatch.get('tech_name'),
+                                'tech_phone': dispatch.get('tech_phone')
                             }
                             note = lit_get_dispatch_confirmed_note(note_data)
                             append_note_response = await self._append_note_to_ticket(ticket_id, note)
