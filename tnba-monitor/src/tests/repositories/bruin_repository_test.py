@@ -587,6 +587,222 @@ class TestBruinRepository:
         assert result == response
 
     @pytest.mark.asyncio
+    async def append_multiple_notes_to_ticket_test(self):
+        ticket_id = 12345
+        note_1 = {
+            'text': 'This is ticket note 1',
+            'detail_id': 123,
+        }
+        note_2 = {
+            'text': 'This is ticket note 2',
+            'service_number': 'VC1234567',
+        }
+        note_3 = {
+            'text': 'This is ticket note 3',
+            'detail_id': 456,
+            'service_number': 'VC9876543',
+        }
+        notes = [
+            note_1,
+            note_2,
+            note_3,
+        ]
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+                'notes': notes,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': {
+                "ticketNotes": [
+                    {
+                        "noteID": 70646090,
+                        "noteType": "ADN",
+                        "noteValue": "This is ticket note 1",
+                        "actionID": None,
+                        "detailID": 123,
+                        "enteredBy": 442301,
+                        "enteredDate": "2020-05-20T06:00:38.803-04:00",
+                        "lastViewedBy": None,
+                        "lastViewedDate": None,
+                        "refNoteID": None,
+                        "noteStatus": None,
+                        "noteText": None,
+                        "childNotes": None,
+                        "documents": None,
+                        "alerts": None,
+                        "taggedUserDirIDs": None,
+                    },
+                    {
+                        "noteID": 70646091,
+                        "noteType": "ADN",
+                        "noteValue": "This is ticket note 2",
+                        "actionID": None,
+                        "detailID": 999,
+                        "enteredBy": 442301,
+                        "enteredDate": "2020-05-20T06:00:38.803-04:00",
+                        "lastViewedBy": None,
+                        "lastViewedDate": None,
+                        "refNoteID": None,
+                        "noteStatus": None,
+                        "noteText": None,
+                        "childNotes": None,
+                        "documents": None,
+                        "alerts": None,
+                        "taggedUserDirIDs": None,
+                    },
+                    {
+                        "noteID": 70646092,
+                        "noteType": "ADN",
+                        "noteValue": "This is ticket note 3",
+                        "actionID": None,
+                        "detailID": 456,
+                        "enteredBy": 442301,
+                        "enteredDate": "2020-05-20T06:00:38.803-04:00",
+                        "lastViewedBy": None,
+                        "lastViewedDate": None,
+                        "refNoteID": None,
+                        "noteStatus": None,
+                        "noteText": None,
+                        "childNotes": None,
+                        "documents": None,
+                        "alerts": None,
+                        "taggedUserDirIDs": None,
+                    },
+                ],
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.append_multiple_notes_to_ticket(ticket_id, notes)
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.multiple.notes.append.request", request, timeout=15
+        )
+        assert result == response
+
+    @pytest.mark.asyncio
+    async def append_multiple_notes_to_ticket_with_rpc_request_failing_test(self):
+        ticket_id = 12345
+        note_1 = {
+            'text': 'This is ticket note 1',
+            'detail_id': 123,
+        }
+        note_2 = {
+            'text': 'This is ticket note 2',
+            'service_number': 'VC1234567',
+        }
+        note_3 = {
+            'text': 'This is ticket note 3',
+            'detail_id': 456,
+            'service_number': 'VC9876543',
+        }
+        notes = [
+            note_1,
+            note_2,
+            note_3,
+        ]
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+                'notes': notes,
+            },
+        }
+
+        logger = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.append_multiple_notes_to_ticket(ticket_id, notes)
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.multiple.notes.append.request", request, timeout=15
+        )
+        notifications_repository.send_slack_message.assert_awaited_once()
+        logger.error.assert_called_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def append_multiple_notes_to_ticket_with_rpc_request_returning_non_2xx_status_test(self):
+        ticket_id = 12345
+        note_1 = {
+            'text': 'This is ticket note 1',
+            'detail_id': 123,
+        }
+        note_2 = {
+            'text': 'This is ticket note 2',
+            'service_number': 'VC1234567',
+        }
+        note_3 = {
+            'text': 'This is ticket note 3',
+            'detail_id': 456,
+            'service_number': 'VC9876543',
+        }
+        notes = [
+            note_1,
+            note_2,
+            note_3,
+        ]
+
+        request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': ticket_id,
+                'notes': notes,
+            },
+        }
+        response = {
+            'request_id': uuid_,
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        logger = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(return_value=response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        with uuid_mock:
+            result = await bruin_repository.append_multiple_notes_to_ticket(ticket_id, notes)
+
+        event_bus.rpc_request.assert_awaited_once_with(
+            "bruin.ticket.multiple.notes.append.request", request, timeout=15
+        )
+        notifications_repository.send_slack_message.assert_awaited_once()
+        logger.error.assert_called_once()
+        assert result == response
+
+    @pytest.mark.asyncio
     async def get_outage_tickets_test(self):
         bruin_client_id = 12345
         ticket_statuses = ['New', 'InProgress', 'Draft']

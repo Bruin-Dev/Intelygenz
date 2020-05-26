@@ -1,3 +1,5 @@
+from typing import List
+
 from shortuuid import uuid
 
 from application.repositories import nats_error_response
@@ -202,6 +204,45 @@ class BruinRepository:
                     f'Error while claiming next results for ticket {ticket_id}, detail {detail_id} and '
                     f'service number {service_number} in {self._config.ENVIRONMENT.upper()} environment: '
                     f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
+    async def append_multiple_notes_to_ticket(self, ticket_id: int, notes: List[dict]):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                "ticket_id": ticket_id,
+                "notes": notes,
+            },
+        }
+
+        try:
+            self._logger.info(f'Posting multiple notes for ticket {ticket_id}...')
+            response = await self._event_bus.rpc_request(
+                "bruin.ticket.multiple.notes.append.request", request, timeout=15
+            )
+            self._logger.info(f'Posted multiple notes for ticket {ticket_id}!')
+        except Exception as e:
+            err_msg = (
+                f'An error occurred when appending multiple ticket notes to ticket {ticket_id}. '
+                f'Notes: {notes}. Error: {e}'
+            )
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if not (response_status in range(200, 300) or response_status == 409 or response_status == 471):
+                err_msg = (
+                    f'Error while appending multiple notes to ticket {ticket_id} in {self._config.ENVIRONMENT.upper()} '
+                    f'environment. Notes were {notes}. Error: Error {response_status} - {response_body}'
                 )
 
         if err_msg:

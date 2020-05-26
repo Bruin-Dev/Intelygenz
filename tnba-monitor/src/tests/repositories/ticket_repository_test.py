@@ -107,21 +107,31 @@ class TestTicketRepository:
         result = ticket_repository.has_tnba_note(ticket_notes)
         assert result is False
 
-    def find_newest_tnba_note_test(self):
+    def find_newest_tnba_note_by_service_number_test(self):
+        service_number = 'VC1234567'
         ticket_note_1 = {
             "noteId": 41894040,
             "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T10:07:13.503-05:00",
+            "serviceNumber": [
+                service_number,
+            ],
         }
         ticket_note_2 = {
             "noteId": 41894040,
             "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T12:07:13.503-05:00",
+            "serviceNumber": [
+                'VC9999999',
+            ],
         }
         ticket_note_3 = {
             "noteId": 41894040,
             "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
             "createdDate": "2020-02-24T11:07:13.503-05:00",
+            "serviceNumber": [
+                service_number,
+            ],
         }
         ticket_notes = [
             ticket_note_1,
@@ -134,7 +144,7 @@ class TestTicketRepository:
 
         ticket_repository = TicketRepository(config, utils_repository)
 
-        result = ticket_repository.find_newest_tnba_note(ticket_notes)
+        result = ticket_repository.find_newest_tnba_note_by_service_number(ticket_notes, service_number)
 
         assert result == ticket_note_3
 

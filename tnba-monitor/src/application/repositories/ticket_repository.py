@@ -3,6 +3,7 @@ import re
 
 from datetime import datetime
 from datetime import timedelta
+from functools import partial
 from typing import List
 
 from dateutil.parser import parse
@@ -28,10 +29,14 @@ class TicketRepository:
     def has_tnba_note(self, ticket_notes: List[dict]) -> bool:
         return bool(self._utils_repository.get_first_element_matching(ticket_notes, self.is_tnba_note))
 
-    def find_newest_tnba_note(self, ticket_notes: List[dict]) -> dict:
+    def __lookup_fn_for_newest_tnba_note(self, ticket_note: dict, service_number: str) -> bool:
+        return self.is_tnba_note(ticket_note) and service_number in ticket_note['serviceNumber']
+
+    def find_newest_tnba_note_by_service_number(self, ticket_notes: List[dict], service_number: str) -> dict:
         # Ticket notes should have been sorted by "createdDate" already but let's make sure...
         ticket_notes = sorted(ticket_notes, key=lambda note: note['createdDate'])
-        return self._utils_repository.get_last_element_matching(ticket_notes, self.is_tnba_note)
+        lookup_fn = partial(self.__lookup_fn_for_newest_tnba_note, service_number=service_number)
+        return self._utils_repository.get_last_element_matching(ticket_notes, lookup_fn)
 
     @staticmethod
     def is_note_older_than(ticket_note: dict, age: timedelta) -> bool:
