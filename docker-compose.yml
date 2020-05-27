@@ -414,10 +414,12 @@ services:
       context: .
       dockerfile: dispatch-portal-frontend/Dockerfile
       args:
-        NODE_ENV: production
+        CURRENT_ENV: PRO
         DNS_ENVIRONMENT: http://localhost:8080
+    command: ["npm", "run", "cy:run"]
     ports:
       - 3000:3000
+
   nginx:
     build:
       context: .

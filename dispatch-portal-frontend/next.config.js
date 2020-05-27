@@ -1,21 +1,37 @@
 const withSass = require('@zeit/next-sass');
 const tailwindCss = require('tailwindcss');
 
-const isDev = process.env.NODE_ENV !== 'production';
-const isProd = process.env.NODE_ENV === 'production';
-
-const env = {
-  BASE_API: (() => {
-    if (isDev) return 'http://127.0.0.1:8080/dispatch_portal/api';
-    if (isProd) return `${process.env.DNS_ENVIRONMENT}/dispatch_portal/api`;
-    return 'BASE_API:not SET';
-  })(),
-  BASE_PATH: (() => {
-    if (isDev) return '/';
-    if (isProd) return '/dispatch_portal/';
-    return 'BASE_PATH:not SET';
-  })()
+const ENVIRONMENTS = {
+  DEV: 'DEV',
+  TEST: 'TEST',
+  PRO: 'PRO'
 };
+
+const currentEnv = process.env.CURRENT_ENV || ENVIRONMENTS.DEV;
+
+console.log(currentEnv);
+
+const env = (() => {
+  switch (currentEnv) {
+    case ENVIRONMENTS.DEV || ENVIRONMENTS.TEST:
+      return {
+        BASE_API: 'http://127.0.0.1:8080/dispatch_portal/api',
+        BASE_PATH: '/'
+      };
+    case ENVIRONMENTS.PRO:
+      return {
+        BASE_API: `${process.env.DNS_ENVIRONMENT}/dispatch_portal/api`,
+        BASE_PATH: '/dispatch_portal/'
+      };
+    default:
+      return {
+        BASE_API: 'BASE_API:not SET',
+        BASE_PATH: 'BASE_PATH:not SET'
+      };
+  }
+})();
+
+console.log(env);
 
 module.exports = withSass({
   webpack(config) {

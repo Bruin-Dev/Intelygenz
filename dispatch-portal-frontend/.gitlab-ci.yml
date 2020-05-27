@@ -44,6 +44,25 @@ dispatch-portal-frontend-test:
   tags:
     - kubernetes
 
+dispatch-portal-frontend-test-e2e:
+  stage: unit_test
+  image: cypress/base:10
+  variables:
+    CI: 1
+  before_script:
+    - npm install --prefix dispatch-portal-frontend
+    - npm run build --prefix dispatch-portal-frontend
+  script:
+    - npm run ci:test --prefix dispatch-portal-frontend
+  only:
+    - master
+    - /^*feature/.*$/
+    - /^*fix/.*$/
+    - /^*dev/feature/.*$/
+    - /^*dev/fix/.*$/
+  tags:
+    - kubernetes
+
 # =================================================================
 # Images builds jobs for dispatch-portal-frontend module components
 # =================================================================
@@ -53,7 +72,7 @@ dispatch-portal-frontend-nextjs-build:
     MODULE_NAME: dispatch-portal-frontend
     MODULE_VERSION: ${CI_PIPELINE_ID}
   script:
-    - docker build --build-arg NODE_ENV="production" --build-arg DNS_ENVIRONMENT=${DNS_ENVIRONMENT_VAR} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
+    - docker build --build-arg CURRENT_ENV="PRO" --build-arg DNS_ENVIRONMENT=${DNS_ENVIRONMENT_VAR} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
     - python3 ci-utils/ecr/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
