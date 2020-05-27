@@ -667,10 +667,10 @@ class TestApiServer:
         expected_response_create = {'id': 'DIS37450', 'vendor': 'LIT'}
 
         ticket_note = '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n' \
-                      'A dispatch has been requested with LIT. Please see the summary below.\n' \
+                      'Please see the summary below.\n' \
                       '--\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n' \
                       'Time Zone (Local): Pacific Time\n' \
-                      'Vendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n' \
+                      '\nLocation Owner/Name: Red Rose Inn\n' \
                       'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n' \
                       'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n' \
                       'Arrival Instructions: When arriving to the site call ' \
@@ -684,11 +684,12 @@ class TestApiServer:
             'body': {
                 'ticket_id': 'T-12345',
                 'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
-                        'A dispatch has been requested with LIT. Please see the summary below.\n--\n'
+                        'Please see the summary below.\n'
+                        '--\n'
                         f'Dispatch Number: [{dispatch_number}|'
                         f'https://master.mettel-automation.net/dispatch_portal/dispatch/{dispatch_number}]\n'
                         'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
-                        'Time Zone (Local): Pacific Time\nVendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n'
+                        'Time Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\n'
                         'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
                         'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n'
                         'Arrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\n'
@@ -856,12 +857,12 @@ class TestApiServer:
             'body': {
                 'ticket_id': 'T-12345',
                 'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
-                        'A dispatch has been requested with LIT. Please see the summary below.\n'
+                        'Please see the summary below.\n'
                         f'--\nDispatch Number: '
                         f'[{dispatch_number}|'
                         f'https://master.mettel-automation.net/dispatch_portal/dispatch/{dispatch_number}]\n'
                         'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
-                        'Time Zone (Local): Pacific Time\nVendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n'
+                        'Time Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\n'
                         'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
                         'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n'
                         'Arrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\n'
@@ -952,12 +953,12 @@ class TestApiServer:
         expected_response_bruin = {
             "request_id": uuid_,
             "body": [{'noteValue': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
-                      'A dispatch has been requested with LIT. Please see the summary below.\n'
+                      'Please see the summary below.\n'
                       f'--\nDispatch Number: '
                       f'[{dispatch_number}|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37266]\n'
                       'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
                       'Time Zone (Local): Pacific Time\n'
-                      'Vendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n'
+                      '\nLocation Owner/Name: Red Rose Inn\n'
                       'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
                       'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n'
                       'Arrival Instructions: When arriving to the site call '
@@ -1030,10 +1031,10 @@ class TestApiServer:
         expected_response_create = {'id': 'DIS37450', 'vendor': 'LIT'}
 
         ticket_note = '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n' \
-                      'A dispatch has been requested with LIT. Please see the summary below.\n' \
+                      'Please see the summary below.\n' \
                       '--\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n' \
                       'Time Zone (Local): Pacific Time\n' \
-                      'Vendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n' \
+                      '\nLocation Owner/Name: Red Rose Inn\n' \
                       'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n' \
                       'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n' \
                       'Arrival Instructions: When arriving to the site call ' \
@@ -1047,9 +1048,9 @@ class TestApiServer:
             'body': {
                 'ticket_id': 'T-12345',
                 'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
-                        'A dispatch has been requested with LIT. Please see the summary below.\n--\n'
+                        'Please see the summary below.\n--\n'
                         'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
-                        'Time Zone (Local): Pacific Time\nVendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n'
+                        'Time Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\n'
                         'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
                         'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n'
                         'Arrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\n'
@@ -1205,10 +1206,10 @@ class TestApiServer:
         expected_response_create = {'id': 'DIS37450', 'vendor': 'LIT'}
 
         ticket_note = '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n' \
-                      'A dispatch has been requested with LIT. Please see the summary below.\n' \
+                      'Please see the summary below.\n' \
                       '--\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n' \
                       'Time Zone (Local): Pacific Time\n' \
-                      'Vendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n' \
+                      '\nLocation Owner/Name: Red Rose Inn\n' \
                       'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n' \
                       'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n' \
                       'Arrival Instructions: When arriving to the site call ' \
@@ -1247,10 +1248,10 @@ class TestApiServer:
             {
                 'noteValue':
                     '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
-                    'A dispatch has been requested with LIT. Please see the summary below.\n'
+                    'Please see the summary below.\n'
                     '--\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
                     'Time Zone (Local): Pacific Time\n'
-                    'Vendor: LIT\n\nLocation Owner/Name: Red Rose Inn\n'
+                    '\nLocation Owner/Name: Red Rose Inn\n'
                     'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
                     'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n'
                     'Arrival Instructions: When arriving to the site call '

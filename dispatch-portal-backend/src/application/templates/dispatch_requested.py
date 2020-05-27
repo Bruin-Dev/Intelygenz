@@ -1,13 +1,12 @@
-DISPATCH_REQUESTED = """#*Automation Engine*#
+LIT_DISPATCH_REQUESTED = """#*Automation Engine*#
 Dispatch Management - Dispatch Requested
 
-A dispatch has been requested with {vendor}. Please see the summary below.
+Please see the summary below.
 --
 Dispatch Number: {dispatch_number}
 Date of Dispatch: {date_of_dispatch}
 Time of Dispatch (Local): {time_of_dispatch}
 Time Zone (Local): {time_zone}
-Vendor: {vendor}
 
 Location Owner/Name: {job_site}
 Address: {job_site_street}, {job_site_city}, {job_site_state}, {job_site_zip_code}
@@ -37,8 +36,7 @@ def get_dispatch_requested_note(body, dispatch_number):
         dispatch_number,
         f"https://master.mettel-automation.net/dispatch_portal/dispatch/{dispatch_number}"
     )
-    return DISPATCH_REQUESTED.format(
-        vendor='LIT',
+    return LIT_DISPATCH_REQUESTED.format(
         dispatch_number=link_to_dispatch,
         date_of_dispatch=body.get('date_of_dispatch'),
         time_of_dispatch=body.get('time_of_dispatch'),

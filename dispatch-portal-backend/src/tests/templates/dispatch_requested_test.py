@@ -3,13 +3,12 @@ from application.templates.dispatch_requested import get_dispatch_requested_note
 expected_dispatch_request_note = """#*Automation Engine*#
 Dispatch Management - Dispatch Requested
 
-A dispatch has been requested with LIT. Please see the summary below.
+Please see the summary below.
 --
 Dispatch Number: [DIS37266|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37266]
 Date of Dispatch: 2019-11-14
 Time of Dispatch (Local): 6PM-8PM
 Time Zone (Local): Pacific Time
-Vendor: LIT
 
 Location Owner/Name: Red Rose Inn
 Address: 123 Fake Street, Pleasantown, CA, 99088
