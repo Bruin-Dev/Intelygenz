@@ -48,7 +48,7 @@ function Dispatch({ authToken }) {
                 <b>SLA Level:</b> {data.slaLevel}
               </p>
               <p className="text-gray-700 text-sm">
-                <b>Mettel Id:</b> {data.mettelId}
+                <b>Bruin Ticket ID:</b> {data.mettelId}
               </p>
               <p className="text-gray-700 text-sm">
                 <b>Local time of dispatch:</b> {data.timeDispatch}
