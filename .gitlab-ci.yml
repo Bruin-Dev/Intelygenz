@@ -16,7 +16,7 @@ variables:
   DOCKER_BASE_IMAGE_VERSION: 1.0.7
   DOCKER_IMAGE_UTILS_VERSION: 1.0.3
   bruin_bridge_desired_tasks: 5
-  cts_bridge_desired_tasks: 1
+  cts_bridge_desired_tasks: 0
   dispatch_portal_backend_desired_tasks: 1
   dispatch_portal_frontend_desired_tasks: 1
   last_contact_report_desired_tasks: 1
