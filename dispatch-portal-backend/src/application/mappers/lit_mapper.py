@@ -3,29 +3,35 @@ def map_get_dispatch(body):
     From lit to dispatch portal
     '''
     body = {k.lower(): v for k, v in body.items()}
+    job_site_contact_name = ''
+    if body.get('job_site_contact_name_and_phone_number') is not None:
+        job_site_contact_name = ' '.join(body['job_site_contact_name_and_phone_number'].split(' ')[:2])
+    job_site_contact_number = ''
+    if body.get('job_site_contact_name_and_phone_number') is not None:
+        job_site_contact_number = ' '.join(body['job_site_contact_name_and_phone_number'].split(' ')[2:])
     dispatch_request = {
-        "dispatch_number": body['dispatch_number'],
-        "date_of_dispatch": body['date_of_dispatch'],
-        "site_survey_quote_required": body['site_survey_quote_required'],
-        "time_of_dispatch": body['local_time_of_dispatch'],
-        "mettel_bruin_ticket_id": body["mettel_bruin_ticketid"],
-        "time_zone": body['time_zone_local'],
-        "job_site": body["job_site"],
-        "job_site_street": body["job_site_street"],
-        "job_site_city": body["job_site_city"],
-        "job_site_state": body["job_site_state"],
-        "job_site_zip_code": body["job_site_zip_code"],
-        "job_site_contact_name": ' '.join(body['job_site_contact_name_and_phone_number'].split(' ')[:2]),
-        "job_site_contact_number": ' '.join(body['job_site_contact_name_and_phone_number'].split(' ')[2:]),
-        "materials_needed_for_dispatch": body["special_materials_needed_for_dispatch"],
-        "scope_of_work": body["scope_of_work"],
-        "mettel_tech_call_in_instructions": body["mettel_tech_call_in_instructions"],
-        "name_of_mettel_requester": body["name_of_mettel_requester"],
-        "mettel_department": body["mettel_department"],
-        "mettel_requester_email": body["mettel_requester_email"],
+        "dispatch_number": body.get('dispatch_number'),
+        "date_of_dispatch": body.get('date_of_dispatch'),
+        "site_survey_quote_required": body.get('site_survey_quote_required'),
+        "time_of_dispatch": body.get('local_time_of_dispatch'),
+        "mettel_bruin_ticket_id": body.get("mettel_bruin_ticketid"),
+        "time_zone": body.get('time_zone_local'),
+        "job_site": body.get("job_site"),
+        "job_site_street": body.get("job_site_street"),
+        "job_site_city": body.get("job_site_city"),
+        "job_site_state": body.get("job_site_state"),
+        "job_site_zip_code": body.get("job_site_zip_code"),
+        "job_site_contact_name": job_site_contact_name,
+        "job_site_contact_number": job_site_contact_number,
+        "materials_needed_for_dispatch": body.get("special_materials_needed_for_dispatch"),
+        "scope_of_work": body.get("scope_of_work"),
+        "mettel_tech_call_in_instructions": body.get("mettel_tech_call_in_instructions"),
+        "name_of_mettel_requester": body.get("name_of_mettel_requester"),
+        "mettel_department": body.get("mettel_department"),
+        "mettel_requester_email": body.get("mettel_requester_email"),
         # TODO: get from lit
         # "mettel_requester_phone_number": body["mettel_requester_phone_number"]
-        "dispatch_status": body['dispatch_status'],
+        "dispatch_status": body.get('dispatch_status'),
     }
     return dispatch_request
 
