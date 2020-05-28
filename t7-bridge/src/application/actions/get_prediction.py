@@ -38,7 +38,7 @@ class GetPrediction:
         response = {
             'request_id': msg['request_id'],
             'body': prediction["body"],
-            'status': prediction["status_code"]
+            'status': prediction["status"]
         }
 
         await self._event_bus.publish_message(msg['response_topic'], response)

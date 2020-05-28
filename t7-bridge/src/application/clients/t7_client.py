@@ -29,34 +29,34 @@ class T7Client:
                                         verify=True)
             except requests.exceptions.ConnectionError as conn_err:
                 self._logger.error(f'Got connection error from T7 client {conn_err}')
-                raise Exception({"body": conn_err, "status_code": 500})
+                raise Exception({"body": conn_err, "status": 500})
 
-            return_response = dict.fromkeys(["body", "status_code"])
+            return_response = dict.fromkeys(["body", "status"])
 
             if response.status_code in range(200, 300):
                 self._logger.info(f'Got response from T7: {response.json()}')
                 return_response["body"] = response.json()
-                return_response["status_code"] = response.status_code
+                return_response["status"] = response.status_code
 
             if response.status_code == 400:
                 return_response["body"] = response.json()
-                return_response["status_code"] = response.status_code
+                return_response["status"] = response.status_code
                 self._logger.error(f"Got error from TNBA API: {response.json()}")
 
             if response.status_code == 401:
                 return_response["body"] = response.json()
-                return_response["status_code"] = response.status_code
+                return_response["status"] = response.status_code
                 self._logger.error(f"Got unauthorized from TNBA API: {response.json()}")
 
             if response.status_code == 403:
                 # TNBA API doesn't return a JSON when 403, but a doc, so we put our own message
                 return_response["body"] = f'Got 403 Forbidden from TNBA API'
-                return_response["status_code"] = response.status_code
+                return_response["status"] = response.status_code
                 self._logger.error(f"Got 403 Forbidden from TNBA API")
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got possible 404 as 500 from TNBA API: {response.json()}")
                 return_response["body"] = f"Got possible 404 as 500 from TNBA API: {response.json()}"
-                return_response["status_code"] = 500
+                return_response["status"] = 500
                 # TNBA API returns 500 code if ticketId is not found in Bruin. We bypass that here
                 # by using the error message under the "error" key in the response body
                 if response.json().get("error") and not response.json()["error"] in "error_getting_ticket_data":

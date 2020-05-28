@@ -115,7 +115,7 @@ class TestGetPrediction:
                         ]
                     }
                 ],
-            "status_code": 200
+            "status": 200
         }
 
         event_bus = Mock()
@@ -132,7 +132,6 @@ class TestGetPrediction:
             response_topic,
             {
                 'request_id': request_id,
-                'body': expected_predictions["body"],
-                'status': expected_predictions["status_code"],
+                **expected_predictions,
             }
         )

@@ -61,7 +61,7 @@ class TestT7Client:
             assert logger.info.called
             mock_get.assert_called_once()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
-            assert prediction_list == {"body": get_response, "status_code": 200}
+            assert prediction_list == {"body": get_response, "status": 200}
 
     def get_prediction_400_test(self):
         config = testconfig
@@ -85,7 +85,7 @@ class TestT7Client:
             assert logger.error.called
             mock_get.assert_called_once()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
-            assert prediction_list == {"body": get_response, "status_code": 400}
+            assert prediction_list == {"body": get_response, "status": 400}
 
     def get_prediction_401_test(self):
         config = testconfig
@@ -109,7 +109,7 @@ class TestT7Client:
             assert logger.error.called
             mock_get.assert_called_once()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
-            assert prediction_list == {"body": get_response, "status_code": 401}
+            assert prediction_list == {"body": get_response, "status": 401}
 
     def get_prediction_403_test(self):
         config = testconfig
@@ -128,7 +128,7 @@ class TestT7Client:
             assert logger.error.called
             mock_get.assert_called_once()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
-            assert prediction_list == {"body": "Got 403 Forbidden from TNBA API", "status_code": 403}
+            assert prediction_list == {"body": "Got 403 Forbidden from TNBA API", "status": 403}
 
     def get_prediction_404_as_500_test(self):
         config = testconfig
@@ -151,7 +151,7 @@ class TestT7Client:
             mock_get.assert_called_once()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
             assert prediction_list == {"body": f'Got possible 404 as 500 from TNBA API: {get_response}',
-                                       "status_code": 500}
+                                       "status": 500}
 
     def get_prediction_500_test(self):
         config = testconfig
@@ -174,4 +174,4 @@ class TestT7Client:
             mock_get.assert_called()
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
             assert prediction_list == {"body": f'Got 500 from TNBA API: {get_response}',
-                                       "status_code": 500}
+                                       "status": 500}

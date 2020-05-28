@@ -33,12 +33,12 @@ class TestT7Repository:
                 "assets": assets,
                 "requestId": "e676150a-73b9-412b-8207-ac2a3bbc9cbc"
             },
-            "status_code": 200
+            "status": 200
         }
 
         expected_predictions = {
             "body": assets,
-            "status_code": 200
+            "status": 200
         }
 
         logger = Mock()
@@ -56,7 +56,7 @@ class TestT7Repository:
         ticket_id = 123
         raw_predictions = {
             "body": "Got internal error from Bruin",
-            "status_code": 500
+            "status": 500
         }
 
         logger = Mock()
