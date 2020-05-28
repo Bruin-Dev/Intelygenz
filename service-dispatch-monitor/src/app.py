@@ -4,11 +4,12 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from pytz import timezone
 
-from application.actions.lit_dispatch_monitor import LitDispatchMonitor
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
 from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.nats.clients import NATSClient
+from application.actions.lit_dispatch_monitor import LitDispatchMonitor
+from application.repositories.lit_monitor_repository import LitMonitorRepository
 
 
 class Container:
@@ -32,8 +33,9 @@ class Container:
 
         self._event_bus.add_consumer(consumer=self._client2, consumer_name="consumer2")
 
+        self._lit_monitor_repository = LitMonitorRepository(self._logger, self._event_bus)
         self._lit_monitor = LitDispatchMonitor(config, self._redis_client, self._event_bus, self._scheduler,
-                                               self._logger)
+                                               self._logger, self._lit_monitor_repository)
         self._logger.info("Container created")
 
     async def start(self):

@@ -36,7 +36,7 @@ LOG_CONFIG = {
     'name': 'service-dispatch-monitor',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
-    'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
+    'format': '%(asctime)s: %(module)s: %(levelname)s - %(funcName)20s: %(message)s'
 }
 
 REDIS = {
