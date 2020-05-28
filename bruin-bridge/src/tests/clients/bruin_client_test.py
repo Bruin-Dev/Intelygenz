@@ -960,7 +960,7 @@ class TestBruinClient:
 
         expected_result = {
             "body": valid_next_result,
-            "status_code": 200
+            "status": 200
         }
 
         response_mock = Mock()
@@ -1001,7 +1001,7 @@ class TestBruinClient:
 
         expected_result = {
             "body": response_400,
-            "status_code": 400
+            "status": 400
         }
 
         response_mock = Mock()
@@ -1108,7 +1108,7 @@ class TestBruinClient:
 
         expected_result = {
             "body": valid_put_response,
-            "status_code": 200
+            "status": 200
         }
 
         response_mock = Mock()
@@ -1161,7 +1161,7 @@ class TestBruinClient:
 
         expected_result = {
             "body": put_response_400,
-            "status_code": 400
+            "status": 400
         }
 
         response_mock = Mock()
@@ -1285,7 +1285,7 @@ class TestPostOutageTicket:
 
         expected = {
             "body": f"Connection error in Bruin API. Cause: {connection_error_cause}",
-            "status_code": 500
+            "status": 500
         }
         assert result == expected
 
@@ -1332,7 +1332,7 @@ class TestPostOutageTicket:
 
         expected = {
             "body": ticket_data,
-            "status_code": bruin_response_status_code,
+            "status": bruin_response_status_code,
         }
         assert result == expected
 
@@ -1380,7 +1380,7 @@ class TestPostOutageTicket:
 
         expected = {
             "body": ticket_data,
-            "status_code": bruin_custom_status_code,
+            "status": bruin_custom_status_code,
         }
         assert result == expected
 
@@ -1428,7 +1428,7 @@ class TestPostOutageTicket:
 
         expected = {
             "body": ticket_data,
-            "status_code": bruin_custom_status_code,
+            "status": bruin_custom_status_code,
         }
         assert result == expected
 
@@ -1476,7 +1476,7 @@ class TestPostOutageTicket:
 
         expected = {
             "body": bruin_response_body,
-            "status_code": bruin_response_status_code,
+            "status": bruin_response_status_code,
         }
         assert result == expected
 
@@ -1516,7 +1516,7 @@ class TestPostOutageTicket:
 
         expected = {
             "body": "Maximum retries reached while re-login",
-            "status_code": bruin_response_status_code,
+            "status": bruin_response_status_code,
         }
         assert result == expected
 
@@ -1554,7 +1554,7 @@ class TestPostOutageTicket:
         expected = {
             "body": ("Permissions to create a new outage ticket with payload "
                      f"{json.dumps(request_params)} were not granted"),
-            "status_code": bruin_response_status_code,
+            "status": bruin_response_status_code,
         }
         assert result == expected
 
@@ -1592,7 +1592,7 @@ class TestPostOutageTicket:
 
         expected = {
             "body": f"Check mistypings in URL: {url}",
-            "status_code": bruin_response_status_code,
+            "status": bruin_response_status_code,
         }
         assert result == expected
 
@@ -1630,7 +1630,7 @@ class TestPostOutageTicket:
 
         expected = {
             "body": "Got internal error from Bruin",
-            "status_code": bruin_response_status_code,
+            "status": bruin_response_status_code,
         }
         assert result == expected
 
@@ -1714,7 +1714,7 @@ class TestGetClientInfo:
 
         expected = {
             "body": bruin_response_message,
-            "status_code": bruin_response_status_code,
+            "status": bruin_response_status_code,
         }
         assert result == expected
 
@@ -1754,7 +1754,7 @@ class TestGetClientInfo:
 
         expected = {
             "body": bruin_response_message,
-            "status_code": bruin_response_status_code,
+            "status": bruin_response_status_code,
         }
         assert result == expected
 
@@ -1808,7 +1808,7 @@ class TestGetClientInfo:
 
         expected = {
             "body": bruin_response_message,
-            "status_code": bruin_response_status_code,
+            "status": bruin_response_status_code,
         }
         assert result == expected
 
@@ -1855,7 +1855,7 @@ class TestGetClientInfo:
         response_mock.json = Mock()
         response_mock.status_code = 500
 
-        expected_result = {"body": "Got internal error from Bruin", "status_code": 500}
+        expected_result = {"body": "Got internal error from Bruin", "status": 500}
 
         with patch.object(bruin_client_module.requests, 'get', return_value=response_mock):
             bruin_client = BruinClient(logger, config)
@@ -1882,7 +1882,7 @@ class TestGetClientInfo:
 
         message = {
             "body": f"Connection error in Bruin API. {cause}",
-            "status_code": 500}
+            "status": 500}
 
         with patch.object(bruin_client_module.requests, 'get', side_effect=ConnectionError(cause)):
             bruin_client = BruinClient(logger, config)

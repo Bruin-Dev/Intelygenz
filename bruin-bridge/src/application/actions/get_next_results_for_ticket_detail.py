@@ -43,7 +43,7 @@ class GetNextResultsForTicketDetail:
         self._logger.info(f'Got all available next results for ticket {ticket_id} and detail {detail_id}!')
 
         response["body"] = next_results["body"]
-        response["status"] = next_results["status_code"]
+        response["status"] = next_results["status"]
 
         await self._event_bus.publish_message(msg['response_topic'], response)
         self._logger.info(f'Next results for ticket {ticket_id} and detail {detail_id} published in event bus!')

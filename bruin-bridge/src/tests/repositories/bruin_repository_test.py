@@ -869,7 +869,7 @@ class TestBruinRepository:
                 "errorMessage": None,
                 "errorCode": 0,
             },
-            "status_code": response_status,
+            "status": response_status,
         }
 
         logger = Mock()
@@ -882,7 +882,7 @@ class TestBruinRepository:
         result = bruin_repository.post_outage_ticket(client_id, service_number)
 
         bruin_client.post_outage_ticket.assert_called_once_with(client_id, service_number)
-        assert result == {"body": ticket_id, "status_code": response_status}
+        assert result == {"body": ticket_id, "status": response_status}
 
     def post_outage_ticket_with_409_status_code_test(self):
         client_id = 9994
@@ -898,7 +898,7 @@ class TestBruinRepository:
                 "errorMessage": None,
                 "errorCode": response_status,
             },
-            "status_code": response_status,
+            "status": response_status,
         }
 
         logger = Mock()
@@ -911,7 +911,7 @@ class TestBruinRepository:
         result = bruin_repository.post_outage_ticket(client_id, service_number)
 
         bruin_client.post_outage_ticket.assert_called_once_with(client_id, service_number)
-        assert result == {"body": ticket_id, "status_code": response_status}
+        assert result == {"body": ticket_id, "status": response_status}
 
     def post_outage_ticket_with_471_status_code_test(self):
         client_id = 9994
@@ -927,7 +927,7 @@ class TestBruinRepository:
                 "errorMessage": None,
                 "errorCode": response_status,
             },
-            "status_code": response_status,
+            "status": response_status,
         }
 
         logger = Mock()
@@ -940,7 +940,7 @@ class TestBruinRepository:
         result = bruin_repository.post_outage_ticket(client_id, service_number)
 
         bruin_client.post_outage_ticket.assert_called_once_with(client_id, service_number)
-        assert result == {"body": ticket_id, "status_code": response_status}
+        assert result == {"body": ticket_id, "status": response_status}
 
     def post_outage_ticket_with_error_status_code_test(self):
         client_id = 9994
@@ -949,7 +949,7 @@ class TestBruinRepository:
         response_status = 500
         client_response = {
             "body": "Got internal error from Bruin",
-            "status_code": response_status,
+            "status": response_status,
         }
 
         logger = Mock()
@@ -985,7 +985,7 @@ class TestBruinRepository:
                 "instance": "/api/Inventory",
                 "extensions": {}
             },
-            "status_code": response_status,
+            "status": response_status,
         }
 
         logger = Mock()
@@ -1052,13 +1052,13 @@ class TestBruinRepository:
                     }
                 ]
             },
-            "status_code": response_status,
+            "status": response_status,
         }
 
         expected_result = {
             "body": {"client_id": client_response["body"]["documents"][0]["clientID"],
                      "client_name": client_response["body"]["documents"][0]["clientName"]},
-            "status_code": response_status
+            "status": response_status
         }
 
         logger = Mock()
@@ -1084,13 +1084,13 @@ class TestBruinRepository:
             "body": {
                 "documents": []
             },
-            "status_code": response_status,
+            "status": response_status,
         }
 
         expected_result = {
             "body": {"client_id": None,
                      "client_name": None},
-            "status_code": response_status
+            "status": response_status
         }
 
         logger = Mock()
@@ -1157,13 +1157,13 @@ class TestBruinRepository:
                     }
                 ]
             },
-            "status_code": response_status,
+            "status": response_status,
         }
 
         expected_result = {
             "body": {"client_id": None,
                      "client_name": None},
-            "status_code": response_status
+            "status": response_status
         }
 
         logger = Mock()
@@ -1230,13 +1230,13 @@ class TestBruinRepository:
                     }
                 ]
             },
-            "status_code": response_status,
+            "status": response_status,
         }
 
         expected_result = {
             "body": {"client_id": None,
                      "client_name": None},
-            "status_code": response_status
+            "status": response_status
         }
 
         logger = Mock()
@@ -1277,7 +1277,7 @@ class TestBruinRepository:
                     ]
                 }
             ],
-            'status_code': 200,
+            'status': 200,
         }
 
         logger = Mock()
@@ -1311,7 +1311,7 @@ class TestBruinRepository:
         possible_work_queues_response_status = 500
         possible_work_queues_response = {
             "body": possible_work_queues_response_body,
-            "status_code": possible_work_queues_response_status,
+            "status": possible_work_queues_response_status,
         }
 
         logger = Mock()
@@ -1330,7 +1330,7 @@ class TestBruinRepository:
         expected = {
             'body': f'Error while claiming possible work queues for ticket {ticket_id} and filters '
                     f'{work_queue_filters}: {possible_work_queues_response_body}',
-            'status_code': possible_work_queues_response_status,
+            'status': possible_work_queues_response_status,
         }
         assert result == expected
 
@@ -1356,7 +1356,7 @@ class TestBruinRepository:
                 "currentTaskName": "Holmdel NOC Investigate ",
                 "nextResults": []
             },
-            "status_code": 200
+            "status": 200
         }
 
         logger = Mock()
@@ -1374,7 +1374,7 @@ class TestBruinRepository:
 
         expected = {
             'body': f'No work queues were found for ticket {ticket_id} and filters {work_queue_filters}',
-            'status_code': 404,
+            'status': 404,
         }
         assert result == expected
 
@@ -1420,7 +1420,7 @@ class TestBruinRepository:
                     work_queue
                 ]
             },
-            "status_code": 200
+            "status": 200
         }
 
         logger = Mock()
@@ -1439,7 +1439,7 @@ class TestBruinRepository:
         expected = {
             "body": f'No work queue with name {target_queue_name} was found using ticket ID {ticket_id} and '
                     f'filters {work_queue_filters}',
-            "status_code": 404
+            "status": 404
         }
         assert result == expected
 
@@ -1484,7 +1484,7 @@ class TestBruinRepository:
                     work_queue
                 ]
             },
-            "status_code": 200
+            "status": 200
         }
 
         change_work_queue_payload = {
@@ -1501,7 +1501,7 @@ class TestBruinRepository:
             "body": {
                 "message": "success"
             },
-            "status_code": 200
+            "status": 200
         }
 
         logger = Mock()

@@ -32,7 +32,7 @@ class TestGetClientInfo:
                 "client_id": 1919,
                 "client_name": "Tet Corp"
             },
-            "status_code": 200
+            "status": 200
         }
         bruin_repository.get_client_info = Mock(return_value=client_info)
 
@@ -48,8 +48,7 @@ class TestGetClientInfo:
 
         event_bus_response = {
             "request_id": 19,
-            'body': client_info["body"],
-            'status': client_info["status_code"]
+            **client_info,
         }
 
         get_client_info = GetClientInfo(logger, event_bus, bruin_repository)
@@ -80,7 +79,7 @@ class TestGetClientInfo:
 
         get_client_info = GetClientInfo(logger, event_bus, bruin_repository)
         await get_client_info.get_client_info(event_bus_request)
-        bruin_repository.get_client_info.assert_not_called
+        bruin_repository.get_client_info.assert_not_called()
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
         assert logger.error.called
 
@@ -106,6 +105,6 @@ class TestGetClientInfo:
 
         get_client_info = GetClientInfo(logger, event_bus, bruin_repository)
         await get_client_info.get_client_info(event_bus_request)
-        bruin_repository.get_client_info.assert_not_called
+        bruin_repository.get_client_info.assert_not_called()
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
         assert logger.error.called

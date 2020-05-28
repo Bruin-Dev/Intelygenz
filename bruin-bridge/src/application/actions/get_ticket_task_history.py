@@ -42,7 +42,7 @@ class GetTicketTaskHistory:
         ticket_task_history = self._bruin_repository.get_ticket_task_history(filters)
 
         response["body"] = ticket_task_history["body"]
-        response["status"] = ticket_task_history["status_code"]
+        response["status"] = ticket_task_history["status"]
 
         await self._event_bus.publish_message(response_topic, response)
         self._logger.info(

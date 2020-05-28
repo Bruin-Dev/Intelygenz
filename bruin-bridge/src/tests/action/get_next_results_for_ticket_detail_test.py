@@ -114,12 +114,11 @@ class TestGetNextResultsForTicketDetail:
         response_status = 200
         repository_response = {
             'body': response_body,
-            'status_code': response_status,
+            'status': response_status,
         }
         rpc_response = {
             'request_id': request_id,
-            'body': response_body,
-            'status': response_status,
+            **repository_response,
         }
 
         logger = Mock()

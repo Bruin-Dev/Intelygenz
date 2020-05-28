@@ -41,7 +41,7 @@ class GetClientInfo:
         client_info = self._bruin_repository.get_client_info(filters)
 
         response["body"] = client_info["body"]
-        response["status"] = client_info["status_code"]
+        response["status"] = client_info["status"]
 
         await self._event_bus.publish_message(response_topic, response)
         self._logger.info(

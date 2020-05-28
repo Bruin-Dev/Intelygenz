@@ -45,7 +45,7 @@ class ChangeDetailWorkQueue:
         result = self._bruin_repository.change_detail_work_queue(ticket_id, filters=msg_body)
 
         response["body"] = result["body"]
-        response["status"] = result["status_code"]
+        response["status"] = result["status"]
         await self._event_bus.publish_message(response_topic, response)
 
         self._logger.info(

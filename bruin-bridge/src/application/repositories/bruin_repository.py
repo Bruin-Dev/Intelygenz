@@ -191,7 +191,7 @@ class BruinRepository:
     def post_outage_ticket(self, client_id, service_number):
         response = self._bruin_client.post_outage_ticket(client_id, service_number)
 
-        status_code = response['status_code']
+        status_code = response['status']
         if not (status_code in range(200, 300) or status_code == 409 or status_code == 471):
             return response
 
@@ -201,7 +201,7 @@ class BruinRepository:
     def get_client_info(self, filters):
         response = self._bruin_client.get_client_info(filters)
 
-        if response["status_code"] not in range(200, 300):
+        if response["status"] not in range(200, 300):
             return response
 
         documents = response["body"].get("documents")
@@ -246,19 +246,19 @@ class BruinRepository:
             ticket_id, get_work_queues_filters
         )
         possible_work_queues_response_body = possible_work_queues_response['body']
-        possible_work_queues_response_status = possible_work_queues_response['status_code']
+        possible_work_queues_response_status = possible_work_queues_response['status']
         if possible_work_queues_response_status not in range(200, 300):
             return {
                 'body': f'Error while claiming possible work queues for ticket {ticket_id} and filters '
                         f'{get_work_queues_filters}: {possible_work_queues_response_body}',
-                'status_code': possible_work_queues_response_status,
+                'status': possible_work_queues_response_status,
             }
 
         work_queues = possible_work_queues_response_body['nextResults']
         if not work_queues:
             return {
                 'body': f'No work queues were found for ticket {ticket_id} and filters {get_work_queues_filters}',
-                'status_code': 404,
+                'status': 404,
             }
 
         queue_name = filters["queue_name"]
@@ -272,7 +272,7 @@ class BruinRepository:
             result = {
                 "body": f'No work queue with name {queue_name} was found using ticket ID {ticket_id} and '
                         f'filters {get_work_queues_filters}',
-                "status_code": 404
+                "status": 404
             }
             return result
 
@@ -290,6 +290,6 @@ class BruinRepository:
 
     def get_ticket_task_history(self, filters):
         ticket_current_task = self._bruin_client.get_ticket_task_history(filters)
-        if ticket_current_task["status_code"] in range(200, 300):
+        if ticket_current_task["status"] in range(200, 300):
             ticket_current_task["body"] = ticket_current_task["body"]["result"]
         return ticket_current_task

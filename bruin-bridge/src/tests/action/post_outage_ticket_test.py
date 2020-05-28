@@ -82,9 +82,6 @@ class TestPostOutageTicket:
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
 
-        parameters = {
-            "service_number": "VC05400009999"
-        }
         response_topic = "some.topic"
         event_bus_request = {"request_id": 123, "response_topic": response_topic}
 
@@ -168,12 +165,15 @@ class TestPostOutageTicket:
         outage_ticket_id = 123456
         response_status_code = 200
 
+        repository_response = {
+            'body': outage_ticket_id,
+            'status': response_status_code,
+        }
+
         logger = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.post_outage_ticket = Mock(return_value={
-            'body': outage_ticket_id, 'status_code': response_status_code
-        })
+        bruin_repository.post_outage_ticket = Mock(return_value=repository_response)
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -194,7 +194,6 @@ class TestPostOutageTicket:
             "some.topic",
             {
                 "request_id": 123,
-                "body": outage_ticket_id,
-                "status": response_status_code,
+                **repository_response,
             },
         )

@@ -31,7 +31,7 @@ class TestChangeDetailWorkQueue:
             "body": {
                 "message": "success"
             },
-            "status_code": 200
+            "status": 200
         }
         bruin_repository.change_detail_work_queue = Mock(return_value=put_response)
 
@@ -56,8 +56,7 @@ class TestChangeDetailWorkQueue:
 
         event_bus_response = {
             "request_id": 19,
-            'body': put_response["body"],
-            'status': put_response["status_code"]
+            **put_response,
         }
 
         change_detail_work_queue = ChangeDetailWorkQueue(logger, event_bus, bruin_repository)
