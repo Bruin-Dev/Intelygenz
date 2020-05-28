@@ -21,9 +21,6 @@ DISPATCH_MONITOR_CONFIG = {
     'jobs_intervals': {
         'dispatch_monitor': 60 * 15
     },
-    'confirmed_semaphore': 5,
-    'tech_on_site_semaphore': 5,
-    'dispatches_completed_semaphore': 5,
 }
 
 LOG_CONFIG = {
