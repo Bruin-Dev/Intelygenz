@@ -20,34 +20,37 @@ class TestBruinRepository:
         assert bruin_repository._logger is logger
         assert bruin_repository._bruin_client is bruin_client
 
-    # @pytest.mark.asyncio
-    # async def get_all_filtered_tickets_test(self):
-    #     logger = Mock()
-    #     bruin_client = Mock()
-    #     bruin_client.get_all_tickets = Mock(side_effect=[
-    #         {'body': [{'ticketID': 123}, {'ticketID': 123}], 'status': 200},
-    #         {'body': [{'ticketID': 321}], 'status': 200}
-    #     ])
-    #     params = dict(client_id=123, ticket_id=321, category='SD-WAN', ticket_topic='VOO')
-    #
-    #     ticket_status_1 = "New"
-    #     ticket_status_2 = "In-Progress"
-    #
-    #     full_params_1 = params.copy()
-    #     full_params_1["TicketStatus"] = ticket_status_1
-    #
-    #     full_params_2 = params.copy()
-    #     full_params_2["TicketStatus"] = ticket_status_2
-    #
-    #     bruin_repository = BruinRepository(logger, bruin_client)
-    #     filtered_tickets = await bruin_repository.get_all_filtered_tickets(
-    #         params=params,
-    #         ticket_status=[ticket_status_1, ticket_status_2],
-    #     )
-    #
-    #     bruin_repository._bruin_client.get_all_tickets.assert_called()
-    #     assert filtered_tickets['body'] == [{'ticketID': 123}, {'ticketID': 321}]
-    #     assert filtered_tickets['status'] == 200
+    @pytest.mark.asyncio
+    async def get_all_filtered_tickets_test(self):
+        logger = Mock()
+        bruin_client = Mock()
+        bruin_client.get_all_tickets = Mock(side_effect=[
+            {'body': [{'ticketID': 123}, {'ticketID': 123}], 'status': 200},
+            {'body': [{'ticketID': 321}], 'status': 200}
+        ])
+        params = dict(client_id=123, ticket_id=321, category='SD-WAN', ticket_topic='VOO')
+
+        ticket_status_1 = "New"
+        ticket_status_2 = "In-Progress"
+
+        full_params_1 = params.copy()
+        full_params_1["TicketStatus"] = ticket_status_1
+
+        full_params_2 = params.copy()
+        full_params_2["TicketStatus"] = ticket_status_2
+
+        bruin_repository = BruinRepository(logger, bruin_client)
+        filtered_tickets = await bruin_repository.get_all_filtered_tickets(
+            params=params,
+            ticket_status=[ticket_status_1, ticket_status_2],
+        )
+
+        bruin_repository._bruin_client.get_all_tickets.assert_called()
+        ticket_item1 = {'ticketID': 123}
+        ticket_item2 = {'ticketID': 321}
+        assert ticket_item1 in filtered_tickets['body']
+        assert ticket_item2 in filtered_tickets['body']
+        assert filtered_tickets['status'] == 200
 
     @pytest.mark.asyncio
     async def get_all_filtered_tickets_with_none_returned_for_one_ticket_status_test(self):
@@ -80,23 +83,22 @@ class TestBruinRepository:
 
         async def gather_mock(*args, **kwargs):
             results = []
-            results.append(bruin_repository._get_tickets_by_status(ticket_status_1, params.copy(), response))
-            results.append(bruin_repository._get_tickets_by_status(ticket_status_2, params.copy(), response))
-            results.append(bruin_repository._get_tickets_by_status(ticket_status_3, params.copy(), response))
+            results.append(await bruin_repository._get_tickets_by_status(ticket_status_1, params.copy(), response))
+            results.append(await bruin_repository._get_tickets_by_status(ticket_status_2, params.copy(), response))
+            results.append(await bruin_repository._get_tickets_by_status(ticket_status_3, params.copy(), response))
             return results
 
-        with patch.object(bruin_repository_module.asyncio, "get_event_loop"):
-            with patch.object(bruin_repository_module.asyncio, "gather", return_value=gather_mock()):
-                filtered_tickets = await bruin_repository.get_all_filtered_tickets(
-                    params=params,
-                    ticket_status=[ticket_status_1, ticket_status_2, ticket_status_3]
-                )
+        with patch.object(bruin_repository_module.asyncio, "gather", return_value=gather_mock()):
+            filtered_tickets = await bruin_repository.get_all_filtered_tickets(
+                params=params,
+                ticket_status=[ticket_status_1, ticket_status_2, ticket_status_3]
+            )
 
-                bruin_repository._bruin_client.get_all_tickets.assert_has_calls([
-                    call(full_params_1),
-                    call(full_params_2),
-                ], any_order=False)
-                assert call(full_params_3) not in bruin_repository._bruin_client.get_all_tickets.mock_calls
+            bruin_repository._bruin_client.get_all_tickets.assert_has_calls([
+                call(full_params_1),
+                call(full_params_2),
+            ], any_order=False)
+            assert call(full_params_3) not in bruin_repository._bruin_client.get_all_tickets.mock_calls
 
     @pytest.mark.asyncio
     async def get_filtered_tickets_with_bruin_returning_empty_lists_for_every_status_test(self):
@@ -147,6 +149,7 @@ class TestBruinRepository:
         logger = Mock()
         bruin_client = Mock()
 
+        wrong_edge_serial = 'This is a meaningless detail'
         edge_serial = 'VC05200026138'
         params = dict(client_id=123, category='SD-WAN', ticket_topic='VAS')
         ticket_status_1 = "New"
@@ -161,7 +164,7 @@ class TestBruinRepository:
             'ticketDetails': [
                 {
                     "detailID": 2746999,
-                    "detailValue": 'This is a meaningless detail',
+                    "detailValue": wrong_edge_serial,
                 },
             ],
             'ticketNotes': [
@@ -199,43 +202,64 @@ class TestBruinRepository:
                 }
             ],
         }
-
+        ticket1 = {'ticketID': ticket_1_id}
+        ticket2 = {'ticketID': ticket_2_id}
+        ticket3 = {'ticketID': ticket_3_id}
         bruin_repository = BruinRepository(logger, bruin_client)
         bruin_repository.get_all_filtered_tickets = CoroutineMock(return_value={'body': [
-            {'ticketID': ticket_1_id},
-            {'ticketID': ticket_2_id},
-            {'ticketID': ticket_3_id},
+            ticket1,
+            ticket2,
+            ticket3,
         ], 'status': 200})
         bruin_repository.get_ticket_details = Mock(side_effect=[
             {'body': ticket_1_details, 'status': 200}, {'body': ticket_2_details, 'status': 200},
             {'body': ticket_3_details, 'status': 200}])
 
-        ticket_details_by_edge = await bruin_repository.get_ticket_details_by_edge_serial(
-            edge_serial=edge_serial, params=params,
-            ticket_statuses=ticket_statuses,
-        )
+        response = dict.fromkeys(["body", "status"])
+        response['body'] = []
+        response['status'] = 200
 
-        bruin_repository.get_all_filtered_tickets.assert_awaited_once_with(
-            params=params,
-            ticket_status=ticket_statuses,
+        async def gather_mock(*args, **kwargs):
+            results = []
+            results.append(await bruin_repository._search_ticket_details_for_serial(edge_serial, ticket1, response))
+            results.append(await bruin_repository._search_ticket_details_for_serial(edge_serial, ticket2, response))
+            results.append(await bruin_repository._search_ticket_details_for_serial(edge_serial, ticket3, response))
+            return results
 
-        )
-        bruin_repository.get_ticket_details.assert_has_calls([
-            call(ticket_1_id), call(ticket_2_id), call(ticket_3_id),
-        ], any_order=False)
+        with patch.object(bruin_repository_module.asyncio, "gather", return_value=gather_mock()):
+            ticket_details_by_edge = await bruin_repository.get_ticket_details_by_edge_serial(
+                edge_serial=edge_serial, params=params,
+                ticket_statuses=ticket_statuses,
+            )
 
-        expected_ticket_details_list = [
-            {
-                'ticketID': ticket_2_id,
-                **ticket_2_details,
-            },
-            {
-                'ticketID': ticket_3_id,
-                **ticket_3_details,
-            },
-        ]
-        assert ticket_details_by_edge['body'] == expected_ticket_details_list
-        assert ticket_details_by_edge['status'] == 200
+            bruin_repository.get_all_filtered_tickets.assert_awaited_once_with(
+                params=params,
+                ticket_status=ticket_statuses,
+
+            )
+            bruin_repository.get_ticket_details.assert_has_calls([
+                call(ticket_1_id), call(ticket_2_id), call(ticket_3_id),
+            ], any_order=False)
+
+            expected_ticket_details_list = [
+                {
+                    'ticketID': ticket_2_id,
+                    **ticket_2_details,
+                },
+                {
+                    'ticketID': ticket_3_id,
+                    **ticket_3_details,
+                },
+            ]
+            expected_ticket_detail1 = {
+                                        'ticketID': ticket_2_id,
+                                        **ticket_2_details,
+                                      }
+            expected_ticket_detail2 = {
+                                        'ticketID': ticket_3_id,
+                                        **ticket_3_details,
+                                      }
+            assert ticket_details_by_edge['body'] == expected_ticket_details_list
 
     @pytest.mark.asyncio
     async def get_ticket_details_by_edge_serial_with_filtered_tickets_reutrn_non_2XX_status_test(self):
@@ -425,7 +449,7 @@ class TestBruinRepository:
         )
         bruin_repository.get_ticket_details.assert_has_calls([
             call(ticket_1_id), call(ticket_2_id), call(ticket_3_id)
-        ], any_order=False)
+        ], any_order=True)
 
         expected_ticket_details_list = []
         assert ticket_details_by_edge["body"] == expected_ticket_details_list

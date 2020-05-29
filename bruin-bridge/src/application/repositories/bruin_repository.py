@@ -13,20 +13,13 @@ class BruinRepository:
         response['status'] = 200
 
         full_params = params.copy()
-        loop = asyncio.get_event_loop()
         futures = [
-            loop.run_in_executor(
-                None,
-                self._get_tickets_by_status,
-                status, full_params, response
-            )
+            self._get_tickets_by_status(status, full_params, response)
             for status in ticket_status
         ]
         try:
             results = await asyncio.gather(*futures)
         except Exception as error:
-            for future in futures:
-                future.cancel()
             return response
 
         tickets = sum(results, [])  # This joins all elements in "results"
@@ -34,7 +27,7 @@ class BruinRepository:
 
         return response
 
-    def _get_tickets_by_status(self, status, params, response):
+    async def _get_tickets_by_status(self, status, params, response):
         params["TicketStatus"] = status
         status_ticket_list = self._bruin_client.get_all_tickets(params)
         response['status'] = status_ticket_list['status']
@@ -58,14 +51,9 @@ class BruinRepository:
         if filtered_tickets['status'] not in range(200, 300):
             return filtered_tickets
 
-        loop = asyncio.get_event_loop()
         futures = [
-                   loop.run_in_executor(
-                                        None,
-                                        self.search_ticket_details_for_serial,
-                                        edge_serial, ticket, response
-                                       )
-                   for ticket in filtered_tickets['body']
+            self._search_ticket_details_for_serial(edge_serial, ticket, response)
+            for ticket in filtered_tickets['body']
         ]
         results = await asyncio.gather(*futures)
 
@@ -75,7 +63,7 @@ class BruinRepository:
 
         return response
 
-    def search_ticket_details_for_serial(self, edge_serial, ticket, response):
+    async def _search_ticket_details_for_serial(self, edge_serial, ticket, response):
         results = []
         ticket_id = ticket['ticketID']
         ticket_details_dict = self.get_ticket_details(ticket_id)
