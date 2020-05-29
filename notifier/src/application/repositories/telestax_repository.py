@@ -5,6 +5,6 @@ class TeleStaxRepository:
         self._telestax_client = telestax_client
         self._logger = logger
 
-    def send_to_email(self, msg):
-        status = self.telestax_client.send_to_sms(msg)
+    def send_to_sms(self, msg, sms_to):
+        status = self._telestax_client.send_to_sms(msg, sms_to)
         return status
