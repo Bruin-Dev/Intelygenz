@@ -10,10 +10,10 @@
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   before_script:
     - terraform init -backend=true -get=true -input=false
-  only:
-    - master
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   tags:
     - kubernetes
 
@@ -44,9 +44,9 @@
     - export TF_VAR_LIT_LOGIN_URL=${LIT_LOGIN_URL_DEV}
     - export TF_VAR_LIT_DOMAIN=${LIT_DOMAIN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
-  only:
-    - master
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   tags:
     - kubernetes

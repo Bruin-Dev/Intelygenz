@@ -35,6 +35,10 @@
     - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
     - python3 ci-utils/check_ecs_resources.py
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
   tags:
     - kubernetes
 
@@ -61,11 +65,14 @@
     - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -d
     - python ci-utils/aws-nuke/aws_nuke_conf_generator.py -e $ENVIRONMENT
     - aws-nuke -c ${AWS_NUKE_CONFIG_FILE} --profile default --force ${AWS_NUKE_OPTS}
-    - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -z -b
-  when: manual
-  only:
-    - branches
-  except:
-    - master
+    - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -z
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+  artifacts:
+    paths:
+      - $AWS_NUKE_CONFIG_FILE
+    expire_in: 1 day
   tags:
     - kubernetes

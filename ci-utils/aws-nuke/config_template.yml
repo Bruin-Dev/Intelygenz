@@ -52,6 +52,14 @@ accounts:
         - type: contains
           property: Name
           value: environment
+      S3Bucket:
+        - invert: true
+          property: tag:Environment
+          value: environment
+      S3Object:
+        - invert: true
+          property: Key
+          value: terraform-environment-dev-resources.tfstate
 regions:
 - us-east-1
 resource-types:
@@ -69,3 +77,5 @@ resource-types:
   - ECSService
   - ECSTaskDefinition
   - EC2SecurityGroup
+  - S3Bucket
+  - S3Object

@@ -7,10 +7,9 @@ terraform-validate-basic-infra:
   script:
     - terraform init infra-as-code/basic-infra
     - terraform validate infra-as-code/basic-infra
-  only:
-    - master
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
 
 terraform-validate-network-resources:
   stage: validation
@@ -21,10 +20,9 @@ terraform-validate-network-resources:
     - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
     - terraform init infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
-  only:
-    - master
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
 
 terraform-validate-dev:
   stage: validation
@@ -38,11 +36,9 @@ terraform-validate-dev:
     - mv temp_references_dev.tf infra-as-code/dev/references.tf
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
-  only:
-    - master
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
-
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
 
 # ==================================================
 # Terraform deployment jobs for infra-as-code module
@@ -53,10 +49,9 @@ basic-infra:
   script:
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
-  only:
-    - master
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
 
 network-resources-infra-branches:
   stage: basic_infra
@@ -64,11 +59,10 @@ network-resources-infra-branches:
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export TF_VAR_CURRENT_ENVIRONMENT="dev"
-  only:
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
-  except:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
 
 network-resources-infra-master:
   stage: basic_infra
@@ -76,25 +70,25 @@ network-resources-infra-master:
   before_script:
     - terraform init -backend=true -get=true -input=false
     - export TF_VAR_CURRENT_ENVIRONMENT="production"
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
 
 check-ecs-resources-branches:
   extends: .check_ecs_resources_template
   before_script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
-  only:
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
-  except:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+
 
 check-ecs-resources-master:
   extends: .check_ecs_resources_template
   before_script:
     - export ENVIRONMENT_SLUG=master
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
 
 deploy-branches:
   stage: deploy
@@ -157,11 +151,10 @@ deploy-branches:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
     on_stop: destroy-branches
-  only:
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
-  except:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
 
 deploy-master:
   stage: deploy
@@ -224,8 +217,8 @@ deploy-master:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net:3000/
     on_stop: destroy-master
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
 
 
 # ===============================================
@@ -244,12 +237,11 @@ destroy-branches:
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
-  when: manual
-  only:
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
-  except:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
 
 destroy-branches-aws-nuke:
   stage: deploy
@@ -257,11 +249,11 @@ destroy-branches-aws-nuke:
   before_script:
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-  only:
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
-  except:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
 
 destroy-master:
   stage: deploy
@@ -276,6 +268,6 @@ destroy-master:
   environment:
     name: $CI_COMMIT_REF_NAME
     action: stop
-  when: manual
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual

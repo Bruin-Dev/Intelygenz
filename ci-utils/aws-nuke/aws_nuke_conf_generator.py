@@ -28,11 +28,12 @@ _aws_common_resources_list = ['CloudWatchLogsLogGroup',
                               'ECSTaskDefinition',
                               'ELBv2',
                               'ELBv2TargetGroup',
-                              'EC2SecurityGroup']
+                              'EC2SecurityGroup',
+                              'S3Bucket']
 
 
 def _print_usage():
-    print('service_discovery.py -e <environment>')
+    print('aws_nuke_conf_generator.py -e <environment_name>')
 
 
 class AWSNukeConfigurationGenerator:
@@ -71,7 +72,10 @@ class AWSNukeConfigurationGenerator:
                 self._generate_rules_aws_nuke_contains('ECSTaskDefinition', environment_name),
                 self._generate_rules_aws_nuke_has_property('ELBv2', 'tag:Environment', environment_name),
                 self._generate_rules_aws_nuke_has_property('ELBv2TargetGroup', 'tag:Environment', environment_name),
-                self._generate_rule_aws_nuke_property_contains('EC2SecurityGroup', 'Name', environment_name)]
+                self._generate_rule_aws_nuke_property_contains('EC2SecurityGroup', 'Name', environment_name),
+                self._generate_rules_aws_nuke_has_property('S3Bucket', 'tag:Environment', environment_name),
+                self._generate_rules_aws_nuke_has_property('S3Object', 'Key',
+                                                           f'terraform-{environment_name}-dev-resources.tfstate')]
 
     def _generate_aws_nuke_configuration_for_service_discovery_environment(self, environment_name):
         aws_nuke_rules_services = []

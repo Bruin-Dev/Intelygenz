@@ -11,12 +11,10 @@
   script:
     - pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
-  only:
-    - master
-    - /^*feature/.*$/
-    - /^*fix/.*$/
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   tags:
     - kubernetes
 
@@ -34,11 +32,9 @@
   script:
     - pytest --cov
   coverage: '/^TOTAL.+?(\d{2,3}.\d+\%)$/'
-  only:
-    - master
-    - /^*feature/.*$/
-    - /^*fix/.*$/
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   tags:
     - kubernetes

@@ -13,12 +13,10 @@ dispatch-portal-frontend-linter:
     key: "dispatch-portal-frontend-${CI_COMMIT_REF_SLUG}"
     paths:
       - dispatch-portal-frontend/node_modules
-  only:
-    - master
-    - /^*feature/.*$/
-    - /^*fix/.*$/
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   tags:
     - kubernetes
 
@@ -36,12 +34,11 @@ dispatch-portal-frontend-test:
     key: "dispatch-portal-frontend-${CI_COMMIT_REF_SLUG}"
     paths:
       - dispatch-portal-frontend/node_modules
-  only:
-    - master
-    - /^*feature/.*$/
-    - /^*fix/.*$/
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   dependencies:
     - dispatch-portal-frontend-linter
   tags:
