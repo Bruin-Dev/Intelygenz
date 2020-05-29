@@ -14,3 +14,10 @@ class NotificationsRepository:
             'message': message,
         }
         await self._event_bus.rpc_request("notification.slack.request", message, timeout=10)
+
+    async def send_sms(self, payload: str):
+        message = {
+            'request_id': uuid(),
+            'body': payload,
+        }
+        await self._event_bus.rpc_request("notification.sms.request", message, timeout=10)

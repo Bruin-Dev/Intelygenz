@@ -1,0 +1,2 @@
+class TestNotificationsRepository:
+    pass

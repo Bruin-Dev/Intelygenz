@@ -66,15 +66,14 @@ class TestCreateDispatch:
         request_id = '123'
         response_topic = 'some.response.topic'
         msg = {
-                'request_id': request_id,
-                'response_topic': response_topic,
-                'body': dipatch_contents
+            'request_id': request_id,
+            'response_topic': response_topic,
+            'body': dipatch_contents
         }
         expected_return = {
-                            'request_id': request_id,
-                            'body': return_body,
-                            'status': return_status
-
+            'request_id': request_id,
+            'body': return_body,
+            'status': return_status
         }
         create_dispatch_action = CreateDispatch(logger, configs, event_bus, lit_repo)
         await create_dispatch_action.create_dispatch(msg)
@@ -102,8 +101,6 @@ class TestCreateDispatch:
                 "Local_Time_of_Dispatch": "7AM-9AM",
                 "Time_Zone_Local": "Pacific Time",
                 "Turn_Up": "Yes",
-                "Hard_Time_of_Dispatch_Local": "7AM-9AM",
-                "Hard_Time_of_Dispatch_Time_Zone_Local": "Eastern Time",
                 "Name_of_MetTel_Requester": "Test User1",
                 "MetTel_Group_Email": "test@mettel.net",
                 "MetTel_Requester_Email": "test@mettel.net",
@@ -156,7 +153,8 @@ class TestCreateDispatch:
             }
         }
         dispatch_required_keys = ["date_of_dispatch", "mettel_bruin_ticketid", "site_survey_quote_required",
-                                  "local_time_of_dispatch", "time_zone_local", "job_site", "job_site_street",
+                                  "local_time_of_dispatch", "time_zone_local",
+                                  "job_site", "job_site_street",
                                   "job_site_city", "job_site_state", "job_site_zip_code",
                                   "job_site_contact_name_and_phone_number", "special_materials_needed_for_dispatch",
                                   "scope_of_work", "mettel_tech_call_in_instructions", "name_of_mettel_requester",

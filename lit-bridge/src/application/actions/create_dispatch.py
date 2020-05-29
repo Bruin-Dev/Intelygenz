@@ -23,7 +23,8 @@ class CreateDispatch:
             return
 
         dispatch_required_keys = ["date_of_dispatch", "mettel_bruin_ticketid", "site_survey_quote_required",
-                                  "local_time_of_dispatch", "time_zone_local", "job_site", "job_site_street",
+                                  "local_time_of_dispatch", "time_zone_local",
+                                  "job_site", "job_site_street",
                                   "job_site_city", "job_site_state", "job_site_zip_code",
                                   "job_site_contact_name_and_phone_number", "special_materials_needed_for_dispatch",
                                   "scope_of_work", "mettel_tech_call_in_instructions", "name_of_mettel_requester",

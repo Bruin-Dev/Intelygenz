@@ -112,6 +112,7 @@ env
 env/
 *-env
 env-*
+env_*
 venv/
 ENV/
 env.bak/

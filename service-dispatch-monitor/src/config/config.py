@@ -25,7 +25,7 @@ DISPATCH_MONITOR_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
     'jobs_intervals': {
-        'dispatch_monitor': 60 * 15
+        'lit_dispatch_monitor': 15  # minutes
     },
 }
 

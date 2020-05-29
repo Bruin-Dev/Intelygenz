@@ -25,7 +25,7 @@ class TestMappers:
             "MetTel_Department_Phone_Number": None,
             "MetTel_Department": "Customer Care",
             "MetTel_Bruin_TicketID": "T-12345",
-            "Local_Time_of_Dispatch": None,
+            "Local_Time_of_Dispatch": "5.30AM",
             "Job_Site_Zip_Code": "99088",
             "Job_Site_Street": "123 Fake Street",
             "Job_Site_State": "CA",
@@ -47,7 +47,7 @@ class TestMappers:
             "dispatch_number": "DIS37450",
             "date_of_dispatch": "2019-11-14",
             "site_survey_quote_required": False,
-            "time_of_dispatch": None,
+            "time_of_dispatch": "5.30AM",
             "time_zone": "Pacific Time",
             "mettel_bruin_ticket_id": "T-12345",
             "job_site": "test street",
@@ -63,7 +63,9 @@ class TestMappers:
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
             "mettel_requester_email": "karen.doe@mettel.net",
-            "dispatch_status": "New Dispatch"
+            "dispatch_status": "New Dispatch",
+            "hard_time_of_dispatch_local": None,
+            "hard_time_of_dispatch_time_zone_local": None
         }
 
         assert expected_map == map_get_dispatch(content)
@@ -88,7 +90,7 @@ class TestMappers:
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
             "mettel_requester_email": "karen.doe@mettel.net",
-            "mettel_department_phone_number": "+1 666 6666 666"
+            "mettel_department_phone_number": "16666666666"
         }
 
         expected_map = {
@@ -109,7 +111,7 @@ class TestMappers:
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
             "mettel_requester_email": "karen.doe@mettel.net",
-            "mettel_department_phone_number": "+1 666 6666 666"
+            "mettel_department_phone_number": "16666666666"
         }
         assert expected_map == map_create_dispatch(content)
 

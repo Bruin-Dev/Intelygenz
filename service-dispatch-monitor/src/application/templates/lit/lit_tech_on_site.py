@@ -1,5 +1,4 @@
-LIT_TECH_ON_SITE = """
-*#Automation Engine#*
+LIT_TECH_ON_SITE = """#*Automation Engine*#
 Dispatch Management - Field Engineer On Site
 
 {field_engineer_name} has arrived
