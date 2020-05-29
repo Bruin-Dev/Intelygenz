@@ -2171,6 +2171,151 @@ class TestTNBAMonitor:
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def process_tickets_without_tnba_with_predictions_found_for_target_serials_and_predictions_having_error_test(
+            self):
+        ticket_1_id = 12345
+        ticket_1_detail_1_id = 2746930
+        ticket_1_detail_1_serial_number = 'VC1234567'
+        ticket_1_detail_2_id = 2746931
+        ticket_1_detail_2_serial_number = 'VC9999999'
+        ticket_1 = {
+            'ticket_id': ticket_1_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_1_detail_1_id,
+                    "detailValue": ticket_1_detail_1_serial_number,
+                },
+                {
+                    "detailID": ticket_1_detail_2_id,
+                    "detailValue": ticket_1_detail_2_serial_number,
+                },
+            ],
+            'ticket_notes': [
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
+                    "noteId": 41894040,
+                    "noteValue": (
+                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                    ),
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+            ],
+        }
+
+        ticket_2_id = 67890
+        ticket_2_detail_1_id = 2746930
+        ticket_2_detail_1_serial_number = 'VC1111222'
+        ticket_2 = {
+            'ticket_id': ticket_2_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_2_detail_1_id,
+                    "detailValue": ticket_2_detail_1_serial_number,
+                },
+            ],
+            'ticket_notes': [],
+        }
+
+        tickets = [
+            ticket_1,
+            ticket_2,
+        ]
+
+        prediction_for_ticket_1_detail_1 = {
+            'assetId': ticket_1_detail_1_serial_number,
+            'error': {
+                'code': 'error_in_prediction',
+                'message': 'Error executing prediction: The labels [\'Refer to ASR Carrier\'] are not in the '
+                           'Task Result" labels map.'
+            },
+        }
+        prediction_for_ticket_1_detail_2 = {
+            'assetId': ticket_1_detail_2_serial_number,
+            'error': {
+                'code': 'error_in_prediction',
+                'message': "Error executing prediction: The labels "
+                           "['Service Repaired', 'Investigating Wireless Device Issue'] are not "
+                           "in the \"Task Result\" labels map."
+            },
+        }
+        t7_prediction_response_for_ticket_1 = {
+            'body': [
+                prediction_for_ticket_1_detail_1,
+                prediction_for_ticket_1_detail_2,
+            ],
+            'status': 200
+        }
+
+        prediction_for_ticket_2_detail_1 = {
+            'assetId': ticket_2_detail_1_serial_number,
+            'error': {
+                'code': 'error_in_prediction',
+                'message': "Error executing prediction: The labels "
+                           "['Line Test Results Provided'] are not in the \"Task Result\" labels map."
+            },
+        }
+        t7_prediction_response_for_ticket_2 = {
+            'body': [
+                prediction_for_ticket_2_detail_1,
+            ],
+            'status': 200
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        monitoring_map_repository = Mock()
+
+        ticket_repository = Mock()
+        ticket_repository.build_tnba_note_from_prediction = Mock()
+
+        prediction_repository = Mock()
+        prediction_repository.find_prediction_object_by_serial = Mock(side_effect=[
+            prediction_for_ticket_1_detail_1,
+            prediction_for_ticket_1_detail_2,
+            prediction_for_ticket_2_detail_1,
+        ])
+
+        bruin_repository = Mock()
+        bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
+        bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
+
+        t7_repository = Mock()
+        t7_repository.get_prediction = CoroutineMock(side_effect=[
+            t7_prediction_response_for_ticket_1,
+            t7_prediction_response_for_ticket_2,
+        ])
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   monitoring_map_repository, bruin_repository, velocloud_repository,
+                                   prediction_repository, notifications_repository)
+
+        await tnba_monitor._process_tickets_without_tnba(tickets)
+
+        t7_repository.get_prediction.assert_has_awaits([
+            call(ticket_1_id),
+            call(ticket_2_id),
+        ])
+        assert notifications_repository.send_slack_message.await_count == 3
+        bruin_repository.get_next_results_for_ticket_detail.assert_not_awaited()
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
+        bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def process_tickets_without_tnba_with_retrieval_of_next_results_returning_non_2xx_status_test(self):
         ticket_1_id = 12345
         ticket_1_detail_1_id = 2746930
@@ -3674,6 +3819,197 @@ class TestTNBAMonitor:
             call(predictions_for_ticket_1, ticket_1_detail_2_serial_number),
             call(predictions_for_ticket_2, ticket_2_detail_1_serial_number),
         ])
+        bruin_repository.get_next_results_for_ticket_detail.assert_not_awaited()
+        prediction_repository.filter_predictions_in_next_results.assert_not_called()
+        prediction_repository.get_best_prediction.assert_not_called()
+        ticket_repository.build_tnba_note_from_prediction.assert_not_called()
+        bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_tickets_with_tnba_with_predictions_found_for_target_serials_and_predictions_having_error_test(
+            self):
+        ticket_1_id = 12345
+        ticket_1_detail_1_id = 2746930
+        ticket_1_detail_1_serial_number = 'VC1234567'
+        ticket_1_detail_2_id = 2746931
+        ticket_1_detail_2_serial_number = 'VC9999999'
+        ticket_1_note_1 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+            "serviceNumber": [
+                ticket_1_detail_1_serial_number,
+            ],
+        }
+        ticket_1_note_2 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+            "serviceNumber": [
+                'VC0000000',
+            ],
+        }
+        ticket_1_note_3 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+            "serviceNumber": [
+                ticket_1_detail_2_serial_number,
+            ],
+        }
+        ticket_1_notes = [
+            ticket_1_note_1,
+            ticket_1_note_2,
+            ticket_1_note_3,
+        ]
+        ticket_1 = {
+            'ticket_id': ticket_1_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_1_detail_1_id,
+                    "detailValue": ticket_1_detail_1_serial_number,
+                },
+                {
+                    "detailID": ticket_1_detail_2_id,
+                    "detailValue": ticket_1_detail_2_serial_number,
+                },
+            ],
+            'ticket_notes': ticket_1_notes,
+        }
+
+        ticket_2_id = 67890
+        ticket_2_detail_1_id = 2746930
+        ticket_2_detail_1_serial_number = 'VC1111222'
+        ticket_2_note_1 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+        }
+        ticket_2_notes = [
+            ticket_2_note_1,
+        ]
+        ticket_2 = {
+            'ticket_id': ticket_2_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_2_detail_1_id,
+                    "detailValue": ticket_2_detail_1_serial_number,
+                },
+            ],
+            'ticket_notes': ticket_2_notes,
+        }
+
+        tickets = [
+            ticket_1,
+            ticket_2,
+        ]
+
+        prediction_for_ticket_1_detail_1 = {
+            'assetId': ticket_1_detail_1_serial_number,
+            'error': {
+                'code': 'error_in_prediction',
+                'message': 'Error executing prediction: The labels [\'Refer to ASR Carrier\'] are not in the '
+                           'Task Result" labels map.'
+            },
+        }
+        prediction_for_ticket_1_detail_2 = {
+            'assetId': ticket_1_detail_2_serial_number,
+            'error': {
+                'code': 'error_in_prediction',
+                'message': "Error executing prediction: The labels "
+                           "['Service Repaired', 'Investigating Wireless Device Issue'] are not "
+                           "in the \"Task Result\" labels map."
+            },
+        }
+        predictions_for_ticket_1 = [
+            prediction_for_ticket_1_detail_1,
+            prediction_for_ticket_1_detail_2,
+        ]
+        t7_prediction_for_ticket_1_response = {
+            'body': predictions_for_ticket_1,
+            'status': 200
+        }
+
+        prediction_for_ticket_2_detail_1 = {
+            'assetId': ticket_2_detail_1_serial_number,
+            'error': {
+                'code': 'error_in_prediction',
+                'message': "Error executing prediction: The labels "
+                           "['Line Test Results Provided'] are not in the \"Task Result\" labels map."
+            },
+        }
+        predictions_for_ticket_2 = [
+            prediction_for_ticket_2_detail_1,
+        ]
+        t7_prediction_for_ticket_2_response = {
+            'body': predictions_for_ticket_2,
+            'status': 200
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        monitoring_map_repository = Mock()
+
+        ticket_repository = Mock()
+        ticket_repository.find_newest_tnba_note_by_service_number = Mock(side_effect=[
+            ticket_1_note_1,
+            ticket_1_note_3,
+            ticket_2_note_1,
+        ])
+        ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
+        ticket_repository.build_tnba_note_from_prediction = Mock()
+
+        prediction_repository = Mock()
+        prediction_repository.find_prediction_object_by_serial = Mock(side_effect=[
+            prediction_for_ticket_1_detail_1,
+            prediction_for_ticket_1_detail_2,
+            prediction_for_ticket_2_detail_1,
+        ])
+        prediction_repository.filter_predictions_in_next_results = Mock()
+        prediction_repository.get_best_prediction = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_next_results_for_ticket_detail = CoroutineMock()
+        bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
+
+        t7_repository = Mock()
+        t7_repository.get_prediction = CoroutineMock(side_effect=[
+            t7_prediction_for_ticket_1_response,
+            t7_prediction_for_ticket_2_response,
+        ])
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   monitoring_map_repository, bruin_repository, velocloud_repository,
+                                   prediction_repository, notifications_repository)
+
+        await tnba_monitor._process_tickets_with_tnba(tickets)
+
+        t7_repository.get_prediction.assert_has_awaits([
+            call(ticket_1_id),
+            call(ticket_2_id),
+        ])
+        ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
+            call(ticket_1_notes, ticket_1_detail_1_serial_number),
+            call(ticket_1_notes, ticket_1_detail_2_serial_number),
+            call(ticket_2_notes, ticket_2_detail_1_serial_number),
+        ])
+        ticket_repository.is_tnba_note_old_enough.assert_has_calls([
+            call(ticket_1_note_1),
+            call(ticket_1_note_3),
+            call(ticket_2_note_1),
+        ])
+        prediction_repository.find_prediction_object_by_serial.assert_has_calls([
+            call(predictions_for_ticket_1, ticket_1_detail_1_serial_number),
+            call(predictions_for_ticket_1, ticket_1_detail_2_serial_number),
+            call(predictions_for_ticket_2, ticket_2_detail_1_serial_number),
+        ])
+        assert notifications_repository.send_slack_message.await_count == 3
         bruin_repository.get_next_results_for_ticket_detail.assert_not_awaited()
         prediction_repository.filter_predictions_in_next_results.assert_not_called()
         prediction_repository.get_best_prediction.assert_not_called()

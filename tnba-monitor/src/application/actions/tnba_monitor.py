@@ -255,6 +255,14 @@ class TNBAMonitor:
                         f"{serial_number}!"
                     )
                     continue
+                elif 'error' in prediction_object_for_serial.keys():
+                    msg = (
+                        f"Prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} was "
+                        f"found but it contains an error from T7 API -> {prediction_object_for_serial['error']}"
+                    )
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    continue
 
                 self._logger.info(
                     f'Found predictions for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number}: '
@@ -372,6 +380,14 @@ class TNBAMonitor:
                         f"No predictions were found for ticket {ticket_id}, detail {ticket_detail_id} and serial "
                         f"{serial_number}!"
                     )
+                    continue
+                elif 'error' in prediction_object_for_serial.keys():
+                    msg = (
+                        f"Prediction for ticket {ticket_id}, detail {ticket_detail_id} and serial {serial_number} was "
+                        f"found but it contains an error from T7 API -> {prediction_object_for_serial['error']}"
+                    )
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
                     continue
 
                 self._logger.info(
