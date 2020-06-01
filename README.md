@@ -9,16 +9,16 @@
 | Module      | Coverage |
 |:-----------:|:--------:|
 | bruin-bridge |[![bruin-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=bruin-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| cts-bridge |[![cts-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=cts-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | dispatch-portal-backend |[![dispatch-portal-backend-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=dispatch-portal-backend-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| igzpackages |[![igzpackages-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=igzpackages-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | last-contact-report |[![last-contact-report-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=last-contact-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | lit-bridge|[![lit-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lit-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| sites-monitor|[![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | t7-bridge|[![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | velocloud-bridge|[![velocloud-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
-| sites-monitor|[![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 
 # Table of Contents
 

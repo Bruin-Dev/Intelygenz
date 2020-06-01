@@ -22,7 +22,7 @@ class S3Buckets:
         s3_bucket_prometheus = f's3://prometheus-storage-{environment}'
         if self._check_s3_bucket_exists(s3_bucket_prometheus):
             if self._delete_content_of_bucket_recursively(s3_bucket_prometheus):
-                logging.info(f"All contents of the bucket {s3_bucket_prometheus} have been successfully deleted")
+                logging.info(f"All contents of the bucket {bucket_prometheus} have been successfully deleted")
                 if self._delete_s3_bucket(bucket_prometheus):
                     logging.info(f"S3 Bucket {bucket_prometheus} was successfully removed")
                 else:
@@ -39,8 +39,9 @@ class S3Buckets:
                          f"directories to store Terraform state file "
                          f"that are going to be deleted")
             for element in s3buckets_check['buckets_list']:
-                logging.info(f"Removing directory {element} from s3 bucket {self._s3_bucket_backend_terraform}")
-                subprocess.call(['aws', 's3', 'rm', element, '--region', 'us-east-1'], stdout=FNULL)
+                s3_directory_to_delete = f"s3://{element['bucket_name']}/{element['bucket_file']}"
+                logging.info(f"Removing directory {element['bucket_file']} from s3 bucket {element['bucket_name']}")
+                subprocess.call(['aws', 's3', 'rm', s3_directory_to_delete, '--region', 'us-east-1'], stdout=FNULL)
         else:
             logging.error("The environment {} hasn't any associated directories in bucket {} to store Terraform "
                           "state file".format(environment, self._s3_bucket_backend_terraform))
@@ -49,7 +50,7 @@ class S3Buckets:
         has_s3_buckets = {'s3_buckets': False}
         s3_buckets_list_to_check = [
             {
-                "bucket_name": f"s3://{self._s3_bucket_backend_terraform}",
+                "bucket_name": f"{self._s3_bucket_backend_terraform}",
                 "bucket_file": f"terraform-{environment}-dev-resources.tfstate"
             }
         ]
@@ -83,9 +84,9 @@ class S3Buckets:
                                 stderr=subprocess.PIPE,
                                 universal_newlines=True)
         if result.returncode != 0 and result.stderr != '':
-            print(f"S3 bucket {bucket_name} doesn't exists")
+            logging.error(f"S3 bucket {bucket_name} doesn't exists")
             return False
-        print(f"S3 Bucket {bucket_name} exists")
+        logging.info(f"S3 Bucket {bucket_name} exists")
         return True
 
     @staticmethod

@@ -18,4 +18,4 @@
         + [Network infrastructure](SYSTEM_OVERVIEW.md#network-infrastructure)
 
 ---
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2019
+With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020

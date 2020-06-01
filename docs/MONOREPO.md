@@ -26,4 +26,4 @@ versions of one project are related to the other and then syncing them.
 + This is not only a repository, it's a sum of good practices between automation, code and documentation.
 
 ---
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2019
+With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020

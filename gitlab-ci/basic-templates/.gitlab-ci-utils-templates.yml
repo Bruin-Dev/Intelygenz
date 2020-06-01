@@ -56,23 +56,19 @@
   script:
     - apk add --update-cache --upgrade curl
     - apk add --no-cache py-pip
-    - pip3 install awscli
+    - pip3 install -r ci-utils/requirements.txt
     - curl -L --output aws-nuke https://github.com/rebuy-de/aws-nuke/releases/download/v${AWS_NUKE_VERSION}/aws-nuke-v${AWS_NUKE_VERSION}-linux-amd64
     - chmod +x ./aws-nuke
     - mv ./aws-nuke /bin/aws-nuke
-    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-v${ECS_CLI_VERSION}
     - chmod +x /usr/local/bin/ecs-cli
     - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -d
     - python ci-utils/aws-nuke/aws_nuke_conf_generator.py -e $ENVIRONMENT
     - aws-nuke -c ${AWS_NUKE_CONFIG_FILE} --profile default --force ${AWS_NUKE_OPTS}
-    - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -z
+    - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -z -b
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
     - if: $CI_COMMIT_BRANCH == "master"
       when: never
-  artifacts:
-    paths:
-      - $AWS_NUKE_CONFIG_FILE
-    expire_in: 1 day
   tags:
     - kubernetes

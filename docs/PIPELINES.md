@@ -70,12 +70,18 @@ In these jobs services in the monorepo will be deployed to the selected environm
   * An [ECS Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) that will use the new Docker image uploaded for each service of the project, being these services the specified below:
 
     * [bruin-bridge](../bruin-bridge)
+    
+    * [cts-bridge](../cts-bridge)
+    
+    * [dispatch-portal-backend](../dispatch-portal-backend)
+    
+    * [dispatch-portal-frontend](../dispatch-portal-frontend)
 
-    * [las-contact-report](../last-contact-report)
+    * [last-contact-report](../last-contact-report)
+    
+    * [lit-bridge](../lit-bridge)
 
-    * [metrics-grafana](../metrics-dashboard/grafana)
-
-    * [metrics-prometheus](../metrics-dashboard/prometheus)
+    * [metrics-prometheus](../metrics-dashboard/grafana)
 
     * [nats-server, nats-server-1, nats-server-2](../nats-server)
 
@@ -83,13 +89,13 @@ In these jobs services in the monorepo will be deployed to the selected environm
 
     * [service-affecting-monitor](../service-affecting-monitor)
 
-    * [service-outage-monitor](../service-outage-monitor)
+    * [service-outage-monitor-1, service-outage-monitor-2, service-outage-monitor-3, service-outage-monitor-4, service-outage-monitor-triage](../service-outage-monitor)
+    
+    * [sites-monitor](../sites-monitor)
 
     * [t7-bridge](../t7-bridge)
 
     * [velocloud-bridge](../velocloud-bridge)
-
-    * [sites-monitor](../sites-monitor)
 
   * A [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for each of the above *ECS Services*
 
@@ -115,13 +121,39 @@ In this process, a series of resources will also be created in AWS for the selec
 
 * A [CloudFormation Stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html) for create the [SNS topic](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html) that will be used by *CloudWatch Alarms* notifications of this environment
 
-Also, resources of type `null_resource` are created to execute some Python scripts:
+* A [S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/gsg/GetStartedWithS3.html) to store the content of the metrics obtained by [Thanos](https://thanos.io/) and displayed through [Grafana](https://grafana.com/).
 
-1. The creation of [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) starts only if a Python script launched as a `null_resource` finishes with success. This script checks that the last ECS service created for NATS is running in `HEALTHY` state.
+Also, resources of type [null_resource](https://www.terraform.io/docs/providers/null/resource.html) are created to execute some Python scripts:
 
-2. If the previous step succeeded then ECS services related to capabilities microservices are created (`bruin-bridge`, `velocloud-bridge`, `t7-bridge`, `notifier` and `prometheus`). Once created, the script used for NATS is launched through `null_resource` to check that the task instances for each of these ECS services were created successfully and are in `RUNNING` and `HEALTHY` status.
+1. The creation of [ECS Services](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) starts only if a Python script launched as a `null_resource` finishes with success. 
 
-3. Once all the scripts for the capabilities microservices have finished successfully, ECS services for the use-cases microservices are all created; that is, [last-contact-report](../last-contact-report), [service-affecting-monitor](../service-affecting-monitor), [service-outage-monitor](../service-outage-monitor) and [sites-monitor](../sites-monitor) are created. This is achieved by defining explicit dependencies between the ECS services for the capabilities microservices and the set of null resources that perform the healthcheck of the capabilities microservices.​
+    This script checks that the last ECS service created for NATS is running in `HEALTHY` state.
+
+2. If the previous step succeeded then ECS services related to capabilities microservices are created, with these being the following:
+
+    - `bruin-bridge`
+    - `cts-bridge`
+    - `lit-bridge`
+    - `notifier`
+    - `prometheus`
+    - `t7-bridge`
+    - `velocloud-bridge` 
+
+    Once created, the script used for NATS is launched through `null_resource` to check that the task instances for each of these ECS services were created successfully and are in `RUNNING` and `HEALTHY` status.
+
+3. Once all the scripts for the capabilities microservices have finished successfully, ECS services for the use-cases microservices are all created, with these being the following:
+    
+    - `dispatch-portal-backend`
+	- `last-contact-report`
+	- `service-affecting-monitor`
+	- `service-outage-monitor-1`
+	- `service-outage-monitor-2`
+	- `service-outage-monitor-3`
+	- `service-outage-monitor-4`
+	- `service-outage-monitor-triage`
+	- `sites-monitor`
+
+   This is achieved by defining explicit dependencies between the ECS services for the capabilities microservices and the set of null resources that perform the healthcheck of the capabilities microservices.​
 
    The following is an example of a definition for the use-case microservice `service-affecting-monitor` using [*Terraform*](https://www.terraform.io/). Here, the dependency between the corresponding `null_resource` type resources in charge of performing the health check of the different capabilities microservices in Terraform code for this microservice is established.
 
@@ -130,15 +162,18 @@ Also, resources of type `null_resource` are created to execute some Python scrip
 
       . . .
 
-      depends_on = [ null_resource.bruin-bridge-healthcheck,
-                     null_resource.velocloud-bridge-healthcheck,
-                     null_resource.t7-bridge-healthcheck,
-                     null_resource.notifier-healthcheck,
-                     null_resource.metrics-prometheus-healthcheck ]
+        depends_on = [ null_resource.bruin-bridge-healthcheck,
+                       null_resource.cts-bridge-healthcheck,
+                       null_resource.lit-bridge-healthcheck,
+                       null_resource.velocloud-bridge-healthcheck,
+                       null_resource.t7-bridge-healthcheck,
+                       null_resource.notifier-healthcheck,
+                       null_resource.metrics-prometheus-healthcheck ]
+      . . .
    }
    ```
 
    >This procedure has been done to ensure that use case microservices are not created in ECS until new versions of the capability-type microservices are properly deployed, as use case microservices need to use capability-type microservices.
 
 ---
-With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2019
+With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020
