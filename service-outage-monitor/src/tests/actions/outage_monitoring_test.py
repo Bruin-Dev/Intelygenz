@@ -2244,6 +2244,10 @@ class TestServiceOutageMonitor:
             'ticketDetails': [outage_ticket_detail],
             'ticketNotes': outage_ticket_notes,
         }
+        resolve_outage_ticket_return = {
+                                        'body': "Success",
+                                        'status': 200
+                                       }
         outage_ticket_response_status = 200
 
         event_bus = Mock()
@@ -2266,7 +2270,7 @@ class TestServiceOutageMonitor:
             'body': outage_ticket_response_body, 'status': outage_ticket_response_status
         })
         outage_monitor._is_detail_resolved = Mock(return_value=True)
-        outage_monitor._resolve_outage_ticket = CoroutineMock()
+        outage_monitor._resolve_outage_ticket = CoroutineMock(return_value=resolve_outage_ticket_return)
         outage_monitor._append_autoresolve_note_to_ticket = CoroutineMock()
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
@@ -2275,6 +2279,120 @@ class TestServiceOutageMonitor:
                 await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
         outage_monitor._resolve_outage_ticket.assert_not_awaited()
+        outage_monitor._append_autoresolve_note_to_ticket.assert_not_awaited()
+        outage_monitor._notify_successful_autoresolve.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def run_ticket_autoresolve_with_resolve_outage_return_non_2xx_status_test(self):
+        serial_number = 'VC1234567'
+        client_id = 12345
+
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': serial_number},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': f'EVIL-CORP|{client_id}|',
+            'bruin_client_info': {
+                'client_id': client_id,
+                'client_name': 'METTEL/NEW YORK',
+            },
+        }
+
+        uuid_ = uuid()
+
+        last_down_events_response_body = [
+            {
+                'event': 'LINK_ALIVE',
+                'category': 'NETWORK',
+                'eventTime': '2019-07-30 07:38:00+00:00',
+                'message': 'GE2 alive'
+            }
+        ]
+        last_down_events_response_status = 200
+
+        outage_ticket_id = 12345
+        outage_ticket_detail_id = 2746937
+        outage_ticket_detail = {
+            "detailID": outage_ticket_detail_id,
+            "detailValue": serial_number,
+            "detailStatus": "I",
+        }
+        outage_ticket_notes = [
+            {
+                "noteId": 68246614,
+                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-02 10:18:16-05:00",
+            },
+            {
+                "noteId": 68246615,
+                "noteValue": "#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2021-01-03 10:18:16-05:00",
+            },
+        ]
+        outage_ticket_response_body = {
+            'ticketID': outage_ticket_id,
+            'ticketDetails': [outage_ticket_detail],
+            'ticketNotes': outage_ticket_notes,
+        }
+        outage_ticket_response_status = 200
+
+        resolve_outage_ticket_body = "Failure"
+        resolve_outage_ticket_status = 500
+        resolve_outage_ticket_return = {
+                                        'body': resolve_outage_ticket_body,
+                                        'status': resolve_outage_ticket_status
+                                       }
+        resolve_outage_slack_message = f"Error trying to autoresolve ticket {outage_ticket_id} for serial "\
+                                       f"{serial_number}.The error "\
+                                       f"was {resolve_outage_ticket_status}: {resolve_outage_ticket_body}"
+
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock()
+        scheduler = Mock()
+        logger = Mock()
+
+        outage_repository = Mock()
+        outage_repository.is_outage_ticket_auto_resolvable = Mock(return_value=True)
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config['environment'] = 'production'
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository)
+        outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._get_last_down_events_for_edge = CoroutineMock(return_value={
+            'body': last_down_events_response_body, 'status': last_down_events_response_status
+        })
+        outage_monitor._get_outage_ticket_for_edge = CoroutineMock(return_value={
+            'body': outage_ticket_response_body, 'status': outage_ticket_response_status
+        })
+        outage_monitor._is_detail_resolved = Mock(return_value=False)
+        outage_monitor._resolve_outage_ticket = CoroutineMock(return_value=resolve_outage_ticket_return)
+        outage_monitor._append_autoresolve_note_to_ticket = CoroutineMock()
+        outage_monitor._notify_successful_autoresolve = CoroutineMock()
+
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            with patch.object(outage_monitoring_module, 'uuid', return_value=uuid_):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+
+        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        outage_monitor._get_last_down_events_for_edge.assert_awaited_once_with(edge_full_id, down_events_since)
+
+        outage_monitor._get_outage_ticket_for_edge.assert_awaited_once_with(edge_status)
+        outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
+            outage_ticket_notes, max_autoresolves=3
+        )
+
+        outage_monitor._resolve_outage_ticket.assert_awaited_once_with(outage_ticket_id, outage_ticket_detail_id)
+        event_bus.rpc_request.assert_awaited_once_with(
+            "notification.slack.request",
+            {
+                'request_id': uuid_,
+                'message': resolve_outage_slack_message,
+            },
+            timeout=30,
+        )
         outage_monitor._append_autoresolve_note_to_ticket.assert_not_awaited()
         outage_monitor._notify_successful_autoresolve.assert_not_awaited()
 
@@ -2333,6 +2451,10 @@ class TestServiceOutageMonitor:
         }
         outage_ticket_response_status = 200
 
+        resolve_outage_ticket_return = {
+                                        'body': "Success",
+                                        'status': 200
+                                       }
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -2353,7 +2475,7 @@ class TestServiceOutageMonitor:
             'body': outage_ticket_response_body, 'status': outage_ticket_response_status
         })
         outage_monitor._is_detail_resolved = Mock(return_value=False)
-        outage_monitor._resolve_outage_ticket = CoroutineMock()
+        outage_monitor._resolve_outage_ticket = CoroutineMock(return_value=resolve_outage_ticket_return)
         outage_monitor._append_autoresolve_note_to_ticket = CoroutineMock()
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 

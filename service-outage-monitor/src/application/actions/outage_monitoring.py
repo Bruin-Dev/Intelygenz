@@ -534,7 +534,22 @@ class OutageMonitor:
 
         self._logger.info(f'Autoresolving ticket {outage_ticket_id} linked to edge {edge_identifier} '
                           f' with serial number {serial_number}...')
-        await self._resolve_outage_ticket(outage_ticket_id, detail_for_ticket_resolution['detailID'])
+
+        resolve_outage = await self._resolve_outage_ticket(outage_ticket_id, detail_for_ticket_resolution['detailID'])
+        resolve_outage_body = resolve_outage['body']
+        resolve_outage_status = resolve_outage['status']
+        if resolve_outage_status not in range(200, 300):
+            err_msg = (
+                f"Error trying to autoresolve ticket {outage_ticket_id} for serial "
+                f"{serial_number}.The error was {resolve_outage_status}: {resolve_outage_body}"
+            )
+
+            self._logger.error(err_msg)
+            slack_message = {'request_id': uuid(),
+                             'message': err_msg}
+            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+            return
+
         await self._append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
 
         bruin_client_id = edge_status['bruin_client_info']['client_id']
@@ -578,7 +593,9 @@ class OutageMonitor:
                 'detail_id': detail_id,
             }
         }
-        await self._event_bus.rpc_request("bruin.ticket.status.resolve", resolve_ticket_request, timeout=15)
+        resolve_outage = await self._event_bus.rpc_request("bruin.ticket.status.resolve",
+                                                           resolve_ticket_request, timeout=15)
+        return resolve_outage
 
     async def _append_autoresolve_note_to_ticket(self, ticket_id, serial_number):
         current_datetime = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
