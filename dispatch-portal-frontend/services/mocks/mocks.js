@@ -15,7 +15,7 @@ mockadapter.onGet(API_URLS.DISPATCH).reply(200, {
   vendor: 'lit',
   list_dispatch: [
     {
-      dispatch_number: 'DIS37263',
+      dispatch_number: 'DIS17918', // IMPORTANTE: debe coincidir con el primero de obtener todos(el get All), para que los test E2E funcionen correctamente
       date_of_dispatch: '2015-01-01',
       site_survey_quote_required: true,
       time_of_dispatch: null,
@@ -222,10 +222,10 @@ mockadapter.onPost(API_URLS.DISPATCH).reply(204, { id: 123 });
 
 mockadapter.onPost(API_URLS.UPLOAD_FILES).reply(204);
 
-mockadapter.onGet(new RegExp(`${API_URLS.DISPATCH}/*`)).reply(200, {
-  vendor: 'CTS',
+export const mockLitSingleDispatch = {
+  vendor: 'LIT',
   slaLevel: 3,
-  id: 'DIS17918',
+  id: 'DIS17918', // IMPORTANTE: debe coincidir con el del OBTENER DETALLE(el get), para que los test E2E funcionen correctamente
   status: 'completed',
   dispatch: {
     date_of_dispatch: '2016-11-16',
@@ -255,6 +255,9 @@ mockadapter.onGet(new RegExp(`${API_URLS.DISPATCH}/*`)).reply(200, {
     field_engineer_last_name: 'Jávega',
     field_engineer_contact_number: '+34633292080'
   }
-});
+};
+mockadapter
+  .onGet(new RegExp(`${API_URLS.DISPATCH}/*`))
+  .reply(200, mockLitSingleDispatch);
 
 export default axiosInstanceMocks;

@@ -1,4 +1,4 @@
-import config from '../../../fixtures/config';
+import dataE2e from '../../../fixtures/config';
 
 // Scenario: I login Unsuccessfull with invalid mail
 
@@ -14,7 +14,7 @@ Then('I receive a validation error', function() {
 });
 
 When('I introduce invalid fields', function() {
-  cy.get('input[name=email]').type(config.userEmail);
+  cy.get('input[name=email]').type(dataE2e.userEmail);
   cy.get('input[name=password]').type('01234');
 });
 // When => 'I click to submit'

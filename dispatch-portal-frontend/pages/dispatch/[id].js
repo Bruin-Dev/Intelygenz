@@ -52,25 +52,42 @@ function Dispatch({ authToken }) {
               </div>
 
               <p className="text-gray-700 text-sm">
-                <b>Vendor:</b> {data.vendor}
+                <b>Vendor:</b>{' '}
+                <span data-test-id="dispatch-detail-vendor">{data.vendor}</span>
               </p>
               <p className="text-gray-700 text-sm">
-                <b>SLA Level:</b> {data.slaLevel}
+                <b>SLA Level:</b>{' '}
+                <span data-test-id="dispatch-detail-slaLevel">
+                  {data.slaLevel}
+                </span>
               </p>
               <p className="text-gray-700 text-sm">
-                <b>Mettel Id:</b> {data.id}
+                <b>Mettel Id:</b>{' '}
+                <span data-test-id="dispatch-detail-id">{data.id}</span>
               </p>
               <p className="text-gray-700 text-sm">
-                <b>Date of dispatch:</b> {data.dateDispatch}
+                <b>Date of dispatch:</b>{' '}
+                <span data-test-id="dispatch-detail-dateDispatch">
+                  {data.dateDispatch}
+                </span>
               </p>
               <p className="text-gray-700 text-sm">
-                <b>Local time of dispatch:</b> {data.timeDispatch}
+                <b>Local time of dispatch:</b>{' '}
+                <span data-test-id="dispatch-detail-timeDispatch">
+                  {data.timeDispatch}
+                </span>
               </p>
               <p className="text-gray-700 text-sm">
-                <b>Time Zone Local:</b> {data.timeZone}
+                <b>Time Zone Local:</b>{' '}
+                <span data-test-id="dispatch-detail-timeZone">
+                  {data.timeZone}
+                </span>
               </p>
               <p className="text-gray-700 text-sm">
-                <b>Status:</b> <StatusButton status={data.status} />
+                <b>Status:</b>{' '}
+                <span data-test-id="dispatch-detail-status">
+                  <StatusButton status={data.status} />
+                </span>
               </p>
             </div>
           </div>
@@ -81,16 +98,28 @@ function Dispatch({ authToken }) {
                   Requester
                 </div>
                 <p className="text-gray-900 text-sm">
-                  Name: {data.requester.name}
+                  Name:{' '}
+                  <span data-test-id="dispatch-detail-requester-name">
+                    {data.requester.name}
+                  </span>
                 </p>
                 <p className="text-gray-900 text-sm">
-                  Email: {data.requester.email}
+                  Email:{' '}
+                  <span data-test-id="dispatch-detail-requester-email">
+                    {data.requester.email}
+                  </span>
                 </p>
                 <p className="text-gray-900 text-sm">
-                  Department: {data.requester.department}
+                  Department:{' '}
+                  <span data-test-id="dispatch-detail-requester-department">
+                    {data.requester.department}
+                  </span>
                 </p>
                 <p className="text-gray-900 text-sm">
-                  Phone number: {data.requester.phoneNumber}
+                  Phone number:{' '}
+                  <span data-test-id="dispatch-detail-requester-phoneNumber">
+                    {data.requester.phoneNumber}
+                  </span>
                 </p>
               </div>
 
@@ -98,22 +127,40 @@ function Dispatch({ authToken }) {
                 On-Site Contact
               </div>
               <p className="text-gray-900 text-sm">
-                Site: {data.onSiteContact.site}
+                Site:{' '}
+                <span data-test-id="dispatch-detail-onSiteContact-site">
+                  {data.onSiteContact.site}
+                </span>
               </p>
               <p className="text-gray-900 text-sm">
-                Street: {data.onSiteContact.street}
+                Street:{' '}
+                <span data-test-id="dispatch-detail-onSiteContact-street">
+                  {data.onSiteContact.street}
+                </span>
               </p>
               <p className="text-gray-900 text-sm">
-                City: {data.onSiteContact.city}
+                City:{' '}
+                <span data-test-id="dispatch-detail-onSiteContact-city">
+                  {data.onSiteContact.city}
+                </span>
               </p>
               <p className="text-gray-900 text-sm">
-                State: {data.onSiteContact.state}
+                State:{' '}
+                <span data-test-id="dispatch-detail-onSiteContact-state">
+                  {data.onSiteContact.state}
+                </span>
               </p>
               <p className="text-gray-900 text-sm">
-                Zip: {data.onSiteContact.zip}
+                Zip:{' '}
+                <span data-test-id="dispatch-detail-onSiteContact-zip">
+                  {data.onSiteContact.zip}
+                </span>
               </p>
               <p className="text-gray-900 text-sm">
-                Phone number: {data.onSiteContact.phoneNumber}
+                Phone number:{' '}
+                <span data-test-id="dispatch-detail-onSiteContact-phoneNumber">
+                  {data.onSiteContact.phoneNumber}
+                </span>
               </p>
             </div>
           </div>
@@ -125,26 +172,43 @@ function Dispatch({ authToken }) {
               </div>
 
               <p className="text-gray-900 text-sm">
-                Service type: {data.details.serviceType}
+                Service type:{' '}
+                <span data-test-id="dispatch-detail-details-serviceType">
+                  {data.details.serviceType}
+                </span>
               </p>
               <p className="text-gray-900 text-sm">
-                Instructions: {data.details.instructions}
+                Instructions:{' '}
+                <span data-test-id="dispatch-detail-details-instructions">
+                  {data.details.instructions}
+                </span>
               </p>
               <p className="text-gray-900 text-sm">
-                Information: {data.details.information}
+                Information:{' '}
+                <span data-test-id="dispatch-detail-details-information">
+                  {data.details.information}
+                </span>
               </p>
               <p className="text-gray-900 text-sm">
-                Materials: {data.details.materials}
+                Materials:{' '}
+                <span data-test-id="dispatch-detail-details-materials">
+                  {data.details.materials}
+                </span>
               </p>
 
               {data.vendor === config.VENDORS.CTS && (
                 <>
                   <p className="text-gray-900 text-sm">
-                    Field engineer: {data.details.fieldEngineer}
+                    Field engineer:{' '}
+                    <span data-test-id="dispatch-detail-details-fieldEngineer">
+                      {data.details.fieldEngineer}
+                    </span>
                   </p>
                   <p className="text-gray-900 text-sm">
                     Field engineer contact number:{' '}
-                    {data.details.fieldEngineerContactNumber}
+                    <span data-test-id="dispatch-detail-details-fieldEngineerContactNumber">
+                      {data.details.fieldEngineerContactNumber}
+                    </span>
                   </p>
                 </>
               )}

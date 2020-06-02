@@ -1,7 +1,10 @@
+import { mockLitSingleDispatch } from '../../services/mocks/mocks';
+
 export default {
   userEmail: 'mettel@mettel.com',
   userPassword: '1234',
   dispatch: {
+    // Data for create new dispatch
     date_of_dispatch: '2020-05-29',
     job_site: 'Jesus asjh',
     job_site_city: 'Las Rozas',
@@ -26,5 +29,8 @@ export default {
     time_zone: 'Eastern Time',
     vendor: 'LIT',
     id: '123'
+  },
+  getDispatch: {
+    ...mockLitSingleDispatch
   }
 };

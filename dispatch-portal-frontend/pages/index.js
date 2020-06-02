@@ -35,7 +35,11 @@ const columns = [
     selector: 'id',
     sortable: true,
     cell: row => (
-      <a className="link" href={`${Routes.DISPATCH()}/${row.id}`}>
+      <a
+        className="link"
+        data-test-id={`dispatchId-${row.id}-link`}
+        href={`${Routes.DISPATCH()}/${row.id}`}
+      >
         {row.id}
       </a>
     )

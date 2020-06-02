@@ -1,6 +1,7 @@
 {
   "projectId": "mettel2020",
   "video": false,
+  "viewportWidth": 1600,
   "baseUrl": "http://localhost:8081",
   "testFiles": "**/*.{feature, features}"
 }

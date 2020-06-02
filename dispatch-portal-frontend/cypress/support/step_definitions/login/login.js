@@ -1,4 +1,4 @@
-import config from '../../../fixtures/config';
+import dataE2e from '../../../fixtures/config';
 
 // Scenario: Opening app
 Given('I open app', function() {
@@ -16,8 +16,8 @@ Given('I navigate to login page', function() {
 });
 
 When('I introduce valid credentials', function() {
-  cy.get('input[name=email]').type(config.userEmail);
-  cy.get('input[name=password]').type(config.userPassword);
+  cy.get('input[name=email]').type(dataE2e.userEmail);
+  cy.get('input[name=password]').type(dataE2e.userPassword);
 });
 
 When('I click to submit', function() {
