@@ -5,65 +5,62 @@ import DataTable from 'react-data-table-component';
 import { dispatchService } from '../services/dispatch/dispatch.service';
 import { privateRoute } from '../components/privateRoute/PrivateRoute';
 import Menu from '../components/menu/Menu';
-import Loading from '../components/loading/Loading';
+import { StatusButton } from '../ui/components/status/StatusButton';
 import { Routes } from '../config/routes';
 import { config } from '../config/config';
+import './index.scss';
 
 const columns = [
   {
     name: ' ',
     selector: 'color',
-    sortable: true,
     cell: row => (
       <span
-        className={row.vendor === config.VENDORS.CTS ? 'cts-row' : 'lit-row'}
+        className={
+          row.vendor.toUpperCase() === config.VENDORS.CTS
+            ? 'cts-row'
+            : 'lit-row'
+        }
       />
     )
   },
   {
     name: 'System',
     selector: 'vendor',
-    sortable: true
+    sortable: true,
+    cell: row => <span>{row.vendor.toUpperCase()}</span>
   },
   {
     name: 'Dispatch ID',
-    selector: 'dispatch_number',
+    selector: 'id',
     sortable: true,
     cell: row => (
-      <a className="link" href={`${Routes.DISPATCH()}/${row.dispatch_number}`}>
-        {row.dispatch_number}
+      <a className="link" href={`${Routes.DISPATCH()}/${row.id}`}>
+        {row.id}
       </a>
     )
   },
   {
     name: 'Customer/Location',
-    selector: 'customerLocation',
-    sortable: true,
     cell: row => (
-      <span>{`${row.job_site_street} ${row.job_site_city} ${row.job_site_state} ${row.job_site_zip_code}`}</span>
+      <span>{`${row.onSiteContact.street} ${row.onSiteContact.city} ${row.onSiteContact.state} ${row.onSiteContact.zip}`}</span>
     )
   },
   {
     name: 'Bruin Ticket ID',
-    selector: 'mettel_bruin_ticket_id',
+    selector: 'mettelId',
     sortable: true
   },
   {
     name: 'Time Scheduled',
-    selector: 'date_of_dispatch',
+    selector: 'dateDispatch',
     sortable: true
   },
   {
     name: 'Dispatch Status',
     selector: 'dispatch_status',
     sortable: true,
-    cell: (
-      row // Todo: review status states
-    ) => (
-      <button type="button" className={row.dispatch_status.replace(' ', '_')}>
-        {row.dispatch_status}
-      </button>
-    )
+    cell: row => <StatusButton status={row.status} />
   }
 ];
 
@@ -99,7 +96,6 @@ function Index({ authToken }) {
           Create new dispatch
         </button>
       </Link>
-      {isLoading && <Loading />}
 
       {apiError && <p>Error!</p>}
 
@@ -109,6 +105,7 @@ function Index({ authToken }) {
         data={data}
         fixedHeader
         pagination
+        progressPending={isLoading}
         className="dataTable"
       />
     </div>

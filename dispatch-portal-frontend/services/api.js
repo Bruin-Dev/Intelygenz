@@ -1,17 +1,8 @@
 import axios from 'axios';
 import { config } from '../config/config';
+import { baseConfig } from './api.config';
+import axiosInstanceMocks from './mocks/mocks';
 
-export const API_URLS = {
-  LOGIN: '/login',
-  DISPATCH: '/lit/dispatch',
-  UPLOAD_FILES: '/upload'
-};
+const axiosInstance = axios.create(baseConfig);
 
-export const baseConfig = {
-  baseURL: config.baseApi,
-  headers: {
-    'Content-Type': 'application/json;charset=utf-8'
-  }
-};
-
-export const axiosInstance = axios.create(baseConfig);
+export default config.mocks ? axiosInstanceMocks : axiosInstance;

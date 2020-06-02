@@ -2,36 +2,45 @@ const withSass = require('@zeit/next-sass');
 const tailwindCss = require('tailwindcss');
 
 const ENVIRONMENTS = {
-  DEV: 'DEV',
-  TEST: 'TEST',
+  LOCAL: 'LOCAL',
+  TEST_E2E: 'TEST_E2E',
   PRO: 'PRO'
 };
 
-const currentEnv = process.env.CURRENT_ENV || ENVIRONMENTS.DEV;
-
-console.log(currentEnv);
+const currentEnv = process.env.CURRENT_ENV || ENVIRONMENTS.LOCAL; // default dev, for local development
 
 const env = (() => {
   switch (currentEnv) {
-    case ENVIRONMENTS.DEV || ENVIRONMENTS.TEST:
+    case ENVIRONMENTS.LOCAL:
       return {
         BASE_API: 'http://127.0.0.1:8080/dispatch_portal/api',
-        BASE_PATH: '/'
+        BASE_PATH: '/',
+        ENVIRONMENT: ENVIRONMENTS.LOCAL,
+        MOCKS: true
+      };
+    case ENVIRONMENTS.TEST_E2E:
+      return {
+        BASE_API: '/dispatch_portal/api',
+        BASE_PATH: '/dispatch_portal/',
+        ENVIRONMENT: ENVIRONMENTS.TEST_E2E,
+        MOCKS: true
       };
     case ENVIRONMENTS.PRO:
       return {
         BASE_API: `${process.env.DNS_ENVIRONMENT}/dispatch_portal/api`,
-        BASE_PATH: '/dispatch_portal/'
+        BASE_PATH: '/dispatch_portal/',
+        ENVIRONMENT: ENVIRONMENTS.PRO,
+        MOCKS: false
       };
     default:
       return {
         BASE_API: 'BASE_API:not SET',
-        BASE_PATH: 'BASE_PATH:not SET'
+        BASE_PATH: 'BASE_PATH:not SET',
+        ENVIRONMENT: 'ENVIRONMENT:not SET',
+        MOCKS: 'MOCKS:not SET'
       };
   }
 })();
-
-console.log(env);
 
 module.exports = withSass({
   webpack(config) {

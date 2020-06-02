@@ -1,5 +1,7 @@
-//     colours
+//===== COLORS
 $metTel-primary: rgb(9, 35, 64);
+$vendor-1: #FF8800;
+$vendor-2: #aa66cc;
 
 $white: #FFFFFF;
 $success: #28a745;
@@ -7,8 +9,6 @@ $warning: #FF8800;
 $danger: #e34c26;
 
 $blue: #1f78d1;
-$cts-row: #aa66cc;
-$lit-row: #FF8800;
 
 $bg-general: #ccc;
 $bg-asideMenu: #ccc;
@@ -21,7 +21,7 @@ $bg-in_progress: #FF8800;
 $bg-completed: #28a745;
 
 
-//=====ESTADOS
+//===== STATES
 
 
 .danger{
@@ -45,7 +45,7 @@ $bg-completed: #28a745;
   cursor: not-allowed;
 }
 
-//=====TRANSICIONES
+//===== TRANSITIONS
 .trans {
   -webkit-transition:   all 0.3s ease-in-out;
   -moz-transition:      all 0.3s ease-in-out;

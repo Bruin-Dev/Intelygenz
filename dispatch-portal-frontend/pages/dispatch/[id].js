@@ -7,6 +7,7 @@ import Menu from '../../components/menu/Menu';
 import Loading from '../../components/loading/Loading';
 import { config } from '../../config/config';
 import './id.scss';
+import { StatusButton } from '../../ui/components/status/StatusButton';
 
 function Dispatch({ authToken }) {
   const router = useRouter();
@@ -18,6 +19,7 @@ function Dispatch({ authToken }) {
   useEffect(() => {
     async function getInfoDispatch() {
       const response = await dispatchService.get(id);
+      console.log(response);
 
       if (response && !response.error) {
         setData(response);
@@ -27,10 +29,18 @@ function Dispatch({ authToken }) {
     getInfoDispatch();
   }, [id]);
 
+  if (isLoading) {
+    return (
+      <div>
+        <Menu authToken={authToken} />
+        {isLoading && <Loading />}
+      </div>
+    );
+  }
+
   return (
     <div>
       <Menu authToken={authToken} />
-      {isLoading && <Loading />}
       {!data ? (
         <p>Not found dispatch</p>
       ) : (
@@ -48,7 +58,10 @@ function Dispatch({ authToken }) {
                 <b>SLA Level:</b> {data.slaLevel}
               </p>
               <p className="text-gray-700 text-sm">
-                <b>Mettel Id:</b> {data.mettelId}
+                <b>Mettel Id:</b> {data.id}
+              </p>
+              <p className="text-gray-700 text-sm">
+                <b>Date of dispatch:</b> {data.dateDispatch}
               </p>
               <p className="text-gray-700 text-sm">
                 <b>Local time of dispatch:</b> {data.timeDispatch}
@@ -57,12 +70,7 @@ function Dispatch({ authToken }) {
                 <b>Time Zone Local:</b> {data.timeZone}
               </p>
               <p className="text-gray-700 text-sm">
-                <b>Status:</b>{' '}
-                <button type="button" className={data.status}>
-                  {' '}
-                  {/* Todo: repair status button */}
-                  {data.status}
-                </button>
+                <b>Status:</b> <StatusButton status={data.status} />
               </p>
             </div>
           </div>
@@ -126,10 +134,7 @@ function Dispatch({ authToken }) {
                 Information: {data.details.information}
               </p>
               <p className="text-gray-900 text-sm">
-                Special Materials: {data.details.specialMaterials}
-              </p>
-              <p className="text-gray-900 text-sm">
-                Sercive type: {data.details.serviceType}
+                Materials: {data.details.materials}
               </p>
 
               {data.vendor === config.VENDORS.CTS && (

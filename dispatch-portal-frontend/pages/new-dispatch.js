@@ -7,95 +7,15 @@ import Menu from '../components/menu/Menu';
 import Loading from '../components/loading/Loading';
 import { dispatchService } from '../services/dispatch/dispatch.service';
 import { Routes } from '../config/routes';
-import { states } from '../config/constants/states';
+import { states } from '../config/constants/states.constants';
+import {
+  timeOptions,
+  vendorsOptions,
+  timeZoneOptions,
+  departmentOptions,
+  serviceTypesOptions
+} from '../config/constants/dispatch.constants';
 import './new-dispatch.scss';
-import { config } from '../config/config';
-
-// Todo: refactor constant
-const timeZoneOptions = [
-  'Eastern Time',
-  'Pacific Time',
-  'Mountain Time',
-  'Central Time',
-  'Hawaii Time',
-  'Alaska Time'
-];
-
-const departmentOptions = [
-  'Customer Care',
-  'DSL',
-  'T1 Repair',
-  'POTs Repair',
-  'Provisioning',
-  'Advanced Services Engineering',
-  'Wireless',
-  'Holmdel Network Engineering',
-  'Advanced Services Implementations',
-  'Other'
-];
-
-const slaOptions = ['Pre-Planned', 'Next Business Day', '4-Hour'];
-const vendorsOptions = [
-  // Todo: review
-  { name: config.VENDORS.LIT, value: config.VENDORS.LIT },
-  { name: config.VENDORS.CTS, value: config.VENDORS.CTS }
-];
-const serviceTypesOptions = [
-  { name: 'Troubleshoot', value: 'troubleshoot' },
-  { name: 'Part Replacement', value: 'replacement' },
-  { name: 'Cable Run', value: 'cable' }
-];
-
-const timeOptions = [
-  `12.00AM`,
-  `12.30AM`,
-  `1.00AM`,
-  `1.30AM`,
-  `2.00AM`,
-  `2.30AM`,
-  `3.00AM`,
-  `3.30AM`,
-  `4.00AM`,
-  `4.30AM`,
-  `5.00AM`,
-  `5.30AM`,
-  `6.00AM`,
-  `6.30AM`,
-  `7.00AM`,
-  `7.30AM`,
-  `8.00AM`,
-  `8.30AM`,
-  `9.00AM`,
-  `9.30AM`,
-  `10.00AM`,
-  `10.30AM`,
-  `11.00AM`,
-  `11.30AM`,
-  `12.00PM`,
-  `12.30PM`,
-  `1.00PM`,
-  `1.30PM`,
-  `2.00PM`,
-  `2.30PM`,
-  `3.00PM`,
-  `3.30PM`,
-  `4.00PM`,
-  `4.30PM`,
-  `5.00PM`,
-  `5.30PM`,
-  `6.00PM`,
-  `6.30PM`,
-  `7.00PM`,
-  `7.30PM`,
-  `8.00PM`,
-  `8.30PM`,
-  `9.00PM`,
-  `9.30PM`,
-  `10.00PM`,
-  `10.30PM`,
-  `11.00PM`,
-  `11.30PM`
-];
 
 function NewDispatch({ authToken }) {
   const router = useRouter();
@@ -609,7 +529,7 @@ function NewDispatch({ authToken }) {
                     type="text"
                     name="lastName"
                     id="lastName"
-                    ref={register({ required: true, maxLength: 6 })}
+                    ref={register({ required: true, maxLength: 10 })}
                     placeholder="MacLow"
                   />
                   {errors.lastName && (
@@ -617,7 +537,7 @@ function NewDispatch({ authToken }) {
                       {errors.lastName?.type === 'required' &&
                         'This field is required'}
                       {errors.lastName?.type === 'maxLength' &&
-                        'This input exceeds the maximum length of 6 characters'}
+                        'This input exceeds the maximum length of 10 characters'}
                     </p>
                   )}
                 </label>
@@ -662,16 +582,23 @@ function NewDispatch({ authToken }) {
                           ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
                           : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
                       }
-                      type="email"
+                      type="text"
                       name="email"
                       id="email"
-                      ref={register({ required: true })}
+                      ref={register({
+                        required: true,
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                          message: 'Incorrect format: example@example.com'
+                        }
+                      })}
                       placeholder="example@example.com"
                     />
-                    {/* Todo: add regex validation */}
                     {errors.email && (
                       <p className="text-red-500 text-xs italic">
-                        This field is required
+                        {errors.email?.type === 'required' &&
+                          'This field is required'}
+                        {errors.email.message}
                       </p>
                     )}
                   </label>
@@ -866,15 +793,14 @@ function NewDispatch({ authToken }) {
                     name="lastNameRequester"
                     id="lastNameRequester"
                     placeholder="Kidman"
-                    ref={register({ required: true, maxLength: 6 })}
+                    ref={register({ required: true, maxLength: 10 })}
                   />
                   {errors.lastNameRequester && (
                     <p className="text-red-500 text-xs italic">
                       {errors.lastNameRequester?.type === 'required' &&
                         'This field is required'}
                       {errors.lastNameRequester?.type === 'maxLength' &&
-                        'This input exceeds the maximum length of 6 characters'}{' '}
-                      {/* Todo: errors array */}
+                        'This input exceeds the maximum length of 10 characters'}{' '}
                     </p>
                   )}
                 </label>
@@ -965,16 +891,23 @@ function NewDispatch({ authToken }) {
                         ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
                         : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
                     }
-                    type="email"
+                    type="text"
                     name="emailRequester"
                     id="emailRequester"
-                    ref={register({ required: true })}
+                    ref={register({
+                      required: true,
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                        message: 'Incorrect format: example@example.com'
+                      }
+                    })}
                     placeholder="example@example.com"
                   />
-                  {/* Todo: add regex validation */}
                   {errors.emailRequester && (
                     <p className="text-red-500 text-xs italic">
-                      This field is required
+                      {errors.emailRequester?.type === 'required' &&
+                        'This field is required'}
+                      {errors.emailRequester.message}
                     </p>
                   )}
                 </label>
