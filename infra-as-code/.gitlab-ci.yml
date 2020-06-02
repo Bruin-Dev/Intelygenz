@@ -242,6 +242,7 @@ destroy-branches:
       when: never
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
       when: manual
+      allow_failure: true
 
 destroy-branches-aws-nuke:
   stage: deploy
@@ -254,6 +255,7 @@ destroy-branches-aws-nuke:
       when: never
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
       when: manual
+      allow_failure: true
 
 destroy-master:
   stage: deploy
@@ -271,3 +273,4 @@ destroy-master:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       when: manual
+      allow_failure: true

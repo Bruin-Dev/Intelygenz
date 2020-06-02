@@ -9,6 +9,9 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
+    - apk add --update-cache --upgrade curl
+    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-v${ECS_CLI_VERSION}
+    - chmod +x /usr/local/bin/ecs-cli
     - export ENVIRONMENT_VAR=${TF_VAR_ENVIRONMENT}
     - export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS=${VELOCLOUD_HOST_1}
     - export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS_FILTER=${VELOCLOUD_HOST_1_FILTER}
@@ -27,6 +30,7 @@
     - terraform init infra-as-code/dev
     - terraform refresh infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
+    - python3 ci-utils/delete_environments_aws_resources/main.py -e ${TF_VAR_ENVIRONMENT} -z -b
   tags:
     - kubernetes
 
