@@ -697,7 +697,7 @@ class BruinClient:
                 return_response["status"] = 500
                 raise Exception(return_response)
 
-            if response.status_code in range(200, 299):
+            if response.status_code in range(200, 300):
                 return_response["body"] = response.json()
                 return_response["status"] = response.status_code
                 self._logger.info(f'Got ticket task history for : {filters}')
@@ -710,13 +710,13 @@ class BruinClient:
             if response.status_code == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying get ticket current task")
                 self.login()
-                return_response["body"] = f"Maximum retries while relogin"
+                return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
 
             if response.status_code in range(500, 513):
                 self._logger.error(f"Got {response.status_code}. Retrying...")
-                return_response["body"] = f"Got internal error from Bruin"
+                return_response["body"] = "Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
 

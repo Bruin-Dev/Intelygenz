@@ -1742,126 +1742,53 @@ class TestBruinRepository:
         bruin_client.post_multiple_ticket_notes.assert_called_once_with(ticket_id, payload)
         assert result == repository_response
 
-    def post_multiple_ticket_notes_with_all_conditions_met_test(self):
-        ticket_id = 12345
-        notes = [
-            {
-                'text': 'Test note 1',
-                'service_number': 'VC1234567',
-            },
-            {
-                'text': 'Test note 2',
-                'detail_id': 999,
-            },
-            {
-                'text': 'Test note 3',
-                'service_number': 'VC99999999',
-                'detail_id': 888,
-            },
-        ]
+    def get_ticket_task_history_ok_test(self):
 
-        payload = {
-            "notes": [
-                {
-                    'noteType': 'ADN',
-                    'noteValue': 'Test note 1',
-                    'serviceNumber': 'VC1234567',
-                },
-                {
-                    'noteType': 'ADN',
-                    'noteValue': 'Test note 2',
-                    'detailId': 999,
-                },
-                {
-                    'noteType': 'ADN',
-                    'noteValue': 'Test note 3',
-                    'serviceNumber': 'VC99999999',
-                    'detailId': 888,
-                },
-            ],
-        }
+        ticket_id = 4503440
 
-        note_1_from_client_response = {
-          "noteID": 70646090,
-          "noteType": "ADN",
-          "noteValue": "Test note 1",
-          "actionID": None,
-          "detailID": 5002307,
-          "enteredBy": 442301,
-          "enteredDate": "2020-05-20T06:00:38.803-04:00",
-          "lastViewedBy": None,
-          "lastViewedDate": None,
-          "refNoteID": None,
-          "noteStatus": None,
-          "noteText": None,
-          "childNotes": None,
-          "documents": None,
-          "alerts": None,
-          "taggedUserDirIDs": None,
-        }
-        note_2_from_client_response = {
-            "noteID": 70646091,
-            "noteType": "ADN",
-            "noteValue": "Test note 2",
-            "actionID": None,
-            "detailID": 999,
-            "enteredBy": 442301,
-            "enteredDate": "2020-05-20T06:00:38.803-04:00",
-            "lastViewedBy": None,
-            "lastViewedDate": None,
-            "refNoteID": None,
-            "noteStatus": None,
-            "noteText": None,
-            "childNotes": None,
-            "documents": None,
-            "alerts": None,
-            "taggedUserDirIDs": None,
-        }
-        note_3_from_client_response = {
-            "noteID": 70646091,
-            "noteType": "ADN",
-            "noteValue": "Test note 3",
-            "actionID": None,
-            "detailID": 888,
-            "enteredBy": 442301,
-            "enteredDate": "2020-05-20T06:00:38.803-04:00",
-            "lastViewedBy": None,
-            "lastViewedDate": None,
-            "refNoteID": None,
-            "noteStatus": None,
-            "noteText": None,
-            "childNotes": None,
-            "documents": None,
-            "alerts": None,
-            "taggedUserDirIDs": None,
-        }
+        results = ['List of task history']
+        return_body = {'result': results}
+        return_status = 200
+
         client_response = {
-            "body": {
-                "ticketNotes": [
-                    note_1_from_client_response,
-                    note_2_from_client_response,
-                    note_3_from_client_response,
-                ],
-            },
-            "status": 200,
-        }
-        repository_response = {
-            "body": [
-                note_1_from_client_response,
-                note_2_from_client_response,
-                note_3_from_client_response,
-            ],
-            "status": 200,
+            "body": return_body,
+            "status": return_status
         }
 
         logger = Mock()
 
         bruin_client = Mock()
-        bruin_client.post_multiple_ticket_notes = Mock(return_value=client_response)
+        bruin_client.get_ticket_task_history = Mock(return_value=client_response)
 
+        filter = {'ticket_id': ticket_id}
         bruin_repository = BruinRepository(logger, bruin_client)
 
-        result = bruin_repository.post_multiple_ticket_notes(ticket_id, notes)
+        result = bruin_repository.get_ticket_task_history(filter)
 
-        bruin_client.post_multiple_ticket_notes.assert_called_once_with(ticket_id, payload)
-        assert result == repository_response
+        bruin_client.get_ticket_task_history.assert_called_once_with(filter)
+        assert result == {"body": results, "status": return_status}
+
+    def get_ticket_task_history_ko_non_2xx_return_test(self):
+
+        ticket_id = 4503440
+
+        return_body = 'Failed'
+        return_status = 400
+
+        client_response = {
+            "body": return_body,
+            "status": return_status
+        }
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_ticket_task_history = Mock(return_value=client_response)
+
+        filter = {'ticket_id': ticket_id}
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = bruin_repository.get_ticket_task_history(filter)
+
+        bruin_client.get_ticket_task_history.assert_called_once_with(filter)
+        assert result == {"body": return_body, "status": return_status}

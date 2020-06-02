@@ -2195,3 +2195,155 @@ class TestPostMultipleTicketNotes:
             "status": bruin_response_status_code,
         }
         assert result == expected
+
+    def get_ticket_task_history_2xx_response_test(self):
+        ticket_id = 12345
+        filter = {'ticket_id': ticket_id}
+
+        results = ['List of task history']
+        bruin_response_body = {'result': results}
+        bruin_response_status_code = 200
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=bruin_response):
+            result = bruin_client.get_ticket_task_history(filter)
+
+            bruin_client_module.requests.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/AITicketData?ticketId={filter["ticket_id"]}',
+                headers=bruin_client._get_request_headers(),
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def get_ticket_task_history_400_response_test(self):
+        ticket_id = 12345
+        filter = {'ticket_id': ticket_id}
+
+        bruin_response_body = {'result': 'Failure'}
+        bruin_response_status_code = 400
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=bruin_response):
+            result = bruin_client.get_ticket_task_history(filter)
+
+            bruin_client_module.requests.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/AITicketData?ticketId={filter["ticket_id"]}',
+                headers=bruin_client._get_request_headers(),
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def get_ticket_task_history_401_response_test(self):
+        ticket_id = 12345
+        filter = {'ticket_id': ticket_id}
+
+        bruin_response_body = f"Maximum retries while relogin"
+        bruin_response_status_code = 401
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=bruin_response):
+            result = bruin_client.get_ticket_task_history(filter)
+
+            bruin_client_module.requests.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/AITicketData?ticketId={filter["ticket_id"]}',
+                headers=bruin_client._get_request_headers(),
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def get_ticket_task_history_5xx_response_test(self):
+        ticket_id = 12345
+        filter = {'ticket_id': ticket_id}
+
+        bruin_response_body = "Got internal error from Bruin"
+        bruin_response_status_code = 500
+
+        bruin_response = Mock()
+        bruin_response.status_code = bruin_response_status_code
+        bruin_response.json = Mock(return_value=bruin_response_body)
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        with patch.object(bruin_client_module.requests, 'get', return_value=bruin_response):
+            result = bruin_client.get_ticket_task_history(filter)
+
+            bruin_client_module.requests.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/AITicketData?ticketId={filter["ticket_id"]}',
+                headers=bruin_client._get_request_headers(),
+                verify=False
+            )
+
+        expected = {
+            "body": bruin_response_body,
+            "status": bruin_response_status_code,
+        }
+        assert result == expected
+
+    def get_ticket_task_history_connection_error_test(self):
+        ticket_id = 12345
+        filter = {'ticket_id': ticket_id}
+
+        bruin_response_status_code = 500
+
+        logger = Mock()
+
+        bruin_client = BruinClient(logger, config)
+        bruin_client._bearer_token = "Someverysecretaccesstoken"
+
+        error_message = 'Failed'
+        with patch.object(bruin_client_module.requests, 'get', side_effect=ConnectionError(error_message)):
+            result = bruin_client.get_ticket_task_history(filter)
+
+            bruin_client_module.requests.get.assert_called_with(
+                f'{config.BRUIN_CONFIG["base_url"]}/api/Ticket/AITicketData?ticketId={filter["ticket_id"]}',
+                headers=bruin_client._get_request_headers(),
+                verify=False
+            )
+
+        expected = {
+            "body": f"Connection error in Bruin API. {error_message}",
+            "status": bruin_response_status_code,
+        }
+        assert result == expected

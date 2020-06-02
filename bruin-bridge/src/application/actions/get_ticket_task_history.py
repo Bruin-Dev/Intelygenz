@@ -16,22 +16,22 @@ class GetTicketTaskHistory:
             'body': None,
             'status': None
         }
-        if "filters" not in msg.keys():
+        if "body" not in msg.keys():
             self._logger.error(f'Cannot get ticket task history using {json.dumps(msg)}. '
                                f'JSON malformed')
             response["status"] = 400
             response["body"] = 'You must specify ' \
-                               '{.."filter":{"ticket_id"}...} in the request'
+                               '{.."body":{"ticket_id"}...} in the request'
             await self._event_bus.publish_message(response_topic, response)
             return
 
-        filters = msg['filters']
+        filters = msg['body']
 
         if "ticket_id" not in filters.keys():
             self._logger.info(f'Cannot get get ticket task history using {json.dumps(filters)}. '
                               f'Need "ticket_id"')
             response["status"] = 400
-            response["body"] = 'You must specify "ticket_id" in the filter'
+            response["body"] = 'You must specify "ticket_id" in the body'
             await self._event_bus.publish_message(response_topic, response)
             return
 
