@@ -24,9 +24,9 @@ class T7Client:
         def get_prediction():
             self._logger.info(f'Getting prediction for ticket id: {ticket_id}')
 
-            response = requests.get(f"{self._config.T7CONFIG['base_url']}api/v1/suggestions?ticketId={ticket_id}",
+            response = requests.get(f"{self._config.T7CONFIG['base_url']}/api/v1/suggestions?ticketId={ticket_id}",
                                     headers=self._get_request_headers(),
-                                    verify=False)
+                                    verify=True)
 
             if response.status_code in range(200, 300):
                 return response.json()['assets']

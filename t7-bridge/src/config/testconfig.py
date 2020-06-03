@@ -27,7 +27,7 @@ LOG_CONFIG = {
 
 
 T7CONFIG = {
-    'base_url': 'http://test-url.com/',
+    'base_url': 'http://test-url.com',
     'client_name': 'test-name',
     'version': '1.0.0',
     'auth-token': 'test-token'
