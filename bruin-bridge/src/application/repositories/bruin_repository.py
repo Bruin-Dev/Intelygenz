@@ -12,9 +12,8 @@ class BruinRepository:
         response['body'] = []
         response['status'] = 200
 
-        full_params = params.copy()
         futures = [
-            self._get_tickets_by_status(status, full_params, response)
+            self._get_tickets_by_status(status, params.copy(), response)
             for status in ticket_status
         ]
         try:
