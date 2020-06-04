@@ -224,5 +224,7 @@ class TestTicketRepository:
             '#*Automation Engine*#',
             'TNBA',
             '',
-            f'The ticket next best action should be Holmdel NOC Investigate'
+            'The next best action for this ticket is: Holmdel NOC Investigate.',
+            '',
+            'TNBA is based on AI model designed specifically for MetTel.',
         ])

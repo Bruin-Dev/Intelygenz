@@ -56,6 +56,8 @@ class TicketRepository:
             '#*Automation Engine*#',
             'TNBA',
             '',
-            f'The ticket next best action should be {prediction["name"]}'
+            f'The next best action for this ticket is: {prediction["name"]}.',
+            '',
+            'TNBA is based on AI model designed specifically for MetTel.',
         ]
         return os.linesep.join(note_lines)
