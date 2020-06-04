@@ -284,12 +284,17 @@ class TestLitDispatchMonitor:
             'status': 400
         }
 
+        send_error_sms_to_slack_response = f'An error occurred when sending Confirmed SMS with notifier client. ' \
+                                           f'payload: {sms_payload}'
+
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
+        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
 
         response = await lit_dispatch_monitor._send_confirmed_sms(dispatch_number, ticket_id, dispatch, sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
+        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(send_error_sms_to_slack_response)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, lit_dispatch_monitor, dispatch_confirmed, dispatch_confirmed_2,

@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 from time import perf_counter
 from collections import defaultdict
+from shortuuid import uuid
 
 
 from apscheduler.util import undefined
@@ -10,11 +11,12 @@ from pytz import timezone
 from application.repositories.utils_repository import UtilsRepository
 from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_note
 from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_sms_note
+from application.repositories.lit_repository import LitRepository
+from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms
+from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_24_hours_before_sms
+from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_2_hours_before_sms
 from application.templates.lit.lit_tech_on_site import lit_get_tech_on_site_note
 from application.templates.lit.lit_repair_completed import lit_get_repair_completed_note
-from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms
-
-from application.repositories.lit_repository import LitRepository
 
 
 class LitDispatchMonitor:
@@ -180,8 +182,7 @@ class LitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'phone_number': sms_to
+            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local')
         }
 
         sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
@@ -198,15 +199,15 @@ class LitDispatchMonitor:
             self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - SMS NOT sent")
-            # TODO: notify slack
-            # retry o wait until next time?
+            err_msg = f'An error occurred when sending Confirmed SMS with notifier client. ' \
+                      f'payload: {sms_payload}'
+            await self._notifications_repository.send_to_slack(err_msg)
             return False
         self._logger.info(
             f"SMS sent Response {sms_response_body}")
         return True
 
     async def _send_tech_24_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
-        raise Exception("TODO: _send_tech_24_sms")
         if sms_to is None:
             return False
 
@@ -218,7 +219,7 @@ class LitDispatchMonitor:
             'phone_number': sms_to
         }
 
-        sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
+        sms_data = lit_get_tech_24_hours_before_sms(sms_data_payload)
 
         sms_payload = {
             'sms_to': sms_to,
@@ -232,15 +233,15 @@ class LitDispatchMonitor:
             self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - SMS NOT sent")
-            # TODO: notify slack
-            # retry o wait until next time?
+            err_msg = f'An error occurred when sending a tech 24 hours SMS with notifier client. ' \
+                      f'payload: {sms_payload}'
+            await self._notifications_repository.send_to_slack(err_msg)
             return False
         self._logger.info(
             f"SMS sent Response {sms_response_body}")
         return True
 
     async def _send_tech_2_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
-        raise Exception("TODO: _send_tech_2_sms")
         if sms_to is None:
             return False
 
@@ -252,7 +253,7 @@ class LitDispatchMonitor:
             'phone_number': sms_to
         }
 
-        sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
+        sms_data = lit_get_tech_2_hours_before_sms(sms_data_payload)
 
         sms_payload = {
             'sms_to': sms_to,
@@ -266,8 +267,9 @@ class LitDispatchMonitor:
             self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - SMS NOT sent")
-            # TODO: notify slack
-            # retry o wait until next time?
+            err_msg = f'An error occurred when sending a tech 2 S hours SMS with notifier client. ' \
+                      f'payload: {sms_payload}'
+            await self._notifications_repository.send_to_slack(err_msg)
             return False
         self._logger.info(
             f"SMS sent Response {sms_response_body}")
@@ -293,7 +295,9 @@ class LitDispatchMonitor:
             self._logger.info(f"Note: `{note}` "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - Not appended")
-            # TODO: notify slack
+            err_msg = f'An error occurred when appending a confirmed note with bruin client. ' \
+                      f'Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - payload: {note_data}'
+            await self._notifications_repository.send_to_slack(err_msg)
             return False
         self._logger.info(f"Note: `{note}` "
                           f"Dispatch: {dispatch_number} "
@@ -315,6 +319,8 @@ class LitDispatchMonitor:
             self._logger.info(f"Note: `{sms_note}` "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - SMS note not appended")
+            err_msg = f"Note: `{sms_note}` Dispatch: {dispatch_number} Ticket_id: {ticket_id} - SMS note not appended"
+            await self._notifications_repository.send_to_slack(err_msg)
             return False
         self._logger.info(f"Note: `{sms_note}` "
                           f"Dispatch: {dispatch_number} "
@@ -336,7 +342,10 @@ class LitDispatchMonitor:
         if append_sms_note_response_status not in range(200, 300):
             self._logger.info(f"Note: `{sms_note}` "
                               f"Dispatch: {dispatch_number} "
-                              f"Ticket_id: {ticket_id} - SMS note not appended")
+                              f"Ticket_id: {ticket_id} - SMS tech 24 hours note not appended")
+            err_msg = f"Note: `{sms_note}` Dispatch: {dispatch_number} Ticket_id: {ticket_id} " \
+                      f"- SMS tech 24 hours note not appended"
+            await self._notifications_repository.send_to_slack(err_msg)
             return False
         self._logger.info(f"Note: `{sms_note}` "
                           f"Dispatch: {dispatch_number} "
@@ -358,7 +367,10 @@ class LitDispatchMonitor:
         if append_sms_note_response_status not in range(200, 300):
             self._logger.info(f"Note: `{sms_note}` "
                               f"Dispatch: {dispatch_number} "
-                              f"Ticket_id: {ticket_id} - SMS note not appended")
+                              f"Ticket_id: {ticket_id} - SMS tech 2 hours note not appended")
+            err_msg = f"Note: `{sms_note}` Dispatch: {dispatch_number} Ticket_id: {ticket_id} " \
+                      f"- SMS tech 2 hours note not appended"
+            await self._notifications_repository.send_to_slack(err_msg)
             return False
         self._logger.info(f"Note: `{sms_note}` "
                           f"Dispatch: {dispatch_number} "
@@ -396,7 +408,10 @@ class LitDispatchMonitor:
                     self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                       f"- Error: we could not retrieve 'sms_to' number from: "
                                       f"{dispatch.get('Job_Site_Contact_Name_and_Phone_Number')}")
-                    # TODO: notify slack
+                    err_msg = f"An error occurred retrieve 'sms_to' number " \
+                              f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                              f"from: {dispatch.get('Job_Site_Contact_Name_and_Phone_Number')}"
+                    await self._notifications_repository.send_to_slack(err_msg)
                     continue
 
                 date_time_of_dispatch = datetime_tz_response['datetime_localized']
