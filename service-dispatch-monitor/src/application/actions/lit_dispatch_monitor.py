@@ -479,21 +479,6 @@ class LitDispatchMonitor:
 
                     self._logger.info(f"Dispatch: {dispatch_number} "
                                       f"Ticket_id: {ticket_id} - Sending confirmed SMS")
-                    sms_sended = await self._send_confirmed_sms(dispatch_number, ticket_id, dispatch, sms_to)
-                    if not sms_sended:
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"SMS could not be sent to {sms_to}.")
-                        continue
-
-                    result_append_confirmed_sms_note = await self._append_confirmed_sms_note(dispatch_number, ticket_id, sms_to)
-
-                    if not result_append_confirmed_sms_note:
-                        self._logger.info("Confirmed SMS note not appended")
-                        continue
-
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"Confirmed Note, SMS send and Confirmed SMS note sent OK.")
-                    continue
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"- already has a confirmed note")
 
@@ -522,8 +507,6 @@ class LitDispatchMonitor:
                                   f"- already has a sms confirmed note")
 
                 if tech_24_hours_before_note_found is None:
-                    # TODO: retrieve date and time of dispatch and if is < 24h send sms and append note
-                    # Compare datetime.now(tz) with date_time_of_dispatch for 24 hours
                     hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                   date_time_of_dispatch)
                     if hours_diff > self.HOURS_24:
@@ -532,7 +515,7 @@ class LitDispatchMonitor:
                         continue
 
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"TODO: send SMS 24h note")
+                                      f"Sending SMS 24h note")
                     result_sms_24_sended = await self._send_tech_24_sms(dispatch_number, ticket_id, dispatch, sms_to)
                     if not result_sms_24_sended:
                         self._logger.info()
@@ -549,17 +532,26 @@ class LitDispatchMonitor:
                                   f"- Already has a sms tech 24 hours before note")
 
                 if tech_2_hours_before_note_found is None:
-                    # TODO: retrieve date and time of dispatch and if is < 2h send sms and append note
-                    # Compare datetime.now(tz) with date_time_of_dispatch for 2 hours
                     hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                   date_time_of_dispatch)
                     if hours_diff > self.HOURS_2:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"SMS 2h note not needed to send now")
                         continue
-                    # TODO: Send SMS 2h and append note
+
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"TODO: send SMS 2h note")
+                                      f"Sending SMS 2h note")
+                    result_sms_2_sended = await self._send_tech_2_sms(dispatch_number, ticket_id, dispatch, sms_to)
+                    if not result_sms_2_sended:
+                        self._logger.info()
+                        continue
+
+                    result_append_tech_2_sms_note = self._append_tech_2_sms_note(dispatch_number, ticket_id, sms_to)
+                    if not result_append_tech_2_sms_note:
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                          f"- A sms tech 2 hours before note not appended")
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"- A sms tech 2 hours before note appended")
                     continue
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"- already has a sms tech 2 hours before note")

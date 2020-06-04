@@ -1085,3 +1085,84 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._send_confirmed_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
         ])
+
+    @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_skip_details_requested_watermark_not_found_test(
+            self, lit_dispatch_monitor, dispatch_confirmed, dispatch_confirmed_2, ticket_details_1,
+            ticket_details_2_no_requested_watermark, append_note_response):
+        confirmed_dispatches = [
+            dispatch_confirmed,
+            dispatch_confirmed_2
+        ]
+
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+
+        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
+
+        dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
+        ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+        dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
+        ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
+
+        confirmed_note_1 = '#*Automation Engine*#\n' \
+                           'Dispatch Management - Dispatch Confirmed\n' \
+                           'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
+                           'Field Engineer\nJoe Malone\n+12123595129\n'
+
+        sms_to = '+12123595129'
+
+        responses_details_mock = [
+            ticket_details_1,
+            ticket_details_2_no_requested_watermark
+        ]
+        responses_append_notes_mock = [
+            response_append_note_1,
+            response_append_note_1
+        ]
+        responses_confirmed_sms = [
+            True
+        ]
+
+        datetime_return_1 = {
+            'datetime_localized': datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'),
+            'timezone': timezone(f'US/Pacific')
+        }
+        datetime_return_2 = {
+            'datetime_localized': datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'),
+            'timezone': timezone(f'US/Eastern')
+        }
+        datetime_returns_mock = [
+            datetime_return_1,
+            datetime_return_2
+        ]
+
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
+            side_effect=datetime_returns_mock)
+        lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=responses_append_notes_mock)
+        lit_dispatch_monitor._send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
+
+        await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized.assert_has_calls([
+            call(dispatch_confirmed, dispatch_number_1, ticket_id_1),
+        ])
+
+        lit_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1),
+            call(ticket_id_2)
+        ])
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_has_awaits([
+            call(ticket_id_1, confirmed_note_1),
+            call(ticket_id_1, sms_note_1)
+        ])
+
+        lit_dispatch_monitor._send_confirmed_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+        ])

@@ -307,6 +307,40 @@ def ticket_details_2_error(ticket_details):
 
 
 @pytest.fixture(scope='function')
+def ticket_details_2_no_requested_watermark():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
 def append_note_response():
     return {
         "ticketNotes": [
