@@ -14,6 +14,11 @@ data "template_file" "automation-last-contact-report" {
     NATS_SERVER1 = local.nats_server1
     REDIS_HOSTNAME = local.redis-hostname
     LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_PREFIX = local.automation-last-contact-report-papertrail_prefix
+    PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
+    PAPERTRAIL_PORT = var.PAPERTRAIL_PORT
+    ENVIRONMENT_NAME = var.ENVIRONMENT_NAME
   }
 }
 

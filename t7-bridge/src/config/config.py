@@ -20,11 +20,19 @@ NATS_CONFIG = {
     'reconnects': 150
 }
 
+ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+
 LOG_CONFIG = {
     'name': 't7-bridge',
-    'level': logging.DEBUG,
+    'level': logging.INFO,
     'stream_handler': logging.StreamHandler(sys.stdout),
-    'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
+    'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
+    'papertrail': {
+        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-t7-bridge'),
+        'host': os.getenv('PAPERTRAIL_HOST'),
+        'port': int(os.getenv('PAPERTRAIL_PORT'))
+    },
 }
 
 T7CONFIG = {

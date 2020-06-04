@@ -1,6 +1,7 @@
 import argparse
 import gitlab
 import os
+import getpass
 
 parser = argparse.ArgumentParser()
 parser.add_argument('token', type=str, help='Private token to access the repo')
@@ -119,12 +120,17 @@ MONITORING_SECONDS = 4500
 mettel_path = os.path.abspath(os.path.join(
     os.path.dirname(os.path.realpath(__file__)), os.pardir))
 
+# Get environment name of local system
+ENVIRONMENT_NAME = getpass.getuser() + '-local'
+
 # Creating a dict with the repos as keys and texts as values
 env_dict = {
     os.path.join('base-microservice', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
     os.path.join('bruin-bridge', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -154,9 +160,11 @@ env_dict = {
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}',
     os.path.join('metrics-dashboard', 'grafana', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
     os.path.join('last-contact-report', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -181,20 +189,24 @@ env_dict = {
         f'BILLING_RECIPIENT={BILLING_RECIPIENT}\n'
         f'EMAIL_ACC_PWD={EMAIL_ACC_PWD}',
     os.path.join('nats-server', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'CLUSTER_MODE={NATS_CLUSTER_MODE1}\n'
         f'NATSCLUSTER={NATSCLUSTER1}\n'
         f'PORT={NATS_PORT1}',
     os.path.join('nats-server', 'nats-server-1-env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'CLUSTER_MODE={NATS_CLUSTER_MODE2}\n'
         f'NATSCLUSTER={NATSCLUSTER2}\n'
         f'NATSROUTECLUSTER={NATSROUTECLUSTER}\n'
         f'PORT={NATS_PORT2}',
     os.path.join('nats-server', 'nats-server-2-env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'CLUSTER_MODE={NATS_CLUSTER_MODE3}\n'
         f'NATSCLUSTER={NATSCLUSTER3}\n'
         f'NATSROUTECLUSTER={NATSROUTECLUSTER}\n'
         f'PORT={NATS_PORT3}',
     os.path.join('notifier', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -205,16 +217,27 @@ env_dict = {
         f'TELESTAX_FROM_PHONE_NUMBER={TELESTAX_FROM_PHONE_NUMBER}\n'
         f'EMAIL_ACC_PWD={EMAIL_ACC_PWD}',
     os.path.join('service-affecting-monitor', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}',
+    os.path.join('service-outage-monitor', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
     os.path.join('service-outage-monitor', 'src', 'config', 'env-outage-monitor-1'):
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
+        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}',
+    os.path.join('sites-monitor', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
+        f'MONITORING_SECONDS={MONITORING_SECONDS}\n'
+        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
         f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
         f'VELOCLOUD_HOSTS={SERVICE_OUTAGE_MONITOR_1_HOSTS}\n'
         f'VELOCLOUD_HOSTS_FILTER={SERVICE_OUTAGE_MONITOR_1_HOSTS_FILTER}\n'
@@ -256,11 +279,13 @@ env_dict = {
         f'VELOCLOUD_HOSTS_FILTER={SERVICE_OUTAGE_MONITOR_TRIAGE_HOSTS_FILTER}\n'
         f'ENABLE_TRIAGE_MONITORING=1',
     os.path.join('t7-bridge', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'T7_BASE_URL={T7_BASE_URL}\n'
         f'T7_TOKEN={T7_TOKEN}',
     os.path.join('velocloud-bridge', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'

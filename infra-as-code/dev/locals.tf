@@ -12,35 +12,15 @@ locals {
   automation-route53_record-name = "${var.SUBDOMAIN}.${data.aws_route53_zone.automation.name}"
   automation-zone-service_discovery_private_dns-name = "${var.ENVIRONMENT}.local"
 
-  // automation-nats-server local vars
-  automation-nats-server-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
-  automation-nats-server-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server"
-  automation-nats-server-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server"
-  automation-nats-server-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server"
-  automation-nats-server-ecs_service-name = "${var.ENVIRONMENT}-nats-server"
-  automation-nats-server-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server.family}:${aws_ecs_task_definition.automation-nats-server.revision}"
-  automation-nats-server-task_definition_template-container_name = "nats-server"
-  automation-nats-server-task_definition_template-natscluster = "nats://0.0.0.0:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
-
   // automation-redis local vars
   automation-redis-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-redis"
   automation-redis-security_group-name = "${var.ENVIRONMENT}-redis-sg"
   automation-redis-security_group-tag-Name = "${var.ENVIRONMENT}-redis"
   redis-hostname = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
 
-  // automation-nats-server-2 local vars
-  automation-nats-server-2-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
-  automation-nats-server-2-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-2"
-  automation-nats-server-2-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-2"
-  automation-nats-server-2-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-2"
-  automation-nats-server-2-ecs_service-name = "${var.ENVIRONMENT}-nats-server-2"
-  automation-nats-server-2-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server-2.family}:${aws_ecs_task_definition.automation-nats-server-2.revision}"
-  automation-nats-server-2-task_definition_template-container_name = "nats-server-2"
-  automation-nats-server-2-task_definition_template-natscluster = "nats://localhost:${var.NATS_SERVER_2_CLUSTER_PORT}"
-  automation-nats-server-2-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
-
   // bruin-brige local vars
   automation-bruin-bridge-image = "${data.aws_ecr_repository.automation-bruin-bridge.repository_url}:${var.BRUIN_BRIDGE_BUILD_NUMBER}"
+  automation-bruin-bridge-papertrail_prefix = "bruin-bridge-${element(split("-", var.BRUIN_BRIDGE_BUILD_NUMBER),2)}"
   automation-bruin-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-bruin-bridge"
   automation-bruin-bridge_service-security_group-name = "${var.ENVIRONMENT}-bruin-bridge"
   automation-bruin-bridge-resource-name = "${var.ENVIRONMENT}-bruin-bridge"
@@ -50,6 +30,7 @@ locals {
 
   // cts-brige local vars
   automation-cts-bridge-image = "${data.aws_ecr_repository.automation-cts-bridge.repository_url}:${var.CTS_BRIDGE_BUILD_NUMBER}"
+  automation-cts-bridge-papertrail_prefix = "cts-bridge-${element(split("-", var.CTS_BRIDGE_BUILD_NUMBER),2)}"
   automation-cts-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-cts-bridge"
   automation-cts-bridge_service-security_group-name = "${var.ENVIRONMENT}-cts-bridge"
   automation-cts-bridge-resource-name = "${var.ENVIRONMENT}-cts-bridge"
@@ -57,41 +38,50 @@ locals {
   automation-cts-bridge-task_definition = "${aws_ecs_task_definition.automation-cts-bridge.family}:${aws_ecs_task_definition.automation-cts-bridge.revision}"
   automation-cts-bridge-service_discovery_service-name = "cts-bridge-${var.ENVIRONMENT}"
 
-  // lit-brige local vars
-  automation-lit-bridge-image = "${data.aws_ecr_repository.automation-lit-bridge.repository_url}:${var.LIT_BRIDGE_BUILD_NUMBER}"
-  automation-lit-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-lit-bridge"
-  automation-lit-bridge_service-security_group-name = "${var.ENVIRONMENT}-lit-bridge"
-  automation-lit-bridge-resource-name = "${var.ENVIRONMENT}-lit-bridge"
-  automation-lit-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-lit-bridge"
-  automation-lit-bridge-task_definition = "${aws_ecs_task_definition.automation-lit-bridge.family}:${aws_ecs_task_definition.automation-lit-bridge.revision}"
-  automation-lit-bridge-service_discovery_service-name = "lit-bridge-${var.ENVIRONMENT}"
-
-  // t7-brige local vars
-  automation-t7-bridge-image = "${data.aws_ecr_repository.automation-t7-bridge.repository_url}:${var.T7_BRIDGE_BUILD_NUMBER}"
-  automation-t7-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-t7-bridge"
-  automation-t7-bridge_service-security_group-name = "${var.ENVIRONMENT}-t7-bridge"
-  automation-t7-bridge-resource-name = "${var.ENVIRONMENT}-t7-bridge"
-  automation-t7-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-t7-bridge"
-  automation-t7-bridge-task_definition = "${aws_ecs_task_definition.automation-t7-bridge.family}:${aws_ecs_task_definition.automation-t7-bridge.revision}"
-  automation-t7-bridge-service_discovery_service-name = "t7-bridge-${var.ENVIRONMENT}"
-
   // automation-dispatch-portal-backend local vars
   automation-dispatch-portal-backend-ecs_task_definition-family = "${var.ENVIRONMENT}-dispatch-portal-backend"
   automation-dispatch-portal-backend-image = "${data.aws_ecr_repository.automation-dispatch-portal-backend.repository_url}:${var.DISPATCH_PORTAL_BACKEND_BUILD_NUMBER}"
+  automation-dispatch-portal-backend-papertrail_prefix = "dispatch-portal-backend-${element(split("-", var.DISPATCH_PORTAL_BACKEND_BUILD_NUMBER),2)}"
   automation-dispatch-portal-backend-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-backend"
   automation-dispatch-portal-backend-service-security_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal-backend"
   automation-dispatch-portal-backend-resource-name = "${var.ENVIRONMENT}-dispatch-portal-backend"
   automation-dispatch-portal-backend-task_definition = "${aws_ecs_task_definition.automation-dispatch-portal-backend.family}:${aws_ecs_task_definition.automation-dispatch-portal-backend.revision}"
   automation-dispatch-portal-backend-service_discovery_service-name = "dispatch-portal-backend-${var.ENVIRONMENT}"
 
+  // automation-dispatch-portal-frontend local vars
+  automation-dispatch-portal-frontend-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nextjs.repository_url}:${var.DISPATCH_PORTAL_FRONTEND_BUILD_NUMBER}"
+  automation-dispatch-portal-frontend-nginx-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nginx.repository_url}:${var.DISPATCH_PORTAL_FRONTEND_NGINX_BUILD_NUMBER}"
+  automation-dispatch-portal-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-dispatch-portal-frontend-ecs_task_definition-family = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-ecs_task_definition = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-service-security_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-ecs_service-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+  automation-dispatch-portal-frontend-ecs_service-task_definition = "${aws_ecs_task_definition.automation-dispatch-portal-frontend.family}:${aws_ecs_task_definition.automation-dispatch-portal-frontend.revision}"
+  automation-dispatch-portal-frontend-service_discovery_service-name = "dispatch-portal-frontend-${var.ENVIRONMENT}"
+  automation-dispatch-portal-target_group-name = "${var.ENVIRONMENT}-disp-prtl"
+  automation-dispatch-portal-target_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal"
+
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${var.LAST_CONTACT_REPORT_BUILD_NUMBER}"
+  automation-last-contact-report-papertrail_prefix = "last-contact-report-${element(split("-", var.LAST_CONTACT_REPORT_BUILD_NUMBER),2)}"
   automation-last-contact-report-service-security_group-name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-service-security_group-tag-Name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-resource-name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-task_definition = "${aws_ecs_task_definition.automation-last-contact-report.family}:${aws_ecs_task_definition.automation-last-contact-report.revision}"
   automation-last-contact-service_discovery_service-name = "last-contact-report-${var.ENVIRONMENT}"
+
+  // lit-brige local vars
+  automation-lit-bridge-image = "${data.aws_ecr_repository.automation-lit-bridge.repository_url}:${var.LIT_BRIDGE_BUILD_NUMBER}"
+  automation-lit-bridge-papertrail_prefix = "lit-bridge-${element(split("-", var.LIT_BRIDGE_BUILD_NUMBER),2)}"
+  automation-lit-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge_service-security_group-name = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge-resource-name = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-lit-bridge"
+  automation-lit-bridge-task_definition = "${aws_ecs_task_definition.automation-lit-bridge.family}:${aws_ecs_task_definition.automation-lit-bridge.revision}"
+  automation-lit-bridge-service_discovery_service-name = "lit-bridge-${var.ENVIRONMENT}"
 
   // automation-lumin-billing-report local vars
   automation-lumin-billing-report-ecs_task_definition-family = "${var.ENVIRONMENT}-lumin-billing-report"
@@ -104,6 +94,7 @@ locals {
 
   // automation-metrics-grafana local vars
   automation-metrics-grafana-image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.GRAFANA_BUILD_NUMBER}"
+  automation-grafana-papertrail_prefix = "grafana-${element(split("-", var.GRAFANA_BUILD_NUMBER),2)}"
   automation-metrics-grafana-target_group-name = "${var.ENVIRONMENT}-mts-grafana"
   automation-metrics-grafana-target_group-tag-Name = "${var.ENVIRONMENT}-metrics-grafana"
 
@@ -142,8 +133,41 @@ locals {
   automation-metrics-thanos-querier-GRPC_PORT = 10999
   automation-metrics-thanos-querier-HTTP_PORT = 19091
 
+  // automation-nats-server local vars
+  automation-nats-server-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
+  automation-nats-server-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server"
+  automation-nats-server-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server"
+  automation-nats-server-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server"
+  automation-nats-server-ecs_service-name = "${var.ENVIRONMENT}-nats-server"
+  automation-nats-server-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server.family}:${aws_ecs_task_definition.automation-nats-server.revision}"
+  automation-nats-server-task_definition_template-container_name = "nats-server"
+  automation-nats-server-task_definition_template-natscluster = "nats://0.0.0.0:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
+
+  // automation-nats-server-1 local vars
+  automation-nats-server-1-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
+  automation-nats-server-1-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-ecs_service-name = "${var.ENVIRONMENT}-nats-server-1"
+  automation-nats-server-1-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server-1.family}:${aws_ecs_task_definition.automation-nats-server-1.revision}"
+  automation-nats-server-1-task_definition_template-container_name = "nats-server-1"
+  automation-nats-server-1-task_definition_template-natscluster = "nats://localhost:${var.NATS_SERVER_1_CLUSTER_PORT}"
+  automation-nats-server-1-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
+
+  // automation-nats-server-2 local vars
+  automation-nats-server-2-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
+  automation-nats-server-2-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-2"
+  automation-nats-server-2-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-2"
+  automation-nats-server-2-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-2"
+  automation-nats-server-2-ecs_service-name = "${var.ENVIRONMENT}-nats-server-2"
+  automation-nats-server-2-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server-2.family}:${aws_ecs_task_definition.automation-nats-server-2.revision}"
+  automation-nats-server-2-task_definition_template-container_name = "nats-server-2"
+  automation-nats-server-2-task_definition_template-natscluster = "nats://localhost:${var.NATS_SERVER_2_CLUSTER_PORT}"
+  automation-nats-server-2-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
+
   // automation-notifier local vars
   automation-notifier-image = "${data.aws_ecr_repository.automation-notifier.repository_url}:${var.NOTIFIER_BUILD_NUMBER}"
+  automation-notifier-papertrail_prefix = "notifier-${element(split("-", var.NOTIFIER_BUILD_NUMBER),2)}"
   automation-notifier-ecs_task_definition-family = "${var.ENVIRONMENT}-notifier"
   automation-notifier-service-security_group-name = "${var.ENVIRONMENT}-notifier"
   automation-notifier-service-security_group-tag-Name = "${var.ENVIRONMENT}-notifier"
@@ -152,6 +176,7 @@ locals {
 
   // automation-service-affecting-monitor local vars
   automation-service-affecting-monitor-image = "${data.aws_ecr_repository.automation-service-affecting-monitor.repository_url}:${var.SERVICE_AFFECTING_MONITOR_BUILD_NUMBER}"
+  automation-service-affecting-monitor-papertrail_prefix = "service-affecting-monitor-${element(split("-", var.SERVICE_AFFECTING_MONITOR_BUILD_NUMBER),2)}"
   automation-service-affecting-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-service-affecting-monitor"
   automation-service-affecting-monitor-service-security_group-name = "${var.ENVIRONMENT}-service-affecting-monitor"
   automation-service-affecting-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-affecting-monitor"
@@ -174,6 +199,7 @@ locals {
   automation-service-outage-monitor-velocloud_hosts_filter = "[]"
 
   // automation-service-outage-monitor-1 local vars
+  automation-service-outage-monitor-1-papertrail_prefix = "service-outage-monitor-1-${element(split("-", var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER),2)}"
   automation-service-outage-monitor-1-container_name = "service-outage-monitor-1"
   automation-service-outage-monitor-1-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-1"
   automation-service-outage-monitor-1-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-1"
@@ -183,6 +209,7 @@ locals {
   automation-service-outage-monitor-1-service_discovery_service-name = "service-outage-monitor-1-${var.ENVIRONMENT}"
 
   // automation-service-outage-monitor-2 local vars
+  automation-service-outage-monitor-2-papertrail_prefix = "service-outage-monitor-2-${element(split("-", var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER),2)}"
   automation-service-outage-monitor-2-container_name = "service-outage-monitor-2"
   automation-service-outage-monitor-2-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-2"
   automation-service-outage-monitor-2-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-2"
@@ -192,6 +219,7 @@ locals {
   automation-service-outage-monitor-2-service_discovery_service-name = "service-outage-monitor-2-${var.ENVIRONMENT}"
 
   // automation-service-outage-monitor-3 local vars
+  automation-service-outage-monitor-3-papertrail_prefix = "service-outage-monitor-3-${element(split("-", var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER),2)}"
   automation-service-outage-monitor-3-container_name = "service-outage-monitor-3"
   automation-service-outage-monitor-3-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-3"
   automation-service-outage-monitor-3-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-3"
@@ -201,6 +229,7 @@ locals {
   automation-service-outage-monitor-3-service_discovery_service-name = "service-outage-monitor-3-${var.ENVIRONMENT}"
 
   // automation-service-outage-monitor-4 local vars
+  automation-service-outage-monitor-4-papertrail_prefix = "service-outage-monitor-4-${element(split("-", var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER),2)}"
   automation-service-outage-monitor-4-container_name = "service-outage-monitor-4"
   automation-service-outage-monitor-4-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-4"
   automation-service-outage-monitor-4-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-4"
@@ -210,6 +239,7 @@ locals {
   automation-service-outage-monitor-4-service_discovery_service-name = "service-outage-monitor-4-${var.ENVIRONMENT}"
 
   // automation-service-outage-monitor-triage local vars
+  automation-service-outage-monitor-triage-papertrail_prefix = "service-outage-monitor-triage-${element(split("-", var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER),2)}"
   automation-service-outage-monitor-triage-container_name = "service-outage-monitor-triage"
   automation-service-outage-monitor-triage-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-triage"
   automation-service-outage-monitor-triage-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-triage"
@@ -218,17 +248,9 @@ locals {
   automation-service-outage-monitor-triage-ecs_service-task_definition = "${aws_ecs_task_definition.automation-service-outage-monitor-triage.family}:${aws_ecs_task_definition.automation-service-outage-monitor-triage.revision}"
   automation-service-outage-monitor-triage-service_discovery_service-name = "service-outage-monitor-triage-${var.ENVIRONMENT}"
 
-  // automation-velocloud-bridge local vars
-  automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.VELOCLOUD_BRIDGE_BUILD_NUMBER}"
-  automation-velocloud-bridge-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
-  automation-velocloud-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-velocloud-bridge"
-  automation-velocloud-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-velocloud-bridge"
-  automation-velocloud-bridge-ecs_service-name = "${var.ENVIRONMENT}-velocloud-bridge"
-  automation-velocloud-bridge-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
-  automation-velocloud-bridge-service_discovery_service-name = "velocloud-bridge-${var.ENVIRONMENT}"
-
   // automation-sites-monitor local vars
   automation-sites-monitor-image = "${data.aws_ecr_repository.automation-sites-monitor.repository_url}:${var.SITES_MONITOR_BUILD_NUMBER}"
+  automation-sites-monitor-papertrail_prefix = "sites-monitor-${element(split("-", var.SITES_MONITOR_BUILD_NUMBER),2)}"
   automation-sites-monitor-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   automation-sites-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-sites-monitor"
   automation-sites-monitor-service-security_group-name = "${var.ENVIRONMENT}-sites-monitor"
@@ -237,20 +259,25 @@ locals {
   automation-sites-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-sites-monitor.family}:${aws_ecs_task_definition.automation-sites-monitor.revision}"
   automation-sites-monitor-service_discovery_service-name = "sites-monitor-${var.ENVIRONMENT}"
 
-  // automation-dispatch-portal-frontend local vars
-  automation-dispatch-portal-frontend-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nextjs.repository_url}:${var.DISPATCH_PORTAL_FRONTEND_BUILD_NUMBER}"
-  automation-dispatch-portal-frontend-nginx-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nginx.repository_url}:${var.DISPATCH_PORTAL_FRONTEND_NGINX_BUILD_NUMBER}"
-  automation-dispatch-portal-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
-  automation-dispatch-portal-frontend-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
-  automation-dispatch-portal-frontend-ecs_task_definition-family = "${var.ENVIRONMENT}-dispatch-portal-frontend"
-  automation-dispatch-portal-frontend-ecs_task_definition = "${var.ENVIRONMENT}-dispatch-portal-frontend"
-  automation-dispatch-portal-frontend-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
-  automation-dispatch-portal-frontend-service-security_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
-  automation-dispatch-portal-frontend-ecs_service-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
-  automation-dispatch-portal-frontend-ecs_service-task_definition = "${aws_ecs_task_definition.automation-dispatch-portal-frontend.family}:${aws_ecs_task_definition.automation-dispatch-portal-frontend.revision}"
-  automation-dispatch-portal-frontend-service_discovery_service-name = "dispatch-portal-frontend-${var.ENVIRONMENT}"
-  automation-dispatch-portal-target_group-name = "${var.ENVIRONMENT}-disp-prtl"
-  automation-dispatch-portal-target_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal"
+  // automation-t7-brige local vars
+  automation-t7-bridge-image = "${data.aws_ecr_repository.automation-t7-bridge.repository_url}:${var.T7_BRIDGE_BUILD_NUMBER}"
+  automation-t7-bridge-papertrail_prefix = "t7-bridge-${element(split("-", var.T7_BRIDGE_BUILD_NUMBER),2)}"
+  automation-t7-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge_service-security_group-name = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge-resource-name = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-t7-bridge"
+  automation-t7-bridge-task_definition = "${aws_ecs_task_definition.automation-t7-bridge.family}:${aws_ecs_task_definition.automation-t7-bridge.revision}"
+  automation-t7-bridge-service_discovery_service-name = "t7-bridge-${var.ENVIRONMENT}"
+
+  // automation-velocloud-bridge local vars
+  automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.VELOCLOUD_BRIDGE_BUILD_NUMBER}"
+  automation-velocloud-bridge-papertrail_prefix = "velocloud-bridge-${element(split("-", var.VELOCLOUD_BRIDGE_BUILD_NUMBER),2)}"
+  automation-velocloud-bridge-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-velocloud-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-velocloud-bridge"
+  automation-velocloud-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-velocloud-bridge"
+  automation-velocloud-bridge-ecs_service-name = "${var.ENVIRONMENT}-velocloud-bridge"
+  automation-velocloud-bridge-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
+  automation-velocloud-bridge-service_discovery_service-name = "velocloud-bridge-${var.ENVIRONMENT}"
 
   // automation-tnba-monitor local vars
   automation-tnba-monitor-image = "${data.aws_ecr_repository.automation-tnba-monitor.repository_url}:${var.TNBA_MONITOR_BUILD_NUMBER}"
@@ -274,7 +301,7 @@ locals {
   // alarms common local variables
   running_task_count_service-alarm-evaluation_periods = "2"
   running_task_count_service-alarm-period = "300"
-  running_task_count_service-alarm-threshold = 3
+  running_task_count_service-alarm-threshold = "3"
 
   // alarm exception_messages_services local variables
   exception_messages_services_alarm-evaluation_periods = "1"
@@ -366,16 +393,5 @@ locals {
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms-${var.ENVIRONMENT}"
   cloudformation_sns_stack_alarms_errors_exceptions_messages-description-stack="MetTel Notificacion Topic for Alarms in ECS cluster with name ${var.ENVIRONMENT}"
   cloudformation_sns_stack_alarms_errors_exceptions_messages-description-operator_email="Email address to notify if there are any active alarms in MetTel automation infrastructure"
-
-  // automation-nats-server-1 local vars
-  automation-nats-server-1-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
-  automation-nats-server-1-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-1"
-  automation-nats-server-1-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-1"
-  automation-nats-server-1-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-1"
-  automation-nats-server-1-ecs_service-name = "${var.ENVIRONMENT}-nats-server-1"
-  automation-nats-server-1-ecs_service-task_definition = "${aws_ecs_task_definition.automation-nats-server-1.family}:${aws_ecs_task_definition.automation-nats-server-1.revision}"
-  automation-nats-server-1-task_definition_template-container_name = "nats-server-1"
-  automation-nats-server-1-task_definition_template-natscluster = "nats://localhost:${var.NATS_SERVER_1_CLUSTER_PORT}"
-  automation-nats-server-1-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
 
 }

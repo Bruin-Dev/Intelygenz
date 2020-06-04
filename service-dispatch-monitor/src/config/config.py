@@ -35,7 +35,13 @@ LOG_CONFIG = {
     'name': 'service-dispatch-monitor',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
-    'format': '%(asctime)s: %(module)s: %(levelname)s - %(funcName)20s: %(message)s'
+    'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
+    'papertrail': {
+        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-service-dispatch-monitor'),
+        'host': os.getenv('PAPERTRAIL_HOST'),
+        'port': int(os.getenv('PAPERTRAIL_PORT'))
+    }
 }
 
 REDIS = {

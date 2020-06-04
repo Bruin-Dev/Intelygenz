@@ -16,6 +16,11 @@ data "template_file" "automation-service-outage-monitor-4" {
     VELOCLOUD_HOSTS = var.SERVICE_OUTAGE_MONITOR_4_HOSTS
     ENABLE_TRIAGE_MONITORING = var.SERVICE_OUTAGE_MONITOR_4_HOSTS == "" ? 1 : 0
     VELOCLOUD_HOSTS_FILTER = var.SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_PREFIX = local.automation-service-outage-monitor-4-papertrail_prefix
+    PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
+    PAPERTRAIL_PORT = var.PAPERTRAIL_PORT
+    ENVIRONMENT_NAME = var.ENVIRONMENT_NAME
   }
 }
 

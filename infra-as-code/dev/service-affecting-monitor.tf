@@ -15,7 +15,11 @@ data "template_file" "automation-service-affecting-monitor" {
     REDIS_HOSTNAME = local.redis-hostname
     CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
     LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
-
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_PREFIX = local.automation-service-affecting-monitor-papertrail_prefix
+    PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
+    PAPERTRAIL_PORT = var.PAPERTRAIL_PORT
+    ENVIRONMENT_NAME = var.ENVIRONMENT_NAME
   }
 }
 

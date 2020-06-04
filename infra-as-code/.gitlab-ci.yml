@@ -97,6 +97,9 @@ deploy-branches:
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export PAPERTRAIL_API_TOKEN=${PAPERTRAIL_API_TOKEN_DEV}
+    - export TF_VAR_PAPERTRAIL_HOST=${PAPERTRAIL_HOST_DEV}
+    - export TF_VAR_PAPERTRAIL_PORT=${PAPERTRAIL_PORT_DEV}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
@@ -155,7 +158,6 @@ deploy-branches:
     - export TF_VAR_service_outage_monitor_4_desired_tasks=${service_outage_monitor_4_desired_tasks}
     - export TF_VAR_service_outage_monitor_triage_desired_tasks=${service_outage_monitor_triage_desired_tasks}
     - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
-    - export TF_VAR_tnba_monitor_desired_tasks=${tnba_monitor_desired_tasks}
     - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
     - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
   environment:
@@ -174,6 +176,9 @@ deploy-master:
     - terraform init -backend=true -get=true -input=false
     - export ENVIRONMENT_SLUG=master
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export PAPERTRAIL_API_TOKEN=${PAPERTRAIL_API_TOKEN_PRO}
+    - export TF_VAR_PAPERTRAIL_HOST=${PAPERTRAIL_HOST_PRO}
+    - export TF_VAR_PAPERTRAIL_PORT=${PAPERTRAIL_PORT_PRO}
     - export TF_VAR_SUBDOMAIN=${ENVIRONMENT_SLUG}
     - export TF_VAR_NATS_MODULE_VERSION=${NATS_MODULE_VERSION}
     - export TF_VAR_VELOCLOUD_CREDENTIALS=${VELOCLOUD_CREDENTIALS_PRO}
@@ -232,7 +237,6 @@ deploy-master:
     - export TF_VAR_service_outage_monitor_4_desired_tasks=${service_outage_monitor_4_desired_tasks}
     - export TF_VAR_service_outage_monitor_triage_desired_tasks=${service_outage_monitor_triage_desired_tasks}
     - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
-    - export TF_VAR_tnba_monitor_desired_tasks=${tnba_monitor_desired_tasks}
     - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
     - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
   environment:

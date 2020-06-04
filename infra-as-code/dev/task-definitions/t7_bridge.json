@@ -51,6 +51,26 @@
       {
         "name": "T7_TOKEN",
         "value": "${T7_TOKEN}"
+      },
+      {
+        "name": "PAPERTRAIL_ACTIVE",
+        "value": "${PAPERTRAIL_ACTIVE}"
+      },
+      {
+        "name": "PAPERTRAIL_HOST",
+        "value": "${PAPERTRAIL_HOST}"
+      },
+      {
+        "name": "PAPERTRAIL_PORT",
+        "value": "${PAPERTRAIL_PORT}"
+      },
+      {
+        "name": "PAPERTRAIL_PREFIX",
+        "value": "${PAPERTRAIL_PREFIX}"
+      },
+      {
+        "name": "ENVIRONMENT_NAME",
+        "value": "${ENVIRONMENT_NAME}"
       }
     ]
   }

@@ -2,6 +2,10 @@ variable "ENVIRONMENT" {
   description = "Name of current environment"
 }
 
+variable "ENVIRONMENT_NAME" {
+  description = "Name of current environment without automation prefix"
+}
+
 variable "SLACK_URL" {
   description = "webhook url of slack for current environment"
 }
@@ -611,4 +615,16 @@ variable "velocloud-bridge-task-definition-json" {
   type = string
   description = "Task definition arn output in rendered json for velocloud-bridge"
   default = "/tmp/velocloud-bridge-task-definition.json"
+}
+
+variable PAPERTRAIL_HOST {
+  type = string
+  description = "Papertrail address to which the logs of the microservices with the send to papertrail flag will be sent"
+  default = ""
+}
+
+variable PAPERTRAIL_PORT {
+  type = number
+  description = "Papertrail host to which the logs of the microservices with the send to papertrail flag will be sent"
+  default = 0
 }

@@ -20,6 +20,9 @@ In this folder are stored a series of scripts implemented in bash and python use
 - [Script manage_ecr_docker_images](#manage_ecr_docker_images)
   - [Description](#manage_ecr_docker_images_description)
   - [Usage](#manage_ecr_docker_images_usage)
+- [Papertrail_provisioning](#papertrail_provisioning)
+  - [Description](#papertrail_provisioning_description)
+  - [Usage](#papertrail_provisioning_usage)
 
 ## Script task_healtheck<a name="task_healthcheck"></a>
 
@@ -207,7 +210,7 @@ This [script](./manage_ecr_docker_images_description.py) has been implemented in
 
 - Obtain the most up-to-date image of all the ECR repositories used in the project by saving each one of them in a JSON file for each of the repositories with the following format
 
-   ```json
+   ```bash
    {
        "tag": <ecr_repository_tag>
    }
@@ -250,3 +253,16 @@ Once the previous steps have been carried out, it is possible to use this [scrip
    ```sh
    $ python3 ci-utils/manage_ecr_docker_images.py -g
    ```
+
+## Papertrail provisioning <a name="papertrail_provisioning"></a>
+
+### Description <a name="papertrail_provisioning_description"></a>
+
+In the [papertrail_provisioning](./papertrail_provisioning) folder are the utilities to perform the papertrail provisioning for the different microservices of the project in each environment.
+
+### Usage  <a name="papertrail_provisioning_usage"></a>
+
+This utility is intended to be used in the gitlab deployment pipelines for each environment, it uses a configuration file called [config.py](./papertrail_provisioning/config.py) where it will collect the different environment variables needed.
+
+It is possible to add and/or remove papertrail groups, as well as the searches on them by means of the mentioned config.py file, through the modification of the dictionary value named PAPERTRAIL_PROVISIONING.
+

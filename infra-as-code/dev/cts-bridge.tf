@@ -21,6 +21,11 @@ data "template_file" "automation-cts-bridge" {
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     REDIS_HOSTNAME = local.redis-hostname
     CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_PREFIX = local.automation-cts-bridge-papertrail_prefix
+    PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
+    PAPERTRAIL_PORT = var.PAPERTRAIL_PORT
+    ENVIRONMENT_NAME = var.ENVIRONMENT_NAME
   }
 }
 

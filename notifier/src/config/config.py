@@ -38,12 +38,19 @@ TELESTAX_CONFIG = {
     'wait_fixed': 15,
     'stop_after_attempt': 2,
 }
+ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 
 LOG_CONFIG = {
     'name': 'notifier',
-    'level': logging.DEBUG,
+    'level': logging.INFO,
     'stream_handler': logging.StreamHandler(sys.stdout),
-    'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
+    'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
+    'papertrail': {
+        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-notifier'),
+        'host': os.getenv('PAPERTRAIL_HOST'),
+        'port': int(os.getenv('PAPERTRAIL_PORT'))
+    },
 }
 
 QUART_CONFIG = {

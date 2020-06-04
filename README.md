@@ -288,7 +288,7 @@ As mentioned in the previous section, the project uses custom images created fro
 
 There are a number of variables to indicate the version number of these images, as well as of the `igzpackages` library, which will be used in the CI/CD process of the branch you are working on
 
-- `IGZ_PACKAGES_VERSION`: Used version of the `igzpackages` library. These are published in a S3 bucket, accessible via [CloudFront URL](https://d3nllpcjtts00v.cloudfront.net/igzpackages/index.html).
+- `IGZ_PACKAGES_VERSION`: Used version of the `igzpackages` library. These are published in a S3 bucket, accessible via [CloudFront URL](https://s3pypi.mettel-automation.net/igzpackages/index.html).
 
 - `DOCKER_BASE_IMAGE_VERSION`: Used version of the docker custom images as base images of the Python microservices in its `Dockerfile`.
 
@@ -330,8 +330,8 @@ These variables are indicated in different ways, depending on whether you want t
 
     ```bash
     . . .
-    -f https://d3nllpcjtts00v.cloudfront.net/igzpackages/index.html
-    igzpackages==1.0.9
+    -f https://s3pypi.mettel-automation.net/igzpackages/index.html
+    igzpackages==2.0.0
     ```
 
 >It is important to reflect the changes in all files simultaneously so that the version of the development in local and AWS is the same at the end of the development of a feature or fix.

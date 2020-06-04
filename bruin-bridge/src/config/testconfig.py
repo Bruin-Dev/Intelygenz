@@ -30,7 +30,7 @@ BRUIN_CONFIG = {
 
 LOG_CONFIG = {
     'name': 'bruin-bridge-test',
-    'level': logging.DEBUG,
+    'level': logging.INFO,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }

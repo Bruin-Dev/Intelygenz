@@ -55,6 +55,26 @@
       {
         "name": "REDIS_HOSTNAME",
         "value": "${REDIS_HOSTNAME}"
+      },
+      {
+        "name": "PAPERTRAIL_ACTIVE",
+        "value": "${PAPERTRAIL_ACTIVE}"
+      },
+      {
+        "name": "PAPERTRAIL_HOST",
+        "value": "${PAPERTRAIL_HOST}"
+      },
+      {
+        "name": "PAPERTRAIL_PORT",
+        "value": "${PAPERTRAIL_PORT}"
+      },
+      {
+        "name": "PAPERTRAIL_PREFIX",
+        "value": "${PAPERTRAIL_PREFIX}"
+      },
+      {
+        "name": "ENVIRONMENT_NAME",
+        "value": "${ENVIRONMENT_NAME}"
       }
 
     ]

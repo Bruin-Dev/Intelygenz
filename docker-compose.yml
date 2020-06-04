@@ -38,7 +38,7 @@ services:
       args:
         REPOSITORY_URL: 374050862540.dkr.ecr.us-east-1.amazonaws.com/automation
         DOCKER_BASE_IMAGE_VERSION: 1.0.7
-        IGZ_PACKAGES_REPOSITORY_URL: https://d3nllpcjtts00v.cloudfront.net/igzpackages/index.html
+        IGZ_PACKAGES_REPOSITORY_URL: https://s3pypi.mettel-automation.net/igzpackages/index.html
         IGZ_PACKAGES_VERSION: 1.0.0
     env_file:
       - base-microservice/src/config/env
