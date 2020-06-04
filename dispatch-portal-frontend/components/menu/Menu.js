@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 import { Routes } from '../../config/routes';
@@ -17,7 +17,10 @@ function Menu({ authToken }) {
     setMenuState(!currentMenuState);
 
   return (
-    <nav className="flex items-center justify-between flex-wrap bg-teal-500 p-6">
+    <nav
+      data-testid="menu-component"
+      className="flex items-center justify-between flex-wrap bg-teal-500 p-6"
+    >
       <div className="flex items-center flex-shrink-0 text-white mr-6">
         <a href={Routes.BASE()}>
           <svg xmlns="http://www.w3.org/2000/svg" width="100" height="32">
@@ -42,6 +45,7 @@ function Menu({ authToken }) {
       <div className="block lg:hidden">
         <button
           type="button"
+          data-testid="menu-mobile-button"
           className="flex items-center px-3 py-2 border rounded text-teal-200 border-teal-400 hover:text-white hover:border-white"
           onClick={() => openAndCloseMobileMenu(menuState)}
         >
@@ -56,6 +60,7 @@ function Menu({ authToken }) {
         </button>
       </div>
       <div
+        data-testid="menu-container"
         className={
           menuState
             ? `w-full block flex-grow lg:flex lg:items-center lg:w-auto`

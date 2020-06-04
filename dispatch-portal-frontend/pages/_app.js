@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import '../ui/styles/_all.scss';
 import '../ui/styles/tailwind.scss';

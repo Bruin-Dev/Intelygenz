@@ -5,13 +5,14 @@ import {
   dispatchLitOutAdapter
 } from './dispatch.adapter';
 
-export const dispatchService = {
-  getAll: async () => {
+export class DispatchService {
+  constructor(axiosAuxI = axiosInstance) {
+    this.axiosI = axiosAuxI;
+  }
+
+  async getAll() {
     try {
-      const res = await axiosInstance.get(API_URLS.DISPATCH);
-      if (res.error) {
-        return { error: res.error };
-      }
+      const res = await this.axiosI.get(API_URLS.DISPATCH);
 
       return {
         data: res.data.list_dispatch.map(dispatch =>
@@ -19,59 +20,45 @@ export const dispatchService = {
         )
       };
     } catch (error) {
-      return dispatchService.captureErrorGeneric(error);
+      return this.captureErrorGeneric(error);
     }
-  },
-  newDispatch: async data => {
+  }
+
+  async newDispatch(data) {
     try {
-      const res = await axiosInstance.post(
+      const res = await this.axiosI.post(
         API_URLS.DISPATCH,
         dispatchLitOutAdapter(data)
       );
 
-      if (res.error) {
-        return res.error;
-      }
-
       return res;
     } catch (error) {
-      return dispatchService.captureErrorGeneric(error);
+      return this.captureErrorGeneric(error);
     }
-  },
-  get: async id => {
-    try {
-      const res = await axiosInstance.get(`${API_URLS.DISPATCH}/${id}`);
+  }
 
-      if (res.error) {
-        return res.error;
-      }
+  async get(id) {
+    try {
+      const res = await this.axiosI.get(`${API_URLS.DISPATCH}/${id}`);
+
       return dispatchLitInAdapter(res.data);
     } catch (error) {
-      return dispatchService.captureErrorGeneric(error);
+      return this.captureErrorGeneric(error);
     }
-  },
-  uploadFiles: async (id, data) => {
-    try {
-      const res = await axiosInstance.post(API_URLS.UPLOAD_FILES, data);
+  }
 
-      if (res.error) {
-        return false;
-      }
+  async uploadFiles(id, data) {
+    try {
+      const res = await this.axiosI.post(API_URLS.UPLOAD_FILES, data);
 
       return true;
     } catch (error) {
-      return dispatchService.captureErrorGeneric(error);
+      return this.captureErrorGeneric(error);
     }
-  },
-  captureErrorGeneric: error => {
-    if (error.response) {
-      return { error };
-    }
-    if (error.request) {
-      console.log(error.request);
-    } else {
-      console.log('Error', error.message);
-    }
-    console.log(error);
   }
-};
+
+  // eslint-disable-next-line class-methods-use-this
+  captureErrorGeneric(error) {
+    return { error: error.message };
+  }
+}

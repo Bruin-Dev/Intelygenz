@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import ServerCookie from 'next-cookies';
 import {
-  loginService,
+  LoginService,
   TOKEN_STORAGE_KEY
 } from '../services/auth/login.service';
 import { Routes } from '../config/routes';
@@ -21,7 +21,7 @@ function Login() {
 
   const onSubmit = async values => {
     setIsLoading(true);
-    const loginResponse = await loginService.postLogin(values);
+    const loginResponse = await new LoginService().postLogin(values);
     setResponse({ ...response, ...loginResponse });
 
     // Redirect to dashboard page
@@ -33,7 +33,7 @@ function Login() {
   };
 
   return (
-    <div className="login-wrapper">
+    <div className="login-wrapper" data-testid="login-page-component">
       <div className="flex mb-4">
         <div className="sm:w-full md:w-1/3 ml-auto mr-auto h-12">
           <form

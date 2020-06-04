@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { privateRoute } from '../components/privateRoute/PrivateRoute';
 import Menu from '../components/menu/Menu';
 import Loading from '../components/loading/Loading';
-import { dispatchService } from '../services/dispatch/dispatch.service';
+import { DispatchService } from '../services/dispatch/dispatch.service';
 import { Routes } from '../config/routes';
 import { states } from '../config/constants/states.constants';
 import {
@@ -22,10 +22,11 @@ function NewDispatch({ authToken }) {
   const { register, handleSubmit, errors } = useForm();
   const [response, setResponse] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [files, setFiles] = useState([]);
+  // const [files, setFiles] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState([]); // Note: ['CTS'] ['LIT'] ['CTS', 'LIT']
+  const dispatchService = new DispatchService();
 
-  const deleteFile = async index => {
+  /* const deleteFile = async index => {
     const auxArraySlice = [...files]; // For react state
     auxArraySlice.splice(index, 1);
     setFiles(auxArraySlice);
@@ -42,12 +43,13 @@ function NewDispatch({ authToken }) {
 
     const res = await dispatchService.uploadFiles(dispatchId, data);
     return res;
-  };
+  }; */
 
   const onSubmit = async data => {
     setIsLoading(true);
 
     const res = await dispatchService.newDispatch(data);
+
     if (res && !res.error && res.data && res.data.id) {
       // Upload files
       // const resFiles = await uploadFiles(res.data.id);
@@ -76,7 +78,7 @@ function NewDispatch({ authToken }) {
   const showFieldByVendor = vendor => selectedVendor.includes(vendor);
 
   return (
-    <>
+    <div data-testid="newDispatch-page-component">
       <Menu authToken={authToken} />
       <div className="new-dispatch-wrapper">
         <p className="form-title">New Dispatch Request</p>
@@ -100,6 +102,7 @@ function NewDispatch({ authToken }) {
                         }
                         type="date"
                         name="dateDispatch"
+                        data-testid="dateDispatch"
                         id="dateDispatch"
                         ref={register({ required: true })}
                       />
@@ -119,6 +122,7 @@ function NewDispatch({ authToken }) {
                       <div className="relative">
                         <select
                           name="timeDispatch"
+                          data-testid="timeDispatch"
                           id="timeDispatch"
                           ref={register({ required: true })}
                           className={
@@ -166,6 +170,7 @@ function NewDispatch({ authToken }) {
                     <div className="relative">
                       <select
                         name="timeZone"
+                        data-testid="timeZone"
                         id="timeZone"
                         ref={register({ required: true })}
                         className={
@@ -226,6 +231,7 @@ function NewDispatch({ authToken }) {
                         name="vendor"
                         value={vendorsOption.value}
                         id={vendorsOption.value}
+                        data-testid={`${vendorsOption.value}-checkbox`}
                         ref={register({ required: true })}
                         className="opacity-0 absolute rounded"
                         onChange={changeVendor}
@@ -261,6 +267,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="mettelId"
+                    data-testid="mettelId"
                     id="mettelId"
                     ref={register({ required: true })}
                     placeholder="458788998"
@@ -274,7 +281,7 @@ function NewDispatch({ authToken }) {
               </div>
 
               {showFieldByVendor(vendorsOptions[1].value) && (
-                <div className="flex flex-col">
+                <div className="flex flex-col" data-testid="cts-field">
                   <label
                     className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
                     htmlFor="slaLevel"
@@ -288,6 +295,7 @@ function NewDispatch({ authToken }) {
                       }
                       type="text"
                       name="slaLevel"
+                      data-testid="slaLevel"
                       id="slaLevel"
                       ref={register({ required: true })}
                       placeholder="Level 1"
@@ -322,6 +330,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="owner"
+                    data-testid="owner"
                     id="owner"
                     ref={register({ required: true })}
                     placeholder="James"
@@ -348,6 +357,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="address1"
+                    data-testid="address1"
                     id="address1"
                     ref={register({ required: true })}
                     placeholder="88 St Laurent Dr"
@@ -373,6 +383,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="address2"
+                    data-testid="address2"
                     id="address2"
                     ref={register({ required: true })}
                     placeholder="Clark"
@@ -400,6 +411,7 @@ function NewDispatch({ authToken }) {
                         }
                         type="text"
                         name="city"
+                        data-testid="city"
                         id="city"
                         ref={register({ required: true })}
                         placeholder="Nueva jersey"
@@ -420,6 +432,7 @@ function NewDispatch({ authToken }) {
                       <div className="relative">
                         <select
                           name="state"
+                          data-testid="state"
                           id="state"
                           ref={register({ required: true })}
                           className={
@@ -468,6 +481,7 @@ function NewDispatch({ authToken }) {
                         }
                         type="text"
                         name="zip"
+                        data-testid="zip"
                         id="zip"
                         ref={register({ required: true })}
                         placeholder="07097"
@@ -502,6 +516,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="firstName"
+                    data-testid="firstName"
                     id="firstName"
                     ref={register({ required: true })}
                     placeholder="Helen"
@@ -528,6 +543,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="lastName"
+                    data-testid="lastName"
                     id="lastName"
                     ref={register({ required: true, maxLength: 10 })}
                     placeholder="MacLow"
@@ -557,6 +573,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="phoneNumber"
+                    data-testid="phoneNumber"
                     id="phoneNumber"
                     ref={register({ required: true })}
                     placeholder="+1 587897524"
@@ -584,6 +601,7 @@ function NewDispatch({ authToken }) {
                       }
                       type="text"
                       name="email"
+                      data-testid="email"
                       id="email"
                       ref={register({
                         required: true,
@@ -636,6 +654,7 @@ function NewDispatch({ authToken }) {
                         <input
                           type="checkbox"
                           name="serviceType"
+                          data-testid="serviceType"
                           value={serviceTypesOption.value}
                           id={serviceTypesOption.value}
                           ref={register({ required: true })}
@@ -670,6 +689,7 @@ function NewDispatch({ authToken }) {
                     rows="4"
                     cols="50"
                     name="issues"
+                    data-testid="issues"
                     id="issues"
                     ref={register({ required: true })}
                     placeholder="Write your issues here ...."
@@ -699,6 +719,7 @@ function NewDispatch({ authToken }) {
                     rows="4"
                     cols="50"
                     name="materials"
+                    data-testid="materials"
                     id="materials"
                     ref={register({ required: true })}
                     placeholder="Write your comments here ...."
@@ -725,6 +746,7 @@ function NewDispatch({ authToken }) {
                     rows="4"
                     cols="50"
                     name="instructions"
+                    data-testid="instructions"
                     id="instructions"
                     placeholder="Write your instructions here ...."
                     ref={register({ required: true })}
@@ -766,6 +788,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="firstNameRequester"
+                    data-testid="firstNameRequester"
                     id="firstNameRequester"
                     placeholder="Charlize"
                     ref={register({ required: true })}
@@ -791,6 +814,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="lastNameRequester"
+                    data-testid="lastNameRequester"
                     id="lastNameRequester"
                     placeholder="Kidman"
                     ref={register({ required: true, maxLength: 10 })}
@@ -814,6 +838,7 @@ function NewDispatch({ authToken }) {
                   <div className="relative">
                     <select
                       name="department"
+                      data-testid="department"
                       id="department"
                       ref={register({ required: true })}
                       className={
@@ -868,6 +893,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="phoneNumberRequester"
+                    data-testid="phoneNumberRequester"
                     id="phoneNumberRequester"
                     placeholder="+1 000000000"
                     ref={register({ required: true })}
@@ -893,6 +919,7 @@ function NewDispatch({ authToken }) {
                     }
                     type="text"
                     name="emailRequester"
+                    data-testid="emailRequester"
                     id="emailRequester"
                     ref={register({
                       required: true,
@@ -901,7 +928,7 @@ function NewDispatch({ authToken }) {
                         message: 'Incorrect format: example@example.com'
                       }
                     })}
-                    placeholder="example@example.com"
+                    placeholder="example1@example.com"
                   />
                   {errors.emailRequester && (
                     <p className="text-red-500 text-xs italic">
@@ -917,7 +944,7 @@ function NewDispatch({ authToken }) {
 
           <div className="flex content-center">
             {isLoading ? (
-              <Loading />
+              <Loading data-testid="loading-new-dispatch-page" />
             ) : (
               <button
                 className="bg-teal-500 hover:bg-teal-700 text-white center py-2 px-4 rounded"
@@ -928,14 +955,17 @@ function NewDispatch({ authToken }) {
               </button>
             )}
             {response && response.error && (
-              <p className="text-red-500 text-xs italic">
+              <p
+                className="text-red-500 text-xs italic"
+                data-testid="error-new-dispatch-page"
+              >
                 Error, please try again later
               </p>
             )}
           </div>
         </form>
       </div>
-    </>
+    </div>
   );
 }
 

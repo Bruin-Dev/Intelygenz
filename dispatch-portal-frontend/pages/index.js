@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import DataTable from 'react-data-table-component';
-import { dispatchService } from '../services/dispatch/dispatch.service';
+import { DispatchService } from '../services/dispatch/dispatch.service';
 import { privateRoute } from '../components/privateRoute/PrivateRoute';
 import Menu from '../components/menu/Menu';
 import { StatusButton } from '../ui/components/status/StatusButton';
@@ -76,7 +76,7 @@ function Index({ authToken }) {
 
   useEffect(() => {
     async function getAllDispatches() {
-      const response = await dispatchService.getAll();
+      const response = await new DispatchService().getAll();
       if (response && response.data) {
         setData(response.data);
       }
@@ -90,7 +90,7 @@ function Index({ authToken }) {
   }, [page]);
 
   return (
-    <div>
+    <div data-testid="index-page-component">
       <Menu authToken={authToken} />
       <Link href={Routes.NEW_DISPATCH()}>
         <button

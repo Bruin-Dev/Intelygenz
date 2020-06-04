@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
-import { dispatchService } from '../../services/dispatch/dispatch.service';
+import { DispatchService } from '../../services/dispatch/dispatch.service';
 import { privateRoute } from '../../components/privateRoute/PrivateRoute';
 import Menu from '../../components/menu/Menu';
 import Loading from '../../components/loading/Loading';
@@ -9,7 +9,7 @@ import { config } from '../../config/config';
 import './id.scss';
 import { StatusButton } from '../../ui/components/status/StatusButton';
 
-function Dispatch({ authToken }) {
+function DispatchDetail({ authToken }) {
   const router = useRouter();
   const { id } = router.query;
 
@@ -17,9 +17,9 @@ function Dispatch({ authToken }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let response;
     async function getInfoDispatch() {
-      const response = await dispatchService.get(id);
-      console.log(response);
+      response = await new DispatchService().get(id);
 
       if (response && !response.error) {
         setData(response);
@@ -31,7 +31,7 @@ function Dispatch({ authToken }) {
 
   if (isLoading) {
     return (
-      <div>
+      <div data-testid="dispatch-detail-loading-page">
         <Menu authToken={authToken} />
         {isLoading && <Loading />}
       </div>
@@ -39,7 +39,7 @@ function Dispatch({ authToken }) {
   }
 
   return (
-    <div>
+    <div data-testid="dispatch-detail-page">
       <Menu authToken={authToken} />
       {!data ? (
         <p>Not found dispatch</p>
@@ -220,8 +220,8 @@ function Dispatch({ authToken }) {
   );
 }
 
-Dispatch.propTypes = {
+DispatchDetail.propTypes = {
   authToken: PropTypes.string
 };
 
-export default privateRoute(Dispatch);
+export default privateRoute(DispatchDetail);
