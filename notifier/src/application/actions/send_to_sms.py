@@ -10,7 +10,7 @@ class SendToSms:
         self._telestax_repository = telestax_repository
 
     async def send_to_sms(self, msg: dict):
-        status = 500
+        status = 400
         msg_body = msg.get('body')
         if msg_body is not None \
                 and "sms_data" in msg_body and msg_body["sms_data"] is not None and msg_body["sms_data"] != "" \
