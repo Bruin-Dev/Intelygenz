@@ -83,22 +83,23 @@ class TestBruinRepository:
 
         async def gather_mock(*args, **kwargs):
             results = []
-            results.append(await bruin_repository._get_tickets_by_status(ticket_status_1, params.copy(), response))
-            results.append(await bruin_repository._get_tickets_by_status(ticket_status_2, params.copy(), response))
-            results.append(await bruin_repository._get_tickets_by_status(ticket_status_3, params.copy(), response))
+            results.append(bruin_repository._get_tickets_by_status(ticket_status_1, params.copy(), response))
+            results.append(bruin_repository._get_tickets_by_status(ticket_status_2, params.copy(), response))
+            results.append(bruin_repository._get_tickets_by_status(ticket_status_3, params.copy(), response))
             return results
 
-        with patch.object(bruin_repository_module.asyncio, "gather", return_value=gather_mock()):
-            filtered_tickets = await bruin_repository.get_all_filtered_tickets(
-                params=params,
-                ticket_status=[ticket_status_1, ticket_status_2, ticket_status_3]
-            )
+        with patch.object(bruin_repository_module.asyncio, "get_event_loop"):
+            with patch.object(bruin_repository_module.asyncio, "gather", return_value=gather_mock()):
+                filtered_tickets = await bruin_repository.get_all_filtered_tickets(
+                    params=params,
+                    ticket_status=[ticket_status_1, ticket_status_2, ticket_status_3]
+                )
 
-            bruin_repository._bruin_client.get_all_tickets.assert_has_calls([
-                call(full_params_1),
-                call(full_params_2),
-            ], any_order=False)
-            assert call(full_params_3) not in bruin_repository._bruin_client.get_all_tickets.mock_calls
+                bruin_repository._bruin_client.get_all_tickets.assert_has_calls([
+                    call(full_params_1),
+                    call(full_params_2),
+                ], any_order=False)
+                assert call(full_params_3) not in bruin_repository._bruin_client.get_all_tickets.mock_calls
 
     @pytest.mark.asyncio
     async def get_filtered_tickets_with_bruin_returning_empty_lists_for_every_status_test(self):
@@ -221,45 +222,46 @@ class TestBruinRepository:
 
         async def gather_mock(*args, **kwargs):
             results = []
-            results.append(await bruin_repository._search_ticket_details_for_serial(edge_serial, ticket1, response))
-            results.append(await bruin_repository._search_ticket_details_for_serial(edge_serial, ticket2, response))
-            results.append(await bruin_repository._search_ticket_details_for_serial(edge_serial, ticket3, response))
+            results.append(bruin_repository._search_ticket_details_for_serial(edge_serial, ticket1, response))
+            results.append(bruin_repository._search_ticket_details_for_serial(edge_serial, ticket2, response))
+            results.append(bruin_repository._search_ticket_details_for_serial(edge_serial, ticket3, response))
             return results
 
-        with patch.object(bruin_repository_module.asyncio, "gather", return_value=gather_mock()):
-            ticket_details_by_edge = await bruin_repository.get_ticket_details_by_edge_serial(
-                edge_serial=edge_serial, params=params,
-                ticket_statuses=ticket_statuses,
-            )
+        with patch.object(bruin_repository_module.asyncio, "get_event_loop"):
+            with patch.object(bruin_repository_module.asyncio, "gather", return_value=gather_mock()):
+                ticket_details_by_edge = await bruin_repository.get_ticket_details_by_edge_serial(
+                    edge_serial=edge_serial, params=params,
+                    ticket_statuses=ticket_statuses,
+                )
 
-            bruin_repository.get_all_filtered_tickets.assert_awaited_once_with(
-                params=params,
-                ticket_status=ticket_statuses,
+                bruin_repository.get_all_filtered_tickets.assert_awaited_once_with(
+                    params=params,
+                    ticket_status=ticket_statuses,
 
-            )
-            bruin_repository.get_ticket_details.assert_has_calls([
-                call(ticket_1_id), call(ticket_2_id), call(ticket_3_id),
-            ], any_order=False)
+                )
+                bruin_repository.get_ticket_details.assert_has_calls([
+                    call(ticket_1_id), call(ticket_2_id), call(ticket_3_id),
+                ], any_order=False)
 
-            expected_ticket_details_list = [
-                {
-                    'ticketID': ticket_2_id,
-                    **ticket_2_details,
-                },
-                {
-                    'ticketID': ticket_3_id,
-                    **ticket_3_details,
-                },
-            ]
-            expected_ticket_detail1 = {
-                                        'ticketID': ticket_2_id,
-                                        **ticket_2_details,
-                                      }
-            expected_ticket_detail2 = {
-                                        'ticketID': ticket_3_id,
-                                        **ticket_3_details,
-                                      }
-            assert ticket_details_by_edge['body'] == expected_ticket_details_list
+                expected_ticket_details_list = [
+                    {
+                        'ticketID': ticket_2_id,
+                        **ticket_2_details,
+                    },
+                    {
+                        'ticketID': ticket_3_id,
+                        **ticket_3_details,
+                    },
+                ]
+                expected_ticket_detail1 = {
+                                            'ticketID': ticket_2_id,
+                                            **ticket_2_details,
+                                          }
+                expected_ticket_detail2 = {
+                                            'ticketID': ticket_3_id,
+                                            **ticket_3_details,
+                                          }
+                assert ticket_details_by_edge['body'] == expected_ticket_details_list
 
     @pytest.mark.asyncio
     async def get_ticket_details_by_edge_serial_with_filtered_tickets_reutrn_non_2XX_status_test(self):

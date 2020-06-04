@@ -14,8 +14,13 @@ class BruinRepository:
         response['body'] = []
         response['status'] = 200
 
+        loop = asyncio.get_event_loop()
         futures = [
-            self._get_tickets_by_status(status, params.copy(), response)
+            loop.run_in_executor(
+                None,
+                self._get_tickets_by_status,
+                status, params.copy(), response
+            )
             for status in ticket_status
         ]
         try:
@@ -28,7 +33,7 @@ class BruinRepository:
 
         return response
 
-    async def _get_tickets_by_status(self, status, params, response):
+    def _get_tickets_by_status(self, status, params, response):
         params["TicketStatus"] = status
         status_ticket_list = self._bruin_client.get_all_tickets(params)
         response['status'] = status_ticket_list['status']
@@ -52,10 +57,16 @@ class BruinRepository:
         if filtered_tickets['status'] not in range(200, 300):
             return filtered_tickets
 
+        loop = asyncio.get_event_loop()
         futures = [
-            self._search_ticket_details_for_serial(edge_serial, ticket, response)
+            loop.run_in_executor(
+                None,
+                self._search_ticket_details_for_serial,
+                edge_serial, ticket, response
+            )
             for ticket in filtered_tickets['body']
         ]
+
         results = await asyncio.gather(*futures)
 
         tickets = sum(results, [])
@@ -64,7 +75,7 @@ class BruinRepository:
 
         return response
 
-    async def _search_ticket_details_for_serial(self, edge_serial, ticket, response):
+    def _search_ticket_details_for_serial(self, edge_serial, ticket, response):
         results = []
         ticket_id = ticket['ticketID']
         ticket_details_dict = self.get_ticket_details(ticket_id)
