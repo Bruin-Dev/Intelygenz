@@ -21,7 +21,8 @@ from application.actions import lit_dispatch_monitor as lit_dispatch_monitor_mod
 
 from application.repositories.lit_repository import LitRepository
 
-from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms
+from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms, \
+    lit_get_tech_24_hours_before_sms, lit_get_tech_2_hours_before_sms
 from config import testconfig
 
 
@@ -191,6 +192,60 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._monitor_confirmed_dispatches.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def append_confirmed_note_test(self, lit_dispatch_monitor, dispatch_confirmed, append_note_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch_confirmed.get('Dispatch_Number')
+        sms_to = '+1987654327'
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+        sms_note = '#*Automation Engine*#\nDispatch Management - Dispatch Confirmed\n' \
+                   'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
+                   'Field Engineer\nJoe Malone\n+12123595129\n'
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(side_effect=[response_append_note_1])
+
+        response = await lit_dispatch_monitor._append_confirmed_note(dispatch_number, ticket_id, dispatch_confirmed)
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
+        assert response is True
+
+    @pytest.mark.asyncio
+    async def append_confirmed_note_error_test(self, lit_dispatch_monitor, dispatch_confirmed, append_note_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch_confirmed.get('Dispatch_Number')
+        sms_to = '+1987654327'
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 400
+        }
+        note_data = {
+            'vendor': 'LIT',
+            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'tech_name': dispatch_confirmed.get('Tech_First_Name'),
+            'tech_phone': dispatch_confirmed.get('Tech_Mobile_Number')
+        }
+        sms_note = '#*Automation Engine*#\nDispatch Management - Dispatch Confirmed\n' \
+                   'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
+                   'Field Engineer\nJoe Malone\n+12123595129\n'
+
+        send_error_sms_to_slack_response = f'An error occurred when appending a confirmed note with bruin client. ' \
+                                           f'Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - payload: {note_data}'
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(side_effect=[response_append_note_1])
+        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+
+        response = await lit_dispatch_monitor._append_confirmed_note(dispatch_number, ticket_id, dispatch_confirmed)
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
+        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(send_error_sms_to_slack_response)
+        assert response is False
+
+    @pytest.mark.asyncio
     async def send_confirmed_sms_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch.get('Dispatch_Number')
@@ -297,6 +352,313 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(send_error_sms_to_slack_response)
 
     @pytest.mark.asyncio
+    async def send_tech_24_sms_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch.get('Dispatch_Number')
+        sms_to = '+1987654327'
+        sms_data_payload = {
+            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'phone_number': sms_to
+        }
+
+        sms_data = lit_get_tech_24_hours_before_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to,
+            'sms_data': sms_data
+        }
+
+        send_sms_response = {
+            'request_id': uuid_,
+            'body': sms_success_response,
+            'status': 200
+        }
+
+        lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
+
+        response = await lit_dispatch_monitor._send_tech_24_sms(dispatch_number, ticket_id, dispatch, sms_to)
+        assert response is True
+
+        lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
+
+    @pytest.mark.asyncio
+    async def send_tech_24_sms_with_not_valid_sms_to_phone_test(self, lit_dispatch_monitor, dispatch):
+        updated_dispatch = dispatch.copy()
+        ticket_id = '3544800'
+        dispatch_number = updated_dispatch.get('Dispatch_Number')
+        updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = 'NOT VALID PHONE'
+        sms_to = None
+
+        lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
+
+        response = await lit_dispatch_monitor._send_tech_24_sms(dispatch_number, ticket_id, updated_dispatch, sms_to)
+        assert response is False
+
+        lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def send_tech_24_sms_with_error_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch.get('Dispatch_Number')
+        # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
+        # sms_to = LitRepository.get_sms_to(dispatch)
+        sms_to = '+1987654327'
+        sms_data_payload = {
+            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'phone_number': sms_to
+        }
+
+        sms_data = lit_get_tech_24_hours_before_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to,
+            'sms_data': sms_data
+        }
+
+        send_sms_response = {
+            'request_id': uuid_,
+            'body': sms_success_response,
+            'status': 400
+        }
+
+        send_error_sms_to_slack_response = f'An error occurred when sending a tech 24 hours SMS with notifier client. ' \
+                                           f'payload: {sms_payload}'
+
+        lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
+        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+
+        response = await lit_dispatch_monitor._send_tech_24_sms(dispatch_number, ticket_id, dispatch, sms_to)
+        assert response is False
+
+        lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
+        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(
+            send_error_sms_to_slack_response)
+
+    @pytest.mark.asyncio
+    async def send_tech_2_sms_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch.get('Dispatch_Number')
+        sms_to = '+1987654327'
+        sms_data_payload = {
+            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'phone_number': sms_to
+        }
+
+        sms_data = lit_get_tech_2_hours_before_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to,
+            'sms_data': sms_data
+        }
+
+        send_sms_response = {
+            'request_id': uuid_,
+            'body': sms_success_response,
+            'status': 200
+        }
+
+        lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
+
+        response = await lit_dispatch_monitor._send_tech_2_sms(dispatch_number, ticket_id, dispatch, sms_to)
+        assert response is True
+
+        lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
+
+    @pytest.mark.asyncio
+    async def send_tech_2_sms_with_not_valid_sms_to_phone_test(self, lit_dispatch_monitor, dispatch):
+        updated_dispatch = dispatch.copy()
+        ticket_id = '3544800'
+        dispatch_number = updated_dispatch.get('Dispatch_Number')
+        updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = 'NOT VALID PHONE'
+        sms_to = None
+
+        lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
+
+        response = await lit_dispatch_monitor._send_tech_2_sms(dispatch_number, ticket_id, updated_dispatch, sms_to)
+        assert response is False
+
+        lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def send_tech_2_sms_with_error_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch.get('Dispatch_Number')
+        # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
+        # sms_to = LitRepository.get_sms_to(dispatch)
+        sms_to = '+1987654327'
+        sms_data_payload = {
+            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'phone_number': sms_to
+        }
+
+        sms_data = lit_get_tech_2_hours_before_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to,
+            'sms_data': sms_data
+        }
+
+        send_sms_response = {
+            'request_id': uuid_,
+            'body': sms_success_response,
+            'status': 400
+        }
+
+        send_error_sms_to_slack_response = f'An error occurred when sending a tech 2 hours SMS with notifier client. ' \
+                                           f'payload: {sms_payload}'
+
+        lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
+        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+
+        response = await lit_dispatch_monitor._send_tech_2_sms(dispatch_number, ticket_id, dispatch, sms_to)
+        assert response is False
+
+        lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
+        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(
+            send_error_sms_to_slack_response)
+
+    @pytest.mark.asyncio
+    async def append_confirmed_sms_note_test(self, lit_dispatch_monitor, dispatch, append_note_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch.get('Dispatch_Number')
+        sms_to = '+1987654327'
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+        sms_note = '#*Automation Engine*#\nDispatch confirmation SMS sent to +1987654327\n'
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(side_effect=[response_append_note_1])
+
+        response = await lit_dispatch_monitor._append_confirmed_sms_note(dispatch_number, ticket_id, sms_to)
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
+        assert response is True
+
+    @pytest.mark.asyncio
+    async def append_confirmed_sms_note_error_test(self, lit_dispatch_monitor, dispatch, append_note_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch.get('Dispatch_Number')
+        sms_to = '+1987654327'
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 400
+        }
+        sms_note = '#*Automation Engine*#\nDispatch confirmation SMS sent to +1987654327\n'
+
+        send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
+                                           f'- SMS Confirmed note not appended'
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+
+        response = await lit_dispatch_monitor._append_confirmed_sms_note(dispatch_number, ticket_id, sms_to)
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
+        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(send_error_sms_to_slack_response)
+        assert response is False
+
+    @pytest.mark.asyncio
+    async def append_tech_24_sms_note_test(self, lit_dispatch_monitor, dispatch, append_note_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch.get('Dispatch_Number')
+        sms_to = '+1987654327'
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+        sms_note = '#*Automation Engine*#\nDispatch 24h prior reminder SMS sent to +1987654327\n'
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+
+        response = await lit_dispatch_monitor._append_tech_24_sms_note(dispatch_number, ticket_id, sms_to)
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
+        assert response is True
+
+    @pytest.mark.asyncio
+    async def append_tech_24_sms_note_error_test(self, lit_dispatch_monitor, dispatch, append_note_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch.get('Dispatch_Number')
+        sms_to = '+1987654327'
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 400
+        }
+        sms_note = '#*Automation Engine*#\nDispatch 24h prior reminder SMS sent to +1987654327\n'
+
+        send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
+                                           f'- SMS tech 24 hours note not appended'
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+
+        response = await lit_dispatch_monitor._append_tech_24_sms_note(dispatch_number, ticket_id, sms_to)
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
+        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(
+            send_error_sms_to_slack_response)
+        assert response is False
+
+    @pytest.mark.asyncio
+    async def append_tech_2_sms_note_test(self, lit_dispatch_monitor, dispatch, append_note_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch.get('Dispatch_Number')
+        sms_to = '+1987654327'
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+        sms_note = '#*Automation Engine*#\nDispatch 2h prior reminder SMS sent to +1987654327\n'
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+
+        response = await lit_dispatch_monitor._append_tech_2_sms_note(dispatch_number, ticket_id, sms_to)
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
+        assert response is True
+
+    @pytest.mark.asyncio
+    async def append_tech_2_sms_note_error_test(self, lit_dispatch_monitor, dispatch, append_note_response):
+        ticket_id = '3544800'
+        dispatch_number = dispatch.get('Dispatch_Number')
+        sms_to = '+1987654327'
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 400
+        }
+        sms_note = '#*Automation Engine*#\nDispatch 2h prior reminder SMS sent to +1987654327\n'
+
+        send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
+                                           f'- SMS tech 2 hours note not appended'
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+
+        response = await lit_dispatch_monitor._append_tech_2_sms_note(dispatch_number, ticket_id, sms_to)
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
+        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(
+            send_error_sms_to_slack_response)
+        assert response is False
+
+    @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, lit_dispatch_monitor, dispatch_confirmed, dispatch_confirmed_2,
                                                 ticket_details_1, ticket_details_2,
                                                 append_note_response, append_note_response_2,
@@ -328,8 +690,8 @@ class TestLitDispatchMonitor:
             'status': 200
         }
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +1987654327\n'
-        sms_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +1987654327\n'
+        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
+        sms_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595126\n'
 
         dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
@@ -342,11 +704,11 @@ class TestLitDispatchMonitor:
                            'Field Engineer\nJoe Malone\n+12123595129\n'
         confirmed_note_2 = '#*Automation Engine*#\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
-                           'Dispatch scheduled for 2020-03-16 @ 10:30AM-11:30PM Eastern Time\n\n' \
-                           'Field Engineer\nHulk Hogan\n+12123596666\n'
+                           'Dispatch scheduled for 2020-03-16 @ 10:30AM-11:30AM Eastern Time\n\n' \
+                           'Field Engineer\nHulk Hogan\n+12123595126\n'
 
-        sms_to = '+1987654327'
-        sms_to_2 = '+1987654327'
+        sms_to = '+12123595129'
+        sms_to_2 = '+12123595126'
 
         sms_data = ''
         sms_payload = {
@@ -412,4 +774,314 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._send_confirmed_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to),
             call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2)
+        ])
+
+    @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_skipping_one_invalid_ticket_id_test(
+            self, lit_dispatch_monitor, dispatch_confirmed, dispatch_confirmed_skipped, ticket_details_1, append_note_response):
+        confirmed_dispatches = [
+            dispatch_confirmed,
+            dispatch_confirmed_skipped
+        ]
+
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+
+        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
+
+        dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
+        ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+
+        confirmed_note_1 = '#*Automation Engine*#\n' \
+                           'Dispatch Management - Dispatch Confirmed\n' \
+                           'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
+                           'Field Engineer\nJoe Malone\n+12123595129\n'
+
+        sms_to = '+12123595129'
+
+        responses_details_mock = [
+            ticket_details_1
+        ]
+        responses_append_notes_mock = [
+            response_append_note_1,
+            response_append_note_1
+        ]
+        responses_confirmed_sms = [
+            True
+        ]
+
+        datetime_return_1 = {
+            'datetime_localized': datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'),
+            'timezone': timezone(f'US/Pacific')
+        }
+        datetime_returns_mock = [
+            datetime_return_1
+        ]
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
+            side_effect=datetime_returns_mock)
+        lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=responses_append_notes_mock)
+        lit_dispatch_monitor._send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
+
+        await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized.assert_has_calls([
+            call(dispatch_confirmed, dispatch_number_1, ticket_id_1),
+        ])
+
+        lit_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1)
+        ])
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_has_awaits([
+            call(ticket_id_1, confirmed_note_1),
+            call(ticket_id_1, sms_note_1)
+        ])
+
+        lit_dispatch_monitor._send_confirmed_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+        ])
+
+    @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_skipping_one_invalid_datetime_test(self, lit_dispatch_monitor, dispatch_confirmed,
+                                                             dispatch_confirmed_skipped_datetime, ticket_details_1,
+                                                             append_note_response):
+        confirmed_dispatches = [
+            dispatch_confirmed,
+            dispatch_confirmed_skipped_datetime
+        ]
+
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+
+        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
+
+        dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
+        ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+
+        confirmed_note_1 = '#*Automation Engine*#\n' \
+                           'Dispatch Management - Dispatch Confirmed\n' \
+                           'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
+                           'Field Engineer\nJoe Malone\n+12123595129\n'
+
+        sms_to = '+12123595129'
+
+        responses_details_mock = [
+            ticket_details_1
+        ]
+        responses_append_notes_mock = [
+            response_append_note_1,
+            response_append_note_1
+        ]
+        responses_confirmed_sms = [
+            True
+        ]
+
+        datetime_return_1 = {
+            'datetime_localized': datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'),
+            'timezone': timezone(f'US/Pacific')
+        }
+        datetime_return_2 = None
+        datetime_returns_mock = [
+            datetime_return_1,
+            datetime_return_2
+        ]
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
+            side_effect=datetime_returns_mock)
+        lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=responses_append_notes_mock)
+        lit_dispatch_monitor._send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
+
+        await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized.assert_has_calls([
+            call(dispatch_confirmed, dispatch_number_1, ticket_id_1),
+        ])
+
+        lit_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1)
+        ])
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_has_awaits([
+            call(ticket_id_1, confirmed_note_1),
+            call(ticket_id_1, sms_note_1)
+        ])
+
+        lit_dispatch_monitor._send_confirmed_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+        ])
+
+    @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_skipping_one_invalid_sms_to_test(self, lit_dispatch_monitor, dispatch_confirmed,
+                                                             dispatch_confirmed_skipped_bad_phone, ticket_details_1,
+                                                             append_note_response):
+        confirmed_dispatches = [
+            dispatch_confirmed,
+            dispatch_confirmed_skipped_bad_phone
+        ]
+
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+
+        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
+
+        dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
+        ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+        dispatch_number_2 = dispatch_confirmed_skipped_bad_phone.get('Dispatch_Number')
+        ticket_id_2 = dispatch_confirmed_skipped_bad_phone.get('MetTel_Bruin_TicketID')
+
+        confirmed_note_1 = '#*Automation Engine*#\n' \
+                           'Dispatch Management - Dispatch Confirmed\n' \
+                           'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
+                           'Field Engineer\nJoe Malone\n+12123595129\n'
+
+        sms_to = '+12123595129'
+
+        responses_details_mock = [
+            ticket_details_1
+        ]
+        responses_append_notes_mock = [
+            response_append_note_1,
+            response_append_note_1
+        ]
+        responses_confirmed_sms = [
+            True
+        ]
+
+        datetime_return_1 = {
+            'datetime_localized': datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'),
+            'timezone': timezone(f'US/Pacific')
+        }
+        datetime_return_2 = {
+            'datetime_localized': datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'),
+            'timezone': timezone(f'US/Eastern')
+        }
+        datetime_returns_mock = [
+            datetime_return_1,
+            datetime_return_2
+        ]
+
+        err_msg = f"An error occurred retrieve 'sms_to' number " \
+                  f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2} - " \
+                  f"from: {dispatch_confirmed_skipped_bad_phone.get('Job_Site_Contact_Name_and_Phone_Number')}"
+
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
+            side_effect=datetime_returns_mock)
+        lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=responses_append_notes_mock)
+        lit_dispatch_monitor._send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
+        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock(sideffect=[])
+
+        await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized.assert_has_calls([
+            call(dispatch_confirmed, dispatch_number_1, ticket_id_1),
+        ])
+
+        lit_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1)
+        ])
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_has_awaits([
+            call(ticket_id_1, confirmed_note_1),
+            call(ticket_id_1, sms_note_1)
+        ])
+
+        lit_dispatch_monitor._send_confirmed_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+        ])
+
+        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(err_msg)
+
+    @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_error_getting_ticket_details_test(
+            self, lit_dispatch_monitor, dispatch_confirmed, dispatch_confirmed_2, ticket_details_1, ticket_details_2_error,
+            append_note_response):
+        confirmed_dispatches = [
+            dispatch_confirmed,
+            dispatch_confirmed_2
+        ]
+
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+
+        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
+
+        dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
+        ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+        dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
+        ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
+
+        confirmed_note_1 = '#*Automation Engine*#\n' \
+                           'Dispatch Management - Dispatch Confirmed\n' \
+                           'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
+                           'Field Engineer\nJoe Malone\n+12123595129\n'
+
+        sms_to = '+12123595129'
+
+        responses_details_mock = [
+            ticket_details_1,
+            ticket_details_2_error
+        ]
+        responses_append_notes_mock = [
+            response_append_note_1,
+            response_append_note_1
+        ]
+        responses_confirmed_sms = [
+            True
+        ]
+
+        datetime_return_1 = {
+            'datetime_localized': datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'),
+            'timezone': timezone(f'US/Pacific')
+        }
+        datetime_return_2 = {
+            'datetime_localized': datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'),
+            'timezone': timezone(f'US/Eastern')
+        }
+        datetime_returns_mock = [
+            datetime_return_1,
+            datetime_return_2
+        ]
+
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
+            side_effect=datetime_returns_mock)
+        lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=responses_append_notes_mock)
+        lit_dispatch_monitor._send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
+
+        await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized.assert_has_calls([
+            call(dispatch_confirmed, dispatch_number_1, ticket_id_1),
+        ])
+
+        lit_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1),
+            call(ticket_id_2)
+        ])
+
+        lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_has_awaits([
+            call(ticket_id_1, confirmed_note_1),
+            call(ticket_id_1, sms_note_1)
+        ])
+
+        lit_dispatch_monitor._send_confirmed_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
         ])

@@ -1,7 +1,10 @@
+from phonenumbers import NumberParseException
 from shortuuid import uuid
 import datetime
 from pytz import timezone
 
+
+import phonenumbers
 
 from application.repositories import nats_error_response
 
@@ -12,6 +15,7 @@ class LitRepository:
         self._config = config
         self._event_bus = event_bus
         self._notifications_repository = notifications_repository
+        self.DATETIME_TZ_FORMAT = "%Y-%m-%d %I:%M%p"
 
     async def get_all_dispatches(self):
         err_msg = None
@@ -48,17 +52,17 @@ class LitRepository:
 
     @staticmethod
     def get_sms_to(dispatch):
-        # TODO: https://pypi.org/project/phonenumbers/
         # Example format->  Job_Site_Contact_Name_and_Phone_Number: "Jane Doe +1 666 6666 666"
         sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
         if sms_to is None or sms_to.strip() == '':
             return None
         # Remove non digits
         sms_to = ''.join(ch for ch in sms_to if ch.isdigit())
-        sms_to = f"+{sms_to}"
-        if sms_to.strip() == '+':
+        try:
+            sms_to = phonenumbers.parse(sms_to, "US")
+        except NumberParseException:
             return None
-        return sms_to
+        return phonenumbers.format_number(sms_to, phonenumbers.PhoneNumberFormat.E164)
 
     def get_dispatch_confirmed_date_time_localized(self, dispatch, dispatch_number, ticket_id):
         return_datetime_localized = None
@@ -85,19 +89,10 @@ class LitRepository:
                 final_time_of_dispatch = f"{final_time_of_dispatch}:00"
 
             final_datetime = datetime.datetime.strptime(f'{date_of_dispatch} {final_time_of_dispatch}{am_pm}',
-                                               "%Y-%m-%d %I:%M%p")
-
+                                                        self.DATETIME_TZ_FORMAT)
             # "Pacific Time"
             time_zone_of_dispatch = dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)
-
-            if date_of_dispatch is None or time_of_dispatch is None or time_zone_of_dispatch is None:
-                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                  f"has not valid date '{date_of_dispatch}' or "
-                                  f"time '{time_of_dispatch}' or "
-                                  f"timezone '{time_zone_of_dispatch}'.")
-                return None
-            if 'Time' in time_zone_of_dispatch:
-                time_zone_of_dispatch = time_zone_of_dispatch.replace('Time', '').replace(' ', '')
+            time_zone_of_dispatch = time_zone_of_dispatch.replace('Time', '').replace(' ', '')
             final_timezone = timezone(f'US/{time_zone_of_dispatch}')
 
             return_datetime_localized = final_timezone.localize(final_datetime)

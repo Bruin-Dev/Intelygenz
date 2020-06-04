@@ -9,7 +9,8 @@ from apscheduler.util import undefined
 from pytz import timezone
 
 from application.repositories.utils_repository import UtilsRepository
-from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_note
+from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_note, \
+    lit_get_tech_24_hours_before_sms_note, lit_get_tech_2_hours_before_sms_note
 from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_sms_note
 from application.repositories.lit_repository import LitRepository
 from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms
@@ -267,7 +268,7 @@ class LitDispatchMonitor:
             self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - SMS NOT sent")
-            err_msg = f'An error occurred when sending a tech 2 S hours SMS with notifier client. ' \
+            err_msg = f'An error occurred when sending a tech 2 hours SMS with notifier client. ' \
                       f'payload: {sms_payload}'
             await self._notifications_repository.send_to_slack(err_msg)
             return False
@@ -289,6 +290,7 @@ class LitDispatchMonitor:
         note = lit_get_dispatch_confirmed_note(note_data)
         # if self._config.DISPATCH_MONITOR_CONFIG['environment'] == 'production':
         append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, note)
+        # import pdb;pdb.set_trace()
         append_note_response_status = append_note_response['status']
         append_note_response_body = append_note_response['body']
         if append_note_response_status not in range(200, 300):
@@ -318,8 +320,9 @@ class LitDispatchMonitor:
         if append_sms_note_response_status not in range(200, 300):
             self._logger.info(f"Note: `{sms_note}` "
                               f"Dispatch: {dispatch_number} "
-                              f"Ticket_id: {ticket_id} - SMS note not appended")
-            err_msg = f"Note: `{sms_note}` Dispatch: {dispatch_number} Ticket_id: {ticket_id} - SMS note not appended"
+                              f"Ticket_id: {ticket_id} - SMS Confirmed note not appended")
+            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
+                      f"- SMS Confirmed note not appended"
             await self._notifications_repository.send_to_slack(err_msg)
             return False
         self._logger.info(f"Note: `{sms_note}` "
@@ -330,20 +333,20 @@ class LitDispatchMonitor:
         return True
 
     async def _append_tech_24_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
-        raise Exception("TODO: _append_tech_24_sms_note")
         sms_note_data = {
             'phone_number': sms_to
         }
-        sms_note = lit_get_dispatch_confirmed_sms_note(sms_note_data)
+        sms_note = lit_get_tech_24_hours_before_sms_note(sms_note_data)
         append_sms_note_response = await self._bruin_repository.append_note_to_ticket(
             ticket_id, sms_note)
         append_sms_note_response_status = append_sms_note_response['status']
         append_sms_note_response_body = append_sms_note_response['body']
         if append_sms_note_response_status not in range(200, 300):
-            self._logger.info(f"Note: `{sms_note}` "
-                              f"Dispatch: {dispatch_number} "
-                              f"Ticket_id: {ticket_id} - SMS tech 24 hours note not appended")
-            err_msg = f"Note: `{sms_note}` Dispatch: {dispatch_number} Ticket_id: {ticket_id} " \
+            self._logger.info(f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} "
+                              f"Note: `{sms_note}` "
+                              f"- SMS tech 2 hours note not appended")
+            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
                       f"- SMS tech 24 hours note not appended"
             await self._notifications_repository.send_to_slack(err_msg)
             return False
@@ -355,20 +358,20 @@ class LitDispatchMonitor:
         return True
 
     async def _append_tech_2_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
-        raise Exception("TODO: _append_tech_2_sms_note")
         sms_note_data = {
             'phone_number': sms_to
         }
-        sms_note = lit_get_dispatch_confirmed_sms_note(sms_note_data)
+        sms_note = lit_get_tech_2_hours_before_sms_note(sms_note_data)
         append_sms_note_response = await self._bruin_repository.append_note_to_ticket(
             ticket_id, sms_note)
         append_sms_note_response_status = append_sms_note_response['status']
         append_sms_note_response_body = append_sms_note_response['body']
         if append_sms_note_response_status not in range(200, 300):
-            self._logger.info(f"Note: `{sms_note}` "
-                              f"Dispatch: {dispatch_number} "
-                              f"Ticket_id: {ticket_id} - SMS tech 2 hours note not appended")
-            err_msg = f"Note: `{sms_note}` Dispatch: {dispatch_number} Ticket_id: {ticket_id} " \
+            self._logger.info(f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} "
+                              f"Note: `{sms_note}` "
+                              f"- SMS tech 2 hours note not appended")
+            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
                       f"- SMS tech 2 hours note not appended"
             await self._notifications_repository.send_to_slack(err_msg)
             return False
@@ -404,6 +407,7 @@ class LitDispatchMonitor:
                     continue
 
                 sms_to = LitRepository.get_sms_to(dispatch)
+
                 if sms_to is None:
                     self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                       f"- Error: we could not retrieve 'sms_to' number from: "
@@ -430,6 +434,9 @@ class LitDispatchMonitor:
                     self._logger.error(f"Error: Dispatch [{dispatch_number}] "
                                        f"Get ticket details for ticket {ticket_id}: "
                                        f"{response_body}")
+                    err_msg = f"An error occurred retrieve getting ticket details from bruin " \
+                              f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
+                    await self._notifications_repository.send_to_slack(err_msg)
                     continue
                 ticket_notes = response_body.get('ticketNotes', [])
 

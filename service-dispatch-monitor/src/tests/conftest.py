@@ -60,7 +60,7 @@ def dispatch():
             "Job_Site_Zip_Code": "10038-4201",
             "Job_Site_Street": "160 Broadway",
             "Job_Site_State": "NY",
-            "Job_Site_Contact_Name_and_Phone_Number": "Test Client on site +1987654327",
+            "Job_Site_Contact_Name_and_Phone_Number": "Test Client on site +12123595126",
             "Job_Site_City": "New York",
             "Job_Site": "me test",
             "Information_for_Tech": "test",
@@ -77,6 +77,7 @@ def dispatch():
 @pytest.fixture(scope='function')
 def dispatch_confirmed(lit_dispatch_monitor, dispatch):
     updated_dispatch = copy.deepcopy(dispatch)
+    updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "Test Client on site +12123595129"
     updated_dispatch["Tech_First_Name"] = "Joe Malone"
     updated_dispatch["Tech_Mobile_Number"] = "+12123595129"
     updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
@@ -90,11 +91,65 @@ def dispatch_confirmed_2(lit_dispatch_monitor, dispatch):
     updated_dispatch = copy.deepcopy(dispatch)
     updated_dispatch["Dispatch_Number"] = "DIS37406"
     updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
-    updated_dispatch["Tech_Mobile_Number"] = "+12123596666"
+    updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
     updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
     updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
-    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30PM"
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_confirmed_skipped(lit_dispatch_monitor, dispatch):
+    updated_dispatch = copy.deepcopy(dispatch)
+    updated_dispatch["Dispatch_Number"] = "DIS37406"
+    updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
+    updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
+    updated_dispatch["MetTel_Bruin_TicketID"] = "3544801|OTHER"
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_confirmed_skipped_datetime(lit_dispatch_monitor, dispatch):
+    updated_dispatch = copy.deepcopy(dispatch)
+    updated_dispatch["Dispatch_Number"] = "DIS37406"
+    updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
+    updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
+    updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "BAD TIME"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_confirmed_skipped_bad_phone(lit_dispatch_monitor, dispatch):
+    updated_dispatch = copy.deepcopy(dispatch)
+    updated_dispatch["Dispatch_Number"] = "DIS37406"
+    updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
+    updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
+    updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
+    updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "NOT VALID PHONE"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_confirmed_error(dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed)
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30-11:30"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_confirmed_error_2(dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed)
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = None
     return updated_dispatch
 
 
@@ -144,7 +199,7 @@ def lit_repository():
 @pytest.fixture(scope='function')
 def sms_success_response():
     sms_from = '+16666666666'
-    sms_to = '+1987654327'
+    sms_to = '+19876543276'
     return {
           'sid': 'SM74b94f1bd0da4546ad034fc7c69791c0',
           'date_created': 'Fri, 29 May 2020 10:22:40 +0000',
@@ -240,6 +295,14 @@ def ticket_details_1(ticket_details):
 @pytest.fixture(scope='function')
 def ticket_details_2(ticket_details):
     updated_ticket_details = copy.deepcopy(ticket_details)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_2_error(ticket_details):
+    updated_ticket_details = copy.deepcopy(ticket_details)
+    updated_ticket_details['body'] = None
+    updated_ticket_details['status'] = 400
     return updated_ticket_details
 
 

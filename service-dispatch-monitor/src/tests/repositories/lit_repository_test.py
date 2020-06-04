@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from asynctest import CoroutineMock
+from pytz import timezone
 from shortuuid import uuid
 
 from application.repositories import lit_repository as lit_repository_module
@@ -99,8 +100,8 @@ class TestLitRepository:
 
     def get_sms_to_test(self, dispatch):
         updated_dispatch = copy.deepcopy(dispatch)
-        updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = "Test Client on site +1 (987) 654 327"
-        expected_phone = "+1987654327"
+        updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = "Test Client on site +1 (212) 359-5129"
+        expected_phone = "+12123595129"
         assert LitRepository.get_sms_to(updated_dispatch) == expected_phone
 
     def get_sms_to_with_error_test(self, dispatch):
@@ -112,3 +113,49 @@ class TestLitRepository:
         updated_dispatch = copy.deepcopy(dispatch)
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = "no valid Number"
         assert LitRepository.get_sms_to(updated_dispatch) is None
+
+    def get_dispatch_confirmed_date_time_localized_test(self, lit_repository, dispatch_confirmed, dispatch_confirmed_2,
+                                                        dispatch_confirmed_error, dispatch_confirmed_error_2):
+        dispatch_number = dispatch_confirmed.get('Dispatch_Number')
+        ticket_id = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+        date_of_dispatch = dispatch_confirmed.get('Date_of_Dispatch', None)
+        final_time_of_dispatch = '4:00'
+        am_pm = 'PM'
+        final_timezone = timezone(f'US/Pacific')
+        final_datetime = datetime.strptime(f'{date_of_dispatch} {final_time_of_dispatch}{am_pm}', "%Y-%m-%d %I:%M%p")
+        return_datetime_localized = final_timezone.localize(final_datetime)
+
+        expected_response = {
+            'datetime_localized': return_datetime_localized,
+            'timezone': final_timezone
+        }
+
+        dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
+        ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
+        date_of_dispatch_2 = dispatch_confirmed_2.get('Date_of_Dispatch')
+        final_time_of_dispatch_2 = '10:30'
+        am_pm_2 = 'AM'
+        final_timezone_2 = timezone(f'US/Eastern')
+        final_datetime_2 = datetime.strptime(f'{date_of_dispatch_2} {final_time_of_dispatch_2}{am_pm_2}',
+                                             lit_repository.DATETIME_TZ_FORMAT)
+        return_datetime_localized_2 = final_timezone_2.localize(final_datetime_2)
+
+        expected_response_2 = {
+            'datetime_localized': return_datetime_localized_2,
+            'timezone': final_timezone_2
+        }
+
+        response = lit_repository.get_dispatch_confirmed_date_time_localized(dispatch_confirmed, dispatch_number,
+                                                                             ticket_id)
+        response_2 = lit_repository.get_dispatch_confirmed_date_time_localized(dispatch_confirmed_2, dispatch_number_2,
+                                                                               ticket_id_2)
+        response_3 = lit_repository.get_dispatch_confirmed_date_time_localized(dispatch_confirmed_error, dispatch_number_2,
+                                                                               ticket_id_2)
+        response_4 = lit_repository.get_dispatch_confirmed_date_time_localized(dispatch_confirmed_error_2,
+                                                                               dispatch_number_2,
+                                                                               ticket_id_2)
+
+        assert response == expected_response
+        assert response_2 == expected_response_2
+        assert response_3 is None
+        assert response_4 is None
