@@ -3002,6 +3002,315 @@ class TestTNBAMonitor:
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def process_tickets_without_tnba_with_append_multiple_notes_returning_non_2xx_status_test(self):
+        ticket_1_id = 12345
+        ticket_1_detail_1_id = 2746930
+        ticket_1_detail_1_serial_number = 'VC1234567'
+        ticket_1_detail_2_id = 2746931
+        ticket_1_detail_2_serial_number = 'VC9999999'
+        ticket_1 = {
+            'ticket_id': ticket_1_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_1_detail_1_id,
+                    "detailValue": ticket_1_detail_1_serial_number,
+                },
+                {
+                    "detailID": ticket_1_detail_2_id,
+                    "detailValue": ticket_1_detail_2_serial_number,
+                },
+            ],
+            'ticket_notes': [
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
+                    "noteId": 41894040,
+                    "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+                {
+                    "noteId": 41894040,
+                    "noteValue": (
+                        f'#*Automation Engine*#\nAuto-resolving ticket.\nTimeStamp: 2019-07-30 06:38:00+00:00'
+                    ),
+                    "createdDate": "2020-02-24T10:07:13.503-05:00",
+                },
+            ],
+        }
+
+        ticket_2_id = 67890
+        ticket_2_detail_1_id = 2746930
+        ticket_2_detail_1_serial_number = 'VC1111222'
+        ticket_2 = {
+            'ticket_id': ticket_2_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_2_detail_1_id,
+                    "detailValue": ticket_2_detail_1_serial_number,
+                },
+            ],
+            'ticket_notes': [],
+        }
+
+        tickets = [
+            ticket_1,
+            ticket_2,
+        ]
+
+        t7_prediction_response_for_ticket_1_detail_1_predictions_item_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        t7_prediction_response_for_ticket_1_detail_1_predictions_item_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
+        t7_prediction_response_for_ticket_1_detail_1_predictions = [
+            t7_prediction_response_for_ticket_1_detail_1_predictions_item_1,
+            t7_prediction_response_for_ticket_1_detail_1_predictions_item_2,
+        ]
+        t7_prediction_response_for_ticket_1_detail_1_prediction_object = {
+            'assetId': ticket_1_detail_1_serial_number,
+            'predictions': t7_prediction_response_for_ticket_1_detail_1_predictions,
+        }
+        t7_prediction_response_for_ticket_1_detail_2_predictions_item_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        t7_prediction_response_for_ticket_1_detail_2_predictions_item_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
+        t7_prediction_response_for_ticket_1_detail_2_predictions = [
+            t7_prediction_response_for_ticket_1_detail_2_predictions_item_1,
+            t7_prediction_response_for_ticket_1_detail_2_predictions_item_2,
+        ]
+        t7_prediction_response_for_ticket_1_detail_2_prediction_object = {
+            'assetId': ticket_1_detail_2_serial_number,
+            'predictions': t7_prediction_response_for_ticket_1_detail_2_predictions,
+        }
+        t7_prediction_response_for_ticket_1 = {
+            'body': [
+                t7_prediction_response_for_ticket_1_detail_1_prediction_object,
+                t7_prediction_response_for_ticket_1_detail_2_prediction_object,
+            ],
+            'status': 200
+        }
+
+        t7_prediction_response_for_ticket_2_detail_1_predictions_item_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        t7_prediction_response_for_ticket_2_detail_1_predictions_item_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
+        t7_prediction_response_for_ticket_2_detail_1_predictions = [
+            t7_prediction_response_for_ticket_2_detail_1_predictions_item_1,
+            t7_prediction_response_for_ticket_2_detail_1_predictions_item_2,
+        ]
+        t7_prediction_response_for_ticket_2_detail_1_prediction_object = {
+            'assetId': ticket_2_detail_1_serial_number,
+            'predictions': t7_prediction_response_for_ticket_2_detail_1_predictions,
+        }
+        t7_prediction_response_for_ticket_2 = {
+            'body': [
+                t7_prediction_response_for_ticket_2_detail_1_prediction_object,
+            ],
+            'status': 200
+        }
+
+        next_results_for_ticket_1_detail_1_response = {
+            'body': {
+                "currentTaskId": 10683187,
+                "currentTaskKey": "344",
+                "currentTaskName": "Holmdel NOC Investigate ",
+                "nextResults": [
+                    {
+                        "resultTypeId": 620,
+                        "resultName": "Repair Completed",
+                        "notes": [
+                            {
+                                "noteType": "Notes",
+                                "noteDescription": "Notes",
+                                "availableValueOptions": None,
+                                "defaultValue": None,
+                                "required": False,
+                            }
+                        ]
+                    }
+                ],
+            },
+            'status': 200,
+        }
+        next_results_for_ticket_1_detail_2_response = {
+            'body': {
+                "currentTaskId": 10683187,
+                "currentTaskKey": "344",
+                "currentTaskName": "Holmdel NOC Investigate ",
+                "nextResults": [
+                    {
+                        "resultTypeId": 620,
+                        "resultName": "Request Completed",
+                        "notes": [
+                            {
+                                "noteType": "Notes",
+                                "noteDescription": "Notes",
+                                "availableValueOptions": None,
+                                "defaultValue": None,
+                                "required": False,
+                            }
+                        ]
+                    }
+                ],
+            },
+            'status': 200,
+        }
+        next_results_for_ticket_2_detail_1_response = {
+            'body': {
+                "currentTaskId": 10683187,
+                "currentTaskKey": "344",
+                "currentTaskName": "Holmdel NOC Investigate ",
+                "nextResults": [
+                    {
+                        "resultTypeId": 620,
+                        "resultName": "Repair Completed",
+                        "notes": [
+                            {
+                                "noteType": "Notes",
+                                "noteDescription": "Notes",
+                                "availableValueOptions": None,
+                                "defaultValue": None,
+                                "required": False,
+                            }
+                        ]
+                    }
+                ],
+            },
+            'status': 200,
+        }
+
+        filtered_predictions_for_ticket_1_detail_1 = [
+            t7_prediction_response_for_ticket_1_detail_1_predictions_item_1
+        ]
+        filtered_predictions_for_ticket_1_detail_2 = [
+            t7_prediction_response_for_ticket_1_detail_2_predictions_item_1
+        ]
+        filtered_predictions_for_ticket_2_detail_1 = [
+            t7_prediction_response_for_ticket_2_detail_1_predictions_item_1
+        ]
+
+        tnba_note_for_ticket_1_detail_1 = 'This is TNBA note 1'
+        tnba_note_for_ticket_1_detail_2 = 'This is TNBA note 2'
+        tnba_note_for_ticket_2_detail_1 = 'This is TNBA note 3'
+
+        append_multiple_notes_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        monitoring_map_repository = Mock()
+
+        ticket_repository = Mock()
+        ticket_repository.build_tnba_note_from_prediction = Mock(side_effect=[
+            tnba_note_for_ticket_1_detail_1,
+            tnba_note_for_ticket_1_detail_2,
+            tnba_note_for_ticket_2_detail_1,
+        ])
+
+        prediction_repository = Mock()
+        prediction_repository.find_prediction_object_by_serial = Mock(side_effect=[
+            t7_prediction_response_for_ticket_1_detail_1_prediction_object,
+            t7_prediction_response_for_ticket_1_detail_2_prediction_object,
+            t7_prediction_response_for_ticket_2_detail_1_prediction_object,
+        ])
+        prediction_repository.filter_predictions_in_next_results = Mock(side_effect=[
+            filtered_predictions_for_ticket_1_detail_1,
+            filtered_predictions_for_ticket_1_detail_2,
+            filtered_predictions_for_ticket_2_detail_1,
+        ])
+        prediction_repository.get_best_prediction = Mock(side_effect=[
+            t7_prediction_response_for_ticket_1_detail_1_predictions_item_1,
+            t7_prediction_response_for_ticket_1_detail_2_predictions_item_1,
+            t7_prediction_response_for_ticket_2_detail_1_predictions_item_1,
+        ])
+
+        bruin_repository = Mock()
+        bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
+            next_results_for_ticket_1_detail_1_response,
+            next_results_for_ticket_1_detail_2_response,
+            next_results_for_ticket_2_detail_1_response,
+        ])
+        bruin_repository.append_multiple_notes_to_ticket = CoroutineMock(return_value=append_multiple_notes_response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        t7_repository = Mock()
+        t7_repository.get_prediction = CoroutineMock(side_effect=[
+            t7_prediction_response_for_ticket_1,
+            t7_prediction_response_for_ticket_2,
+        ])
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   monitoring_map_repository, bruin_repository, velocloud_repository,
+                                   prediction_repository, notifications_repository)
+
+        with patch.object(config, 'ENVIRONMENT', "production"):
+            await tnba_monitor._process_tickets_without_tnba(tickets)
+
+        t7_repository.get_prediction.assert_has_awaits([
+            call(ticket_1_id),
+            call(ticket_2_id),
+        ])
+        bruin_repository.get_next_results_for_ticket_detail.assert_has_awaits([
+            call(ticket_1_id, ticket_1_detail_1_id, ticket_1_detail_1_serial_number),
+            call(ticket_1_id, ticket_1_detail_2_id, ticket_1_detail_2_serial_number),
+            call(ticket_2_id, ticket_2_detail_1_id, ticket_2_detail_1_serial_number),
+        ])
+        ticket_repository.build_tnba_note_from_prediction.assert_has_calls([
+            call(t7_prediction_response_for_ticket_1_detail_1_predictions_item_1),
+            call(t7_prediction_response_for_ticket_1_detail_2_predictions_item_1),
+            call(t7_prediction_response_for_ticket_2_detail_1_predictions_item_1),
+        ])
+        bruin_repository.append_multiple_notes_to_ticket.assert_has_awaits([
+            call(
+                ticket_1_id,
+                [
+                    {
+                        'text': tnba_note_for_ticket_1_detail_1,
+                        'detail_id': ticket_1_detail_1_id,
+                        'service_number': ticket_1_detail_1_serial_number,
+                    },
+                    {
+                        'text': tnba_note_for_ticket_1_detail_2,
+                        'detail_id': ticket_1_detail_2_id,
+                        'service_number': ticket_1_detail_2_serial_number,
+                    },
+                ],
+            ),
+            call(
+                ticket_2_id,
+                [
+                    {
+                        'text': tnba_note_for_ticket_2_detail_1,
+                        'detail_id': ticket_2_detail_1_id,
+                        'service_number': ticket_2_detail_1_serial_number,
+                    },
+                ],
+            ),
+        ])
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def process_tickets_without_tnba_with_all_conditions_met_for_appending_tnba_notes_test(self):
         ticket_1_id = 12345
         ticket_1_detail_1_id = 2746930
@@ -3207,13 +3516,17 @@ class TestTNBAMonitor:
         tnba_note_for_ticket_1_detail_2 = 'This is TNBA note 2'
         tnba_note_for_ticket_2_detail_1 = 'This is TNBA note 3'
 
+        append_multiple_notes_response = {
+            'body': 'ok',
+            'status': 200,
+        }
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
-        notifications_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.build_tnba_note_from_prediction = Mock(side_effect=[
@@ -3245,7 +3558,10 @@ class TestTNBAMonitor:
             next_results_for_ticket_1_detail_2_response,
             next_results_for_ticket_2_detail_1_response,
         ])
-        bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
+        bruin_repository.append_multiple_notes_to_ticket = CoroutineMock(return_value=append_multiple_notes_response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
 
         t7_repository = Mock()
         t7_repository.get_prediction = CoroutineMock(side_effect=[
@@ -3301,6 +3617,7 @@ class TestTNBAMonitor:
                 ],
             ),
         ])
+        assert notifications_repository.send_slack_message.await_count == 2
 
     @pytest.mark.asyncio
     async def process_tickets_with_tnba_with_empty_list_of_tickets_test(self):
@@ -5164,8 +5481,375 @@ class TestTNBAMonitor:
             call(prediction_object_for_ticket_1_detail_2_predictions_list_item_1),
             call(prediction_object_for_ticket_2_detail_1_predictions_list_item_2),
         ])
-        assert notifications_repository.send_slack_message.call_count == 3
+        assert notifications_repository.send_slack_message.await_count == 3
         bruin_repository.append_multiple_notes_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_tickets_with_tnba_with_append_multiple_notes_returning_non_2xx_status_test(self):
+        ticket_1_id = 12345
+        ticket_1_detail_1_id = 2746930
+        ticket_1_detail_1_serial_number = 'VC1234567'
+        ticket_1_detail_2_id = 2746931
+        ticket_1_detail_2_serial_number = 'VC9999999'
+        ticket_1_note_1 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+            "serviceNumber": [
+                ticket_1_detail_1_serial_number,
+            ],
+        }
+        ticket_1_note_2 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTriage\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+            "serviceNumber": [
+                'VC0000000',
+            ],
+        }
+        ticket_1_note_3 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+            "serviceNumber": [
+                ticket_1_detail_2_serial_number,
+            ],
+        }
+        ticket_1_notes = [
+            ticket_1_note_1,
+            ticket_1_note_2,
+            ticket_1_note_3,
+        ]
+        ticket_1 = {
+            'ticket_id': ticket_1_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_1_detail_1_id,
+                    "detailValue": ticket_1_detail_1_serial_number,
+                },
+                {
+                    "detailID": ticket_1_detail_2_id,
+                    "detailValue": ticket_1_detail_2_serial_number,
+                },
+            ],
+            'ticket_notes': ticket_1_notes,
+        }
+
+        ticket_2_id = 67890
+        ticket_2_detail_1_id = 2746930
+        ticket_2_detail_1_serial_number = 'VC1111222'
+        ticket_2_note_1 = {
+            "noteId": 41894040,
+            "noteValue": f'#*Automation Engine*#\nTNBA\nTimeStamp: 2019-07-30 06:38:00+00:00',
+            "createdDate": "2020-02-24T10:07:13.503-05:00",
+        }
+        ticket_2_notes = [
+            ticket_2_note_1,
+        ]
+        ticket_2 = {
+            'ticket_id': ticket_2_id,
+            'ticket_details': [
+                {
+                    "detailID": ticket_2_detail_1_id,
+                    "detailValue": ticket_2_detail_1_serial_number,
+                },
+            ],
+            'ticket_notes': ticket_2_notes,
+        }
+
+        tickets = [
+            ticket_1,
+            ticket_2,
+        ]
+
+        prediction_object_for_ticket_1_detail_1_predictions_list_item_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        prediction_object_for_ticket_1_detail_1_predictions_list_item_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
+        prediction_object_for_ticket_1_detail_1_predictions_list = [
+            prediction_object_for_ticket_1_detail_1_predictions_list_item_1,
+            prediction_object_for_ticket_1_detail_1_predictions_list_item_2,
+        ]
+        prediction_object_for_ticket_1_detail_1 = {
+            'assetId': ticket_1_detail_1_serial_number,
+            'predictions': prediction_object_for_ticket_1_detail_1_predictions_list,
+        }
+        prediction_object_for_ticket_1_detail_2_predictions_list_item_1 = {
+            'name': 'Repair Completed',
+            'probability': 0.9484384655952454
+        }
+        prediction_object_for_ticket_1_detail_2_predictions_list_item_2 = {
+            'name': 'Holmdel NOC Investigate',
+            'probability': 0.1234567890123456
+        }
+        prediction_object_for_ticket_1_detail_2_predictions_list = [
+            prediction_object_for_ticket_1_detail_2_predictions_list_item_1,
+            prediction_object_for_ticket_1_detail_2_predictions_list_item_2,
+        ]
+        prediction_object_for_ticket_1_detail_2 = {
+            'assetId': ticket_1_detail_2_serial_number,
+            'predictions': prediction_object_for_ticket_1_detail_2_predictions_list,
+        }
+        predictions_for_ticket_1 = [
+            prediction_object_for_ticket_1_detail_1,
+            prediction_object_for_ticket_1_detail_2,
+        ]
+        t7_prediction_for_ticket_1_response = {
+            'body': predictions_for_ticket_1,
+            'status': 200
+        }
+
+        prediction_object_for_ticket_2_detail_1_predictions_list_item_1 = {
+            'name': 'Request Completed',
+            'probability': 0.1111111111111111
+        }
+        prediction_object_for_ticket_2_detail_1_predictions_list_item_2 = {
+            'name': 'No Trouble Found - Carrier Issue',
+            'probability': 0.2222222222222222
+        }
+        prediction_object_for_ticket_2_detail_1_predictions_list = [
+            prediction_object_for_ticket_2_detail_1_predictions_list_item_1,
+            prediction_object_for_ticket_2_detail_1_predictions_list_item_2,
+        ]
+        prediction_object_for_ticket_2_detail_1 = {
+            'assetId': ticket_2_detail_1_serial_number,
+            'predictions': prediction_object_for_ticket_2_detail_1_predictions_list,
+        }
+        predictions_for_ticket_2 = [
+            prediction_object_for_ticket_2_detail_1,
+        ]
+        t7_prediction_for_ticket_2_response = {
+            'body': predictions_for_ticket_2,
+            'status': 200
+        }
+
+        available_results_for_ticket_1_detail_1 = [
+            {
+                "resultTypeId": 620,
+                "resultName": "Request Completed",
+                "notes": [
+                    {
+                        "noteType": "Notes",
+                        "noteDescription": "Notes",
+                        "availableValueOptions": None,
+                        "defaultValue": None,
+                        "required": False,
+                    }
+                ]
+            }
+        ]
+        next_results_response_for_ticket_1_detail_1 = {
+            'body': {
+                "currentTaskId": 10683187,
+                "currentTaskKey": "344",
+                "currentTaskName": "Holmdel NOC Investigate ",
+                "nextResults": available_results_for_ticket_1_detail_1,
+            },
+            'status': 200,
+        }
+
+        available_results_for_ticket_1_detail_2 = [
+            {
+                "resultTypeId": 620,
+                "resultName": "Request Completed",
+                "notes": [
+                    {
+                        "noteType": "Notes",
+                        "noteDescription": "Notes",
+                        "availableValueOptions": None,
+                        "defaultValue": None,
+                        "required": False,
+                    }
+                ]
+            }
+        ]
+        next_results_response_for_ticket_1_detail_2 = {
+            'body': {
+                "currentTaskId": 10683187,
+                "currentTaskKey": "344",
+                "currentTaskName": "Holmdel NOC Investigate ",
+                "nextResults": available_results_for_ticket_1_detail_2,
+            },
+            'status': 200,
+        }
+
+        available_results_for_ticket_2_detail_1 = [
+            {
+                "resultTypeId": 620,
+                "resultName": "Request Completed",
+                "notes": [
+                    {
+                        "noteType": "Notes",
+                        "noteDescription": "Notes",
+                        "availableValueOptions": None,
+                        "defaultValue": None,
+                        "required": False,
+                    }
+                ]
+            }
+        ]
+        next_results_response_for_ticket_2_detail_1 = {
+            'body': {
+                "currentTaskId": 10683187,
+                "currentTaskKey": "344",
+                "currentTaskName": "Holmdel NOC Investigate ",
+                "nextResults": available_results_for_ticket_2_detail_1,
+            },
+            'status': 200,
+        }
+
+        filtered_predictions_for_ticket_1_detail_1 = [
+            prediction_object_for_ticket_1_detail_1_predictions_list_item_1,
+        ]
+        filtered_predictions_for_ticket_1_detail_2 = [
+            prediction_object_for_ticket_1_detail_2_predictions_list_item_1,
+        ]
+        filtered_predictions_for_ticket_2_detail_1 = [
+            prediction_object_for_ticket_2_detail_1_predictions_list_item_2,
+        ]
+
+        tnba_note_for_ticket_1_detail_1 = 'This is TNBA note 1'
+        tnba_note_for_ticket_1_detail_2 = 'This is TNBA note 2'
+        tnba_note_for_ticket_2_detail_1 = 'This is TNBA note 3'
+
+        append_multiple_notes_response = {
+            'body': 'Got internal error from Bruin',
+            'status': 500,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+        velocloud_repository = Mock()
+        monitoring_map_repository = Mock()
+
+        ticket_repository = Mock()
+        ticket_repository.find_newest_tnba_note_by_service_number = Mock(side_effect=[
+            ticket_1_note_1,
+            ticket_1_note_3,
+            ticket_2_note_1,
+        ])
+        ticket_repository.is_tnba_note_old_enough = Mock(return_value=True)
+        ticket_repository.build_tnba_note_from_prediction = Mock(side_effect=[
+            tnba_note_for_ticket_1_detail_1,
+            tnba_note_for_ticket_1_detail_2,
+            tnba_note_for_ticket_2_detail_1,
+        ])
+
+        prediction_repository = Mock()
+        prediction_repository.find_prediction_object_by_serial = Mock(side_effect=[
+            prediction_object_for_ticket_1_detail_1,
+            prediction_object_for_ticket_1_detail_2,
+            prediction_object_for_ticket_2_detail_1,
+        ])
+        prediction_repository.filter_predictions_in_next_results = Mock(side_effect=[
+            filtered_predictions_for_ticket_1_detail_1,
+            filtered_predictions_for_ticket_1_detail_2,
+            filtered_predictions_for_ticket_2_detail_1,
+        ])
+        prediction_repository.get_best_prediction = Mock(side_effect=[
+            prediction_object_for_ticket_1_detail_1_predictions_list_item_1,
+            prediction_object_for_ticket_1_detail_2_predictions_list_item_1,
+            prediction_object_for_ticket_2_detail_1_predictions_list_item_2,
+        ])
+        prediction_repository.is_best_prediction_different_from_prediction_in_tnba_note = Mock(return_value=True)
+
+        bruin_repository = Mock()
+        bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(side_effect=[
+            next_results_response_for_ticket_1_detail_1,
+            next_results_response_for_ticket_1_detail_2,
+            next_results_response_for_ticket_2_detail_1,
+        ])
+        bruin_repository.append_multiple_notes_to_ticket = CoroutineMock(return_value=append_multiple_notes_response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        t7_repository = Mock()
+        t7_repository.get_prediction = CoroutineMock(side_effect=[
+            t7_prediction_for_ticket_1_response,
+            t7_prediction_for_ticket_2_response,
+        ])
+
+        tnba_monitor = TNBAMonitor(event_bus, logger, scheduler, config, t7_repository, ticket_repository,
+                                   monitoring_map_repository, bruin_repository, velocloud_repository,
+                                   prediction_repository, notifications_repository)
+
+        with patch.object(config, 'ENVIRONMENT', "production"):
+            await tnba_monitor._process_tickets_with_tnba(tickets)
+
+        t7_repository.get_prediction.assert_has_awaits([
+            call(ticket_1_id),
+            call(ticket_2_id),
+        ])
+        ticket_repository.find_newest_tnba_note_by_service_number.assert_has_calls([
+            call(ticket_1_notes, ticket_1_detail_1_serial_number),
+            call(ticket_1_notes, ticket_1_detail_2_serial_number),
+            call(ticket_2_notes, ticket_2_detail_1_serial_number),
+        ])
+        ticket_repository.is_tnba_note_old_enough.assert_has_calls([
+            call(ticket_1_note_1),
+            call(ticket_1_note_3),
+            call(ticket_2_note_1),
+        ])
+        prediction_repository.find_prediction_object_by_serial.assert_has_calls([
+            call(predictions_for_ticket_1, ticket_1_detail_1_serial_number),
+            call(predictions_for_ticket_1, ticket_1_detail_2_serial_number),
+            call(predictions_for_ticket_2, ticket_2_detail_1_serial_number),
+        ])
+        bruin_repository.get_next_results_for_ticket_detail.assert_has_awaits([
+            call(ticket_1_id, ticket_1_detail_1_id, ticket_1_detail_1_serial_number),
+            call(ticket_1_id, ticket_1_detail_2_id, ticket_1_detail_2_serial_number),
+            call(ticket_2_id, ticket_2_detail_1_id, ticket_2_detail_1_serial_number),
+        ])
+        prediction_repository.filter_predictions_in_next_results.assert_has_calls([
+            call(prediction_object_for_ticket_1_detail_1_predictions_list, available_results_for_ticket_1_detail_1),
+            call(prediction_object_for_ticket_1_detail_2_predictions_list, available_results_for_ticket_1_detail_2),
+            call(prediction_object_for_ticket_2_detail_1_predictions_list, available_results_for_ticket_2_detail_1),
+        ])
+        prediction_repository.get_best_prediction.assert_has_calls([
+            call(filtered_predictions_for_ticket_1_detail_1),
+            call(filtered_predictions_for_ticket_1_detail_2),
+            call(filtered_predictions_for_ticket_2_detail_1),
+        ])
+        ticket_repository.build_tnba_note_from_prediction.assert_has_calls([
+            call(prediction_object_for_ticket_1_detail_1_predictions_list_item_1),
+            call(prediction_object_for_ticket_1_detail_2_predictions_list_item_1),
+            call(prediction_object_for_ticket_2_detail_1_predictions_list_item_2),
+        ])
+        bruin_repository.append_multiple_notes_to_ticket.assert_has_awaits([
+            call(
+                ticket_1_id,
+                [
+                    {
+                        'text': tnba_note_for_ticket_1_detail_1,
+                        'detail_id': ticket_1_detail_1_id,
+                        'service_number': ticket_1_detail_1_serial_number,
+                    },
+                    {
+                        'text': tnba_note_for_ticket_1_detail_2,
+                        'detail_id': ticket_1_detail_2_id,
+                        'service_number': ticket_1_detail_2_serial_number,
+                    },
+                ],
+            ),
+            call(
+                ticket_2_id,
+                [
+                    {
+                        'text': tnba_note_for_ticket_2_detail_1,
+                        'detail_id': ticket_2_detail_1_id,
+                        'service_number': ticket_2_detail_1_serial_number,
+                    },
+                ],
+            ),
+        ])
+        notifications_repository.send_slack_message.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def process_tickets_with_tnba_with_all_conditions_met_for_appending_tnba_note_test(self):
@@ -5399,13 +6083,17 @@ class TestTNBAMonitor:
         tnba_note_for_ticket_1_detail_2 = 'This is TNBA note 2'
         tnba_note_for_ticket_2_detail_1 = 'This is TNBA note 3'
 
+        append_multiple_notes_response = {
+            'body': 'ok',
+            'status': 200,
+        }
+
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
         velocloud_repository = Mock()
         monitoring_map_repository = Mock()
-        notifications_repository = Mock()
 
         ticket_repository = Mock()
         ticket_repository.find_newest_tnba_note_by_service_number = Mock(side_effect=[
@@ -5444,7 +6132,10 @@ class TestTNBAMonitor:
             next_results_response_for_ticket_1_detail_2,
             next_results_response_for_ticket_2_detail_1,
         ])
-        bruin_repository.append_multiple_notes_to_ticket = CoroutineMock()
+        bruin_repository.append_multiple_notes_to_ticket = CoroutineMock(return_value=append_multiple_notes_response)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
 
         t7_repository = Mock()
         t7_repository.get_prediction = CoroutineMock(side_effect=[
@@ -5525,3 +6216,4 @@ class TestTNBAMonitor:
                 ],
             ),
         ])
+        assert notifications_repository.send_slack_message.await_count == 2

@@ -1,5 +1,6 @@
 import asyncio
 import time
+import os
 
 from datetime import datetime
 from typing import List
@@ -9,6 +10,12 @@ from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone
 from tenacity import retry, wait_exponential, stop_after_delay
+
+
+TNBA_NOTE_APPENDED_SUCCESS_MSG = (
+    'TNBA note appended to ticket {ticket_id} and detail {detail_id} (serial: {serial_number}) '
+    'with prediction: {prediction}'
+)
 
 
 class TNBAMonitor:
@@ -235,6 +242,7 @@ class TNBAMonitor:
                 continue
 
             tnba_notes: List[dict] = []
+            slack_messages: List[str] = []
 
             for ticket_detail in ticket['ticket_details']:
                 ticket_detail_id = ticket_detail['detailID']
@@ -312,6 +320,12 @@ class TNBAMonitor:
                         'detail_id': ticket_detail_id,
                         'service_number': serial_number,
                     })
+                    slack_messages.append(
+                        TNBA_NOTE_APPENDED_SUCCESS_MSG.format(
+                            ticket_id=ticket_id, detail_id=ticket_detail_id,
+                            serial_number=serial_number, prediction=best_prediction['name'],
+                        )
+                    )
                 elif self._config.ENVIRONMENT == 'dev':
                     tnba_message = (
                         f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
@@ -326,7 +340,15 @@ class TNBAMonitor:
                 self._logger.info(f'No TNBA notes were built for ticket {ticket_id}!')
             else:
                 self._logger.info(f'Appending TNBA notes to ticket {ticket_id}...')
-                await self._bruin_repository.append_multiple_notes_to_ticket(ticket_id, tnba_notes)
+                append_notes_response = await self._bruin_repository.append_multiple_notes_to_ticket(
+                    ticket_id, tnba_notes
+                )
+                append_notes_response_status = append_notes_response['status']
+                if append_notes_response_status not in range(200, 300):
+                    continue
+
+                slack_message = os.linesep.join(slack_messages)
+                await self._notifications_repository.send_slack_message(slack_message)
 
             self._logger.info(f'Finished processing ticket without TNBA notes. ID: {ticket_id}')
 
@@ -346,6 +368,7 @@ class TNBAMonitor:
                 continue
 
             tnba_notes: List[dict] = []
+            slack_messages: List[str] = []
             ticket_notes = ticket['ticket_notes']
 
             for ticket_detail in ticket['ticket_details']:
@@ -451,6 +474,12 @@ class TNBAMonitor:
                         'detail_id': ticket_detail_id,
                         'service_number': serial_number,
                     })
+                    slack_messages.append(
+                        TNBA_NOTE_APPENDED_SUCCESS_MSG.format(
+                            ticket_id=ticket_id, detail_id=ticket_detail_id,
+                            serial_number=serial_number, prediction=best_prediction['name'],
+                        )
+                    )
                 elif self._config.ENVIRONMENT == 'dev':
                     tnba_message = (
                         f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
@@ -465,7 +494,15 @@ class TNBAMonitor:
                 self._logger.info(f'No TNBA notes were built for ticket {ticket_id}!')
             else:
                 self._logger.info(f'Appending TNBA notes to ticket {ticket_id}...')
-                await self._bruin_repository.append_multiple_notes_to_ticket(ticket_id, tnba_notes)
+                append_notes_response = await self._bruin_repository.append_multiple_notes_to_ticket(
+                    ticket_id, tnba_notes
+                )
+                append_notes_response_status = append_notes_response['status']
+                if append_notes_response_status not in range(200, 300):
+                    continue
+
+                slack_message = os.linesep.join(slack_messages)
+                await self._notifications_repository.send_slack_message(slack_message)
 
             self._logger.info(f'Finished processing ticket with TNBA notes. ID: {ticket_id}')
 
