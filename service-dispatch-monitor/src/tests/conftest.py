@@ -176,6 +176,37 @@ def dispatch_tech_on_site(lit_dispatch_monitor, dispatch_confirmed):
 
 
 @pytest.fixture(scope='function')
+def dispatch_tech_on_site_2(lit_dispatch_monitor, dispatch_confirmed_2):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed_2)
+    updated_dispatch["Tech_Arrived_On_Site"] = True
+    updated_dispatch["Time_of_Check_In"] = "10:30"
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_tech_on_site_skipped(lit_dispatch_monitor, dispatch_tech_on_site):
+    updated_dispatch = copy.deepcopy(dispatch_tech_on_site)
+    updated_dispatch["MetTel_Bruin_TicketID"] = "3544800|OTHER"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_tech_on_site_skipped_2(lit_dispatch_monitor, dispatch_tech_on_site_2):
+    updated_dispatch = copy.deepcopy(dispatch_tech_on_site_2)
+    updated_dispatch["MetTel_Bruin_TicketID"] = "3544801-OTHER"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_tech_on_site_skipped_bad_phone(lit_dispatch_monitor, dispatch_tech_on_site_skipped):
+    updated_dispatch = copy.deepcopy(dispatch_tech_on_site_skipped)
+    updated_dispatch["MetTel_Bruin_TicketID"] = "3544800"
+    updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "NOT VALID PHONE"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def dispatch_tech_not_on_site(dispatch_confirmed):
     return copy.deepcopy(dispatch_confirmed)
 
@@ -482,6 +513,44 @@ def ticket_details_2_with_2h_sms_note(ticket_details_2_with_24h_sms_note, dispat
         "noteId": 70805310,
         "noteValue": "#*Automation Engine*#"
                      "Dispatch 2h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
+        "serviceNumber": [
+            "4664325"
+        ],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(note_24h_sms_ticket_note)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_1_with_tech_on_site_sms_note(ticket_details_1_with_2h_sms_note, dispatch_confirmed):
+    updated_ticket_details = copy.deepcopy(ticket_details_1_with_2h_sms_note)
+    field_engineer_name = dispatch_confirmed.get('Tech_First_Name')
+    note_24h_sms_ticket_note = {
+        "noteId": 70805315,
+        "noteValue": "#*Automation Engine*#"
+                     "Dispatch Management - Field Engineer On Site\n\n"
+                     "{field_engineer_name} has arrived\n".format(field_engineer_name=field_engineer_name),
+        "serviceNumber": [
+            "4664325"
+        ],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(note_24h_sms_ticket_note)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_2_with_tech_on_site_sms_note(ticket_details_2_with_2h_sms_note, dispatch_confirmed_2):
+    updated_ticket_details = copy.deepcopy(ticket_details_2_with_2h_sms_note)
+    field_engineer_name = dispatch_confirmed_2.get('Tech_First_Name')
+    note_24h_sms_ticket_note = {
+        "noteId": 70805316,
+        "noteValue": "#*Automation Engine*#"
+                     "Dispatch Management - Field Engineer On Site\n\n"
+                     "{field_engineer_name} has arrived\n".format(field_engineer_name=field_engineer_name),
         "serviceNumber": [
             "4664325"
         ],

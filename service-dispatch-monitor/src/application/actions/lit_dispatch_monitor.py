@@ -9,14 +9,17 @@ from apscheduler.util import undefined
 from pytz import timezone
 
 from application.repositories.utils_repository import UtilsRepository
-from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_note, \
-    lit_get_tech_24_hours_before_sms_note, lit_get_tech_2_hours_before_sms_note
-from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_sms_note
 from application.repositories.lit_repository import LitRepository
+from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_note
+from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_sms_note
+from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_24_hours_before_sms_note
+from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_2_hours_before_sms_note
+from application.templates.lit.lit_tech_on_site import lit_get_tech_on_site_note
 from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms
 from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_24_hours_before_sms
 from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_2_hours_before_sms
-from application.templates.lit.lit_tech_on_site import lit_get_tech_on_site_note
+from application.templates.lit.sms.tech_on_site import lit_get_tech_on_site_sms
+
 from application.templates.lit.lit_repair_completed import lit_get_repair_completed_note
 
 
@@ -276,6 +279,37 @@ class LitDispatchMonitor:
             f"SMS sent Response {sms_response_body}")
         return True
 
+    async def _send_tech_on_site_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+        if sms_to is None:
+            return False
+
+        # Get SMS data
+        sms_data_payload = {
+            'field_engineer_name': dispatch.get('Tech_First_Name')
+        }
+
+        sms_data = lit_get_tech_on_site_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to,
+            'sms_data': sms_data
+        }
+        self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_data}`")
+        sms_response = await self._notifications_repository.send_sms(sms_payload)
+        sms_response_status = sms_response['status']
+        sms_response_body = sms_response['body']
+        if sms_response_status not in range(200, 300):
+            self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
+                              f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} - SMS NOT sent")
+            err_msg = f'An error occurred when sending a tech on site SMS with notifier client. ' \
+                      f'payload: {sms_payload}'
+            await self._notifications_repository.send_to_slack(err_msg)
+            return False
+        self._logger.info(
+            f"SMS sent Response {sms_response_body}")
+        return True
+
     async def _append_confirmed_note(self, dispatch_number, ticket_id, dispatch) -> bool:
         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                           f"- Adding confirm note")
@@ -290,7 +324,7 @@ class LitDispatchMonitor:
         note = lit_get_dispatch_confirmed_note(note_data)
         # if self._config.DISPATCH_MONITOR_CONFIG['environment'] == 'production':
         append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, note)
-        # import pdb;pdb.set_trace()
+
         append_note_response_status = append_note_response['status']
         append_note_response_body = append_note_response['body']
         if append_note_response_status not in range(200, 300):
@@ -303,9 +337,9 @@ class LitDispatchMonitor:
             return False
         self._logger.info(f"Note: `{note}` "
                           f"Dispatch: {dispatch_number} "
-                          f"Ticket_id: {ticket_id} - Appended")
+                          f"Ticket_id: {ticket_id} - Confirmed note appended")
         self._logger.info(
-            f"Note appended. Response {append_note_response_body}")
+            f"Confirmed Note appended. Response {append_note_response_body}")
         return True
 
     async def _append_confirmed_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
@@ -327,9 +361,9 @@ class LitDispatchMonitor:
             return False
         self._logger.info(f"Note: `{sms_note}` "
                           f"Dispatch: {dispatch_number} "
-                          f"Ticket_id: {ticket_id} - SMS note Appended")
+                          f"Ticket_id: {ticket_id} - Confirmed SMS note Appended")
         self._logger.info(
-            f"Confirmed Note appended. Response {append_sms_note_response_body}")
+            f"SMS Confirmed note appended. Response {append_sms_note_response_body}")
         return True
 
     async def _append_tech_24_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
@@ -352,9 +386,9 @@ class LitDispatchMonitor:
             return False
         self._logger.info(f"Note: `{sms_note}` "
                           f"Dispatch: {dispatch_number} "
-                          f"Ticket_id: {ticket_id} - SMS note Appended")
+                          f"Ticket_id: {ticket_id} - SMS 24h note Appended")
         self._logger.info(
-            f"Confirmed Note appended. Response {append_sms_note_response_body}")
+            f"SMS 24h Note appended. Response {append_sms_note_response_body}")
         return True
 
     async def _append_tech_2_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
@@ -375,9 +409,32 @@ class LitDispatchMonitor:
             return False
         self._logger.info(f"Note: `{sms_note}` "
                           f"Dispatch: {dispatch_number} "
-                          f"Ticket_id: {ticket_id} - SMS note Appended")
+                          f"Ticket_id: {ticket_id} - SMS 2h note Appended")
         self._logger.info(
-            f"Confirmed Note appended. Response {append_sms_note_response_body}")
+            f"SMS 2h Note appended. Response {append_sms_note_response_body}")
+        return True
+
+    async def _append_tech_on_site_sms_note(self, dispatch_number, ticket_id, sms_to, field_engineer_name) -> bool:
+        sms_note_data = {
+            'field_engineer_name': field_engineer_name
+        }
+        sms_note = lit_get_tech_on_site_note(sms_note_data)
+        append_sms_note_response = await self._bruin_repository.append_note_to_ticket(
+            ticket_id, sms_note)
+        append_sms_note_response_status = append_sms_note_response['status']
+        append_sms_note_response_body = append_sms_note_response['body']
+        if append_sms_note_response_status not in range(200, 300):
+            self._logger.info(f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` "
+                              f"- SMS tech on site note not appended")
+            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
+                      f"- SMS tech on site note not appended"
+            await self._notifications_repository.send_to_slack(err_msg)
+            return False
+        self._logger.info(f"Note: `{sms_note}` "
+                          f"Dispatch: {dispatch_number} "
+                          f"Ticket_id: {ticket_id} - SMS tech on site note Appended")
+        self._logger.info(
+            f"Tech on site note appended. Response {append_sms_note_response_body}")
         return True
 
     async def _monitor_confirmed_dispatches(self, confirmed_dispatches):
@@ -562,105 +619,114 @@ class LitDispatchMonitor:
                                   f"- This ticket should never be again in Dispatch Confirmed, "
                                   f"at some point it has to change to tech on site")
         except Exception as ex:
-            # import pdb;pdb.set_trace()
             self._logger.error(f"Error: {ex}")
         finally:
             stop = perf_counter()
             self._logger.info(f"Monitor Confirmed Dispatches took: {(stop - start) / 60} minutes")
 
-    # async def _monitor_tech_on_site_dispatches(self, tech_on_site_dispatches):
-    #     try:
-    #         start = perf_counter()
-    #         self._logger.info(f"Dispatches to process before filter {len(tech_on_site_dispatches)}")
-    #         tech_on_site_dispatches = list(filter(self._is_tech_on_site, tech_on_site_dispatches))
-    #         self._logger.info(f"Dispatches to process after filter {len(tech_on_site_dispatches)}")
-    #         for dispatch in tech_on_site_dispatches:
-    #             dispatch_number = dispatch.get('Dispatch_Number', None)
-    #             ticket_id = dispatch.get('MetTel_Bruin_TicketID', None)
-    #
-    #             self._logger.info(f"Dispatch: [{dispatch_number}] ticket id for {ticket_id}")
-    #             if not self._is_valid_ticket_id(ticket_id):
-    #                 self._logger.info(f"Dispatch: [{dispatch_number}] ticket id for {ticket_id} discarded.")
-    #                 continue
-    #             self._logger.info(f"Determined final ticket id for {ticket_id}")
-    #
-    #             if ticket_id is not None:
-    #                 self._logger.info(f"Getting details for ticket [{ticket_id}]")
-    #
-    #                 response = await self._get_ticket_details(ticket_id)
-    #                 response_status = response['status']
-    #                 response_body = response['body']
-    #
-    #                 ticket_notes = response_body.get('ticketNotes')
-    #
-    #                 if response_status not in range(200, 300):
-    #                     self._logger.error(f"Dispatch [{dispatch_number}] "
-    #                                        f"get ticket details for ticket {ticket_id}")
-    #                     # TODO: notify slack
-    #                     continue
-    #
-    #                 if dispatch_number and ticket_notes:
-    #                     self._logger.info(
-    #                         f"Checking watermark for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
-    #
-    #                     self._logger.info(ticket_notes)
-    #
-    #                     watermark_found = UtilsRepository.get_first_element_matching(
-    #                         iterable=ticket_notes,
-    #                         condition=lambda note: self.DISPATCH_REQUESTED_WATERMARK in note.get('noteValue'),
-    #                         fallback=None
-    #                     )
-    #                     confirmed_note_found = UtilsRepository.get_first_element_matching(
-    #                         iterable=ticket_notes,
-    #                         condition=lambda note: self.DISPATCH_CONFIRMED_WATERMARK in note.get('noteValue'),
-    #                         fallback=None
-    #                     )
-    #                     tech_on_site_note_found = UtilsRepository.get_first_element_matching(
-    #                         iterable=ticket_notes,
-    #                         condition=lambda note: self.DISPATCH_FIELD_ENGINEER_ON_SITE_WATERMARK in note.get('noteValue'),
-    #                         fallback=None
-    #                     )
-    #
-    #                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-    #                                       f"watermark_found: {watermark_found} "
-    #                                       f"confirmed_note_found: {confirmed_note_found} "
-    #                                       f"tech_on_site_note_found: {tech_on_site_note_found}")
-    #                     if watermark_found is not None:
-    #                         if confirmed_note_found is not None and tech_on_site_note_found is not None:
-    #                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-    #                                               f"- already has a tech on site note")
-    #                             # TODO: notify slack
-    #                         else:
-    #                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-    #                                               f"- Adding tech on site note")
-    #                             note_data = {
-    #                                 'vendor': 'LIT',
-    #                                 'field_engineer_name': dispatch.get('Tech_First_Name')
-    #                             }
-    #                             note = lit_get_tech_on_site_note(note_data)
-    #                             # if self._config.DISPATCH_MONITOR_CONFIG['environment'] == 'production':
-    #                             append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, note)
-    #                             append_note_response_status = append_note_response['status']
-    #                             append_note_response_body = append_note_response['body']
-    #                             if append_note_response_status not in range(200, 300):
-    #                                 self._logger.info(f"Note: `{note}` "
-    #                                                   f"Dispatch: {dispatch_number} "
-    #                                                   f"Ticket_id: {ticket_id} - Not appended")
-    #                                 return
-    #                             self._logger.info(f"Note: `{note}` "
-    #                                               f"Dispatch: {dispatch_number} "
-    #                                               f"Ticket_id: {ticket_id} - Appended")
-    #                             self._logger.info(
-    #                                 f"Note appended. Response {append_note_response_body}")
-    #                     else:
-    #                         self._logger.warn(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-    #                                           f"- Watermark not found, ticket does not belong to us")
-    #     except Exception as ex:
-    #         self._logger.error(f"Error: {ex}")
-    #
-    #     stop = perf_counter()
-    #     self._logger.info(f"Monitor Tech on Site Dispatches took: {(stop - start) / 60} minutes")
-    #
+    async def _monitor_tech_on_site_dispatches(self, tech_on_site_dispatches):
+        try:
+            start = perf_counter()
+            self._logger.info(f"Dispatches to process before filter {len(tech_on_site_dispatches)}")
+            tech_on_site_dispatches = list(filter(self._is_tech_on_site, tech_on_site_dispatches))
+            self._logger.info(f"Dispatches to process after filter {len(tech_on_site_dispatches)}")
+
+            for dispatch in tech_on_site_dispatches:
+                dispatch_number = dispatch.get('Dispatch_Number', None)
+                ticket_id = dispatch.get('MetTel_Bruin_TicketID', None)
+
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id}")
+                if ticket_id is None or not self._is_valid_ticket_id(ticket_id) or dispatch_number is None:
+                    self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
+                    continue
+
+                sms_to = LitRepository.get_sms_to(dispatch)
+
+                if sms_to is None:
+                    self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                      f"- Error: we could not retrieve 'sms_to' number from: "
+                                      f"{dispatch.get('Job_Site_Contact_Name_and_Phone_Number')}")
+                    err_msg = f"An error occurred retrieve 'sms_to' number " \
+                              f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                              f"from: {dispatch.get('Job_Site_Contact_Name_and_Phone_Number')}"
+                    await self._notifications_repository.send_to_slack(err_msg)
+                    continue
+
+                ############################
+                # TODO: remove
+                # ticket_id = '4667739'
+                ############################
+                self._logger.info(f"Getting details for ticket [{ticket_id}]")
+
+                response = await self._bruin_repository.get_ticket_details(ticket_id)
+                response_status = response['status']
+                response_body = response['body']
+
+                if response_status not in range(200, 300):
+                    self._logger.error(f"Error: Dispatch [{dispatch_number}] "
+                                       f"Get ticket details for ticket {ticket_id}: "
+                                       f"{response_body}")
+                    err_msg = f"An error occurred retrieve getting ticket details from bruin " \
+                              f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
+                    response_send_to_slack = await self._notifications_repository.send_to_slack(err_msg)
+                    continue
+                ticket_notes = response_body.get('ticketNotes', [])
+
+                self._logger.info(
+                    f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
+
+                self._logger.info(ticket_notes)
+
+                requested_watermark_found = UtilsRepository.find_note(ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
+                confirmed_note_found = UtilsRepository.find_note(ticket_notes, self.DISPATCH_CONFIRMED_WATERMARK)
+                confirmed_sms_note_found = UtilsRepository.find_note(ticket_notes,
+                                                                     self.DISPATCH_CONFIRMED_SMS_WATERMARK)
+                tech_24_hours_before_note_found = UtilsRepository.find_note(ticket_notes,
+                                                                            self.TECH_24_HOURS_BEFORE_SMS_WATERMARK)
+                tech_2_hours_before_note_found = UtilsRepository.find_note(ticket_notes,
+                                                                           self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
+                tech_on_site_note_found = UtilsRepository.find_note(ticket_notes,
+                                                                    self.DISPATCH_FIELD_ENGINEER_ON_SITE_WATERMARK)
+
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"requested_watermark_found: {requested_watermark_found} "
+                                  f"confirmed_note_found: {confirmed_note_found} "
+                                  f"confirmed_sms_note_found: {confirmed_sms_note_found} "
+                                  f"tech_24_hours_before_note_found: {tech_24_hours_before_note_found} "
+                                  f"tech_2_hours_before_note_found: {tech_2_hours_before_note_found} "
+                                  f"tech_on_site_note_found: {tech_on_site_note_found}")
+
+                # Check if dispatch was created by the dispatch portal
+                if requested_watermark_found is None:
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"- Watermark not found, ticket does not belong to us")
+                    continue
+                # TODO: check if we missed other notes?
+                if tech_on_site_note_found is None:
+                    result_sms_tech_on_site_sended = await self._send_tech_on_site_sms(dispatch_number, ticket_id,
+                                                                                       dispatch, sms_to)
+                    if not result_sms_tech_on_site_sended:
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                          f"- SMS tech on site not sended")
+                        continue
+
+                    result_append_tech_on_site_sms_note = await self._append_tech_on_site_sms_note(
+                        dispatch_number, ticket_id, sms_to, dispatch.get('Tech_First_Name'))
+                    if not result_append_tech_on_site_sms_note:
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                          f"- A sms tech on site note not appended")
+                        continue
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"- A sms tech on site note appended")
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"- already has a sms tech tech on site note")
+
+        except Exception as ex:
+            self._logger.error(f"Error: {ex}")
+
+        stop = perf_counter()
+        self._logger.info(f"Monitor Tech on Site Dispatches took: {(stop - start) / 60} minutes")
+
     # async def _monitor_repair_completed(self, dispatches_completed):
     #     try:
     #         start = perf_counter()
