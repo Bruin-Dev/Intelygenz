@@ -32,6 +32,10 @@ There are two types of microservices showed in the diagram above depending on th
 
   * Those that take the role of replier in the context of NATS, these are the microservices that contain capabilites, being these the following ones:
 
+    * *cts-bridge*
+
+    * *lit-bridge*
+
     * *notifier*
 
     * *velocloud-bridge*
@@ -42,23 +46,34 @@ There are two types of microservices showed in the diagram above depending on th
 
   * Those that take the role of requester in the context of NATS, these are microservices that contain use cases, being these the following ones:
 
+    * *dispatch-portal-backend*
+
+    * *grafana* component, from *metrics-prometheus* microservice
+
+    * *last-contact-report*
+
     * *service-affecting-monitor*
 
     * *service-outage-monitor*
 
     * *sites-monitor*
 
-    * *last-contact-report*
+    * *tnba-monitor*
+
+> All microservices that communicate with NATS can also communicate with the Redis cluster. This is needed
+  to bypass the limit size that NATS enforces for all the messages it receives (1MB).
 
 * Microservices that doesn't communicate with NATS
 
-  * *metrics-prometheus*
+  * *dispatch-portal-frontend*
+
+  * *prometheus* and *thanos* components, from *metrics-prometheus* microservice
 
   * *Redis cluster* (Docker container in local/ElastiCache Redis Cluster in AWS)
 
 ### Connection between microservices
 
-The services that are part of the previously explained architecture are related to each other, in the following [diagram](https://www.draw.io/#G1KbDy9gSMOmwVC0fWnqmeHxupclXEfYl_) it's possible see the relationships between them.
+The services that are part of the previously explained architecture are related to each other, in the following [diagram](https://www.draw.io/#G1npbFKJq-cODHY5WddFt4aB-d3y9bv_lW) it's possible see the relationships between them.
 
 ![IMAGE: microservices_general_relationship](./img/system_overview/microservices_general_relationship.png)
 
@@ -68,7 +83,7 @@ This microservice is in charge of making requests to the bruin API, taking the r
 
 When another microservice requests bruin data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
 
-The following [diagram](https://www.draw.io/#G1_NissfciInkExqxBCI2wTafnjyyelHhz) shows the dependencies or iteractions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following [diagram](https://www.draw.io/#G1hm9zTW5i2ATZGzxu6rpSlU_q58eas4Er) shows the dependencies or iteractions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: bruin-bridge_microservice_relationships](./img/system_overview/isolated_microservices/bruin-bridge_microservice_relationships.png)
 
@@ -78,7 +93,7 @@ This microservice is in charge of sending emails or slack notifications.
 
 It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.
 
-The following [diagram](https://www.draw.io/#G1pbs-QPdcn8E0z4nteNR66TXiBQqTDwcQ) shows the dependencies or iteractions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following [diagram](https://www.draw.io/#G1pbs-G1PYWiomIPqlX98oyuaYGkYgR30k4rumZU) shows the dependencies or iteractions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: notifier_microservice_relationships](./img/system_overview/isolated_microservices/notifier_microservice_relationships.png)
 
@@ -88,7 +103,7 @@ This microservice is in charge of making requests to the velocloud API, taking t
 
 When another microservice requests velocloud data, it will be in charge of making response messages to the same and never of request, that is to say, it will always be a producer within a NATS topic and never a consumer.
 
-The following [diagram](https://www.draw.io/#G1bN_ZIbL1LDPyJ5cVKUlg4tOsEnCVqXDt) shows the dependencies or iteractions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
+The following [diagram](https://www.draw.io/#G18Yl-0CTx_AZefmkxo_HN3PPq85cu3FlR) shows the dependencies or iteractions of this microservice with the others, being in this case none, since it is in charge of one of the isolated microservices as explained above.
 
 ![IMAGE: velocloud-bridge_microservice_relationships](./img/system_overview/isolated_microservices/velocloud-bridge_microservice_relationships.png)
 
@@ -102,26 +117,8 @@ The following flow is used to make this report:
 
 2. Once the events are obtained from an edge, it communicates with the *notifier* microservice to send an email with this information.
 
-It is possible to see the relations between the mentioned services for the flow in the following [diagram](https://www.draw.io/#G1JzSwJw04goDcA_fEjySmMZ_Ol32TVSeB).
+It is possible to see the relations between the mentioned services for the flow in the following [diagram](https://www.draw.io/#G1MrpWIRpw4wHeSRo6TCe6IOUZahsHoH6H).
 ![IMAGE: last-contact-report_microservice_relationships](./img/system_overview/microservices_with_communications/last-contact-report_microservice_relationships.png)
-
-#### Sites-monitor microservice
-
-This microservice requests data from the velocloud API via the velocloud-bridge microservice, using this information to enrich Prometheus. The prometheus data serves as a feed for Grafana.
-
-The following [diagram](https://www.draw.io/#G1xmdDJALLoK25VmO7-gSVITODfaTFIyT_) shows the relationship between this microservice and the others.
-
-![IMAGE: sites-monitor_microservice_relationships](./img/system_overview/microservices_with_communications/sites-monitor_microservice_relationships.png)
-
-#### T7-bridge microservice
-
-The function of this microservice is to embed in the notes of a ticket the prediction calculated by T7, this prediction will store information on the recommendations actions for the ticket.
-
-In order to carry out the mentioned actions, it communicates with the API of T7 to obtain the information about the prediction, as it can be seen in the following [diagram](https://www.draw.io/#G1uD7Otczhg_kZrgtBztJ5GvLkud0uaTNv).
-
-![IMAGE: t7-bridge_microservice_relationships](./img/system_overview/microservices_with_communications/t7-bridge_microservice_relationships.png)
-
-> **It is important to note that this microservice is not currently used.**
 
 #### Service-affecting-monitor microservice
 
@@ -131,7 +128,7 @@ In case the thresholds are exceeded, it will communicate with the notifier servi
 
 This microservice also communicates with the bruin-bridge microservice to create tickets or add notes to an existing one, including in this information about the routers for which a problem is detected.
 
-In the following [diagram](https://www.draw.io/#G1FE_V_fGLC9wSsa9wWMixDMnG_7EGGOxJ) it's possible see the relationships between this microservice and the others.
+In the following [diagram](https://www.draw.io/#G1TJksbMyHCN-wStHoQQw6wG95oKN2nbx6) it's possible see the relationships between this microservice and the others.
 
 ![IMAGE: service-affecting-monitor_microservice_relationships](./img/system_overview/microservices_with_communications/service-affecting-monitor_microservice_relationships.png)
 
@@ -143,6 +140,8 @@ This microservice orchestrates the execution of three different processes:
 
   When an outage is detected, the edge is sent to a quarantine and it is checked again 10 minutes later. If the edge remains in outage state and it
 is not under any outage ticket in Bruin then it is moved from quarantine to another queue to be reported. The report is sent via e-mail when the hour scheduled at the beginning of the process is reached.
+
+  > This feature exists in code but it is currently disabled.
 
 * Outage monitoring. This process is responsible for resolving/unresolving outage tickets depending on the state of an edge. It is triggered every 3 minutes.
 
@@ -165,8 +164,35 @@ will be taken.
     between the creation date of the last triage note and the current moment are claimed to Velocloud and then they are included in the triage notes, which are finally appended to the ticket. Note that due to Bruin limitations it is not feasible to have a triage note with 1500 characters or more;
     that is the reason why several triage notes are appended to the ticket (instead of just appending one).
 
-In the following [diagram](https://www.draw.io/#G1Da5yU-ohkQQ5eKJE1sB9URzLyXyXcZx0) it's possible see the relationship of this microservice with the others.
+In the following [diagram](https://www.draw.io/#G11LUSJtUUGETqQSEJzW7ewmJmw0HmpW5f) it's possible see the relationship of this microservice with the others.
 ![IMAGE: service-outage-monitor_microservice_relationships](./img/system_overview/microservices_with_communications/service-outage-monitor_microservice_relationships.png)
+
+#### Sites-monitor microservice
+
+This microservice requests data from the velocloud API via the velocloud-bridge microservice, using this information to enrich Prometheus. The prometheus data serves as a feed for Grafana.
+
+The following [diagram](https://www.draw.io/#G10QYwr2V_WS0kjfxdhFomYiTNSdXL9x2u) shows the relationship between this microservice and the others.
+
+![IMAGE: sites-monitor_microservice_relationships](./img/system_overview/microservices_with_communications/sites-monitor_microservice_relationships.png)
+
+#### T7-bridge microservice
+
+The function of this microservice is to embed in the notes of a ticket the prediction calculated by T7, this prediction will store information on the recommendations actions for the ticket.
+
+In order to carry out the mentioned actions, it communicates with the API of T7 to obtain the information about the prediction, as it can be seen in the following [diagram](https://www.draw.io/#G162Jq0mZDiHHVsIgQts0TUnNizTER4cT0).
+
+![IMAGE: t7-bridge_microservice_relationships](./img/system_overview/isolated_microservices/t7-bridge_microservice_relationships.png)
+
+#### TNBA-monitor microservice
+
+This microservice is in charge of appending notes to Bruin tickets indicating what is *T*he *N*ext *B*est *A*ction a member of the support team of
+Bruin can take to move forward on the resolution of the ticket.
+
+It mostly communicates with `bruin-bridge` and `t7-bridge` to embed predictions into tickets, but it also communicates with other capabilities as shown in the following [diagram](https://www.draw.io/#G1uD7Otczhg_kZrgtBztJ5GvLkud0uaTNv).
+
+The following [diagram](https://www.draw.io/#G1Yu4rtLV6WvOWr7FxE1l-sclOL4SA5r2z) shows the relationship between this microservice and the others.
+
+![IMAGE: sites-monitor_microservice_relationships](./img/system_overview/microservices_with_communications/tnba-monitor_microservice_relationships.png)
 
 ## Infrastructure
 

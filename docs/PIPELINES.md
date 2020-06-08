@@ -95,6 +95,8 @@ In these jobs services in the monorepo will be deployed to the selected environm
 
     * [t7-bridge](../t7-bridge)
 
+    * [tnba-monitor](../tnba-monitor)
+
     * [velocloud-bridge](../velocloud-bridge)
 
   * A [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html) for each of the above *ECS Services*
@@ -152,6 +154,7 @@ Also, resources of type [null_resource](https://www.terraform.io/docs/providers/
 	- `service-outage-monitor-4`
 	- `service-outage-monitor-triage`
 	- `sites-monitor`
+	- `tnba-monitor`
 
    This is achieved by defining explicit dependencies between the ECS services for the capabilities microservices and the set of null resources that perform the healthcheck of the capabilities microservices.​
 
