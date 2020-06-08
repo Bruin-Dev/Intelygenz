@@ -113,7 +113,8 @@ class MonitoringMapRepository:
                 edge_status_data['bruin_client_info'] = bruin_client_info_response_body
 
                 self._logger.info(f'[map-bruin-client-to-edges]Getting management status for edge {edge_identifier}...')
-                management_status_response = await self._bruin_repository.get_management_status(edge_status_data)
+                management_status_response = await self._bruin_repository.get_management_status(bruin_client_id,
+                                                                                                serial_number)
                 self._logger.info(f'[map-bruin-client-to-edges]Got management status for edge {edge_identifier} -> '
                                   f'{management_status_response}')
 
