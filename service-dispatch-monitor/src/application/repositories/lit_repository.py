@@ -67,21 +67,71 @@ class LitRepository:
     def get_dispatch_confirmed_date_time_localized(self, dispatch, dispatch_number, ticket_id):
         return_datetime_localized = None
         try:
+            final_time_of_dispatch = None
             # "2015-01-01"
             date_of_dispatch = dispatch.get('Date_of_Dispatch', None)
-            # "4pm-6pm"
+            # ['4-6pm', '4pm-6pm','12pm','12:00PM','9:00 AM','10 am','10am ET','10a-12p ET','11a-1p PT','2-4pm ET',
+            # '12-2PM CT','11am CT','12:00','3:30pm ET','12::00PM','8am-1p PT','7.00PM','8 AM CT']
             time_of_dispatch = dispatch.get('Hard_Time_of_Dispatch_Local', None)
 
-            final_time_of_dispatch = None
-            start_time_of_dispatch = time_of_dispatch.upper().split('-')[0]
-            am_pm = None
-            if 'PM' in start_time_of_dispatch:
-                am_pm = 'PM'
-                final_time_of_dispatch = start_time_of_dispatch.replace('PM', '')
-            elif 'AM' in start_time_of_dispatch:
-                am_pm = 'AM'
-                final_time_of_dispatch = start_time_of_dispatch.replace('AM', '')
+            if time_of_dispatch is None:
+                self._logger.error(f"Not valid time of dispatch: {time_of_dispatch}")
+                return None
 
+            time_of_dispatch = time_of_dispatch.upper()
+            final_time_of_dispatch = None
+            am_pm = None
+            timezone_job = None
+
+            if '::' in time_of_dispatch:
+                time_of_dispatch = time_of_dispatch.replace('::', ':')
+
+            end_time_of_dispatch = None
+            if '-' in time_of_dispatch:
+                # ['4-6pm', '4pm-6pm', '10a-12p ET', '11a-1p PT', '2-4pm ET', '12-2PM CT', '8am-1p PT']
+                if ' ' in time_of_dispatch:
+                    time_of_dispatch = time_of_dispatch.split(' ')[0]
+                start_time_of_dispatch = time_of_dispatch.split('-')[0]
+                end_time_of_dispatch = time_of_dispatch.split('-')[1]
+                if 'AM' in start_time_of_dispatch or 'A' in start_time_of_dispatch:
+                    am_pm = 'AM'
+                    start_time_of_dispatch = start_time_of_dispatch.replace('AM', '')
+                    final_time_of_dispatch = start_time_of_dispatch.replace('A', '')
+                elif 'PM' in start_time_of_dispatch or 'P' in start_time_of_dispatch:
+                    am_pm = 'PM'
+                    start_time_of_dispatch = start_time_of_dispatch.replace('PM', '')
+                    final_time_of_dispatch = start_time_of_dispatch.replace('P', '')
+            else:
+                # ['12pm', '12:00PM', '9:00 AM', '10 am', '10am ET', '11am CT',
+                #  '12:00', '3:30pm ET', '12::00PM', '7.00PM', '8 AM CT']
+                if '.' not in time_of_dispatch:
+                    time_of_dispatch = time_of_dispatch.replace('.', ':')
+                if 'AM' in time_of_dispatch or 'A' in time_of_dispatch or \
+                        'PM' in time_of_dispatch or 'P' in time_of_dispatch:
+                    if ' ' in time_of_dispatch:
+                        if len(time_of_dispatch.split(' ')) > 2:
+                            final_time_of_dispatch = time_of_dispatch.split(' ')[0]
+                            am_pm = time_of_dispatch.split(' ')[1]
+                            tz_job = time_of_dispatch.split(' ')[2]
+                        else:
+                            final_time_of_dispatch = time_of_dispatch.split(' ')[0]
+                            tz_job = time_of_dispatch.split(' ')[1]
+                            if ':' in final_time_of_dispatch:
+                                part_final_time_of_dispatch = final_time_of_dispatch.split(':')[0]
+                                part_2_final_time_of_dispatch = final_time_of_dispatch.split(':')[1]
+
+                                minutes = ''.join(ch for ch in part_2_final_time_of_dispatch if ch.isdigit())
+                                am_pm = ''.join(ch for ch in part_2_final_time_of_dispatch if not ch.isdigit())
+                                final_time_of_dispatch = f"{part_final_time_of_dispatch}:{minutes}"
+                            else:
+                                temp = final_time_of_dispatch
+                                final_time_of_dispatch = ''.join(ch for ch in temp if ch.isdigit())
+                                am_pm = ''.join(ch for ch in temp if not ch.isdigit())
+                    else:
+                        final_time_of_dispatch = ''.join(ch for ch in time_of_dispatch if ch.isdigit())
+                        am_pm = ''.join(ch for ch in time_of_dispatch if not ch.isdigit())
+                else:
+                    final_time_of_dispatch = None
             if final_time_of_dispatch is None:
                 return None
 

@@ -246,12 +246,12 @@ class TestLitDispatchMonitor:
                                            f'Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - payload: {note_data}'
 
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(side_effect=[response_append_note_1])
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._append_confirmed_note(dispatch_number, ticket_id, dispatch_confirmed)
 
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(send_error_sms_to_slack_response)
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(send_error_sms_to_slack_response)
         assert response is False
 
     @pytest.mark.asyncio
@@ -352,13 +352,13 @@ class TestLitDispatchMonitor:
                                            f'payload: {sms_payload}'
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._send_confirmed_sms(dispatch_number, ticket_id, dispatch, sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(send_error_sms_to_slack_response)
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(send_error_sms_to_slack_response)
 
     @pytest.mark.asyncio
     async def send_tech_24_sms_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
@@ -438,13 +438,13 @@ class TestLitDispatchMonitor:
                                            f'payload: {sms_payload}'
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._send_tech_24_sms(dispatch_number, ticket_id, dispatch, sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
             send_error_sms_to_slack_response)
 
     @pytest.mark.asyncio
@@ -525,13 +525,13 @@ class TestLitDispatchMonitor:
                                            f'payload: {sms_payload}'
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._send_tech_2_sms(dispatch_number, ticket_id, dispatch, sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
             send_error_sms_to_slack_response)
 
     @pytest.mark.asyncio
@@ -606,13 +606,13 @@ class TestLitDispatchMonitor:
                                            f'payload: {sms_payload}'
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._send_tech_on_site_sms(dispatch_number, ticket_id, dispatch, sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
             send_error_sms_to_slack_response)
 
     @pytest.mark.asyncio
@@ -650,12 +650,12 @@ class TestLitDispatchMonitor:
 
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._append_confirmed_sms_note(dispatch_number, ticket_id, sms_to)
 
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(send_error_sms_to_slack_response)
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(send_error_sms_to_slack_response)
         assert response is False
 
     @pytest.mark.asyncio
@@ -694,12 +694,12 @@ class TestLitDispatchMonitor:
 
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._append_tech_24_sms_note(dispatch_number, ticket_id, sms_to)
 
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
             send_error_sms_to_slack_response)
         assert response is False
 
@@ -739,12 +739,12 @@ class TestLitDispatchMonitor:
 
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._append_tech_2_sms_note(dispatch_number, ticket_id, sms_to)
 
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
             send_error_sms_to_slack_response)
         assert response is False
 
@@ -785,13 +785,13 @@ class TestLitDispatchMonitor:
 
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._append_tech_on_site_sms_note(dispatch_number, ticket_id, sms_to,
                                                                             dispatch_confirmed.get('Tech_First_Name'))
 
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
             send_error_sms_to_slack_response)
         assert response is False
 
@@ -1130,7 +1130,7 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         lit_dispatch_monitor._send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock(sideffect=[])
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(sideffect=[])
 
         await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
 
@@ -1151,7 +1151,7 @@ class TestLitDispatchMonitor:
             call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
         ])
 
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(err_msg)
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_error_getting_ticket_details_test(
@@ -1215,7 +1215,7 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
             side_effect=datetime_returns_mock)
         lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock(side_effect=responses_send_to_slack_mock)
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(side_effect=responses_send_to_slack_mock)
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         lit_dispatch_monitor._send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
@@ -2528,11 +2528,11 @@ class TestLitDispatchMonitor:
                   f"Dispatch: {dispatch_number_1} - Ticket_id: {ticket_id_1} - " \
                   f"from: {dispatch_tech_on_site_skipped_bad_phone.get('Job_Site_Contact_Name_and_Phone_Number')}"
 
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock(return_value=err_msg)
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(return_value=err_msg)
 
         await lit_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
 
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(err_msg)
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_error_getting_ticket_details_test(self, lit_dispatch_monitor,
@@ -2578,7 +2578,7 @@ class TestLitDispatchMonitor:
         err_msg = f"An error occurred retrieve getting ticket details from bruin " \
                   f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2}"
 
-        lit_dispatch_monitor._notifications_repository.send_to_slack = CoroutineMock(return_value=err_msg)
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(return_value=err_msg)
 
         await lit_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
 
@@ -2595,7 +2595,7 @@ class TestLitDispatchMonitor:
             call(dispatch_number_1, ticket_id_1, sms_to, dispatch_tech_on_site.get('Tech_First_Name'))
         ])
 
-        lit_dispatch_monitor._notifications_repository.send_to_slack.assert_awaited_once_with(err_msg)
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_watermark_not_found_test(self, lit_dispatch_monitor,

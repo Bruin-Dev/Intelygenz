@@ -114,6 +114,69 @@ class TestLitRepository:
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = "no valid Number"
         assert LitRepository.get_sms_to(updated_dispatch) is None
 
+    def get_dispatch_confirmed_date_time_localized_samples_test(self, lit_repository, dispatch_confirmed):
+        dates = [
+            {'date': '4-6pm', 'am_pm': 'PM', 'final': '4:00'},
+            {'date': '4pm-6pm', 'am_pm': 'PM', 'final': '4:00'},
+            {'date': '12pm', 'am_pm': 'PM', 'final': '12:00'},
+            {'date': '12:00PM', 'am_pm': 'PM', 'final': '12:00'},
+            {'date': '9:00 AM', 'am_pm': 'AM', 'final': '9:00'},
+            {'date': '10 am', 'am_pm': 'AM', 'final': '10:00'},
+            {'date': '10am ET', 'am_pm': 'AM', 'final': '10:00'},
+            {'date': '10a-12p ET', 'am_pm': 'AM', 'final': '10:00'},
+            {'date': '11a-1p PT', 'am_pm': 'AM', 'final': '11:00'},
+            {'date': '2-4pm ET', 'am_pm': 'PM', 'final': '2:00'},
+            {'date': '12-2PM CT', 'am_pm': 'PM', 'final': '12:00'},
+            {'date': '11am CT', 'am_pm': 'AM', 'final': '11:00'},
+            {'date': '12:00', 'am_pm': None, 'final': None},
+            {'date': '3:30pm ET', 'am_pm': 'PM', 'final': '3:30'},
+            {'date': '12::00PM', 'am_pm': 'PM', 'final': '12:00'},
+            {'date': '8am-1p PT', 'am_pm': 'AM', 'final': '8:00'},
+            {'date': '7.00PM', 'am_pm': 'PM', 'final': '7:00'},
+            {'date': '1.30AM', 'am_pm': 'PM', 'final': '7:00'},
+            {'date': '8 AM CT', 'am_pm': 'AM', 'final': '8:00'},
+            {'date': None, 'am_pm': None, 'final': None},
+            {'date': '3:30a ET', 'am_pm': 'AM', 'final': '3:30'},
+            {'date': '3:30p ET', 'am_pm': 'PM', 'final': '3:30'},
+            {'date': '3:30pm ET', 'am_pm': 'PM', 'final': '3:30'},
+        ]
+        responses = []
+        expected_responses = []
+        for test_date in dates:
+            new_dispatch = copy.deepcopy(dispatch_confirmed)
+
+            dispatch_number = new_dispatch.get('Dispatch_Number')
+            ticket_id = new_dispatch.get('MetTel_Bruin_TicketID')
+            date_of_dispatch = new_dispatch.get('Date_of_Dispatch', None)
+
+            new_dispatch['Hard_Time_of_Dispatch_Local'] = test_date['date']
+
+            final_time_of_dispatch = test_date['final']
+            am_pm = test_date['am_pm']
+
+            expected_response = None
+            if am_pm is not None and final_time_of_dispatch is not None:
+                final_timezone = timezone(f'US/Pacific')
+                final_datetime = datetime.strptime(f'{date_of_dispatch} {final_time_of_dispatch}{am_pm}', "%Y-%m-%d %I:%M%p")
+                return_datetime_localized = final_timezone.localize(final_datetime)
+
+                new_dispatch['Hard_Time_of_Dispatch_Local'] = test_date['date']
+                res = lit_repository.get_dispatch_confirmed_date_time_localized(new_dispatch, dispatch_number, ticket_id)
+
+            if res is None:
+                responses.append(res)
+                expected_responses.append(None)
+            else:
+                responses.append(res)
+                expected_response = {
+                    'datetime_localized': return_datetime_localized,
+                    'timezone': final_timezone
+                }
+                expected_responses.append(expected_response)
+            assert res == expected_response
+
+        assert responses == expected_responses
+
     def get_dispatch_confirmed_date_time_localized_test(self, lit_repository, dispatch_confirmed, dispatch_confirmed_2,
                                                         dispatch_confirmed_error, dispatch_confirmed_error_2):
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
