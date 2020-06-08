@@ -154,4 +154,4 @@ class TestTeleStaxClient:
         with patch.object(test_client, '_get_sms_data', side_effect=Exception("mocked_error")):
             response = test_client.send_to_sms(sms_body, sms_to)
 
-        assert response == msg_delivery_status
+        assert response == msg_delivery_status['body']

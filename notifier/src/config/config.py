@@ -34,7 +34,9 @@ TELESTAX_CONFIG = {
     'url': os.environ['TELESTAX_URL'],
     'account_sid': os.environ["TELESTAX_ACCOUNT_SID"],
     'auth_token': os.environ["TELESTAX_AUTH_TOKEN"],
-    'from': os.environ["TELESTAX_FROM_PHONE_NUMBER"]
+    'from': os.environ["TELESTAX_FROM_PHONE_NUMBER"],
+    'wait_fixed': 15,
+    'stop_after_attempt': 2,
 }
 
 LOG_CONFIG = {

@@ -62,7 +62,7 @@ class TestTeleStaxNotifier:
         test_bus.publish_message = CoroutineMock()
         mock_logger = Mock()
 
-        msg_delivery_status = 500
+        msg_delivery_status = 400
         request_id = "123"
         response_topic = "notifications.sms.request"
         sms_body = "This is a dummy SMS"

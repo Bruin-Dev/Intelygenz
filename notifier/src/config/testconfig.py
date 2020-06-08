@@ -28,7 +28,9 @@ TELESTAX_CONFIG = {
     'url': 'https://fake-telestax.com',
     'account_sid': 'ACCOUNT_SID',
     'auth_token': 'AUTH_TOKEN',
-    'from': '16666666666'
+    'from': '16666666666',
+    'wait_fixed': 3,
+    'stop_after_attempt': 2,
 }
 
 LOG_CONFIG = {
