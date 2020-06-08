@@ -27,7 +27,7 @@ MONITOR_CONFIG = {
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
     ],
     'semaphore': 10,
-    'velo_filter': {},
+    'velo_filter': {"mettel.velocloud.net": []},
     'tnba_notes_age_for_new_appends_in_minutes': 30,
 }
 
