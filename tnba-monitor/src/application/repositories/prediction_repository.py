@@ -6,7 +6,7 @@ from typing import List
 
 
 TNBA_NOTE_PREDICTION_LINE_REGEX = re.compile(r'^The next best action for this ticket is: '
-                                             r'(?P<prediction_name>\w+(\s\w+)*)')
+                                             r'(?P<prediction_name>.*)\.$')
 
 
 class PredictionRepository:

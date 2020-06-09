@@ -140,13 +140,15 @@ class TestPredictionRepository:
                 '#*Automation Engine*#,'
                 'TNBA',
                 '',
-                'The next best action for this ticket is: Holmdel NOC Investigate',
+                'The next best action for this ticket is: No Trouble Found - Carrier Issue.',
+                '',
+                'TNBA is based on AI model designed specifically for MetTel.',
             ]),
             "createdDate": "2020-02-24T10:07:13.503-05:00",
         }
 
         best_prediction = {
-            'name': 'Holmdel NOC Investigate',
+            'name': 'No Trouble Found - Carrier Issue',
             'probability': 0.9484384655952454
         }
 
@@ -166,7 +168,9 @@ class TestPredictionRepository:
                 '#*Automation Engine*#,'
                 'TNBA',
                 '',
-                'The ticket next best action should be Holmdel NOC Investigate',
+                'The next best action for this ticket is: No Trouble Found - Carrier Issue.',
+                '',
+                'TNBA is based on AI model designed specifically for MetTel.',
             ]),
             "createdDate": "2020-02-24T10:07:13.503-05:00",
         }
