@@ -55,6 +55,7 @@ include:
   - local: 'infra-as-code/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'
   - local: 'lit-bridge/.gitlab-ci.yml'
+  - local: 'lumin-billing-report/.gitlab-ci.yml'
   - local: 'metrics-dashboard/.gitlab-ci.yml'
   - local: 'nats-server/.gitlab-ci.yml'
   - local: 'notifier/.gitlab-ci.yml'
