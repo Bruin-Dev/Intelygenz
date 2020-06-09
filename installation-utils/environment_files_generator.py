@@ -139,6 +139,7 @@ env_dict = {
         f'BRUIN_LOGIN_URL={BRUIN_LOGIN_URL}\n'
         f'BRUIN_BASE_URL={BRUIN_BASE_URL}',
     os.path.join('cts-bridge', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -152,10 +153,12 @@ env_dict = {
         f'CTS_LOGIN_URL={CTS_LOGIN_URL}\n'
         f'CTS_DOMAIN={CTS_DOMAIN}\n',
     os.path.join('dispatch-portal-backend', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'DISPATCH_PORTAL_SERVER_PORT={DISPATCH_PORTAL_SERVER_PORT}',
     os.path.join('service-dispatch-monitor', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}',
@@ -170,6 +173,7 @@ env_dict = {
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}',
     os.path.join('lit-bridge', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -223,26 +227,18 @@ env_dict = {
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}',
-    os.path.join('service-outage-monitor', 'src', 'config', 'env'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
     os.path.join('service-outage-monitor', 'src', 'config', 'env-outage-monitor-1'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
-        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}',
-    os.path.join('sites-monitor', 'src', 'config', 'env'):
-        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
-        f'MONITORING_SECONDS={MONITORING_SECONDS}\n'
-        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
         f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
         f'VELOCLOUD_HOSTS={SERVICE_OUTAGE_MONITOR_1_HOSTS}\n'
         f'VELOCLOUD_HOSTS_FILTER={SERVICE_OUTAGE_MONITOR_1_HOSTS_FILTER}\n'
         f'ENABLE_TRIAGE_MONITORING=0',
     os.path.join('service-outage-monitor', 'src', 'config', 'env-outage-monitor-2'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -252,6 +248,7 @@ env_dict = {
         f'VELOCLOUD_HOSTS_FILTER={SERVICE_OUTAGE_MONITOR_2_HOSTS_FILTER}\n'
         f'ENABLE_TRIAGE_MONITORING=0',
     os.path.join('service-outage-monitor', 'src', 'config', 'env-outage-monitor-3'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -261,6 +258,7 @@ env_dict = {
         f'VELOCLOUD_HOSTS_FILTER={SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER}\n'
         f'ENABLE_TRIAGE_MONITORING=0',
     os.path.join('service-outage-monitor', 'src', 'config', 'env-outage-monitor-4'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -270,6 +268,7 @@ env_dict = {
         f'VELOCLOUD_HOSTS_FILTER={SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER}\n'
         f'ENABLE_TRIAGE_MONITORING=0',
     os.path.join('service-outage-monitor', 'src', 'config', 'env-triage'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
@@ -278,6 +277,12 @@ env_dict = {
         f'VELOCLOUD_HOSTS={SERVICE_OUTAGE_MONITOR_TRIAGE_HOST}\n'
         f'VELOCLOUD_HOSTS_FILTER={SERVICE_OUTAGE_MONITOR_TRIAGE_HOSTS_FILTER}\n'
         f'ENABLE_TRIAGE_MONITORING=1',
+    os.path.join('sites-monitor', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
+        f'MONITORING_SECONDS={MONITORING_SECONDS}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
     os.path.join('t7-bridge', 'src', 'config', 'env'):
         f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
@@ -291,13 +296,8 @@ env_dict = {
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'VELOCLOUD_CREDENTIALS={VELOCLOUD_CREDENTIALS}\n'
         f'VELOCLOUD_VERIFY_SSL={VELOCLOUD_VERIFY_SSL}',
-    os.path.join('sites-monitor', 'src', 'config', 'env'):
-        f'NATS_SERVER1={NATS_SERVER1}\n'
-        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
-        f'MONITORING_SECONDS={MONITORING_SECONDS}\n'
-        f'LAST_CONTACT_RECIPIENT={LAST_CONTACT_RECIPIENT}\n'
-        f'REDIS_HOSTNAME={REDIS_HOSTNAME}',
     os.path.join('tnba-monitor', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'

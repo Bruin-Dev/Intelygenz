@@ -16,6 +16,11 @@ data "template_file" "automation-lumin-billing-report" {
     CUSTOMER_NAME = var.CUSTOMER_NAME_BILLING_REPORT
     BILLING_RECIPIENT = var.BILLING_RECIPIENT_REPORT
     EMAIL_ACC_PWD = var.EMAIL_ACC_PWD
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_PREFIX = local.automation-lumin-billing-report-papertrail_prefix
+    PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
+    PAPERTRAIL_PORT = var.PAPERTRAIL_PORT
+    ENVIRONMENT_NAME = var.ENVIRONMENT_NAME
   }
 }
 

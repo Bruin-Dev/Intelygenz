@@ -152,7 +152,7 @@ resource "null_resource" "nats-server-healthcheck" {
                 null_resource.generate_nats_server_task_definition_output_json]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t nats-server ${var.nats-server-task-definition-json}"
+    command = "python3 ci-utils/ecs/task_healthcheck.py -t nats-server ${var.nats-server-task-definition-json}"
   }
 
   triggers = {

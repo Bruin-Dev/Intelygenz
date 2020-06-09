@@ -51,8 +51,16 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[lit-bridge] - logs"
                 },
                 {
+                    "query": f"lumin-billing-report AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
+                    "search_name": f"[lumin-billing-report] - logs"
+                },
+                {
                     "query": f"service-affecting-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
                     "search_name": f"[service-affecting-monitor] - logs"
+                },
+                {
+                    "query": f"service-dispatch-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
+                    "search_name": f"[service-dispatch-monitor] - logs"
                 },
                 {
                     "query": f"service-outage-monitor-1 AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
@@ -83,6 +91,10 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[t7-bridge] - logs"
                 },
                 {
+                    "query": f"tnba-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
+                    "search_name": f"[tnba-monitor] - logs"
+                },
+                {
                     "query": f"velocloud-bridge AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER}",
                     "search_name": f"[velocloud-bridge] - logs"
                 },
@@ -96,23 +108,37 @@ PAPERTRAIL_PROVISIONING = {
             "wildcard": f"{SYSTEM_IPS}",
             "destination_port": f"{PAPERTRAIL_PORT}",
             "system_type": "hostname",
-            "group_name": f"[{ENVIRONMENT_NAME}] - {BRANCH_NAME} alarms",
-            "alarms": True,
+            "group_name": f"[{ENVIRONMENT_NAME}] - {BRANCH_NAME} notifications",
+            "notifications": True,
             "searches": [
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER} AND "
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND "
                              f"\"Successfully created outage ticket for edge\"",
                     "search_name": f"[service-outage-monitor] - ticket creation"
                 },
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER} AND "
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND "
                              f"\"Ticket linked to edge was autoresolved!\"",
                     "search_name": f"[service-outage-monitor] - ticked autoresolved"
                 },
                 {
-                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND {BUILD_NUMBER} AND "
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND "
                              f"\"Triage appended to ticket\"",
                     "search_name": f"[service-outage-monitor] - triage appended"
+                }
+            ]
+        },
+        {
+            "wildcard": f"{SYSTEM_IPS}",
+            "destination_port": f"{PAPERTRAIL_PORT}",
+            "system_type": "hostname",
+            "group_name": f"[{ENVIRONMENT_NAME}] - {BRANCH_NAME} alarms",
+            "alarms": True,
+            "searches": [
+                {
+                    "query": f"service-outage-monitor AND {ENVIRONMENT_NAME} AND "
+                             f"\"Successfully created outage ticket for edge\"",
+                    "search_name": f"[service-outage-monitor] - ticket creation"
                 }
             ]
         }

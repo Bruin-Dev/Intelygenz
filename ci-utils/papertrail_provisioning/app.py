@@ -51,10 +51,11 @@ class PapertrailProvisioner:
                     destination_port = group['destination_port']
                     system_type = group['system_type']
                     is_alarm_group = group.get('alarms', False)
+                    is_notifications_group = group.get('notifications', False)
                     for search in group['searches']:
                         search_name = search['search_name']
                         query = search['query']
-                        if not is_alarm_group:
+                        if not is_alarm_group or not is_notifications_group:
                             subprocess.call([papertrail_cli_exec, '-a', 'd', '-g', group_name, '-w', wildcard, '-S',
                                              search_name, '-q', query, '-p', destination_port, '-t', system_type,
                                              '--delete-only-searches', 'true'])

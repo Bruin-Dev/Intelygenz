@@ -161,7 +161,7 @@ resource "null_resource" "lit-bridge-healthcheck" {
   ]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t lit-bridge ${var.lit-bridge-task-definition-json}"
+    command = "python3 ci-utils/ecs/task_healthcheck.py -t lit-bridge ${var.lit-bridge-task-definition-json}"
   }
 
   triggers = {

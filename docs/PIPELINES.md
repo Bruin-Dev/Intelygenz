@@ -30,7 +30,13 @@ In the project there are two types of environments in the project:
 
 ## Validation steps
 
-This stage checks that all services comply with the rules of [PEP8](https://www.python.org/dev/peps/pep-0008/#package-and-module-names), as well as whether the Terraform files used to configure the infrastructure are valid from a syntactic point of view.
+This stage checks the following:
+
+* All python microservices comply with the rules of [PEP8](https://www.python.org/dev/peps/pep-0008/#package-and-module-names)
+
+* Terraform files used to configure the infrastructure are valid from a syntactic point of view.
+
+* The frontend modules comply with the linter configured for them
 
 ## Unit tests steps
 
@@ -80,6 +86,8 @@ In these jobs services in the monorepo will be deployed to the selected environm
     * [last-contact-report](../last-contact-report)
     
     * [lit-bridge](../lit-bridge)
+    
+    * [lumin-billing-report](../lumin-billing-report)
 
     * [metrics-prometheus](../metrics-dashboard/grafana)
 
@@ -88,6 +96,8 @@ In these jobs services in the monorepo will be deployed to the selected environm
     * [notifier](../notifier)
 
     * [service-affecting-monitor](../service-affecting-monitor)
+    
+    * [service-dispatch-monitor](../service-dispatch-monitor)
 
     * [service-outage-monitor-1, service-outage-monitor-2, service-outage-monitor-3, service-outage-monitor-4, service-outage-monitor-triage](../service-outage-monitor)
     
@@ -147,7 +157,9 @@ Also, resources of type [null_resource](https://www.terraform.io/docs/providers/
     
     - `dispatch-portal-backend`
 	- `last-contact-report`
+	- `lumin-billing-report`
 	- `service-affecting-monitor`
+	- `service-dispatch-monitor`
 	- `service-outage-monitor-1`
 	- `service-outage-monitor-2`
 	- `service-outage-monitor-3`
@@ -178,5 +190,6 @@ Also, resources of type [null_resource](https://www.terraform.io/docs/providers/
 
    >This procedure has been done to ensure that use case microservices are not created in ECS until new versions of the capability-type microservices are properly deployed, as use case microservices need to use capability-type microservices.
 
+4. The provisioning of the different groups and the searches included in each one of them is done through a [python utility](../ci-utils/papertrail_provisioning), this makes calls to the util [go-papertrail-cli](https://github.com/xoanmm/go-papertrail-cli) who is in charge of the provisioning of the elements mentioned in [Papertrail](https://papertrailapp.com/).
 ---
 With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020

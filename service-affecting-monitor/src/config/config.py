@@ -43,7 +43,7 @@ ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 
 LOG_CONFIG = {
     'name': 'service-affecting-monitor',
-    'level': logging.INFO,
+    'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {

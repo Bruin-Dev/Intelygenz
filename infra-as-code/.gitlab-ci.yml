@@ -138,28 +138,6 @@ deploy-branches:
     - export TF_VAR_TELESTAX_AUTH_TOKEN=${TELESTAX_AUTH_TOKEN}
     - export TF_VAR_TELESTAX_FROM_PHONE_NUMBER=${TELESTAX_FROM_PHONE_NUMBER}
     - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
-    - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
-    - export TF_VAR_cts_bridge_desired_tasks=${cts_bridge_desired_tasks}
-    - export TF_VAR_dispatch_portal_backend_desired_tasks=${dispatch_portal_backend_desired_tasks}
-    - export TF_VAR_dispatch_portal_frontend_desired_tasks=${dispatch_portal_frontend_desired_tasks}
-    - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
-    - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
-    - export TF_VAR_lumin_billing_report_desired_tasks=${lumin_billing_report_desired_tasks}
-    - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
-    - export TF_VAR_nats_server_desired_tasks=${nats_server_desired_tasks}
-    - export TF_VAR_nats_server_1_desired_tasks=${nats_server_1_desired_tasks}
-    - export TF_VAR_nats_server_2_desired_tasks=${nats_server_2_desired_tasks}
-    - export TF_VAR_notifier_desired_tasks=${notifier_desired_tasks}
-    - export TF_VAR_service_affecting_monitor_desired_tasks=${service_affecting_monitor_desired_tasks}
-    - export TF_VAR_service_dispatch_monitor_desired_tasks=${service_dispatch_monitor_desired_tasks}
-    - export TF_VAR_service_outage_monitor_1_desired_tasks=${service_outage_monitor_1_desired_tasks}
-    - export TF_VAR_service_outage_monitor_2_desired_tasks=${service_outage_monitor_2_desired_tasks}
-    - export TF_VAR_service_outage_monitor_3_desired_tasks=${service_outage_monitor_3_desired_tasks}
-    - export TF_VAR_service_outage_monitor_4_desired_tasks=${service_outage_monitor_4_desired_tasks}
-    - export TF_VAR_service_outage_monitor_triage_desired_tasks=${service_outage_monitor_triage_desired_tasks}
-    - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
-    - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
-    - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net/
@@ -217,28 +195,6 @@ deploy-master:
     - export TF_VAR_TELESTAX_AUTH_TOKEN=${TELESTAX_AUTH_TOKEN}
     - export TF_VAR_TELESTAX_FROM_PHONE_NUMBER=${TELESTAX_FROM_PHONE_NUMBER}
     - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
-    - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
-    - export TF_VAR_cts_bridge_desired_tasks=${cts_bridge_desired_tasks}
-    - export TF_VAR_dispatch_portal_backend_desired_tasks=${dispatch_portal_backend_desired_tasks}
-    - export TF_VAR_dispatch_portal_frontend_desired_tasks=${dispatch_portal_frontend_desired_tasks}
-    - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
-    - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
-    - export TF_VAR_lumin_billing_report_desired_tasks=${lumin_billing_report_desired_tasks}
-    - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
-    - export TF_VAR_nats_server_desired_tasks=${nats_server_desired_tasks}
-    - export TF_VAR_nats_server_1_desired_tasks=${nats_server_1_desired_tasks}
-    - export TF_VAR_nats_server_2_desired_tasks=${nats_server_2_desired_tasks}
-    - export TF_VAR_notifier_desired_tasks=${notifier_desired_tasks}
-    - export TF_VAR_service_affecting_monitor_desired_tasks=${service_affecting_monitor_desired_tasks}
-    - export TF_VAR_service_dispatch_monitor_desired_tasks=${service_dispatch_monitor_desired_tasks}
-    - export TF_VAR_service_outage_monitor_1_desired_tasks=${service_outage_monitor_1_desired_tasks}
-    - export TF_VAR_service_outage_monitor_2_desired_tasks=${service_outage_monitor_2_desired_tasks}
-    - export TF_VAR_service_outage_monitor_3_desired_tasks=${service_outage_monitor_3_desired_tasks}
-    - export TF_VAR_service_outage_monitor_4_desired_tasks=${service_outage_monitor_4_desired_tasks}
-    - export TF_VAR_service_outage_monitor_triage_desired_tasks=${service_outage_monitor_triage_desired_tasks}
-    - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
-    - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
-    - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
   environment:
     name: $CI_COMMIT_REF_NAME
     url: http://${ENVIRONMENT_SLUG}.mettel-automation.net:3000/

@@ -89,8 +89,8 @@ In the automation-engine folder you will need to update the:
 
 ### ci-utils
 In ci-utils you will need to makes changes to the following files:
--  [assign_docker_images_build_numbers.sh](ci-utils/assign_docker_images_build_numbers.sh) 
--  [manage_ecr_docker_images.py](ci-utils/manage_ecr_docker_images.py)
+-  [assign_docker_images_build_numbers.sh](ci-utils/ecr/assign_docker_images_build_numbers.sh) 
+-  [manage_ecr_docker_images.py](ci-utils/ecr/manage_ecr_docker_images.py)
 
 ### gitlab-ci
 If your microservices adds any new env variables you will need to make changes to the following file:

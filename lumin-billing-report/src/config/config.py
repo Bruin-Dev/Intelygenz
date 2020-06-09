@@ -39,9 +39,15 @@ ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME', 'local')
 
 LOG_CONFIG = {
     'name': 'lumin-billing-report',
-    'level': logging.INFO,
+    'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
-    'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
+    'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
+    'papertrail': {
+        'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
+        'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-lumin-billing-report'),
+        'host': os.getenv('PAPERTRAIL_HOST'),
+        'port': int(os.getenv('PAPERTRAIL_PORT'))
+    },
 }
 
 QUART_CONFIG = {

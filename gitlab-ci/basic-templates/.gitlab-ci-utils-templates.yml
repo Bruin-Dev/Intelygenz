@@ -33,11 +33,10 @@
     - export TF_VAR_service_outage_monitor_4_desired_tasks=${service_outage_monitor_4_desired_tasks}
     - export TF_VAR_service_outage_monitor_triage_desired_tasks=${service_outage_monitor_triage_desired_tasks}
     - export TF_VAR_sites_monitor_desired_tasks=${sites_monitor_desired_tasks}
-    - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
     - export TF_VAR_tnba_monitor_desired_tasks=${tnba_monitor_desired_tasks}
+    - export TF_VAR_t7_bridge_desired_tasks=${t7_bridge_desired_tasks}
     - export TF_VAR_velocloud_bridge_desired_tasks=${velocloud_bridge_desired_tasks}
     - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
-    - python3 ci-utils/check_ecs_resources.py
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
     - if: $CI_COMMIT_BRANCH == "master"
@@ -59,7 +58,7 @@
   script:
     - apk add --update-cache --upgrade curl
     - apk add --no-cache py-pip
-    - pip3 install -r ci-utils/requirements.txt
+    - pip3 install -r ci-utils/aws-nuke/requirements.txt
     - curl -L --output aws-nuke https://github.com/rebuy-de/aws-nuke/releases/download/v${AWS_NUKE_VERSION}/aws-nuke-v${AWS_NUKE_VERSION}-linux-amd64
     - chmod +x ./aws-nuke
     - mv ./aws-nuke /bin/aws-nuke

@@ -152,7 +152,7 @@ resource "null_resource" "velocloud-bridge-healthcheck" {
                 aws_elasticache_cluster.automation-redis]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/task_healthcheck.py -t velocloud-bridge ${var.velocloud-bridge-task-definition-json}"
+    command = "python3 ci-utils/ecs/task_healthcheck.py -t velocloud-bridge ${var.velocloud-bridge-task-definition-json}"
   }
 
   triggers = {

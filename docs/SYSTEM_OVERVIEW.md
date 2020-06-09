@@ -53,6 +53,8 @@ There are two types of microservices showed in the diagram above depending on th
     * *last-contact-report*
 
     * *service-affecting-monitor*
+    
+    * *service-dispatch-monitor*
 
     * *service-outage-monitor*
 
@@ -66,6 +68,8 @@ There are two types of microservices showed in the diagram above depending on th
 * Microservices that doesn't communicate with NATS
 
   * *dispatch-portal-frontend*
+  
+  * *lumin-billing-report*
 
   * *prometheus* and *thanos* components, from *metrics-prometheus* microservice
 

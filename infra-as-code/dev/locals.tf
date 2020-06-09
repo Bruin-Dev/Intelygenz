@@ -91,6 +91,7 @@ locals {
   automation-lumin-billing-report-resource-name = "${var.ENVIRONMENT}-lumin-billing-report"
   automation-lumin-billing-report-task_definition = "${aws_ecs_task_definition.automation-lumin-billing-report.family}:${aws_ecs_task_definition.automation-lumin-billing-report.revision}"
   automation-lumin-billing-report-service_discovery_service-name = "lumin-billing-report-${var.ENVIRONMENT}"
+  automation-lumin-billing-report-papertrail_prefix = "lumin-billing-report-${element(split("-", var.LIT_BRIDGE_BUILD_NUMBER),2)}"
 
   // automation-metrics-grafana local vars
   automation-metrics-grafana-image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.GRAFANA_BUILD_NUMBER}"
@@ -192,6 +193,7 @@ locals {
   automation-service-dispatch-monitor-resource-name = "${var.ENVIRONMENT}-service-dispatch-monitor"
   automation-service-dispatch-monitor-task_definition = "${aws_ecs_task_definition.automation-service-dispatch-monitor.family}:${aws_ecs_task_definition.automation-service-dispatch-monitor.revision}"
   automation-service-dispatch-monitor-service_discovery_service-name = "service-dispatch-monitor-${var.ENVIRONMENT}"
+  automation-service-dispatch-monitor-papertrail_prefix = "service-dispatch-monitor-${element(split("-", var.SERVICE_DISPATCH_MONITOR_BUILD_NUMBER),2)}"
 
   // automation-service-outage-monitor local vars (for all service-outage-monitor services)
   automation-service-outage-monitor-image = "${data.aws_ecr_repository.automation-service-outage-monitor.repository_url}:${var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
@@ -288,6 +290,7 @@ locals {
   automation-tnba-monitor-ecs_service-name = "${var.ENVIRONMENT}-tnba-monitor"
   automation-tnba-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-tnba-monitor.family}:${aws_ecs_task_definition.automation-tnba-monitor.revision}"
   automation-tnba-monitor-service_discovery_service-name = "tnba-monitor-${var.ENVIRONMENT}"
+  automation-tnba-monitor-papertrail_prefix = "tnba-monitor-${element(split("-", var.TNBA_MONITOR_BUILD_NUMBER),2)}"
 
   // metrics local variables
   exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"
