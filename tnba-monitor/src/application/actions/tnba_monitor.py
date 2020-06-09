@@ -14,7 +14,7 @@ from tenacity import retry, wait_exponential, stop_after_delay
 
 TNBA_NOTE_APPENDED_SUCCESS_MSG = (
     'TNBA note appended to ticket {ticket_id} and detail {detail_id} (serial: {serial_number}) '
-    'with prediction: {prediction}'
+    'with prediction: {prediction}. Details at app.bruin.com/t/{ticket_id}'
 )
 
 
@@ -329,7 +329,7 @@ class TNBAMonitor:
                 elif self._config.ENVIRONMENT == 'dev':
                     tnba_message = (
                         f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
-                        f'(serial: {serial_number}). Note: {tnba_note}'
+                        f'(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}'
                     )
                     self._logger.info(tnba_message)
                     await self._notifications_repository.send_slack_message(tnba_message)
@@ -483,7 +483,7 @@ class TNBAMonitor:
                 elif self._config.ENVIRONMENT == 'dev':
                     tnba_message = (
                         f'TNBA note would have been appended to ticket {ticket_id} and detail {ticket_detail_id} '
-                        f'(serial: {serial_number}). Note: {tnba_note}'
+                        f'(serial: {serial_number}). Note: {tnba_note}. Details at app.bruin.com/t/{ticket_id}'
                     )
                     self._logger.info(tnba_message)
                     await self._notifications_repository.send_slack_message(tnba_message)
