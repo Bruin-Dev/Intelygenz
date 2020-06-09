@@ -2,6 +2,7 @@ from phonenumbers import NumberParseException
 from shortuuid import uuid
 import datetime
 from pytz import timezone
+import re
 
 
 import phonenumbers
@@ -16,6 +17,12 @@ class LitRepository:
         self._event_bus = event_bus
         self._notifications_repository = notifications_repository
         self.DATETIME_TZ_FORMAT = "%Y-%m-%d %I:%M%p"
+        self._reg = r"\d(\d)?([:,]\d\d)?[( )|(-)]?((am)|(AM)|(Am)|(aM)|(pm)|(PM)|(Pm)|(pM)|(P)|(p)|(A)|(a))?"
+        self._compiled = re.compile(self._reg)
+        self._reg_am_pm = r"((am)|(AM)|(Am)|(pm)|(PM)|(Pm)|(P)|(p)|(A)|(a))"
+        self._compiled_am_pm = re.compile(self._reg_am_pm)
+        self._reg_time = r"\d(\d)?([:,]\d\d)?((am)|(AM)|(Am)|(pm)|(PM)|(Pm))?"
+        self._compiled_time = re.compile(self._reg_time)
 
     async def get_all_dispatches(self):
         err_msg = None
@@ -67,85 +74,57 @@ class LitRepository:
     def get_dispatch_confirmed_date_time_localized(self, dispatch, dispatch_number, ticket_id):
         return_datetime_localized = None
         try:
-            final_time_of_dispatch = None
-            # "2015-01-01"
             date_of_dispatch = dispatch.get('Date_of_Dispatch', None)
-            # ['4-6pm', '4pm-6pm','12pm','12:00PM','9:00 AM','10 am','10am ET','10a-12p ET','11a-1p PT','2-4pm ET',
-            # '12-2PM CT','11am CT','12:00','3:30pm ET','12::00PM','8am-1p PT','7.00PM','8 AM CT']
             time_of_dispatch = dispatch.get('Hard_Time_of_Dispatch_Local', None)
-
             if time_of_dispatch is None:
                 self._logger.error(f"Not valid time of dispatch: {time_of_dispatch}")
                 return None
 
+            self._logger.info(f"Original time_of_dispatch: {time_of_dispatch}")
             time_of_dispatch = time_of_dispatch.upper()
+            # Clean input: '.' -> ':', '::' -> ':'
+            time_of_dispatch = time_of_dispatch.replace('.', ':')
+            time_of_dispatch = time_of_dispatch.replace('::', ':')
             final_time_of_dispatch = None
             am_pm = None
-            timezone_job = None
-
-            if '::' in time_of_dispatch:
-                time_of_dispatch = time_of_dispatch.replace('::', ':')
-
-            end_time_of_dispatch = None
-            if '-' in time_of_dispatch:
-                # ['4-6pm', '4pm-6pm', '10a-12p ET', '11a-1p PT', '2-4pm ET', '12-2PM CT', '8am-1p PT']
-                if ' ' in time_of_dispatch:
-                    time_of_dispatch = time_of_dispatch.split(' ')[0]
-                start_time_of_dispatch = time_of_dispatch.split('-')[0]
-                end_time_of_dispatch = time_of_dispatch.split('-')[1]
-                if 'AM' in start_time_of_dispatch or 'A' in start_time_of_dispatch:
-                    am_pm = 'AM'
-                    start_time_of_dispatch = start_time_of_dispatch.replace('AM', '')
-                    final_time_of_dispatch = start_time_of_dispatch.replace('A', '')
-                elif 'PM' in start_time_of_dispatch or 'P' in start_time_of_dispatch:
-                    am_pm = 'PM'
-                    start_time_of_dispatch = start_time_of_dispatch.replace('PM', '')
-                    final_time_of_dispatch = start_time_of_dispatch.replace('P', '')
-            else:
-                # ['12pm', '12:00PM', '9:00 AM', '10 am', '10am ET', '11am CT',
-                #  '12:00', '3:30pm ET', '12::00PM', '7.00PM', '8 AM CT']
-                if '.' not in time_of_dispatch:
-                    time_of_dispatch = time_of_dispatch.replace('.', ':')
-                if 'AM' in time_of_dispatch or 'A' in time_of_dispatch or \
-                        'PM' in time_of_dispatch or 'P' in time_of_dispatch:
-                    if ' ' in time_of_dispatch:
-                        if len(time_of_dispatch.split(' ')) > 2:
-                            final_time_of_dispatch = time_of_dispatch.split(' ')[0]
-                            am_pm = time_of_dispatch.split(' ')[1]
-                            tz_job = time_of_dispatch.split(' ')[2]
-                        else:
-                            final_time_of_dispatch = time_of_dispatch.split(' ')[0]
-                            tz_job = time_of_dispatch.split(' ')[1]
-                            if ':' in final_time_of_dispatch:
-                                part_final_time_of_dispatch = final_time_of_dispatch.split(':')[0]
-                                part_2_final_time_of_dispatch = final_time_of_dispatch.split(':')[1]
-
-                                minutes = ''.join(ch for ch in part_2_final_time_of_dispatch if ch.isdigit())
-                                am_pm = ''.join(ch for ch in part_2_final_time_of_dispatch if not ch.isdigit())
-                                final_time_of_dispatch = f"{part_final_time_of_dispatch}:{minutes}"
+            self._logger.info(f"Filtered time_of_dispatch: {time_of_dispatch}")
+            groups = [x.group() for x in self._compiled.finditer(time_of_dispatch)]
+            self._logger.info(groups)
+            found_am_pm = False
+            for group in groups:
+                groups_am_pm = [x.group() for x in self._compiled_am_pm.finditer(group)]
+                if not found_am_pm:
+                    for group_am_pm in groups_am_pm:
+                        if group_am_pm in ['AM', 'PM', 'A', 'P']:
+                            found_am_pm = True
+                            if 'A' in group_am_pm:
+                                am_pm = 'AM'
                             else:
-                                temp = final_time_of_dispatch
-                                final_time_of_dispatch = ''.join(ch for ch in temp if ch.isdigit())
-                                am_pm = ''.join(ch for ch in temp if not ch.isdigit())
-                    else:
-                        final_time_of_dispatch = ''.join(ch for ch in time_of_dispatch if ch.isdigit())
-                        am_pm = ''.join(ch for ch in time_of_dispatch if not ch.isdigit())
-                else:
-                    final_time_of_dispatch = None
-            if final_time_of_dispatch is None:
+                                am_pm = 'PM'
+                            break
+            for group in groups:
+                groups_time = [x.group() for x in self._compiled_time.finditer(group)]
+                if len(groups_time) > 0:
+                    final_time_of_dispatch = f'{groups_time[0]}'
+                    final_time_of_dispatch = final_time_of_dispatch.replace("AM", "")
+                    final_time_of_dispatch = final_time_of_dispatch.replace("PM", "")
+                    final_time_of_dispatch = final_time_of_dispatch.replace("A", "")
+                    final_time_of_dispatch = final_time_of_dispatch.replace("P", "")
+                    if ':' not in final_time_of_dispatch:
+                        final_time_of_dispatch = f'{final_time_of_dispatch}:00'
+                break
+            if found_am_pm:
+                new_date = f'{date_of_dispatch} {final_time_of_dispatch}{am_pm}'
+                self._logger.info(new_date)
+                final_datetime = datetime.datetime.strptime(new_date, self.DATETIME_TZ_FORMAT)
+                # "Pacific Time"
+                time_zone_of_dispatch = dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)
+                time_zone_of_dispatch = time_zone_of_dispatch.replace('Time', '').replace(' ', '')
+                final_timezone = timezone(f'US/{time_zone_of_dispatch}')
+
+                return_datetime_localized = final_timezone.localize(final_datetime)
+            else:
                 return None
-
-            if ':' not in final_time_of_dispatch:
-                final_time_of_dispatch = f"{final_time_of_dispatch}:00"
-
-            final_datetime = datetime.datetime.strptime(f'{date_of_dispatch} {final_time_of_dispatch}{am_pm}',
-                                                        self.DATETIME_TZ_FORMAT)
-            # "Pacific Time"
-            time_zone_of_dispatch = dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)
-            time_zone_of_dispatch = time_zone_of_dispatch.replace('Time', '').replace(' ', '')
-            final_timezone = timezone(f'US/{time_zone_of_dispatch}')
-
-            return_datetime_localized = final_timezone.localize(final_datetime)
         except Exception as ex:
             self._logger.error(f"Error: getting confirmed date time of dispatch -> {ex}")
             return None

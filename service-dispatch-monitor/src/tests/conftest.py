@@ -185,6 +185,16 @@ def dispatch_tech_on_site_2(lit_dispatch_monitor, dispatch_confirmed_2):
 
 
 @pytest.fixture(scope='function')
+def dispatch_tech_on_site_bad_datetime(lit_dispatch_monitor, dispatch_confirmed_2):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed_2)
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = None
+    updated_dispatch["Tech_Arrived_On_Site"] = True
+    updated_dispatch["Time_of_Check_In"] = "10:30"
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def dispatch_tech_on_site_skipped(lit_dispatch_monitor, dispatch_tech_on_site):
     updated_dispatch = copy.deepcopy(dispatch_tech_on_site)
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544800|OTHER"

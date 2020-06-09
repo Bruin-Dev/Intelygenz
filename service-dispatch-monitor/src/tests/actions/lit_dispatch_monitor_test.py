@@ -140,14 +140,17 @@ class TestLitDispatchMonitor:
                 'DispatchList': dispatches
             }
         }
-        splitted_dispatches = {
-            str(lit_dispatch_monitor.DISPATCH_REQUESTED): [dispatch],
-            str(lit_dispatch_monitor.DISPATCH_CONFIRMED): [dispatch_confirmed],
-        }
+        splitted_dispatches = {}
+        for ds in lit_dispatch_monitor._dispatch_statuses:
+            splitted_dispatches[ds] = []
+        splitted_dispatches[str(lit_dispatch_monitor.DISPATCH_REQUESTED)] = [dispatch]
+        splitted_dispatches[str(lit_dispatch_monitor.DISPATCH_CONFIRMED)] = [dispatch_confirmed]
+
         confirmed_dispatches = [dispatch_confirmed]
         lit_dispatch_monitor._lit_repository.get_all_dispatches = CoroutineMock(return_value=dispatches_response)
         lit_dispatch_monitor._get_dispatches_splitted_by_status = Mock(return_value=splitted_dispatches)
         lit_dispatch_monitor._monitor_confirmed_dispatches = CoroutineMock()
+
         await lit_dispatch_monitor._lit_dispatch_monitoring_process()
 
         lit_dispatch_monitor._monitor_confirmed_dispatches.assert_awaited_once()
@@ -2382,12 +2385,14 @@ class TestLitDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_test(self, lit_dispatch_monitor, dispatch_tech_on_site,
-                                                   dispatch_tech_on_site_2, ticket_details_1, ticket_details_2,
+                                                   dispatch_tech_on_site_2, dispatch_tech_on_site_bad_datetime,
+                                                   ticket_details_1, ticket_details_2,
                                                    append_note_response, append_note_response_2,
                                                    sms_success_response, sms_success_response_2):
         tech_on_site_dispatches = [
             dispatch_tech_on_site,
-            dispatch_tech_on_site_2
+            dispatch_tech_on_site_2,
+            dispatch_tech_on_site_bad_datetime
         ]
 
         response_append_note_1 = {
@@ -2400,6 +2405,25 @@ class TestLitDispatchMonitor:
             'body': append_note_response_2,
             'status': 200
         }
+
+        tz_1 = timezone(f'US/Pacific')
+        datetime_return_1 = {
+            'datetime_localized': tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_1
+        }
+        tz_2 = timezone(f'US/Eastern')
+        datetime_return_2 = {
+            'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_2
+        }
+        tz_3 = timezone(f'US/Pacific')
+        datetime_return_3 = None
+
+        datetime_returns_mock = [
+            datetime_return_1,
+            datetime_return_2,
+            datetime_return_3
+        ]
 
         response_sms_note_1 = {
             'request_id': uuid_,
@@ -2417,8 +2441,10 @@ class TestLitDispatchMonitor:
 
         dispatch_number_1 = dispatch_tech_on_site.get('Dispatch_Number')
         dispatch_number_2 = dispatch_tech_on_site_2.get('Dispatch_Number')
+        dispatch_number_3 = dispatch_tech_on_site_bad_datetime.get('Dispatch_Number')
         ticket_id_1 = dispatch_tech_on_site.get('MetTel_Bruin_TicketID')
         ticket_id_2 = dispatch_tech_on_site_2.get('MetTel_Bruin_TicketID')
+        ticket_id_3 = dispatch_tech_on_site_bad_datetime.get('MetTel_Bruin_TicketID')
 
         tech_on_site_sms_note_1 = '#*Automation Engine*#\n' \
                                   'Dispatch Management - Field Engineer On Site\n\n' \
@@ -2455,12 +2481,19 @@ class TestLitDispatchMonitor:
             True
         ]
 
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
+            side_effect=datetime_returns_mock)
         lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
-        # lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(side_effect=responses_append_notes_mock)
         lit_dispatch_monitor._send_tech_on_site_sms = CoroutineMock(side_effect=responses_sms_tech_on_site_mock)
         lit_dispatch_monitor._append_tech_on_site_sms_note = CoroutineMock(side_effect=responses_append_tech_on_site_sms_note_mock)
 
         await lit_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
+
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized.assert_has_calls([
+            call(dispatch_tech_on_site, dispatch_number_1, ticket_id_1),
+            call(dispatch_tech_on_site_2, dispatch_number_2, ticket_id_2),
+            call(dispatch_tech_on_site_bad_datetime, dispatch_number_3, ticket_id_3),
+        ])
 
         lit_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
             call(ticket_id_1),

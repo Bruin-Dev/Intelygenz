@@ -129,6 +129,8 @@ class LitDispatchMonitor:
 
     def _get_dispatches_splitted_by_status(self, dispatches):
         dispatches_splitted_by_status = defaultdict(list)
+        for ds in self._dispatch_statuses:
+            dispatches_splitted_by_status[ds] = []
         for dispatch in dispatches:
             if dispatch.get('Dispatch_Status') in self._dispatch_statuses:
                 dispatches_splitted_by_status[dispatch.get('Dispatch_Status')].append(dispatch)
@@ -174,7 +176,7 @@ class LitDispatchMonitor:
 
             monitor_tasks = [
                 self._monitor_confirmed_dispatches(dispatches_splitted_by_status[self.DISPATCH_CONFIRMED]),
-                # self._monitor_tech_on_site_dispatches(dispatches_splitted_by_status[self.DISPATCH_FIELD_ENGINEER_ON_SITE]),
+                self._monitor_tech_on_site_dispatches(dispatches_splitted_by_status[self.DISPATCH_FIELD_ENGINEER_ON_SITE]),
                 # self._monitor_repair_completed(dispatches_splitted_by_status[self.DISPATCH_REPAIR_COMPLETED])
             ]
 
@@ -575,7 +577,6 @@ class LitDispatchMonitor:
                                   f"- already has a sms confirmed note")
 
                 # Check if dispatch has a sms 2 hours note
-                # import pdb;pdb.set_trace()
                 if tech_24_hours_before_note_found is None:
                     hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                   date_time_of_dispatch)
@@ -604,7 +605,6 @@ class LitDispatchMonitor:
                                   f"- Already has a sms tech 24 hours before note")
 
                 # Check if dispatch has a sms 2 hours note
-                # import pdb;pdb.set_trace()
                 if tech_2_hours_before_note_found is None:
                     hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                   date_time_of_dispatch)
@@ -653,6 +653,18 @@ class LitDispatchMonitor:
                 self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id}")
                 if ticket_id is None or not self._is_valid_ticket_id(ticket_id) or dispatch_number is None:
                     self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
+                    continue
+
+                datetime_tz_response = self._lit_repository.get_dispatch_confirmed_date_time_localized(
+                    dispatch, dispatch_number, ticket_id)
+
+                if datetime_tz_response is None:
+                    self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                      f"Could not determine date time of dispatch.")
+                    err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                              f"An error occurred retrieve datetime of dispatch: " \
+                              f"{dispatch.get('Hard_Time_of_Dispatch_Local', None)}"
+                    await self._notifications_repository.send_slack_message(err_msg)
                     continue
 
                 sms_to = LitRepository.get_sms_to(dispatch)

@@ -114,7 +114,7 @@ class TestLitRepository:
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = "no valid Number"
         assert LitRepository.get_sms_to(updated_dispatch) is None
 
-    def get_dispatch_confirmed_date_time_localized_samples_test(self, lit_repository, dispatch_confirmed):
+    def get_dispatch_confirmed_date_time_localized_regex_test(self, lit_repository, dispatch_confirmed):
         dates = [
             {'date': '4-6pm', 'am_pm': 'PM', 'final': '4:00'},
             {'date': '4pm-6pm', 'am_pm': 'PM', 'final': '4:00'},
@@ -133,12 +133,13 @@ class TestLitRepository:
             {'date': '12::00PM', 'am_pm': 'PM', 'final': '12:00'},
             {'date': '8am-1p PT', 'am_pm': 'AM', 'final': '8:00'},
             {'date': '7.00PM', 'am_pm': 'PM', 'final': '7:00'},
-            {'date': '1.30AM', 'am_pm': 'PM', 'final': '7:00'},
+            {'date': '1.30AM', 'am_pm': 'AM', 'final': '1:30'},
             {'date': '8 AM CT', 'am_pm': 'AM', 'final': '8:00'},
             {'date': None, 'am_pm': None, 'final': None},
             {'date': '3:30a ET', 'am_pm': 'AM', 'final': '3:30'},
             {'date': '3:30p ET', 'am_pm': 'PM', 'final': '3:30'},
             {'date': '3:30pm ET', 'am_pm': 'PM', 'final': '3:30'},
+            {'date': '3:30pm ET', 'am_pm': 'PM', 'final': '3:30', 'tz': 'BAD'}
         ]
         responses = []
         expected_responses = []
@@ -150,19 +151,20 @@ class TestLitRepository:
             date_of_dispatch = new_dispatch.get('Date_of_Dispatch', None)
 
             new_dispatch['Hard_Time_of_Dispatch_Local'] = test_date['date']
+            if 'tz' in test_date:
+                new_dispatch['Hard_Time_of_Dispatch_Time_Zone_Local'] = test_date['tz']
 
             final_time_of_dispatch = test_date['final']
             am_pm = test_date['am_pm']
 
             expected_response = None
-            if am_pm is not None and final_time_of_dispatch is not None:
+            new_dispatch['Hard_Time_of_Dispatch_Local'] = test_date['date']
+            if am_pm is not None:
                 final_timezone = timezone(f'US/Pacific')
-                final_datetime = datetime.strptime(f'{date_of_dispatch} {final_time_of_dispatch}{am_pm}', "%Y-%m-%d %I:%M%p")
+                final_datetime = datetime.strptime(f'{date_of_dispatch} {final_time_of_dispatch}{am_pm}',
+                                                   lit_repository.DATETIME_TZ_FORMAT)
                 return_datetime_localized = final_timezone.localize(final_datetime)
-
-                new_dispatch['Hard_Time_of_Dispatch_Local'] = test_date['date']
-                res = lit_repository.get_dispatch_confirmed_date_time_localized(new_dispatch, dispatch_number, ticket_id)
-
+            res = lit_repository.get_dispatch_confirmed_date_time_localized(new_dispatch, dispatch_number, ticket_id)
             if res is None:
                 responses.append(res)
                 expected_responses.append(None)
