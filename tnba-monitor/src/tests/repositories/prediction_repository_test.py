@@ -140,7 +140,7 @@ class TestPredictionRepository:
                 '#*Automation Engine*#,'
                 'TNBA',
                 '',
-                'The ticket next best action should be Holmdel NOC Investigate',
+                'The next best action for this ticket is: Holmdel NOC Investigate',
             ]),
             "createdDate": "2020-02-24T10:07:13.503-05:00",
         }
