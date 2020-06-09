@@ -5,7 +5,8 @@ from functools import partial
 from typing import List
 
 
-TNBA_NOTE_PREDICTION_LINE_REGEX = re.compile(r'^The ticket next best action should be (?P<prediction_name>\w+(\s\w+)*)')
+TNBA_NOTE_PREDICTION_LINE_REGEX = re.compile(r'^The next best action for this ticket is: '
+                                             r'(?P<prediction_name>\w+(\s\w+)*)')
 
 
 class PredictionRepository:
