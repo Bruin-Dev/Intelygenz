@@ -15,6 +15,10 @@ data "template_file" "automation-notifier" {
     REDIS_HOSTNAME = local.redis-hostname
     SLACK_URL = var.SLACK_URL
     EMAIL_ACC_PWD = var.EMAIL_ACC_PWD
+    TELESTAX_URL = var.TELESTAX_URL
+    TELESTAX_ACCOUNT_SID = var.TELESTAX_ACCOUNT_SID
+    TELESTAX_AUTH_TOKEN = var.TELESTAX_AUTH_TOKEN
+    TELESTAX_FROM_PHONE_NUMBER = var.TELESTAX_FROM_PHONE_NUMBER
   }
 }
 

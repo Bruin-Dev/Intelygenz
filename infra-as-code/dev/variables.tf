@@ -6,6 +6,26 @@ variable "SLACK_URL" {
   description = "webhook url of slack for current environment"
 }
 
+variable "TELESTAX_URL" {
+  description = "Notifier telestax url"
+  default = ""
+}
+
+variable "TELESTAX_ACCOUNT_SID" {
+  description = "Notifier telestax account sid"
+  default = ""
+}
+
+variable "TELESTAX_AUTH_TOKEN" {
+  description = "Notifier telestax auth token"
+  default = ""
+}
+
+variable "TELESTAX_FROM_PHONE_NUMBER" {
+  description = "Notifier telestax from phone number"
+  default = ""
+}
+
 variable "domain" {
   default = "mettel-automation.net"
 }

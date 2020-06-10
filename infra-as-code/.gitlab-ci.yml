@@ -130,6 +130,10 @@ deploy-branches:
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
     - export TF_VAR_SLACK_URL=${SLACK_URL_DEV}
+    - export TF_VAR_TELESTAX_URL=${TELESTAX_URL}
+    - export TF_VAR_TELESTAX_ACCOUNT_SID=${TELESTAX_ACCOUNT_SID}
+    - export TF_VAR_TELESTAX_AUTH_TOKEN=${TELESTAX_AUTH_TOKEN}
+    - export TF_VAR_TELESTAX_FROM_PHONE_NUMBER=${TELESTAX_FROM_PHONE_NUMBER}
     - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
     - export TF_VAR_cts_bridge_desired_tasks=${cts_bridge_desired_tasks}
@@ -203,6 +207,10 @@ deploy-master:
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=production
     - export TF_VAR_SLACK_URL=${SLACK_URL_PRO}
+    - export TF_VAR_TELESTAX_URL=${TELESTAX_URL}
+    - export TF_VAR_TELESTAX_ACCOUNT_SID=${TELESTAX_ACCOUNT_SID}
+    - export TF_VAR_TELESTAX_AUTH_TOKEN=${TELESTAX_AUTH_TOKEN}
+    - export TF_VAR_TELESTAX_FROM_PHONE_NUMBER=${TELESTAX_FROM_PHONE_NUMBER}
     - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
     - export TF_VAR_cts_bridge_desired_tasks=${cts_bridge_desired_tasks}

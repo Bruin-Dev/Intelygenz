@@ -47,6 +47,22 @@
       {
         "name": "EMAIL_ACC_PWD",
         "value": "${EMAIL_ACC_PWD}"
+      },
+      {
+        "name": "TELESTAX_URL",
+        "value": "${TELESTAX_URL}"
+      },
+      {
+        "name": "TELESTAX_ACCOUNT_SID",
+        "value": "${TELESTAX_ACCOUNT_SID}"
+      },
+      {
+        "name": "TELESTAX_AUTH_TOKEN",
+        "value": "${TELESTAX_AUTH_TOKEN}"
+      },
+      {
+        "name": "TELESTAX_FROM_PHONE_NUMBER",
+        "value": "${TELESTAX_FROM_PHONE_NUMBER}"
       }
     ]
   }

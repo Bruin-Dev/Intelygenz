@@ -27,6 +27,7 @@ class TestTeleStaxNotifier:
         mock_logger = Mock()
 
         msg_delivery_status = 200
+
         request_id = "123"
         response_topic = "notifications.sms.request"
         sms_body = "This is a dummy SMS"
@@ -41,8 +42,14 @@ class TestTeleStaxNotifier:
             "body": sms_payload,
         }
 
+        msg_response = {
+            "request_id": request_id,
+            "status": msg_delivery_status,
+            "body": 'TEST',
+        }
+
         test_actions = SendToSms(config, test_bus, mock_logger, mock_telestax_repository)
-        test_actions._telestax_repository.send_to_sms = Mock(return_value=msg_delivery_status)
+        test_actions._telestax_repository.send_to_sms = Mock(return_value=sms_payload)
 
         await test_actions.send_to_sms(msg=msg_dict)
 
@@ -85,5 +92,5 @@ class TestTeleStaxNotifier:
         test_actions._telestax_repository.send_to_sms.assert_not_called()
         test_bus.publish_message.assert_awaited_with(
             response_topic,
-            {'request_id': request_id, 'status': msg_delivery_status, 'body': sms_payload},
+            {'request_id': request_id, 'status': msg_delivery_status, 'body': None},
         )
