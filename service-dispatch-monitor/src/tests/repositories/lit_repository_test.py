@@ -210,15 +210,14 @@ class TestLitRepository:
             'timezone': final_timezone_2
         }
 
-        response = lit_repository.get_dispatch_confirmed_date_time_localized(dispatch_confirmed, dispatch_number,
-                                                                             ticket_id)
-        response_2 = lit_repository.get_dispatch_confirmed_date_time_localized(dispatch_confirmed_2, dispatch_number_2,
-                                                                               ticket_id_2)
-        response_3 = lit_repository.get_dispatch_confirmed_date_time_localized(dispatch_confirmed_error, dispatch_number_2,
-                                                                               ticket_id_2)
-        response_4 = lit_repository.get_dispatch_confirmed_date_time_localized(dispatch_confirmed_error_2,
-                                                                               dispatch_number_2,
-                                                                               ticket_id_2)
+        response = lit_repository.get_dispatch_confirmed_date_time_localized(
+            dispatch_confirmed, dispatch_number, ticket_id)
+        response_2 = lit_repository.get_dispatch_confirmed_date_time_localized(
+            dispatch_confirmed_2, dispatch_number_2, ticket_id_2)
+        response_3 = lit_repository.get_dispatch_confirmed_date_time_localized(
+            dispatch_confirmed_error, dispatch_number_2, ticket_id_2)
+        response_4 = lit_repository.get_dispatch_confirmed_date_time_localized(
+            dispatch_confirmed_error_2, dispatch_number_2, ticket_id_2)
 
         assert response == expected_response
         assert response_2 == expected_response_2

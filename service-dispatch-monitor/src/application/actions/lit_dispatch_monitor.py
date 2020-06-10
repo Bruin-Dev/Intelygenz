@@ -24,7 +24,8 @@ from application.templates.lit.lit_repair_completed import lit_get_repair_comple
 
 
 class LitDispatchMonitor:
-    def __init__(self, config, redis_client, event_bus, scheduler, logger, lit_repository, bruin_repository, notifications_repository):
+    def __init__(self, config, redis_client, event_bus, scheduler, logger, lit_repository, bruin_repository,
+                 notifications_repository):
         self._config = config
         self._redis_client = redis_client
         self._scheduler = scheduler
@@ -183,7 +184,8 @@ class LitDispatchMonitor:
 
             monitor_tasks = [
                 self._monitor_confirmed_dispatches(dispatches_splitted_by_status[self.DISPATCH_CONFIRMED]),
-                self._monitor_tech_on_site_dispatches(dispatches_splitted_by_status[self.DISPATCH_FIELD_ENGINEER_ON_SITE]),
+                self._monitor_tech_on_site_dispatches(
+                    dispatches_splitted_by_status[self.DISPATCH_FIELD_ENGINEER_ON_SITE]),
                 # self._monitor_repair_completed(dispatches_splitted_by_status[self.DISPATCH_REPAIR_COMPLETED])
             ]
 
@@ -527,9 +529,12 @@ class LitDispatchMonitor:
 
                 requested_watermark_found = UtilsRepository.find_note(ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
                 confirmed_note_found = UtilsRepository.find_note(ticket_notes, self.DISPATCH_CONFIRMED_WATERMARK)
-                confirmed_sms_note_found = UtilsRepository.find_note(ticket_notes, self.DISPATCH_CONFIRMED_SMS_WATERMARK)
-                tech_24_hours_before_note_found = UtilsRepository.find_note(ticket_notes, self.TECH_24_HOURS_BEFORE_SMS_WATERMARK)
-                tech_2_hours_before_note_found = UtilsRepository.find_note(ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
+                confirmed_sms_note_found = UtilsRepository.find_note(ticket_notes,
+                                                                     self.DISPATCH_CONFIRMED_SMS_WATERMARK)
+                tech_24_hours_before_note_found = UtilsRepository.find_note(ticket_notes,
+                                                                            self.TECH_24_HOURS_BEFORE_SMS_WATERMARK)
+                tech_2_hours_before_note_found = UtilsRepository.find_note(ticket_notes,
+                                                                           self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
 
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"requested_watermark_found: {requested_watermark_found} "
@@ -546,7 +551,8 @@ class LitDispatchMonitor:
 
                 # Check if dispatch has a confirmed note
                 if confirmed_note_found is None:
-                    result_append_confirmed_note = await self._append_confirmed_note(dispatch_number, ticket_id, dispatch)
+                    result_append_confirmed_note = await self._append_confirmed_note(
+                        dispatch_number, ticket_id, dispatch)
                     if not result_append_confirmed_note:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"Confirmed Note not appended")
@@ -570,7 +576,8 @@ class LitDispatchMonitor:
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- Confirm SMS note not found")
 
-                    result_append_confirmed_sms_note = await self._append_confirmed_sms_note(dispatch_number, ticket_id, sms_to)
+                    result_append_confirmed_sms_note = await self._append_confirmed_sms_note(
+                        dispatch_number, ticket_id, sms_to)
 
                     if not result_append_confirmed_sms_note:
                         self._logger.info("Confirmed SMS note not appended")
@@ -599,7 +606,8 @@ class LitDispatchMonitor:
                                           f"- SMS 24h not sended")
                         continue
 
-                    result_append_tech_24_sms_note = await self._append_tech_24_sms_note(dispatch_number, ticket_id, sms_to)
+                    result_append_tech_24_sms_note = await self._append_tech_24_sms_note(
+                        dispatch_number, ticket_id, sms_to)
                     if not result_append_tech_24_sms_note:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"- A sms tech 24 hours before note not appended")
@@ -627,7 +635,8 @@ class LitDispatchMonitor:
                                           f"- SMS 2h not sended")
                         continue
 
-                    result_append_tech_2_sms_note = await self._append_tech_2_sms_note(dispatch_number, ticket_id, sms_to)
+                    result_append_tech_2_sms_note = await self._append_tech_2_sms_note(
+                        dispatch_number, ticket_id, sms_to)
                     if not result_append_tech_2_sms_note:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"- A sms tech 2 hours before note not appended")
@@ -844,7 +853,8 @@ class LitDispatchMonitor:
     #
     #                             note = lit_get_repair_completed_note(note_data)
     #                             # if self._config.DISPATCH_MONITOR_CONFIG['environment'] == 'production':
-    #                             append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, note)
+    #                             append_note_response = await self._bruin_repository.append_note_to_ticket(
+    #                                                               ticket_id, note)
     #                             append_note_response_status = append_note_response['status']
     #                             append_note_response_body = append_note_response['body']
     #                             if append_note_response_status not in range(200, 300):

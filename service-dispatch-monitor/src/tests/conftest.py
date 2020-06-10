@@ -393,30 +393,26 @@ def ticket_details_2_no_requested_watermark():
 def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed):
     updated_ticket_details = copy.deepcopy(ticket_details_1)
     confirmed_ticket_note = {
-                    "noteId": 70805301,
-                    "noteValue": "#*Automation Engine*#\n"
-                                 "Dispatch Management - Dispatch Confirmed\n"
-                                 "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                                 "Field Engineer"
-                                 "{tech_name}"
-                                 "{tech_phone}".format(date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
-                                                       time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-                                                       time_zone=dispatch_confirmed.get('Time_Zone_Local'),
-                                                       tech_name=dispatch_confirmed.get('Tech_First_Name'),
-                                                       tech_phone=dispatch_confirmed.get('Tech_Mobile_Number')),
-                    "serviceNumber": [
-                        "4664325"
-                    ],
-                    "createdDate": "2020-05-28T06:06:40.27-04:00",
-                    "creator": None
-                }
+        "noteId": 70805301,
+        "noteValue": "#*Automation Engine*#\n"
+                     "Dispatch Management - Dispatch Confirmed\n"
+                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
+                     "Field Engineer"
+                     "{tech_name}"
+                     "{tech_phone}".format(date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
+                                           time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
+                                           time_zone=dispatch_confirmed.get('Time_Zone_Local'),
+                                           tech_name=dispatch_confirmed.get('Tech_First_Name'),
+                                           tech_phone=dispatch_confirmed.get('Tech_Mobile_Number')),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
     confirmed_sms_ticket_note_2 = {
         "noteId": 70805301,
         "noteValue": "#*Automation Engine*#\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
-        "serviceNumber": [
-            "4664325"
-        ],
+        "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
@@ -440,9 +436,7 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
                                            time_zone=dispatch_confirmed_2.get('Time_Zone_Local'),
                                            tech_name=dispatch_confirmed_2.get('Tech_First_Name'),
                                            tech_phone=dispatch_confirmed_2.get('Tech_Mobile_Number')),
-        "serviceNumber": [
-            "4664325"
-        ],
+        "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
@@ -450,9 +444,7 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
         "noteId": 70805304,
         "noteValue": "#*Automation Engine*#\n"
                      "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595126"),
-        "serviceNumber": [
-            "4664325"
-        ],
+        "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
@@ -469,9 +461,7 @@ def ticket_details_1_with_24h_sms_note(ticket_details_1_with_confirmation_note, 
         "noteId": 70805310,
         "noteValue": "#*Automation Engine*#"
                      "Dispatch 24h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
-        "serviceNumber": [
-            "4664325"
-        ],
+        "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
@@ -487,9 +477,7 @@ def ticket_details_2_with_24h_sms_note(ticket_details_2_with_confirmation_note, 
         "noteId": 70805310,
         "noteValue": "#*Automation Engine*#"
                      "Dispatch 24h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
-        "serviceNumber": [
-            "4664325"
-        ],
+        "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
@@ -505,9 +493,7 @@ def ticket_details_1_with_2h_sms_note(ticket_details_1_with_24h_sms_note, dispat
         "noteId": 70805310,
         "noteValue": "#*Automation Engine*#"
                      "Dispatch 2h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
-        "serviceNumber": [
-            "4664325"
-        ],
+        "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
@@ -523,9 +509,7 @@ def ticket_details_2_with_2h_sms_note(ticket_details_2_with_24h_sms_note, dispat
         "noteId": 70805310,
         "noteValue": "#*Automation Engine*#"
                      "Dispatch 2h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
-        "serviceNumber": [
-            "4664325"
-        ],
+        "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
@@ -542,9 +526,7 @@ def ticket_details_1_with_tech_on_site_sms_note(ticket_details_1_with_2h_sms_not
         "noteValue": "#*Automation Engine*#"
                      "Dispatch Management - Field Engineer On Site\n\n"
                      "{field_engineer_name} has arrived\n".format(field_engineer_name=field_engineer_name),
-        "serviceNumber": [
-            "4664325"
-        ],
+        "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
@@ -561,9 +543,7 @@ def ticket_details_2_with_tech_on_site_sms_note(ticket_details_2_with_2h_sms_not
         "noteValue": "#*Automation Engine*#"
                      "Dispatch Management - Field Engineer On Site\n\n"
                      "{field_engineer_name} has arrived\n".format(field_engineer_name=field_engineer_name),
-        "serviceNumber": [
-            "4664325"
-        ],
+        "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
