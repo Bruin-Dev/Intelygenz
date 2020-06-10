@@ -63,6 +63,13 @@ LIT_CLIENT_SECURITY_TOKEN = var_dict["LIT_CLIENT_SECURITY_TOKEN_DEV"]
 LIT_LOGIN_URL = var_dict["LIT_LOGIN_URL_DEV"]
 LIT_DOMAIN = var_dict["LIT_DOMAIN_DEV"]
 
+# Lumin Billing Report variables
+LUMIN_URI = var_dict["LUMIN_URI"]
+LUMIN_TOKEN = var_dict["LUMIN_TOKEN"]
+CUSTOMER_NAME = var_dict["CUSTOMER_NAME_BILLING_REPORT"]
+BILLING_RECIPIENT = var_dict["BILLING_RECIPIENT_REPORT_DEV"]
+EMAIL_ACC_PWD = var_dict["EMAIL_ACC_PWD"]
+
 # Dispatch portal backend variable
 DISPATCH_PORTAL_SERVER_PORT = var_dict["DISPATCH_PORTAL_SERVER_PORT"]
 
@@ -161,6 +168,12 @@ env_dict = {
         f'LIT_CLIENT_SECURITY_TOKEN={LIT_CLIENT_SECURITY_TOKEN}\n'
         f'LIT_LOGIN_URL={LIT_LOGIN_URL}\n'
         f'LIT_DOMAIN={LIT_DOMAIN}\n',
+    os.path.join('lumin-billing-report', 'src', 'config', 'env'):
+        f'LUMIN_URI={LUMIN_URI}\n'
+        f'LUMIN_TOKEN={LUMIN_TOKEN}\n'
+        f'CUSTOMER_NAME={CUSTOMER_NAME}\n'
+        f'BILLING_RECIPIENT={BILLING_RECIPIENT}\n'
+        f'EMAIL_ACC_PWD={EMAIL_ACC_PWD}',
     os.path.join('nats-server', 'env'):
         f'CLUSTER_MODE={NATS_CLUSTER_MODE1}\n'
         f'NATSCLUSTER={NATSCLUSTER1}\n'

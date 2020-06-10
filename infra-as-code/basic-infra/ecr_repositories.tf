@@ -18,6 +18,10 @@ resource "aws_ecr_repository" "automation-service-affecting-monitor" {
   name = "automation-service-affecting-monitor"
 }
 
+resource "aws_ecr_repository" "automation-service-dispatch-monitor" {
+  name = "automation-service-dispatch-monitor"
+}
+
 resource "aws_ecr_repository" "automation-service-outage-monitor" {
   name = "automation-service-outage-monitor"
 }

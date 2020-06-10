@@ -144,6 +144,7 @@ deploy-branches:
     - export TF_VAR_nats_server_2_desired_tasks=${nats_server_2_desired_tasks}
     - export TF_VAR_notifier_desired_tasks=${notifier_desired_tasks}
     - export TF_VAR_service_affecting_monitor_desired_tasks=${service_affecting_monitor_desired_tasks}
+    - export TF_VAR_service_dispatch_monitor_desired_tasks=${service_dispatch_monitor_desired_tasks}
     - export TF_VAR_service_outage_monitor_1_desired_tasks=${service_outage_monitor_1_desired_tasks}
     - export TF_VAR_service_outage_monitor_2_desired_tasks=${service_outage_monitor_2_desired_tasks}
     - export TF_VAR_service_outage_monitor_3_desired_tasks=${service_outage_monitor_3_desired_tasks}
@@ -216,6 +217,7 @@ deploy-master:
     - export TF_VAR_nats_server_2_desired_tasks=${nats_server_2_desired_tasks}
     - export TF_VAR_notifier_desired_tasks=${notifier_desired_tasks}
     - export TF_VAR_service_affecting_monitor_desired_tasks=${service_affecting_monitor_desired_tasks}
+    - export TF_VAR_service_dispatch_monitor_desired_tasks=${service_dispatch_monitor_desired_tasks}
     - export TF_VAR_service_outage_monitor_1_desired_tasks=${service_outage_monitor_1_desired_tasks}
     - export TF_VAR_service_outage_monitor_2_desired_tasks=${service_outage_monitor_2_desired_tasks}
     - export TF_VAR_service_outage_monitor_3_desired_tasks=${service_outage_monitor_3_desired_tasks}

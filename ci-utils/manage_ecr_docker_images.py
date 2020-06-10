@@ -18,6 +18,7 @@ class DeleteOlderDockerImage:
                              'automation-dispatch-portal-frontend',
                              'automation-dispatch-portal-frontend/nginx',
                              'automation-dispatch-portal-backend',
+                             'automation-service-dispatch-monitor',
                              'automation-last-contact-report',
                              'automation-lit-bridge',
                              'automation-lumin-billing-report',
