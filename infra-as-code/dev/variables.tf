@@ -40,6 +40,11 @@ variable "DISPATCH_PORTAL_BACKEND_BUILD_NUMBER" {
   default = "automation-master-latest"
 }
 
+variable "SERVICE_DISPATCH_MONITOR_BUILD_NUMBER" {
+  description = "Docker build number of image for microservice service-dispatch-monitor"
+  default = "automation-master-latest"
+}
+
 variable "LAST_CONTACT_REPORT_BUILD_NUMBER" {
   description = "Docker build number of image for microservice last-contact-report"
   default = "automation-master-latest"
@@ -418,6 +423,12 @@ variable "dispatch_portal_backend_desired_tasks" {
   default = 1
   type = number
   description = "Number of desired tasks of microservice dispatch-portal-backend"
+}
+
+variable "service_dispatch_monitor_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice service-dispatch-monitor"
 }
 
 variable "last_contact_report_desired_tasks" {

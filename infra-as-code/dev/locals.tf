@@ -84,6 +84,15 @@ locals {
   automation-dispatch-portal-backend-task_definition = "${aws_ecs_task_definition.automation-dispatch-portal-backend.family}:${aws_ecs_task_definition.automation-dispatch-portal-backend.revision}"
   automation-dispatch-portal-backend-service_discovery_service-name = "dispatch-portal-backend-${var.ENVIRONMENT}"
 
+  // automation-service-dispatch-monitor local vars
+  automation-service-dispatch-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-service-dispatch-monitor"
+  automation-service-dispatch-monitor-image = "${data.aws_ecr_repository.automation-service-dispatch-monitor.repository_url}:${var.SERVICE_DISPATCH_MONITOR_BUILD_NUMBER}"
+  automation-service-dispatch-monitor-service-security_group-name = "${var.ENVIRONMENT}-service-dispatch-monitor"
+  automation-service-dispatch-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-dispatch-monitor"
+  automation-service-dispatch-monitor-resource-name = "${var.ENVIRONMENT}-service-dispatch-monitor"
+  automation-service-dispatch-monitor-task_definition = "${aws_ecs_task_definition.automation-service-dispatch-monitor.family}:${aws_ecs_task_definition.automation-service-dispatch-monitor.revision}"
+  automation-service-dispatch-monitor-service_discovery_service-name = "service-dispatch-monitor-${var.ENVIRONMENT}"
+
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${var.LAST_CONTACT_REPORT_BUILD_NUMBER}"

@@ -136,6 +136,10 @@ env_dict = {
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
         f'DISPATCH_PORTAL_SERVER_PORT={DISPATCH_PORTAL_SERVER_PORT}',
+    os.path.join('service-dispatch-monitor', 'src', 'config', 'env'):
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}',
     os.path.join('metrics-dashboard', 'grafana', 'config', 'env'):
         f'NATS_SERVER1={NATS_SERVER1}\n'
         f'REDIS_HOSTNAME={REDIS_HOSTNAME}',

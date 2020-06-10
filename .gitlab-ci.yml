@@ -18,6 +18,7 @@ variables:
   bruin_bridge_desired_tasks: 5
   cts_bridge_desired_tasks: 0
   dispatch_portal_backend_desired_tasks: 1
+  service_dispatch_monitor_desired_tasks: 1
   dispatch_portal_frontend_desired_tasks: 1
   last_contact_report_desired_tasks: 1
   lit_bridge_desired_tasks: 1
@@ -52,6 +53,7 @@ include:
   - local: 'cts-bridge/.gitlab-ci.yml'
   - local: 'ci-utils/.gitlab-ci.yml'
   - local: 'dispatch-portal-backend/.gitlab-ci.yml'
+  - local: 'service-dispatch-monitor/.gitlab-ci.yml'
   - local: 'dispatch-portal-frontend/.gitlab-ci.yml'
   - local: 'infra-as-code/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'
