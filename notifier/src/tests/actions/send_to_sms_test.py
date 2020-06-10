@@ -52,7 +52,7 @@ class TestTeleStaxNotifier:
         )
         test_bus.publish_message.assert_awaited_once_with(
             response_topic,
-            {'request_id': request_id, 'status': msg_delivery_status},
+            {'request_id': request_id, 'status': msg_delivery_status, 'body': sms_payload},
         )
 
     @pytest.mark.asyncio
@@ -85,5 +85,5 @@ class TestTeleStaxNotifier:
         test_actions._telestax_repository.send_to_sms.assert_not_called()
         test_bus.publish_message.assert_awaited_with(
             response_topic,
-            {'request_id': request_id, 'status': msg_delivery_status},
+            {'request_id': request_id, 'status': msg_delivery_status, 'body': sms_payload},
         )

@@ -16,5 +16,5 @@ class SendToSms:
                 and "sms_data" in msg_body and msg_body["sms_data"] is not None and msg_body["sms_data"] != "" \
                 and "sms_to" in msg_body and msg_body["sms_to"] is not None and msg_body["sms_to"] != []:
             status = self._telestax_repository.send_to_sms(msg_body["sms_data"], msg_body["sms_to"])
-        notification_response = {"request_id": msg['request_id'], "status": status}
+        notification_response = {"request_id": msg['request_id'], "status": status, "body": msg_body}
         await self._event_bus.publish_message(msg["response_topic"], notification_response)
