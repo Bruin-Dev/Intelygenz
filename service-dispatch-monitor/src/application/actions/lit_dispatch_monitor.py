@@ -146,6 +146,8 @@ class LitDispatchMonitor:
 
             if response_lit_dispatches_status not in range(200, 300):
                 self._logger.error("Error getting all dispatches from LIT")
+                err_msg = f'An error occurred retrieving all dispatches in the request status from LIT.'
+                await self._notifications_repository.send_slack_message(err_msg)
                 raise
 
             if response_lit_dispatches_body is None \
@@ -155,19 +157,24 @@ class LitDispatchMonitor:
                     or response_lit_dispatches_body['DispatchList'] is None:
                 self._logger.error(f"[get_all_dispatches] Could not retrieve all dispatches, "
                                    f"reason: {response_lit_dispatches_body}")
+                err_msg = f'An error occurred retrieving all dispatches from LIT.'
+                await self._notifications_repository.send_slack_message(err_msg)
                 return
 
             lit_dispatches = response_lit_dispatches_body.get('DispatchList', [])
-            # TODO: remove, Only this dispatches for testing
+            # TODO: remove, Only this dispatches for testing in Sandbox
             #  - DIS37567 - Confirmed
             #  - DIS37568 - Tech Arrived
             #  - DIS37569 - Tech Out / Repair completed - This on never appears with 'GetOpenDispatchList'
-            testing_dispatches = ['DIS55702']
+            # testing_dispatches = ['DIS55702']  # Production Dispatch
+            # testing_dispatches = ['DIS37567', 'DIS37568', 'DIS37569']
+            testing_dispatches = ['DIS37567']
             lit_dispatches = [
                 _dispatch
                 for _dispatch in lit_dispatches
                 if _dispatch.get('Dispatch_Number') in testing_dispatches
             ]
+            # TODO: End remove
 
             dispatches_splitted_by_status = self._get_dispatches_splitted_by_status(lit_dispatches)
 
@@ -194,7 +201,6 @@ class LitDispatchMonitor:
     async def _send_confirmed_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
         if sms_to is None:
             return False
-        sms_to = sms_to.replace('+', '')
 
         # Get SMS data
         sms_data_payload = {
@@ -206,7 +212,7 @@ class LitDispatchMonitor:
         sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
         self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_data}`")
@@ -217,7 +223,8 @@ class LitDispatchMonitor:
             self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - SMS NOT sent")
-            err_msg = f'An error occurred when sending Confirmed SMS with notifier client. ' \
+            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                      f'An error occurred when sending Confirmed SMS with notifier client. ' \
                       f'payload: {sms_payload}'
             await self._notifications_repository.send_slack_message(err_msg)
             return False
@@ -228,7 +235,6 @@ class LitDispatchMonitor:
     async def _send_tech_24_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
         if sms_to is None:
             return False
-        sms_to = sms_to.replace('+', '')
 
         # Get SMS data
         sms_data_payload = {
@@ -241,7 +247,7 @@ class LitDispatchMonitor:
         sms_data = lit_get_tech_24_hours_before_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
         self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_data}`")
@@ -252,7 +258,8 @@ class LitDispatchMonitor:
             self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - SMS NOT sent")
-            err_msg = f'An error occurred when sending a tech 24 hours SMS with notifier client. ' \
+            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                      f'An error occurred when sending a tech 24 hours SMS with notifier client. ' \
                       f'payload: {sms_payload}'
             await self._notifications_repository.send_slack_message(err_msg)
             return False
@@ -263,7 +270,6 @@ class LitDispatchMonitor:
     async def _send_tech_2_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
         if sms_to is None:
             return False
-        sms_to = sms_to.replace('+', '')
 
         # Get SMS data
         sms_data_payload = {
@@ -276,7 +282,7 @@ class LitDispatchMonitor:
         sms_data = lit_get_tech_2_hours_before_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
         self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_data}`")
@@ -287,7 +293,8 @@ class LitDispatchMonitor:
             self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - SMS NOT sent")
-            err_msg = f'An error occurred when sending a tech 2 hours SMS with notifier client. ' \
+            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                      f'An error occurred when sending a tech 2 hours SMS with notifier client. ' \
                       f'payload: {sms_payload}'
             await self._notifications_repository.send_slack_message(err_msg)
             return False
@@ -298,7 +305,6 @@ class LitDispatchMonitor:
     async def _send_tech_on_site_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
         if sms_to is None:
             return False
-        sms_to = sms_to.replace('+', '')
 
         # Get SMS data
         sms_data_payload = {
@@ -308,7 +314,7 @@ class LitDispatchMonitor:
         sms_data = lit_get_tech_on_site_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
         self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_data}`")
@@ -319,7 +325,8 @@ class LitDispatchMonitor:
             self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
                               f"Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - SMS NOT sent")
-            err_msg = f'An error occurred when sending a tech on site SMS with notifier client. ' \
+            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                      f'An error occurred when sending a tech on site SMS with notifier client. ' \
                       f'payload: {sms_payload}'
             await self._notifications_repository.send_slack_message(err_msg)
             return False
@@ -496,10 +503,7 @@ class LitDispatchMonitor:
 
                 date_time_of_dispatch = datetime_tz_response['datetime_localized']
                 tz = datetime_tz_response['timezone']
-                ############################
-                # TODO: remove
-                # ticket_id = '4667739'
-                ############################
+
                 self._logger.info(f"Getting details for ticket [{ticket_id}]")
 
                 response = await self._bruin_repository.get_ticket_details(ticket_id)
@@ -512,7 +516,7 @@ class LitDispatchMonitor:
                                        f"{response_body}")
                     err_msg = f"An error occurred retrieve getting ticket details from bruin " \
                               f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
-                    response_send_slack_message = await self._notifications_repository.send_slack_message(err_msg)
+                    await self._notifications_repository.send_slack_message(err_msg)
                     continue
                 ticket_notes = response_body.get('ticketNotes', [])
 
@@ -526,8 +530,6 @@ class LitDispatchMonitor:
                 confirmed_sms_note_found = UtilsRepository.find_note(ticket_notes, self.DISPATCH_CONFIRMED_SMS_WATERMARK)
                 tech_24_hours_before_note_found = UtilsRepository.find_note(ticket_notes, self.TECH_24_HOURS_BEFORE_SMS_WATERMARK)
                 tech_2_hours_before_note_found = UtilsRepository.find_note(ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
-
-                # tech_on_site_note_found = UtilsRepository.find_note(ticket_notes, self.TECH_ON_SITE_SMS_WATERMARK)
 
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"requested_watermark_found: {requested_watermark_found} "
@@ -683,10 +685,6 @@ class LitDispatchMonitor:
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
 
-                ############################
-                # TODO: remove
-                # ticket_id = '4667739'
-                ############################
                 self._logger.info(f"Getting details for ticket [{ticket_id}]")
 
                 response = await self._bruin_repository.get_ticket_details(ticket_id)

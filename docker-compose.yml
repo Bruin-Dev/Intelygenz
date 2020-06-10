@@ -175,8 +175,10 @@ services:
     depends_on:
       - "nats-server"
       - redis
+      - "bruin-bridge"
       - "lit-bridge"
       - "cts-bridge"
+      - "notifier"
     ports:
       - 5011:5000
 

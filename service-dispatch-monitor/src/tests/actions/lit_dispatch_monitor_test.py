@@ -180,10 +180,14 @@ class TestLitDispatchMonitor:
                 'DispatchList': dispatches
             }
         }
+        err_msg = f'An error occurred retrieving all dispatches in the request status from LIT.'
         lit_dispatch_monitor._lit_repository.get_all_dispatches = CoroutineMock(return_value=dispatches_response)
         lit_dispatch_monitor._monitor_confirmed_dispatches = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
         await lit_dispatch_monitor._lit_dispatch_monitoring_process()
 
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
         lit_dispatch_monitor._monitor_confirmed_dispatches.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -197,10 +201,15 @@ class TestLitDispatchMonitor:
                 'DispatchList': dispatches
             }
         }
+        err_msg = f'An error occurred retrieving all dispatches from LIT.'
+
         lit_dispatch_monitor._lit_repository.get_all_dispatches = CoroutineMock(return_value=dispatches_response)
         lit_dispatch_monitor._monitor_confirmed_dispatches = CoroutineMock()
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
         await lit_dispatch_monitor._lit_dispatch_monitoring_process()
 
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
         lit_dispatch_monitor._monitor_confirmed_dispatches.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -348,7 +357,8 @@ class TestLitDispatchMonitor:
             'status': 400
         }
 
-        send_error_sms_to_slack_response = f'An error occurred when sending Confirmed SMS with notifier client. ' \
+        send_error_sms_to_slack_response = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                                           f'An error occurred when sending Confirmed SMS with notifier client. ' \
                                            f'payload: {sms_payload}'
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
@@ -434,7 +444,8 @@ class TestLitDispatchMonitor:
             'status': 400
         }
 
-        send_error_sms_to_slack_response = f'An error occurred when sending a tech 24 hours SMS with notifier client. ' \
+        send_error_sms_to_slack_response = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                                           f'An error occurred when sending a tech 24 hours SMS with notifier client. ' \
                                            f'payload: {sms_payload}'
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
@@ -521,7 +532,8 @@ class TestLitDispatchMonitor:
             'status': 400
         }
 
-        send_error_sms_to_slack_response = f'An error occurred when sending a tech 2 hours SMS with notifier client. ' \
+        send_error_sms_to_slack_response = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                                           f'An error occurred when sending a tech 2 hours SMS with notifier client. ' \
                                            f'payload: {sms_payload}'
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
@@ -602,7 +614,8 @@ class TestLitDispatchMonitor:
             'status': 400
         }
 
-        send_error_sms_to_slack_response = f'An error occurred when sending a tech on site SMS with notifier client. ' \
+        send_error_sms_to_slack_response = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                                           f'An error occurred when sending a tech on site SMS with notifier client. ' \
                                            f'payload: {sms_payload}'
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
