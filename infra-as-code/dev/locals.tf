@@ -93,6 +93,15 @@ locals {
   automation-last-contact-report-task_definition = "${aws_ecs_task_definition.automation-last-contact-report.family}:${aws_ecs_task_definition.automation-last-contact-report.revision}"
   automation-last-contact-service_discovery_service-name = "last-contact-report-${var.ENVIRONMENT}"
 
+  // automation-lumin-billing-report local vars
+  automation-lumin-billing-report-ecs_task_definition-family = "${var.ENVIRONMENT}-lumin-billing-report"
+  automation-lumin-billing-report-image = "${data.aws_ecr_repository.automation-lumin-billing-report.repository_url}:${var.LUMIN_BILLING_REPORT_BUILD_NUMBER}"
+  automation-lumin-billing-report-service-security_group-name = "${var.ENVIRONMENT}-lumin-billing-report"
+  automation-lumin-billing-report-service-security_group-tag-Name = "${var.ENVIRONMENT}-lumin-billing-report"
+  automation-lumin-billing-report-resource-name = "${var.ENVIRONMENT}-lumin-billing-report"
+  automation-lumin-billing-report-task_definition = "${aws_ecs_task_definition.automation-lumin-billing-report.family}:${aws_ecs_task_definition.automation-lumin-billing-report.revision}"
+  automation-lumin-billing-report-service_discovery_service-name = "lumin-billing-report-${var.ENVIRONMENT}"
+
   // automation-metrics-grafana local vars
   automation-metrics-grafana-image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.GRAFANA_BUILD_NUMBER}"
   automation-metrics-grafana-target_group-name = "${var.ENVIRONMENT}-mts-grafana"

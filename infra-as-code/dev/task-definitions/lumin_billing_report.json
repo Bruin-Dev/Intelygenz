@@ -1,0 +1,57 @@
+[
+  {
+    "name": "luming-billing-report",
+    "image": "${image}",
+    "portMappings": [
+      {
+        "containerPort": 5000,
+        "hostPort": 5000
+      }
+    ],
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "${log_prefix}"
+      }
+    },
+    "healthCheck": {
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost:5000/_health || exit 1"
+      ],
+      "interval": 30,
+      "retries": 3,
+      "startPeriod": 30,
+      "timeout": 5
+    },
+    "environment": [
+      {
+        "name": "PYTHONUNBUFFERED",
+        "value": "${PYTHONUNBUFFERED}"
+      },
+      {
+        "name": "LUMIN_URI",
+        "value": "${LUMIN_URI}"
+      },
+      {
+        "name": "LUMIN_TOKEN",
+        "value": "${LUMIN_TOKEN}"
+      },
+      {
+        "name": "CUSTOMER_NAME",
+        "value": "${CUSTOMER_NAME}"
+      },
+      {
+        "name": "BILLING_RECIPIENT",
+        "value": "${BILLING_RECIPIENT}"
+      },
+      {
+        "name": "EMAIL_ACC_PWD",
+        "value": "${EMAIL_ACC_PWD}"
+      }
+    ]
+  }
+]

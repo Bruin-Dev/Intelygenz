@@ -122,6 +122,10 @@ deploy-branches:
     - export TF_VAR_LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_DEV}
     - export TF_VAR_LIT_LOGIN_URL=${LIT_LOGIN_URL_DEV}
     - export TF_VAR_LIT_DOMAIN=${LIT_DOMAIN_DEV}
+    - export TF_VAR_LUMIN_URI=${LUMIN_URI}
+    - export TF_VAR_LUMIN_TOKEN=${LUMIN_TOKEN}
+    - export TF_VAR_CUSTOMER_NAME_BILLING_REPORT=${CUSTOMER_NAME_BILLING_REPORT}
+    - export TF_VAR_BILLING_RECIPIENT_REPORT=${BILLING_RECIPIENT_REPORT_DEV}
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_DEV}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_DEV}
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
@@ -133,6 +137,7 @@ deploy-branches:
     - export TF_VAR_dispatch_portal_frontend_desired_tasks=${dispatch_portal_frontend_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
     - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
+    - export TF_VAR_lumin_billing_report_desired_tasks=${lumin_billing_report_desired_tasks}
     - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
     - export TF_VAR_nats_server_desired_tasks=${nats_server_desired_tasks}
     - export TF_VAR_nats_server_1_desired_tasks=${nats_server_1_desired_tasks}
@@ -189,6 +194,10 @@ deploy-master:
     - export TF_VAR_LIT_CLIENT_SECURITY_TOKEN=${LIT_CLIENT_SECURITY_TOKEN_PRO}
     - export TF_VAR_LIT_LOGIN_URL=${LIT_LOGIN_URL_PRO}
     - export TF_VAR_LIT_DOMAIN=${LIT_DOMAIN_PRO}
+    - export TF_VAR_LUMIN_URI=${LUMIN_URI}
+    - export TF_VAR_LUMIN_TOKEN=${LUMIN_TOKEN}
+    - export TF_VAR_CUSTOMER_NAME_BILLING_REPORT=${CUSTOMER_NAME_BILLING_REPORT}
+    - export TF_VAR_BILLING_RECIPIENT_REPORT=${BILLING_RECIPIENT_REPORT_PROD}
     - export TF_VAR_T7_BASE_URL=${T7_BASE_URL_PRO}
     - export TF_VAR_T7_TOKEN=${T7_TOKEN_PRO}
     - export TF_VAR_CURRENT_ENVIRONMENT=production
@@ -200,6 +209,7 @@ deploy-master:
     - export TF_VAR_dispatch_portal_frontend_desired_tasks=${dispatch_portal_frontend_desired_tasks}
     - export TF_VAR_last_contact_report_desired_tasks=${last_contact_report_desired_tasks}
     - export TF_VAR_lit_bridge_desired_tasks=${lit_bridge_desired_tasks}
+    - export TF_VAR_lumin_billing_report_desired_tasks=${lumin_billing_report_desired_tasks}
     - export TF_VAR_metrics_prometheus_desired_tasks=${metrics_prometheus_desired_tasks}
     - export TF_VAR_nats_server_desired_tasks=${nats_server_desired_tasks}
     - export TF_VAR_nats_server_1_desired_tasks=${nats_server_1_desired_tasks}

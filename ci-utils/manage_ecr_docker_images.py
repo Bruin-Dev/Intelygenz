@@ -20,6 +20,7 @@ class DeleteOlderDockerImage:
                              'automation-dispatch-portal-backend',
                              'automation-last-contact-report',
                              'automation-lit-bridge',
+                             'automation-lumin-billing-report',
                              'automation-metrics-dashboard/grafana',
                              'automation-metrics-dashboard/prometheus',
                              'automation-metrics-dashboard/thanos',

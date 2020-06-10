@@ -40,8 +40,8 @@ class BillingReport:
             self._logger.info(f'It will be executed now')
 
         self._scheduler.add_job(
-            self._billing_report_process, 'interval',
-            minutes=5,
+            self._billing_report_process, 'cron',
+            day=1,
             misfire_grace_time=86400,
             replace_existing=True,
             next_run_time=next_run_time,
@@ -86,6 +86,6 @@ class BillingReport:
         self._logger.info("Requesting lumin.AI usage details for billing report")
 
         email_obj = await self.generate_billing_report_data()
-        await self._email_client.send_to_email(email_obj)
+        self._email_client.send_to_email(email_obj)
 
         self._logger.info("Lumin.AI Billing Report sent")

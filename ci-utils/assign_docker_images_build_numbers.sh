@@ -6,6 +6,8 @@ export TF_VAR_CTS_BRIDGE_BUILD_NUMBER=$(cat /tmp/automation-cts-bridge.json| jq 
 echo "TF_VAR_CTS_BRIDGE_BUILD_NUMBER is ${TF_VAR_CTS_BRIDGE_BUILD_NUMBER}"
 export TF_VAR_LIT_BRIDGE_BUILD_NUMBER=$(cat /tmp/automation-lit-bridge.json| jq -r .tag)
 echo "TF_VAR_LIT_BRIDGE_BUILD_NUMBER is ${TF_VAR_LIT_BRIDGE_BUILD_NUMBER}"
+export TF_VAR_LUMIN_BILLING_REPORT_BUILD_NUMBER=$(cat /tmp/automation-lumin-billing-report.json| jq -r .tag)
+echo "TF_VAR_LUMIN_BILLING_REPORT_BUILD_NUMBER is ${TF_VAR_LUMIN_BILLING_REPORT_BUILD_NUMBER}"
 export TF_VAR_DISPATCH_PORTAL_BACKEND_BUILD_NUMBER=$(cat /tmp/automation-dispatch-portal-backend.json| jq -r .tag)
 echo "TF_VAR_DISPATCH_PORTAL_BACKEND_BUILD_NUMBER is ${TF_VAR_DISPATCH_PORTAL_BACKEND_BUILD_NUMBER}"
 export TF_VAR_DISPATCH_PORTAL_FRONTEND_BUILD_NUMBER=$(cat /tmp/automation-dispatch-portal-frontend.json| jq -r .tag)

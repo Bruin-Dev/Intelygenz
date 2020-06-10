@@ -115,13 +115,13 @@ class TestBillingReport:
             with patch.object(alert_module, 'timezone', new=Mock()):
                 report.start_billing_report_job(exec_on_start=True)
 
-        # scheduler.add_job.assert_called_once_with(
-        #     report._billing_report_process, 'cron',
-        #     day=1, misfire_grace_time=86400,
-        #     next_run_time=next_run_time,
-        #     replace_existing=True,
-        #     id='_billing_report_process',
-        # )
+        scheduler.add_job.assert_called_once_with(
+            report._billing_report_process, 'cron',
+            day=1, misfire_grace_time=86400,
+            next_run_time=next_run_time,
+            replace_existing=True,
+            id='_billing_report_process',
+        )
 
     def start_billing_report_job_with_no_exec_on_start_test(self):
         opts = {
@@ -137,13 +137,13 @@ class TestBillingReport:
         report = BillingReport(lumin_repo, email_client, templ, scheduler, **opts)
         report.start_billing_report_job(exec_on_start=False)
 
-        # scheduler.add_job.assert_called_once_with(
-        #     report._billing_report_process, 'cron',
-        #     day=1, misfire_grace_time=86400,
-        #     next_run_time=undefined,
-        #     replace_existing=True,
-        #     id='_billing_report_process',
-        # )
+        scheduler.add_job.assert_called_once_with(
+            report._billing_report_process, 'cron',
+            day=1, misfire_grace_time=86400,
+            next_run_time=undefined,
+            replace_existing=True,
+            id='_billing_report_process',
+        )
 
     def register_error_handler_test(self):
         opts = {

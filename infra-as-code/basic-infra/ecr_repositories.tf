@@ -77,3 +77,7 @@ resource "aws_ecr_repository" "automation-tnba-monitor" {
 resource "aws_ecr_repository" "automation-cts-bridge" {
   name = "automation-cts-bridge"
 }
+
+resource "aws_ecr_repository" "automation-lumin-billing-report" {
+  name = "automation-lumin-billing-report"
+}

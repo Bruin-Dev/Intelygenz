@@ -22,7 +22,7 @@ class Container:
         self._server = QuartServer(config)
 
         # init clients
-        self._email_client = EmailClient(config.EMAIL_CONFIG, logger=self._logger)
+        self._email_client = EmailClient(config, logger=self._logger)
         self._lumin_client = LuminBillingClient(config.LUMIN_CONFIG, logger=self._logger)
 
         # init repositories

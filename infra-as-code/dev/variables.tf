@@ -45,6 +45,11 @@ variable "LAST_CONTACT_REPORT_BUILD_NUMBER" {
   default = "automation-master-latest"
 }
 
+variable "LUMIN_BILLING_REPORT_BUILD_NUMBER" {
+  description = "Docker build number of image for microservice lumin-billing-report"
+  default = "automation-master-latest"
+}
+
 variable "LIT_BRIDGE_BUILD_NUMBER" {
   description = "Docker build number of image for microservice lit-bridge"
   default = "automation-master-latest"
@@ -209,6 +214,12 @@ variable "DISPATCH_PORTAL_SERVER_PORT" {
   default = ""
 }
 
+// last-contact-report environment variables
+
+variable "LAST_CONTACT_RECIPIENT" {
+  default = ""
+}
+
 // lit-bridge environment variables
 
 variable "LIT_CLIENT_ID"{
@@ -239,9 +250,21 @@ variable "LIT_DOMAIN"{
   default = ""
 }
 
-// last-contact-report environment variables
+// lumin-billing-report environment variables
 
-variable "LAST_CONTACT_RECIPIENT" {
+variable "LUMIN_URI" {
+  default = ""
+}
+
+variable "LUMIN_TOKEN" {
+  default = ""
+}
+
+variable "CUSTOMER_NAME_BILLING_REPORT" {
+  default = ""
+}
+
+variable "BILLING_RECIPIENT_REPORT" {
   default = ""
 }
 
@@ -407,6 +430,12 @@ variable "lit_bridge_desired_tasks" {
   default = 1
   type = number
   description = "Number of desired tasks of microservice lit-bridge"
+}
+
+variable "lumin_billing_report_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice lumin-billing-report"
 }
 
 variable "metrics_prometheus_desired_tasks" {
