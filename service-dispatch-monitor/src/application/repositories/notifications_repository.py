@@ -20,4 +20,4 @@ class NotificationsRepository:
             'request_id': uuid(),
             'body': payload,
         }
-        await self._event_bus.rpc_request("notification.sms.request", message, timeout=10)
+        return await self._event_bus.rpc_request("notification.sms.request", message, timeout=10)

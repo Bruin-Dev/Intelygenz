@@ -118,7 +118,9 @@ class LitRepository:
                 self._logger.info(new_date)
                 final_datetime = datetime.datetime.strptime(new_date, self.DATETIME_TZ_FORMAT)
                 # "Pacific Time"
-                time_zone_of_dispatch = dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)
+
+                time_zone_of_dispatch = dispatch.get('Time_Zone_Local', None)
+                # time_zone_of_dispatch = dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)
                 time_zone_of_dispatch = time_zone_of_dispatch.replace('Time', '').replace(' ', '')
                 final_timezone = timezone(f'US/{time_zone_of_dispatch}')
 

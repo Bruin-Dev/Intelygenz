@@ -237,7 +237,7 @@ class TestLitDispatchMonitor:
             'vendor': 'LIT',
             'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'time_zone': dispatch_confirmed.get('Time_Zone_Local'),
             'tech_name': dispatch_confirmed.get('Tech_First_Name'),
             'tech_phone': dispatch_confirmed.get('Tech_Mobile_Number')
         }
@@ -267,14 +267,14 @@ class TestLitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'time_zone': dispatch.get('Time_Zone_Local'),
             'phone_number': sms_to
         }
 
         sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
 
@@ -294,15 +294,12 @@ class TestLitDispatchMonitor:
             'status': 200
         }
 
-        # lit_dispatch_monitor._event_bus.rpc_request = CoroutineMock(return_value=response)
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
         response = await lit_dispatch_monitor._send_confirmed_sms(dispatch_number, ticket_id, dispatch, sms_to)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
-        # lit_dispatch_monitor._notifications_repository._event_bus.rpc_request.assert_awaited_once_with(
-        #     "notification.sms.request", request, timeout=30)
 
     @pytest.mark.asyncio
     async def send_confirmed_sms_with_not_valid_sms_to_phone_test(self, lit_dispatch_monitor, dispatch):
@@ -329,14 +326,14 @@ class TestLitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'time_zone': dispatch.get('Time_Zone_Local'),
             'phone_number': sms_to
         }
 
         sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
 
@@ -371,14 +368,14 @@ class TestLitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'time_zone': dispatch.get('Time_Zone_Local'),
             'phone_number': sms_to
         }
 
         sms_data = lit_get_tech_24_hours_before_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
 
@@ -420,14 +417,14 @@ class TestLitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'time_zone': dispatch.get('Time_Zone_Local'),
             'phone_number': sms_to
         }
 
         sms_data = lit_get_tech_24_hours_before_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
 
@@ -458,14 +455,14 @@ class TestLitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'time_zone': dispatch.get('Time_Zone_Local'),
             'phone_number': sms_to
         }
 
         sms_data = lit_get_tech_2_hours_before_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
 
@@ -507,14 +504,14 @@ class TestLitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'time_zone': dispatch.get('Time_Zone_Local'),
             'phone_number': sms_to
         }
 
         sms_data = lit_get_tech_2_hours_before_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
 
@@ -549,7 +546,7 @@ class TestLitDispatchMonitor:
         sms_data = lit_get_tech_on_site_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
 
@@ -595,7 +592,7 @@ class TestLitDispatchMonitor:
         sms_data = lit_get_tech_on_site_sms(sms_data_payload)
 
         sms_payload = {
-            'sms_to': sms_to,
+            'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
         }
 

@@ -88,7 +88,7 @@ def dispatch_confirmed(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_First_Name"] = "Joe Malone"
     updated_dispatch["Tech_Mobile_Number"] = "+12123595129"
     updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
-    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Pacific Time"
+    updated_dispatch["Time_Zone_Local"] = "Pacific Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "4PM-6PM"
     return updated_dispatch
 
@@ -102,7 +102,7 @@ def dispatch_confirmed_2(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
     updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
-    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Time_Zone_Local"] = "Eastern Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
     return updated_dispatch
 
@@ -115,7 +115,7 @@ def dispatch_confirmed_skipped(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544801|OTHER"
     updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
-    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Time_Zone_Local"] = "Eastern Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
     return updated_dispatch
 
@@ -128,7 +128,7 @@ def dispatch_confirmed_skipped_datetime(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
     updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
-    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Time_Zone_Local"] = "Eastern Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "BAD TIME"
     return updated_dispatch
 
@@ -141,7 +141,7 @@ def dispatch_confirmed_skipped_bad_phone(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
     updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
-    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Time_Zone_Local"] = "Eastern Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
     updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "NOT VALID PHONE"
     return updated_dispatch
@@ -401,7 +401,7 @@ def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed
                                  "{tech_name}"
                                  "{tech_phone}".format(date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
                                                        time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-                                                       time_zone=dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+                                                       time_zone=dispatch_confirmed.get('Time_Zone_Local'),
                                                        tech_name=dispatch_confirmed.get('Tech_First_Name'),
                                                        tech_phone=dispatch_confirmed.get('Tech_Mobile_Number')),
                     "serviceNumber": [
@@ -437,7 +437,7 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
                      "{tech_name}"
                      "{tech_phone}".format(date_of_dispatch=dispatch_confirmed_2.get('Date_of_Dispatch'),
                                            time_of_dispatch=dispatch_confirmed_2.get('Hard_Time_of_Dispatch_Local'),
-                                           time_zone=dispatch_confirmed_2.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+                                           time_zone=dispatch_confirmed_2.get('Time_Zone_Local'),
                                            tech_name=dispatch_confirmed_2.get('Tech_First_Name'),
                                            tech_phone=dispatch_confirmed_2.get('Tech_Mobile_Number')),
         "serviceNumber": [

@@ -162,7 +162,7 @@ class LitDispatchMonitor:
             #  - DIS37567 - Confirmed
             #  - DIS37568 - Tech Arrived
             #  - DIS37569 - Tech Out / Repair completed - This on never appears with 'GetOpenDispatchList'
-            testing_dispatches = ['DIS37567', 'DIS37568', 'DIS37569']
+            testing_dispatches = ['DIS55702']
             lit_dispatches = [
                 _dispatch
                 for _dispatch in lit_dispatches
@@ -194,12 +194,13 @@ class LitDispatchMonitor:
     async def _send_confirmed_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
         if sms_to is None:
             return False
+        sms_to = sms_to.replace('+', '')
 
         # Get SMS data
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local')
+            'time_zone': dispatch.get('Time_Zone_Local')
         }
 
         sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
@@ -227,12 +228,13 @@ class LitDispatchMonitor:
     async def _send_tech_24_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
         if sms_to is None:
             return False
+        sms_to = sms_to.replace('+', '')
 
         # Get SMS data
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'time_zone': dispatch.get('Time_Zone_Local'),
             'phone_number': sms_to
         }
 
@@ -261,12 +263,13 @@ class LitDispatchMonitor:
     async def _send_tech_2_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
         if sms_to is None:
             return False
+        sms_to = sms_to.replace('+', '')
 
         # Get SMS data
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'time_zone': dispatch.get('Time_Zone_Local'),
             'phone_number': sms_to
         }
 
@@ -295,6 +298,7 @@ class LitDispatchMonitor:
     async def _send_tech_on_site_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
         if sms_to is None:
             return False
+        sms_to = sms_to.replace('+', '')
 
         # Get SMS data
         sms_data_payload = {
@@ -330,7 +334,7 @@ class LitDispatchMonitor:
             'vendor': 'LIT',
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'time_zone': dispatch.get('Time_Zone_Local'),
             'tech_name': dispatch.get('Tech_First_Name'),
             'tech_phone': dispatch.get('Tech_Mobile_Number')
         }
