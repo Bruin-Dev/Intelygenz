@@ -31,3 +31,12 @@ LOG_CONFIG = {
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }
+
+REDIS = {
+    "host": 'localhost'
+}
+
+QUART_CONFIG = {
+    'title': 'service-dispatch-monitor',
+    'port': 5000
+}

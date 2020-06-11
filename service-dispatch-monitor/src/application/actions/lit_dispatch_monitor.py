@@ -163,20 +163,6 @@ class LitDispatchMonitor:
                 return
 
             lit_dispatches = response_lit_dispatches_body.get('DispatchList', [])
-            # TODO: remove, Only this dispatches for testing in Sandbox
-            #  - DIS37567 - Confirmed
-            #  - DIS37568 - Tech Arrived
-            #  - DIS37569 - Tech Out / Repair completed - This on never appears with 'GetOpenDispatchList'
-            # testing_dispatches = ['DIS55702']  # Production Dispatch
-            # testing_dispatches = ['DIS37567', 'DIS37568', 'DIS37569']
-            testing_dispatches = ['DIS37567']
-            lit_dispatches = [
-                _dispatch
-                for _dispatch in lit_dispatches
-                if _dispatch.get('Dispatch_Number') in testing_dispatches
-            ]
-            # TODO: End remove
-
             dispatches_splitted_by_status = self._get_dispatches_splitted_by_status(lit_dispatches)
 
             self._logger.info(f"Splitted by status: "
@@ -208,7 +194,7 @@ class LitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Time_Zone_Local')
+            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local')
         }
 
         sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
@@ -242,7 +228,7 @@ class LitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Time_Zone_Local'),
+            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'phone_number': sms_to
         }
 
@@ -277,7 +263,7 @@ class LitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Time_Zone_Local'),
+            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'phone_number': sms_to
         }
 
@@ -343,7 +329,7 @@ class LitDispatchMonitor:
             'vendor': 'LIT',
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Time_Zone_Local'),
+            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'tech_name': dispatch.get('Tech_First_Name'),
             'tech_phone': dispatch.get('Tech_Mobile_Number')
         }
@@ -847,7 +833,7 @@ class LitDispatchMonitor:
     #                                 'vendor': 'LIT',
     #                                 'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
     #                                 'time_of_dispatch': time_of_dispatch,
-    #                                 'time_zone': dispatch.get('Time_Zone_Local'),
+    #                                 'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
     #                                 'ticket_id': ticket_id
     #                             }
     #

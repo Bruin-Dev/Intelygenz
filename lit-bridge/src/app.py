@@ -71,8 +71,6 @@ class Container:
 
         self._server = QuartServer(config)
 
-        self._server = QuartServer(config)
-
     async def start(self):
         await self._event_bus.connect()
         self._lit_repository.login_job(exec_on_start=True)

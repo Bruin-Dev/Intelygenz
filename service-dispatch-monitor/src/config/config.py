@@ -39,3 +39,8 @@ LOG_CONFIG = {
 REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
 }
+
+QUART_CONFIG = {
+    'title': 'service-dispatch-monitor',
+    'port': 5000
+}

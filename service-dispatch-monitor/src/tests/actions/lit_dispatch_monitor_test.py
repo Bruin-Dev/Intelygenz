@@ -246,7 +246,7 @@ class TestLitDispatchMonitor:
             'vendor': 'LIT',
             'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Time_Zone_Local'),
+            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'tech_name': dispatch_confirmed.get('Tech_First_Name'),
             'tech_phone': dispatch_confirmed.get('Tech_Mobile_Number')
         }
@@ -270,16 +270,16 @@ class TestLitDispatchMonitor:
         assert response is False
 
     @pytest.mark.asyncio
-    async def send_confirmed_sms_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
+    async def send_confirmed_sms_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
-        dispatch_number = dispatch.get('Dispatch_Number')
+        dispatch_number = dispatch_confirmed.get('Dispatch_Number')
         # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
         # sms_to = LitRepository.get_sms_to(dispatch)
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Time_Zone_Local'),
+            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'phone_number': sms_to
         }
 
@@ -308,7 +308,8 @@ class TestLitDispatchMonitor:
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
-        response = await lit_dispatch_monitor._send_confirmed_sms(dispatch_number, ticket_id, dispatch, sms_to)
+        response = await lit_dispatch_monitor._send_confirmed_sms(dispatch_number, ticket_id, dispatch_confirmed,
+                                                                  sms_to)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -329,16 +330,16 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def send_confirmed_sms_with_error_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
+    async def send_confirmed_sms_with_error_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
-        dispatch_number = dispatch.get('Dispatch_Number')
+        dispatch_number = dispatch_confirmed.get('Dispatch_Number')
         # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
         # sms_to = LitRepository.get_sms_to(dispatch)
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Time_Zone_Local'),
+            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'phone_number': sms_to
         }
 
@@ -367,7 +368,8 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        response = await lit_dispatch_monitor._send_confirmed_sms(dispatch_number, ticket_id, dispatch, sms_to)
+        response = await lit_dispatch_monitor._send_confirmed_sms(dispatch_number, ticket_id, dispatch_confirmed,
+                                                                  sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -375,14 +377,14 @@ class TestLitDispatchMonitor:
             send_error_sms_to_slack_response)
 
     @pytest.mark.asyncio
-    async def send_tech_24_sms_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
+    async def send_tech_24_sms_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
-        dispatch_number = dispatch.get('Dispatch_Number')
+        dispatch_number = dispatch_confirmed.get('Dispatch_Number')
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Time_Zone_Local'),
+            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'phone_number': sms_to
         }
 
@@ -401,7 +403,7 @@ class TestLitDispatchMonitor:
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
-        response = await lit_dispatch_monitor._send_tech_24_sms(dispatch_number, ticket_id, dispatch, sms_to)
+        response = await lit_dispatch_monitor._send_tech_24_sms(dispatch_number, ticket_id, dispatch_confirmed, sms_to)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -422,16 +424,16 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def send_tech_24_sms_with_error_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
+    async def send_tech_24_sms_with_error_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
-        dispatch_number = dispatch.get('Dispatch_Number')
+        dispatch_number = dispatch_confirmed.get('Dispatch_Number')
         # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
         # sms_to = LitRepository.get_sms_to(dispatch)
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Time_Zone_Local'),
+            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'phone_number': sms_to
         }
 
@@ -456,7 +458,7 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        response = await lit_dispatch_monitor._send_tech_24_sms(dispatch_number, ticket_id, dispatch, sms_to)
+        response = await lit_dispatch_monitor._send_tech_24_sms(dispatch_number, ticket_id, dispatch_confirmed, sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -464,14 +466,14 @@ class TestLitDispatchMonitor:
             send_error_sms_to_slack_response)
 
     @pytest.mark.asyncio
-    async def send_tech_2_sms_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
+    async def send_tech_2_sms_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
-        dispatch_number = dispatch.get('Dispatch_Number')
+        dispatch_number = dispatch_confirmed.get('Dispatch_Number')
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Time_Zone_Local'),
+            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'phone_number': sms_to
         }
 
@@ -490,14 +492,14 @@ class TestLitDispatchMonitor:
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
-        response = await lit_dispatch_monitor._send_tech_2_sms(dispatch_number, ticket_id, dispatch, sms_to)
+        response = await lit_dispatch_monitor._send_tech_2_sms(dispatch_number, ticket_id, dispatch_confirmed, sms_to)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
 
     @pytest.mark.asyncio
-    async def send_tech_2_sms_with_not_valid_sms_to_phone_test(self, lit_dispatch_monitor, dispatch):
-        updated_dispatch = dispatch.copy()
+    async def send_tech_2_sms_with_not_valid_sms_to_phone_test(self, lit_dispatch_monitor, dispatch_confirmed):
+        updated_dispatch = dispatch_confirmed.copy()
         ticket_id = '3544800'
         dispatch_number = updated_dispatch.get('Dispatch_Number')
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = 'NOT VALID PHONE'
@@ -511,16 +513,16 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def send_tech_2_sms_with_error_test(self, lit_dispatch_monitor, dispatch, sms_success_response):
+    async def send_tech_2_sms_with_error_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
-        dispatch_number = dispatch.get('Dispatch_Number')
+        dispatch_number = dispatch_confirmed.get('Dispatch_Number')
         # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
         # sms_to = LitRepository.get_sms_to(dispatch)
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Time_Zone_Local'),
+            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
+            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
+            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'phone_number': sms_to
         }
 
@@ -544,7 +546,7 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        response = await lit_dispatch_monitor._send_tech_2_sms(dispatch_number, ticket_id, dispatch, sms_to)
+        response = await lit_dispatch_monitor._send_tech_2_sms(dispatch_number, ticket_id, dispatch_confirmed, sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)

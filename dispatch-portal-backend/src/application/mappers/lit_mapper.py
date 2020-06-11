@@ -4,10 +4,10 @@ def map_get_dispatch(body):
     '''
     body = {k.lower(): v for k, v in body.items()}
     job_site_contact_name = ''
-    if body.get('job_site_contact_name_and_phone_number') is not None:
+    if body.get('job_site_contact_name_and_phone_number', None) is not None:
         job_site_contact_name = ' '.join(body['job_site_contact_name_and_phone_number'].split(' ')[:2])
     job_site_contact_number = ''
-    if body.get('job_site_contact_name_and_phone_number') is not None:
+    if body.get('job_site_contact_name_and_phone_number', None) is not None:
         job_site_contact_number = ' '.join(body['job_site_contact_name_and_phone_number'].split(' ')[2:])
     dispatch_request = {
         "dispatch_number": body.get('dispatch_number'),
@@ -15,9 +15,9 @@ def map_get_dispatch(body):
         "site_survey_quote_required": body.get('site_survey_quote_required'),
         "hard_time_of_dispatch_local": body.get('hard_time_of_dispatch_local'),
         "hard_time_of_dispatch_time_zone_local": body.get('hard_time_of_dispatch_time_zone_local'),
-        "time_of_dispatch": body.get('local_time_of_dispatch'),
+        "time_of_dispatch": body.get('hard_time_of_dispatch_local'),
         "mettel_bruin_ticket_id": body.get("mettel_bruin_ticketid"),
-        "time_zone": body.get('time_zone_local'),
+        "time_zone": body.get('hard_time_of_dispatch_time_zone_local'),
         "job_site": body.get("job_site"),
         "job_site_street": body.get("job_site_street"),
         "job_site_city": body.get("job_site_city"),
@@ -48,6 +48,8 @@ def map_create_dispatch(body):
         "site_survey_quote_required": body['site_survey_quote_required'],
         "local_time_of_dispatch": body.get('time_of_dispatch'),
         "time_zone_local": body.get('time_zone'),
+        "hard_time_of_dispatch_local": body.get('time_of_dispatch'),
+        "hard_time_of_dispatch_time_zone_local": body.get('time_zone'),
         "mettel_bruin_ticketid": body["mettel_bruin_ticket_id"],
         "job_site": body["job_site"],
         "job_site_street": body["job_site_street"],
@@ -79,6 +81,8 @@ def map_update_dispatch(body):
         "site_survey_quote_required": body.get('site_survey_quote_required', None),
         "local_time_of_dispatch": body.get('time_of_dispatch'),
         "time_zone_local": body.get('time_zone'),
+        "hard_time_of_dispatch_local": body.get('time_of_dispatch'),
+        "hard_time_of_dispatch_time_zone_local": body.get('time_zone'),
         "mettel_bruin_ticketid": body.get("mettel_bruin_ticket_id", None),
         "job_site": body.get("job_site", None),
         "job_site_street": body.get("job_site_street", None),

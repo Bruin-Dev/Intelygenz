@@ -120,8 +120,8 @@ class TestApiServer:
                     "Job_Site_City": "Pleasantown",
                     "Job_Site": "test street",
                     "Information_for_Tech": None,
-                    "Hard_Time_of_Dispatch_Time_Zone_Local": None,
-                    "Hard_Time_of_Dispatch_Local": None,
+                    "Hard_Time_of_Dispatch_Time_Zone_Local": "Pacific Time",
+                    "Hard_Time_of_Dispatch_Local": "7AM-8PM",
                     "Dispatch_Status": "New Dispatch",
                     "Dispatch_Number": "DIS37450",
                     "Date_of_Dispatch": "2019-11-14",
@@ -147,8 +147,8 @@ class TestApiServer:
                 "time_of_dispatch": "7AM-8PM",
                 "time_zone": "Pacific Time",
                 "mettel_bruin_ticket_id": "T-12345",
-                "hard_time_of_dispatch_local": None,
-                "hard_time_of_dispatch_time_zone_local": None,
+                "hard_time_of_dispatch_local": "7AM-8PM",
+                "hard_time_of_dispatch_time_zone_local": "Pacific Time",
                 "job_site": "test street",
                 "job_site_street": "123 Fake Street",
                 "job_site_city": "Pleasantown",
@@ -306,8 +306,8 @@ class TestApiServer:
                         "Job_Site_City": "Pleasantown",
                         "Job_Site": "test site",
                         "Information_for_Tech": None,
-                        "Hard_Time_of_Dispatch_Time_Zone_Local": None,
-                        "Hard_Time_of_Dispatch_Local": None,
+                        "Hard_Time_of_Dispatch_Time_Zone_Local": "Pacific Time",
+                        "Hard_Time_of_Dispatch_Local": "2:00pm",
                         "Dispatch_Status": "New Dispatch",
                         "Dispatch_Number": "DIS37263",
                         "Date_of_Dispatch": "2019-11-14",
@@ -369,8 +369,8 @@ class TestApiServer:
                     "time_of_dispatch": "2:00pm",
                     "time_zone": "Pacific Time",
                     "mettel_bruin_ticket_id": "T-12345",
-                    "hard_time_of_dispatch_local": None,
-                    "hard_time_of_dispatch_time_zone_local": None,
+                    "hard_time_of_dispatch_local": "2:00pm",
+                    "hard_time_of_dispatch_time_zone_local": "Pacific Time",
                     "job_site": "test site",
                     "job_site_street": "123 Fake Street",
                     "job_site_city": "Pleasantown",
@@ -647,6 +647,8 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
             "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
@@ -833,6 +835,8 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "12.30AM",
             "time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "12.30AM",
             "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
@@ -958,20 +962,26 @@ class TestApiServer:
 
         expected_response_bruin = {
             "request_id": uuid_,
-            "body": [{'noteValue': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
-                      'Please see the summary below.\n'
-                      f'--\nDispatch Number: '
-                      f'[{dispatch_number}|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37266]\n'
-                      'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
-                      'Time Zone (Local): Pacific Time\n'
-                      '\nLocation Owner/Name: Red Rose Inn\n'
-                      'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
-                      'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n'
-                      'Arrival Instructions: When arriving to the site call '
-                      'HOLMDEL NOC for telematic assistance\nMaterials Needed:\n'
-                      'Laptop, cable, tuner, ladder,internet hotspot\n\nRequester\n'
-                      'Name: Karen Doe\nPhone: mettel_department_phone_number\n'
-                      'Email: karen.doe@mettel.net\nDepartment: Customer Care'}],
+            "body": {
+                'ticketNotes': [
+                    {
+                        'noteValue': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
+                        'Please see the summary below.\n'
+                        f'--\nDispatch Number: '
+                        f'[{dispatch_number}|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37266]\n'
+                        'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
+                        'Time Zone (Local): Pacific Time\n'
+                        '\nLocation Owner/Name: Red Rose Inn\n'
+                        'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
+                        'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n'
+                        'Arrival Instructions: When arriving to the site call '
+                        'HOLMDEL NOC for telematic assistance\nMaterials Needed:\n'
+                        'Laptop, cable, tuner, ladder,internet hotspot\n\nRequester\n'
+                        'Name: Karen Doe\nPhone: mettel_department_phone_number\n'
+                        'Email: karen.doe@mettel.net\nDepartment: Customer Care'
+                    }
+                ]
+            },
             "status": 200
         }
 
@@ -1011,6 +1021,204 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
+            "mettel_bruin_ticketid": "T-12345",
+            "job_site": "Red Rose Inn",
+            "job_site_street": "123 Fake Street",
+            "job_site_city": "Pleasantown",
+            "job_site_state": "CA",
+            "job_site_zip_code": "99088",
+            "job_site_contact_name_and_phone_number": "Jane Doe +1 666 6666 666",
+            "special_materials_needed_for_dispatch": "Laptop, cable, tuner, ladder,internet hotspot",
+            "scope_of_work": "Device is bouncing constantly",
+            "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
+            "name_of_mettel_requester": "Karen Doe",
+            "mettel_department": "Customer Care",
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "mettel_department_phone_number"
+        }
+
+        payload_request = {
+            "request_id": uuid_,
+            "body": {
+                'RequestDispatch': payload_lit_mapped
+            }
+        }
+
+        expected_response_create = {'id': 'DIS37450', 'vendor': 'LIT'}
+
+        ticket_note = '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n' \
+                      'Please see the summary below.\n' \
+                      '--\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n' \
+                      'Time Zone (Local): Pacific Time\n' \
+                      '\nLocation Owner/Name: Red Rose Inn\n' \
+                      'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n' \
+                      'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n' \
+                      'Arrival Instructions: When arriving to the site call ' \
+                      'HOLMDEL NOC for telematic assistance\nMaterials Needed:\n' \
+                      'Laptop, cable, tuner, ladder,internet hotspot\n\nRequester\n' \
+                      'Name: Karen Doe\nPhone: mettel_department_phone_number\n' \
+                      'Email: karen.doe@mettel.net\nDepartment: Customer Care'
+
+        append_note_to_ticket_request = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': 'T-12345',
+                'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
+                        'Please see the summary below.\n--\n'
+                        'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
+                        'Time Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\n'
+                        'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
+                        'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n'
+                        'Arrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\n'
+                        'Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n'
+                        'Requester\nName: Karen Doe\nPhone: mettel_department_phone_number\n'
+                        'Email: karen.doe@mettel.net\nDepartment: Customer Care'
+            },
+        }
+
+        payload_ticket_request_msg = {
+            'request_id': uuid_,
+            'body': {
+                'ticket_id': 'T-12345'
+            }
+        }
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.post(f'/lit/dispatch', json=payload_lit)
+
+            data = await response.get_json()
+
+            event_bus.rpc_request.assert_has_awaits([
+                call("lit.dispatch.post", payload_request, timeout=30),
+                call("bruin.ticket.details.request", payload_ticket_request_msg, timeout=200)
+            ])
+
+            assert response.status_code == HTTPStatus.OK
+            assert data == expected_response_create
+
+    @pytest.mark.asyncio
+    async def lit_create_dispatch_error_exception_test(self):
+        uuid_ = 'UUID1'
+        logger = Mock()
+        redis_client = Mock()
+
+        dispatch_number = 'DIS37450'
+        expected_response = {
+            "Status": "Success",
+            "Message": None,
+            "Dispatch": {
+                "turn_up": None,
+                "Time_Zone_Local": "Pacific Time",
+                "Time_of_Check_Out": None,
+                "Time_of_Check_In": None,
+                "Tech_Off_Site": False,
+                "Tech_Mobile_Number": None,
+                "Tech_First_Name": None,
+                "Tech_Arrived_On_Site": False,
+                "Special_Materials_Needed_for_Dispatch": "Laptop, cable, tuner, ladder,internet hotspot",
+                "Special_Dispatch_Notes": None,
+                "Site_Survey_Quote_Required": False,
+                "Scope_of_Work": "Device is bouncing constantly",
+                "Name_of_MetTel_Requester": "Karen Doe",
+                "MetTel_Tech_Call_In_Instructions":
+                    "When arriving to the site call HOLMDEL NOC for telematic assistance",
+                "MetTel_Requester_Email": "karen.doe@mettel.net",
+                "MetTel_Note_Updates": None,
+                "MetTel_Group_Email": None,
+                "MetTel_Department_Phone_Number": None,
+                "MetTel_Department": "Customer Care",
+                "MetTel_Bruin_TicketID": None,
+                "Local_Time_of_Dispatch": None,
+                "Job_Site_Zip_Code": "99088",
+                "Job_Site_Street": "123 Fake Street",
+                "Job_Site_State": "CA",
+                "Job_Site_Contact_Name_and_Phone_Number": "Jane Doe +1 666 6666 666",
+                "Job_Site_City": "Pleasantown",
+                "Job_Site": "test street",
+                "Information_for_Tech": None,
+                "Hard_Time_of_Dispatch_Time_Zone_Local": None,
+                "Hard_Time_of_Dispatch_Local": None,
+                "Dispatch_Status": "New Dispatch",
+                "Dispatch_Number": dispatch_number,
+                "Date_of_Dispatch": "2019-11-14",
+                "Close_Out_Notes": None,
+                "Backup_MetTel_Department_Phone_Number": None
+            },
+            "APIRequestID": "a130v000001U6iTAAS"
+        }
+        expected_response_lit = {
+            "request_id": uuid_,
+            "body": expected_response,
+            "status": 200
+        }
+
+        expected_response_bruin = {
+            "request_id": uuid_,
+            "body": {
+                'NOT ticketNotes field': [
+                    {
+                        'noteValue': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
+                                     'Please see the summary below.\n'
+                                     f'--\nDispatch Number: '
+                                     f'[{dispatch_number}|'
+                                     f'https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37266]\n'
+                                     'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
+                                     'Time Zone (Local): Pacific Time\n'
+                                     '\nLocation Owner/Name: Red Rose Inn\n'
+                                     'Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n'
+                                     'Phone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly\n'
+                                     'Arrival Instructions: When arriving to the site call '
+                                     'HOLMDEL NOC for telematic assistance\nMaterials Needed:\n'
+                                     'Laptop, cable, tuner, ladder,internet hotspot\n\nRequester\n'
+                                     'Name: Karen Doe\nPhone: mettel_department_phone_number\n'
+                                     'Email: karen.doe@mettel.net\nDepartment: Customer Care'
+                    }
+                ]
+            },
+            "status": 200
+        }
+
+        event_bus = Mock()
+
+        event_bus.rpc_request = CoroutineMock(side_effect=[
+            expected_response_lit,
+            expected_response_bruin
+        ])
+
+        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+
+        payload_lit = {
+            "date_of_dispatch": "2019-11-14",
+            "site_survey_quote_required": False,
+            "time_of_dispatch": "6PM-8PM",
+            "time_zone": "Pacific Time",
+            "mettel_bruin_ticket_id": "T-12345",
+            "job_site": "Red Rose Inn",
+            "job_site_street": "123 Fake Street",
+            "job_site_city": "Pleasantown",
+            "job_site_state": "CA",
+            "job_site_zip_code": "99088",
+            "job_site_contact_name": "Jane Doe",
+            "job_site_contact_number": "+1 666 6666 666",
+            "materials_needed_for_dispatch": "Laptop, cable, tuner, ladder,internet hotspot",
+            "scope_of_work": "Device is bouncing constantly",
+            "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
+            "name_of_mettel_requester": "Karen Doe",
+            "mettel_department": "Customer Care",
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "mettel_department_phone_number"
+        }
+
+        payload_lit_mapped = {
+            "date_of_dispatch": "2019-11-14",
+            "site_survey_quote_required": False,
+            "local_time_of_dispatch": "6PM-8PM",
+            "time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
             "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
@@ -1186,6 +1394,8 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
             "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
@@ -1581,6 +1791,8 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
             "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
@@ -1656,7 +1868,7 @@ class TestApiServer:
                 "MetTel_Department_Phone_Number": None,
                 "MetTel_Department": "Customer Care",
                 "MetTel_Bruin_TicketID": "T-12345",
-                "Local_Time_of_Dispatch": None,
+                "Local_Time_of_Dispatch": "6PM-8PM",
                 "Job_Site_Zip_Code": "99088",
                 "Job_Site_Street": "123 Fake Street",
                 "Job_Site_State": "CA",
@@ -1664,8 +1876,8 @@ class TestApiServer:
                 "Job_Site_City": "Pleasantown",
                 "Job_Site": "test street",
                 "Information_for_Tech": None,
-                "Hard_Time_of_Dispatch_Time_Zone_Local": None,
-                "Hard_Time_of_Dispatch_Local": None,
+                "Hard_Time_of_Dispatch_Time_Zone_Local": "Pacific Time",
+                "Hard_Time_of_Dispatch_Local": "6PM-8PM",
                 "Dispatch_Status": "New Dispatch",
                 "Dispatch_Number": dispatch_number,
                 "Date_of_Dispatch": "2019-11-14",
@@ -1691,6 +1903,8 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
             "mettel_bruin_ticket_id": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street MODIFIED",
@@ -1714,6 +1928,8 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
             "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street MODIFIED",
@@ -1945,8 +2161,8 @@ class TestApiServer:
                 "Job_Site_City": "Pleasantown",
                 "Job_Site": "test street",
                 "Information_for_Tech": None,
-                "Hard_Time_of_Dispatch_Time_Zone_Local": None,
-                "Hard_Time_of_Dispatch_Local": None,
+                "Hard_Time_of_Dispatch_Time_Zone_Local": "Pacific Time",
+                "Hard_Time_of_Dispatch_Local": "6am-8am",
                 "Dispatch_Status": "New Dispatch",
                 "Dispatch_Number": dispatch_number,
                 "Date_of_Dispatch": "2019-11-14",
@@ -1995,6 +2211,8 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -2051,6 +2269,8 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
             "mettel_bruin_ticket_id": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
@@ -2074,6 +2294,8 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
+            "hard_time_of_dispatch_local": "6PM-8PM",
+            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
             "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
