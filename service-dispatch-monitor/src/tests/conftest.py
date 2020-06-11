@@ -328,6 +328,15 @@ def ticket_details():
                     ],
                     "createdDate": "2020-05-28T06:06:40.27-04:00",
                     "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": None,
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
                 }
             ]
         },

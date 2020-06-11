@@ -941,14 +941,20 @@ class TestLitDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_exception_test(self, lit_dispatch_monitor, dispatch_confirmed):
+        dispatch_number = dispatch_confirmed.get('Dispatch_Number')
+        ticket_id = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         confirmed_dispatches = [
             dispatch_confirmed
         ]
+        err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                  f"- {dispatch_confirmed}"
         lit_dispatch_monitor.get_dispatch_confirmed_date_time_localized = Mock(side_effect=Exception)
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches)
 
         lit_dispatch_monitor._logger.error.assert_called_once()
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_skipping_one_invalid_ticket_id_test(
@@ -1040,6 +1046,8 @@ class TestLitDispatchMonitor:
 
         dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+        dispatch_number_2 = dispatch_confirmed_skipped_datetime.get('Dispatch_Number')
+        ticket_id_2 = dispatch_confirmed_skipped_datetime.get('MetTel_Bruin_TicketID')
 
         confirmed_note_1 = '#*Automation Engine*#\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1068,12 +1076,17 @@ class TestLitDispatchMonitor:
             datetime_return_1,
             datetime_return_2
         ]
+        err_msg = f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2} - " \
+                  f"An error occurred retrieve datetime of dispatch: " \
+                  f"{dispatch_confirmed_skipped_datetime.get('Hard_Time_of_Dispatch_Local', None)} - " \
+                  f"{dispatch_confirmed_skipped_datetime.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)} "
         lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
             side_effect=datetime_returns_mock)
         lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         lit_dispatch_monitor._send_confirmed_sms = CoroutineMock(side_effect=responses_confirmed_sms)
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
 
@@ -1093,6 +1106,8 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._send_confirmed_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
         ])
+
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_skipping_one_invalid_sms_to_test(
@@ -2504,12 +2519,16 @@ class TestLitDispatchMonitor:
             True
         ]
 
+        err_msg = 'Dispatch: DIS37406 - Ticket_id: 3544801 - ' \
+                  'An error occurred retrieve datetime of dispatch: None - Eastern Time '
+
         lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
             side_effect=datetime_returns_mock)
         lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         lit_dispatch_monitor._send_tech_on_site_sms = CoroutineMock(side_effect=responses_sms_tech_on_site_mock)
         lit_dispatch_monitor._append_tech_on_site_sms_note = CoroutineMock(
             side_effect=responses_append_tech_on_site_sms_note_mock)
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         await lit_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
 
@@ -2543,16 +2562,24 @@ class TestLitDispatchMonitor:
             call(dispatch_number_2, ticket_id_2, sms_to_2, dispatch_tech_on_site_2.get('Tech_First_Name'))
         ])
 
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_with_exception_test(self, lit_dispatch_monitor, dispatch_tech_on_site):
         tech_on_site_dispatches = [
             dispatch_tech_on_site
         ]
-        lit_dispatch_monitor.get_dispatch_confirmed_date_time_localized = Mock(side_effect=Exception)
+        err_msg = f"Error: Dispatch [{dispatch_tech_on_site.get('Dispatch_Number')}] " \
+                  f"in ticket_id: {dispatch_tech_on_site.get('MetTel_Bruin_TicketID')} " \
+                  f"- {dispatch_tech_on_site}"
+        lit_dispatch_monitor.get_dispatch_confirmed_date_time_localized = CoroutineMock(
+            side_effect=Exception('mocked exception'))
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         await lit_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches)
 
         lit_dispatch_monitor._logger.error.assert_called_once()
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_skipping_one_invalid_ticket_id_test(self, lit_dispatch_monitor,
