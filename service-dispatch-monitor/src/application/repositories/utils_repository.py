@@ -15,11 +15,13 @@ class UtilsRepository:
 
     @staticmethod
     def get_diff_hours_between_datetimes(datetime_1, datetime_2):
-        diff = datetime_1 - datetime_2
-
-        days, seconds = diff.days, diff.seconds
-        hours = days * 24 + seconds // 3600
-        return hours
+        if datetime_1 > datetime_2:
+            td = datetime_1 - datetime_2
+        else:
+            td = datetime_2 - datetime_1
+        td_mins = int(round(td.total_seconds() / 60))
+        td_hours = td_mins / 60
+        return td_hours
 
     @staticmethod
     def find_note(ticket_notes, watermark):
