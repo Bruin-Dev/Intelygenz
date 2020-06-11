@@ -29,6 +29,8 @@ DISPATCH_MONITOR_CONFIG = {
     },
 }
 
+ENVIRONMENT = os.environ["CURRENT_ENVIRONMENT"]
+
 LOG_CONFIG = {
     'name': 'service-dispatch-monitor',
     'level': logging.DEBUG,

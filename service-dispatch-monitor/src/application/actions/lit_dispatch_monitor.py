@@ -1,7 +1,6 @@
 import asyncio
 from datetime import datetime
 from time import perf_counter
-from collections import defaultdict
 from shortuuid import uuid
 
 
@@ -19,7 +18,6 @@ from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_co
 from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_24_hours_before_sms
 from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_2_hours_before_sms
 from application.templates.lit.sms.tech_on_site import lit_get_tech_on_site_sms
-
 from application.templates.lit.lit_repair_completed import lit_get_repair_completed_note
 
 
@@ -129,7 +127,7 @@ class LitDispatchMonitor:
         return True
 
     def _get_dispatches_splitted_by_status(self, dispatches):
-        dispatches_splitted_by_status = defaultdict(list)
+        dispatches_splitted_by_status = {}
         for ds in self._dispatch_statuses:
             dispatches_splitted_by_status[ds] = []
         for dispatch in dispatches:
@@ -470,10 +468,11 @@ class LitDispatchMonitor:
 
                 if datetime_tz_response is None:
                     self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                      f"Could not determine date time of dispatch.")
+                                      f"Could not determine date time of dispatch. {dispatch}")
                     err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                               f"An error occurred retrieve datetime of dispatch: " \
-                              f"{dispatch.get('Hard_Time_of_Dispatch_Local', None)}"
+                              f"{dispatch.get('Hard_Time_of_Dispatch_Local', None)} - " \
+                              f"{dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)} "
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
 
@@ -661,10 +660,11 @@ class LitDispatchMonitor:
 
                 if datetime_tz_response is None:
                     self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                      f"Could not determine date time of dispatch.")
+                                      f"Could not determine date time of dispatch. {dispatch}")
                     err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                               f"An error occurred retrieve datetime of dispatch: " \
-                              f"{dispatch.get('Hard_Time_of_Dispatch_Local', None)}"
+                              f"{dispatch.get('Hard_Time_of_Dispatch_Local', None)} - " \
+                              f"{dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)} "
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
 

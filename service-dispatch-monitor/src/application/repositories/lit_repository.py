@@ -67,17 +67,24 @@ class LitRepository:
         sms_to = ''.join(ch for ch in sms_to if ch.isdigit())
         try:
             sms_to = phonenumbers.parse(sms_to, "US")
+            return phonenumbers.format_number(sms_to, phonenumbers.PhoneNumberFormat.E164)
         except NumberParseException:
             return None
-        return phonenumbers.format_number(sms_to, phonenumbers.PhoneNumberFormat.E164)
 
     def get_dispatch_confirmed_date_time_localized(self, dispatch, dispatch_number, ticket_id):
         return_datetime_localized = None
         try:
             date_of_dispatch = dispatch.get('Date_of_Dispatch', None)
             time_of_dispatch = dispatch.get('Hard_Time_of_Dispatch_Local', None)
+            # time_zone_of_dispatch = dispatch.get('Time_Zone_Local', None)
+            time_zone_of_dispatch = dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"date_of_dispatch: {date_of_dispatch} - time_of_dispatch: {time_of_dispatch}")
             if time_of_dispatch is None:
                 self._logger.error(f"Not valid time of dispatch: {time_of_dispatch}")
+                return None
+            if time_zone_of_dispatch is None:
+                self._logger.error(f"Not valid timezone of dispatch: {time_zone_of_dispatch}")
                 return None
 
             self._logger.info(f"Original time_of_dispatch: {time_of_dispatch}")
@@ -119,8 +126,6 @@ class LitRepository:
                 final_datetime = datetime.datetime.strptime(new_date, self.DATETIME_TZ_FORMAT)
                 # "Pacific Time"
 
-                # time_zone_of_dispatch = dispatch.get('Time_Zone_Local', None)
-                time_zone_of_dispatch = dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)
                 time_zone_of_dispatch = time_zone_of_dispatch.replace('Time', '').replace(' ', '')
                 final_timezone = timezone(f'US/{time_zone_of_dispatch}')
 
@@ -128,7 +133,8 @@ class LitRepository:
             else:
                 return None
         except Exception as ex:
-            self._logger.error(f"Error: getting confirmed date time of dispatch -> {ex}")
+            self._logger.error(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                               f"Error: getting confirmed date time of dispatch -> {ex}")
             return None
 
         return {
