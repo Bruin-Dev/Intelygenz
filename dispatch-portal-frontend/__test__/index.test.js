@@ -1,8 +1,7 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
-import { toBeInTheDocument } from '@testing-library/jest-dom';
 import MockAdapter from 'axios-mock-adapter';
-import Index from './index';
+import Index from '../pages/index';
 import { dispatchList } from '../services/mocks/list-dispatch.mock';
 import { API_URLS } from '../services/api.config';
 import axiosI from '../services/api';

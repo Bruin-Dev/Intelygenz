@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, act, fireEvent, screen } from '@testing-library/react';
-import Login from './login';
+import { render, fireEvent, screen } from '@testing-library/react';
+import Login from '../pages/login';
 import { withTestRouter } from '../components/menu/Menu.test';
 import { Routes } from '../config/routes';
 

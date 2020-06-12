@@ -69,7 +69,7 @@ Then('I check info of dispatch', function() {
     dataE2e.getDispatch.dispatch.mettel_tech_call_in_instructions
   );
   cy.get(`[data-test-id="dispatch-detail-details-information"]`).contains(
-    dataE2e.getDispatch.dispatch.information
+    dataE2e.getDispatch.dispatch.scope_of_work
   );
   cy.get(`[data-test-id="dispatch-detail-details-materials"]`).contains(
     dataE2e.getDispatch.dispatch.materials_needed_for_dispatch

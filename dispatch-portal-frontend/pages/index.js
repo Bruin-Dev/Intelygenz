@@ -58,11 +58,14 @@ const columns = [
   {
     name: 'Time Scheduled',
     selector: 'dateDispatch',
-    sortable: true
+    sortable: true,
+    cell: row => (
+      <span>{`${row.dateDispatch} ${row.timeDispatch} ${row.timeZone}`}</span>
+    )
   },
   {
     name: 'Dispatch Status',
-    selector: 'dispatch_status',
+    selector: 'status',
     sortable: true,
     cell: row => <StatusButton status={row.status} />
   }

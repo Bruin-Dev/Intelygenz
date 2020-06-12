@@ -1,8 +1,7 @@
 import React from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { render, screen } from '@testing-library/react';
-import DispatchDetail from './[id]';
-import { withTestRouter } from '../../components/menu/Menu.test';
+import DispatchDetail from '../pages/dispatch/[id]';
+import { withTestRouter } from '../components/menu/Menu.test';
 
 describe('DISPATCH DETAIL PAGE tests', () => {
   const component = withTestRouter(<DispatchDetail />, {

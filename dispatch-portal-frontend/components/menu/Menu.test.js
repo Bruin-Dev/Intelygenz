@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { RouterContext } from 'next/dist/next-server/lib/router-context';
-import { toHaveClass } from '@testing-library/jest-dom';
 import Menu from './Menu';
 import { Routes } from '../../config/routes';
 

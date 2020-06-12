@@ -1,8 +1,7 @@
 import React from 'react';
 import { render, fireEvent, screen, act } from '@testing-library/react';
-import { toBeInTheDocument } from '@testing-library/jest-dom';
 import MockAdapter from 'axios-mock-adapter';
-import NewDispatch from './new-dispatch';
+import NewDispatch from '../pages/new-dispatch';
 import axiosI from '../services/api';
 import { API_URLS } from '../services/api.config';
 import { withTestRouter } from '../components/menu/Menu.test';

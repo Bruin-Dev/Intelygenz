@@ -30,22 +30,22 @@ describe('dispatch service tests', () => {
       {
         dateDispatch: '2015-01-01',
         details: {
-          fieldEngineer: '===not set===',
-          fieldEngineerContactNumber: '===not set===',
+          fieldEngineer: '',
+          fieldEngineerContactNumber: '',
           information: 'ScopeOfWork',
           instructions: '1',
           materials: '1',
-          serviceType: '===not set===',
-          specialMaterials: '===not set==='
+          serviceType: '',
+          specialMaterials: ''
         },
-        hardTimeDispatch: '===not set===',
-        hardTimeZone: '===not set===',
+        hardTimeDispatch: '',
+        hardTimeZone: '',
         id: 'DIS17918',
         mettelId: '0',
         onSiteContact: {
           city: 'Citizville',
           name: 'Rajat 11111',
-          phoneNumber: '===not set===',
+          phoneNumber: '',
           site: 'Primary Citiscape',
           state: 'NY',
           street: '124 Spring street',
@@ -53,17 +53,17 @@ describe('dispatch service tests', () => {
         },
         requester: {
           department: '1',
-          departmentPhoneNumber: '===not set===',
+          departmentPhoneNumber: '',
           email: 'pkamath@mettel.net',
-          groupEmail: '===not set===',
+          groupEmail: '',
           name: 'pkamath',
-          phoneNumber: '===not set==='
+          phoneNumber: ''
         },
-        slaLevel: '===not set===',
+        slaLevel: '',
         status: 'New Dispatch',
-        timeDispatch: '===not set===',
+        timeDispatch: '',
         timeZone: '2',
-        turnUp: '===not set===',
+        turnUp: '',
         vendor: 'lit'
       }
     ];

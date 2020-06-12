@@ -1,6 +1,5 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { toHaveTextContent, toHaveClass } from '@testing-library/jest-dom';
 import { StatusButton, TYPES_STATUS } from './StatusButton';
 
 describe('Status Button test', () => {

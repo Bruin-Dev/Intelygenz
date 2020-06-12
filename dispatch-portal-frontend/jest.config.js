@@ -1,10 +1,11 @@
 module.exports = {
+  setupFilesAfterEnv: ['./jest.setup.js'],
   collectCoverageFrom: ['**/*.{js,jsx,ts,tsx}'],
   coveragePathIgnorePatterns: ['/__mocks__/'],
   coverageReporters: ['clover', 'json', 'json-summary', 'lcov', 'text'],
   coverageThreshold: {
     global: {
-      branches: 90,
+      branches: 80,
       functions: 90,
       lines: 90,
       statements: 90
@@ -21,7 +22,6 @@ module.exports = {
     '<rootDir>/build/',
     '<rootDir>/out/',
     '<rootDir>/tmp-*/',
-    '<rootDir>/babel.config.js',
     '<rootDir>/jest.config.js',
     '<rootDir>/next.config.js',
     '<rootDir>/tailwind.config.js'

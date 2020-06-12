@@ -43,7 +43,7 @@ const env = (() => {
 })();
 
 module.exports = withSass({
-  webpack(config) {
+  webpack(config, { webpack }) {
     const rules = [
       {
         test: /\.scss$/,
@@ -68,6 +68,8 @@ module.exports = withSass({
         }
       }
     ];
+
+    config.plugins.push(new webpack.IgnorePlugin(/\/__tests__\//));
 
     return {
       ...config,

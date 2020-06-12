@@ -27,41 +27,40 @@ export const formDataNewDispatch = {
 };
 
 export const mocksInAdapterLitSingleDispatchResult = {
-  dateDispatch: '2016-11-16',
+  dateDispatch: '2020-01-31',
   details: {
     fieldEngineer: 'JC Jávega',
     fieldEngineerContactNumber: '+34633292080',
-    information: 'test',
-    instructions: 'test',
+    information: 'test new scope of work',
+    instructions: 'update callin instruction',
     materials: 'test',
-    serviceType: '===not set===',
-    specialMaterials: '===not set==='
+    serviceType: '',
+    specialMaterials: ''
   },
   hardTimeDispatch: '7AM-9AM',
-  hardTimeZone: 'Eastern Time',
+  hardTimeZone: 'Pacific Time',
   id: 'DIS17918',
-  mettelId: 'test update',
+  mettelId: 'BRUINID5478525',
   onSiteContact: {
-    city: 'test city',
-    name: '===not set===',
-    phoneNumber: 'test',
-    site: 'test',
-    state: 'test state2',
-    street: 'test street',
-    zip: '123321'
+    city: 'test job site city',
+    name: 'update Job',
+    phoneNumber: '+34 7894864658',
+    site: 'test site',
+    state: 'ALABAMA',
+    street: 'test job site street',
+    zip: '10041'
   },
   requester: {
-    department: 'Customer Care',
-    departmentPhoneNumber: '1233211234',
-    email: 'test@mettel.net',
-    groupEmail: 'test@mettel.net',
+    department: 'T1 Repair',
+    departmentPhoneNumber: '',
+    email: 'requester@mettel.net',
+    groupEmail: '',
     name: 'Test User1',
-    phoneNumber: '===not set==='
+    phoneNumber: ''
   },
-  slaLevel: '===not set===',
-  status: '===not set===',
+  slaLevel: '3',
+  status: 'New Dispatch',
   timeDispatch: '7AM-9AM',
   timeZone: 'Pacific Time',
-  turnUp: 'Yes',
   vendor: 'LIT'
 };

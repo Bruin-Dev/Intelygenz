@@ -55,7 +55,7 @@ At the time of writing this document we are using the following global versions:
 - [Storybooks](https://storybook.js.org/), lib for ui-components. √
 
 ## Tests
-- [Unit test, with react testing library](https://github.com/testing-library/react-testing-library) √
+- [Unit test, with react testing library](https://github.com/testing-library/react-testing-library), [jest-dom](https://github.com/testing-library/jest-dom) and [jest](https://jestjs.io/) √
 - [E2E testing with Cypress.io](https://react-hook-form.com/) (not install yet, because at this moment it is impossible to test)
 
 ## Code quality

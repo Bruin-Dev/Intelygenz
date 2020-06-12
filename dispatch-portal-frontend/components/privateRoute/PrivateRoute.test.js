@@ -1,7 +1,5 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { toBeInTheDocument } from '@testing-library/jest-dom';
-
 import { privateRoute } from './PrivateRoute';
 import { Routes } from '../../config/routes';
 import { TOKEN_STORAGE_KEY } from '../../services/auth/login.service';

@@ -1,7 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { toBeInTheDocument } from '@testing-library/jest-dom';
-import MyApp from './_app';
+import MyApp from '../pages/_app';
 
 describe('MYAPP(_APP) tests', () => {
   const MockApp = () => <p>Hello from your Mock App</p>;

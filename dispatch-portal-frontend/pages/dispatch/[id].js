@@ -66,6 +66,12 @@ function DispatchDetail({ authToken }) {
                 <span data-test-id="dispatch-detail-id">{data.id}</span>
               </p>
               <p className="text-gray-700 text-sm">
+                <b>Bruin Ticket Id:</b>{' '}
+                <span data-test-id="dispatch-detail-bruin-id">
+                  {data.mettelId}
+                </span>
+              </p>
+              <p className="text-gray-700 text-sm">
                 <b>Date of dispatch:</b>{' '}
                 <span data-test-id="dispatch-detail-dateDispatch">
                   {data.dateDispatch}
