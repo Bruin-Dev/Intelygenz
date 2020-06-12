@@ -4,7 +4,7 @@ In the folder a series of *Python* files are stored, these allow the deletion of
 
 >It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment.
 
-## Usage <a name="delete_environments_aws_resources_usage"></a>
+## Usage <a name="delete-environments-aws-resources_usage"></a>
 
 In order to be able to use the CLI mentioned previously it is necessary to previously define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the following way:
 
@@ -20,7 +20,7 @@ python main.py -e <environment_name> [commands]
 ```
 >To use any command it's necessary to specify the environment name as the first argument of the `main.py` script through the -e parameter.
 
-## Commands <a name="delete_environments_aws_resources_commands"></a>
+## Commands <a name="delete-environments-aws-resources_commands"></a>
 
 CLI supports a number of commands. These are explained below:
 

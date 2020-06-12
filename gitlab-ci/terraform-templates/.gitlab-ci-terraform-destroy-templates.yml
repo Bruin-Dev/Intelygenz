@@ -31,7 +31,7 @@
     - terraform init infra-as-code/dev
     - terraform refresh infra-as-code/dev
     - terraform destroy -auto-approve infra-as-code/dev
-    - python3 ci-utils/delete_environments_aws_resources/main.py -e ${TF_VAR_ENVIRONMENT} -z -b
+    - python3 ci-utils/delete-environments-aws-resources/main.py -e ${TF_VAR_ENVIRONMENT} -z -b
   tags:
     - kubernetes
 

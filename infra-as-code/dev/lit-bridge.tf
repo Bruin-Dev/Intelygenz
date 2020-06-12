@@ -20,7 +20,7 @@ data "template_file" "automation-lit-bridge" {
     LIT_CLIENT_SECURITY_TOKEN = var.LIT_CLIENT_SECURITY_TOKEN
     LIT_LOGIN_URL = var.LIT_LOGIN_URL
     LIT_DOMAIN = var.LIT_DOMAIN
-    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-lit-bridge-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT

@@ -15,7 +15,7 @@ data "template_file" "automation-sites-monitor" {
     MONITORING_SECONDS = var.MONITORING_SECONDS
     LAST_CONTACT_RECIPIENT = var.LAST_CONTACT_RECIPIENT
     REDIS_HOSTNAME = local.redis-hostname
-    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-sites-monitor-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT

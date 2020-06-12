@@ -14,7 +14,7 @@ data "template_file" "automation-tnba-monitor" {
     NATS_SERVER1 = local.nats_server1
     REDIS_HOSTNAME = local.redis-hostname
     CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
-    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-tnba-monitor-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT

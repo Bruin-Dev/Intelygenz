@@ -18,42 +18,6 @@ resource "aws_cloudformation_stack" "sns_topic_alarms" {
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "exception_messages_services_alarm" {
-  alarm_name                = local.exception_messages_services_alarm-name
-  comparison_operator       = "GreaterThanOrEqualToThreshold"
-  evaluation_periods        = local.exception_messages_services_alarm-evaluation_periods
-  metric_name               = local.exception_detected_metric-metric_transformation-name
-  namespace                 = "LogMetrics"
-  period                    = local.exception_messages_services_alarm-period
-  statistic                 = "Sum"
-  threshold                 = local.exception_messages_services_alarm-threshold
-  insufficient_data_actions = []
-  alarm_description         = "This metric monitors number of exception messages for all the services in ECS cluster ${var.ENVIRONMENT}"
-  alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
-  tags = {
-    Name = local.exception_messages_services_alarm-name
-    Environment = var.ENVIRONMENT
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "error_messages_services_alarm" {
-  alarm_name                = local.error_messages_services_alarm-name
-  comparison_operator       = "GreaterThanOrEqualToThreshold"
-  evaluation_periods        = local.error_messages_services_alarm-evaluation_periods
-  metric_name               = local.errors_detected_metric-metric_transformation-name
-  namespace                 = "LogMetrics"
-  period                    = local.error_messages_services_alarm-period
-  statistic                 = "Sum"
-  threshold                 = local.error_messages_services_alarm-threshold
-  insufficient_data_actions = []
-  alarm_description         = "This metric monitors number of error messages for all the services in ECS cluster ${var.ENVIRONMENT}"
-  alarm_actions             = [ aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"] ]
-  tags = {
-    Name = local.error_messages_services_alarm-tag-Name
-    Environment = var.ENVIRONMENT
-  }
-}
-
 resource "aws_cloudwatch_metric_alarm" "running_task_count_sites-monitor_alarm" {
   count = var.sites_monitor_desired_tasks != 0 ? 1 : 0
   alarm_name                = local.running_task_count_sites-monitor_alarm-name
@@ -292,6 +256,29 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server-2_alarm" 
   }
 }
 
+resource "aws_cloudwatch_metric_alarm" "running_task_count_service-dispatch_monitor_alarm" {
+  count = var.service_dispatch_monitor_desired_tasks != 0 ? 1 : 0
+  alarm_name = local.running_task_count_service-dispatch-monitor_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold * var.service_dispatch_monitor_desired_tasks
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of service-dispatch-monitor service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-service-dispatch-monitor"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_service-dispatch-monitor_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-1_alarm" {
   count = var.service_outage_monitor_1_desired_tasks != 0 ? 1 : 0
@@ -433,6 +420,30 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_last-contact-report_a
   }
   tags = {
     Name = local.running_task_count_last-contact-report_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_lumin-billing-report_alarm" {
+  count = var.lumin_billing_report_desired_tasks != 0 ? 1 : 0
+  alarm_name = local.running_task_count_lumin-billing-report_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold * var.lumin_billing_report_desired_tasks
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of lumin-billing-report service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-lumin-billing-report"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_lumin-billing-report_alarm-tag-Name
     Environment = var.ENVIRONMENT
   }
 }

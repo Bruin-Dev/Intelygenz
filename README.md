@@ -16,6 +16,7 @@
 | lumin-billing-report|[![lumin-billing-report](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=lumin-billing-report-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | notifier|[![notifier-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=notifier-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-affecting-monitor|[![service-affecting-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-affecting-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| service-dispatch-monitor|[![service-dispatch-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-dispatch-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | sites-monitor|[![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | t7-bridge|[![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
@@ -51,6 +52,7 @@
     - [Process goal](#process-goal)
     - [Process flow](#process-flow)
 - [Good Practices](#good-practices)
+- [Setting up logs with Papertrail](#setting-up-logs-with-papertrail)
 - [METRICS](#metrics)
 
 # Project structure
@@ -396,6 +398,10 @@ Services involved: sites-monitor, velocloud-bridge, notifier.
 - Documentation **must** be updated as frecuently as possible. It's recomended to annotate every action taken in the development phase, and afterwards, add to the documentation the actions or information considered relevant.
 - Pair programming is strongly reccomended when doing difficult or delicate tasks. It is **mandatory** when a new teammate arrives.
 - Solutions of hard problems should be put in common in order to use all the knowledge and points of view of the team.
+
+# Setting up logs with Papertrail
+
+[Papertrail](https://papertrailapp.com/) is used as a centralized system of logs, for each microservice a series of predefined searches are used, with the possibility of creating new ones and/or modifying the current ones. It is necessary to use the [papertrail-provisioning](ci-utils/papertrail-provisioning) tool for this purpose.
 
 # METRICS
 

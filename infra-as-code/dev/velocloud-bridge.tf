@@ -16,7 +16,7 @@ data "template_file" "automation-velocloud-bridge" {
     VELOCLOUD_CREDENTIALS = var.VELOCLOUD_CREDENTIALS
     VELOCLOUD_VERIFY_SSL = var.VELOCLOUD_VERIFY_SSL
     REDIS_HOSTNAME = local.redis-hostname
-    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-velocloud-bridge-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT

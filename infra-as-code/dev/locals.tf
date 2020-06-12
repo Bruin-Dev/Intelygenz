@@ -364,6 +364,10 @@ locals {
   running_task_count_nats-server-2_alarm-name = "Running tasks count of nats-server-2 service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_nats-server-2_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_nats-server-2"
 
+  // alarm running_task_count_service-dispatch-monitor local variables
+  running_task_count_service-dispatch-monitor_alarm-name = "Running tasks count of service-dispatch-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_service-dispatch-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-dispatch-monitor"
+
   // alarm running_task_count_service-outage-monitor (Velocloud host# 1) local variables
   running_task_count_service-outage-monitor-1_alarm-name = "Running tasks count of service-outage-monitor service # 1 in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_service-outage-monitor-1_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-monitor-1"
@@ -383,6 +387,10 @@ locals {
   // alarm running_task_count_service-outage-monitor (triage monitoring) local variables
   running_task_count_service-outage-monitor-triage_alarm-name = "Running tasks count of service-outage-monitor service for triage in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_service-outage-monitor-triage_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_service-outage-monitor-triage"
+
+  // alarm running_task_count_lumin-billing-report local variables
+  running_task_count_lumin-billing-report_alarm-name = "Running tasks count of lumin-billing-report service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_lumin-billing-report_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_lumin-billing-report"
 
   // alarm running_task_count_last-contact-report local variables
   running_task_count_last-contact-report_alarm-name = "Running tasks count of last-contact-report service in ECS cluster with name ${var.ENVIRONMENT}"

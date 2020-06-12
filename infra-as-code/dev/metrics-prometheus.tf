@@ -45,7 +45,7 @@ data "template_file" "automation-metrics-prometheus" {
     REDIS_HOSTNAME = local.redis-hostname
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
-    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-grafana-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT

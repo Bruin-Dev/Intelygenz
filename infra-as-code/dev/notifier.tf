@@ -15,7 +15,7 @@ data "template_file" "automation-notifier" {
     REDIS_HOSTNAME = local.redis-hostname
     SLACK_URL = var.SLACK_URL
     EMAIL_ACC_PWD = var.EMAIL_ACC_PWD
-    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-notifier-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT

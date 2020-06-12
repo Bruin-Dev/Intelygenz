@@ -16,7 +16,7 @@ data "template_file" "automation-service-outage-monitor-1" {
     VELOCLOUD_HOSTS = var.SERVICE_OUTAGE_MONITOR_1_HOSTS
     ENABLE_TRIAGE_MONITORING = var.SERVICE_OUTAGE_MONITOR_1_HOSTS == "" ? 1 : 0
     VELOCLOUD_HOSTS_FILTER = var.SERVICE_OUTAGE_MONITOR_1_HOSTS_FILTER
-    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-service-outage-monitor-1-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT

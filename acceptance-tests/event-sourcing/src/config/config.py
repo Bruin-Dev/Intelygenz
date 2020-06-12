@@ -24,7 +24,7 @@ NATS_CONFIG = {
 
 LOG_CONFIG = {
     'name': 'base-nats-test',
-    'level': logging.INFO,
+    'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }

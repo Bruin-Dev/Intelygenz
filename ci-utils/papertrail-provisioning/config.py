@@ -14,6 +14,7 @@ PAPERTRAIL_CLI_DONWLOAD_URL = f"https://github.com/xoanmm/go-papertrail-cli/rele
 
 if BRANCH_NAME == "master":
     SYSTEM_IPS = os.environ['AWS_PUBLIC_IPS_PRODUCTION']
+    ENVIRONMENT_NAME = "production"
 else:
     SYSTEM_IPS = os.environ['AWS_PUBLIC_IPS_DEV']
 

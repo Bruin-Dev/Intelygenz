@@ -190,6 +190,6 @@ Also, resources of type [null_resource](https://www.terraform.io/docs/providers/
 
    >This procedure has been done to ensure that use case microservices are not created in ECS until new versions of the capability-type microservices are properly deployed, as use case microservices need to use capability-type microservices.
 
-4. The provisioning of the different groups and the searches included in each one of them is done through a [python utility](../ci-utils/papertrail_provisioning), this makes calls to the util [go-papertrail-cli](https://github.com/xoanmm/go-papertrail-cli) who is in charge of the provisioning of the elements mentioned in [Papertrail](https://papertrailapp.com/).
+4. The provisioning of the different groups and the searches included in each one of them is done through a [python utility](../ci-utils/papertrail-provisioning), this makes calls to the util [go-papertrail-cli](https://github.com/xoanmm/go-papertrail-cli) who is in charge of the provisioning of the elements mentioned in [Papertrail](https://papertrailapp.com/).
 ---
 With passion from the [Intelygenz](https://www.intelygenz.com) Team @ 2020

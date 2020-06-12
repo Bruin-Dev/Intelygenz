@@ -64,10 +64,10 @@
     - mv ./aws-nuke /bin/aws-nuke
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-v${ECS_CLI_VERSION}
     - chmod +x /usr/local/bin/ecs-cli
-    - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -d
+    - python ci-utils/delete-environments-aws-resources/main.py -e $ENVIRONMENT -d
     - python ci-utils/aws-nuke/aws_nuke_conf_generator.py -e $ENVIRONMENT
     - aws-nuke -c ${AWS_NUKE_CONFIG_FILE} --profile default --force ${AWS_NUKE_OPTS}
-    - python ci-utils/delete_environments_aws_resources/main.py -e $ENVIRONMENT -z -b
+    - python ci-utils/delete-environments-aws-resources/main.py -e $ENVIRONMENT -z -b
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
     - if: $CI_COMMIT_BRANCH == "master"

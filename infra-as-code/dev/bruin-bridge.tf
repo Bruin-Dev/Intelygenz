@@ -17,7 +17,7 @@ data "template_file" "automation-bruin-bridge" {
     BRUIN_CLIENT_SECRET = var.BRUIN_CLIENT_SECRET
     BRUIN_LOGIN_URL = var.BRUIN_LOGIN_URL
     BRUIN_BASE_URL = var.BRUIN_BASE_URL
-    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-bruin-bridge-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT

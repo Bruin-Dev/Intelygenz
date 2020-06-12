@@ -33,7 +33,7 @@ VELOCLOUD_CONFIG = {
 
 LOG_CONFIG = {
     'name': 'test-name',
-    'level': logging.INFO,
+    'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
     'format': '%(asctime)s: %(module)s: %(levelname)s: %(message)s'
 }

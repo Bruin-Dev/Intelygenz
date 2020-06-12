@@ -14,7 +14,7 @@ data "template_file" "automation-dispatch-portal-backend" {
     NATS_SERVER1 = local.nats_server1
     REDIS_HOSTNAME = local.redis-hostname
     DISPATCH_PORTAL_SERVER_PORT = var.DISPATCH_PORTAL_SERVER_PORT
-    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-dispatch-portal-backend-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT

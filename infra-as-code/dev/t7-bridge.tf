@@ -15,7 +15,7 @@ data "template_file" "automation-t7-bridge" {
     REDIS_HOSTNAME = local.redis-hostname
     T7_BASE_URL = var.T7_BASE_URL
     T7_TOKEN = var.T7_TOKEN
-    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "dev" ? true : false
+    PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-t7-bridge-papertrail_prefix
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT

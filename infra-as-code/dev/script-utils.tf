@@ -1,6 +1,6 @@
 resource "null_resource" "papertrail_provisioning" {
 
-  count = var.CURRENT_ENVIRONMENT == "dev" ? 1 : 0
+  count = var.CURRENT_ENVIRONMENT == "production" ? 1 : 0
 
   depends_on = [
       aws_ecs_service.automation-bruin-bridge,
@@ -28,7 +28,7 @@ resource "null_resource" "papertrail_provisioning" {
   ]
 
   provisioner "local-exec" {
-    command = "python3 ci-utils/papertrail_provisioning/app.py"
+    command = "python3 ci-utils/papertrail-provisioning/app.py"
   }
 
   triggers = {

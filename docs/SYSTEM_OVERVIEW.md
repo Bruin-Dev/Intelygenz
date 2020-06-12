@@ -93,7 +93,7 @@ The following [diagram](https://www.draw.io/#G1hm9zTW5i2ATZGzxu6rpSlU_q58eas4Er)
 
 #### Notifier microservice
 
-This microservice is in charge of sending emails or slack notifications.
+This microservice is in charge of sending emails, Slack notifications and SMS.
 
 It is important to point out that it is not in charge of the composition of the messages to be sent, that is to say, of their content, but only of sending them.
 
@@ -135,6 +135,14 @@ This microservice also communicates with the bruin-bridge microservice to create
 In the following [diagram](https://www.draw.io/#G1TJksbMyHCN-wStHoQQw6wG95oKN2nbx6) it's possible see the relationships between this microservice and the others.
 
 ![IMAGE: service-affecting-monitor_microservice_relationships](./img/system_overview/microservices_with_communications/service-affecting-monitor_microservice_relationships.png)
+
+#### Service-dispatch-monitor microservice
+
+*TODO*: Document this section
+
+In the following [diagram](https://www.draw.io/#G1BH1c57HfqXE-jn5BVtgU3j5b8CILgC3V) it's possible see the relationships between this microservice and the others.
+
+![IMAGE: service-dispatch-monitor_microservice_relationships](./img/system_overview/microservices_with_communications/service-dispatch-monitor_microservice_relationships.png)
 
 #### Service-outage-monitor microservice
 
