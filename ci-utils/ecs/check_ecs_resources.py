@@ -15,8 +15,9 @@ ENVIRONMENT = os.environ['TF_VAR_ENVIRONMENT']
 class CheckECSResources:
     _total_ecs_tasks_allowed = int(os.environ['ECS_MAX_TASKS'])
     _ecs_services_tasks = [os.environ['TF_VAR_bruin_bridge_desired_tasks'],
+                           os.environ['TF_VAR_cts_bridge_desired_tasks'],
                            os.environ['TF_VAR_dispatch_portal_backend_desired_tasks'],
-                           os.environ['TF_VAR_service_dispatch_monitor_desired_tasks'],
+                           os.environ['TF_VAR_dispatch_portal_frontend_desired_tasks'],
                            os.environ['TF_VAR_last_contact_report_desired_tasks'],
                            os.environ['TF_VAR_lit_bridge_desired_tasks'],
                            os.environ['TF_VAR_lumin_billing_report_desired_tasks'],
@@ -26,6 +27,7 @@ class CheckECSResources:
                            os.environ['TF_VAR_nats_server_2_desired_tasks'],
                            os.environ['TF_VAR_notifier_desired_tasks'],
                            os.environ['TF_VAR_service_affecting_monitor_desired_tasks'],
+                           os.environ['TF_VAR_service_dispatch_monitor_desired_tasks'],
                            os.environ['TF_VAR_service_outage_monitor_1_desired_tasks'],
                            os.environ['TF_VAR_service_outage_monitor_2_desired_tasks'],
                            os.environ['TF_VAR_service_outage_monitor_3_desired_tasks'],

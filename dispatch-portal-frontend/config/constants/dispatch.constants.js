@@ -1,13 +1,21 @@
 import { config } from '../config';
 
 export const timeZoneOptions = [
-  'Eastern Time',
-  'Pacific Time',
-  'Mountain Time',
-  'Central Time',
-  'Hawaii Time',
-  'Alaska Time'
+  { name: 'Eastern Time', shortName: 'ET' },
+  { name: 'Pacific Time', shortName: 'PT' },
+  { name: 'Mountain Time', shortName: 'MT' },
+  { name: 'Central Time', shortName: 'CT' },
+  { name: 'Hawaii Time', shortName: 'HT' },
+  { name: 'Alaska Time', shortName: 'AT' }
 ];
+
+export const getTimeZoneShortName = timeZone => {
+  const shortName = timeZoneOptions.filter(
+    timeZoneOption => timeZoneOption.name === timeZone
+  );
+
+  return shortName.length ? shortName[0].shortName : '';
+};
 
 export const departmentOptions = [
   'Customer Care',

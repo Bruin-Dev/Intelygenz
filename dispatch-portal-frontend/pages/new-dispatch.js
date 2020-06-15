@@ -180,8 +180,8 @@ function NewDispatch({ authToken }) {
                         }
                       >
                         {timeZoneOptions.map((zone, index) => (
-                          <option key={`timeZone-${index}`} value={zone}>
-                            {zone}
+                          <option key={`timeZone-${index}`} value={zone.name}>
+                            {zone.name}
                           </option>
                         ))}
                       </select>

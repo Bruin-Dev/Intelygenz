@@ -54,12 +54,10 @@ dispatch-portal-frontend-test-e2e:
     - npm run build --prefix dispatch-portal-frontend
   script:
     - npm run ci:test --prefix dispatch-portal-frontend
-  only:
-    - master
-    - /^*feature/.*$/
-    - /^*fix/.*$/
-    - /^*dev/feature/.*$/
-    - /^*dev/fix/.*$/
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   tags:
     - kubernetes
 

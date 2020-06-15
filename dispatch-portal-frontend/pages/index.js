@@ -6,6 +6,7 @@ import { DispatchService } from '../services/dispatch/dispatch.service';
 import { privateRoute } from '../components/privateRoute/PrivateRoute';
 import Menu from '../components/menu/Menu';
 import { StatusButton } from '../ui/components/status/StatusButton';
+import { getTimeZoneShortName } from '../config/constants/dispatch.constants';
 import { Routes } from '../config/routes';
 import { config } from '../config/config';
 import './index.scss';
@@ -60,7 +61,9 @@ const columns = [
     selector: 'dateDispatch',
     sortable: true,
     cell: row => (
-      <span>{`${row.dateDispatch} ${row.timeDispatch} ${row.timeZone}`}</span>
+      <span>{`${row.dateDispatch} ${row.timeDispatch} ${getTimeZoneShortName(
+        row.timeZone
+      )}`}</span>
     )
   },
   {
@@ -80,6 +83,7 @@ function Index({ authToken }) {
   useEffect(() => {
     async function getAllDispatches() {
       const response = await new DispatchService().getAll();
+
       if (response && response.data) {
         setData(response.data);
       }

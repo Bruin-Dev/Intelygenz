@@ -35,6 +35,7 @@ variables:
   service_outage_monitor_4_desired_tasks: 1
   service_outage_monitor_triage_desired_tasks: 1
   sites_monitor_desired_tasks: 1
+  tnba_monitor_desired_tasks: 1
   t7_bridge_desired_tasks: 1
   velocloud_bridge_desired_tasks: 5
 
@@ -52,7 +53,6 @@ include:
   - local: 'cts-bridge/.gitlab-ci.yml'
   - local: 'ci-utils/.gitlab-ci.yml'
   - local: 'dispatch-portal-backend/.gitlab-ci.yml'
-  - local: 'service-dispatch-monitor/.gitlab-ci.yml'
   - local: 'dispatch-portal-frontend/.gitlab-ci.yml'
   - local: 'infra-as-code/.gitlab-ci.yml'
   - local: 'last-contact-report/.gitlab-ci.yml'
@@ -62,8 +62,9 @@ include:
   - local: 'nats-server/.gitlab-ci.yml'
   - local: 'notifier/.gitlab-ci.yml'
   - local: 'service-affecting-monitor/.gitlab-ci.yml'
+  - local: 'service-dispatch-monitor/.gitlab-ci.yml'
   - local: 'service-outage-monitor/.gitlab-ci.yml'
-  - local: 't7-bridge/.gitlab-ci.yml'
-  - local: 'velocloud-bridge/.gitlab-ci.yml'
   - local: 'sites-monitor/.gitlab-ci.yml'
   - local: 'tnba-monitor/.gitlab-ci.yml'
+  - local: 't7-bridge/.gitlab-ci.yml'
+  - local: 'velocloud-bridge/.gitlab-ci.yml'
