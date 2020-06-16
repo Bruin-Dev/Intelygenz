@@ -19,7 +19,7 @@ resource "aws_cloudformation_stack" "sns_topic_alarms" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_sites-monitor_alarm" {
-  count = var.sites_monitor_desired_tasks != 0 ? 1 : 0
+  count = var.sites_monitor_desired_tasks > 0 ? 1 : 0
   alarm_name                = local.running_task_count_sites-monitor_alarm-name
   comparison_operator       = "LessThanOrEqualToThreshold"
   evaluation_periods        = local.running_task_count_service-alarm-evaluation_periods
@@ -42,7 +42,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_sites-monitor_alarm" 
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_tnba-monitor_alarm" {
-  count = var.tnba_monitor_desired_tasks != 0 ? 1 : 0
+  count = var.tnba_monitor_desired_tasks > 0 ? 1 : 0
   alarm_name                = local.running_task_count_tnba-monitor_alarm-name
   comparison_operator       = "LessThanOrEqualToThreshold"
   evaluation_periods        = local.running_task_count_service-alarm-evaluation_periods
@@ -66,7 +66,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_tnba-monitor_alarm" {
 
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_bruin-bridge_alarm" {
-  count = var.bruin_bridge_desired_tasks != 0 ? 1 : 0
+  count = var.bruin_bridge_desired_tasks > 0 ? 1 : 0
   alarm_name                = local.running_task_count_bruin-bridge_alarm-name
   comparison_operator       = "LessThanOrEqualToThreshold"
   evaluation_periods        = local.running_task_count_service-alarm-evaluation_periods
@@ -89,7 +89,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_bruin-bridge_alarm" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-affecting-monitor_alarm" {
-  count = var.service_affecting_monitor_desired_tasks != 0 ? 1 : 0
+  count = var.service_affecting_monitor_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_service-affecting-monitor_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -113,7 +113,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-affecting-mon
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_t7-bridge_alarm" {
-  count = var.t7_bridge_desired_tasks != 0 ? 1 : 0
+  count = var.t7_bridge_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_t7-bridge_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -137,7 +137,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_t7-bridge_alarm" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_notifier_alarm" {
-  count = var.notifier_desired_tasks != 0 ? 1 : 0
+  count = var.notifier_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_notifier_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -161,7 +161,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_notifier_alarm" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_metrics-prometheus_alarm" {
-  count = var.metrics_prometheus_desired_tasks != 0 ? 1 : 0
+  count = var.metrics_prometheus_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_metrics-prometheus_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -185,7 +185,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_metrics-prometheus_al
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server_alarm" {
-  count = var.nats_server_desired_tasks != 0 ? 1 : 0
+  count = var.nats_server_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_nats-server_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -209,7 +209,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server_alarm" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server-1_alarm" {
-  count = var.nats_server_1_desired_tasks != 0 ? 1 : 0
+  count = var.nats_server_1_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_nats-server-1_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -233,7 +233,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server-1_alarm" 
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server-2_alarm" {
-  count = var.nats_server_2_desired_tasks != 0 ? 1 : 0
+  count = var.nats_server_2_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_nats-server-2_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -257,7 +257,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_nats-server-2_alarm" 
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-dispatch_monitor_alarm" {
-  count = var.service_dispatch_monitor_desired_tasks != 0 ? 1 : 0
+  count = var.service_dispatch_monitor_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_service-dispatch-monitor_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -281,7 +281,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-dispatch_moni
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-1_alarm" {
-  count = var.service_outage_monitor_1_desired_tasks != 0 ? 1 : 0
+  count = var.service_outage_monitor_1_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_service-outage-monitor-1_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -305,7 +305,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-2_alarm" {
-  count = var.service_outage_monitor_2_desired_tasks != 0 ? 1 : 0
+  count = var.service_outage_monitor_2_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_service-outage-monitor-2_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -329,7 +329,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-3_alarm" {
-  count = var.service_outage_monitor_3_desired_tasks != 0 ? 1 : 0
+  count = var.service_outage_monitor_3_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_service-outage-monitor-3_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -353,7 +353,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-4_alarm" {
-  count = var.service_outage_monitor_4_desired_tasks != 0 ? 1 : 0
+  count = var.service_outage_monitor_4_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_service-outage-monitor-4_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -377,7 +377,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monitor-triage_alarm" {
-  count = var.service_outage_monitor_triage_desired_tasks != 0 ? 1 : 0
+  count = var.service_outage_monitor_triage_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_service-outage-monitor-triage_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -401,7 +401,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_service-outage-monito
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_last-contact-report_alarm" {
-  count = var.last_contact_report_desired_tasks != 0 ? 1 : 0
+  count = var.last_contact_report_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_last-contact-report_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -425,7 +425,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_last-contact-report_a
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_lumin-billing-report_alarm" {
-  count = var.lumin_billing_report_desired_tasks != 0 ? 1 : 0
+  count = var.lumin_billing_report_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_lumin-billing-report_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
@@ -449,7 +449,7 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_lumin-billing-report_
 }
 
 resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-bridge_alarm" {
-  count = var.velocloud_bridge_desired_tasks != 0 ? 1 : 0
+  count = var.velocloud_bridge_desired_tasks > 0 ? 1 : 0
   alarm_name = local.running_task_count_velocloud-bridge_alarm-name
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
