@@ -82,6 +82,10 @@ resource "aws_ecr_repository" "automation-cts-bridge" {
   name = "automation-cts-bridge"
 }
 
+resource "aws_ecr_repository" "automation-customer-cache" {
+  name = "automation-customer-cache"
+}
+
 resource "aws_ecr_repository" "automation-lumin-billing-report" {
   name = "automation-lumin-billing-report"
 }

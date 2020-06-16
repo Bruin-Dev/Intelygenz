@@ -49,11 +49,6 @@ variable "BUILD_NUMBER" {
   default = "latest"
 }
 
-variable "VELOCLOUD_BRIDGE_BUILD_NUMBER" {
-  description = "Docker build number of image for velocloud-bridge microservice"
-  default = "automation-master-latest"
-}
-
 variable "NATS_MODULE_VERSION" {
   default = "latest"
 }
@@ -370,6 +365,12 @@ variable "dispatch_portal_frontend_desired_tasks" {
   description = "Number of desired tasks of microservice dispatch-portal-frontend"
 }
 
+variable "customer_cache_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice customer-cache"
+}
+
 variable "dispatch_portal_backend_desired_tasks" {
   default = 1
   type = number
@@ -508,6 +509,12 @@ variable "cts-bridge-task-definition-json" {
   type = string
   description = "Task definition arn output in rendered json for CTS-bridge"
   default = "/tmp/cts-bridge-task-definition.json"
+}
+
+variable "customer-cache-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for customer-cache"
+  default = "/tmp/customer-cache-task-definition.json"
 }
 
 variable "dispatch-portal-backend-task-definition-json" {

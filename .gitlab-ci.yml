@@ -17,6 +17,7 @@ variables:
   DOCKER_IMAGE_UTILS_VERSION: 1.1.2
   bruin_bridge_desired_tasks: 2
   cts_bridge_desired_tasks: 1
+  customer_cache_desired_tasks: 1
   dispatch_portal_backend_desired_tasks: 1
   dispatch_portal_frontend_desired_tasks: 1
   last_contact_report_desired_tasks: 1
@@ -51,6 +52,7 @@ include:
   # Gitlab-CI jobs declaration for each microservice/module
   - local: 'bruin-bridge/.gitlab-ci.yml'
   - local: 'cts-bridge/.gitlab-ci.yml'
+  - local: 'customer-cache/.gitlab-ci.yml'
   - local: 'ci-utils/.gitlab-ci.yml'
   - local: 'dispatch-portal-backend/.gitlab-ci.yml'
   - local: 'dispatch-portal-frontend/.gitlab-ci.yml'

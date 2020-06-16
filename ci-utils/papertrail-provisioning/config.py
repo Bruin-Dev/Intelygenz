@@ -33,6 +33,10 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[bruin-bridge] - logs"
                 },
                 {
+                    "query": f"customer-cache AND {ENVIRONMENT_ID} AND {BUILD_NUMBER}",
+                    "search_name": f"[customer-cache] - logs"
+                },
+                {
                     "query": f"cts-bridge AND {ENVIRONMENT_ID} AND {BUILD_NUMBER}",
                     "search_name": f"[cts-bridge] - logs"
                 },

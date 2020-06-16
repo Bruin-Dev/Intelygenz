@@ -38,6 +38,16 @@ locals {
   automation-cts-bridge-task_definition = "${aws_ecs_task_definition.automation-cts-bridge.family}:${aws_ecs_task_definition.automation-cts-bridge.revision}"
   automation-cts-bridge-service_discovery_service-name = "cts-bridge-${var.ENVIRONMENT}"
 
+  // customer-cache local vars
+  automation-customer-cache-image = "${data.aws_ecr_repository.automation-customer-cache.repository_url}:${data.external.customer-cache-build_number.result["image_tag"]}"
+  automation-customer-cache-papertrail_prefix = "customer-cache-${element(split("-", data.external.customer-cache-build_number.result["image_tag"]),2)}"
+  automation-customer-cache-ecs_task_definition-family = "${var.ENVIRONMENT}-customer-cache"
+  automation-customer-cache_service-security_group-name = "${var.ENVIRONMENT}-customer-cache"
+  automation-customer-cache-resource-name = "${var.ENVIRONMENT}-customer-cache"
+  automation-customer-cache-service-security_group-tag-Name = "${var.ENVIRONMENT}-customer-cache"
+  automation-customer-cache-task_definition = "${aws_ecs_task_definition.automation-customer-cache.family}:${aws_ecs_task_definition.automation-customer-cache.revision}"
+  automation-customer-cache-service_discovery_service-name = "customer-cache-${var.ENVIRONMENT}"
+
   // automation-dispatch-portal-backend local vars
   automation-dispatch-portal-backend-ecs_task_definition-family = "${var.ENVIRONMENT}-dispatch-portal-backend"
   automation-dispatch-portal-backend-image = "${data.aws_ecr_repository.automation-dispatch-portal-backend.repository_url}:${data.external.dispatch-portal-backend-build_number.result["image_tag"]}"
@@ -412,6 +422,10 @@ locals {
   // alarm running_task_count_cts-bridge local variables
   running_task_count_cts-bridge_alarm-name = "Running tasks count of cts-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_cts-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_cts-bridge"
+
+  // alarm running_task_count_customer-cache local variables
+  running_task_count_customer-cache_alarm-name = "Running tasks count of customer-cache service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_customer-cache_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_customer-cache"
 
   // cloudformation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms-${var.ENVIRONMENT}"
