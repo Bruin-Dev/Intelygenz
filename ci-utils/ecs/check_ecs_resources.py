@@ -15,6 +15,7 @@ ENVIRONMENT = os.environ['TF_VAR_ENVIRONMENT']
 class CheckECSResources:
     _total_ecs_tasks_allowed = int(os.environ['ECS_MAX_TASKS'])
     _ecs_services_tasks = [os.environ['TF_VAR_bruin_bridge_desired_tasks'],
+                           os.environ['TF_VAR_bruin_test_desired_tasks'],
                            os.environ['TF_VAR_cts_bridge_desired_tasks'],
                            os.environ['TF_VAR_dispatch_portal_backend_desired_tasks'],
                            os.environ['TF_VAR_dispatch_portal_frontend_desired_tasks'],

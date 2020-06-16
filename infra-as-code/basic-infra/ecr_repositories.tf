@@ -34,6 +34,10 @@ resource "aws_ecr_repository" "automation-bruin-bridge" {
   name = "automation-bruin-bridge"
 }
 
+resource "aws_ecr_repository" "automation-bruin-test" {
+  name = "automation-bruin-test"
+}
+
 resource "aws_ecr_repository" "automation-lit-bridge" {
   name = "automation-lit-bridge"
 }

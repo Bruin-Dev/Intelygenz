@@ -54,6 +54,11 @@ variable "BRUIN_BRIDGE_BUILD_NUMBER" {
   default = "automation-master-latest"
 }
 
+variable "BRUIN_TEST_BUILD_NUMBER" {
+  description = "Docker build number of image for microservice bruin-test"
+  default = "automation-master-latest"
+}
+
 variable "CTS_BRIDGE_BUILD_NUMBER" {
   description = "Docker build number of image for microservice cts-bridge"
   default = "automation-master-latest"
@@ -204,6 +209,24 @@ variable "BRUIN_LOGIN_URL" {
 }
 
 variable "BRUIN_BASE_URL" {
+  default = ""
+}
+
+// bruin-test environment variables
+
+variable "BRUIN_CLIENT_ID_TEST" {
+  default = ""
+}
+
+variable "BRUIN_CLIENT_SECRET_TEST" {
+  default = ""
+}
+
+variable "BRUIN_LOGIN_URL_TEST" {
+  default = ""
+}
+
+variable "BRUIN_BASE_URL_TEST" {
   default = ""
 }
 
@@ -435,6 +458,12 @@ variable "bruin_bridge_desired_tasks" {
   default = 2
   type = number
   description = "Number of desired tasks of microservice bruin-bridge"
+}
+
+variable "bruin_test_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice bruin-test"
 }
 
 variable "cts_bridge_desired_tasks" {

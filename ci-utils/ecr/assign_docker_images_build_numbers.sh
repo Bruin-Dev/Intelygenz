@@ -2,6 +2,8 @@
     
 export TF_VAR_BRUIN_BRIDGE_BUILD_NUMBER=$(cat /tmp/automation-bruin-bridge.json| jq -r .tag)
 echo "TF_VAR_BRUIN_BRIDGE_BUILD_NUMBER is ${TF_VAR_BRUIN_BRIDGE_BUILD_NUMBER}"
+export TF_VAR_BRUIN_TEST_BUILD_NUMBER=$(cat /tmp/automation-bruin-test.json| jq -r .tag)
+echo "TF_VAR_BRUIN_TEST_BUILD_NUMBER is ${TF_VAR_BRUIN_TEST_BUILD_NUMBER}"
 export TF_VAR_CTS_BRIDGE_BUILD_NUMBER=$(cat /tmp/automation-cts-bridge.json| jq -r .tag)
 echo "TF_VAR_CTS_BRIDGE_BUILD_NUMBER is ${TF_VAR_CTS_BRIDGE_BUILD_NUMBER}"
 export TF_VAR_LIT_BRIDGE_BUILD_NUMBER=$(cat /tmp/automation-lit-bridge.json| jq -r .tag)

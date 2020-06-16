@@ -1,0 +1,17 @@
+# ==============================================
+# Linter validation jobs for bruin-test module
+# ==============================================
+bruin-test-linter:
+  variables:
+    MODULE: bruin-test
+  extends: .lint_module
+
+# ==========================================
+# Images builds jobs for bruin-test module
+# ==========================================
+bruin-test-build:
+  stage: build
+  variables:
+    MODULE_NAME: bruin-test
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  extends: .build_app_image

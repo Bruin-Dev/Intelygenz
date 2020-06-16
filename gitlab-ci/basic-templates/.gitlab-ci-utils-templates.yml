@@ -14,6 +14,7 @@
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
+    - export TF_VAR_bruin_test_desired_tasks=${bruin_test_desired_tasks}
     - export TF_VAR_cts_bridge_desired_tasks=${cts_bridge_desired_tasks}
     - export TF_VAR_dispatch_portal_backend_desired_tasks=${dispatch_portal_backend_desired_tasks}
     - export TF_VAR_dispatch_portal_frontend_desired_tasks=${dispatch_portal_frontend_desired_tasks}
