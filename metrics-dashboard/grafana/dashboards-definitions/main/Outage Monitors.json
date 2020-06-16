@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 4,
-  "iteration": 1591992621416,
+  "iteration": 1592333563222,
   "links": [],
   "panels": [
     {
@@ -519,7 +519,7 @@
       "thresholds": "",
       "timeFrom": null,
       "timeShift": null,
-      "title": " Errors append first triage in the last 4 hours",
+      "title": " Errors trying to append the first triage in the last 4 hours",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -775,5 +775,5 @@
   "timezone": "",
   "title": "Outage Monitor (all instances)",
   "uid": "u3tpYYmGz",
-  "version": 633
+  "version": 3491
 }

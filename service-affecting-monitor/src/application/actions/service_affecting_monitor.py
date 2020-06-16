@@ -184,13 +184,11 @@ class ServiceAffectingMonitor:
 
     async def _notify_trouble(self, device, edge_status, link, input, output, trouble, threshold):
         self._logger.info(f'Service affecting trouble {trouble} detected in edge with data {edge_status}')
-
-        client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]
-        ticket_exists = await self._ticket_existence(client_id, edge_status['edge_info']['edges']['serialNumber'],
-                                                     trouble)
-
-        if ticket_exists is False:
-            if self._config.MONITOR_CONFIG['environment'] == 'production':
+        if self._config.MONITOR_CONFIG['environment'] == 'production':
+            client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]
+            ticket_exists = await self._ticket_existence(client_id, edge_status['edge_info']['edges']['serialNumber'],
+                                                         trouble)
+            if ticket_exists is False:
                 # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact change here
                 ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
                 ticket_note = self._ticket_object_to_string(ticket_dict)
@@ -222,8 +220,19 @@ class ServiceAffectingMonitor:
                 }
                 ticket_id = await self._event_bus.rpc_request("bruin.ticket.creation.request",
                                                               ticket_details, timeout=30)
-                if ticket_id["status"] in range(200, 300):
-                    self._metrics_repository.increment_tickets_created()
+                if ticket_id["status"] not in range(200, 300):
+                    err_msg = (f'Outage ticket creation failed for edge {edge_status["edge_id"]}. Reason: '
+                               f'Error {ticket_id["status"]} - {ticket_id["body"]}')
+
+                    self._logger.error(err_msg)
+                    slack_message = {
+                        'request_id': uuid(),
+                        'message': err_msg
+                    }
+                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                    return
+
+                self._metrics_repository.increment_tickets_created()
 
                 ticket_append_note_msg = {'request_id': uuid(),
                                           'body': {

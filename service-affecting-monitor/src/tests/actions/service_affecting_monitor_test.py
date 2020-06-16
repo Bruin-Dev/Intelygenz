@@ -2038,14 +2038,17 @@ class TestServiceAffectingMonitor:
         }
 
         config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config["environment"] = 'production'
 
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository)
         service_affecting_monitor._ticket_existence = CoroutineMock(return_value=True)
         service_affecting_monitor._ticket_object_to_string = Mock()
 
-        await service_affecting_monitor._notify_trouble(device, edge_status, 'Some Link Info', 'Input results',
-                                                        'Output results', 'LATENCY', 120)
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._notify_trouble(device, edge_status, 'Some Link Info', 'Input results',
+                                                            'Output results', 'LATENCY', 120)
 
         service_affecting_monitor._ticket_object_to_string.assert_not_called()
 
@@ -2115,14 +2118,16 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._ticket_object_to_string.assert_not_called()
 
     @pytest.mark.asyncio
-    async def notify_trouble_with_no_existing_ticket_and_production_environment_test(self):
+    async def notify_trouble_with_no_existing_ticket_and_production_environment_failed_rpc_test(self):
         logger = Mock()
         scheduler = Mock()
         template_renderer = Mock()
         metrics_repository = Mock()
+        metrics_repository.increment_tickets_created = Mock()
 
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[{'ticketIds': {'ticketIds': [123]}}, 'Note Posted',
+        event_bus.rpc_request = CoroutineMock(side_effect=[{'body': 'Failed', 'status': 400},
+                                                           'Note Posted',
                                                            'Slack Sent'])
 
         device = {
@@ -2176,14 +2181,24 @@ class TestServiceAffectingMonitor:
                 ]
             }
         }
+        err_msg = ("Outage ticket creation failed for edge {'host': 'mettel.velocloud.net', 'enterprise_id': 137, "
+                   "'edge_id': 1602}. Reason: "
+                   "Error 400 - Failed")
+        uuid_ = uuid()
+
+        slack_message = {
+            'request_id': uuid_,
+            'message': err_msg
+        }
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
                                                             metrics_repository)
         service_affecting_monitor._ticket_existence = CoroutineMock(return_value=False)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
 
-        await service_affecting_monitor._notify_trouble(device, edges_to_report, 'Some Link Info', 'Input results',
-                                                        'Output results', trouble, 120)
+        with patch.object(service_affecting_monitor_module, 'uuid', return_value=uuid_):
+            await service_affecting_monitor._notify_trouble(device, edges_to_report, 'Some Link Info', 'Input results',
+                                                            'Output results', trouble, 120)
 
         service_affecting_monitor._ticket_existence.assert_awaited_once_with(client_id,
                                                                              edges_to_report['edge_info']['edges'][
@@ -2191,18 +2206,25 @@ class TestServiceAffectingMonitor:
 
         service_affecting_monitor._compose_ticket_dict.assert_called_once()
         service_affecting_monitor._ticket_object_to_string.assert_called_once()
-        event_bus.rpc_request.assert_not_called()
+        event_bus.rpc_request.assert_awaited_with(
+                                                   "notification.slack.request",
+                                                   slack_message,
+                                                   timeout=10
+                                                 )
+        metrics_repository.increment_tickets_created.assert_not_called()
 
     @pytest.mark.asyncio
-    async def _notify_trouble_pro_ticket_not_exists_test(self):
+    async def notify_trouble_pro_ticket_not_exists_success_rpc_test(self):
         event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=[{'body': {'ticketIds': [123]}}, 'Note Posted',
+        event_bus.rpc_request = CoroutineMock(side_effect=[{'body': {'ticketIds': [123]}, 'status': 200},
+                                                           'Note Posted',
                                                            'Slack Sent'])
         logger = Mock()
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
+        metrics_repository.increment_tickets_created = Mock()
 
         config.MONITOR_CONFIG['environment'] = 'production'
         device = {
@@ -2269,6 +2291,7 @@ class TestServiceAffectingMonitor:
         service_affecting_monitor._compose_ticket_dict.assert_called_once()
         service_affecting_monitor._ticket_object_to_string.assert_called_with('Some ordered dict object')
 
+        metrics_repository.increment_tickets_created.assert_called_once()
         assert event_bus.rpc_request.called
         assert 'Some string object' == event_bus.rpc_request.mock_calls[1][1][1]['body']['note']
 
@@ -2302,7 +2325,6 @@ class TestServiceAffectingMonitor:
         await service_affecting_monitor._notify_trouble(device, 'Some Edge Status', 'Some Link Info', 'Input results',
                                                         'Output results', 'LATENCY', 120)
 
-        service_affecting_monitor._compose_ticket_dict.assert_called_once()
         service_affecting_monitor._template_renderer.compose_email_object.assert_not_called()
         event_bus.rpc_request.assert_not_awaited()
 
