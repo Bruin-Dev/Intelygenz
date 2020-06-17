@@ -18,6 +18,10 @@ describe('DISPATCH DETAIL PAGE tests', () => {
 
   it('renders correctly with not found dispatch data', async () => {
     render(component);
-    expect(await screen.findByText('Not found dispatch')).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        'There are problems obtaining the requested information.'
+      )
+    ).toBeInTheDocument();
   });
 });

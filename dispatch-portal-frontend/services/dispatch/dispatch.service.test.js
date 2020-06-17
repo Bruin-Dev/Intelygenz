@@ -2,12 +2,14 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { DispatchService } from './dispatch.service';
 import { API_URLS } from '../api.config';
-import { dispatchList } from '../mocks/list-dispatch.mock';
-import {
-  formDataNewDispatch,
-  mocksInAdapterLitSingleDispatchResult
-} from '../mocks/new-dispatch.mock';
-import { mockLitSingleDispatch } from '../mocks/single-dispatch.mock';
+import { dispatchLitList } from '../mocks/data/lit/list-dispatch.mock';
+import { formDataNewDispatch } from '../mocks/data/new-dispatch.mock';
+import { mockLitSingleDispatch } from '../mocks/data/lit/single-dispatch.mock';
+import { mocksInAdapterLitSingleDispatchResult } from '../mocks/data/lit/result-adapter-in-dispatch.mock';
+import { dispatchCtsList } from '../mocks/data/cts/list-dispatch.mock';
+import { config } from '../../config/config';
+import { mockCtsSingleDispatch } from '../mocks/data/cts/single-dispatch.mock';
+import { mocksInAdapterCtsSingleDispatchResult } from '../mocks/data/cts/result-adapter-in-dispatch.mock';
 
 describe('dispatch service tests', () => {
   const axiosIMocksTest = axios.create();
@@ -21,107 +23,264 @@ describe('dispatch service tests', () => {
     mockadapter.reset();
   });
 
-  it('fetches getAll successfully data from an API', async () => {
-    mockadapter.onGet(API_URLS.DISPATCH).reply(200, {
+  /** ***
+   *
+   * GET ALL
+   * * */
+  it('fetch getAll: successfully data from an API(CTS &  LIT OK)', async () => {
+    mockadapter.onGet(API_URLS.DISPATCH_LIT).reply(200, {
       vendor: 'lit',
-      list_dispatch: [dispatchList.data[0]]
+      list_dispatch: [dispatchLitList.data[0]]
+    });
+    mockadapter.onGet(API_URLS.DISPATCH_CTS).reply(200, {
+      vendor: 'cts',
+      list_dispatch: [dispatchCtsList.data[0]]
     });
     const expectedResult = [
       {
-        dateDispatch: '2015-01-01',
-        details: {
-          fieldEngineer: '',
-          fieldEngineerContactNumber: '',
-          information: 'ScopeOfWork',
-          instructions: '1',
-          materials: '1',
-          serviceType: '',
-          specialMaterials: ''
-        },
-        hardTimeDispatch: '',
-        hardTimeZone: '',
         id: 'DIS17918',
-        mettelId: '0',
-        onSiteContact: {
-          city: 'Citizville',
-          name: 'Rajat 11111',
-          phoneNumber: '',
-          site: 'Primary Citiscape',
-          state: 'NY',
-          street: '124 Spring street',
-          zip: '12345'
-        },
-        requester: {
-          department: '1',
-          departmentPhoneNumber: '',
-          email: 'pkamath@mettel.net',
-          groupEmail: '',
-          name: 'pkamath',
-          phoneNumber: ''
-        },
+        vendor: 'lit',
         slaLevel: '',
         status: 'New Dispatch',
-        timeDispatch: '',
-        timeZone: '2',
+        dateDispatch: '2020-01-31',
+        mettelId: 'BRUINID5478525',
+        timeDispatch: '7AM-9AM',
+        timeZone: 'Pacific Time',
         turnUp: '',
-        vendor: 'lit'
+        hardTimeDispatch: '',
+        hardTimeZone: '',
+        requester: {
+          name: 'Test User1',
+          groupEmail: '',
+          email: 'requester@mettel.net',
+          department: 'T1 Repair',
+          phoneNumber: '',
+          departmentPhoneNumber: ''
+        },
+        onSiteContact: {
+          site: 'test site',
+          street: 'test job site street',
+          city: 'test job site city',
+          state: 'ALABAMA',
+          zip: '10041',
+          phoneNumber: '+34 7894864658',
+          name: 'update Job'
+        },
+        details: {
+          serviceType: '',
+          instructions: 'update callin instruction',
+          materials: 'test',
+          information: 'test new scope of work',
+          specialMaterials: '',
+          fieldEngineer: '',
+          fieldEngineerContactNumber: ''
+        }
+      },
+      {
+        id: 'DIS17918_1',
+        vendor: 'cts',
+        slaLevel: '',
+        status: 'New Dispatch',
+        dateDispatch: '2020-01-31',
+        mettelId: 'BRUINID5478525',
+        timeDispatch: '7AM-9AM',
+        timeZone: 'Pacific Time',
+        turnUp: '',
+        hardTimeDispatch: '',
+        hardTimeZone: '',
+        requester: {
+          name: 'Test User1',
+          groupEmail: '',
+          email: 'requester@mettel.net',
+          department: 'T1 Repair',
+          phoneNumber: '',
+          departmentPhoneNumber: ''
+        },
+        onSiteContact: {
+          site: 'test site',
+          street: 'test job site street',
+          city: 'test job site city',
+          state: 'ALABAMA',
+          zip: '10041',
+          phoneNumber: '+34 7894864658',
+          name: 'update Job'
+        },
+        details: {
+          serviceType: '',
+          instructions: 'update callin instruction',
+          materials: 'test',
+          information: 'test new scope of work',
+          specialMaterials: '',
+          fieldEngineer: '',
+          fieldEngineerContactNumber: ''
+        }
       }
     ];
 
     const res = await new DispatchService(axiosIMocksTest).getAll();
+
     expect(res).toMatchObject({ data: expectedResult });
   });
 
-  it('fetches getAll error 503 from an API', async () => {
-    mockadapter.onGet(API_URLS.DISPATCH).reply(503);
+  it('fetch getAll: one of the calls fails(CTS)', async () => {
+    mockadapter.onGet(API_URLS.DISPATCH_LIT).reply(404);
+    mockadapter.onGet(API_URLS.DISPATCH_CTS).reply(200, {
+      vendor: 'cts',
+      list_dispatch: [dispatchCtsList.data[0]]
+    });
+    const expectedResult = [
+      {
+        id: 'DIS17918_1',
+        vendor: 'cts',
+        slaLevel: '',
+        status: 'New Dispatch',
+        dateDispatch: '2020-01-31',
+        mettelId: 'BRUINID5478525',
+        timeDispatch: '7AM-9AM',
+        timeZone: 'Pacific Time',
+        turnUp: '',
+        hardTimeDispatch: '',
+        hardTimeZone: '',
+        requester: {
+          name: 'Test User1',
+          groupEmail: '',
+          email: 'requester@mettel.net',
+          department: 'T1 Repair',
+          phoneNumber: '',
+          departmentPhoneNumber: ''
+        },
+        onSiteContact: {
+          site: 'test site',
+          street: 'test job site street',
+          city: 'test job site city',
+          state: 'ALABAMA',
+          zip: '10041',
+          phoneNumber: '+34 7894864658',
+          name: 'update Job'
+        },
+        details: {
+          serviceType: '',
+          instructions: 'update callin instruction',
+          materials: 'test',
+          information: 'test new scope of work',
+          specialMaterials: '',
+          fieldEngineer: '',
+          fieldEngineerContactNumber: ''
+        }
+      }
+    ];
 
     const res = await new DispatchService(axiosIMocksTest).getAll();
 
     expect(res).toMatchObject({
-      error: 'Request failed with status code 503'
+      data: expectedResult,
+      error: 'Request failed with status code 404'
     });
   });
+  it('fetch getAll: one of the calls fails(LIT)', async () => {
+    mockadapter.onGet(API_URLS.DISPATCH_CTS).reply(404);
+    mockadapter.onGet(API_URLS.DISPATCH_LIT).reply(200, {
+      vendor: 'lit',
+      list_dispatch: [dispatchLitList.data[0]]
+    });
+    const expectedResult = [
+      {
+        id: 'DIS17918',
+        vendor: 'lit',
+        slaLevel: '',
+        status: 'New Dispatch',
+        dateDispatch: '2020-01-31',
+        mettelId: 'BRUINID5478525',
+        timeDispatch: '7AM-9AM',
+        timeZone: 'Pacific Time',
+        turnUp: '',
+        hardTimeDispatch: '',
+        hardTimeZone: '',
+        requester: {
+          name: 'Test User1',
+          groupEmail: '',
+          email: 'requester@mettel.net',
+          department: 'T1 Repair',
+          phoneNumber: '',
+          departmentPhoneNumber: ''
+        },
+        onSiteContact: {
+          site: 'test site',
+          street: 'test job site street',
+          city: 'test job site city',
+          state: 'ALABAMA',
+          zip: '10041',
+          phoneNumber: '+34 7894864658',
+          name: 'update Job'
+        },
+        details: {
+          serviceType: '',
+          instructions: 'update callin instruction',
+          materials: 'test',
+          information: 'test new scope of work',
+          specialMaterials: '',
+          fieldEngineer: '',
+          fieldEngineerContactNumber: ''
+        }
+      }
+    ];
 
-  it('fetches newDispacth successfully data from an API', async () => {
-    const apiResponseMock = { id: 123 };
-    mockadapter.onPost(API_URLS.DISPATCH).reply(204, apiResponseMock);
-
-    const res = await new DispatchService(axiosIMocksTest).newDispatch(
-      formDataNewDispatch
-    ); // Todo: review data
-
-    expect(res).toMatchObject({ data: apiResponseMock });
-  });
-
-  it('fetches newDispacth error 400 from an API', async () => {
-    mockadapter.onPost(API_URLS.DISPATCH).reply(400);
-
-    const res = await new DispatchService(axiosIMocksTest).newDispatch(
-      formDataNewDispatch
-    ); // Todo: review data;
+    const res = await new DispatchService(axiosIMocksTest).getAll();
 
     expect(res).toMatchObject({
-      error: 'Request failed with status code 400'
+      data: expectedResult,
+      error: 'Request failed with status code 404'
     });
   });
 
-  it('fetches get successfully data from an API', async () => {
+  it('fetch getAll: error 503 from both API', async () => {
+    mockadapter.onGet(API_URLS.DISPATCH_LIT).reply(503);
+    mockadapter.onGet(API_URLS.DISPATCH_CTS).reply(503);
+
+    const res = await new DispatchService(axiosIMocksTest).getAll();
+
+    expect(res).toMatchObject({
+      error:
+        'Request failed with status code 503 && Request failed with status code 503'
+    });
+  });
+
+  /** ***
+   *
+   * GET SINGLE DISPATCH
+   * * */
+  it('fetch get: successfully data from an API(LIT)', async () => {
     mockadapter
-      .onGet(new RegExp(`${API_URLS.DISPATCH}/*`))
+      .onGet(new RegExp(`${API_URLS.DISPATCH_LIT}/*`))
       .reply(200, mockLitSingleDispatch);
 
     const res = await new DispatchService(axiosIMocksTest).get(
-      mockLitSingleDispatch.id
+      mockLitSingleDispatch.id,
+      config.VENDORS.LIT
     );
 
     expect(res).toMatchObject(mocksInAdapterLitSingleDispatchResult);
   });
 
-  it('fetches get error 400 from an API', async () => {
-    mockadapter.onGet(new RegExp(`${API_URLS.DISPATCH}/*`)).reply(400);
+  it('fetch get: successfully data from an API(CTS)', async () => {
+    mockadapter
+      .onGet(new RegExp(`${API_URLS.DISPATCH_CTS}/*`))
+      .reply(200, mockCtsSingleDispatch);
 
     const res = await new DispatchService(axiosIMocksTest).get(
-      mockLitSingleDispatch.id
+      mockCtsSingleDispatch.id,
+      config.VENDORS.CTS
+    );
+
+    expect(res).toMatchObject(mocksInAdapterCtsSingleDispatchResult);
+  });
+
+  it('fetch get: error 400 from an API', async () => {
+    mockadapter.onGet(new RegExp(`${API_URLS.DISPATCH_LIT}/*`)).reply(400);
+
+    const res = await new DispatchService(axiosIMocksTest).get(
+      mockLitSingleDispatch.id,
+      config.VENDORS.LIT
     );
 
     expect(res).toMatchObject({
@@ -129,6 +288,50 @@ describe('dispatch service tests', () => {
     });
   });
 
+  /** ***
+   *
+   * NEW DISPATCH
+   * * */
+  it('fetch newDispacth: successfully data from an API(LIT)', async () => {
+    const apiResponseMock = { id: 123 };
+    mockadapter.onPost(API_URLS.DISPATCH_LIT).reply(204, apiResponseMock);
+
+    const res = await new DispatchService(axiosIMocksTest).newDispatch(
+      formDataNewDispatch,
+      config.VENDORS.LIT
+    );
+
+    expect(res).toMatchObject({ data: apiResponseMock });
+  });
+  it('fetch newDispacth: successfully data from an API(CTS)', async () => {
+    const apiResponseMock = { id: 123 };
+    mockadapter.onPost(API_URLS.DISPATCH_CTS).reply(204, apiResponseMock);
+
+    const res = await new DispatchService(axiosIMocksTest).newDispatch(
+      formDataNewDispatch,
+      config.VENDORS.CTS
+    );
+
+    expect(res).toMatchObject({ data: apiResponseMock });
+  });
+
+  it('fetches newDispacth error 400 from an API', async () => {
+    mockadapter.onPost(API_URLS.DISPATCH_LIT).reply(400);
+
+    const res = await new DispatchService(axiosIMocksTest).newDispatch(
+      formDataNewDispatch,
+      config.VENDORS.LIT
+    );
+
+    expect(res).toMatchObject({
+      error: 'Request failed with status code 400'
+    });
+  });
+
+  /** ***
+   *
+   * UPLOAD FILES
+   * * */
   it('fetches uploadFiles successfully data from an API', async () => {
     mockadapter.onPost(API_URLS.UPLOAD_FILES).reply(204);
 

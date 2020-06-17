@@ -12,6 +12,7 @@ import { StatusButton } from '../../ui/components/status/StatusButton';
 function DispatchDetail({ authToken }) {
   const router = useRouter();
   const { id } = router.query;
+  const { vendor } = router.query;
 
   const [data, setData] = useState();
   const [isLoading, setIsLoading] = useState(true);
@@ -19,7 +20,7 @@ function DispatchDetail({ authToken }) {
   useEffect(() => {
     let response;
     async function getInfoDispatch() {
-      response = await new DispatchService().get(id);
+      response = await new DispatchService().get(id, vendor);
 
       if (response && !response.error) {
         setData(response);
@@ -27,7 +28,7 @@ function DispatchDetail({ authToken }) {
       setIsLoading(false);
     }
     getInfoDispatch();
-  }, [id]);
+  }, [id, vendor]);
 
   if (isLoading) {
     return (
@@ -42,7 +43,12 @@ function DispatchDetail({ authToken }) {
     <div data-testid="dispatch-detail-page">
       <Menu authToken={authToken} />
       {!data ? (
-        <p>Not found dispatch</p>
+        <button
+          type="button"
+          className="float-center text-red-500 border border-red-500 text-base px-1 m-8 rounded inline-flex items-center cursor-not-allowed"
+        >
+          There are problems obtaining the requested information.
+        </button>
       ) : (
         <div className="flex m-8">
           <div className="w-1/4 border-b border-l lg:h-auto lg:border-t lg:border-gray-400 flex-none rounded-t lg:rounded-t-none lg:rounded-l bg-gray-300 p-4 justify-between">

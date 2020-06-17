@@ -1,14 +1,24 @@
 import {
   dispatchLitInAdapter,
   dispatchLitOutAdapter
-} from './dispatch.adapter';
-import { mockLitSingleDispatch } from '../mocks/single-dispatch.mock';
-import { mocksInAdapterLitSingleDispatchResult } from '../mocks/new-dispatch.mock';
+} from './lit-dispatch.adapter';
+import { mockLitSingleDispatch } from '../mocks/data/lit/single-dispatch.mock';
+import {
+  mocksInAdapterLitAllDispatchResult,
+  mocksInAdapterLitSingleDispatchResult
+} from '../mocks/data/lit/result-adapter-in-dispatch.mock';
+import { dispatchLitList } from '../mocks/data/lit/list-dispatch.mock';
 
-describe('dispatch adapter tests', () => {
-  it('check dispatchLitInAdapter', () => {
+describe('lit dispatch adapter tests', () => {
+  it('check dispatchLitInAdapter for get(single item)', () => {
     expect(dispatchLitInAdapter(mockLitSingleDispatch)).toMatchObject(
       mocksInAdapterLitSingleDispatchResult
+    );
+  });
+
+  it('check dispatchLitInAdapter for getAll', () => {
+    expect(dispatchLitInAdapter(dispatchLitList.data[0])).toMatchObject(
+      mocksInAdapterLitAllDispatchResult
     );
   });
 

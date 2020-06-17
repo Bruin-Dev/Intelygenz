@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
 import Index from '../pages/index';
-import { dispatchList } from '../services/mocks/list-dispatch.mock';
+import { dispatchLitList } from '../services/mocks/data/lit/list-dispatch.mock';
 import { API_URLS } from '../services/api.config';
 import axiosI from '../services/api';
 
@@ -30,7 +30,7 @@ describe('DASHBOARD PAGE tests', () => {
   it('renders correctly with list of dispatch', async () => {
     mockadapter.onGet(API_URLS.DISPATCH).reply(200, {
       vendor: 'lit',
-      list_dispatch: dispatchList.data
+      list_dispatch: dispatchLitList.data
     });
 
     act(() => render(<Index />));

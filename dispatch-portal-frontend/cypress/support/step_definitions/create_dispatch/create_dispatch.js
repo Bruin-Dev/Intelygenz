@@ -54,8 +54,4 @@ And('I click to submit new dispatch', function() {
   cy.get('[data-test-id="new-dispatch-submit"]').click();
 });
 
-Then('I navigate to Dispatch detail page', function() {
-  cy.location().should(loc => {
-    expect(loc.pathname).to.eq(`/dispatch/${dataE2e.dispatch.id}`);
-  });
-});
+// Then ==> I navigate to Dashboard page

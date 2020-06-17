@@ -1,6 +1,6 @@
-import { mockLitSingleDispatch } from '../../services/mocks/single-dispatch.mock';
-import { formDataNewDispatch } from '../../services/mocks/new-dispatch.mock';
-import { userLoginSucess } from '../../services/mocks/userData.mocks';
+import { mockLitSingleDispatch } from '../../services/mocks/data/lit/single-dispatch.mock';
+import { formDataNewDispatch } from '../../services/mocks/data/new-dispatch.mock';
+import { userLoginSucess } from '../../services/mocks/data/userData.mocks';
 
 export default {
   userEmail: userLoginSucess.email,

@@ -11,4 +11,4 @@ Feature: Create dispatch
     Given I navigate to new dispatch
     When I introduce valid fields for new dispatch
     And I click to submit new dispatch
-    Then I navigate to Dispatch detail page
+    Then I navigate to Dashboard page

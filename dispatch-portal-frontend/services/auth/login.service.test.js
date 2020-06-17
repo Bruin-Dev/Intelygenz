@@ -2,7 +2,7 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { LoginService } from './login.service';
 import { API_URLS } from '../api.config';
-import { userLoginSucess } from '../mocks/userData.mocks';
+import { userLoginSucess } from '../mocks/data/userData.mocks';
 
 describe('login service tests', () => {
   const axiosIMocksTest = axios.create();

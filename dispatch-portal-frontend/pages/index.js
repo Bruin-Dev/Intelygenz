@@ -34,12 +34,16 @@ const columns = [
   {
     name: 'Dispatch ID',
     selector: 'id',
-    sortable: true,
+    sortable: true, // Todo: delete uppercase
     cell: row => (
       <a
         className="link"
         data-test-id={`dispatchId-${row.id}-link`}
-        href={`${Routes.DISPATCH()}/${row.id}`}
+        href={`${Routes.DISPATCH()}/${row.id}?vendor=${
+          row.vendor.toUpperCase() === config.VENDORS.CTS
+            ? config.VENDORS.CTS
+            : config.VENDORS.LIT
+        }`}
       >
         {row.id}
       </a>
@@ -80,45 +84,76 @@ function Index({ authToken }) {
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
 
-  useEffect(() => {
-    async function getAllDispatches() {
-      const response = await new DispatchService().getAll();
+  const getAllDispatches = async () => {
+    setIsLoading(true);
+    setApiError(false);
 
-      if (response && response.data) {
-        setData(response.data);
-      }
+    const response = await new DispatchService().getAll();
 
-      if (response && response.error) {
-        setApiError(response.error);
-      }
-      setIsLoading(false);
+    if (response && response.data) {
+      setData(response.data);
     }
+
+    if (response && response.error) {
+      setApiError(response.error);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
     getAllDispatches();
   }, [page]);
 
   return (
     <div data-testid="index-page-component">
       <Menu authToken={authToken} />
-      <Link href={Routes.NEW_DISPATCH()}>
-        <button
-          type="button"
-          className="float-right bg-transparent hover:bg-teal-500 text-teal-700 hover:text-white py-2 px-4 m-4 border border-teal-500 hover:border-transparent rounded"
-        >
-          Create new dispatch
-        </button>
-      </Link>
 
-      {apiError && <p>Error!</p>}
+      <div className="flex flex-col px-10">
+        <Link href={Routes.NEW_DISPATCH()}>
+          <button
+            type="button"
+            className="float-right bg-transparent hover:bg-teal-500 text-teal-700 hover:text-white py-2 px-4 m-4 border border-teal-500 hover:border-transparent rounded"
+          >
+            Create new dispatch
+          </button>
+        </Link>
 
-      <DataTable
-        title="Dispatches List"
-        columns={columns}
-        data={data}
-        fixedHeader
-        pagination
-        progressPending={isLoading}
-        className="dataTable"
-      />
+        <div className="flex flex-grow">
+          <h1 className="text-2xl px-3">Dispatches List</h1>
+          {apiError && (
+            <button
+              type="button"
+              onClick={getAllDispatches}
+              className="float-center text-red-500 border border-red-500 text-sm px-1 m-2 rounded inline-flex items-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                className="fill-current w-4 h-4 mr-1"
+              >
+                <path
+                  className="heroicon-ui"
+                  d="M6 18.7V21a1 1 0 0 1-2 0v-5a1 1 0 0 1 1-1h5a1 1 0 1 1 0 2H7.1A7 7 0 0 0 19 12a1 1 0 1 1 2 0 9 9 0 0 1-15 6.7zM18 5.3V3a1 1 0 0 1 2 0v5a1 1 0 0 1-1 1h-5a1 1 0 0 1 0-2h2.9A7 7 0 0 0 5 12a1 1 0 1 1-2 0 9 9 0 0 1 15-6.7z"
+                />
+              </svg>
+              There are problems obtaining one or more suppliers, click to
+              reload.
+            </button>
+          )}
+        </div>
+
+        <DataTable
+          columns={columns}
+          data={data}
+          fixedHeader
+          pagination
+          progressPending={isLoading}
+          className="dataTable"
+          defaultSortField="id"
+        />
+      </div>
     </div>
   );
 }

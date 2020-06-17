@@ -1,29 +1,29 @@
-export const dispatchList = {
+export const dispatchCtsList = {
   data: [
     {
-      dispatch_number: 'DIS17918',
-      date_of_dispatch: '2015-01-01',
-      site_survey_quote_required: true,
-      time_of_dispatch: null,
-      mettel_bruin_ticket_id: '0',
-      time_zone: '2',
-      job_site: 'Primary Citiscape',
-      job_site_street: '124 Spring street',
-      job_site_city: 'Citizville',
-      job_site_state: 'NY',
-      job_site_zip_code: '12345',
-      job_site_contact_name: 'Rajat 11111',
-      job_site_contact_number: '',
-      materials_needed_for_dispatch: '1',
-      scope_of_work: 'ScopeOfWork',
-      mettel_tech_call_in_instructions: '1',
-      name_of_mettel_requester: 'pkamath',
-      mettel_department: '1',
-      mettel_requester_email: 'pkamath@mettel.net',
-      dispatch_status: 'New Dispatch'
+      date_of_dispatch: '2020-01-31',
+      dispatch_number: 'DIS17918_1',
+      dispatch_status: 'New Dispatch',
+      job_site: 'test site',
+      job_site_city: 'test job site city',
+      job_site_contact_name: 'update Job',
+      job_site_contact_number: '+34 7894864658',
+      job_site_state: 'ALABAMA',
+      job_site_street: 'test job site street',
+      job_site_zip_code: '10041',
+      materials_needed_for_dispatch: 'test',
+      mettel_bruin_ticket_id: 'BRUINID5478525',
+      mettel_department: 'T1 Repair',
+      mettel_requester_email: 'requester@mettel.net',
+      mettel_tech_call_in_instructions: 'update callin instruction',
+      name_of_mettel_requester: 'Test User1',
+      scope_of_work: 'test new scope of work',
+      site_survey_quote_required: false,
+      time_of_dispatch: '7AM-9AM',
+      time_zone: 'Pacific Time'
     },
     {
-      dispatch_number: 'DIS37266',
+      dispatch_number: 'DIS37266_1',
       date_of_dispatch: '2015-01-01',
       site_survey_quote_required: true,
       time_of_dispatch: null,
@@ -46,7 +46,7 @@ export const dispatchList = {
       dispatch_status: 'New Dispatch'
     },
     {
-      dispatch_number: 'DIS37264',
+      dispatch_number: 'DIS37264_1',
       date_of_dispatch: '2015-01-01',
       site_survey_quote_required: true,
       time_of_dispatch: null,
@@ -68,7 +68,7 @@ export const dispatchList = {
       dispatch_status: 'New Dispatch'
     },
     {
-      dispatch_number: 'DIS37265',
+      dispatch_number: 'DIS37265_1',
       date_of_dispatch: '2015-01-01',
       site_survey_quote_required: true,
       time_of_dispatch: null,
@@ -90,7 +90,7 @@ export const dispatchList = {
       dispatch_status: 'New Dispatch'
     },
     {
-      dispatch_number: 'DIS37243',
+      dispatch_number: 'DIS37243_1',
       date_of_dispatch: '2016-11-16',
       site_survey_quote_required: false,
       time_of_dispatch: null,
@@ -112,7 +112,7 @@ export const dispatchList = {
       dispatch_status: 'New Dispatch'
     },
     {
-      dispatch_number: 'DIS37466',
+      dispatch_number: 'DIS37466_1',
       date_of_dispatch: '2016-11-16',
       site_survey_quote_required: false,
       time_of_dispatch: null,
@@ -136,7 +136,7 @@ export const dispatchList = {
       dispatch_status: 'New Dispatch'
     },
     {
-      dispatch_number: 'DIS37286',
+      dispatch_number: 'DIS37286_1',
       date_of_dispatch: '2016-11-16',
       site_survey_quote_required: false,
       time_of_dispatch: null,
@@ -158,7 +158,7 @@ export const dispatchList = {
       dispatch_status: 'New Dispatch'
     },
     {
-      dispatch_number: 'DIS37366',
+      dispatch_number: 'DIS37366_1',
       date_of_dispatch: '2016-11-16',
       site_survey_quote_required: false,
       time_of_dispatch: null,
@@ -180,7 +180,7 @@ export const dispatchList = {
       dispatch_status: 'New Dispatch'
     },
     {
-      dispatch_number: 'DIS37358',
+      dispatch_number: 'DIS37358_1',
       date_of_dispatch: '2016-11-16',
       site_survey_quote_required: false,
       time_of_dispatch: null,

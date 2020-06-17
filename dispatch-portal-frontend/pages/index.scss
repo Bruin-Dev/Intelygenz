@@ -1,8 +1,10 @@
 @import '../ui/styles/variables';
 
 .dataTable{
-  padding: 0 3%;
-  width: 94%;
+  width: 100%;
+  header {
+    display: none;
+  }
   .rdt_Table{
     width: 100%;
 

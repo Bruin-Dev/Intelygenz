@@ -3,45 +3,108 @@ import axiosInstance from '../api';
 import {
   dispatchLitInAdapter,
   dispatchLitOutAdapter
-} from './dispatch.adapter';
+} from './lit-dispatch.adapter';
+import {
+  dispatchCtsInAdapter,
+  dispatchCtsOutAdapter
+} from './cts-dispatch.adapter';
+import { config } from '../../config/config';
 
 export class DispatchService {
   constructor(axiosAuxI = axiosInstance) {
     this.axiosI = axiosAuxI;
   }
 
-  async getAll() {
+  async getAllByVendor(urlVendor) {
     try {
-      const res = await this.axiosI.get(API_URLS.DISPATCH);
+      const res = await this.axiosI.get(urlVendor);
 
-      return {
-        data: res.data.list_dispatch.map(dispatch =>
-          dispatchLitInAdapter({ ...dispatch, vendor: res.data.vendor })
-        )
-      };
-    } catch (error) {
-      return this.captureErrorGeneric(error);
-    }
-  }
-
-  async newDispatch(data) {
-    try {
-      const res = await this.axiosI.post(
-        API_URLS.DISPATCH,
-        dispatchLitOutAdapter(data)
+      return res.data.list_dispatch.map(dispatch =>
+        dispatchLitInAdapter({
+          ...dispatch,
+          vendor: res.data.vendor
+        })
       );
-
-      return res;
     } catch (error) {
       return this.captureErrorGeneric(error);
     }
   }
 
-  async get(id) {
-    try {
-      const res = await this.axiosI.get(`${API_URLS.DISPATCH}/${id}`);
+  async getAll() {
+    const responseLit = await this.getAllByVendor(API_URLS.DISPATCH_LIT);
+    const responseCts = await this.getAllByVendor(API_URLS.DISPATCH_CTS);
 
-      return dispatchLitInAdapter(res.data);
+    // Fails both calls
+    if (responseLit.error && responseCts.error) {
+      return {
+        error: `${responseCts.error} && ${responseLit.error}`
+      };
+    }
+
+    // Lit error
+    if (responseLit.error) {
+      return {
+        data: responseCts,
+        ...responseLit
+      };
+    }
+
+    // Cts error
+    if (responseCts.error) {
+      return {
+        data: responseLit,
+        ...responseCts
+      };
+    }
+
+    // Success
+    return {
+      data: [...responseLit, ...responseCts]
+    };
+  }
+
+  async newDispatch(data, vendor) {
+    try {
+      let res;
+      if (config.VENDORS.LIT === vendor) {
+        res = await this.axiosI.post(
+          API_URLS.DISPATCH_LIT,
+          dispatchLitOutAdapter(data)
+        );
+
+        return res;
+      }
+
+      if (config.VENDORS.CTS === vendor) {
+        res = await this.axiosI.post(
+          API_URLS.DISPATCH_CTS,
+          dispatchCtsOutAdapter(data)
+        );
+
+        return res;
+      }
+
+      return { error: 'Not vendor selected' };
+    } catch (error) {
+      return this.captureErrorGeneric(error);
+    }
+  }
+
+  async get(id, vendor) {
+    try {
+      let res;
+      if (config.VENDORS.LIT === vendor) {
+        res = await this.axiosI.get(`${API_URLS.DISPATCH_LIT}/${id}`);
+
+        return dispatchLitInAdapter(res.data);
+      }
+
+      if (config.VENDORS.CTS === vendor) {
+        res = await this.axiosI.get(`${API_URLS.DISPATCH_CTS}/${id}`);
+
+        return dispatchCtsInAdapter(res.data);
+      }
+      return { error: 'Not vendor selected' };
     } catch (error) {
       return this.captureErrorGeneric(error);
     }

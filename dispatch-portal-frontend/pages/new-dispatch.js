@@ -15,13 +15,19 @@ import {
   departmentOptions,
   serviceTypesOptions
 } from '../config/constants/dispatch.constants';
+import { config } from '../config/config';
 import './new-dispatch.scss';
+import VendorDispatchLink from '../ui/components/vendorDispatchLink/VendorDispatchLink';
 
 function NewDispatch({ authToken }) {
   const router = useRouter();
   const { register, handleSubmit, errors } = useForm();
-  const [response, setResponse] = useState([]);
+  const [response, setResponse] = useState({
+    data: [],
+    errors: []
+  });
   const [isLoading, setIsLoading] = useState(false);
+  const [blockedVendors, setBlockedVendors] = useState([]);
   // const [files, setFiles] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState([]); // Note: ['CTS'] ['LIT'] ['CTS', 'LIT']
   const dispatchService = new DispatchService();
@@ -45,23 +51,56 @@ function NewDispatch({ authToken }) {
     return res;
   }; */
 
-  const onSubmit = async data => {
+  const onSubmit = async formData => {
     setIsLoading(true);
 
-    const res = await dispatchService.newDispatch(data);
+    const resAux = {};
+    resAux.data = [];
+    resAux.errors = [];
 
-    if (res && !res.error && res.data && res.data.id) {
-      // Upload files
-      // const resFiles = await uploadFiles(res.data.id);
-      // if (resFiles) {
-      // Go to details
-      router.push(`${Routes.DISPATCH()}/${res.data.id}`);
+    /** **
+     *
+     * Explanation:
+     * - Send as many calls as vendors are selected.
+     * - Cases:
+     * 1) Everything OK: redirect to Dashboard.
+     * 2) All KO: show error.
+     * 3) Some fail and others do not: block the vendors that have been OK and show error in the other vendors.
+     *
+     */
+    await Promise.all(
+      formData.vendor.map(async vendor => {
+        const resData = await dispatchService.newDispatch(formData, vendor);
+
+        if (resData && resData.error) {
+          resAux.errors.push({
+            message: resData.error,
+            vendor
+          });
+          return;
+        }
+
+        if (resData && resData.data && resData.data.id) {
+          // Todo: Upload files // const resFiles = await uploadFiles(res.data.id);
+          resAux.data.push({
+            data: resData,
+            vendor
+          });
+          setBlockedVendors([...blockedVendors, vendor]);
+        }
+      })
+    );
+
+    // Check error
+    if (resAux.errors.length) {
+      // Todo: Check number of errors
+      setResponse(resAux);
+      setIsLoading(false);
       return;
-      // }
     }
-    // Todo: show/add upload error
-    setResponse(res);
-    setIsLoading(false);
+
+    // Success
+    router.push(`${Routes.BASE()}`);
   };
 
   const changeVendor = event => {
@@ -213,39 +252,43 @@ function NewDispatch({ authToken }) {
                 <div className="block uppercase tracking-wide text-grey-darker text-sm mb-2">
                   Vendor
                 </div>
-                {vendorsOptions.map(vendorsOption => (
-                  <label
-                    className="flex justify-start items-start"
-                    htmlFor="vendor"
-                    key={`vendorsOption-${vendorsOption.value}`}
-                  >
-                    <div
-                      className={
-                        errors.vendor
-                          ? 'bg-white border-2 rounded border-red-500 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 mb-4 focus-within:border-blue-500'
-                          : 'bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 mb-4 focus-within:border-blue-500'
-                      }
+                {vendorsOptions.map(vendorsOption =>
+                  blockedVendors.find(r => vendorsOption.value === r) ? (
+                    ''
+                  ) : (
+                    <label
+                      className="flex justify-start items-start"
+                      htmlFor="vendor"
+                      key={`vendorsOption-${vendorsOption.value}`}
                     >
-                      <input
-                        type="checkbox"
-                        name="vendor"
-                        value={vendorsOption.value}
-                        id={vendorsOption.value}
-                        data-testid={`${vendorsOption.value}-checkbox`}
-                        ref={register({ required: true })}
-                        className="opacity-0 absolute rounded"
-                        onChange={changeVendor}
-                      />
-                      <svg
-                        className="fill-current hidden w-4 h-4 text-green-500 pointer-events-none"
-                        viewBox="0 0 20 20"
+                      <div
+                        className={
+                          errors.vendor
+                            ? 'bg-white border-2 rounded border-red-500 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 mb-4 focus-within:border-blue-500'
+                            : 'bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 mb-4 focus-within:border-blue-500'
+                        }
                       >
-                        <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
-                      </svg>
-                    </div>
-                    <div className="select-none">{vendorsOption.name}</div>
-                  </label>
-                ))}
+                        <input
+                          type="checkbox"
+                          name="vendor"
+                          value={vendorsOption.value}
+                          id={vendorsOption.value}
+                          data-testid={`${vendorsOption.value}-checkbox`}
+                          ref={register({ required: true })}
+                          className="opacity-0 absolute rounded"
+                          onChange={changeVendor}
+                        />
+                        <svg
+                          className="fill-current hidden w-4 h-4 text-green-500 pointer-events-none"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
+                        </svg>
+                      </div>
+                      <div className="select-none">{vendorsOption.name}</div>
+                    </label>
+                  )
+                )}
                 {errors.vendor && (
                   <p className="text-red-500 text-xs italic">
                     This field is required
@@ -280,13 +323,13 @@ function NewDispatch({ authToken }) {
                 </label>
               </div>
 
-              {showFieldByVendor(vendorsOptions[1].value) && (
+              {showFieldByVendor(config.VENDORS.CTS) && (
                 <div className="flex flex-col" data-testid="cts-field">
                   <label
                     className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
                     htmlFor="slaLevel"
                   >
-                    SLA Level
+                    SLA Level (only for {config.VENDORS.CTS})
                     <input
                       className={
                         errors.slaLevel
@@ -585,43 +628,6 @@ function NewDispatch({ authToken }) {
                   )}
                 </label>
               </div>
-
-              {showFieldByVendor(vendorsOptions[1].value) && (
-                <div className="flex flex-col">
-                  <label
-                    className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
-                    htmlFor="email"
-                  >
-                    Email
-                    <input
-                      className={
-                        errors.email
-                          ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
-                          : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
-                      }
-                      type="text"
-                      name="email"
-                      data-testid="email"
-                      id="email"
-                      ref={register({
-                        required: true,
-                        pattern: {
-                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                          message: 'Incorrect format: example@example.com'
-                        }
-                      })}
-                      placeholder="example@example.com"
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-xs italic">
-                        {errors.email?.type === 'required' &&
-                          'This field is required'}
-                        {errors.email.message}
-                      </p>
-                    )}
-                  </label>
-                </div>
-              )}
             </div>
           </div>
 
@@ -633,10 +639,10 @@ function NewDispatch({ authToken }) {
 
           <div className="flex">
             <div className="w-1/2 px-8">
-              {showFieldByVendor(vendorsOptions[1].value) && (
+              {showFieldByVendor(config.VENDORS.CTS) && (
                 <div className="flex flex-col">
                   <div className="block uppercase tracking-wide text-grey-darker text-sm mb-2">
-                    Service Type
+                    Service Type (only for {config.VENDORS.CTS})
                   </div>
                   {serviceTypesOptions.map(serviceTypesOption => (
                     <label
@@ -942,7 +948,7 @@ function NewDispatch({ authToken }) {
             </div>
           </div>
 
-          <div className="flex content-center">
+          <div className="flex flex-row-reverse content-center px-8">
             {isLoading ? (
               <Loading data-testid="loading-new-dispatch-page" />
             ) : (
@@ -954,13 +960,36 @@ function NewDispatch({ authToken }) {
                 Submit
               </button>
             )}
-            {response && response.error && (
+            {response && response.errors.length ? (
               <p
-                className="text-red-500 text-xs italic"
+                className="text-red-500 text-base italic py-2 mx-5"
                 data-testid="error-new-dispatch-page"
               >
-                Error, please try again later
+                {response.errors.length === vendorsOptions.length
+                  ? 'Error, please try again later'
+                  : `Error in one of the vendors: ${response.errors.map(
+                      error => error.vendor
+                    )}   `}
               </p>
+            ) : (
+              ''
+            )}
+            {response && response.data.length ? (
+              <p
+                className="text-green-500 text-base italic py-2 mx-5"
+                data-testid="error-new-dispatch-page"
+              >
+                The following dispatches have been created correctly for these
+                vendors:{' '}
+                {response.data.map(resData => (
+                  <VendorDispatchLink
+                    dispatchId={resData.data.data.id}
+                    vendor={resData.vendor}
+                  />
+                ))}
+              </p>
+            ) : (
+              ''
             )}
           </div>
         </form>
