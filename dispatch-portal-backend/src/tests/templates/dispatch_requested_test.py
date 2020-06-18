@@ -1,4 +1,4 @@
-from application.templates.dispatch_requested import get_dispatch_requested_note
+from application.templates.lit.dispatch_requested import get_dispatch_requested_note
 
 expected_dispatch_request_note = """#*Automation Engine*#
 Dispatch Management - Dispatch Requested

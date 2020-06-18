@@ -1,6 +1,5 @@
 import json
 
-import requests
 from simple_salesforce import Salesforce, SalesforceGeneralError, SalesforceAuthenticationFailed, SalesforceError
 from tenacity import retry, wait_exponential, stop_after_delay, stop_after_attempt, wait_fixed
 
@@ -58,13 +57,12 @@ class CtsClient:
             self._logger.info(f'Creating dispatch...')
             self._logger.info(f'Payload that will be applied : {payload}')
             return_response = dict.fromkeys(["body", "status"])
-
             try:
                 if self._config.CTS_CONFIG['environment'] == 'dev':
                     response = self._salesforce_sdk.Service__c.create(payload, self._get_request_headers())
                 elif self._config.CTS_CONFIG['environment'] == 'production':
                     # TODO: Not implemented: send post request to their cts form
-                    raise Exception("TODO: CTS create_dispatch: Not implemented.")
+                    raise Exception("TODO: CTS create_dispatch: Not implemented in production.")
                 return_response["body"] = dict(response)
                 if response["success"] is True:
                     return_response["status"] = 200
@@ -96,13 +94,13 @@ class CtsClient:
                 # field_names = [field['name'] for field in desc['fields']]
                 # query = "SELECT {} FROM Service__c".format(','.join(field_names))
 
-                if self._config.CTS_CONFIG['environment'] == 'dev':
-                    # response = self._salesforce_sdk.query(query)
-                    response = self._salesforce_sdk.Service__c.get(dispatch_id)
-                elif self._config.CTS_CONFIG['environment'] == 'production':
-                    # TODO: not implemented
-                    raise Exception("TODO: CTS get_all_dispatches: Not implemented - "
-                                    "PROBABLY THE SAME AS PRODUCTION.")
+                # if self._config.CTS_CONFIG['environment'] == 'dev':
+                #     # response = self._salesforce_sdk.query(query)
+                #     response = self._salesforce_sdk.Service__c.get(dispatch_id)
+                # elif self._config.CTS_CONFIG['environment'] == 'production':
+                #     # TODO: check first in redis cache?
+                #     response = self._salesforce_sdk.Service__c.get(dispatch_id)
+                response = self._salesforce_sdk.Service__c.get(dispatch_id)
                 self._logger.info(f"Retrieved dispatch: {response.get('Id', None)}")
                 return_response["body"] = dict(response)
                 return_response["status"] = 200
@@ -134,12 +132,11 @@ class CtsClient:
                 # TODO: not implemented, filter by a prefix
                 self._logger.info(f"Applying filter: {query}")
 
-                if self._config.CTS_CONFIG['environment'] == 'dev':
-                    response = self._salesforce_sdk.query(query)
-                elif self._config.CTS_CONFIG['environment'] == 'production':
-                    # TODO: not implemented
-                    raise Exception("TODO: CTS get_all_dispatches: Not implemented - "
-                                    "PROBABLY THE SAME AS PRODUCTION.")
+                # if self._config.CTS_CONFIG['environment'] == 'dev':
+                #     response = self._salesforce_sdk.query(query)
+                # elif self._config.CTS_CONFIG['environment'] == 'production':
+                #     response = self._salesforce_sdk.query(query)
+                response = self._salesforce_sdk.query(query)
 
                 return_response["body"] = dict(response)
                 return_response["status"] = 200
@@ -169,7 +166,7 @@ class CtsClient:
                                                                       self._get_request_headers())
                 elif self._config.CTS_CONFIG['environment'] == 'production':
                     # TODO: Not implemented: send email with specific subject
-                    raise Exception("TODO: CTS update_dispatch: Not implemented.")
+                    raise Exception("TODO: CTS update_dispatch: Not implemented in production.")
                 return_response["body"] = dict(response)
                 return_response["status"] = 200
                 return return_response

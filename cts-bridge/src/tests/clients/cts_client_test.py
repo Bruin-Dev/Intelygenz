@@ -173,7 +173,7 @@ class TestCTSClient:
         config = testconfig
         logger.error = Mock()
 
-        dipatch_contents = {
+        dispatch_contents = {
             "RequestDispatch": {
                 "Date_of_Dispatch": "2016-11-16",
                 "Site_Survey_Quote_Required": False,
@@ -217,7 +217,7 @@ class TestCTSClient:
 
         with patch.object(cts_client._salesforce_sdk.Service__c, 'create',
                           return_value=expected_dispatch_response) as mock_apexecute:
-            post_response = cts_client.create_dispatch(dipatch_contents)
+            post_response = cts_client.create_dispatch(dispatch_contents)
             mock_apexecute.assert_called_once()
 
             assert post_response["body"] == expected_dispatch_response

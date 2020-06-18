@@ -14,6 +14,28 @@ def map_create_dispatch(body):
     '''
     body = {k.lower(): v for k, v in body.items()}
     dispatch_request = {
+        "datetime_of_dispatch": f"{body['date_of_dispatch']} {body['time_of_dispatch']}",
+        "timezone_of_dispatch": body['time_zone'],
+        "reference": str(body["mettel_bruin_ticket_id"]),
+        "sla_level": body["sla_level"],
+        "job_country": "United States",  # TODO: Canada, ¿PR?
+        "job_site": body["job_site"],  # Location Owner
+        "job_site_street": body["job_site_street"],
+        "job_site_city": body["job_site_city"],
+        "job_site_state": body["job_site_state"],
+        "job_site_zip_code": body["job_site_zip_code"],
+        "job_site_contact_name": body["job_site_contact_name"],
+        "job_site_contact_phone_number": body["job_site_contact_number"],
+        "scope_of_work": body["scope_of_work"],  # TODO: Onsite SOW
+        "failure_experienced": body["failure_experienced"],
+        "special_materials_needed_for_dispatch": body["materials_needed_for_dispatch"],
+        "mettel_tech_call_in_instructions": body["mettel_tech_call_in_instructions"],
+        "services_categories": body["services_categories"],  # TODO: services_categories
+        "mettel_department": body["mettel_department"],
+        "name_of_mettel_requester": body["name_of_mettel_requester"],
+        "mettel_department_phone_number": body["mettel_department_phone_number"],
+        "mettel_requester_email": body["mettel_requester_email"],
+        #######################################################
         "date_of_dispatch": body['date_of_dispatch'],
 
         "field52361222M": "month",
@@ -32,19 +54,19 @@ def map_create_dispatch(body):
         "time_zone_local": body['time_zone'],
         "field74407345": "",
 
-        "job_site": body["job_site"],
+        # "job_site": body["job_site"],
 
-        "job_site_street": body["job_site_street"],
+        # "job_site_street": body["job_site_street"],
         "field52362051-address": "",
         "field52362051-address2": "",
 
-        "job_site_city": body["job_site_city"],
+        # "job_site_city": body["job_site_city"],
         "field52362051-city": "",
 
-        "job_site_state": body["job_site_state"],
+        # "job_site_state": body["job_site_state"],
         "field52362051-state": "",
 
-        "job_site_zip_code": body["job_site_zip_code"],
+        # "job_site_zip_code": body["job_site_zip_code"],
         "field52362051-zip": "",
 
         "field52361914": "location_id_field",
@@ -59,13 +81,13 @@ def map_create_dispatch(body):
         "field52380329": "failure_experienced_field",
         "field52380353": "onsite_sow_field",
 
-        "special_materials_needed_for_dispatch": body["materials_needed_for_dispatch"],
+        # "special_materials_needed_for_dispatch": body["materials_needed_for_dispatch"],
         "field56596157": "",
 
-        "scope_of_work": body["scope_of_work"],
+        # "scope_of_work": body["scope_of_work"],
         "field52380918": "services_categories",
 
-        "mettel_tech_call_in_instructions": body["mettel_tech_call_in_instructions"],
+        # "mettel_tech_call_in_instructions": body["mettel_tech_call_in_instructions"],
 
         "name_of_mettel_requester": body["name_of_mettel_requester"],
         "field52381072-first": "mettel_requester_name_field",

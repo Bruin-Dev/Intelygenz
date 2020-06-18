@@ -4,6 +4,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from pytz import timezone
 
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.notifications_repository import NotificationsRepository
 from application.server.api_server import DispatchServer
 from config import config
 from igz.packages.Logger.logger_client import LoggerClient
@@ -31,8 +33,11 @@ class Container:
 
         self._event_bus.add_consumer(consumer=self._client2, consumer_name="consumer2")
 
-        self._dispatch_api_server = DispatchServer(config, self._redis_client, self._event_bus,
-                                                   self._logger)
+        self._notifications_repository = NotificationsRepository(self._event_bus)
+        self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
+
+        self._dispatch_api_server = DispatchServer(config, self._redis_client, self._event_bus, self._logger,
+                                                   self._bruin_repository, self._notifications_repository)
         self._logger.info("Container created")
 
     async def start(self):

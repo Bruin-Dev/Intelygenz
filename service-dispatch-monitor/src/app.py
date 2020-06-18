@@ -14,6 +14,8 @@ from application.repositories.bruin_repository import BruinRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.lit_repository import LitRepository
 from application.actions.lit_dispatch_monitor import LitDispatchMonitor
+from application.repositories.cts_repository import CtsRepository
+from application.actions.cts_dispatch_monitor import CtsDispatchMonitor
 
 
 class Container:
@@ -38,9 +40,13 @@ class Container:
         self._event_bus.add_consumer(consumer=self._client2, consumer_name="consumer2")
         self._notifications_repository = NotificationsRepository(self._event_bus)
         self._lit_repository = LitRepository(self._logger, config, self._event_bus, self._notifications_repository)
+        self._cts_repository = CtsRepository(self._logger, config, self._event_bus, self._redis_client)
         self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
         self._lit_monitor = LitDispatchMonitor(config, self._redis_client, self._event_bus, self._scheduler,
                                                self._logger, self._lit_repository, self._bruin_repository,
+                                               self._notifications_repository)
+        self._cts_monitor = CtsDispatchMonitor(config, self._redis_client, self._event_bus, self._scheduler,
+                                               self._logger, self._cts_repository, self._bruin_repository,
                                                self._notifications_repository)
         self._server = QuartServer(config)
         self._logger.info("Container created")
@@ -48,6 +54,7 @@ class Container:
     async def start(self):
         await self._event_bus.connect()
         await self._lit_monitor.start_monitoring_job(exec_on_start=True)
+        await self._cts_monitor.start_monitoring_job(exec_on_start=True)
         self._scheduler.start()
 
     async def start_server(self):

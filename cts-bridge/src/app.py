@@ -27,9 +27,6 @@ class Container:
 
         self._scheduler = AsyncIOScheduler(timezone=config.CTS_CONFIG['timezone'])
 
-        self._cts_client = CtsClient(self._logger, config)
-        self._cts_repository = CtsRepository(self._cts_client, self._logger, self._scheduler, config)
-
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 
         # NATS clients
@@ -47,13 +44,13 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_update_dispatch, consumer_name="update_dispatch")
         self._event_bus.add_consumer(self._subscriber_upload_file, consumer_name="upload_file")
 
+        self._cts_client = CtsClient(self._logger, config)
+        self._cts_repository = CtsRepository(self._cts_client, self._logger, self._scheduler, config)
+
         # actions
-        self._create_dispatch = CreateDispatch(self._logger, config.CTS_CONFIG, self._event_bus,
-                                               self._cts_repository)
-        self._get_dispatch = GetDispatch(self._logger, config.CTS_CONFIG, self._event_bus,
-                                         self._cts_repository)
-        self._update_dispatch = UpdateDispatch(self._logger, config.CTS_CONFIG, self._event_bus,
-                                               self._cts_repository)
+        self._create_dispatch = CreateDispatch(self._logger, config.CTS_CONFIG, self._event_bus, self._cts_repository)
+        self._get_dispatch = GetDispatch(self._logger, config.CTS_CONFIG, self._event_bus, self._cts_repository)
+        self._update_dispatch = UpdateDispatch(self._logger, config.CTS_CONFIG, self._event_bus, self._cts_repository)
 
         # action wrappers
         self._action_create_disptch = ActionWrapper(self._create_dispatch, "create_dispatch",

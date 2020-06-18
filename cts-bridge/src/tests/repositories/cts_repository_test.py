@@ -6,6 +6,7 @@ from unittest.mock import patch
 from application.repositories.cts_repository import CtsRepository
 from apscheduler.util import undefined
 
+from application.clients.cts_client import CtsClient
 from application.repositories import cts_repository as cts_repo_module
 from config import testconfig as config
 
@@ -69,16 +70,17 @@ class TestCTSRepository:
         )
 
     def create_dispatch_test(self):
-        cts_client = Mock()
-        cts_client.create_dispatch = Mock()
-
         logger = Mock()
         scheduler = Mock()
         config = Mock()
 
+        cts_client = CtsClient(logger, config)
+        cts_client.create_dispatch = Mock()
+
         payload = {"Request_Dispatch": {"test": "dispatch"}}
 
         cts_repo = CtsRepository(cts_client, logger, scheduler, config)
+
         cts_repo.create_dispatch(payload)
 
         cts_client.create_dispatch.assert_called_with(payload)

@@ -66,15 +66,14 @@ class TestCreateDispatch:
         request_id = '123'
         response_topic = 'some.response.topic'
         msg = {
-                'request_id': request_id,
-                'response_topic': response_topic,
-                'body': dipatch_contents
+            'request_id': request_id,
+            'response_topic': response_topic,
+            'body': dipatch_contents
         }
         expected_return = {
-                            'request_id': request_id,
-                            'body': return_body,
-                            'status': return_status
-
+            'request_id': request_id,
+            'body': return_body,
+            'status': return_status
         }
         create_dispatch_action = CreateDispatch(logger, configs, event_bus, cts_repo)
         await create_dispatch_action.create_dispatch(msg)

@@ -20,6 +20,7 @@ NATS_CONFIG = {
 
 CTS_CONFIG = {
     'environment': 'dev',
+    'email': '__CTS_EMAIL__',
     'client_id': '__CTS_CLIENT_ID__',
     'client_secret': "__CTS_CLIENT_SECRET__",
     'client_username': "__CTS_CLIENT_USERNAME__",

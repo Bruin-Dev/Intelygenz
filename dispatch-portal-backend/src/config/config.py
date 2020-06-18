@@ -37,13 +37,20 @@ DISPATCH_PORTAL_CONFIG = {
     'swagger_title': 'Dispatch Portal API doc'
 }
 
+CTS_CONFIG = {
+    # Email for requests and cancellations
+    # 'email': 'CTS-MettelService@core-techs.com',
+    'email': 'juancarlos.gomez@intelygenz.com'
+}
+
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 
 LOG_CONFIG = {
     'name': 'dispatch-portal-backend',
     'level': logging.DEBUG,
     'stream_handler': logging.StreamHandler(sys.stdout),
-    'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
+    # 'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(hostname)s: %(module)s::%(lineno)d %(levelname)s: %(message)s',
+    'format': f'%(asctime)s: {ENVIRONMENT_NAME}: %(module)s::%(lineno)d %(levelname)s: %(message)s',
     'papertrail': {
         'active': True if os.getenv('PAPERTRAIL_ACTIVE') == "true" else False,
         'prefix': os.getenv('PAPERTRAIL_PREFIX', f'{ENVIRONMENT_NAME}-dispatch-portal-backend'),

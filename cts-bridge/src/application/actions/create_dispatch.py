@@ -7,8 +7,11 @@ class CreateDispatch:
         self._cts_repository = cts_repository
 
     async def create_dispatch(self, msg):
-        create_dispatch_response = {"request_id": msg["request_id"], "body": None,
-                                    "status": None}
+        create_dispatch_response = {
+            "request_id": msg["request_id"],
+            "body": None,
+            "status": None
+        }
 
         if msg.get("body") is None:
             create_dispatch_response["status"] = 400
@@ -38,6 +41,8 @@ class CreateDispatch:
             if request_dispatch["status"] in range(200, 300):
                 self._logger.info(f'Created a dispatch with dispatch number: '
                                   f'{request_dispatch["body"]["Dispatch"]["Dispatch_Number"]}')
+            else:
+                self._logger.info(f'Not created a dispatch with payload: {msg["body"]}')
 
             create_dispatch_response["body"] = request_dispatch["body"]
             create_dispatch_response["status"] = request_dispatch["status"]

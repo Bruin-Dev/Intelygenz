@@ -138,7 +138,7 @@ class LitDispatchMonitor:
     async def _lit_dispatch_monitoring_process(self):
         try:
             start = perf_counter()
-            self._logger.info(f"Starting Dispatch Monitor Process...")
+            self._logger.info(f"Starting Dispatch Monitor Process for LIT...")
             response_lit_dispatches = await self._lit_repository.get_all_dispatches()
             response_lit_dispatches_status = response_lit_dispatches.get('status')
             response_lit_dispatches_body = response_lit_dispatches.get('body')
@@ -176,11 +176,11 @@ class LitDispatchMonitor:
             start_monitor_tasks = perf_counter()
             await asyncio.gather(*monitor_tasks, return_exceptions=True)
             stop_monitor_tasks = perf_counter()
-            self._logger.info(f"All monitor tasks finished: "
+            self._logger.info(f"[LIT] All monitor tasks finished: "
                               f"{(stop_monitor_tasks - start_monitor_tasks) / 60} minutes")
 
             stop = perf_counter()
-            self._logger.info(f"Elapsed time processing all dispatches cache: {(stop - start) / 60} minutes")
+            self._logger.info(f"[LIT] Elapsed time processing all dispatches cache: {(stop - start) / 60} minutes")
         except Exception as ex:
             self._logger.error(f"Error: {ex}")
 
@@ -640,11 +640,11 @@ class LitDispatchMonitor:
                 except Exception as ex:
                     err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
                               f"- {dispatch}"
-                    self._logger.error(f"")
+                    self._logger.error(err_msg)
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
         except Exception as ex:
-            err_msg = f"Error: _monitor_tech_on_site_dispatches - {ex}"
+            err_msg = f"Error: _monitor_confirmed_dispatches - {ex}"
             self._logger.error(f"Error: {ex}")
             await self._notifications_repository.send_slack_message(err_msg)
         stop = perf_counter()
@@ -704,7 +704,7 @@ class LitDispatchMonitor:
                                            f"{response_body}")
                         err_msg = f"An error occurred retrieve getting ticket details from bruin " \
                                   f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
-                        response_send_slack_message = await self._notifications_repository.send_slack_message(err_msg)
+                        await self._notifications_repository.send_slack_message(err_msg)
                         continue
                     ticket_notes = response_body.get('ticketNotes', [])
                     ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
@@ -761,7 +761,7 @@ class LitDispatchMonitor:
                 except Exception as ex:
                     err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "\
                               f"- {dispatch}"
-                    self._logger.error(f"")
+                    self._logger.error(err_msg)
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
         except Exception as ex:
