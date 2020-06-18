@@ -102,7 +102,6 @@ REDIS = {
 
 TRIAGE_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"],
-    'send_email': False,
     'polling_minutes': 10,
     'recipient': os.environ["LAST_CONTACT_RECIPIENT"],
     'enable_triage': bool(int(os.environ['ENABLE_TRIAGE_MONITORING'])),

@@ -1,6 +1,5 @@
+import asyncio
 import json
-import os
-import re
 import time
 
 from collections import defaultdict
@@ -9,27 +8,28 @@ from datetime import timedelta
 from time import perf_counter
 from typing import Callable
 
-import asyncio
 from application.repositories import EdgeIdentifier
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
-from dateutil.parser import parse
-from igz.packages.repositories.edge_repository import EdgeIdentifier
 from pytz import timezone
 from pytz import utc
-from shortuuid import uuid
-from tenacity import retry, wait_exponential, stop_after_delay
-
-empty_str = str()
+from tenacity import retry
+from tenacity import stop_after_delay
+from tenacity import wait_exponential
 
 
 class OutageMonitor:
-    def __init__(self, event_bus, logger, scheduler, config, outage_repository, metrics_repository):
+    def __init__(self, event_bus, logger, scheduler, config, outage_repository, bruin_repository, velocloud_repository,
+                 notifications_repository, triage_repository, metrics_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._outage_repository = outage_repository
+        self._bruin_repository = bruin_repository
+        self._velocloud_repository = velocloud_repository
+        self._notifications_repository = notifications_repository
+        self._triage_repository = triage_repository
         self._metrics_repository = metrics_repository
 
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
@@ -124,7 +124,7 @@ class OutageMonitor:
                           f": {(stop - start)/60} minutes")
 
         self._logger.info(f'[outage_monitoring_process] Outage monitoring process finished! Elapsed time:'
-                          f'{(time.time() - total_start_time) / 60} minutes')
+                          f'{(time.time() - total_start_time) // 60} minutes')
         self._metrics_repository.set_last_cycle_duration((time.time() - total_start_time) // 60)
 
     async def _build_cache(self):
@@ -134,25 +134,10 @@ class OutageMonitor:
 
         self._logger.info('[build_cache] Building cache...')
 
-        try:
-            self._logger.info('[build_cache] Claiming edges under monitoring...')
-            edges_to_monitor_response = await self._get_edges_for_monitoring()
-            self._logger.info('[build_cache] Got edges under monitoring from Velocloud ')
-        except Exception as e:
-            self._logger.error(
-                f'[build_cache] An error occurred while claiming edges for outage monitoring: {e}')
-            raise
-
+        edges_to_monitor_response = await self._velocloud_repository.get_edges_for_outage_monitoring()
         edges_to_monitor_response_body = edges_to_monitor_response['body']
         edges_to_monitor_response_status = edges_to_monitor_response['status']
         if edges_to_monitor_response_status not in range(200, 300):
-            err_msg = (
-                '[build_cache] Something happened while retrieving edges under monitoring from Velocloud. '
-                f'Reason: Error {edges_to_monitor_response_status} - {edges_to_monitor_response_body}')
-            self._logger.error(err_msg)
-
-            slack_message = {'request_id': uuid(), 'message': err_msg}
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             return
 
         # Remove blacklisted
@@ -177,7 +162,9 @@ class OutageMonitor:
         self._autoresolve_serials_whitelist = self._temp_autoresolve_serials_whitelist
 
         cache_stop = perf_counter()
-        self._logger.info(f'[build_cache] Create cache finished! Elapsed time {(cache_stop - cache_start)/60} minutes')
+        self._logger.info(
+            f'[build_cache] Create cache finished! Elapsed time: {(cache_stop - cache_start) // 60} minutes'
+        )
 
     async def _process_host_with_cache(self, host, host_cache):
         self._logger.info(f"[process_host_with_cache] {host} starting '_process_edge' task for {len(host_cache)} edges")
@@ -190,31 +177,17 @@ class OutageMonitor:
         stop = perf_counter()
 
         self._logger.info(f"[process_host_with_cache] Elapsed time processing host - {host} edges in minutes: "
-                          f"{(stop - start)/60}")
+                          f"{(stop - start) // 60}")
 
     async def _process_edge(self, edge_full_id, bruin_client_info):
         async with self._process_semaphore:
             try:
                 edge_identifier = EdgeIdentifier(**edge_full_id)
 
-                self._logger.info(f'[process_edge] Checking status of {edge_identifier}...')
-                edge_status_response = await self._get_edge_status_by_id(edge_full_id)
-
-                self._logger.info(
-                    f'[process_edge] Got status for edge {edge_identifier} -> {edge_status_response}')
-
+                edge_status_response = await self._velocloud_repository.get_edge_status(edge_full_id)
                 edge_status_response_body = edge_status_response['body']
                 edge_status_response_status = edge_status_response['status']
                 if edge_status_response_status not in range(200, 300):
-                    err_msg = (
-                        f"[process_edge] An error occurred while trying to retrieve edge status for edge "
-                        f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
-                    )
-
-                    self._logger.error(err_msg)
-                    slack_message = {'request_id': uuid(),
-                                     'message': err_msg}
-                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                     return
 
                 edge_data = edge_status_response_body["edge_info"]
@@ -249,6 +222,7 @@ class OutageMonitor:
                 else:
                     self._logger.info(f'[process_edge] {edge_identifier} is in healthy state.')
                     await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
+
                 self._metrics_repository.increment_edges_processed()
             except Exception as ex:
                 self._logger.error(f"[process_edge] Error: {ex} processing edge: {edge_full_id}. "
@@ -256,6 +230,8 @@ class OutageMonitor:
                 await self._start_edge_after_error_process(edge_full_id, bruin_client_info)
 
     async def _add_edge_to_temp_cache(self, edge_full_id):
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+
         @retry(wait=wait_exponential(multiplier=self._config.MONITOR_CONFIG['multiplier'],
                                      min=self._config.MONITOR_CONFIG['min']),
                stop=stop_after_delay(self._config.MONITOR_CONFIG['stop_delay']))
@@ -263,11 +239,10 @@ class OutageMonitor:
             async with self._semaphore:
                 self._logger.info("[add_edge_to_temp_cache] Starting process_edges job")
 
-                edge_identifier = EdgeIdentifier(**edge_full_id)
-
                 past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
-                recent_events_response = await self._get_last_events_for_edge(
-                    edge_full_id, since=past_moment_for_events_lookup
+                recent_events_response = await self._velocloud_repository.get_last_edge_events(
+                    edge_full_id, since=past_moment_for_events_lookup,
+                    event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD'],
                 )
 
                 recent_events_response_status = recent_events_response['status']
@@ -286,24 +261,10 @@ class OutageMonitor:
                     f'[add_edge_to_temp_cache] Got link and edge events activity in the last 7 days'
                     f' {edge_identifier}!')
 
-                self._logger.info(f'[add_edge_to_temp_cache] Checking status of {edge_identifier}...')
-                edge_status_response = await self._get_edge_status_by_id(edge_full_id)
-
-                self._logger.info(
-                    f'[add_edge_to_temp_cache] Got status for edge {edge_identifier} -> {edge_status_response}')
-
+                edge_status_response = await self._velocloud_repository.get_edge_status(edge_full_id)
                 edge_status_response_body = edge_status_response['body']
                 edge_status_response_status = edge_status_response['status']
                 if edge_status_response_status not in range(200, 300):
-                    err_msg = (
-                        f"[add_edge_to_temp_cache] An error occurred while trying to retrieve edge status for edge "
-                        f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
-                    )
-
-                    self._logger.error(err_msg)
-                    slack_message = {'request_id': uuid(),
-                                     'message': err_msg}
-                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                     return
 
                 edge_data = edge_status_response_body["edge_info"]
@@ -321,22 +282,17 @@ class OutageMonitor:
                     self._temp_autoresolve_serials_whitelist.add(edge_serial)
 
                 self._logger.info(f'[add_edge_to_temp_cache] Claiming Bruin client info for serial {edge_serial}...')
-                bruin_client_info_response = await self._get_bruin_client_info_by_serial(edge_serial)
+                bruin_client_info_response = await self._bruin_repository.get_client_info(edge_serial)
                 self._logger.info(f'[add_edge_to_temp_cache] Got Bruin client info for serial {edge_serial} -> '
                                   f'{bruin_client_info_response}')
 
                 bruin_client_info_response_body = bruin_client_info_response['body']
                 bruin_client_info_response_status = bruin_client_info_response['status']
                 if bruin_client_info_response_status not in range(200, 300):
-                    err_msg = (f'Error trying to get Bruin client info from Bruin for serial {edge_serial}: '
-                               f'Error {bruin_client_info_response_status} - {bruin_client_info_response_body}')
-                    self._logger.error(err_msg)
-
-                    slack_message = {'request_id': uuid(), 'message': err_msg}
-                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
                     return
 
-                if not bruin_client_info_response_body.get('client_id'):
+                bruin_client_id = bruin_client_info_response_body['client_id']
+                if not bruin_client_id:
                     self._logger.info(
                         f"[add_edge_to_temp_cache] Edge {edge_identifier} doesn't have any Bruin client ID associated. "
                         'Skipping...')
@@ -345,30 +301,19 @@ class OutageMonitor:
                 # Attach Bruin client info to edge_data
                 edge_data['bruin_client_info'] = bruin_client_info_response_body
 
-                self._logger.info(f'[add_edge_to_temp_cache] Getting management status for edge {edge_identifier}...')
-                management_status_response = await self._get_management_status(edge_data)
-                self._logger.info(f'[add_edge_to_temp_cache] Got management status for edge {edge_identifier} -> '
-                                  f'{management_status_response}')
-
+                management_status_response = await self._bruin_repository.get_management_status(
+                    bruin_client_id, edge_serial)
                 management_status_response_body = management_status_response['body']
                 management_status_response_status = management_status_response['status']
                 if management_status_response_status not in range(200, 300):
-                    self._logger.error(f"[add_edge_to_temp_cache] Management status is unknown for {edge_identifier}")
-                    message = (
-                        f"[add_edge_to_temp_cache] Management status is unknown for {edge_identifier}. "
-                        f"Cause: {management_status_response_body}"
-                    )
-                    slack_message = {'request_id': uuid(),
-                                     'message': message}
-                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                     return
 
-                if not self._is_management_status_active(management_status_response_body):
-                    self._logger.info(
-                        f'Management status is not active for {edge_identifier}. Skipping process...')
+                if not self._bruin_repository.is_management_status_active(management_status_response_body):
+                    self._logger.info(f'Management status is not active for {edge_identifier}. Skipping process...')
                     return
                 else:
                     self._logger.info(f'Management status for {edge_identifier} seems active.')
+
                 self._temp_monitoring_map.append({
                     'edge_full_id': edge_full_id,
                     'edge_data': edge_data,
@@ -389,24 +334,10 @@ class OutageMonitor:
             async with self._process_errors_semaphore:
                 edge_identifier = EdgeIdentifier(**edge_full_id)
 
-                self._logger.info(f'[process_edge_after_error] Checking status of {edge_identifier}...')
-                edge_status_response = await self._get_edge_status_by_id(edge_full_id)
-
-                self._logger.info(
-                    f'[process_edge_after_error] Got status for edge {edge_identifier} -> {edge_status_response}')
-
+                edge_status_response = await self._velocloud_repository.get_edge_status(edge_full_id)
                 edge_status_response_body = edge_status_response['body']
                 edge_status_response_status = edge_status_response['status']
                 if edge_status_response_status not in range(200, 300):
-                    err_msg = (
-                        f"[process_edge_after_error] An error occurred while trying to retrieve edge status for edge "
-                        f"{edge_identifier}: Error {edge_status_response_status} - {edge_status_response_body}"
-                    )
-
-                    self._logger.error(err_msg)
-                    slack_message = {'request_id': uuid(),
-                                     'message': err_msg}
-                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
                     return
 
                 edge_data = edge_status_response_body["edge_info"]
@@ -446,6 +377,7 @@ class OutageMonitor:
             await _process_edge_after_error()
         except Exception as ex:
             self._metrics_repository.increment_retry_errors()
+
             serial_number = None
             for edge in self._monitoring_map_cache:
                 if edge['edge_full_id'] == edge_full_id:
@@ -454,11 +386,7 @@ class OutageMonitor:
                                f"for edge: ({edge_full_id, bruin_client_info}). Error: {ex}")
             slack_message = f"Maximum retries happened while trying to process edge {edge_full_id} with " \
                             f"serial {serial_number}"
-            slack_message_dict = {
-                'request_id': uuid(),
-                'message': slack_message
-            }
-            await self._event_bus.rpc_request("notification.slack.request", slack_message_dict, timeout=30)
+            await self._notifications_repository.send_slack_message(slack_message)
 
     async def _run_ticket_autoresolve_for_edge(self, edge_full_id, edge_status):
         edge_identifier = EdgeIdentifier(**edge_full_id)
@@ -478,22 +406,12 @@ class OutageMonitor:
 
         seconds_ago_for_down_events_lookup = self._config.MONITOR_CONFIG['autoresolve_down_events_seconds']
         timedelta_for_down_events_lookup = timedelta(seconds=seconds_ago_for_down_events_lookup)
-        last_down_events_response = await self._get_last_down_events_for_edge(
+        last_down_events_response = await self._velocloud_repository.get_last_down_edge_events(
             edge_full_id, timedelta_for_down_events_lookup
         )
-
         last_down_events_body = last_down_events_response['body']
         last_down_events_status = last_down_events_response['status']
         if last_down_events_status not in range(200, 300):
-            err_msg = (f'Error while retrieving down events for edge {edge_identifier}. '
-                       f'Reason: Error {last_down_events_status} - {last_down_events_body}')
-
-            self._logger.error(f'[ticket-autoresolve] {err_msg}')
-            slack_message = {
-                'request_id': uuid(),
-                'message': err_msg
-            }
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             return
 
         if not last_down_events_body:
@@ -501,20 +419,13 @@ class OutageMonitor:
                               f'last {seconds_ago_for_down_events_lookup / 60} minutes. Skipping autoresolve...')
             return
 
-        outage_ticket_response = await self._get_outage_ticket_for_edge(edge_status)
-
+        client_id = edge_status['bruin_client_info']['client_id']
+        outage_ticket_response = await self._bruin_repository.get_outage_ticket_details_by_service_number(
+            client_id, serial_number
+        )
         outage_ticket_response_body = outage_ticket_response['body']
         outage_ticket_response_status = outage_ticket_response['status']
         if outage_ticket_response_status not in range(200, 300):
-            err_msg = (f'Error while retrieving outage ticket for edge {edge_identifier}. '
-                       f'Reason: Error {outage_ticket_response_status} - {outage_ticket_response_body}')
-
-            self._logger.error(f'[ticket-autoresolve] {err_msg}')
-            slack_message = {
-                'request_id': uuid(),
-                'message': err_msg
-            }
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
             return
 
         if not outage_ticket_response_body:
@@ -541,26 +452,17 @@ class OutageMonitor:
 
         self._logger.info(f'Autoresolving ticket {outage_ticket_id} linked to edge {edge_identifier} '
                           f' with serial number {serial_number}...')
-
-        resolve_outage = await self._resolve_outage_ticket(outage_ticket_id, detail_for_ticket_resolution['detailID'])
-        resolve_outage_body = resolve_outage['body']
-        resolve_outage_status = resolve_outage['status']
-        if resolve_outage_status not in range(200, 300):
-            err_msg = (
-                f"Error trying to autoresolve ticket {outage_ticket_id} for serial "
-                f"{serial_number}.The error was {resolve_outage_status}: {resolve_outage_body}"
-            )
-
-            self._logger.error(err_msg)
-            slack_message = {'request_id': uuid(),
-                             'message': err_msg}
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=30)
+        resolve_ticket_response = await self._bruin_repository.resolve_ticket(
+            outage_ticket_id, detail_for_ticket_resolution['detailID']
+        )
+        if resolve_ticket_response['status'] not in range(200, 300):
             return
 
-        await self._append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
+        await self._bruin_repository.append_autoresolve_note_to_ticket(outage_ticket_id, serial_number)
 
         bruin_client_id = edge_status['bruin_client_info']['client_id']
         await self._notify_successful_autoresolve(outage_ticket_id, bruin_client_id)
+
         self._metrics_repository.increment_tickets_autoresolved()
         self._logger.info(f'Ticket {outage_ticket_id} linked to edge {edge_identifier} was autoresolved!')
 
@@ -575,108 +477,26 @@ class OutageMonitor:
         except StopIteration:
             return fallback
 
-    async def _get_last_down_events_for_edge(self, edge_full_id, since: timedelta):
-        current_datetime = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-
-        last_down_events_request = {
-            'request_id': uuid(),
-            'body': {
-                'edge': edge_full_id,
-                'start_date': current_datetime - since,
-                'end_date': current_datetime,
-                'filter': ['EDGE_DOWN', 'LINK_DEAD'],
-            }
-        }
-        down_events = await self._event_bus.rpc_request(
-            "alert.request.event.edge", last_down_events_request, timeout=180
-        )
-        return down_events
-
-    async def _resolve_outage_ticket(self, ticket_id, detail_id):
-        resolve_ticket_request = {
-            'request_id': uuid(),
-            'body': {
-                'ticket_id': ticket_id,
-                'detail_id': detail_id,
-            }
-        }
-        resolve_outage = await self._event_bus.rpc_request("bruin.ticket.status.resolve",
-                                                           resolve_ticket_request, timeout=15)
-        return resolve_outage
-
-    async def _append_autoresolve_note_to_ticket(self, ticket_id, serial_number):
-        current_datetime = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-        autoresolve_note = (
-            f'#*Automation Engine*#\nAuto-resolving detail for serial: {serial_number}\nTimeStamp: '
-            f'{current_datetime + timedelta(seconds=1)}'
-        )
-
-        append_autoresolve_note_request = {
-            'request_id': uuid(),
-            'body': {
-                'ticket_id': ticket_id,
-                'note': autoresolve_note,
-            }
-        }
-        await self._event_bus.rpc_request(
-            "bruin.ticket.note.append.request", append_autoresolve_note_request, timeout=15
-        )
-
     async def _notify_successful_autoresolve(self, ticket_id, client_id):
-        notify_slack_message_request = {
-            'request_id': uuid(),
-            'message': (
-                f'Ticket {ticket_id} was autoresolved in {self._config.TRIAGE_CONFIG["environment"].upper()} '
-                f'environment. Details at https://app.bruin.com/helpdesk?clientId={client_id}&ticketId={ticket_id}'
-            )
-        }
-        await self._event_bus.rpc_request("notification.slack.request", notify_slack_message_request, timeout=10)
-
-    async def _get_outage_ticket_for_edge(self, edge_status: dict, ticket_statuses=None):
-        edge_serial = edge_status['edges']['serialNumber']
-        client_id = edge_status['bruin_client_info']['client_id']
-
-        outage_ticket_request = {
-            'request_id': uuid(),
-            'body': {
-                'edge_serial': edge_serial,
-                'client_id': client_id,
-            },
-        }
-
-        if ticket_statuses is not None:
-            outage_ticket_request['body']['ticket_statuses'] = ticket_statuses
-
-        outage_ticket = await self._event_bus.rpc_request(
-            'bruin.ticket.outage.details.by_edge_serial.request', outage_ticket_request, timeout=180,
+        message = (
+            f'Ticket {ticket_id} was autoresolved in {self._config.TRIAGE_CONFIG["environment"].upper()} '
+            f'environment. Details at https://app.bruin.com/helpdesk?clientId={client_id}&ticketId={ticket_id}'
         )
-        return outage_ticket
-
-    async def _get_edges_for_monitoring(self):
-        edge_list_request = {
-            'request_id': uuid(),
-            'body': {
-                'filter': self._config.MONITOR_CONFIG['velocloud_instances_filter']
-            },
-        }
-
-        edge_list = await self._event_bus.rpc_request("edge.list.request", edge_list_request, timeout=300)
-        return edge_list
+        await self._notifications_repository.send_slack_message(message)
 
     async def _recheck_edge_for_ticket_creation(self, edge_full_id, bruin_client_info):
         edge_identifier = EdgeIdentifier(**edge_full_id)
 
-        self._logger.info(
-            f"[outage-recheck] Checking status of {edge_identifier} to ensure it's still in outage state...")
-        full_edge_status = await self._get_edge_status_by_id(edge_full_id)
-        self._logger.info(f'[outage-recheck] Got status for edge {edge_identifier}.')
-        edge_status = {}
-        is_outage = None
-        if full_edge_status["status"] in range(200, 300):
-            edge_status = full_edge_status["body"]["edge_info"]
-            edge_status['bruin_client_info'] = bruin_client_info
+        edge_status_response = await self._velocloud_repository.get_edge_status(edge_full_id)
+        edge_status_response_body = edge_status_response['body']
+        edge_status_response_status = edge_status_response['status']
+        if edge_status_response_status not in range(200, 300):
+            return
 
-            is_outage = self._outage_repository.is_there_an_outage(edge_status)
+        edge_data = edge_status_response_body["edge_info"]
+        edge_data['bruin_client_info'] = bruin_client_info
+
+        is_outage = self._outage_repository.is_there_an_outage(edge_data)
         if is_outage:
             self._logger.info(f'[outage-recheck] Edge {edge_identifier} is still in outage state.')
 
@@ -686,26 +506,25 @@ class OutageMonitor:
                     f'[outage-recheck] Attempting outage ticket creation for faulty edge {edge_identifier}...'
                 )
 
-                ticket_creation_response = await self._create_outage_ticket(edge_status)
+                serial_number = edge_data['edges']['serialNumber']
+                bruin_client_id = bruin_client_info['client_id']
+                ticket_creation_response = await self._bruin_repository.create_outage_ticket(
+                    bruin_client_id, serial_number
+                )
                 ticket_creation_response_body = ticket_creation_response['body']
                 ticket_creation_response_status = ticket_creation_response['status']
                 if ticket_creation_response_status in range(200, 300):
                     self._logger.info(f'Successfully created outage ticket for edge {edge_identifier}.')
                     self._metrics_repository.increment_tickets_created()
-                    bruin_client_id = bruin_client_info['client_id']
-                    slack_message = {
-                        'request_id': uuid(),
-                        'message': f'Outage ticket created for faulty edge {edge_identifier}. Ticket '
-                                   f'details at https://app.bruin.com/helpdesk?clientId={bruin_client_id}&'
-                                   f'ticketId={ticket_creation_response_body}.'
-                    }
-                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
-                    self._logger.info('Appending triage note to recently created ticket '
-                                      f'{ticket_creation_response_body}...')
-                    await self._append_triage_note_to_new_ticket(
-                        ticket_creation_response_body, edge_full_id, edge_status
+                    bruin_client_id = bruin_client_info['client_id']
+                    slack_message = (
+                        f'Outage ticket created for faulty edge {edge_identifier}. Ticket '
+                        f'details at https://app.bruin.com/helpdesk?clientId={bruin_client_id}&'
+                        f'ticketId={ticket_creation_response_body}.'
                     )
+                    await self._notifications_repository.send_slack_message(slack_message)
+                    await self._append_triage_note(ticket_creation_response_body, edge_full_id, edge_data)
                 elif ticket_creation_response_status == 409:
                     self._logger.info(
                         f'[outage-recheck] Faulty edge {edge_identifier} already has an outage ticket in progress '
@@ -716,17 +535,7 @@ class OutageMonitor:
                         f'[outage-recheck] Faulty edge {edge_identifier} has a resolved outage ticket '
                         f'(ID = {ticket_creation_response_body}). Re-opening ticket...'
                     )
-                    await self._reopen_outage_ticket(ticket_creation_response_body, edge_status)
-                else:
-                    err_msg = (f'Outage ticket creation failed for edge {edge_identifier}. Reason: '
-                               f'Error {ticket_creation_response_status} - {ticket_creation_response_body}')
-
-                    self._logger.error(f'[outage-recheck] {err_msg}')
-                    slack_message = {
-                        'request_id': uuid(),
-                        'message': err_msg
-                    }
-                    await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+                    await self._reopen_outage_ticket(ticket_creation_response_body, edge_data)
             else:
                 self._logger.info(
                     f'[outage-recheck] Not starting outage ticket creation for faulty edge {edge_identifier} because '
@@ -736,64 +545,72 @@ class OutageMonitor:
             self._logger.info(
                 f'[outage-recheck] {edge_identifier} seems to be healthy again! No ticket will be created.'
             )
-            await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+            await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
 
-    async def _create_outage_ticket(self, edge_status):
-        ticket_data = self._generate_outage_ticket(edge_status)
-        ticket_creation_response = await self._event_bus.rpc_request(
-            "bruin.ticket.creation.outage.request", {'request_id': uuid(), 'body': ticket_data}, timeout=30
+    async def _append_triage_note(self, ticket_id, edge_full_id, edge_status):
+        self._logger.info(f'Appending triage note to recently created ticket {ticket_id}...')
+
+        edge_identifier = EdgeIdentifier(**edge_full_id)
+
+        past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
+
+        recent_events_response = await self._velocloud_repository.get_last_edge_events(
+            edge_full_id, since=past_moment_for_events_lookup
         )
+        recent_events_response_body = recent_events_response['body']
+        recent_events_response_status = recent_events_response['status']
 
-        return ticket_creation_response
+        if recent_events_response_status not in range(200, 300):
+            return
 
-    async def _append_triage_note_to_new_ticket(self, ticket_id, edge_full_id, edge_status):
-        serial_number = edge_status['edges']['serialNumber']
+        if not recent_events_response_body:
+            self._logger.info(
+                f'No events were found for edge {edge_identifier} starting from {past_moment_for_events_lookup}. '
+                f'Not appending any triage note to ticket {ticket_id}.'
+            )
+            return
 
-        tickets = [
-            {
-                'ticket_id': ticket_id,
-                'ticket_detail': {
-                    'detailValue': serial_number,
-                }
-            }
-        ]
+        recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
 
-        edges_data_by_serial = {
-            serial_number: {
-                'edge_id': edge_full_id,
-                'edge_status': edge_status,
-            }
-        }
+        ticket_note = self._triage_repository.build_triage_note(edge_full_id, edge_status, recent_events_response_body)
 
-        await self._process_tickets_without_triage(tickets, edges_data_by_serial)
+        if self._config.TRIAGE_CONFIG['environment'] == 'dev':
+            serial_number = edge_status['edges']['serialNumber']
+            triage_message = (
+                f'Triage note would have been appended to ticket {ticket_id} (serial: {serial_number}).'
+                f'Note: {ticket_note}. Details at app.bruin.com/t/{ticket_id}'
+            )
+            self._logger.info(triage_message)
+            await self._notifications_repository.send_slack_message(triage_message)
+        elif self._config.TRIAGE_CONFIG['environment'] == 'production':
+            append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
+
+            if append_note_response['status'] == 503:
+                self._metrics_repository.increment_first_triage_errors()
 
     async def _reopen_outage_ticket(self, ticket_id, edge_status):
         self._logger.info(f'[outage-ticket-reopening] Reopening outage ticket {ticket_id}...')
 
-        ticket_details_request_msg = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
-        ticket_details = await self._event_bus.rpc_request(
-            "bruin.ticket.details.request", ticket_details_request_msg, timeout=15
-        )
-        detail_id_for_reopening = ticket_details['body']['ticketDetails'][0]['detailID']
+        ticket_details_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        ticket_details_response_body = ticket_details_response['body']
+        ticket_details_response_status = ticket_details_response['status']
+        if ticket_details_response_status not in range(200, 300):
+            return
 
-        ticket_reopening_msg = {'request_id': uuid(), 'body': {'ticket_id': ticket_id,
-                                                               'detail_id': detail_id_for_reopening}}
-        ticket_reopening_response = await self._event_bus.rpc_request(
-            "bruin.ticket.status.open", ticket_reopening_msg, timeout=30
-        )
+        detail_id_for_reopening = ticket_details_response_body['ticketDetails'][0]['detailID']
+        ticket_reopening_response = await self._bruin_repository.open_ticket(ticket_id, detail_id_for_reopening)
+        ticket_reopening_response_status = ticket_reopening_response['status']
 
-        if ticket_reopening_response['status'] == 200:
-            self._logger.info(
-                f'[outage-ticket-reopening] Outage ticket {ticket_id} reopening succeeded.'
-            )
+        if ticket_reopening_response_status == 200:
+            self._logger.info(f'[outage-ticket-reopening] Outage ticket {ticket_id} reopening succeeded.')
             bruin_client_id = edge_status['bruin_client_info']['client_id']
-            slack_message = {
-                'request_id': uuid(),
-                'message': f'Outage ticket {ticket_id} reopened. Ticket details at '
-                           f'https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}.'
-            }
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
+            slack_message = (
+                f'Outage ticket {ticket_id} reopened. Ticket details at '
+                f'https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}.'
+            )
+            await self._notifications_repository.send_slack_message(slack_message)
             await self._post_note_in_outage_ticket(ticket_id, edge_status)
+
             self._metrics_repository.increment_tickets_reopened()
         else:
             self._logger.error(
@@ -801,8 +618,6 @@ class OutageMonitor:
             )
 
     async def _post_note_in_outage_ticket(self, ticket_id, edge_status):
-        ticket_note_timestamp = datetime.now(timezone(self._config.MONITOR_CONFIG['timezone']))
-
         outage_causes = self._get_outage_causes(edge_status)
         ticket_note_outage_causes = 'Outage causes:'
         if outage_causes is not None:
@@ -817,26 +632,7 @@ class OutageMonitor:
         else:
             ticket_note_outage_causes += ' Could not determine causes.'
 
-        ticket_note = (
-            f'#*Automation Engine*#\n'
-            f'Re-opening ticket.\n'
-            f'{ticket_note_outage_causes}\n'
-            f'TimeStamp: {str(ticket_note_timestamp)}'
-        )
-
-        ticket_append_note_msg = {'request_id': uuid(), 'body': {'ticket_id': ticket_id, 'note': ticket_note}}
-
-        self._logger.info(f'[outage-ticket-reopening] Posting reopening note in ticket {ticket_id}...')
-        await self._event_bus.rpc_request("bruin.ticket.note.append.request", ticket_append_note_msg, timeout=15)
-
-    def _generate_outage_ticket(self, edge_status):
-        serial_number = edge_status['edges']['serialNumber']
-        bruin_client_id = edge_status['bruin_client_info']['client_id']
-
-        return {
-            "client_id": bruin_client_id,
-            "service_number": serial_number,
-        }
+        await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, ticket_note_outage_causes)
 
     def _get_outage_causes(self, edge_status):
         outage_causes = {}
@@ -854,321 +650,3 @@ class OutageMonitor:
                 outage_links_states[link_data['interface']] = link_state
 
         return outage_causes or None
-
-    async def _get_edge_status_by_id(self, edge_full_id):
-        edge_status_request_dict = {
-            'request_id': uuid(),
-            'body': edge_full_id,
-        }
-        edge_status_response = await self._event_bus.rpc_request(
-            'edge.status.request', edge_status_request_dict, timeout=120,
-        )
-
-        return edge_status_response
-
-    async def _get_management_status(self, edge_status):
-        bruin_client_id = edge_status['bruin_client_info']['client_id']
-        serial_number = edge_status['edges']['serialNumber']
-        management_request = {
-            "request_id": uuid(),
-            "body": {
-                "client_id": bruin_client_id,
-                "status": "A",
-                "service_number": serial_number
-            }
-        }
-
-        management_status = await self._event_bus.rpc_request("bruin.inventory.management.status",
-                                                              management_request, timeout=30)
-
-        return management_status
-
-    async def _get_bruin_client_info_by_serial(self, serial_number):
-        client_info_request = {
-            "request_id": uuid(),
-            "body": {
-                "service_number": serial_number,
-            },
-        }
-
-        client_info = await self._event_bus.rpc_request("bruin.customer.get.info", client_info_request, timeout=30)
-        return client_info
-
-    def _is_management_status_active(self, management_status) -> bool:
-        return management_status in {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"}
-
-    # TODO: All the code starting from this line should be isolated to its own repository and then make both
-    # OutageMonitoring and Triage actions share that repo to append the first triage note to the proper tickets
-    async def _process_tickets_without_triage(self, tickets, edges_data_by_serial):  # pragma: no cover
-        self._logger.info('Processing tickets without triage...')
-
-        for ticket in tickets:
-            ticket_id = ticket['ticket_id']
-
-            serial_number = ticket['ticket_detail']['detailValue']
-            edge_data = edges_data_by_serial[serial_number]
-            edge_full_id = edge_data['edge_id']
-            edge_identifier = EdgeIdentifier(**edge_full_id)
-
-            past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
-
-            recent_events_response = await self._get_last_events_for_edge(
-                edge_full_id, since=past_moment_for_events_lookup
-            )
-
-            recent_events_response_status = recent_events_response['status']
-            if recent_events_response_status not in range(200, 300):
-                continue
-
-            recent_events_response_body = recent_events_response['body']
-            if not recent_events_response_body:
-                self._logger.info(
-                    f'No events were found for edge {edge_identifier} starting from {past_moment_for_events_lookup}. '
-                    f'Not appending the first triage note to ticket {ticket_id}.'
-                )
-                continue
-
-            recent_events_response_body.sort(key=lambda event: event['eventTime'], reverse=True)
-
-            relevant_info_for_triage_note = self._gather_relevant_data_for_first_triage_note(
-                edge_data, recent_events_response_body
-            )
-
-            if self._config.TRIAGE_CONFIG['environment'] == 'dev':
-                self._logger.info(f'Triage note would have been appended to ticket {ticket_id} with the following'
-                                  f'info: {relevant_info_for_triage_note}')
-                # email_data = self._template_renderer.compose_email_object(relevant_info_for_triage_note)
-                #
-                # try:
-                #     await self._send_email(email_data)
-                # except Exception:
-                #     self._logger.error(f'An error occurred when sending email with data {email_data}')
-            elif self._config.TRIAGE_CONFIG['environment'] == 'production':
-                ticket_note = self._transform_relevant_data_into_ticket_note(relevant_info_for_triage_note)
-
-                try:
-                    append_note_response = await self._append_note_to_ticket(ticket_id, ticket_note)
-                except Exception:
-                    await self._notify_failing_rpc_request_for_appending_ticket_note(ticket_id, ticket_note)
-                    continue
-
-                append_note_response_status = append_note_response['status']
-                if append_note_response_status not in range(200, 300):
-                    await self._notify_http_error_when_appending_note_to_ticket(ticket_id, append_note_response)
-
-        self._logger.info('Finished processing tickets without triage!')
-
-    async def _get_last_events_for_edge(self, edge_full_id, since: datetime):  # pragma: no cover
-        until = datetime.now(utc)
-        filters = ['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-
-        err_msg = None
-        edge_identifier = EdgeIdentifier(**edge_full_id)
-
-        request = {
-            'request_id': uuid(),
-            'body': {
-                'edge': edge_full_id,
-                'start_date': since,
-                'end_date': until,
-                'filter': filters,
-            },
-        }
-
-        try:
-            self._logger.info(
-                f"Getting events of edge {edge_identifier} having any type of {filters} that took place "
-                f"between {since} and {until} from Velocloud..."
-            )
-            response = await self._event_bus.rpc_request("alert.request.event.edge", request, timeout=30)
-            self._logger.info(
-                f"Got events of edge {edge_identifier} having any type in {filters} that took place "
-                f"between {since} and {until} from Velocloud!"
-            )
-        except Exception as e:
-            err_msg = f'An error occurred when requesting edge events ' \
-                      f'from Velocloud for edge {edge_identifier} -> {e}'
-            response = {'body': None, 'status': 503}
-        else:
-            response_body = response['body']
-            response_status = response['status']
-
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f'Error while retrieving events of edge {edge_identifier} having any type in {filters} that '
-                    f'took place between {since} and {until} in {self._config.TRIAGE_CONFIG["environment"].upper()}'
-                    f'environment: Error {response_status} - {response_body}'
-                )
-
-        if err_msg:
-            self._logger.error(err_msg)
-            slack_message = {'request_id': uuid(), 'message': err_msg}
-            await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-
-        return response
-
-    def _gather_relevant_data_for_first_triage_note(self, edge_data, edge_events) -> dict:  # pragma: no cover
-        edge_full_id = edge_data['edge_id']
-        edge_status = edge_data['edge_status']
-
-        host = edge_full_id['host']
-        enterprise_id = edge_full_id['enterprise_id']
-        edge_id = edge_full_id['edge_id']
-
-        edge_status_data = edge_status['edges']
-        edge_name = edge_status_data['name']
-        edge_state = edge_status_data['edgeState']
-        edge_serial = edge_status_data['serialNumber']
-
-        edge_links = edge_status['links']
-
-        velocloud_base_url = f'https://{host}/#!/operator/customer/{enterprise_id}/monitor'
-        velocloud_edge_base_url = f'{velocloud_base_url}/edge/{edge_id}'
-
-        relevant_data: dict = OrderedDict()
-
-        relevant_data["Orchestrator Instance"] = host
-        relevant_data["Edge Name"] = edge_name
-        relevant_data["Links"] = {
-            'Edge': f'{velocloud_edge_base_url}/',
-            'QoE': f'{velocloud_edge_base_url}/qoe/',
-            'Transport': f'{velocloud_edge_base_url}/links/',
-            'Events': f'{velocloud_base_url}/events/',
-        }
-
-        relevant_data["Edge Status"] = edge_state
-        relevant_data["Serial"] = edge_serial
-
-        links_interface_names = []
-        for link in edge_links:
-            link_data = link['link']
-            if not link_data:
-                continue
-
-            interface_name = link_data['interface']
-            link_state = link_data['state']
-            link_label = link_data['displayName']
-
-            relevant_data[f'Interface {interface_name}'] = empty_str
-            relevant_data[f'Interface {interface_name} Label'] = link_label
-            relevant_data[f'Interface {interface_name} Status'] = link_state
-
-            links_interface_names.append(interface_name)
-
-        tz_object = timezone(self._config.TRIAGE_CONFIG['timezone'])
-
-        relevant_data["Last Edge Online"] = None
-        relevant_data["Last Edge Offline"] = None
-
-        last_online_event_for_edge = self._get_first_element_matching(
-            iterable=edge_events, condition=lambda event: event['event'] == 'EDGE_UP'
-        )
-        last_offline_event_for_edge = self._get_first_element_matching(
-            iterable=edge_events, condition=lambda event: event['event'] == 'EDGE_DOWN'
-        )
-
-        if last_online_event_for_edge is not None:
-            relevant_data["Last Edge Online"] = parse(last_online_event_for_edge['eventTime']).astimezone(tz_object)
-
-        if last_offline_event_for_edge is not None:
-            relevant_data["Last Edge Offline"] = parse(last_offline_event_for_edge['eventTime']).astimezone(tz_object)
-
-        for interface_name in links_interface_names:
-            last_online_key = f'Last {interface_name} Interface Online'
-            last_offline_key = f'Last {interface_name} Interface Offline'
-
-            relevant_data[last_online_key] = None
-            relevant_data[last_offline_key] = None
-
-            last_online_event_for_current_link = self._get_first_element_matching(
-                iterable=edge_events,
-                condition=lambda event: event['event'] == 'LINK_ALIVE' and self.__event_message_contains_interface_name(
-                    event['message'], interface_name)
-            )
-
-            last_offline_event_for_current_link = self._get_first_element_matching(
-                iterable=edge_events,
-                condition=lambda event: event['event'] == 'LINK_DEAD' and self.__event_message_contains_interface_name(
-                    event['message'], interface_name)
-            )
-
-            if last_online_event_for_current_link is not None:
-                relevant_data[last_online_key] = parse(last_online_event_for_current_link['eventTime']).astimezone(
-                    tz_object)
-
-            if last_offline_event_for_current_link is not None:
-                relevant_data[last_offline_key] = parse(last_offline_event_for_current_link['eventTime']).astimezone(
-                    tz_object)
-
-        return relevant_data
-
-    def _transform_relevant_data_into_ticket_note(self, relevant_data: dict) -> str:  # pragma: no cover
-        ticket_note_lines = [
-            '#*Automation Engine*#',
-            'Triage',
-        ]
-
-        for key, value in relevant_data.items():
-            if value is empty_str:
-                ticket_note_lines.append(key)
-            elif key == 'Links':
-                clickable_links = [f'[{name}|{url}]' for name, url in value.items()]
-                ticket_note_lines.append(f"Links: {' - '.join(clickable_links)}")
-            else:
-                ticket_note_lines.append(f'{key}: {value}')
-
-        return os.linesep.join(ticket_note_lines)
-
-    async def _append_note_to_ticket(self, ticket_id, ticket_note):  # pragma: no cover
-        append_note_to_ticket_request = {
-            'request_id': uuid(),
-            'body': {
-                'ticket_id': ticket_id,
-                'note': ticket_note,
-            },
-        }
-
-        append_ticket_to_note = await self._event_bus.rpc_request(
-            "bruin.ticket.note.append.request", append_note_to_ticket_request, timeout=15
-        )
-        return append_ticket_to_note
-
-    __event_interface_name_regex = re.compile(
-        r'(^Interface (?P<interface_name>[a-zA-Z0-9]+) is (up|down)$)|'
-        r'(^Link (?P<interface_name2>[a-zA-Z0-9]+) is (no longer|now) DEAD$)'
-    )
-
-    def __event_message_contains_interface_name(self, event_message, interface_name):  # pragma: no cover
-        match = self.__event_interface_name_regex.match(event_message)
-
-        interface_name_found = match.group('interface_name') or match.group('interface_name2')
-        return interface_name == interface_name_found
-
-    async def _notify_failing_rpc_request_for_appending_ticket_note(self, ticket_id, ticket_note):  # pragma: no cover
-        err_msg = f'An error occurred when appending a ticket note to ticket {ticket_id}. Ticket note: {ticket_note}'
-
-        self._logger.error(err_msg)
-        slack_message = {'request_id': uuid(), 'message': err_msg}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-
-    async def _notify_http_error_when_appending_note_to_ticket(self, ticket_id, append_note_response):
-        append_note_response_body = append_note_response['body']
-        append_note_response_status = append_note_response['status']
-
-        err_msg = (
-            f'Error while appending note to ticket {ticket_id} in {self._config.TRIAGE_CONFIG["environment"].upper()} '
-            f'environment: Error {append_note_response_status} - {append_note_response_body}'
-        )
-
-        self._logger.error(err_msg)
-        slack_message = {'request_id': uuid(), 'message': err_msg}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
-
-    async def _notify_triage_note_was_appended_to_ticket(self, ticket_id, bruin_client_id):  # pragma: no cover
-        message = (f'Triage appended to ticket {ticket_id} in '
-                   f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment. Details at '
-                   f'https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}')
-
-        self._logger.info(message)
-        slack_message = {'request_id': uuid(), 'message': message}
-        await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)

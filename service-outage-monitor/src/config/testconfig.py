@@ -66,7 +66,6 @@ QUART_CONFIG = {
 TRIAGE_CONFIG = {
     'environment': "dev",
     'polling_minutes': 10,
-    'send_email': True,
     'recipient': "some.recipient@email.com",
     'enable_triage': True,
     'timezone': 'US/Eastern',

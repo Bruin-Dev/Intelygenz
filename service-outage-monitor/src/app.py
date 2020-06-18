@@ -1,6 +1,5 @@
 import asyncio
 
-import jinja2
 import redis
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -13,11 +12,15 @@ from prometheus_client import start_http_server
 
 from application.actions.outage_monitoring import OutageMonitor
 from application.actions.triage import Triage
-from application.repositories.outage_monitoring_metrics_repository import OutageMonitoringMetricsRepository
+from application.repositories.bruin_repository import BruinRepository
 from application.repositories.monitoring_map_repository import MonitoringMapRepository
+from application.repositories.notifications_repository import NotificationsRepository
+from application.repositories.outage_monitoring_metrics_repository import OutageMonitoringMetricsRepository
 from application.repositories.outage_repository import OutageRepository
 from application.repositories.triage_metrics_repository import TriageMetricsRepository
-from application.repositories.triage_report_renderer import TriageReportRenderer
+from application.repositories.triage_repository import TriageRepository
+from application.repositories.utils_repository import UtilsRepository
+from application.repositories.velocloud_repository import VelocloudRepository
 from config import config
 
 
@@ -51,29 +54,32 @@ class Container:
         self._outage_monitoring_metrics_repository = OutageMonitoringMetricsRepository()
 
         # REPOSITORIES
+        self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
+        self._velocloud_repository = VelocloudRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                                         notifications_repository=self._notifications_repository)
+        self._bruin_repository = BruinRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                                 notifications_repository=self._notifications_repository)
+        self._utils_repository = UtilsRepository()
+        self._triage_repository = TriageRepository(config, self._utils_repository)
         self._monitoring_map_repository = MonitoringMapRepository(config=config, scheduler=self._scheduler,
                                                                   event_bus=self._event_bus, logger=self._logger,
+                                                                  velocloud_repository=self._velocloud_repository,
+                                                                  bruin_repository=self._bruin_repository,
                                                                   metrics_repository=self._triage_metrics_repository)
-
-        # JINJA2 TEMPLATE ENVIRONMENTS
-        self._triage_report_templates_loader = jinja2.FileSystemLoader(searchpath="src/templates/triage")
-        self._triage_report_templates_environment = jinja2.Environment(loader=self._triage_report_templates_loader)
-
-        # EMAIL TEMPLATE
-        self._triage_report_renderer = TriageReportRenderer(config, self._triage_report_templates_environment)
 
         # OUTAGE UTILS
         self._outage_repository = OutageRepository(self._logger)
 
         # ACTIONS
-        self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
-                                             config, self._outage_repository)
         self._triage = Triage(self._event_bus, self._logger, self._scheduler,
-                              config, self._triage_report_renderer, self._outage_repository,
-                              self._monitoring_map_repository, self._triage_metrics_repository)
+                              config, self._outage_repository,
+                              self._monitoring_map_repository, self._bruin_repository,
+                              self._velocloud_repository, self._notifications_repository,
+                              self._triage_repository, self._triage_metrics_repository)
         self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,
-                                             config, self._outage_repository,
-                                             self._outage_monitoring_metrics_repository)
+                                             config, self._outage_repository, self._bruin_repository,
+                                             self._velocloud_repository, self._notifications_repository,
+                                             self._triage_repository, self._outage_monitoring_metrics_repository)
 
     async def _start(self):
         self._start_prometheus_metrics_server()
