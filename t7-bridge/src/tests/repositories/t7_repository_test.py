@@ -69,3 +69,16 @@ class TestT7Repository:
 
         t7_repository._t7_client.get_prediction.assert_called_once_with(ticket_id)
         assert predictions == raw_predictions
+
+    def post_automation_metrics_test(self):
+        params = {"ticket_id": 123, "ticket_rows": []}
+        return_value = {"body": "No content", "status": 204}
+
+        logger = Mock()
+        t7_client = Mock()
+        t7_client.post_automation_metrics = Mock(return_value=return_value)
+
+        t7_repository = T7Repository(logger, t7_client)
+
+        post_automation_metrics = t7_repository.post_automation_metrics(params)
+        assert post_automation_metrics == return_value

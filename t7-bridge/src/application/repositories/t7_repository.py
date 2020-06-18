@@ -10,3 +10,7 @@ class T7Repository:
             return prediction
         prediction["body"] = prediction["body"]["assets"]
         return prediction
+
+    def post_automation_metrics(self, params):
+        post_metrics_response = self._t7_client.post_automation_metrics(params)
+        return post_metrics_response

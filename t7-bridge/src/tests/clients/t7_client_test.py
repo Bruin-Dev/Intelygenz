@@ -175,3 +175,140 @@ class TestT7Client:
             assert mock_get.call_args[0][0] == 'http://test-url.com/api/v1/suggestions?ticketId=123'
             assert prediction_list == {"body": f'Got 500 from TNBA API: {get_response}',
                                        "status": 500}
+
+    def post_automation_metrics_200_test(self):
+        config = testconfig
+        post_response = "Successfully posted metrics"
+
+        logger = Mock()
+        logger.info = Mock()
+
+        params = {"ticket_id": 123, "ticket_rows": []}
+        response_mock = Mock()
+        response_mock.status_code = 204
+
+        t7_client = T7Client(logger, config)
+        t7_client._get_request_headers = Mock()
+        with patch.object(t7_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            automation_metrics_response = t7_client.post_automation_metrics(params)
+
+            assert logger.info.called
+            mock_post.assert_called_once()
+            assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
+            assert automation_metrics_response == {"body": post_response, "status": 204}
+
+    def post_automation_metrics_400_test(self):
+        config = testconfig
+        post_response = "Failed"
+
+        logger = Mock()
+        logger.info = Mock()
+
+        params = {"ticket_id": 123, "ticket_rows": []}
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=post_response)
+        response_mock.status_code = 400
+
+        t7_client = T7Client(logger, config)
+        t7_client._get_request_headers = Mock()
+        with patch.object(t7_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            automation_metrics_response = t7_client.post_automation_metrics(params)
+
+            assert logger.info.called
+            mock_post.assert_called_once()
+            assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
+            assert automation_metrics_response == {"body": post_response, "status": 400}
+
+    def post_automation_metrics_401_test(self):
+        config = testconfig
+        post_response = "Failed"
+
+        logger = Mock()
+        logger.info = Mock()
+
+        params = {"ticket_id": 123, "ticket_rows": []}
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=post_response)
+        response_mock.status_code = 401
+
+        t7_client = T7Client(logger, config)
+        t7_client._get_request_headers = Mock()
+        with patch.object(t7_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            automation_metrics_response = t7_client.post_automation_metrics(params)
+
+            assert logger.info.called
+            mock_post.assert_called_once()
+            assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
+            assert automation_metrics_response == {"body": post_response, "status": 401}
+
+    def post_automation_metrics_403_test(self):
+        config = testconfig
+        post_response = "Failed"
+
+        logger = Mock()
+        logger.info = Mock()
+
+        params = {"ticket_id": 123, "ticket_rows": []}
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=post_response)
+        response_mock.status_code = 403
+
+        t7_client = T7Client(logger, config)
+        t7_client._get_request_headers = Mock()
+        with patch.object(t7_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            automation_metrics_response = t7_client.post_automation_metrics(params)
+
+            assert logger.info.called
+            mock_post.assert_called_once()
+            assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
+            assert automation_metrics_response == {"body": 'Got 403 Forbidden from TNBA API', "status": 403}
+
+    def post_automation_metrics_404_as_500_test(self):
+        config = testconfig
+        post_response = {'error': 'error_getting_ticket_data',
+                         'message': 'Unexpected error getting ticket data from Bruin API.'}
+
+        logger = Mock()
+        logger.info = Mock()
+
+        params = {"ticket_id": 123, "ticket_rows": []}
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=post_response)
+        response_mock.status_code = 500
+
+        t7_client = T7Client(logger, config)
+        t7_client._get_request_headers = Mock()
+        with patch.object(t7_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            automation_metrics_response = t7_client.post_automation_metrics(params)
+
+            assert logger.info.called
+            mock_post.assert_called_once()
+            assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
+            assert automation_metrics_response == {"body": f"Got possible 404 as 500 from TNBA API: {post_response}",
+                                                   "status": 500}
+
+    def post_automation_metrics_500_test(self):
+        config = testconfig
+        post_response = {
+                          "error": "unexpected error",
+                          "message": "Unexpected error"
+                        }
+
+        logger = Mock()
+        logger.info = Mock()
+
+        params = {"ticket_id": 123, "ticket_rows": []}
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=post_response)
+        response_mock.status_code = 500
+
+        t7_client = T7Client(logger, config)
+        t7_client._get_request_headers = Mock()
+        with patch.object(t7_client_module.requests, 'post', return_value=response_mock) as mock_post:
+            automation_metrics_response = t7_client.post_automation_metrics(params)
+
+            assert logger.info.called
+            mock_post.assert_called()
+            assert mock_post.call_args[0][0] == 'http://test-url.com/api/v2/metrics'
+            assert automation_metrics_response == {"body": f"Got 500 from TNBA API: {post_response}",
+                                                   "status": 500}
