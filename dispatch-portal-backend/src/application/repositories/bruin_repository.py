@@ -46,7 +46,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
-                    f'{ticket_topic} and belonging to client {client_id} in {self._config.ENVIRONMENT.upper()} '
+                    f'{ticket_topic} and belonging to client {client_id} in {self._config.ENVIRONMENT_NAME.upper()} '
                     f'environment: Error {response_status} - {response_body}'
                 )
 
@@ -80,7 +80,7 @@ class BruinRepository:
             if response_status not in range(200, 300):
                 err_msg = (
                     f'Error while retrieving details of ticket {ticket_id} in '
-                    f'{self._config.ENVIRONMENT.upper()} environment: '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
                     f'Error {response_status} - {response_body}'
                 )
 
@@ -122,7 +122,7 @@ class BruinRepository:
 
             if response_status not in range(200, 300):
                 err_msg = (
-                    f'Error while appending note to ticket {ticket_id} in {self._config.ENVIRONMENT.upper()} '
+                    f'Error while appending note to ticket {ticket_id} in {self._config.ENVIRONMENT_NAME.upper()} '
                     f'environment. Note was {note}. Error: Error {response_status} - {response_body}'
                 )
 

@@ -20,6 +20,7 @@ from swagger_ui import quart_api_doc
 
 from application.mappers import lit_mapper, cts_mapper
 from application.repositories.utils_repository import UtilsRepository
+from application.templates.cts.dispatch_request_mail import render_email_template
 from application.templates.lit.dispatch_requested import get_dispatch_requested_note as lit_get_dispatch_requested_note
 from application.templates.cts.dispatch_requested import get_dispatch_requested_note as cts_get_dispatch_requested_note
 
@@ -334,8 +335,9 @@ class DispatchServer:
                 'code': response['status'], 'message': response['body']
             }
             return jsonify(error_response), response['status'], None
-        if 'body' not in response or 'Id' not in response['body'] \
-                or response['body'] is None:
+        if 'body' not in response or 'done' not in response['body'] or response['body']['done'] is False or \
+                'records' not in response['body'] or response['body']['records'] is None or \
+                len(response['body']['records']) == 0:
             self._logger.error(f"[CTS] Could not retrieve dispatch, reason: {response['body']}")
             error_response = {
                 'code': response['status'], 'message': response['body']
@@ -344,9 +346,10 @@ class DispatchServer:
 
         self._logger.info(f"[CTS] Dispatch [{dispatch_number}] - {response['body']} "
                           f"- took {time.time() - start_time}")
-        response_dispatch['id'] = response['body']['Id']
+        dispatch = response['body']['records'][0]
+        response_dispatch['id'] = dispatch.get('Name') if dispatch.get('Name') else dispatch_number
         response_dispatch['vendor'] = 'cts'
-        response_dispatch['dispatch'] = cts_mapper.map_get_dispatch(response['body'])
+        response_dispatch['dispatch'] = cts_mapper.map_get_dispatch(dispatch)
 
         return jsonify(response_dispatch), response["status"], None
 
@@ -364,15 +367,15 @@ class DispatchServer:
             }
             return jsonify(error_response), response['status'], None
 
-        if 'body' not in response or 'Status' not in response['body'] or \
-                'DispatchList' not in response['body'] or response['body']['DispatchList'] is None:
+        if 'body' not in response or 'done' not in response['body'] or response['body']['done'] is False or \
+                'records' not in response['body'] or response['body']['records'] is None:
             self._logger.error(f"[CTS] Could not retrieve dispatch, reason: {response['body']}")
             error_response = {
                 'code': response['status'], 'message': response['body']
             }
             return jsonify(error_response), response['status'], None
 
-        all_dispatches = response['body']['DispatchList']
+        all_dispatches = response['body'].get('records', [])
         self._logger.info(f"[CTS] All Dispatches - {len(all_dispatches)} - took {time.time() - start_time}")
         response_dispatch['vendor'] = 'cts'
         response_dispatch['list_dispatch'] = [cts_mapper.map_get_dispatch(d) for d in all_dispatches]
@@ -429,17 +432,6 @@ class DispatchServer:
             ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
             ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
 
-            # main_watermark_found = UtilsRepository.get_first_element_matching(
-            #     iterable=ticket_notes,
-            #     condition=lambda note: self.MAIN_WATERMARK in note.get('noteValue')
-            # )
-            # if main_watermark_found is None:
-            #     self._logger.info(f"Ticket: {ticket_id} not created through dispatch portal")
-            #     return_response['status'] = 400
-            #     return_response['body'] = f"Error: Ticket [{ticket_id}] not created through dispatch portal"
-            #     # TODO: notify slack
-            #     return return_response
-
             requested_watermark_found = UtilsRepository.get_first_element_matching(
                 iterable=ticket_notes,
                 condition=lambda note: self.DISPATCH_REQUESTED_WATERMARK in note.get('noteValue')
@@ -449,11 +441,13 @@ class DispatchServer:
                 self._logger.info(f"Ticket: {ticket_id} already has a requested note dispatch portal")
             else:
                 # Send email
-                email_html = f'<div>{json.dumps(body, indent=4)}</div>'
+                cts_body_mapped = cts_mapper.map_create_dispatch(body)
+                email_template = render_email_template(cts_body_mapped)
+                email_html = f'<div>{email_template}</div>'
                 email_data = {
                     'request_id': uuid(),
                     'email_data': {
-                        'subject': f'CTS - Service Submission - {ticket_id}',
+                        'subject': f'[TEST] CTS - Service Submission - {ticket_id}',
                         'recipient': self._config.CTS_CONFIG["email"],
                         'text': 'this is the accessible text for the email',
                         'html': email_html,

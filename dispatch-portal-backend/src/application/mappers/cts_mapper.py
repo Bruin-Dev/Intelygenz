@@ -1,10 +1,14 @@
+import iso8601
+from pytz import timezone
+
+
 def map_get_dispatch(body):
     '''
     From CTS to dispatch portal
     '''
     body = {k.lower(): v for k, v in body.items()}
     dispatch_request = {}
-    # raise Exception("TODO: not implemented")
+    # TODO: not implemented - map fields properly
     return body
 
 
@@ -13,97 +17,67 @@ def map_create_dispatch(body):
     from dispatch portal to cts
     '''
     body = {k.lower(): v for k, v in body.items()}
+
+    # month/day/year hh:mm
+    # Email
     dispatch_request = {
-        "datetime_of_dispatch": f"{body['date_of_dispatch']} {body['time_of_dispatch']}",
+        "onsite_time_needed": f"{body['date_of_dispatch']} {body['time_of_dispatch']}",
         "timezone_of_dispatch": body['time_zone'],
-        "reference": str(body["mettel_bruin_ticket_id"]),
+        "reference": body["mettel_bruin_ticket_id"],
         "sla_level": body["sla_level"],
-        "job_country": "United States",  # TODO: Canada, ¿PR?
-        "job_site": body["job_site"],  # Location Owner
-        "job_site_street": body["job_site_street"],
-        "job_site_city": body["job_site_city"],
-        "job_site_state": body["job_site_state"],
-        "job_site_zip_code": body["job_site_zip_code"],
-        "job_site_contact_name": body["job_site_contact_name"],
-        "job_site_contact_phone_number": body["job_site_contact_number"],
-        "scope_of_work": body["scope_of_work"],  # TODO: Onsite SOW
-        "failure_experienced": body["failure_experienced"],
-        "special_materials_needed_for_dispatch": body["materials_needed_for_dispatch"],
-        "mettel_tech_call_in_instructions": body["mettel_tech_call_in_instructions"],
-        "services_categories": body["services_categories"],  # TODO: services_categories
-        "mettel_department": body["mettel_department"],
-        "name_of_mettel_requester": body["name_of_mettel_requester"],
-        "mettel_department_phone_number": body["mettel_department_phone_number"],
-        "mettel_requester_email": body["mettel_requester_email"],
-        #######################################################
-        "date_of_dispatch": body['date_of_dispatch'],
-
-        "field52361222M": "month",
-        "field52361222D": "day",
-        "field52361222Y": "year",
-        "field52361222H": "hour",
-        "field52361222I": "minute",
-        "field52361222A": "am_pm",
-
-        "field52362094": "SLA LEVEL",
-
-        "site_survey_quote_required": body['site_survey_quote_required'],
-
-        "local_time_of_dispatch": body['time_of_dispatch'],
-
-        "time_zone_local": body['time_zone'],
-        "field74407345": "",
-
-        # "job_site": body["job_site"],
-
-        # "job_site_street": body["job_site_street"],
-        "field52362051-address": "",
-        "field52362051-address2": "",
-
-        # "job_site_city": body["job_site_city"],
-        "field52362051-city": "",
-
-        # "job_site_state": body["job_site_state"],
-        "field52362051-state": "",
-
-        # "job_site_zip_code": body["job_site_zip_code"],
-        "field52362051-zip": "",
-
-        "field52361914": "location_id_field",
-        "field52361998": "location_owner_field",
-
-        "job_site_contact_name_and_phone_number": f'{body["job_site_contact_name"]} '
-                                                  f'{body["job_site_contact_number"]}',
-        "field52377770-first": "onsite_contact_first_name_field",
-        "field52377770-last": "onsite_contact_last_name_field",
-        "field52377777": "onsite_contact_phone_number_field",
-
-        "field52380329": "failure_experienced_field",
-        "field52380353": "onsite_sow_field",
-
-        # "special_materials_needed_for_dispatch": body["materials_needed_for_dispatch"],
-        "field56596157": "",
-
-        # "scope_of_work": body["scope_of_work"],
-        "field52380918": "services_categories",
-
-        # "mettel_tech_call_in_instructions": body["mettel_tech_call_in_instructions"],
-
-        "name_of_mettel_requester": body["name_of_mettel_requester"],
-        "field52381072-first": "mettel_requester_name_field",
-        "field52381072-last": "mettel_requester_last_name_field",
-
-        "mettel_department": body["mettel_department"],
-
-        "field52381073": "mettel_requester_phone_number_field",
-
-        "mettel_requester_email": body["mettel_requester_email"],
-        "field52381073": "mettel_requester_email_field",
-
-        "field52361160": str(body["mettel_bruin_ticket_id"]),
-
-        # Attachments
-        # "field52381089": "attachment_1_field",
-        # "field52381118": "attachment_2_field"
+        "location_country": body['location_country'],
+        "location_owner": body["job_site"],
+        "location_address_1": body['job_site_street_1'],
+        "location_address_2": body['job_site_street_2'],
+        "city": body["job_site_city"],
+        "state": body["job_site_state"],
+        "zip": body["job_site_zip_code"],
+        "onsite_contact_name": body["job_site_contact_name"],
+        "onsite_contact_lastname": body["job_site_contact_lastname"],
+        "onsite_contact_phone_number": body["job_site_contact_number"],
+        "failure_experienced": body["scope_of_work"],
+        "materials_needed": body["materials_needed_for_dispatch"],
+        "service_category": body["service_type"],
+        "onsite_sow": body["mettel_tech_call_in_instructions"],
+        "name": body["name_of_mettel_requester"],
+        "lastname": body["lastname_of_mettel_requester"],
+        "phone_number": body["mettel_department_phone_number"],
+        "email": body["mettel_requester_email"],
+        "mettel_department": body["mettel_department"]
     }
+
+    # Sandbox - creation fields
+    if False:
+        # "2007-01-25T12:00:00Z"
+        final_datetime = f"{body['date_of_dispatch']}T{body['time_of_dispatch']}Z"
+        final_time_zone = body('time_zone', '').replace(' Time', '')
+        final_time_zone = timezone(f'US/{final_time_zone}')
+        datetime_template = f"{body['date_of_dispatch']}T{body['time_of_dispatch']}:00"
+        datetime_of_dispatch = iso8601.parse_date(datetime_template, final_time_zone)
+        # TODO: parse datetime to string with format "2007-01-25T12:00:00Z"
+        dispatch_request_test = {
+            "early_start__c": datetime_of_dispatch,
+            "local_site_time__c": datetime_of_dispatch,
+            "ext_ref_num__c": body["mettel_bruin_ticket_id"],
+            # "sla_level": body["sla_level"],
+            "Location__c": "a1Y0n000000czUkEAI",
+            "lookup_location_owner__c": body["job_site"],
+            "country__c": body["location_country"],
+            "state__c": body["job_site_state"],
+            "street__c": f"{body['job_site_street_1']} {body['job_site_street_2']}",
+            "zip__c": body["job_site_zip_code"],
+            # "parent_account_associated__c": "Mettel",
+            # "service_order__c": "a200n000000hKPSAA2",
+            # "project_name__c": "Installations",
+            "location__c": "a1Y0n000000czUkEAI",
+            # "job_site_street": body["job_site_street"],
+            # "job_site_city": body["job_site_city"],
+            # "job_site_state": body["job_site_state"],
+            # "job_site_zip_code": body["job_site_zip_code"],
+            # "job_site_contact_name": body["job_site_contact_name"],
+            # "job_site_contact_phone_number": body["job_site_contact_number"],
+            "special_shipping_instructions__c": body["mettel_tech_call_in_instructions"],
+            "service_type__c": "a250n000000P5N9AAK"
+        }
+
     return dispatch_request

@@ -17,7 +17,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5004/"
+      "url": "http://localhost:5000/"
     }
   ],
   "tags": [
@@ -791,19 +791,24 @@
           "time_of_dispatch",
           "time_zone",
           "mettel_bruin_ticket_id",
+          "sla_level",
+          "location_country",
           "job_site",
-          "job_site_street",
+          "job_site_street_1",
           "job_site_city",
           "job_site_state",
           "job_site_zip_code",
           "job_site_contact_name",
+          "job_site_contact_lastname",
           "job_site_contact_number",
           "materials_needed_for_dispatch",
           "scope_of_work",
           "mettel_tech_call_in_instructions",
           "name_of_mettel_requester",
+          "lastname_of_mettel_requester",
           "mettel_department",
-          "mettel_requester_email"
+          "mettel_requester_email",
+          "mettel_department_phone_number"
         ],
         "properties": {
           "date_of_dispatch": {
@@ -832,11 +837,26 @@
           "mettel_bruin_ticket_id": {
             "type": "string"
           },
+          "sla_level": {
+            "enum": [
+              "Pre-planned",
+              "Next bussiness day"
+            ],
+            "type": "string"
+          },
+          "location_country": {
+            "type": "string",
+            "example": "United States"
+          },
           "job_site": {
             "type": "string",
             "example": "Red Rose Inn"
           },
-          "job_site_street": {
+          "job_site_street_1": {
+            "type": "string",
+            "example": "123 Fake Street"
+          },
+          "job_site_street_2": {
             "type": "string",
             "example": "123 Fake Street"
           },
@@ -854,7 +874,11 @@
           },
           "job_site_contact_name": {
             "type": "string",
-            "example": "Jane Doe"
+            "example": "Jane"
+          },
+          "job_site_contact_lastname": {
+            "type": "string",
+            "example": "Doe"
           },
           "job_site_contact_number": {
             "type": "string",
@@ -872,9 +896,17 @@
             "type": "string",
             "example": "When arriving to the site call HOLMDEL NOC for telematic assistance"
           },
+          "service_type": {
+            "type": "string",
+            "example": "Troubleshooting"
+          },
           "name_of_mettel_requester": {
             "type": "string",
-            "example": "Karen Doe"
+            "example": "Karen"
+          },
+          "lastname_of_mettel_requester": {
+            "type": "string",
+            "example": "Doe"
           },
           "mettel_department": {
             "enum": [
@@ -894,6 +926,10 @@
           "mettel_requester_email": {
             "type": "string",
             "example": "karen.doe@mettel.net"
+          },
+          "mettel_department_phone_number": {
+            "type": "string",
+            "example": "+1 666 6666 666"
           }
         }
       },
