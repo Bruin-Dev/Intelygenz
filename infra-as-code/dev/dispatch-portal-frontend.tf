@@ -14,6 +14,7 @@ data "template_file" "automation-dispatch-portal-frontend" {
     dispatch_portal_frontend_nginx_image = local.automation-dispatch-portal-frontend-nginx-image
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
+    ENVIRONMENT = var.ENVIRONMENT
   }
 }
 
@@ -134,5 +135,6 @@ resource "aws_ecs_service" "automation-dispatch-portal-frontend" {
                  null_resource.t7-bridge-healthcheck,
                  null_resource.notifier-healthcheck,
                  null_resource.metrics-prometheus-healthcheck,
+                 null_resource.dispatch-portal-backend-healthcheck,
                  aws_lb.automation-alb]
 }

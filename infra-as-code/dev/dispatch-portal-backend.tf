@@ -127,3 +127,48 @@ resource "aws_ecs_service" "automation-dispatch-portal-backend" {
                  null_resource.velocloud-bridge-healthcheck,
                  null_resource.t7-bridge-healthcheck]
 }
+
+data "template_file" "automation-dispatch-portal-backend-task-definition-output" {
+
+  template = file("${path.module}/task-definitions/task_definition_output_template.json")
+
+  vars = {
+    task_definition_arn = aws_ecs_task_definition.automation-dispatch-portal-backend.arn
+  }
+}
+
+resource "null_resource" "generate_dispatch_portal_backend_task_definition_output_json" {
+  count = var.dispatch_portal_backend_desired_tasks > 0 ? 1 : 0
+  provisioner "local-exec" {
+    command = format("cat <<\"EOF\" > \"%s\"\n%s\nEOF", var.dispatch-portal-backend-task-definition-json, data.template_file.automation-dispatch-portal-backend-task-definition-output.rendered)
+  }
+  triggers = {
+    always_run = timestamp()
+  }
+  depends_on = [aws_ecs_task_definition.automation-dispatch-portal-backend]
+}
+
+resource "null_resource" "dispatch-portal-backend-healthcheck" {
+  count = var.dispatch_portal_backend_desired_tasks > 0 ? 1 : 0
+
+  depends_on = [aws_ecs_service.automation-dispatch-portal-backend,
+                aws_ecs_task_definition.automation-dispatch-portal-backend,
+                null_resource.bruin-bridge-healthcheck,
+                null_resource.cts-bridge-healthcheck,
+                null_resource.lit-bridge-healthcheck,
+                null_resource.metrics-prometheus-healthcheck,
+                null_resource.notifier-healthcheck,
+                null_resource.velocloud-bridge-healthcheck,
+                null_resource.t7-bridge-healthcheck,
+                null_resource.generate_dispatch_portal_backend_task_definition_output_json,
+                aws_elasticache_cluster.automation-redis
+  ]
+
+  provisioner "local-exec" {
+    command = "python3 ci-utils/ecs/task_healthcheck.py -t dispatch-portal-backend ${var.dispatch-portal-backend-task-definition-json}"
+  }
+
+  triggers = {
+    always_run = timestamp()
+  }
+}

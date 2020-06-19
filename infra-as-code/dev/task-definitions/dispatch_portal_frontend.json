@@ -49,7 +49,7 @@
     "healthCheck": {
       "command": [
         "CMD-SHELL",
-        "curl -f http://localhost:8080/health-check || exit 1"
+        "curl -f http://localhost:8080/health-check && nc -vz dispatch-portal-backend-${ENVIRONMENT}.${ENVIRONMENT}.local 5000 || exit 1"
       ],
       "interval": 30,
       "retries": 3,

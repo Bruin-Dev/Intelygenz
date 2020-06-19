@@ -610,6 +610,12 @@ variable "cts-bridge-task-definition-json" {
   default = "/tmp/cts-bridge-task-definition.json"
 }
 
+variable "dispatch-portal-backend-task-definition-json" {
+  type = string
+  description = "Task definition arn output in rendered json for CTS-bridge"
+  default = "/tmp/dispatch-portal-backend-task-definition.json"
+}
+
 variable "lit-bridge-task-definition-json" {
   type = string
   description = "Task definition arn output in rendered json for lit-bridge"
