@@ -55,7 +55,7 @@ class PapertrailProvisioner:
                     for search in group['searches']:
                         search_name = search['search_name']
                         query = search['query']
-                        if not is_alarm_group or not is_notifications_group:
+                        if not is_alarm_group and not is_notifications_group:
                             subprocess.call([papertrail_cli_exec, '-a', 'd', '-g', group_name, '-w', wildcard, '-S',
                                              search_name, '-q', query, '-p', destination_port, '-t', system_type,
                                              '--delete-only-searches', 'true'])

@@ -27,7 +27,7 @@ class TaskHealthcheck:
 
     @retry(wait=wait_exponential(multiplier=5,
                                  min=5),
-           stop=stop_after_delay(600))
+           stop=stop_after_delay(900))
     def _wait_until_tasks_is_ready(self, tasks_info, task_name_param):
         if all(self._check_task_status(item)['task_is_running'] and
                self._check_task_status(item)['task_is_healthy'] for item in tasks_info):
@@ -94,7 +94,7 @@ class TaskHealthcheck:
 
     @retry(wait=wait_exponential(multiplier=5,
                                  min=5),
-           stop=stop_after_delay(600))
+           stop=stop_after_delay(900))
     def _get_tasks_arn_for_clusters(self, task_name_param, task_definition_arn_p):
         family_for_task_param = ENVIRONMENT + '-' + task_name_param
         tasks_arn_call = subprocess.Popen(
