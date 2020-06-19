@@ -53,7 +53,7 @@ class Container:
 
     async def start(self):
         await self._event_bus.connect()
-        await self._lit_monitor.start_monitoring_job(exec_on_start=True)
+        # await self._lit_monitor.start_monitoring_job(exec_on_start=True)
         await self._cts_monitor.start_monitoring_job(exec_on_start=True)
         self._scheduler.start()
 

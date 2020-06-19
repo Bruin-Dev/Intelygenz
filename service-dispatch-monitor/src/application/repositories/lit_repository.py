@@ -1,10 +1,9 @@
-from phonenumbers import NumberParseException
 from shortuuid import uuid
 import datetime
 from pytz import timezone
 import re
 
-
+from phonenumbers import NumberParseException
 import phonenumbers
 
 from application.repositories import nats_error_response

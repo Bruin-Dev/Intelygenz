@@ -180,7 +180,7 @@ class LitDispatchMonitor:
                               f"{(stop_monitor_tasks - start_monitor_tasks) / 60} minutes")
 
             stop = perf_counter()
-            self._logger.info(f"[LIT] Elapsed time processing all dispatches cache: {(stop - start) / 60} minutes")
+            self._logger.info(f"[LIT] Elapsed time processing all dispatches: {(stop - start) / 60} minutes")
         except Exception as ex:
             self._logger.error(f"Error: {ex}")
 
@@ -469,7 +469,7 @@ class LitDispatchMonitor:
 
                     if datetime_tz_response is None:
                         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                          f"Could not determine date time of dispatch. {dispatch}")
+                                          f"Could not determine date time of dispatch: {dispatch}")
                         err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                                   f"An error occurred retrieve datetime of dispatch: " \
                                   f"{dispatch.get('Hard_Time_of_Dispatch_Local', None)} - " \
@@ -577,7 +577,7 @@ class LitDispatchMonitor:
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- already has a sms confirmed note")
 
-                    # Check if dispatch has a sms 2 hours note
+                    # Check if dispatch has a sms 24 hours note
                     if tech_24_hours_before_note_found is None:
                         hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                       date_time_of_dispatch)
@@ -672,7 +672,7 @@ class LitDispatchMonitor:
 
                     if datetime_tz_response is None:
                         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                          f"Could not determine date time of dispatch. {dispatch}")
+                                          f"Could not determine date time of dispatch: {dispatch}")
                         err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                                   f"An error occurred retrieve datetime of dispatch: " \
                                   f"{dispatch.get('Hard_Time_of_Dispatch_Local', None)} - " \

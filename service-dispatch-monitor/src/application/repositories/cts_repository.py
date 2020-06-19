@@ -1,13 +1,17 @@
 from shortuuid import uuid
 
+from phonenumbers import NumberParseException
+import phonenumbers
+
 from application.repositories import nats_error_response
 
 
 class CtsRepository:
-    def __init__(self, logger, config, event_bus):
+    def __init__(self, logger, config, event_bus, redis_client):
         self._logger = logger
         self._config = config
         self._event_bus = event_bus
+        self._redis_client = redis_client
 
     async def get_all_dispatches(self):
         err_msg = None
@@ -42,3 +46,41 @@ class CtsRepository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
+
+    @staticmethod
+    def is_valid_ticket_id(ticket_id):
+        # Check ticket id format for example: '4663397|IW24654081'
+        # Bruin ticket ID like 712637/IW76236 and 123-3123 are likely to be from other
+        # kind of tickets (like new installations), thus other teams that are not his,
+        # 4485610(Order)/4520284(Port)
+        # Discard All with more than one ticket
+        ticket_id = ticket_id.replace(' ', '')
+        ticket_id_1 = ticket_id.split('|')
+        ticket_id_2 = ticket_id.split('-')
+        ticket_id_3 = ticket_id.split('/')
+        if len(ticket_id_1) > 1:
+            return False
+        elif len(ticket_id_2) > 1:
+            return False
+        elif len(ticket_id_3) > 1:
+            return False
+        return True
+
+    @staticmethod
+    def get_sms_to(dispatch):
+        description = dispatch.get('Description__c')
+        description_lines = description.splitlines()
+        # Find sms to number
+        sms_to = None
+        for line in description_lines:
+            if line and len(line) > 0 and 'Contact #:' in line:
+                sms_to = ''.join(ch for ch in line if ch.isdigit())
+                break
+        if sms_to is None or sms_to.strip() == '':
+            return None
+        try:
+            # TODO: check other countries
+            sms_to = phonenumbers.parse(sms_to, "US")
+            return phonenumbers.format_number(sms_to, phonenumbers.PhoneNumberFormat.E164)
+        except NumberParseException:
+            return None
