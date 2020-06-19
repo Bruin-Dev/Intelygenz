@@ -79,29 +79,22 @@ class CtsClient:
         except Exception as e:
             return e.args[0]
 
-    def get_dispatch(self, dispatch_id):
+    def get_dispatch(self, dispatch_number, query_fields):
         @retry(wait=wait_exponential(multiplier=self._config.CTS_CONFIG['multiplier'],
                                      min=self._config.CTS_CONFIG['min']),
                stop=stop_after_delay(self._config.CTS_CONFIG['stop_delay']), reraise=True)
         def get_dispatch():
             self._logger.info(f'Getting dispatch...')
-            self._logger.info(f'Getting the dispatch of dispatch id : {dispatch_id}')
+            self._logger.info(f'Getting the dispatch of dispatch id : {dispatch_number}')
 
             return_response = dict.fromkeys(["body", "status"])
             try:
-                # Uncomment if you want to use query instead of get
-                # desc = self._salesforce_sdk.Service__c.describe()
-                # field_names = [field['name'] for field in desc['fields']]
-                # query = "SELECT {} FROM Service__c".format(','.join(field_names))
-
-                # if self._config.CTS_CONFIG['environment'] == 'dev':
-                #     # response = self._salesforce_sdk.query(query)
-                #     response = self._salesforce_sdk.Service__c.get(dispatch_id)
-                # elif self._config.CTS_CONFIG['environment'] == 'production':
-                #     # TODO: check first in redis cache?
-                #     response = self._salesforce_sdk.Service__c.get(dispatch_id)
-                response = self._salesforce_sdk.Service__c.get(dispatch_id)
-                self._logger.info(f"Retrieved dispatch: {response.get('Id', None)}")
+                where = f" WHERE Name = '{dispatch_number}' "
+                query = "SELECT {} FROM Service__c {}".format(query_fields, where)
+                self._logger.info(f"Applying query: {query}")
+                response = self._salesforce_sdk.query(query)
+                # response = self._salesforce_sdk.Service__c.get(dispatch_number)
+                self._logger.info(f"Retrieved dispatch: {dispatch_number}")
                 return_response["body"] = dict(response)
                 return_response["status"] = 200
                 return return_response
@@ -115,7 +108,7 @@ class CtsClient:
         except Exception as e:
             return e.args[0]
 
-    def get_all_dispatches(self):
+    def get_all_dispatches(self, query_fields=None):
         @retry(wait=wait_exponential(multiplier=self._config.CTS_CONFIG['multiplier'],
                                      min=self._config.CTS_CONFIG['min']),
                stop=stop_after_delay(self._config.CTS_CONFIG['stop_delay']), reraise=True)
@@ -124,18 +117,20 @@ class CtsClient:
 
             return_response = dict.fromkeys(["body", "status"])
             try:
+                # TODO: remove
+                where = ""
+                filter_field = ''
+                filter_value = ''
+                if len(filter_field) > 0 and len(filter_value) > 0:
+                    where = f" WHERE {filter_field} LIKE = {filter_value} "
+                if query_fields:
+                    query = "SELECT {} FROM Service__c {}".format(query_fields, where)
+                else:
+                    desc = self._salesforce_sdk.Service__c.describe()
+                    field_names = [field['name'] for field in desc['fields']]
+                    query = "SELECT {} FROM Service__c {}".format(','.join(field_names), where)
 
-                desc = self._salesforce_sdk.Service__c.describe()
-                field_names = [field['name'] for field in desc['fields']]
-                query = "SELECT {} FROM Service__c".format(','.join(field_names))
-
-                # TODO: not implemented, filter by a prefix
-                self._logger.info(f"Applying filter: {query}")
-
-                # if self._config.CTS_CONFIG['environment'] == 'dev':
-                #     response = self._salesforce_sdk.query(query)
-                # elif self._config.CTS_CONFIG['environment'] == 'production':
-                #     response = self._salesforce_sdk.query(query)
+                self._logger.info(f"Applying query: {query}")
                 response = self._salesforce_sdk.query(query)
 
                 return_response["body"] = dict(response)

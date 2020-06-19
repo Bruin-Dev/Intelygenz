@@ -7,8 +7,11 @@ class GetDispatch:
         self._cts_repository = cts_repository
 
     async def get_dispatch(self, msg):
-        get_dispatch_response = {"request_id": msg["request_id"], "body": None,
-                                 "status": None}
+        get_dispatch_response = {
+            "request_id": msg["request_id"],
+            "body": None,
+            "status": None
+        }
         if msg.get("body") is None:
             get_dispatch_response["status"] = 400
             get_dispatch_response["body"] = 'Must include "body" in request'
@@ -20,7 +23,6 @@ class GetDispatch:
             get_dispatch = self._cts_repository.get_dispatch(dispatch_id)
             get_dispatch_response["body"] = get_dispatch["body"]
             get_dispatch_response["status"] = get_dispatch["status"]
-
         else:
             self._logger.info("Getting all dispatches")
             get_all_dispatches = self._cts_repository.get_all_dispatches()
