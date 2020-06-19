@@ -1057,155 +1057,587 @@ devices_by_id = [
     # MarineMax edges
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 990,
+        "serial": "VC05400021566",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 730,
+        "serial": "VC05200063916",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 752,
+        "serial": "VC05200063855",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 826,
+        "serial": "VC05100031591",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 673,
+        "serial": "VC05200060599",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 822,
+        "serial": "VC05200013164",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 1590,
+        "serial": "VC05200077155",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 1090,
+        "serial": "VC05200068387",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 838,
+        "serial": "VC05200012802",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 984,
+        "serial": "VC05200007323",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 658,
+        "serial": "VC05200060456",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 758,
+        "serial": "VC05200063442",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 728,
+        "serial": "VC05200064032",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 743,
+        "serial": "VC05200027286",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 815,
+        "serial": "VC05200013202",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 806,
+        "serial": "VC05200012677",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 1008,
+        "serial": "VC05200070181",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 996,
+        "serial": "VC05200069680",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 1040,
+        "serial": "VC05200068350",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 847,
+        "serial": "VC05200013123",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 1490,
+        "serial": "VC05200069872",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 1532,
+        "serial": "VC05200076497",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 760,
+        "serial": "VC05200063719",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 968,
+        "serial": "VC05200025441",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 837,
+        "serial": "VC05200016754",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 813,
+        "serial": "VC05200013034",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 757,
+        "serial": "VC05200063655",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 1018,
+        "serial": "VC05200069638",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 759,
+        "serial": "VC05200061875",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 1017,
+        "serial": "VC05200068414",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 949,
+        "serial": "VC05200012921",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 778,
+        "serial": "VC05200063428",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 933,
+        "serial": "VC05200012389",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 950,
+        "serial": "VC05200012507",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 805,
+        "serial": "VC05200012444",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 848,
+        "serial": "VC05200012210",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 846,
+        "serial": "VC05200012369",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 1004,
+        "serial": "VC05200068687",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 932,
+        "serial": "VC05200013145",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 995,
+        "serial": "VC05200069261",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 557,
+        "serial": "VC05200062880",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 967,
+        "serial": "VC05200012493",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 716,
+        "serial": "VC05200062954",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 753,
+        "serial": "VC05200064004",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 814,
+        "serial": "VC05200012184",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 807,
+        "serial": "VC05200012579",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
         "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
         "edge_id": 786,
         "serial": "VC05200063134",
-        "enterprise_id": 49
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9200",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
-        "edge_id": 785,
-        "serial": "VC05200063091",
-        "enterprise_id": 49
+        "edge_id": 963,
+        "serial": "VC05200012511",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9201",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
-        "edge_id": 838,
-        "serial": "VC05200012802",
-        "enterprise_id": 49
+        "edge_id": 969,
+        "serial": "VC05200025440",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9202",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
-        "edge_id": 1532,
-        "serial": "VC05200076497",
-        "enterprise_id": 49
+        "edge_id": 788,
+        "serial": "VC05200062673",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9203",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
-        "edge_id": 815,
-        "serial": "VC05200013202",
-        "enterprise_id": 49
+        "edge_id": 976,
+        "serial": "VC05200012392",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9204",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
-        "edge_id": 673,
-        "serial": "VC05200060599",
-        "enterprise_id": 49
+        "edge_id": 854,
+        "serial": "VC05200012721",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9205",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
-        "edge_id": 715,
-        "serial": "VC05200062172",
-        "enterprise_id": 49
+        "edge_id": 975,
+        "serial": "VC05200024950",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9206",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
-        "edge_id": 1004,
-        "serial": "VC05200068687",
-        "enterprise_id": 49
+        "edge_id": 1421,
+        "serial": "VC05200069509",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9207",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
-        "edge_id": 778,
-        "serial": "VC05200063428",
-        "enterprise_id": 49
+        "edge_id": 825,
+        "serial": "VC05200012724",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9208",
-        "host": "metvco03.mettel.net",
-        "edge_id": 1490,
-        "serial": "VC05200069872",
-        "enterprise_id": 49
-    },
-    {
-        "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9209",
-        "host": "metvco03.mettel.net",
-        "edge_id": 950,
-        "serial": "VC05200012507",
-        "enterprise_id": 49
-    },
-    {
-        "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9210",
-        "host": "metvco03.mettel.net",
-        "edge_id": 807,
-        "serial": "VC05200012579",
-        "enterprise_id": 49
-    },
-    {
-        "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9211",
-        "host": "metvco03.mettel.net",
-        "edge_id": 557,
-        "serial": "VC05200062880",
-        "enterprise_id": 49
-    },
-    {
-        "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9212",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
         "edge_id": 1002,
         "serial": "VC05200069898",
-        "enterprise_id": 49
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9213",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
         "edge_id": 821,
         "serial": "VC05200012608",
-        "enterprise_id": 49
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9214",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
-        "edge_id": 846,
-        "serial": "VC05200012369",
-        "enterprise_id": 49
+        "edge_id": 1485,
+        "serial": "VC05200072032",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     },
     {
         "name": "Blackfin Square Escalations Support Team",
-        "email": "tixfix@blackfinsquare.com",
-        "phone": "770-992-9215",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 785,
+        "serial": "VC05200063091",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 789,
+        "serial": "VC05200064188",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
         "host": "metvco03.mettel.net",
         "edge_id": 855,
         "serial": "VC05200012297",
-        "enterprise_id": 49
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 804,
+        "serial": "VC05200016728",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 715,
+        "serial": "VC05200062172",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 558,
+        "serial": "VCE08400004890",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
+    },
+    {
+        "name": "Blackfin Square Escalations Support Team",
+        "phone": "770-992-9199",
+        "host": "metvco03.mettel.net",
+        "edge_id": 723,
+        "serial": "VC05200063958",
+        "enterprise_id": 49,
+        "email": "tixfix@blackfinsquare.com"
     }
 ]
