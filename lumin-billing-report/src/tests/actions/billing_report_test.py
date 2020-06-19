@@ -195,38 +195,46 @@ class TestBillingReport:
 
         logger.exception.assert_not_called()
 
-    # @pytest.mark.asyncio
-    # async def billing_process_test(self, lumin_repo_responses, summary):
-    #     email_contents = {'email': "<div>Some email</div>"}
-    #
-    #     email_client = Mock()
-    #     email_client.send_to_email = CoroutineMock()
-    #     lumin_repo = Mock()
-    #     lumin_repo.get_billing_data_for_period = CoroutineMock(return_value=lumin_repo_responses)
-    #     scheduler = Mock()
-    #     templ = Mock()
-    #     templ.compose_email_object = Mock(return_value=email_contents)
-    #
-    #     opts = {
-    #         "logger": Mock(),
-    #         "config": BILLING_REPORT_CONFIG
-    #     }
-    #
-    #     report = BillingReport(lumin_repo, email_client, templ, scheduler, **opts)
-    #
-    #     await report._billing_report_process()
-    #
-    #     lumin_repo.get_billing_data_for_period.assert_called()
-    #
-    #     repo_args = lumin_repo.get_billing_data_for_period.call_args[0]
-    #
-    #     start_date = repo_args[1]
-    #     end_date = repo_args[2]
-    #
-    #     assert start_date.day == 1
-    #     assert start_date < end_date < datetime.now(tz=timezone(BILLING_REPORT_CONFIG["timezone"]))
-    #
-    #     template_args = templ.compose_email_object.call_args[0]
-    #
-    #     assert template_args[0] == summary
-    #     assert template_args[1] == lumin_repo_responses
+    @pytest.mark.asyncio
+    async def billing_process_test(self, lumin_repo_responses, summary):
+        email_contents = {'email': "<div>Some email</div>"}
+
+        email_client = Mock()
+        email_client.send_to_email = CoroutineMock()
+        lumin_repo = Mock()
+        lumin_repo.get_billing_data_for_period = CoroutineMock(return_value=lumin_repo_responses)
+        scheduler = Mock()
+        templ = Mock()
+        templ.compose_email_object = Mock(return_value=email_contents)
+
+        opts = {
+            "logger": Mock(),
+            "config": BILLING_REPORT_CONFIG
+        }
+
+        report = BillingReport(lumin_repo, email_client, templ, scheduler, **opts)
+
+        await report._billing_report_process()
+
+        lumin_repo.get_billing_data_for_period.assert_called()
+
+        repo_args = lumin_repo.get_billing_data_for_period.call_args[0]
+
+        start_date = repo_args[1]
+        end_date = repo_args[2]
+
+        assert start_date.day == 1
+        assert start_date < end_date
+
+        assert start_date.tzinfo.zone == BILLING_REPORT_CONFIG["timezone"]
+        assert end_date.tzinfo.zone == BILLING_REPORT_CONFIG["timezone"]
+
+        tz = timezone(BILLING_REPORT_CONFIG["timezone"])
+        now = tz.localize(datetime.now())
+
+        assert end_date < now
+
+        template_args = templ.compose_email_object.call_args[0]
+
+        assert template_args[0] == summary
+        assert template_args[1] == lumin_repo_responses

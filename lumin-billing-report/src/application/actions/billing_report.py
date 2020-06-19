@@ -61,8 +61,8 @@ class BillingReport:
         tz = timezone(self._config["timezone"])
 
         billing_types = [LuminBillingTypes.ALL.value]
-        last = datetime.combine(date.today(), time.max).replace(tzinfo=tz) - timedelta(days=1)
-        first = datetime.combine(last.date(), time.min).replace(tzinfo=tz, day=1)
+        last = tz.localize(datetime.combine(date.today(), time.max) - timedelta(days=1))
+        first = tz.localize(datetime.combine(last.date(), time.min).replace(day=1))
 
         summary = {
             "dates": {
