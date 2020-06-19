@@ -155,13 +155,11 @@ class CtsDispatchMonitor:
     def _is_tech_on_site(self, dispatch):
         # Filter tech on site dispatches
         # Dispatch Confirmed --> Field Engineer On Site:
-        # Tech_Arrived_On_Site is set to true and Time_of_Check_In is set.
+        # Status__c and Check_In_Date__c is not None
         # Bruin Note:*#Automation Engine#*Dispatch Management - Field Engineer On Site<FE Name> has arrived
         return all([dispatch is not None,
                     dispatch.get('Status__c') == self.DISPATCH_FIELD_ENGINEER_ON_SITE,
-                    dispatch.get("Tech_Arrived_On_Site") is not None,
-                    dispatch.get("Tech_Arrived_On_Site") is True,
-                    dispatch.get("Time_of_Check_In") is not None])
+                    dispatch.get("Check_In_Date__c") is not None])
 
     async def _append_confirmed_note(self, dispatch_number, ticket_id, dispatch) -> bool:
         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
