@@ -10,52 +10,6 @@ class BruinRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def get_tickets(self, client_id: int, ticket_topic: str, ticket_statuses: list):
-        err_msg = None
-
-        request = {
-            'request_id': uuid(),
-            'body': {
-                'client_id': client_id,
-                'ticket_status': ticket_statuses,
-                'ticket_topic': ticket_topic,
-                'category': 'SD-WAN',
-            },
-        }
-
-        try:
-            self._logger.info(
-                f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
-                f'{ticket_topic} and belonging to client {client_id} from Bruin...'
-            )
-            response = await self._event_bus.rpc_request("bruin.ticket.request", request, timeout=90)
-            self._logger.info(
-                f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
-                f'{ticket_topic} and belonging to client {client_id} from Bruin!'
-            )
-        except Exception as e:
-            err_msg = (
-                f'An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses}, '
-                f'with ticket topic {ticket_topic} and belonging to client {client_id} -> {e}'
-            )
-            response = nats_error_response
-        else:
-            response_body = response['body']
-            response_status = response['status']
-
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
-                    f'{ticket_topic} and belonging to client {client_id} in {self._config.ENVIRONMENT_NAME.upper()} '
-                    f'environment: Error {response_status} - {response_body}'
-                )
-
-        if err_msg:
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
-
-        return response
-
     async def get_ticket_details(self, ticket_id: int):
         err_msg = None
 
@@ -132,24 +86,70 @@ class BruinRepository:
 
         return response
 
-    async def get_outage_tickets(self, client_id: int, ticket_statuses: list):
-        ticket_topic = 'VOO'
+    # async def get_tickets(self, client_id: int, ticket_topic: str, ticket_statuses: list):
+    #     err_msg = None
+    #
+    #     request = {
+    #         'request_id': uuid(),
+    #         'body': {
+    #             'client_id': client_id,
+    #             'ticket_status': ticket_statuses,
+    #             'ticket_topic': ticket_topic,
+    #             'category': 'SD-WAN',
+    #         },
+    #     }
+    #
+    #     try:
+    #         self._logger.info(
+    #             f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
+    #             f'{ticket_topic} and belonging to client {client_id} from Bruin...'
+    #         )
+    #         response = await self._event_bus.rpc_request("bruin.ticket.request", request, timeout=90)
+    #         self._logger.info(
+    #             f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
+    #             f'{ticket_topic} and belonging to client {client_id} from Bruin!'
+    #         )
+    #     except Exception as e:
+    #         err_msg = (
+    #             f'An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses}, '
+    #             f'with ticket topic {ticket_topic} and belonging to client {client_id} -> {e}'
+    #         )
+    #         response = nats_error_response
+    #     else:
+    #         response_body = response['body']
+    #         response_status = response['status']
+    #
+    #         if response_status not in range(200, 300):
+    #             err_msg = (
+    #                 f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
+    #                 f'{ticket_topic} and belonging to client {client_id} in {self._config.ENVIRONMENT_NAME.upper()} '
+    #                 f'environment: Error {response_status} - {response_body}'
+    #             )
+    #
+    #     if err_msg:
+    #         self._logger.error(err_msg)
+    #         await self._notifications_repository.send_slack_message(err_msg)
+    #
+    #     return response
 
-        return await self.get_tickets(client_id, ticket_topic, ticket_statuses)
-
-    async def get_open_outage_tickets(self, client_id: int):
-        ticket_topic = 'VOO'
-        ticket_statuses = ['New', 'InProgress', 'Draft']
-
-        return await self.get_tickets(client_id, ticket_topic, ticket_statuses)
-
-    async def get_affecting_tickets(self, client_id: int, ticket_statuses: list):
-        ticket_topic = 'VAS'
-
-        return await self.get_tickets(client_id, ticket_topic, ticket_statuses)
-
-    async def get_open_affecting_tickets(self, client_id: int):
-        ticket_topic = 'VAS'
-        ticket_statuses = ['New', 'InProgress', 'Draft']
-
-        return await self.get_tickets(client_id, ticket_topic, ticket_statuses)
+    # async def get_outage_tickets(self, client_id: int, ticket_statuses: list):
+    #     ticket_topic = 'VOO'
+    #
+    #     return await self.get_tickets(client_id, ticket_topic, ticket_statuses)
+    #
+    # async def get_open_outage_tickets(self, client_id: int):
+    #     ticket_topic = 'VOO'
+    #     ticket_statuses = ['New', 'InProgress', 'Draft']
+    #
+    #     return await self.get_tickets(client_id, ticket_topic, ticket_statuses)
+    #
+    # async def get_affecting_tickets(self, client_id: int, ticket_statuses: list):
+    #     ticket_topic = 'VAS'
+    #
+    #     return await self.get_tickets(client_id, ticket_topic, ticket_statuses)
+    #
+    # async def get_open_affecting_tickets(self, client_id: int):
+    #     ticket_topic = 'VAS'
+    #     ticket_statuses = ['New', 'InProgress', 'Draft']
+    #
+    #     return await self.get_tickets(client_id, ticket_topic, ticket_statuses)

@@ -23,7 +23,11 @@ class TestApiServer:
         redis_client = Mock()
         event_bus = Mock()
 
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        bruin_repository = Mock()
+        notifications_repository = Mock()
+
+        api_server_test = DispatchServer(config, redis_client, event_bus, logger, bruin_repository,
+                                         notifications_repository)
 
         assert api_server_test._logger is logger
         assert api_server_test._redis_client is redis_client
@@ -37,11 +41,7 @@ class TestApiServer:
         assert api_server_test._app.title == api_server_test._title
 
     @pytest.mark.asyncio
-    async def run_server_test(self):
-        logger = Mock()
-        redis_client = Mock()
-        event_bus = Mock()
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+    async def run_server_test(self, api_server_test):
         with patch.object(application.server.api_server, 'serve', new=CoroutineMock()) \
                 as mock_serve:
             await api_server_test.run_server()
@@ -49,40 +49,26 @@ class TestApiServer:
             assert mock_serve.called
 
     @pytest.mark.asyncio
-    async def ok_app_test(self):
-        logger = Mock()
-        redis_client = Mock()
-        event_bus = Mock()
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+    async def ok_app_test(self, api_server_test):
         client = api_server_test._app.test_client()
         response = await client.get('/_health')
         data = await response.get_json()
         assert response.status_code == 200
         assert data is None
 
-    def attach_swagger_test(self):
-        logger = Mock()
-        redis_client = Mock()
-        event_bus = Mock()
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+    def attach_swagger_test(self, api_server_test):
         with patch.object(api_server_module, 'quart_api_doc', new=CoroutineMock()) as quart_api_doc_mock:
             api_server_test.attach_swagger()
             quart_api_doc_mock.assert_called_once()
 
-    def set_status_test(self):
-        logger = Mock()
-        redis_client = Mock()
-        event_bus = Mock()
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+    def set_status_test(self, api_server_test):
         assert api_server_test._status == HTTPStatus.OK
         api_server_test.set_status(HTTPStatus.INTERNAL_SERVER_ERROR)
         assert api_server_test._status == HTTPStatus.INTERNAL_SERVER_ERROR
 
     @pytest.mark.asyncio
-    async def get_dispatch_test(self):
+    async def lit_get_dispatch_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response_lit = {
@@ -134,8 +120,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         expected_response = {
             "id": "DIS37450",
@@ -167,25 +152,20 @@ class TestApiServer:
             }
         }
 
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
-
         payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch/{dispatch_number}')
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
 
-            # response = await api_server_test.get_dispatch('DIS37450')
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response
 
     @pytest.mark.asyncio
-    async def get_dispatch_not_found_test(self):
+    async def lit_get_dispatch_not_found_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS_NOT_EXISTS'
         expected_response_lit = {
@@ -199,8 +179,7 @@ class TestApiServer:
             "status": 400
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         expected_response = {
             "code": 400,
@@ -212,15 +191,13 @@ class TestApiServer:
             }
         }
 
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
-
         payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch/{dispatch_number}')
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
 
             # response = await api_server_test.get_dispatch('DIS37450')
             assert response.status_code == HTTPStatus.BAD_REQUEST
@@ -228,10 +205,8 @@ class TestApiServer:
             assert data['code'] == HTTPStatus.BAD_REQUEST
 
     @pytest.mark.asyncio
-    async def get_dispatch_error_from_lit_500_test(self):
+    async def lit_get_dispatch_error_from_lit_500_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS_NOT_EXISTS'
         expected_response_lit = {
@@ -245,12 +220,9 @@ class TestApiServer:
             "status": HTTPStatus.INTERNAL_SERVER_ERROR
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         expected_response = {'code': 500, 'message': [{'errorCode': 'APEX_ERROR', 'message': ''}]}
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
 
         payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
 
@@ -258,18 +230,15 @@ class TestApiServer:
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch/{dispatch_number}')
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
 
-            # response = await api_server_test.get_dispatch('DIS37450')
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == expected_response
             assert data['code'] == HTTPStatus.INTERNAL_SERVER_ERROR
 
     @pytest.mark.asyncio
-    async def get_all_dispatch_test(self):
+    async def lit_get_all_dispatch_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         expected_response_lit = {
             "request_id": uuid_,
@@ -356,8 +325,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         expected_response = {
             "vendor": "LIT",
@@ -413,24 +381,20 @@ class TestApiServer:
             ]
         }
 
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
-
         payload = {"request_id": uuid_, "body": {}}
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch/')
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", payload, timeout=30)
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response
 
     @pytest.mark.asyncio
-    async def get_all_dispatch_error_500_test(self):
+    async def lit_get_all_dispatch_error_500_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         expected_response_lit = {
             "request_id": uuid_,
@@ -443,10 +407,7 @@ class TestApiServer:
             "status": HTTPStatus.INTERNAL_SERVER_ERROR
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload = {"request_id": uuid_, "body": {}}
 
@@ -454,23 +415,21 @@ class TestApiServer:
             'code': 500, 'message': [{'errorCode': 'APEX_ERROR', 'message': ''}]
         }
 
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch', json=payload)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once()
+            api_server_test._event_bus.rpc_request.assert_awaited_once()
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == expected_response_get_all_dispatches_error
 
     @pytest.mark.asyncio
-    async def get_all_dispatch_error_400_test(self):
+    async def lit_get_all_dispatch_error_400_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         expected_response_lit = {
             "request_id": uuid_,
@@ -483,10 +442,7 @@ class TestApiServer:
             "status": 400
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload = {"request_id": uuid_, "body": {}}
 
@@ -494,23 +450,21 @@ class TestApiServer:
             'code': 400, 'message': [{'errorCode': 'APEX_ERROR', 'message': ''}]
         }
 
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch', json=payload)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once()
+            api_server_test._event_bus.rpc_request.assert_awaited_once()
 
             assert response.status_code == 400
             assert data == expected_response_get_all_dispatches_error
 
     @pytest.mark.asyncio
-    async def get_all_dispatch_error_in_response_test(self):
+    async def lit_get_all_dispatch_error_in_response_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         expected_response_lit = {
             "request_id": uuid_,
@@ -518,10 +472,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload = {"request_id": uuid_, "body": {}}
 
@@ -529,23 +480,21 @@ class TestApiServer:
             'code': 200, 'message': {}
         }
 
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.get(f'/lit/dispatch', json=payload)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once()
+            api_server_test._event_bus.rpc_request.assert_awaited_once()
 
             assert response.status_code == 200
             assert data == expected_response_get_all_dispatches_error
 
     @pytest.mark.asyncio
-    async def lit_create_dispatch_with_note_test(self):
+    async def lit_create_dispatch_with_note_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -609,16 +558,11 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        # event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        event_bus.rpc_request = CoroutineMock(side_effect=[
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[
             expected_response_lit,
             expected_response_bruin,
             expected_response_bruin_append_note
         ])
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
 
         payload_lit = {
             "date_of_dispatch": "2019-11-14",
@@ -720,20 +664,17 @@ class TestApiServer:
 
             data = await response.get_json()
 
-            event_bus.rpc_request.assert_has_awaits([
+            api_server_test._event_bus.rpc_request.assert_has_awaits([
                 call("lit.dispatch.post", payload_request, timeout=30),
-                call("bruin.ticket.details.request", payload_ticket_request_msg, timeout=200),
-                call("bruin.ticket.note.append.request", append_note_to_ticket_request, timeout=15)
+                call("bruin.ticket.details.request", payload_ticket_request_msg, timeout=200)
             ])
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_create
 
     @pytest.mark.asyncio
-    async def lit_create_dispatch_with_error_appending_note_test(self):
+    async def lit_create_dispatch_with_error_appending_note_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -797,16 +738,11 @@ class TestApiServer:
             "status": 404
         }
 
-        event_bus = Mock()
-        # event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        event_bus.rpc_request = CoroutineMock(side_effect=[
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[
             expected_response_lit,
             expected_response_bruin,
             expected_response_bruin_append_note
         ])
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
 
         payload_lit = {
             "date_of_dispatch": "2019-11-14",
@@ -895,20 +831,17 @@ class TestApiServer:
 
             data = await response.get_json()
 
-            event_bus.rpc_request.assert_has_awaits([
+            api_server_test._event_bus.rpc_request.assert_has_awaits([
                 call("lit.dispatch.post", payload_request, timeout=30),
-                call("bruin.ticket.details.request", payload_ticket_request_msg, timeout=200),
-                call("bruin.ticket.note.append.request", append_note_to_ticket_request, timeout=15)
+                call("bruin.ticket.details.request", payload_ticket_request_msg, timeout=200)
             ])
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_create
 
     @pytest.mark.asyncio
-    async def lit_create_dispatch_note_already_exists_test(self):
+    async def lit_create_dispatch_note_already_exists_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -985,14 +918,10 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-
-        event_bus.rpc_request = CoroutineMock(side_effect=[
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[
             expected_response_lit,
             expected_response_bruin
         ])
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
 
         payload_lit = {
             "date_of_dispatch": "2019-11-14",
@@ -1091,7 +1020,7 @@ class TestApiServer:
 
             data = await response.get_json()
 
-            event_bus.rpc_request.assert_has_awaits([
+            api_server_test._event_bus.rpc_request.assert_has_awaits([
                 call("lit.dispatch.post", payload_request, timeout=30),
                 call("bruin.ticket.details.request", payload_ticket_request_msg, timeout=200)
             ])
@@ -1100,10 +1029,8 @@ class TestApiServer:
             assert data == expected_response_create
 
     @pytest.mark.asyncio
-    async def lit_create_dispatch_error_exception_test(self):
+    async def lit_create_dispatch_error_exception_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -1181,14 +1108,10 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-
-        event_bus.rpc_request = CoroutineMock(side_effect=[
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[
             expected_response_lit,
             expected_response_bruin
         ])
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
 
         payload_lit = {
             "date_of_dispatch": "2019-11-14",
@@ -1287,7 +1210,7 @@ class TestApiServer:
 
             data = await response.get_json()
 
-            event_bus.rpc_request.assert_has_awaits([
+            api_server_test._event_bus.rpc_request.assert_has_awaits([
                 call("lit.dispatch.post", payload_request, timeout=30),
                 call("bruin.ticket.details.request", payload_ticket_request_msg, timeout=200)
             ])
@@ -1296,10 +1219,8 @@ class TestApiServer:
             assert data == expected_response_create
 
     @pytest.mark.asyncio
-    async def lit_create_dispatch_error_getting_ticket_details_test(self):
+    async def lit_create_dispatch_error_getting_ticket_details_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -1357,15 +1278,10 @@ class TestApiServer:
             "status": 404
         }
 
-        event_bus = Mock()
-        # event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        event_bus.rpc_request = CoroutineMock(side_effect=[
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[
             expected_response_lit,
             expected_response_bruin
         ])
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
 
         payload_lit = {
             "date_of_dispatch": "2019-11-14",
@@ -1447,7 +1363,7 @@ class TestApiServer:
 
             data = await response.get_json()
 
-            event_bus.rpc_request.assert_has_awaits([
+            api_server_test._event_bus.rpc_request.assert_has_awaits([
                 call("lit.dispatch.post", payload_request, timeout=30),
                 call("bruin.ticket.details.request", payload_ticket_request_msg, timeout=200)
             ])
@@ -1455,10 +1371,8 @@ class TestApiServer:
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_create
 
-    def exists_watermark_in_ticket_is_true_test(self):
+    def exists_watermark_in_ticket_is_true_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
         watermark = 'Dispatch Management - Dispatch Requested'
         ticket_notes = [
             {
@@ -1479,18 +1393,14 @@ class TestApiServer:
                 'noteValue': 'whatever'
             }
         ]
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock()
+        api_server_test._event_bus.rpc_request = CoroutineMock()
 
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
         response = api_server_test._exists_watermark_in_ticket(watermark, ticket_notes)
         assert response is True
 
     @pytest.mark.asyncio
-    async def create_dispatch_validation_error_test(self):
+    async def lit_create_dispatch_validation_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -1542,10 +1452,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "BAD_FIELD": "2019-11-14",
@@ -1606,16 +1513,14 @@ class TestApiServer:
             response = await client.post(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_not_awaited()
+            api_server_test._event_bus.rpc_request.assert_not_awaited()
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_create_error
 
     @pytest.mark.asyncio
-    async def create_dispatch_error_from_lit_500_test(self):
+    async def lit_create_dispatch_error_from_lit_500_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -1672,10 +1577,7 @@ class TestApiServer:
             "status": HTTPStatus.INTERNAL_SERVER_ERROR
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "date_of_dispatch": "2019-11-14",
@@ -1735,16 +1637,14 @@ class TestApiServer:
             response = await client.post(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once()
+            api_server_test._event_bus.rpc_request.assert_awaited_once()
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == expected_response_create_error
 
     @pytest.mark.asyncio
-    async def create_dispatch_not_body_response_error_test(self):
+    async def lit_create_dispatch_not_body_response_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -1759,10 +1659,7 @@ class TestApiServer:
             "status": 400
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "date_of_dispatch": "2019-11-14",
@@ -1831,16 +1728,15 @@ class TestApiServer:
             response = await client.post(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.post", payload_request, timeout=30)
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                "lit.dispatch.post", payload_request, timeout=30)
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_create_error
 
     @pytest.mark.asyncio
-    async def update_dispatch_test(self):
+    async def lit_update_dispatch_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -1892,10 +1788,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "dispatch_number": dispatch_number,
@@ -1960,16 +1853,15 @@ class TestApiServer:
             response = await client.patch(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.update", payload_request, timeout=30)
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                "lit.dispatch.update", payload_request, timeout=30)
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_create
 
     @pytest.mark.asyncio
-    async def update_dispatch_error_from_lit_500_test(self):
+    async def lit_update_dispatch_error_from_lit_500_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response_lit = {
@@ -1983,10 +1875,7 @@ class TestApiServer:
             "status": HTTPStatus.INTERNAL_SERVER_ERROR
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "dispatch_number": dispatch_number,
@@ -2020,16 +1909,14 @@ class TestApiServer:
             response = await client.patch(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once()
+            api_server_test._event_bus.rpc_request.assert_awaited_once()
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == expected_response_create
 
     @pytest.mark.asyncio
-    async def update_dispatch_with_no_dispatch_number_error_test(self):
+    async def lit_update_dispatch_with_no_dispatch_number_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -2081,10 +1968,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "dispatch_number_BAD_FIELD": dispatch_number,
@@ -2116,16 +2000,14 @@ class TestApiServer:
             response = await client.patch(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_not_awaited()
+            api_server_test._event_bus.rpc_request.assert_not_awaited()
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_create
 
     @pytest.mark.asyncio
-    async def update_dispatch_validation_error_test(self):
+    async def lit_update_dispatch_validation_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -2177,10 +2059,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "dispatch_number_BAD_FIELD": dispatch_number,
@@ -2234,16 +2113,14 @@ class TestApiServer:
             client = api_server_test._app.test_client()
             response = await client.patch(f'/lit/dispatch', json=payload_lit)
             data = await response.get_json()
-            event_bus.rpc_request.assert_not_awaited()
+            api_server_test._event_bus.rpc_request.assert_not_awaited()
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_create
 
     @pytest.mark.asyncio
-    async def update_dispatch_not_body_response_error_test(self):
+    async def lit_update_dispatch_not_body_response_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -2258,10 +2135,7 @@ class TestApiServer:
             "status": 400
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             "dispatch_number": dispatch_number,
@@ -2334,16 +2208,15 @@ class TestApiServer:
             response = await client.patch(f'/lit/dispatch', json=payload_lit)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.update", payload_request, timeout=30)
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                "lit.dispatch.update", payload_request, timeout=30)
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_create_error
 
     @pytest.mark.asyncio
-    async def upload_file_to_dispatch_test(self):
+    async def lit_upload_file_to_dispatch_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -2358,10 +2231,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             'dispatch_number': dispatch_number,
@@ -2387,16 +2257,14 @@ class TestApiServer:
                                          data=b'test', headers=headers)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.upload.file", payload_request, timeout=300)
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.upload.file", payload_request, timeout=300)
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_upload_file
 
     @pytest.mark.asyncio
-    async def upload_file_to_dispatch_no_file_name_in_header_error_test(self):
+    async def lit_upload_file_to_dispatch_no_file_name_in_header_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -2411,10 +2279,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         expected_response_upload_file = {'code': HTTPStatus.BAD_REQUEST, 'message': 'No `filename` in headers'}
 
@@ -2425,16 +2290,15 @@ class TestApiServer:
                                          data=b'test', headers=headers)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_not_awaited()
+            api_server_test._event_bus.rpc_request.assert_not_awaited()
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_upload_file
 
     @pytest.mark.asyncio
-    async def upload_file_to_dispatch_no_correct_content_type_in_header_error_test(self):
+    async def lit_upload_file_to_dispatch_no_correct_content_type_in_header_error_test(self,
+                                                                                       api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -2449,10 +2313,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         expected_response_upload_file = {
             'code': HTTPStatus.BAD_REQUEST,
@@ -2466,16 +2327,14 @@ class TestApiServer:
                                          data=b'test', headers=headers)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_not_awaited()
+            api_server_test._event_bus.rpc_request.assert_not_awaited()
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_upload_file
 
     @pytest.mark.asyncio
-    async def upload_file_to_dispatch_empty_body_error_test(self):
+    async def lit_upload_file_to_dispatch_empty_body_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -2490,10 +2349,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         expected_response_upload_file = {
             'code': HTTPStatus.BAD_REQUEST,
@@ -2507,16 +2363,14 @@ class TestApiServer:
                                          data=b'', headers=headers)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_not_awaited()
+            api_server_test._event_bus.rpc_request.assert_not_awaited()
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_upload_file
 
     @pytest.mark.asyncio
-    async def upload_file_to_dispatch_large_content_length_body_error_test(self):
+    async def lit_upload_file_to_dispatch_large_content_length_body_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -2531,10 +2385,7 @@ class TestApiServer:
             "status": 200
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         expected_response_upload_file = {
             'code': HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
@@ -2552,16 +2403,14 @@ class TestApiServer:
                                          data=b'', headers=headers)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_not_awaited()
+            api_server_test._event_bus.rpc_request.assert_not_awaited()
 
             assert response.status_code == HTTPStatus.REQUEST_ENTITY_TOO_LARGE
             assert data == expected_response_upload_file
 
     @pytest.mark.asyncio
-    async def upload_file_to_dispatch_general_exception_error_test(self):
+    async def lit_upload_file_to_dispatch_general_exception_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -2576,10 +2425,8 @@ class TestApiServer:
             "status": 200
         }
         http_exception = HTTPException(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, "Entity too large", "http_exception")
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(side_effect=http_exception)
 
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=http_exception)
 
         expected_response_upload_file = {
             'code': HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
@@ -2598,7 +2445,7 @@ class TestApiServer:
                 response = await client.post(f'/lit/dispatch/{dispatch_number}/upload-file',
                                              data=data_payload, headers=headers)
                 data = await response.get_json()
-                event_bus.rpc_request.assert_not_awaited()
+                api_server_test._event_bus.rpc_request.assert_not_awaited()
 
                 assert response.status_code == HTTPStatus.REQUEST_ENTITY_TOO_LARGE
                 assert data == expected_response_upload_file
@@ -2607,10 +2454,8 @@ class TestApiServer:
                 assert ex.description == 'Entity too large'
 
     @pytest.mark.asyncio
-    async def upload_file_to_dispatch_error_from_lit_500_test(self):
+    async def lit_upload_file_to_dispatch_error_from_lit_500_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
 
@@ -2625,10 +2470,7 @@ class TestApiServer:
             "status": HTTPStatus.INTERNAL_SERVER_ERROR
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         expected_response_upload_file = {
             'code': 500, 'message': [{'errorCode': 'APEX_ERROR', 'message': ''}]
@@ -2645,16 +2487,14 @@ class TestApiServer:
             response = await client.post(f'/lit/dispatch/{dispatch_number}/upload-file',
                                          data=data_payload, headers=headers)
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once()
+            api_server_test._event_bus.rpc_request.assert_awaited_once()
 
             assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
             assert data == expected_response_upload_file
 
     @pytest.mark.asyncio
-    async def upload_file_to_dispatch_response_status_not_200_error_test(self):
+    async def lit_upload_file_to_dispatch_response_status_not_200_error_test(self, api_server_test):
         uuid_ = 'UUID1'
-        logger = Mock()
-        redis_client = Mock()
 
         dispatch_number = 'DIS37450'
         expected_response = {
@@ -2669,10 +2509,7 @@ class TestApiServer:
             "status": 400
         }
 
-        event_bus = Mock()
-        event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
-
-        api_server_test = DispatchServer(config, redis_client, event_bus, logger)
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
 
         payload_lit = {
             'dispatch_number': dispatch_number,
@@ -2702,7 +2539,247 @@ class TestApiServer:
                                          data=b'test', headers=headers)
 
             data = await response.get_json()
-            event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.upload.file", payload_request, timeout=300)
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                "lit.dispatch.upload.file", payload_request, timeout=300)
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_upload_error
+
+    @pytest.mark.asyncio
+    async def cts_get_dispatch_test(self, api_server_test, cts_dispatch_mapped):
+        uuid_ = 'UUID1'
+        dispatch_number = 'S-147735'
+        expected_response_mapped = cts_dispatch_mapped
+        expected_response_cts = {
+            "request_id": uuid_,
+            "body": expected_response_mapped,
+            "status": 200
+        }
+        cts_expected_response = {
+            'id': 'S-147735',
+            'vendor': "cts",
+            'dispatch': expected_response_cts['body']['records'][0]
+        }
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/{dispatch_number}')
+            data = await response.get_json()
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+
+            assert response.status_code == HTTPStatus.OK
+            assert data == cts_expected_response
+
+    @pytest.mark.asyncio
+    async def cts_get_dispatch_error_500_test(self, api_server_test, cts_dispatch_mapped):
+        uuid_ = 'UUID1'
+        dispatch_number = 'S-147735'
+        expected_response_mapped = cts_dispatch_mapped
+        expected_response_cts = {
+            "request_id": uuid_,
+            "body": "ERROR",
+            "status": 500
+        }
+        cts_expected_response = {
+            'code': 500,
+            'message': "ERROR"
+        }
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/{dispatch_number}')
+            data = await response.get_json()
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+
+            assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+            assert data == cts_expected_response
+
+    @pytest.mark.asyncio
+    async def cts_get_dispatch_error_cts_salesforce_no_records_test(
+            self, api_server_test, cts_dispatch_mapped_without_record):
+        uuid_ = 'UUID1'
+        dispatch_number = 'S-147735'
+        expected_response_mapped_without_records = cts_dispatch_mapped_without_record
+        expected_response_cts = {
+            "request_id": uuid_,
+            "body": expected_response_mapped_without_records,
+            "status": 200
+        }
+        cts_expected_response = {
+            'code': 200,
+            'message': {'done': True}
+        }
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/{dispatch_number}')
+            data = await response.get_json()
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+
+            assert response.status_code == HTTPStatus.OK
+            assert data == cts_expected_response
+
+    @pytest.mark.asyncio
+    async def cts_get_dispatch_error_cts_salesforce_done_false_test(
+            self, api_server_test, cts_dispatch_mapped_without_done_false):
+        uuid_ = 'UUID1'
+        dispatch_number = 'S-147735'
+        expected_response_mapped_done_false = cts_dispatch_mapped_without_done_false
+        expected_response_cts = {
+            "request_id": uuid_,
+            "body": {'done': False, 'records': []},
+            "status": 200
+        }
+        cts_expected_response = {
+            'code': 200,
+            'message': {'done': False, 'records': []}
+        }
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/{dispatch_number}')
+            data = await response.get_json()
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+
+            assert response.status_code == HTTPStatus.OK
+            assert data == cts_expected_response
+
+    @pytest.mark.asyncio
+    async def cts_get_all_dispatches_test(self, api_server_test, cts_all_dispatches_mapped):
+        uuid_ = 'UUID1'
+        expected_response_cts = {
+            "request_id": uuid_,
+            "body": cts_all_dispatches_mapped,
+            "status": 200
+        }
+        cts_expected_response = {
+            'vendor': "cts",
+            'list_dispatch': [expected_response_cts['body']['records'][0]]
+        }
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+
+        payload = {"request_id": uuid_, "body": {}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/')
+            data = await response.get_json()
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+
+            assert response.status_code == HTTPStatus.OK
+            assert data == cts_expected_response
+
+    @pytest.mark.asyncio
+    async def cts_get_all_dispatches_error_500_test(self, api_server_test):
+        uuid_ = 'UUID1'
+        expected_response_cts = {
+            "request_id": uuid_,
+            "body": "ERROR",
+            "status": 500
+        }
+        cts_expected_response = {
+            'code': 500,
+            'message': "ERROR"
+        }
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+
+        payload = {"request_id": uuid_, "body": {}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/')
+            data = await response.get_json()
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+
+            assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+            assert data == cts_expected_response
+
+    @pytest.mark.asyncio
+    async def cts_get_all_dispatches_cts_salesforce_no_records_test(
+            self, api_server_test, cts_dispatch_mapped_without_record):
+        uuid_ = 'UUID1'
+        expected_response_cts = {
+            "request_id": uuid_,
+            "body": cts_dispatch_mapped_without_record,
+            "status": 500
+        }
+        cts_expected_response = {
+            'code': 500,
+            'message': {'done': True}
+        }
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+
+        payload = {"request_id": uuid_, "body": {}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/')
+            data = await response.get_json()
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+
+            assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+            assert data == cts_expected_response
+
+    @pytest.mark.asyncio
+    async def cts_get_all_dispatches_cts_salesforce_done_false_test(
+            self, api_server_test, cts_dispatch_mapped_without_done_false):
+        uuid_ = 'UUID1'
+        expected_response_cts = {
+            "request_id": uuid_,
+            "body": cts_dispatch_mapped_without_done_false,
+            "status": 200
+        }
+        cts_expected_response = {
+            'code': 200,
+            'message': {'done': False, 'records': []}
+        }
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+
+        payload = {"request_id": uuid_, "body": {}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/')
+            data = await response.get_json()
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+
+            assert response.status_code == HTTPStatus.OK
+            assert data == cts_expected_response
+
+    @pytest.mark.asyncio
+    async def cts_create_dispatch_test(self, api_server_test, new_dispatch):
+        # TODO: finish it
+        uuid_ = 'UUID1'
+        igz_dispatch_id = f"IGZ{uuid_}"
+        ticket_id = new_dispatch['mettel_bruin_ticket_id']
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        payload = {"request_id": uuid_, "body": {}}
+        cts_expected_response = {}
+        cts_expected_response['id'] = igz_dispatch_id
+        cts_expected_response['vendor'] = 'CTS'
+        err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
+        payload_request = {
+            "request_id": uuid_,
+            "body": new_dispatch
+        }
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.post(f'/cts/dispatch/', json=new_dispatch)
+            # api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.post", payload, timeout=30)
+            api_server_test._event_bus.rpc_request.assert_has_awaits([
+                call("cts.dispatch.post", payload_request, timeout=30),
+                # call("bruin.ticket.details.request", payload_ticket_request_msg, timeout=200)
+            ])
+            assert response == cts_expected_response

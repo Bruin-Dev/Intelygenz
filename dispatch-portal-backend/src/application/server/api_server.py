@@ -47,7 +47,7 @@ class DispatchServer:
         self._port = config.DISPATCH_PORTAL_CONFIG['port']
         self._hypercorn_config = HyperCornConfig()
         # self._hypercorn_config.debug = True
-        self._hypercorn_config.error_logger = self._logger
+        # self._hypercorn_config.error_logger = self._logger
         self._new_bind = f'0.0.0.0:{self._port}'
         self._app = Pint(__name__, title=self._title, no_openapi=True,
                          base_model_schema=config.DISPATCH_PORTAL_CONFIG['schema_path'])
@@ -171,7 +171,6 @@ class DispatchServer:
         self._logger.info(f"[LIT] Creating new dispatch from lit-bridge")
         start_time = time.time()
         body = await request.get_json()
-
         try:
             validate(body, self._schema['components']['schemas']['new_dispatch_lit'])
         except jsonschema.exceptions.ValidationError as ve:
@@ -389,6 +388,7 @@ class DispatchServer:
         body = await request.get_json()
 
         try:
+            # import pdb;pdb.set_trace()
             validate(body, self._schema['components']['schemas']['new_dispatch_cts'])
         except jsonschema.exceptions.ValidationError as ve:
             self._logger.error(ve)
@@ -409,7 +409,7 @@ class DispatchServer:
             found_ticket_id_in_cache = ticket_id in dispatches_from_cache.keys()
 
             if found_ticket_id_in_cache:
-                err_msg = f"This ticket is already in cache: {ticket_id}"
+                err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
                 self._logger.info(err_msg)
                 return_response['status'] = 400
                 return_response['body'] = err_msg
@@ -483,7 +483,7 @@ class DispatchServer:
         else:
             dispatch_request = cts_mapper.map_create_dispatch(body)
             request_body = dict()
-            request_body['RequestDispatch'] = dispatch_request
+            request_body = dispatch_request
 
             payload = {"request_id": uuid(), "body": request_body}
             response = await self._event_bus.rpc_request("cts.dispatch.post", payload, timeout=30)

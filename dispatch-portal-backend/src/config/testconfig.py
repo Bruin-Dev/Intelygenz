@@ -15,6 +15,9 @@ NATS_CONFIG = {
     }
 }
 
+
+ENVIRONMENT_NAME = 'dev'
+
 DISPATCH_PORTAL_CONFIG = {
     'title': 'Dispatch Portal API',
     'port': 5000,
