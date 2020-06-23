@@ -28,16 +28,6 @@ locals {
   automation-bruin-bridge-task_definition = "${aws_ecs_task_definition.automation-bruin-bridge.family}:${aws_ecs_task_definition.automation-bruin-bridge.revision}"
   automation-bruin-bridge-service_discovery_service-name = "bruin-bridge-${var.ENVIRONMENT}"
 
-  // bruin-test local vars
-  automation-bruin-test-image = "${data.aws_ecr_repository.automation-bruin-test.repository_url}:${var.BRUIN_TEST_BUILD_NUMBER}"
-  automation-bruin-test-papertrail_prefix = "bruin-test-${element(split("-", var.BRUIN_BRIDGE_BUILD_NUMBER),2)}"
-  automation-bruin-test-ecs_task_definition-family = "${var.ENVIRONMENT}-bruin-test"
-  automation-bruin-test_service-security_group-name = "${var.ENVIRONMENT}-bruin-test"
-  automation-bruin-test-resource-name = "${var.ENVIRONMENT}-bruin-test"
-  automation-bruin-test-service-security_group-tag-Name = "${var.ENVIRONMENT}-bruin-test"
-  automation-bruin-test-task_definition = "${aws_ecs_task_definition.automation-bruin-test.family}:${aws_ecs_task_definition.automation-bruin-test.revision}"
-  automation-bruin-test-service_discovery_service-name = "bruin-test-${var.ENVIRONMENT}"
-
   // cts-brige local vars
   automation-cts-bridge-image = "${data.aws_ecr_repository.automation-cts-bridge.repository_url}:${var.CTS_BRIDGE_BUILD_NUMBER}"
   automation-cts-bridge-papertrail_prefix = "cts-bridge-${element(split("-", var.CTS_BRIDGE_BUILD_NUMBER),2)}"
@@ -341,10 +331,6 @@ locals {
   // alarm running_task_count_bruin-bridge local variables
   running_task_count_bruin-bridge_alarm-name = "Running tasks count of bruin-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_bruin-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_bruin-bridge"
-
-  // alarm running_task_count_bruin-test local variables
-  running_task_count_bruin-test_alarm-name = "Running tasks count of bruin-test service in ECS cluster with name ${var.ENVIRONMENT}"
-  running_task_count_bruin-test_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_bruin-test"
 
   // alarm running_task_count_service-affecting-monitor local variables
   running_task_count_service-affecting-monitor_alarm-name = "Running tasks count of service-affecting-monitor service in ECS cluster with name ${var.ENVIRONMENT}"

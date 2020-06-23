@@ -16,7 +16,6 @@ variables:
   DOCKER_BASE_IMAGE_VERSION: 2.0.0
   DOCKER_IMAGE_UTILS_VERSION: 1.0.4
   bruin_bridge_desired_tasks: 5
-  bruin_test_desired_tasks: 1
   cts_bridge_desired_tasks: 1
   dispatch_portal_backend_desired_tasks: 1
   dispatch_portal_frontend_desired_tasks: 1
@@ -51,7 +50,6 @@ include:
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-destroy-templates.yml'
   # Gitlab-CI jobs declaration for each microservice/module
   - local: 'bruin-bridge/.gitlab-ci.yml'
-  - local: 'bruin-test/.gitlab-ci.yml'
   - local: 'cts-bridge/.gitlab-ci.yml'
   - local: 'ci-utils/.gitlab-ci.yml'
   - local: 'dispatch-portal-backend/.gitlab-ci.yml'

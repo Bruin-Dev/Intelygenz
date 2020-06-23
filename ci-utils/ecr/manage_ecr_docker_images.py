@@ -14,7 +14,6 @@ FNULL = open(os.devnull, 'w')
 
 class DeleteOlderDockerImage:
     _default_repositories = ['automation-bruin-bridge',
-                             'automation-bruin-test',
                              'automation-cts-bridge',
                              'automation-dispatch-portal-frontend',
                              'automation-dispatch-portal-frontend/nginx',

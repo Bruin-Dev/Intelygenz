@@ -306,8 +306,8 @@ These variables are indicated in different ways, depending on whether you want t
 
   variables:
     . . .
-    IGZ_PACKAGES_VERSION: 2.0.0
-    DOCKER_BASE_IMAGE_VERSION: 2.0.0
+    IGZ_PACKAGES_VERSION: 1.0.9
+    DOCKER_BASE_IMAGE_VERSION: 1.0.7
     . . .
 
   . . .
@@ -325,7 +325,7 @@ These variables are indicated in different ways, depending on whether you want t
           context: .
           dockerfile: <microservice_folder>/Dockerfile
           args:
-            DOCKER_BASE_IMAGE_VERSION: 2.0.0
+            DOCKER_BASE_IMAGE_VERSION: 1.0.7
       . . .
     ```
 

@@ -17,7 +17,6 @@
     - export TF_VAR_ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
     - export TF_VAR_ALARMS_SUBSCRIPTIONS_EMAIL_ADDRESS=${AWS_ALARMS_NOTIFIER_EMAIL}
     - export TF_VAR_bruin_bridge_desired_tasks=${bruin_bridge_desired_tasks}
-    - export TF_VAR_bruin_test_desired_tasks=${bruin_test_desired_tasks}
     - export TF_VAR_cts_bridge_desired_tasks=${cts_bridge_desired_tasks}
     - export TF_VAR_dispatch_portal_backend_desired_tasks=${dispatch_portal_backend_desired_tasks}
     - export TF_VAR_dispatch_portal_frontend_desired_tasks=${dispatch_portal_frontend_desired_tasks}
