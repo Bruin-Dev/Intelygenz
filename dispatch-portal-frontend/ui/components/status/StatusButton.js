@@ -4,19 +4,19 @@ import React, { useEffect, useState } from 'react';
 export const TYPES_STATUS = {
   newDispatch: {
     value: 'New Dispatch',
-    color: 'bg-teal-500 hover:bg-teal-700'
+    color: 'bg-teal-500'
   },
   requestConfirmed: {
     value: 'Request Confirmed',
-    color: 'bg-orange-500 hover:bg-orange-700'
+    color: 'bg-orange-500'
   },
   techArrived: {
     value: 'Tech Arrived',
-    color: 'bg-yellow-500 hover:bg-yellow-700'
+    color: 'bg-yellow-500'
   },
   repairCompleted: {
     value: 'Repair Completed',
-    color: 'bg-green-500 hover:bg-green-700'
+    color: 'bg-green-500'
   }
 };
 
@@ -46,7 +46,8 @@ export const StatusButton = ({ status }) => {
     <button
       data-testid="statusButton-component"
       type="button"
-      className={`${buttonClass} cursor-not-allowed text-white text-xs font-bold py-2 px-4`}
+      className={`${buttonClass} cursor-pointer text-white text-xs font-bold py-2 px-4`}
+      style={{ cursor: 'auto' }}
     >
       {status}
     </button>

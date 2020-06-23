@@ -2,7 +2,7 @@
 export const dispatchCtsInAdapter = data => ({
   // site_survey_quote_required, job_site_contact_name, hard_time_of_dispatch_local, hard_time_of_dispatch_time_zone_local
   id: data.id || data.dispatch_number || '',
-  vendor: data.vendor || '',
+  vendor: (data.vendor && data.vendor.toUpperCase()) || '',
   slaLevel: data.slaLevel || '',
   status:
     (data.dispatch && data.dispatch.dispatch_status) ||

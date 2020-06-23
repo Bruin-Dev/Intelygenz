@@ -39,7 +39,7 @@ describe('dispatch service tests', () => {
     const expectedResult = [
       {
         id: 'DIS17918',
-        vendor: 'lit',
+        vendor: 'LIT',
         slaLevel: '',
         status: 'New Dispatch',
         dateDispatch: '2020-01-31',
@@ -78,7 +78,7 @@ describe('dispatch service tests', () => {
       },
       {
         id: 'DIS17918_1',
-        vendor: 'cts',
+        vendor: 'CTS',
         slaLevel: '',
         status: 'New Dispatch',
         dateDispatch: '2020-01-31',
@@ -131,7 +131,7 @@ describe('dispatch service tests', () => {
     const expectedResult = [
       {
         id: 'DIS17918_1',
-        vendor: 'cts',
+        vendor: 'CTS',
         slaLevel: '',
         status: 'New Dispatch',
         dateDispatch: '2020-01-31',
@@ -186,7 +186,7 @@ describe('dispatch service tests', () => {
     const expectedResult = [
       {
         id: 'DIS17918',
-        vendor: 'lit',
+        vendor: 'LIT',
         slaLevel: '',
         status: 'New Dispatch',
         dateDispatch: '2020-01-31',

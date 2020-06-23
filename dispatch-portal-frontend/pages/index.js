@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import DataTable from 'react-data-table-component';
+import { useRouter } from 'next/router';
 import { DispatchService } from '../services/dispatch/dispatch.service';
 import { privateRoute } from '../components/privateRoute/PrivateRoute';
 import Menu from '../components/menu/Menu';
@@ -13,7 +14,7 @@ import './index.scss';
 
 const columns = [
   {
-    name: ' ',
+    name: '',
     selector: 'color',
     cell: row => (
       <span
@@ -26,13 +27,24 @@ const columns = [
     )
   },
   {
-    name: 'System',
+    name: 'Bruin Ticket ID',
+    selector: 'mettelId',
+    sortable: true
+  },
+  {
+    name: 'Customer/Location',
+    cell: row => (
+      <span>{`${row.onSiteContact.street} ${row.onSiteContact.city} ${row.onSiteContact.state} ${row.onSiteContact.zip}`}</span>
+    )
+  },
+  {
+    name: 'Vendor',
     selector: 'vendor',
     sortable: true,
     cell: row => <span>{row.vendor.toUpperCase()}</span>
   },
   {
-    name: 'Dispatch ID',
+    name: 'Vendor Dispatch ID',
     selector: 'id',
     sortable: true, // Todo: delete uppercase
     cell: row => (
@@ -40,7 +52,7 @@ const columns = [
         className="link"
         data-test-id={`dispatchId-${row.id}-link`}
         href={`${Routes.DISPATCH()}/${row.id}?vendor=${
-          row.vendor.toUpperCase() === config.VENDORS.CTS
+          row.vendor === config.VENDORS.CTS
             ? config.VENDORS.CTS
             : config.VENDORS.LIT
         }`}
@@ -50,18 +62,7 @@ const columns = [
     )
   },
   {
-    name: 'Customer/Location',
-    cell: row => (
-      <span>{`${row.onSiteContact.street} ${row.onSiteContact.city} ${row.onSiteContact.state} ${row.onSiteContact.zip}`}</span>
-    )
-  },
-  {
-    name: 'Bruin Ticket ID',
-    selector: 'mettelId',
-    sortable: true
-  },
-  {
-    name: 'Time Scheduled',
+    name: 'Scheduled Time',
     selector: 'dateDispatch',
     sortable: true,
     cell: row => (
@@ -79,6 +80,7 @@ const columns = [
 ];
 
 function Index({ authToken }) {
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,14 +111,16 @@ function Index({ authToken }) {
       <Menu authToken={authToken} />
 
       <div className="flex flex-col px-10">
-        <Link href={Routes.NEW_DISPATCH()}>
-          <button
-            type="button"
-            className="float-right bg-transparent hover:bg-teal-500 text-teal-700 hover:text-white py-2 px-4 m-4 border border-teal-500 hover:border-transparent rounded"
-          >
-            Create new dispatch
-          </button>
-        </Link>
+        <div>
+          <Link href={Routes.NEW_DISPATCH()}>
+            <button
+              type="button"
+              className="float-right bg-transparent hover:bg-teal-500 text-teal-700 hover:text-white py-2 px-4 m-4 border border-teal-500 hover:border-transparent rounded"
+            >
+              Create new dispatch
+            </button>
+          </Link>
+        </div>
 
         <div className="flex flex-grow">
           <h1 className="text-2xl px-3">Dispatches List</h1>
@@ -151,7 +155,13 @@ function Index({ authToken }) {
           pagination
           progressPending={isLoading}
           className="dataTable"
-          defaultSortField="id"
+          defaultSortField="dateDispatch"
+          defaultSortAsc={false}
+          onRowClicked={rowData =>
+            router.push(
+              `${Routes.DISPATCH()}/${rowData.id}?vendor=${rowData.vendor}`
+            )
+          }
         />
       </div>
     </div>
