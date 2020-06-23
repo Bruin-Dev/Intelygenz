@@ -101,7 +101,7 @@ resource "aws_ecs_service" "automation-lumin-billing-report" {
 
   network_configuration {
     security_groups = [
-      aws_security_group.automation-dispatch-portal-backend_service.id]
+      aws_security_group.automation-lumin-billing-report_service.id]
     subnets = [
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
@@ -109,7 +109,7 @@ resource "aws_ecs_service" "automation-lumin-billing-report" {
   }
 
   service_registries {
-    registry_arn = aws_service_discovery_service.dispatch-portal-backend.arn
+    registry_arn = aws_service_discovery_service.lumin-billing-report.arn
   }
 
 }
