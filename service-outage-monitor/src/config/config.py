@@ -61,13 +61,10 @@ MONITOR_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
     'jobs_intervals': {
-        'outage_detector': 60 * 40,
         'outage_monitor': 60 * 3,
-        'outage_reporter': 60 * 240,
         'quarantine': quarantine_time,
         'build_cache': 60 * 240
     },
-    'quarantine_key_ttl': quarantine_time + 60 * 5,
     'velocloud_instances_filter': velocloud_hosts_and_filters,
     'blacklisted_edges': [
         # Federal edge that is inside a non-federal Velocloud instance

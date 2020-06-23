@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 
 import asyncio
-from application.repositories.edge_redis_repository import EdgeIdentifier
+from application.repositories import EdgeIdentifier
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from pytz import timezone

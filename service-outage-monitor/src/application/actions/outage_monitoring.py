@@ -3,7 +3,6 @@ import os
 import re
 import time
 
-from collections import OrderedDict
 from collections import defaultdict
 from datetime import datetime
 from datetime import timedelta
@@ -11,6 +10,7 @@ from time import perf_counter
 from typing import Callable
 
 import asyncio
+from application.repositories import EdgeIdentifier
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from dateutil.parser import parse

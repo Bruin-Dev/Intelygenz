@@ -11,7 +11,7 @@ import pytest
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
-from igz.packages.repositories.edge_repository import EdgeIdentifier
+from igz.packages.repositories import EdgeIdentifier
 from pytz import timezone
 from shortuuid import uuid
 

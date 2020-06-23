@@ -20,7 +20,7 @@ from pytz import utc
 from shortuuid import uuid
 from igz.packages.eventbus.eventbus import EventBus
 
-from application.repositories.edge_redis_repository import EdgeIdentifier
+from application.repositories import EdgeIdentifier
 
 empty_str = str()
 

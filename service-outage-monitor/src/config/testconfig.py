@@ -36,13 +36,10 @@ MONITOR_CONFIG = {
     'environment': "dev",
     'timezone': "US/Eastern",
     'jobs_intervals': {
-        'outage_detector': 60 * 40,
         'outage_monitor': 60 * 3,
-        'outage_reporter': 60 * 60,
         'quarantine': quarantine_time,
         'build_cache': 60 * 60
     },
-    'quarantine_key_ttl': quarantine_time + 60 * 5,
     'velocloud_instances_filter': {
         "some-host": [],
     },
