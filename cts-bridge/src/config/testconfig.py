@@ -37,6 +37,8 @@ CTS_CONFIG = {
     'login_ttl': 90
 }
 
+ENVIRONMENT_NAME = 'dev'
+
 LOG_CONFIG = {
     'name': 'cts-bridge-test',
     'level': logging.DEBUG,

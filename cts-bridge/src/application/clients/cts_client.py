@@ -61,8 +61,7 @@ class CtsClient:
                 if self._config.CTS_CONFIG['environment'] == 'dev':
                     response = self._salesforce_sdk.Service__c.create(payload, self._get_request_headers())
                 elif self._config.CTS_CONFIG['environment'] == 'production':
-                    # TODO: Not implemented: send post request to their cts form
-                    raise Exception("TODO: CTS create_dispatch: Not implemented in production.")
+                    raise Exception("CTS create_dispatch: Not implemented in production.")
                 return_response["body"] = dict(response)
                 if response["success"] is True:
                     return_response["status"] = 200
@@ -123,13 +122,7 @@ class CtsClient:
                 filter_value = ''
                 if len(filter_field) > 0 and len(filter_value) > 0:
                     where = f" WHERE {filter_field} LIKE = {filter_value} "
-                if query_fields:
-                    query = "SELECT {} FROM Service__c {}".format(query_fields, where)
-                else:
-                    desc = self._salesforce_sdk.Service__c.describe()
-                    field_names = [field['name'] for field in desc['fields']]
-                    query = "SELECT {} FROM Service__c {}".format(','.join(field_names), where)
-
+                query = "SELECT {} FROM Service__c {}".format(query_fields, where)
                 self._logger.info(f"Applying query: {query}")
                 response = self._salesforce_sdk.query(query)
 
