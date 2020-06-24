@@ -38,7 +38,8 @@ export const dispatchLitInAdapter = data => ({
       (data.dispatch && data.dispatch.mettel_department) ||
       data.mettel_department ||
       '',
-    phoneNumber: '',
+    phoneNumber:
+      (data.dispatch && data.dispatch.mettel_requester_phone_number) || '',
     departmentPhoneNumber:
       (data.dispatch && data.dispatch.mettel_department_phone_number) || ''
   },
@@ -116,5 +117,4 @@ export const dispatchLitOutAdapter = data => ({
   mettel_requester_email: data.emailRequester,
   mettel_requester_phone_number: data.phoneNumberRequester,
   mettel_department_phone_number: data.phoneNumber
-  // Only CTS: serviceType, slaLevel, email(site contact)
 });

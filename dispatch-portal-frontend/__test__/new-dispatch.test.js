@@ -49,6 +49,8 @@ describe('NEW DISPATCH PAGE tests', () => {
     ).toBeInTheDocument();
   });
 
+  /*
+  Todo: review
   it('check submit error(LIT)', async () => {
     mockadapter
       .onGet(new RegExp(`${API_URLS.DISPATCH_LIT}/*`))
@@ -121,7 +123,7 @@ describe('NEW DISPATCH PAGE tests', () => {
     expect(
       await screen.getByTestId('error-new-dispatch-page')
     ).toBeInTheDocument();
-  });
+  }); */
 
   /*
   Todo: falta ir a los detalles

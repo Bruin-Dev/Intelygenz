@@ -18,7 +18,8 @@ import {
   vendorsOptions,
   timeZoneOptions,
   departmentOptions,
-  serviceTypesOptions
+  serviceTypesOptions,
+  slaLevelOptions
 } from '../config/constants/dispatch.constants';
 import { config } from '../config/config';
 import './new-dispatch.scss';
@@ -32,6 +33,7 @@ function NewDispatch({ authToken }) {
     errors: []
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState(false);
   const [blockedVendors, setBlockedVendors] = useState([]);
   const [statesOptions, setStatesOptions] = useState(statesUSA);
   const [selectedVendor, setSelectedVendor] = useState([]); // Note: ['CTS'] ['LIT'] ['CTS', 'LIT']
@@ -39,6 +41,24 @@ function NewDispatch({ authToken }) {
 
   const onSubmit = async formData => {
     setIsLoading(true);
+    setFormErrors(false);
+
+    // Check errors
+    const requesterName =
+      formData.firstNameRequester.length + formData.lastNameRequester.length;
+    if (requesterName > 14) {
+      setFormErrors('Requester');
+      setIsLoading(false);
+      return;
+    }
+
+    // Check errors
+    const onSitecontact = formData.firstName.length + formData.lastName.length;
+    if (onSitecontact > 14) {
+      setFormErrors('On-Site Contact');
+      setIsLoading(false);
+      return;
+    }
 
     const resAux = {};
     resAux.data = [];
@@ -55,7 +75,8 @@ function NewDispatch({ authToken }) {
      *
      */
     await Promise.all(
-      formData.vendor.map(async vendor => {
+      selectedVendor.map(async vendor => {
+        // Todo: change "formData.vendor.map"
         const resData = await dispatchService.newDispatch(formData, vendor);
 
         if (resData && resData.error) {
@@ -87,7 +108,7 @@ function NewDispatch({ authToken }) {
     router.push(`${Routes.BASE()}`);
   };
 
-  const changeVendor = event => {
+  /* const changeVendor = event => {
     const index = selectedVendor.indexOf(event.target.value);
     if (index > -1) {
       const auxSelectedVendors = [...selectedVendor];
@@ -96,6 +117,10 @@ function NewDispatch({ authToken }) {
     } else {
       setSelectedVendor([...selectedVendor, event.target.value]);
     }
+  }; */
+
+  const changeVendor = event => {
+    setSelectedVendor([event.target.value]);
   };
 
   const changeCountry = country => {
@@ -250,7 +275,7 @@ function NewDispatch({ authToken }) {
             <div className="w-full md:w-1/2 p-8">
               <div className="flex flex-col">
                 <div className="block uppercase tracking-wide text-grey-darker text-sm mb-2">
-                  Vendor
+                  Vendor (*multivendor disabled)
                 </div>
                 {vendorsOptions.map(vendorsOption =>
                   blockedVendors.find(r => vendorsOption.value === r) ? (
@@ -269,7 +294,7 @@ function NewDispatch({ authToken }) {
                         }
                       >
                         <input
-                          type="checkbox"
+                          type="radio"
                           name="vendor"
                           value={vendorsOption.value}
                           id={vendorsOption.value}
@@ -329,21 +354,42 @@ function NewDispatch({ authToken }) {
                     className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
                     htmlFor="slaLevel"
                   >
-                    SLA Level (only for {config.VENDORS.CTS})
-                    <input
-                      className={
-                        errors.slaLevel
-                          ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
-                          : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
-                      }
-                      type="text"
-                      name="slaLevel"
-                      data-testid="slaLevel"
-                      id="slaLevel"
-                      ref={register({ required: true })}
-                      placeholder="Level 1"
-                    />
-                    {errors.slaLevel && (
+                    Sla Level (only for {config.VENDORS.CTS})
+                    <div className="relative">
+                      <select
+                        name="slaLevel"
+                        data-testid="slaLevel"
+                        id="slaLevel"
+                        ref={register({ required: true })}
+                        className={
+                          errors.slaLevel
+                            ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
+                            : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
+                        }
+                      >
+                        {slaLevelOptions.map((slaLeveloption, index) => (
+                          <option
+                            key={`slaLeveloption-${index}`}
+                            value={slaLeveloption}
+                          >
+                            {slaLeveloption}
+                          </option>
+                        ))}
+                      </select>
+                      <div
+                        className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker"
+                        style={{ top: '13px', right: '0px' }}
+                      >
+                        <svg
+                          className="h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                        </svg>
+                      </div>
+                    </div>
+                    {errors.country && (
                       <p className="text-red-500 text-xs italic">
                         This field is required
                       </p>
@@ -640,7 +686,7 @@ function NewDispatch({ authToken }) {
                     name="lastName"
                     data-testid="lastName"
                     id="lastName"
-                    ref={register({ required: true, maxLength: 10 })}
+                    ref={register({ required: true })}
                     placeholder="MacLow"
                   />
                   {errors.lastName && (
@@ -837,7 +883,7 @@ function NewDispatch({ authToken }) {
                   className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
                   htmlFor="firstNameRequester"
                 >
-                  First Name
+                  Name
                   <input
                     className={
                       errors.firstNameRequester
@@ -848,12 +894,15 @@ function NewDispatch({ authToken }) {
                     name="firstNameRequester"
                     data-testid="firstNameRequester"
                     id="firstNameRequester"
-                    placeholder="Charlize"
+                    placeholder="Pullman"
                     ref={register({ required: true })}
                   />
                   {errors.firstNameRequester && (
                     <p className="text-red-500 text-xs italic">
-                      This field is required
+                      {errors.firstNameRequester?.type === 'required' &&
+                        'This field is required'}
+                      {errors.firstNameRequester?.type === 'maxLength' &&
+                        'This input exceeds the maximum length of 10 characters'}{' '}
                     </p>
                   )}
                 </label>
@@ -875,7 +924,7 @@ function NewDispatch({ authToken }) {
                     data-testid="lastNameRequester"
                     id="lastNameRequester"
                     placeholder="Kidman"
-                    ref={register({ required: true, maxLength: 10 })}
+                    ref={register({ required: true })}
                   />
                   {errors.lastNameRequester && (
                     <p className="text-red-500 text-xs italic">
@@ -1025,6 +1074,15 @@ function NewDispatch({ authToken }) {
               </p>
             ) : (
               ''
+            )}
+
+            {formErrors && (
+              <p
+                className="text-red-500 text-base italic py-2 mx-5"
+                data-testid="error-new-dispatch-page"
+              >
+                {formErrors}: Name and lastname must not exceed 14 characters.
+              </p>
             )}
             {response && response.data.length ? (
               <p

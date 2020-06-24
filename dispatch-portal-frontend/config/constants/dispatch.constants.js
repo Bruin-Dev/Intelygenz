@@ -94,3 +94,5 @@ export const timeOptions = [
 ];
 
 export const countryOptions = ['United States', 'Canada', 'PR'];
+
+export const slaLevelOptions = ['Pre-planned', 'Next bussiness day'];

@@ -86,7 +86,10 @@ export const dispatchCtsInAdapter = data => ({
         : '',
     fieldEngineerContactNumber:
       (data.dispatch && data.dispatch.field_engineer_contact_number) || '',
-    res: data.description__c || data.dispatch.description__c || ''
+    res:
+      data.description__c ||
+      (data.dispatch && data.dispatch.description__c) ||
+      ''
   }
 });
 
