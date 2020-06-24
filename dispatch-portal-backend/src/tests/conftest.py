@@ -59,6 +59,13 @@ def new_dispatch():
 
 
 @pytest.fixture(scope='function')
+def new_dispatch_validation_error(new_dispatch):
+    updated_cts_new_dispatch = copy.deepcopy(new_dispatch)
+    del updated_cts_new_dispatch['date_of_dispatch']
+    return updated_cts_new_dispatch
+
+
+@pytest.fixture(scope='function')
 def cts_dispatch():
     return {
         "done": True,
@@ -69,6 +76,7 @@ def cts_dispatch():
             },
             'Id': 'a260n000000dXywAAE',
             'Name': 'S-147735',
+            'API_Resource_Name__c': 'Tech Name',
             'Billing_Invoice_Date__c': None,
             'Billing_Invoice_Number__c': None,
             'Billing_Total__c': 0.0,
@@ -141,6 +149,7 @@ def cts_dispatch_mapped():
             },
             "id": "a260n000000dXywAAE",
             "name": "S-147735",
+            'api_resource_name__c': 'Tech Name',
             "billing_invoice_date__c": None,
             "billing_invoice_number__c": None,
             "billing_total__c": 0,
@@ -151,7 +160,17 @@ def cts_dispatch_mapped():
             "city__c": "San Francisco",
             "confirmed__c": False,
             "country__c": None,
-            "description__c": "Onsite Time Needed: 2020-06-21 4:00PM\r\nOnsite Timezone: Pacific Time\r\nReference: 4680743\r\nSLA Level: 4-hour\r\nLocation Country: United States\r\nLocation: Hayes Valley Inn, San Francisco, CA, 94102\r\n\r\nLocation ID: Test Location\r\nLocation Owner: Hayes Valley Inn\r\nOnsite Contact: John Smith\r\nContact #: +1 555 888 3333\r\nFailure Experienced: TEST Device is bouncing constantly\r\nOnsite SOW: This is a TEST\r\nMaterials Needed: Laptop, cable, tuner, ladder, internet hotspot\r\nService Category: Part Replacement\r\nName: Karen Doe\r\nPhone: +1 666 666 6666\r\nEmail: karen.doe@mettel.net",
+            "description__c": "Onsite Time Needed: 2020-06-21 4:00PM\r\n"
+                              "Onsite Timezone: Pacific Time\r\nReference: 4680743\r\n"
+                              "SLA Level: 4-hour\r\nLocation Country: United States\r\n"
+                              "Location: Hayes Valley Inn, San Francisco, CA, 94102\r\n\r\n"
+                              "Location ID: Test Location\r\nLocation Owner: Hayes Valley Inn\r\n"
+                              "Onsite Contact: John Smith\r\nContact #: +1 555 888 3333\r\n"
+                              "Failure Experienced: TEST Device is bouncing constantly\r\n"
+                              "Onsite SOW: This is a TEST\r\n"
+                              "Materials Needed: Laptop, cable, tuner, ladder, internet hotspot\r\n"
+                              "Service Category: Part Replacement\r\nName: Karen Doe\r\n"
+                              "Phone: +1 666 666 6666\r\nEmail: karen.doe@mettel.net",
             "duration_onsite__c": None,
             "early_start__c": "2020-06-21T23:00:00.000+0000",
             "ext_ref_num__c": "4680743",
@@ -246,4 +265,182 @@ def cts_all_dispatches_mapped(cts_dispatch_mapped):
     return {
         "done": True,
         "records": [cts_dispatch_mapped]
+    }
+
+
+@pytest.fixture(scope='function')
+def simple_ticket_note():
+    return "#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n" \
+           "Please see the summary below.\n--\n" \
+           "Dispatch Number:  " \
+           "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/S-12345] " \
+           "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n" \
+           "Time Zone (Local): Pacific Time\n\n" \
+           "Location Owner/Name: Red Rose Inn\n" \
+           "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n" \
+           "Phone: +1 666 6666 666\n\n" \
+           "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n" \
+           "Arrival Instructions: " \
+           "When arriving to the site call HOLMDEL NOC for telematic assistance\n" \
+           "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n" \
+           "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n" \
+           "Email: karen.doe@mettel.net\nDepartment: Customer Care"
+
+
+@pytest.fixture(scope='function')
+def big_ticket_note(simple_ticket_note):
+    return 'A' * 1500 + 'B' * 1500
+
+
+@pytest.fixture(scope='function')
+def ticket_details():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n"
+                                 "Please see the summary below.\n--\n"
+                                 "Dispatch Number:  "
+                                 "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "
+                                 "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
+                                 "Time Zone (Local): Pacific Time\n\n"
+                                 "Location Owner/Name: Red Rose Inn\n"
+                                 "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n"
+                                 "Phone: +1 666 6666 666\n\n"
+                                 "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n"
+                                 "Arrival Instructions: "
+                                 "When arriving to the site call HOLMDEL NOC for telematic assistance\n"
+                                 "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n"
+                                 "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n"
+                                 "Email: karen.doe@mettel.net\nDepartment: Customer Care",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:06:40.27-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": None,
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
+def ticket_details_1(ticket_details):
+    updated_ticket_details = copy.deepcopy(ticket_details)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_2(ticket_details):
+    updated_ticket_details = copy.deepcopy(ticket_details)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_2_error(ticket_details):
+    updated_ticket_details = copy.deepcopy(ticket_details)
+    updated_ticket_details['body'] = None
+    updated_ticket_details['status'] = 400
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_1_no_requested_watermark():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
+def ticket_details_2_no_requested_watermark():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664326",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
     }

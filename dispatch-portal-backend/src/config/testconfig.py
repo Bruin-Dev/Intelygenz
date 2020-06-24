@@ -27,6 +27,12 @@ DISPATCH_PORTAL_CONFIG = {
     'swagger_title': 'Dispatch Portal API doc'
 }
 
+CTS_CONFIG = {
+    # Email for requests and cancellations
+    # 'email': 'CTS-MettelService@core-techs.com',
+    'email': 'mettel.automation@intelygenz.com'
+}
+
 LOG_CONFIG = {
     'name': 'dispatch-portal-backend-test',
     'level': logging.DEBUG,

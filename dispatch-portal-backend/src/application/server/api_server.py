@@ -399,114 +399,113 @@ class DispatchServer:
 
         self._logger.info(f"payload: {body}")
 
-        if self._config.ENVIRONMENT_NAME == 'production':
-            # TODO:
-            return_response = dict.fromkeys(["body", "status"])
-            igz_dispatch_id = f"IGZ{uuid()}"
-            ticket_id = body.get('mettel_bruin_ticket_id')
+        # if self._config.ENVIRONMENT_NAME == 'production':
+        return_response = dict.fromkeys(["body", "status"])
+        igz_dispatch_id = f"IGZ{uuid()}"
+        ticket_id = body.get('mettel_bruin_ticket_id')
+        dispatches_from_cache = self._redis_client.hgetall(self.PENDING_DISPATCHES_KEY)
+        found_ticket_id_in_cache = ticket_id in dispatches_from_cache.keys()
 
-            dispatches_from_cache = self._redis_client.hgetall(self.PENDING_DISPATCHES_KEY)
-            found_ticket_id_in_cache = ticket_id in dispatches_from_cache.keys()
+        if found_ticket_id_in_cache:
+            err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
+            self._logger.info(err_msg)
+            return_response['status'] = 400
+            return_response['body'] = err_msg
+            # TODO: notify slack
+            return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
 
-            if found_ticket_id_in_cache:
-                err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
-                self._logger.info(err_msg)
-                return_response['status'] = 400
-                return_response['body'] = err_msg
-                # TODO: notify slack
-                return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
+        # We can avoid this checks in the future
+        # Check if already exists in bruin
+        pre_existing_ticket_notes_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        pre_existing_ticket_notes_status = pre_existing_ticket_notes_response['status']
+        pre_existing_ticket_notes_body = pre_existing_ticket_notes_response['body']
 
-            # We can avoid this checks in the future
-            # Check if already exists in bruin
-            pre_existing_ticket_notes_response = await self._bruin_repository.get_ticket_details(ticket_id)
-            pre_existing_ticket_notes_status = pre_existing_ticket_notes_response['status']
-            pre_existing_ticket_notes_body = pre_existing_ticket_notes_response['body']
+        if pre_existing_ticket_notes_status not in range(200, 300):
+            err_msg = f"Error: could not retrieve ticket [{ticket_id}] details"
+            self._logger.error(err_msg)
+            return_response['status'] = 400
+            return_response['body'] = err_msg
+            # TODO: notify slack
+            return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
 
-            if pre_existing_ticket_notes_status not in range(200, 300):
-                self._logger.error(f"Error: could not retrieve ticket [{ticket_id}] details")
-                return_response['status'] = 400
-                return_response['body'] = f"Error: could not retrieve ticket [{ticket_id}] details"
-                # TODO: notify slack
-                return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
+        ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
+        ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
 
-            ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
-            ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
-
-            requested_watermark_found = UtilsRepository.get_first_element_matching(
-                iterable=ticket_notes,
-                condition=lambda note: self.DISPATCH_REQUESTED_WATERMARK in note.get('noteValue')
-            )
-            response_dispatch = dict()
-            if requested_watermark_found is not None:
-                self._logger.info(f"Ticket: {ticket_id} already has a requested note dispatch portal")
-            else:
-                # Send email
-                cts_body_mapped = cts_mapper.map_create_dispatch(body)
-                email_template = render_email_template(cts_body_mapped)
-                email_html = f'<div>{email_template}</div>'
-                email_data = {
-                    'request_id': uuid(),
-                    'email_data': {
-                        'subject': f'[TEST] CTS - Service Submission - {ticket_id}',
-                        'recipient': self._config.CTS_CONFIG["email"],
-                        'text': 'this is the accessible text for the email',
-                        'html': email_html,
-                        'images': [],
-                        'attachments': []
-                    }
-                }
-                response_send_email = await self._notifications_repository.send_email(email_data)
-                response_send_email_status = response_send_email['status']
-                if response_send_email_status not in range(200, 300):
-                    self._logger.error("[CTS] we could not send the email")
-                    error_response = {
-                        'code': response_send_email_status,
-                        'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
-                    }
-                    return jsonify(error_response), response_send_email_status, None
-                # Append Note to bruin
-                ticket_note = cts_get_dispatch_requested_note(body, igz_dispatch_id)
-                await self._append_note_to_ticket(igz_dispatch_id, ticket_id, ticket_note)
-                self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Note appended: {ticket_note}")
-                # Add to cache
-                added_to_cache = self._add_dispatch_to_cache(ticket_id, igz_dispatch_id)
-                if added_to_cache:
-                    self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Added to cache")
-
-            response_dispatch['id'] = igz_dispatch_id
-            response_dispatch['vendor'] = 'CTS'
-            self._logger.info(f"[CTS] Dispatch retrieved: {igz_dispatch_id} - took {time.time() - start_time}")
-
-            # Send email
-            # Append Note to bruin
-            # Return generated igz ticket id
+        requested_watermark_found = UtilsRepository.get_first_element_matching(
+            iterable=ticket_notes,
+            condition=lambda note: self.DISPATCH_REQUESTED_WATERMARK in note.get('noteValue')
+        )
+        response_dispatch = dict()
+        if requested_watermark_found is not None:
+            self._logger.info(f"Ticket: {ticket_id} already has a requested note dispatch portal")
         else:
-            dispatch_request = cts_mapper.map_create_dispatch(body)
-            request_body = dict()
-            request_body = dispatch_request
-
-            payload = {"request_id": uuid(), "body": request_body}
-            response = await self._event_bus.rpc_request("cts.dispatch.post", payload, timeout=30)
-            self._logger.info(response)
-
-            if response['status'] == 500:
-                error_response = {
-                    'code': response['status'], 'message': response['body']
+            # Send email
+            cts_body_mapped = cts_mapper.map_create_dispatch(body)
+            email_template = render_email_template(cts_body_mapped)
+            email_html = f'<div>{email_template}</div>'
+            email_data = {
+                'request_id': uuid(),
+                'email_data': {
+                    'subject': f'[TEST] CTS - Service Submission - {ticket_id}',
+                    'recipient': self._config.CTS_CONFIG["email"],
+                    'text': 'this is the accessible text for the email',
+                    'html': email_html,
+                    'images': [],
+                    'attachments': []
                 }
-                return jsonify(error_response), response['status'], None
+            }
+            response_send_email = await self._notifications_repository.send_email(email_data)
+            response_send_email_status = response_send_email['status']
+            if response_send_email_status not in range(200, 300):
+                self._logger.error("[CTS] we could not send the email")
+                error_response = {
+                    'code': response_send_email_status,
+                    'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
+                }
+                return jsonify(error_response), response_send_email_status, None
+            # Append Note to bruin
+            ticket_note = cts_get_dispatch_requested_note(body, igz_dispatch_id)
+            await self._append_note_to_ticket(igz_dispatch_id, ticket_id, ticket_note)
+            self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Note appended: {ticket_note}")
+            # Add to cache
+            added_to_cache = self._add_dispatch_to_cache(ticket_id, igz_dispatch_id)
+            if added_to_cache:
+                self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Added to cache")
 
-            response_dispatch = dict()
-            if 'body' in response and response['body'] is not None and 'Dispatch' in response['body'] \
-                    and response['body']['Dispatch'] is not None \
-                    and 'Dispatch_Number' in response['body']['Dispatch']:
-                dispatch_num = response['body']['Dispatch']['Dispatch_Number']
-                response_dispatch['id'] = dispatch_num
-                response_dispatch['vendor'] = 'CTS'
-                self._logger.info(f"[CTS] Dispatch retrieved: {dispatch_num} - took {time.time() - start_time}")
-            else:
-                self._logger.info(f"[CTS] Dispatch not created - {payload} - took {time.time() - start_time}")
-                error_response = {'code': response['status'], 'message': response['body']}
-                return jsonify(error_response), response['status'], None
+        response_dispatch['id'] = igz_dispatch_id
+        response_dispatch['vendor'] = 'CTS'
+        self._logger.info(f"[CTS] Dispatch retrieved: {igz_dispatch_id} - took {time.time() - start_time}")
+
+        # Send email
+        # Append Note to bruin
+        # Return generated igz ticket id
+        # else:
+        #     dispatch_request = cts_mapper.map_create_dispatch(body)
+        #     request_body = dict()
+        #     request_body = dispatch_request
+        #
+        #     payload = {"request_id": uuid(), "body": request_body}
+        #     response = await self._event_bus.rpc_request("cts.dispatch.post", payload, timeout=30)
+        #     self._logger.info(response)
+        #
+        #     if response['status'] == 500:
+        #         error_response = {
+        #             'code': response['status'], 'message': response['body']
+        #         }
+        #         return jsonify(error_response), response['status'], None
+        #
+        #     response_dispatch = dict()
+        #     if 'body' in response and response['body'] is not None and 'Dispatch' in response['body'] \
+        #             and response['body']['Dispatch'] is not None \
+        #             and 'Dispatch_Number' in response['body']['Dispatch']:
+        #         dispatch_num = response['body']['Dispatch']['Dispatch_Number']
+        #         response_dispatch['id'] = dispatch_num
+        #         response_dispatch['vendor'] = 'CTS'
+        #         self._logger.info(f"[CTS] Dispatch retrieved: {dispatch_num} - took {time.time() - start_time}")
+        #     else:
+        #         self._logger.info(f"[CTS] Dispatch not created - {payload} - took {time.time() - start_time}")
+        #         error_response = {'code': response['status'], 'message': response['body']}
+        #         return jsonify(error_response), response['status'], None
 
         return jsonify(response_dispatch), HTTPStatus.OK, None
 
@@ -551,9 +550,6 @@ class DispatchServer:
             ticket_id = body['mettel_bruin_ticket_id']
             ticket_note = lit_get_dispatch_requested_note(body, dispatch_number)
 
-            # Split the note if needed
-            ticket_notes = textwrap.wrap(ticket_note, self.MAX_TICKET_NOTE, replace_whitespace=False)
-
             pre_existing_ticket_notes_response = await self._get_ticket_details(ticket_id)
             pre_existing_ticket_notes_status = pre_existing_ticket_notes_response['status']
 
@@ -566,23 +562,9 @@ class DispatchServer:
             watermark_found = self._exists_watermark_in_ticket('Dispatch Management - Dispatch Requested',
                                                                pre_existing_ticket_notes)
             if watermark_found is True:
-                # TODO: decide what to do
                 self._logger.info(f"Not adding note for dispatch [{dispatch_number}] to ticket {ticket_id}")
             else:
-                for i, note in enumerate(ticket_notes):
-                    self._logger.info(f"Appending note_{i} to ticket {ticket_id}")
-                    append_note_response = await self._append_note_to_ticket(dispatch_number,
-                                                                             body['mettel_bruin_ticket_id'], note)
-                    append_note_response_status = append_note_response['status']
-                    append_note_response_body = append_note_response['body']
-                    if append_note_response_status not in range(200, 300):
-                        self._logger.error(f"[process_note] Error appending note: `{note}` "
-                                           f"Dispatch: {dispatch_number} "
-                                           f"Ticket_id: {body['mettel_bruin_ticket_id']} - Not appended")
-                        continue
-                    self._logger.info(f"[process_note] Note: `{note}` Dispatch: {dispatch_number} "
-                                      f"Ticket_id: {body['mettel_bruin_ticket_id']} - Appended")
-                    self._logger.info(f"[process_note] Note appended. Response {append_note_response_body}")
+                await self._append_note_to_ticket(dispatch_number, body['mettel_bruin_ticket_id'], ticket_note)
         except Exception as ex:
             self._logger.error(f"[process_note] Error: {ex}")
 
