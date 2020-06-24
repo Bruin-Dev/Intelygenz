@@ -39,8 +39,7 @@ DISPATCH_PORTAL_CONFIG = {
 
 CTS_CONFIG = {
     # Email for requests and cancellations
-    # 'email': 'CTS-MettelService@core-techs.com',
-    'email': 'juancarlos.gomez@intelygenz.com'
+    'email': 'CTS-MettelService@core-techs.com'
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

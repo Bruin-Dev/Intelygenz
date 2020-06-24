@@ -31,8 +31,7 @@ def map_get_dispatch(body):
         "name_of_mettel_requester": body.get("name_of_mettel_requester"),
         "mettel_department": body.get("mettel_department"),
         "mettel_requester_email": body.get("mettel_requester_email"),
-        # TODO: get from lit
-        # "mettel_requester_phone_number": body["mettel_requester_phone_number"]
+        "mettel_requester_phone_number": body.get("mettel_department_phone_number"),
         "dispatch_status": body.get('dispatch_status'),
     }
     return dispatch_request

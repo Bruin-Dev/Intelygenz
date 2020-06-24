@@ -22,7 +22,7 @@ class TestMappers:
             "MetTel_Requester_Email": "karen.doe@mettel.net",
             "MetTel_Note_Updates": None,
             "MetTel_Group_Email": None,
-            "MetTel_Department_Phone_Number": None,
+            "MetTel_Department_Phone_Number": '(111) 111-1111',
             "MetTel_Department": "Customer Care",
             "MetTel_Bruin_TicketID": "T-12345",
             "Local_Time_of_Dispatch": "5.30AM",
@@ -65,6 +65,7 @@ class TestMappers:
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
             "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_requester_phone_number": '(111) 111-1111',
             "dispatch_status": "New Dispatch"
         }
 
@@ -89,7 +90,7 @@ class TestMappers:
             "MetTel_Requester_Email": "karen.doe@mettel.net",
             "MetTel_Note_Updates": None,
             "MetTel_Group_Email": None,
-            "MetTel_Department_Phone_Number": None,
+            "MetTel_Department_Phone_Number": '(111) 111-1111',
             "MetTel_Department": "Customer Care",
             "MetTel_Bruin_TicketID": "T-12345",
             "Local_Time_of_Dispatch": "5.30AM",
@@ -132,6 +133,7 @@ class TestMappers:
             "name_of_mettel_requester": "Karen Doe",
             "mettel_department": "Customer Care",
             "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_requester_phone_number": '(111) 111-1111',
             "dispatch_status": "New Dispatch"
         }
 
