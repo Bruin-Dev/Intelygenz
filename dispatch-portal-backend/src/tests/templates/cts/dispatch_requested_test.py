@@ -15,7 +15,6 @@ Address: 123 Fake Street, Pleasantown, CA, 99088
 On-Site Contact: Jane Doe
 Phone: +1 666 6666 666
 
-# TODO: add more fields - SLA / failure experiended / ...
 Issues Experienced:
 Device is bouncing constantly
 Arrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance

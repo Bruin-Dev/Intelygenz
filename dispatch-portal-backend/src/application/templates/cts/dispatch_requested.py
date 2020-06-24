@@ -1,3 +1,4 @@
+# TODO: add more fields - SLA / failure experiended / ...
 CTS_DISPATCH_REQUESTED = """#*Automation Engine*#
 Dispatch Management - Dispatch Requested
 
@@ -13,7 +14,6 @@ Address: {job_site_street}, {job_site_city}, {job_site_state}, {job_site_zip_cod
 On-Site Contact: {job_site_contact_name}
 Phone: {job_site_contact_number}
 
-# TODO: add more fields - SLA / failure experiended / ...
 Issues Experienced:
 {scope_of_work}
 Arrival Instructions: {mettel_tech_call_in_instructions}
