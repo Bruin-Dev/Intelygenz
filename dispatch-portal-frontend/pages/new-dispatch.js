@@ -7,8 +7,13 @@ import Menu from '../components/menu/Menu';
 import Loading from '../components/loading/Loading';
 import { DispatchService } from '../services/dispatch/dispatch.service';
 import { Routes } from '../config/routes';
-import { states } from '../config/constants/states.constants';
 import {
+  statesCanada,
+  statesPR,
+  statesUSA
+} from '../config/constants/states.constants';
+import {
+  countryOptions,
   timeOptions,
   vendorsOptions,
   timeZoneOptions,
@@ -28,28 +33,9 @@ function NewDispatch({ authToken }) {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [blockedVendors, setBlockedVendors] = useState([]);
-  // const [files, setFiles] = useState([]);
+  const [statesOptions, setStatesOptions] = useState(statesUSA);
   const [selectedVendor, setSelectedVendor] = useState([]); // Note: ['CTS'] ['LIT'] ['CTS', 'LIT']
   const dispatchService = new DispatchService();
-
-  /* const deleteFile = async index => {
-    const auxArraySlice = [...files]; // For react state
-    auxArraySlice.splice(index, 1);
-    setFiles(auxArraySlice);
-  };
-
-  const onChangeHandlerFiles = async e => {
-    e.preventDefault();
-    setFiles([...files, ...e.target.files]);
-  };
-
-  const uploadFiles = async dispatchId => {
-    const data = new FormData();
-    files.map((file, index) => data.append('file', files[index]));
-
-    const res = await dispatchService.uploadFiles(dispatchId, data);
-    return res;
-  }; */
 
   const onSubmit = async formData => {
     setIsLoading(true);
@@ -81,7 +67,6 @@ function NewDispatch({ authToken }) {
         }
 
         if (resData && resData.data && resData.data.id) {
-          // Todo: Upload files // const resFiles = await uploadFiles(res.data.id);
           resAux.data.push({
             data: resData,
             vendor
@@ -93,7 +78,6 @@ function NewDispatch({ authToken }) {
 
     // Check error
     if (resAux.errors.length) {
-      // Todo: Check number of errors
       setResponse(resAux);
       setIsLoading(false);
       return;
@@ -111,6 +95,22 @@ function NewDispatch({ authToken }) {
       setSelectedVendor(auxSelectedVendors);
     } else {
       setSelectedVendor([...selectedVendor, event.target.value]);
+    }
+  };
+
+  const changeCountry = country => {
+    if (country === countryOptions[1]) {
+      setStatesOptions(statesCanada);
+      return;
+    }
+
+    if (country === countryOptions[2]) {
+      setStatesOptions(statesPR);
+      return;
+    }
+
+    if (country === countryOptions[0]) {
+      setStatesOptions(statesUSA);
     }
   };
 
@@ -438,6 +438,58 @@ function NewDispatch({ authToken }) {
                   )}
                 </label>
               </div>
+
+              {showFieldByVendor(config.VENDORS.CTS) && (
+                <div className="flex flex-col">
+                  <label
+                    className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
+                    htmlFor="department"
+                  >
+                    Country (only for {config.VENDORS.CTS})
+                    <div className="relative">
+                      <select
+                        name="country"
+                        data-testid="country"
+                        id="country"
+                        ref={register({ required: true })}
+                        className={
+                          errors.country
+                            ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
+                            : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
+                        }
+                        onChange={e => changeCountry(e.target.value)}
+                      >
+                        {countryOptions.map((countryOption, index) => (
+                          <option
+                            key={`country-${index}`}
+                            value={countryOption}
+                          >
+                            {countryOption}
+                          </option>
+                        ))}
+                      </select>
+                      <div
+                        className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker"
+                        style={{ top: '13px', right: '0px' }}
+                      >
+                        <svg
+                          className="h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                        </svg>
+                      </div>
+                    </div>
+                    {errors.country && (
+                      <p className="text-red-500 text-xs italic">
+                        This field is required
+                      </p>
+                    )}
+                  </label>
+                </div>
+              )}
+
               <div className="flex flex-col">
                 <div className="-mx-3 md:flex mb-2">
                   <div className="md:w-1/2 px-3 mb-6 md:mb-0">
@@ -484,7 +536,7 @@ function NewDispatch({ authToken }) {
                               : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
                           }
                         >
-                          {states.map(state => (
+                          {statesOptions.map(state => (
                             <option value={state.name} key={state.abbreviation}>
                               {state.name}
                             </option>
@@ -840,7 +892,7 @@ function NewDispatch({ authToken }) {
                   className="block uppercase tracking-wide text-grey-darker text-sm mb-2"
                   htmlFor="department"
                 >
-                  MelTel Department
+                  MetTel Department
                   <div className="relative">
                     <select
                       name="department"

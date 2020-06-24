@@ -15,24 +15,37 @@ export class DispatchService {
     this.axiosI = axiosAuxI;
   }
 
-  async getAllByVendor(urlVendor) {
+  async getAllByVendor(vendor) {
     try {
-      const res = await this.axiosI.get(urlVendor);
+      if (config.VENDORS.LIT === vendor) {
+        const res = await this.axiosI.get(API_URLS.DISPATCH_LIT);
 
-      return res.data.list_dispatch.map(dispatch =>
-        dispatchLitInAdapter({
-          ...dispatch,
-          vendor: res.data.vendor
-        })
-      );
+        return res.data.list_dispatch.map(dispatch =>
+          dispatchLitInAdapter({
+            ...dispatch,
+            vendor: res.data.vendor
+          })
+        );
+      }
+
+      if (config.VENDORS.CTS === vendor) {
+        const res = await this.axiosI.get(API_URLS.DISPATCH_CTS);
+
+        return res.data.list_dispatch.map(dispatch =>
+          dispatchCtsInAdapter({
+            ...dispatch,
+            vendor: res.data.vendor
+          })
+        );
+      }
     } catch (error) {
       return this.captureErrorGeneric(error);
     }
   }
 
   async getAll() {
-    const responseLit = await this.getAllByVendor(API_URLS.DISPATCH_LIT);
-    const responseCts = await this.getAllByVendor(API_URLS.DISPATCH_CTS);
+    const responseLit = await this.getAllByVendor(config.VENDORS.LIT);
+    const responseCts = await this.getAllByVendor(config.VENDORS.CTS);
 
     // Fails both calls
     if (responseLit.error && responseCts.error) {

@@ -4,7 +4,7 @@ import { Routes } from '../../../config/routes';
 
 function VendorDispatchLink({ dispatchId, vendor }) {
   return (
-    <span>
+    <span data-testid="vendorDispatchLink-component">
       {vendor}(
       <a href={`${Routes.DISPATCH()}/${dispatchId}?vendor=${vendor}`}>
         {dispatchId}

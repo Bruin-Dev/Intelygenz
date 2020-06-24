@@ -5,11 +5,13 @@ import { API_URLS } from '../api.config';
 import { dispatchLitList } from '../mocks/data/lit/list-dispatch.mock';
 import { formDataNewDispatch } from '../mocks/data/new-dispatch.mock';
 import { mockLitSingleDispatch } from '../mocks/data/lit/single-dispatch.mock';
-import { mocksInAdapterLitSingleDispatchResult } from '../mocks/data/lit/result-adapter-in-dispatch.mock';
+import { mocksInAdapterLitSingleDispatchResult } from '../mocks/data/lit/result-adapter-in-dispatch.datatest';
 import { dispatchCtsList } from '../mocks/data/cts/list-dispatch.mock';
 import { config } from '../../config/config';
 import { mockCtsSingleDispatch } from '../mocks/data/cts/single-dispatch.mock';
-import { mocksInAdapterCtsSingleDispatchResult } from '../mocks/data/cts/result-adapter-in-dispatch.mock';
+import { mocksInAdapterCtsSingleDispatchResult } from '../mocks/data/cts/result-adapter-in-dispatch.datatest';
+import { dispatchCtsInAdapter } from './cts-dispatch.adapter';
+import { dispatchLitInAdapter } from './lit-dispatch.adapter';
 
 describe('dispatch service tests', () => {
   const axiosIMocksTest = axios.create();
@@ -37,84 +39,8 @@ describe('dispatch service tests', () => {
       list_dispatch: [dispatchCtsList.data[0]]
     });
     const expectedResult = [
-      {
-        id: 'DIS17918',
-        vendor: 'LIT',
-        slaLevel: '',
-        status: 'New Dispatch',
-        dateDispatch: '2020-01-31',
-        mettelId: 'BRUINID5478525',
-        timeDispatch: '7AM-9AM',
-        timeZone: 'Pacific Time',
-        turnUp: '',
-        hardTimeDispatch: '',
-        hardTimeZone: '',
-        requester: {
-          name: 'Test User1',
-          groupEmail: '',
-          email: 'requester@mettel.net',
-          department: 'T1 Repair',
-          phoneNumber: '',
-          departmentPhoneNumber: ''
-        },
-        onSiteContact: {
-          site: 'test site',
-          street: 'test job site street',
-          city: 'test job site city',
-          state: 'ALABAMA',
-          zip: '10041',
-          phoneNumber: '+34 7894864658',
-          name: 'update Job'
-        },
-        details: {
-          serviceType: '',
-          instructions: 'update callin instruction',
-          materials: 'test',
-          information: 'test new scope of work',
-          specialMaterials: '',
-          fieldEngineer: '',
-          fieldEngineerContactNumber: ''
-        }
-      },
-      {
-        id: 'DIS17918_1',
-        vendor: 'CTS',
-        slaLevel: '',
-        status: 'New Dispatch',
-        dateDispatch: '2020-01-31',
-        mettelId: 'BRUINID5478525',
-        timeDispatch: '7AM-9AM',
-        timeZone: 'Pacific Time',
-        turnUp: '',
-        hardTimeDispatch: '',
-        hardTimeZone: '',
-        requester: {
-          name: 'Test User1',
-          groupEmail: '',
-          email: 'requester@mettel.net',
-          department: 'T1 Repair',
-          phoneNumber: '',
-          departmentPhoneNumber: ''
-        },
-        onSiteContact: {
-          site: 'test site',
-          street: 'test job site street',
-          city: 'test job site city',
-          state: 'ALABAMA',
-          zip: '10041',
-          phoneNumber: '+34 7894864658',
-          name: 'update Job'
-        },
-        details: {
-          serviceType: '',
-          instructions: 'update callin instruction',
-          materials: 'test',
-          information: 'test new scope of work',
-          specialMaterials: '',
-          fieldEngineer: '',
-          fieldEngineerContactNumber: ''
-        }
-      }
+      dispatchLitInAdapter({ vendor: 'lit', ...dispatchLitList.data[0] }),
+      dispatchCtsInAdapter({ vendor: 'cts', ...dispatchCtsList.data[0] })
     ];
 
     const res = await new DispatchService(axiosIMocksTest).getAll();
@@ -129,45 +55,7 @@ describe('dispatch service tests', () => {
       list_dispatch: [dispatchCtsList.data[0]]
     });
     const expectedResult = [
-      {
-        id: 'DIS17918_1',
-        vendor: 'CTS',
-        slaLevel: '',
-        status: 'New Dispatch',
-        dateDispatch: '2020-01-31',
-        mettelId: 'BRUINID5478525',
-        timeDispatch: '7AM-9AM',
-        timeZone: 'Pacific Time',
-        turnUp: '',
-        hardTimeDispatch: '',
-        hardTimeZone: '',
-        requester: {
-          name: 'Test User1',
-          groupEmail: '',
-          email: 'requester@mettel.net',
-          department: 'T1 Repair',
-          phoneNumber: '',
-          departmentPhoneNumber: ''
-        },
-        onSiteContact: {
-          site: 'test site',
-          street: 'test job site street',
-          city: 'test job site city',
-          state: 'ALABAMA',
-          zip: '10041',
-          phoneNumber: '+34 7894864658',
-          name: 'update Job'
-        },
-        details: {
-          serviceType: '',
-          instructions: 'update callin instruction',
-          materials: 'test',
-          information: 'test new scope of work',
-          specialMaterials: '',
-          fieldEngineer: '',
-          fieldEngineerContactNumber: ''
-        }
-      }
+      dispatchCtsInAdapter({ vendor: 'cts', ...dispatchCtsList.data[0] })
     ];
 
     const res = await new DispatchService(axiosIMocksTest).getAll();
@@ -184,45 +72,7 @@ describe('dispatch service tests', () => {
       list_dispatch: [dispatchLitList.data[0]]
     });
     const expectedResult = [
-      {
-        id: 'DIS17918',
-        vendor: 'LIT',
-        slaLevel: '',
-        status: 'New Dispatch',
-        dateDispatch: '2020-01-31',
-        mettelId: 'BRUINID5478525',
-        timeDispatch: '7AM-9AM',
-        timeZone: 'Pacific Time',
-        turnUp: '',
-        hardTimeDispatch: '',
-        hardTimeZone: '',
-        requester: {
-          name: 'Test User1',
-          groupEmail: '',
-          email: 'requester@mettel.net',
-          department: 'T1 Repair',
-          phoneNumber: '',
-          departmentPhoneNumber: ''
-        },
-        onSiteContact: {
-          site: 'test site',
-          street: 'test job site street',
-          city: 'test job site city',
-          state: 'ALABAMA',
-          zip: '10041',
-          phoneNumber: '+34 7894864658',
-          name: 'update Job'
-        },
-        details: {
-          serviceType: '',
-          instructions: 'update callin instruction',
-          materials: 'test',
-          information: 'test new scope of work',
-          specialMaterials: '',
-          fieldEngineer: '',
-          fieldEngineerContactNumber: ''
-        }
-      }
+      dispatchLitInAdapter({ vendor: 'lit', ...dispatchLitList.data[0] })
     ];
 
     const res = await new DispatchService(axiosIMocksTest).getAll();
@@ -288,6 +138,19 @@ describe('dispatch service tests', () => {
     });
   });
 
+  it('fetches get: but not vendor selected', async () => {
+    mockadapter.onGet(new RegExp(`${API_URLS.DISPATCH_LIT}/*`)).reply(400);
+
+    const res = await new DispatchService(axiosIMocksTest).get(
+      mockLitSingleDispatch.id,
+      'XXX'
+    );
+
+    expect(res).toMatchObject({
+      error: 'Not vendor selected'
+    });
+  });
+
   /** ***
    *
    * NEW DISPATCH
@@ -325,6 +188,19 @@ describe('dispatch service tests', () => {
 
     expect(res).toMatchObject({
       error: 'Request failed with status code 400'
+    });
+  });
+
+  it('fetches newDispacth: but not vendor selected', async () => {
+    mockadapter.onPost(API_URLS.DISPATCH_LIT).reply(400);
+
+    const res = await new DispatchService(axiosIMocksTest).newDispatch(
+      formDataNewDispatch,
+      'XXX'
+    );
+
+    expect(res).toMatchObject({
+      error: 'Not vendor selected'
     });
   });
 

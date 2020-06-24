@@ -4,10 +4,7 @@ import {
 } from './cts-dispatch.adapter';
 
 import { dispatchCtsList } from '../mocks/data/cts/list-dispatch.mock';
-import {
-  mocksInAdapterCtsAllDispatchResult,
-  mocksInAdapterCtsSingleDispatchResult
-} from '../mocks/data/cts/result-adapter-in-dispatch.mock';
+import { mocksInAdapterCtsSingleDispatchResult } from '../mocks/data/cts/result-adapter-in-dispatch.datatest';
 import { mockCtsSingleDispatch } from '../mocks/data/cts/single-dispatch.mock';
 import { config } from '../../config/config';
 
@@ -24,7 +21,7 @@ describe('cts dispatch adapter tests', () => {
         ...dispatchCtsList.data[0],
         vendor: config.VENDORS.CTS
       })
-    ).toMatchObject(mocksInAdapterCtsAllDispatchResult);
+    ).toMatchObject(mocksInAdapterCtsSingleDispatchResult);
   });
 
   it('check dispatchCtsOutAdapter', () => {
@@ -50,8 +47,9 @@ describe('cts dispatch adapter tests', () => {
       department: 'None',
       emailRequester: 'sdga@example.com',
       phoneNumberRequester: '+6262626262626',
-      serviceType: 'T1 service',
-      slaLevel: '9'
+      serviceType: ['T1 service'],
+      slaLevel: '9',
+      country: 'Canada'
     };
     const mocksOutAdapterDispatch = {
       date_of_dispatch: '2020-05-29',
@@ -70,13 +68,13 @@ describe('cts dispatch adapter tests', () => {
       mettel_requester_email: 'sdga@example.com',
       mettel_tech_call_in_instructions: '2332322333 sd adasd...',
       name_of_mettel_requester: 'JC Dan',
-      last_of_mettel_requester: 'Daniels',
+      lastname_of_mettel_requester: 'Daniels',
       scope_of_work: 'adasdas ddas.....',
       site_survey_quote_required: false,
       time_of_dispatch: '12.00AM',
       time_zone: 'Eastern Time',
       sla_level: '9',
-      location_country: 'Canada, PR, United States',
+      location_country: 'Canada',
       service_type: 'T1 service'
     };
 

@@ -209,20 +209,15 @@ function DispatchDetail({ authToken }) {
               </p>
 
               {data.vendor === config.VENDORS.CTS && (
-                <>
-                  <p className="text-gray-900 text-sm">
-                    Field engineer:{' '}
-                    <span data-test-id="dispatch-detail-details-fieldEngineer">
-                      {data.details.fieldEngineer}
-                    </span>
-                  </p>
-                  <p className="text-gray-900 text-sm">
-                    Field engineer contact number:{' '}
-                    <span data-test-id="dispatch-detail-details-fieldEngineerContactNumber">
-                      {data.details.fieldEngineerContactNumber}
-                    </span>
-                  </p>
-                </>
+                <p className="text-gray-900 text-sm">
+                  Rest of parameters:{' '}
+                  <span
+                    data-test-id="dispatch-detail-details-fieldEngineer"
+                    style={{ whiteSpace: 'break-spaces' }}
+                  >
+                    {data.details.res}
+                  </span>
+                </p>
               )}
             </div>
           </div>

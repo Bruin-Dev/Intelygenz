@@ -6,7 +6,7 @@ import { mockLitSingleDispatch } from '../mocks/data/lit/single-dispatch.mock';
 import {
   mocksInAdapterLitAllDispatchResult,
   mocksInAdapterLitSingleDispatchResult
-} from '../mocks/data/lit/result-adapter-in-dispatch.mock';
+} from '../mocks/data/lit/result-adapter-in-dispatch.datatest';
 import { dispatchLitList } from '../mocks/data/lit/list-dispatch.mock';
 
 describe('lit dispatch adapter tests', () => {

@@ -51,4 +51,60 @@ describe('Status Button test', () => {
 
     button.toHaveClass(TYPES_STATUS.repairCompleted.color);
   });
+
+  // CTS status
+  it(`check differents status:${TYPES_STATUS.open.value}`, () => {
+    const { getByTestId } = render(
+      <StatusButton status={TYPES_STATUS.open.value} />
+    );
+
+    const button = expect(getByTestId('statusButton-component'));
+    button.toHaveTextContent(TYPES_STATUS.open.value);
+
+    button.toHaveClass(TYPES_STATUS.open.color);
+  });
+
+  it(`check differents status:${TYPES_STATUS.scheduled.value}`, () => {
+    const { getByTestId } = render(
+      <StatusButton status={TYPES_STATUS.scheduled.value} />
+    );
+
+    const button = expect(getByTestId('statusButton-component'));
+    button.toHaveTextContent(TYPES_STATUS.scheduled.value);
+
+    button.toHaveClass(TYPES_STATUS.scheduled.color);
+  });
+
+  it(`check differents status:${TYPES_STATUS.onSite.value}`, () => {
+    const { getByTestId } = render(
+      <StatusButton status={TYPES_STATUS.onSite.value} />
+    );
+
+    const button = expect(getByTestId('statusButton-component'));
+    button.toHaveTextContent(TYPES_STATUS.onSite.value);
+
+    button.toHaveClass(TYPES_STATUS.onSite.color);
+  });
+
+  it(`check differents status:${TYPES_STATUS.completed.value}`, () => {
+    const { getByTestId } = render(
+      <StatusButton status={TYPES_STATUS.completed.value} />
+    );
+
+    const button = expect(getByTestId('statusButton-component'));
+    button.toHaveTextContent(TYPES_STATUS.completed.value);
+
+    button.toHaveClass(TYPES_STATUS.completed.color);
+  });
+
+  it(`check differents status:${TYPES_STATUS.completePendingCollateral.value}`, () => {
+    const { getByTestId } = render(
+      <StatusButton status={TYPES_STATUS.completePendingCollateral.value} />
+    );
+
+    const button = expect(getByTestId('statusButton-component'));
+    button.toHaveTextContent(TYPES_STATUS.completePendingCollateral.value);
+
+    button.toHaveClass(TYPES_STATUS.completePendingCollateral.color);
+  });
 });

@@ -49,9 +49,9 @@ describe('NEW DISPATCH PAGE tests', () => {
     ).toBeInTheDocument();
   });
 
-  it('check submit error', async () => {
+  it('check submit error(LIT)', async () => {
     mockadapter
-      .onGet(new RegExp(`${API_URLS.DISPATCH}/*`))
+      .onGet(new RegExp(`${API_URLS.DISPATCH_LIT}/*`))
       .reply(400, { error: 'Error!' });
     render(<NewDispatch />);
     const button = screen.getByText('Submit');

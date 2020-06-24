@@ -92,3 +92,5 @@ export const timeOptions = [
   `11.00PM`,
   `11.30PM`
 ];
+
+export const countryOptions = ['United States', 'Canada', 'PR'];
