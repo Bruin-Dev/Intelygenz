@@ -2259,7 +2259,8 @@ class TestApiServer:
                                          data=b'test', headers=headers)
 
             data = await response.get_json()
-            api_server_test._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.upload.file", payload_request, timeout=300)
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                "lit.dispatch.upload.file", payload_request, timeout=300)
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_upload_file
@@ -2779,7 +2780,7 @@ class TestApiServer:
         return_from_cache_mock = {}
         response_get_ticket_details_mock = ticket_details_1_no_requested_watermark
 
-        api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
+        # api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             side_effect=[response_get_ticket_details_mock])
         cts_body_mapped = cts_mapper.map_create_dispatch(new_dispatch)
@@ -2807,18 +2808,18 @@ class TestApiServer:
         }
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
-        api_server_test._add_dispatch_to_cache = Mock(return_value=True)
+        # api_server_test._add_dispatch_to_cache = Mock(return_value=True)
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/cts/dispatch/', json=new_dispatch)
             response_data = await response.get_json()
 
-            api_server_test._redis_client.hgetall.assert_called_once()
+            # api_server_test._redis_client.hgetall.assert_called_once()
             api_server_test._bruin_repository.get_ticket_details.assert_awaited_once()
             api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
             api_server_test._append_note_to_ticket.assert_awaited_once()
-            api_server_test._add_dispatch_to_cache.assert_called_once()
+            # api_server_test._add_dispatch_to_cache.assert_called_once()
 
             assert response_data == cts_expected_response
 
@@ -2842,38 +2843,38 @@ class TestApiServer:
 
             assert response_data == cts_expected_response
 
-    @pytest.mark.asyncio
-    async def cts_create_dispatch_error_found_ticket_in_cache_test(self, api_server_test, new_dispatch):
-        uuid_ = 'UUID1'
-        igz_dispatch_id = f"IGZ{uuid_}"
-        ticket_id = new_dispatch['mettel_bruin_ticket_id']
-        api_server_test._config.ENVIRONMENT_NAME = 'production'
-        payload = {"request_id": uuid_, "body": {}}
-        err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
-        cts_expected_response = {
-            'status': 400,
-            'body': err_msg
-        }
-        payload_request = {
-            "request_id": uuid_,
-            "body": new_dispatch
-        }
-
-        return_from_cache_mock = {
-            ticket_id: igz_dispatch_id
-        }
-
-        api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
-        api_server_test._append_note_to_ticket = CoroutineMock()
-
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
-            client = api_server_test._app.test_client()
-            response = await client.post(f'/cts/dispatch/', json=new_dispatch)
-            response_data = await response.get_json()
-
-            api_server_test._redis_client.hgetall.assert_called_once()
-
-            assert response_data == cts_expected_response
+    # @pytest.mark.asyncio
+    # async def cts_create_dispatch_error_found_ticket_in_cache_test(self, api_server_test, new_dispatch):
+    #     uuid_ = 'UUID1'
+    #     igz_dispatch_id = f"IGZ{uuid_}"
+    #     ticket_id = new_dispatch['mettel_bruin_ticket_id']
+    #     api_server_test._config.ENVIRONMENT_NAME = 'production'
+    #     payload = {"request_id": uuid_, "body": {}}
+    #     err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
+    #     cts_expected_response = {
+    #         'status': 400,
+    #         'body': err_msg
+    #     }
+    #     payload_request = {
+    #         "request_id": uuid_,
+    #         "body": new_dispatch
+    #     }
+    #
+    #     return_from_cache_mock = {
+    #         ticket_id: igz_dispatch_id
+    #     }
+    #
+    #     # api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
+    #     api_server_test._append_note_to_ticket = CoroutineMock()
+    #
+    #     with patch.object(api_server_module, 'uuid', return_value=uuid_):
+    #         client = api_server_test._app.test_client()
+    #         response = await client.post(f'/cts/dispatch/', json=new_dispatch)
+    #         response_data = await response.get_json()
+    #
+    #         # api_server_test._redis_client.hgetall.assert_called_once()
+    #
+    #         assert response_data == cts_expected_response
 
     @pytest.mark.asyncio
     async def cts_create_dispatch_error_could_not_retrieve_ticket_test(
@@ -2896,7 +2897,7 @@ class TestApiServer:
         response_get_ticket_details_mock = ticket_details_2_error
         return_from_cache_mock = {}
 
-        api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
+        # api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             side_effect=[response_get_ticket_details_mock])
 
@@ -2905,7 +2906,7 @@ class TestApiServer:
             response = await client.post(f'/cts/dispatch/', json=new_dispatch)
             response_data = await response.get_json()
 
-            api_server_test._redis_client.hgetall.assert_called_once()
+            # api_server_test._redis_client.hgetall.assert_called_once()
             api_server_test._bruin_repository.get_ticket_details.assert_awaited_once()
             assert response_data == cts_expected_response
 
@@ -2929,7 +2930,7 @@ class TestApiServer:
         return_from_cache_mock = {}
         response_get_ticket_details_mock = ticket_details_1
 
-        api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
+        # api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             side_effect=[response_get_ticket_details_mock])
 
@@ -2938,13 +2939,14 @@ class TestApiServer:
             response = await client.post(f'/cts/dispatch/', json=new_dispatch)
             response_data = await response.get_json()
 
-            api_server_test._redis_client.hgetall.assert_called_once()
+            # api_server_test._redis_client.hgetall.assert_called_once()
             api_server_test._bruin_repository.get_ticket_details.assert_awaited_once()
 
             assert response_data == cts_expected_response
 
     @pytest.mark.asyncio
-    async def cts_create_dispatch_error_send_email_test(self, api_server_test, new_dispatch, ticket_details_1_no_requested_watermark):
+    async def cts_create_dispatch_error_send_email_test(
+            self, api_server_test, new_dispatch, ticket_details_1_no_requested_watermark):
         uuid_ = 'UUID1'
         igz_dispatch_id = f"IGZ{uuid_}"
         ticket_id = new_dispatch['mettel_bruin_ticket_id']
@@ -2964,7 +2966,7 @@ class TestApiServer:
         return_from_cache_mock = {}
         response_get_ticket_details_mock = ticket_details_1_no_requested_watermark
 
-        api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
+        # api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             side_effect=[response_get_ticket_details_mock])
         cts_body_mapped = cts_mapper.map_create_dispatch(new_dispatch)
@@ -2997,7 +2999,7 @@ class TestApiServer:
             response = await client.post(f'/cts/dispatch/', json=new_dispatch)
             response_data = await response.get_json()
 
-            api_server_test._redis_client.hgetall.assert_called_once()
+            # api_server_test._redis_client.hgetall.assert_called_once()
             api_server_test._bruin_repository.get_ticket_details.assert_awaited_once()
             api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
 
@@ -3023,7 +3025,7 @@ class TestApiServer:
         return_from_cache_mock = {}
         response_get_ticket_details_mock = ticket_details_1_no_requested_watermark
 
-        api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
+        # api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             side_effect=[response_get_ticket_details_mock])
         cts_body_mapped = cts_mapper.map_create_dispatch(new_dispatch)
@@ -3051,18 +3053,18 @@ class TestApiServer:
         }
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
-        api_server_test._add_dispatch_to_cache = Mock(return_value=False)
+        # api_server_test._add_dispatch_to_cache = Mock(return_value=False)
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/cts/dispatch/', json=new_dispatch)
             response_data = await response.get_json()
 
-            api_server_test._redis_client.hgetall.assert_called_once()
+            # api_server_test._redis_client.hgetall.assert_called_once()
             api_server_test._bruin_repository.get_ticket_details.assert_awaited_once()
             api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
             api_server_test._append_note_to_ticket.assert_awaited_once()
-            api_server_test._add_dispatch_to_cache.assert_called_once()
+            # api_server_test._add_dispatch_to_cache.assert_called_once()
 
             assert response_data == cts_expected_response
 

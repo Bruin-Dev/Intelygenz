@@ -403,16 +403,17 @@ class DispatchServer:
         return_response = dict.fromkeys(["body", "status"])
         igz_dispatch_id = f"IGZ{uuid()}"
         ticket_id = body.get('mettel_bruin_ticket_id')
-        dispatches_from_cache = self._redis_client.hgetall(self.PENDING_DISPATCHES_KEY)
-        found_ticket_id_in_cache = ticket_id in dispatches_from_cache.keys()
 
-        if found_ticket_id_in_cache:
-            err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
-            self._logger.info(err_msg)
-            return_response['status'] = 400
-            return_response['body'] = err_msg
-            # TODO: notify slack
-            return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
+        # dispatches_from_cache = self._redis_client.hgetall(self.PENDING_DISPATCHES_KEY)
+        # found_ticket_id_in_cache = ticket_id in dispatches_from_cache.keys()
+        #
+        # if found_ticket_id_in_cache:
+        #     err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
+        #     self._logger.info(err_msg)
+        #     return_response['status'] = 400
+        #     return_response['body'] = err_msg
+        #     # TODO: notify slack
+        #     return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
 
         # We can avoid this checks in the future
         # Check if already exists in bruin
@@ -468,9 +469,9 @@ class DispatchServer:
             await self._append_note_to_ticket(igz_dispatch_id, ticket_id, ticket_note)
             self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Note appended: {ticket_note}")
             # Add to cache
-            added_to_cache = self._add_dispatch_to_cache(ticket_id, igz_dispatch_id)
-            if added_to_cache:
-                self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Added to cache")
+            # added_to_cache = self._add_dispatch_to_cache(ticket_id, igz_dispatch_id)
+            # if added_to_cache:
+            #     self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Added to cache")
 
         response_dispatch['id'] = igz_dispatch_id
         response_dispatch['vendor'] = 'CTS'

@@ -495,7 +495,8 @@ class TestLitDispatchMonitor:
         cts_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def send_confirmed_sms_with_error_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, sms_success_response):
+    async def send_confirmed_sms_with_error_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, sms_success_response):
         ticket_id = '12345'
         dispatch_number = cts_dispatch_confirmed.get('Name')
         # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
@@ -571,7 +572,8 @@ class TestLitDispatchMonitor:
         cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
 
     @pytest.mark.asyncio
-    async def send_tech_24_sms_with_not_valid_sms_to_phone_test(self, cts_dispatch_monitor, cts_dispatch_confirmed_no_contact):
+    async def send_tech_24_sms_with_not_valid_sms_to_phone_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed_no_contact):
         updated_dispatch = cts_dispatch_confirmed_no_contact.copy()
         ticket_id = '12345'
         dispatch_number = updated_dispatch.get('Name')

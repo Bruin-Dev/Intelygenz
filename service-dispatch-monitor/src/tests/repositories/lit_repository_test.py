@@ -224,8 +224,9 @@ class TestLitRepository:
         assert response_3 is None
         assert response_4 is None
 
-    def get_dispatch_confirmed_date_time_localized_error_timezone_test(self, lit_repository, dispatch_confirmed, dispatch_confirmed_2,
-                                                        dispatch_confirmed_error, dispatch_confirmed_error_3):
+    def get_dispatch_confirmed_date_time_localized_error_timezone_test(
+            self, lit_repository, dispatch_confirmed, dispatch_confirmed_2, dispatch_confirmed_error,
+            dispatch_confirmed_error_3):
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
         ticket_id = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         date_of_dispatch = dispatch_confirmed.get('Date_of_Dispatch', None)

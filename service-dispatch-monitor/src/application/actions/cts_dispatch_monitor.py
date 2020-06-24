@@ -127,8 +127,9 @@ class CtsDispatchMonitor:
             dispatches_splitted_by_status = self._get_dispatches_splitted_by_status(cts_dispatches)
 
             self._logger.info(f"Splitted by status: {list(dispatches_splitted_by_status.keys())}")
-            completed_dispatches = dispatches_splitted_by_status[self.DISPATCH_REPAIR_COMPLETED] + \
-                                   dispatches_splitted_by_status[self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL]
+            # completed = dispatches_splitted_by_status[self.DISPATCH_REPAIR_COMPLETED]
+            # completed_collateral = dispatches_splitted_by_status[self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL]
+            # completed_dispatches = completed + completed_collateral
             monitor_tasks = [
                 self._monitor_confirmed_dispatches(dispatches_splitted_by_status[self.DISPATCH_CONFIRMED]),
                 self._monitor_tech_on_site_dispatches(dispatches_splitted_by_status[
