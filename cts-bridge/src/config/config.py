@@ -56,7 +56,7 @@ LOG_CONFIG = {
 
 QUART_CONFIG = {
     'title': 'cts-bridge',
-    'port': 5001
+    'port': 5000
 }
 
 GRAFANA_CONFIG = {
