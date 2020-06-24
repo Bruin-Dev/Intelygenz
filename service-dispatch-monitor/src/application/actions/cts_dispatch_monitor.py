@@ -59,7 +59,6 @@ class CtsDispatchMonitor:
         self.DISPATCH_CONFIRMED = 'Scheduled'
         self.DISPATCH_FIELD_ENGINEER_ON_SITE = 'On Site'
         self.DISPATCH_REPAIR_COMPLETED = 'Completed'
-        # TODO: what to do with these
         self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL = 'Complete Pending Collateral'
         self.DISPATCH_SUBMITTED_FOR_BILLING = 'Submitted for Billing'
         self.DISPATCH_BILLED = 'Billed'
@@ -70,10 +69,12 @@ class CtsDispatchMonitor:
             self.DISPATCH_REQUESTED,
             self.DISPATCH_CONFIRMED,
             self.DISPATCH_FIELD_ENGINEER_ON_SITE,
-            self.DISPATCH_REPAIR_COMPLETED
+            self.DISPATCH_REPAIR_COMPLETED,
+            self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL
         ]
 
         self.SITE_STATUS_REQUIRED_DISPATCH = "Requires Dispatch"
+        self._cts_timezone = timezone(f'US/Eastern')
 
     async def start_monitoring_job(self, exec_on_start):
         self._logger.info('Scheduling Service Dispatch Monitor job for CTS...')
@@ -84,9 +85,9 @@ class CtsDispatchMonitor:
             self._logger.info('Service Outage Monitor job is going to be executed immediately')
 
         self._scheduler.add_job(self._cts_dispatch_monitoring_process, 'interval',
-                                minutes=self._config.DISPATCH_MONITOR_CONFIG['jobs_intervals']['lit_dispatch_monitor'],
+                                minutes=self._config.DISPATCH_MONITOR_CONFIG['jobs_intervals']['cts_dispatch_monitor'],
                                 next_run_time=next_run_time, replace_existing=False,
-                                id='_service_dispatch_monitor_lit_process')
+                                id='_service_dispatch_monitor_cts_process')
 
     def _get_dispatches_splitted_by_status(self, dispatches):
         dispatches_splitted_by_status = {}
@@ -124,12 +125,15 @@ class CtsDispatchMonitor:
             cts_dispatches = response_cts_dispatches_body.get('records', [])
 
             dispatches_splitted_by_status = self._get_dispatches_splitted_by_status(cts_dispatches)
-            self._logger.info(f"Splitted by status: {list(dispatches_splitted_by_status.keys())}")
 
+            self._logger.info(f"Splitted by status: {list(dispatches_splitted_by_status.keys())}")
+            completed_dispatches = dispatches_splitted_by_status[self.DISPATCH_REPAIR_COMPLETED] + \
+                                   dispatches_splitted_by_status[self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL]
             monitor_tasks = [
                 self._monitor_confirmed_dispatches(dispatches_splitted_by_status[self.DISPATCH_CONFIRMED]),
-                self._monitor_tech_on_site_dispatches(
-                    dispatches_splitted_by_status[self.DISPATCH_FIELD_ENGINEER_ON_SITE]),
+                self._monitor_tech_on_site_dispatches(dispatches_splitted_by_status[
+                                                          self.DISPATCH_FIELD_ENGINEER_ON_SITE]),
+                # self._monitor_repair_completed(completed_dispatches)
             ]
 
             start_monitor_tasks = perf_counter()
@@ -141,15 +145,15 @@ class CtsDispatchMonitor:
             stop = perf_counter()
             self._logger.info(f"[CTS] Elapsed time processing all dispatches: {(stop - start) / 60} minutes")
         except Exception as ex:
-            self._logger.error(f"Error: {ex}")
+            self._logger.error(f"[CTS] Error: {ex}")
 
     def _is_dispatch_confirmed(self, dispatch):
         # A confirmed dispatch must have status: 'Scheduled'
-        # Confirmed__c set to True, Resource_Email__c and Resource_Phone_Number__c not None
+        # Confirmed__c set to True, API_Resource_Name__c and Resource_Phone_Number__c not None
         return all([dispatch is not None,
                     dispatch.get('Confirmed__c') is True,
                     dispatch.get('Status__c') in self.DISPATCH_CONFIRMED,
-                    dispatch.get("Resource_Email__c") is not None,
+                    dispatch.get("API_Resource_Name__c") is not None,
                     dispatch.get("Resource_Phone_Number__c") is not None])
 
     def _is_tech_on_site(self, dispatch):
@@ -167,7 +171,7 @@ class CtsDispatchMonitor:
         note_data = {
             'vendor': 'CTS',
             'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
-            'tech_name': dispatch.get('Resource_Email__c'),
+            'tech_name': dispatch.get('API_Resource_Name__c'),
             'tech_phone': dispatch.get('Resource_Phone_Number__c')
         }
         note = cts_get_dispatch_confirmed_note(note_data)
@@ -390,7 +394,7 @@ class CtsDispatchMonitor:
 
         # Get SMS data
         sms_data_payload = {
-            'field_engineer_name': dispatch.get('Resource_Email__c')
+            'field_engineer_name': dispatch.get('API_Resource_Name__c')
         }
 
         sms_data = cts_get_tech_on_site_sms(sms_data_payload)
@@ -420,17 +424,17 @@ class CtsDispatchMonitor:
         try:
             start = perf_counter()
             self._logger.info(f"Dispatches to process before filter {len(confirmed_dispatches)}")
-            cts_dispatches_from_cache = self._redis_client.hgetall(self.PENDING_DISPATCHES_KEY)
             _confirmed_dispatches = []
-            for ticket_id, dispatch_number in cts_dispatches_from_cache.items():
-                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} from cache.")
-                # find ticket_id in all dispatches
-                for dispatch in confirmed_dispatches:
-                    current_ticket_id = dispatch.get('Ext_Ref_Num__c')
-                    if current_ticket_id and current_ticket_id == ticket_id:
-                        self._logger.info(f"Found ticket id: {current_ticket_id} in dispatch [{dispatch.get('Name')}]")
-                        _confirmed_dispatches.append(dispatch)
-
+            # cts_dispatches_from_cache = self._redis_client.hgetall(self.PENDING_DISPATCHES_KEY)
+            # for ticket_id, dispatch_number in cts_dispatches_from_cache.items():
+            #     self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} from cache.")
+            #     # find ticket_id in all dispatches
+            #     for dispatch in confirmed_dispatches:
+            #         current_ticket_id = dispatch.get('Ext_Ref_Num__c')
+            #         if current_ticket_id and current_ticket_id == ticket_id:
+            #             self._logger.info(f"Found ticket id: {current_ticket_id} "
+            #                               f"in dispatch [{dispatch.get('Name')}]")
+            #             _confirmed_dispatches.append(dispatch)
             _confirmed_dispatches = list(filter(self._is_dispatch_confirmed, confirmed_dispatches))
             self._logger.info(f"Total confirmed dispatches after filter: {len(confirmed_dispatches)}")
 
@@ -544,9 +548,8 @@ class CtsDispatchMonitor:
 
                     # Check if dispatch has a sms 24 hours note
                     if tech_24_hours_before_note_found is None:
-                        just_now = datetime.utcnow().replace(tzinfo=pytz.utc)
-                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(just_now,
-                                                                                      date_time_of_dispatch)
+                        just_now = self._cts_timezone.localize(datetime.utcnow())
+                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(just_now, date_time_of_dispatch)
                         if hours_diff > self.HOURS_24:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"SMS 24h note not needed to send now")
@@ -575,9 +578,8 @@ class CtsDispatchMonitor:
 
                     # Check if dispatch has a sms 2 hours note
                     if tech_2_hours_before_note_found is None:
-                        just_now = datetime.utcnow().replace(tzinfo=pytz.utc)
-                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(just_now,
-                                                                                      date_time_of_dispatch)
+                        just_now = self._cts_timezone.localize(datetime.utcnow())
+                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(just_now, date_time_of_dispatch)
                         if hours_diff > self.HOURS_2:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"SMS 2h note not needed to send now")
@@ -631,7 +633,8 @@ class CtsDispatchMonitor:
                     ticket_id = dispatch.get('Ext_Ref_Num__c', None)
 
                     self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id}")
-                    if ticket_id is None or not self._is_valid_ticket_id(ticket_id) or dispatch_number is None:
+                    if ticket_id is None or not CtsRepository.is_valid_ticket_id(ticket_id) \
+                            or dispatch_number is None:
                         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
                         continue
 
@@ -716,7 +719,7 @@ class CtsDispatchMonitor:
                             continue
 
                         result_append_tech_on_site_sms_note = await self._append_tech_on_site_sms_note(
-                            dispatch_number, ticket_id, sms_to, dispatch.get('Resource_Email__c'))
+                            dispatch_number, ticket_id, sms_to, dispatch.get('API_Resource_Name__c'))
                         if not result_append_tech_on_site_sms_note:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"- A sms tech on site note not appended")

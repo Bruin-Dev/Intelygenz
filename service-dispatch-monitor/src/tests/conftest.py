@@ -9,6 +9,9 @@ from application.actions.lit_dispatch_monitor import LitDispatchMonitor
 from application.repositories.lit_repository import LitRepository
 from asynctest import CoroutineMock
 
+from application.actions.cts_dispatch_monitor import CtsDispatchMonitor
+
+from application.repositories.cts_repository import CtsRepository
 from config import testconfig
 
 
@@ -158,6 +161,13 @@ def dispatch_confirmed_error(dispatch_confirmed):
 def dispatch_confirmed_error_2(dispatch_confirmed):
     updated_dispatch = copy.deepcopy(dispatch_confirmed)
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = None
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_confirmed_error_3(dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed)
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = None
     return updated_dispatch
 
 
@@ -595,3 +605,184 @@ def append_note_response_2(append_note_response):
                                                   'Dispatch scheduled for 2020-03-16 @ None None\n\n' \
                                                   'Field Engineer\nJoe Malone\n+12123595129\n'
     return updated_note
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_monitor():
+    redis_client = Mock()
+    event_bus = Mock()
+    logger = Mock()
+    scheduler = Mock()
+    config = testconfig
+    cts_repository = Mock()
+    bruin_repository = Mock()
+    notifications_repository = Mock()
+
+    _cts_dispatch_monitor = CtsDispatchMonitor(config, redis_client, event_bus, scheduler, logger,
+                                               cts_repository, bruin_repository, notifications_repository)
+    return _cts_dispatch_monitor
+
+
+@pytest.fixture(scope='function')
+def cts_repository():
+    event_bus = Mock()
+    logger = Mock()
+    config = testconfig
+    notifications_repository = Mock()
+    redis_client = Mock()
+
+    cts_repository = CtsRepository(logger, config, event_bus, notifications_repository, redis_client)
+    return cts_repository
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch():
+    return {
+        'attributes': {
+            'type': 'Service__c',
+            'url': '/services/data/v42.0/sobjects/Service__c/a261C000003V0UAQA0'
+        },
+        'Id': 'a261C000003V0UAQA0',
+        'Name': 'S-12345',
+        'API_Resource_Name__c': 'Geppert, Nicholas',
+        'Billing_Invoice_Date__c': None,
+        'Billing_Invoice_Number__c': None,
+        'Billing_Total__c': 0.0,
+        'Carrier__c': None,
+        'Carrier_ID_Num__c': None,
+        'Check_In_Date__c': None,
+        'Check_Out_Date__c': None,
+        'City__c': 'Washington',
+        'Confirmed__c': False,
+        'Country__c': 'United States',
+        'Description__c': "Onsite Time Needed: Jun 22, 2020 03:00 PM\r\n\r\nReference: 4694961\r\n\r\n"
+                          "SLA Level: 4-Hour\r\n\r\nLocation Country: United States\r\n\r\n"
+                          "Location - US: 1501 K St NW\r\nWashington, DC 20005\r\n\r\n"
+                          "Location ID: 88377\r\n\r\nLocation Owner: Premier Financial Bancorp\r\n\r\n"
+                          "Onsite Contact: Manager On Duty\r\n\r\nContact #: (202) 772-3610\r\n\r\n"
+                          "Failure Experienced: Comcast cable internet circuit is down. "
+                          "Comcast shows the modem offline without cause.\r\n"
+                          "Basic troubleshooting already done including power cycling of the VCE and modem. "
+                          "Client added it's showing red led on the VCE cloud.\r\n"
+                          "Need to check the cabling and check out the Velo device and see if it needs replaced."
+                          "\r\n\r\nStatic IP Address 50.211.140.109\r\nStatic IP Block 50.211.140.108/30\r\n"
+                          "Gateway IP 50.211.140.110\r\nSubnet Mask 255.255.255.252\r\nPrimary DNS 75.75.75.75\r\n"
+                          "Secondary DNS 75.75.76.76\r\n\r\n\r\n"
+                          "Onsite SOW: phone # 877-515-0911 and email address for pictures to be sent to "
+                          "T1repair@mettel.net\r\n\r\nLCON: Mgr on Duty\r\n"
+                          "Phone: (202) 772-3610\r\nAcccess: M-F 9AM-5PM\r\n\r\n"
+                          "Materials Needed: Laptop, Ethernet cable, console cable, Jetpack/Mobile Hotspot, "
+                          "TeamViewer installed, other IW tools (CAT5e, punch down, wall jacks, "
+                          "telecom standard toolkit)\r\n\r\n"
+                          "Service Category: Troubleshoot\r\n\r\nName: Brad Gunnell\r\n\r\n"
+                          "Phone: (877) 515-0911\r\n\r\nEmail: t1repair@mettel.net",
+        'Duration_Onsite__c': 0.6,
+        'Early_Start__c': None,
+        'Ext_Ref_Num__c': '4694961',
+        'Finance_Notes__c': None,
+        'Issue_Summary__c': 'Troubleshoot Modem/Check Cabling',
+        'Lift_Delivery_Date__c': None,
+        'Lift_Release_Date__c': None,
+        'Lift_Vendor__c': None,
+        'Local_Site_Time__c': '2020-06-23T13:00:00.000+0000',
+        'Account__c': '0011C00002oFpvIQAS',
+        'Lookup_Location_Owner__c': 'Premier Financial Bancorp',
+        'On_Site_Elapsed_Time__c': '0 Days 0 Hours 36 Minutes',
+        'On_Time_Auto__c': False,
+        'Open_Date__c': '2020-06-22T20:14:00.000+0000',
+        'P1__c': None, 'P10__c': None, 'P10A__c': None, 'P11__c': None, 'P11A__c': None, 'P12__c': None,
+        'P12A__c': None, 'P13__c': None, 'P13A__c': None, 'P14__c': None, 'P14A__c': None, 'P15__c': None,
+        'P15A__c': None, 'P1A__c': None, 'P2__c': None, 'P2A__c': None, 'P3__c': None, 'P3A__c': None,
+        'P4__c': None, 'P4A__c': None, 'P5__c': None, 'P5A__c': None, 'P6__c': None, 'P6A__c': None,
+        'P7__c': None, 'P7A__c': None, 'P8__c': None, 'P8A__c': None, 'P9__c': None, 'P9A__c': None,
+        'Resource_Assigned_Timestamp__c': None,
+        'Resource_Email__c': None,
+        'Resource_Phone_Number__c': None,
+        'Site_Notes__c': None,
+        'Site_Status__c': 'Requires Dispatch',
+        'Special_Shipping_Instructions__c': None,
+        'Street__c': '1501 K St NW',
+        'Status__c': 'Open',
+        'Resource_Trained__c': False,
+        'Service_Type__c': 'a251C000005Ics1QAC',
+        'Zip__c': '20005'
+    }
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_no_contact(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace('Contact #:', 'NO CONTACT')
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_error_number(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace('Contact #: (202) 772-3610',
+                                                                                    'Contact #: A00123222430A 99 98989')
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_2(cts_dispatch_monitor, cts_dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['Name'] = 'S-12346'
+    updated_dispatch['Ext_Ref_Num__c'] = '123456'
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_not_confirmed(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = False
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_REQUESTED
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_tech_on_site(cts_dispatch_monitor, cts_dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_tech_not_on_site(cts_dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_bad_status_dispatch(dispatch):
+    updated_dispatch = copy.deepcopy(dispatch)
+    updated_dispatch["Status__c"] = "BAD_STATUS"
+    return updated_dispatch

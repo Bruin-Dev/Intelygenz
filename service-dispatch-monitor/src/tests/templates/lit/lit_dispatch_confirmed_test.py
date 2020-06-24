@@ -12,7 +12,7 @@ Michael J. Fox
 """
 
 
-def get_dispatch_requested_note_test():
+def lit_get_dispatch_requested_note_test():
     body = {
       'date_of_dispatch': '2019-11-14',
       'time_of_dispatch': '6PM-8PM',

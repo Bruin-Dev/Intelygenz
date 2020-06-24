@@ -7,16 +7,16 @@ from application.repositories import nats_error_response
 
 
 class CtsRepository:
-    def __init__(self, logger, config, event_bus, redis_client):
+    def __init__(self, logger, config, event_bus, notifications_repository, redis_client):
         self._logger = logger
         self._config = config
         self._event_bus = event_bus
+        self._notifications_repository = notifications_repository
         self._redis_client = redis_client
 
     async def get_all_dispatches(self):
         err_msg = None
 
-        # TODO: append also from CTS salesforce
         request = {
             'request_id': uuid(),
             'body': {},

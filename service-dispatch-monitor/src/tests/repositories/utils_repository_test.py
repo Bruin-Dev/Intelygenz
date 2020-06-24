@@ -85,6 +85,12 @@ class TestUtilsRepository:
         assert hours_2 == 2
         assert hours_24 == 24
 
+        hours_2 = UtilsRepository.get_diff_hours_between_datetimes(data1, data2)
+        hours_24 = UtilsRepository.get_diff_hours_between_datetimes(data3, data4)
+
+        assert hours_2 == 2
+        assert hours_24 == 24
+
     def find_note_test(self, lit_dispatch_monitor, ticket_details):
         expected_note_found = {
             "noteId": 70805300,

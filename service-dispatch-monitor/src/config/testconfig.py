@@ -21,7 +21,8 @@ DISPATCH_MONITOR_CONFIG = {
     'environment': 'dev',
     'timezone': 'US/Eastern',
     'jobs_intervals': {
-        'lit_dispatch_monitor': 15  # minutes
+        'lit_dispatch_monitor': 15,  # minutes
+        'cts_dispatch_monitor': 15  # minutes
     },
 }
 
