@@ -56,11 +56,21 @@ class CtsRepository:
             'Resource_Trained__c',
         ]
         self._cts_excluded_fields_minimun_fields = [
-            'Trained_3rd_Party__c'
+            'Trained_3rd_Party__c',
+            'Service_Order__c',
+            'Project_Name__c',
+            'Location__c',
+            'Release_Number__c',
+            'Resource__c',
+            'Parent_Account_Associated__c',
+            'Service_Order__c',
+            'Project_Name__c',
+            'State__c'
         ]
         self._cts_fields = [
             'Id',
             'Name',
+            'API_Resource_Name__c',
             'Billing_Invoice_Date__c',
             'Billing_Invoice_Number__c',
             'Billing_Total__c',

@@ -116,12 +116,10 @@ class CtsClient:
 
             return_response = dict.fromkeys(["body", "status"])
             try:
-                # TODO: remove
-                where = ""
-                filter_field = ''
-                filter_value = ''
-                if len(filter_field) > 0 and len(filter_value) > 0:
-                    where = f" WHERE {filter_field} LIKE = {filter_value} "
+                status_clausule = "Status__c in ('Open', 'Scheduled', 'On Site', 'Completed', " \
+                                  "'Complete Pending Collateral')"
+                open_date_clausule = "Open_Date__c >= LAST_MONTH"
+                where = f" WHERE {status_clausule} and {open_date_clausule}"
                 query = "SELECT {} FROM Service__c {}".format(query_fields, where)
                 self._logger.info(f"Applying query: {query}")
                 response = self._salesforce_sdk.query(query)
