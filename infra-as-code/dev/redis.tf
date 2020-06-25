@@ -2,7 +2,7 @@ resource "aws_elasticache_cluster" "automation-redis" {
   cluster_id = var.ENVIRONMENT
   engine = "redis"
   engine_version = "5.0.4"
-  node_type = "cache.m4.large"
+  node_type = var.redis_node_type[var.CURRENT_ENVIRONMENT]
   num_cache_nodes = 1
   parameter_group_name = "default.redis5.0"
   port = 6379
