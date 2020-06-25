@@ -437,7 +437,7 @@ class CtsDispatchMonitor:
             #                               f"in dispatch [{dispatch.get('Name')}]")
             #             _confirmed_dispatches.append(dispatch)
             _confirmed_dispatches = list(filter(self._is_dispatch_confirmed, confirmed_dispatches))
-            self._logger.info(f"Total confirmed dispatches after filter: {len(confirmed_dispatches)}")
+            self._logger.info(f"Total confirmed dispatches after filter: {len(_confirmed_dispatches)}")
 
             for dispatch in _confirmed_dispatches:
                 try:

@@ -247,14 +247,14 @@ class CtsRepository:
         return response
 
     def get_dispatch(self, dispatch_id):
-        if self._config.ENVIRONMENT_NAME == 'production':
+        if self._config.CTS_CONFIG['environment'] == 'production':
             response = self._cts_client.get_dispatch(dispatch_id, self._cts_query_all_fields)
         else:
             response = self._cts_client.get_dispatch(dispatch_id, self._cts_query_all_fields_dev)
         return response
 
     def get_all_dispatches(self):
-        if self._config.ENVIRONMENT_NAME == 'production':
+        if self._config.CTS_CONFIG['environment'] == 'production':
             response = self._cts_client.get_all_dispatches(self._cts_query_all_fields)
         else:
             response = self._cts_client.get_all_dispatches(self._cts_query_all_fields_dev)

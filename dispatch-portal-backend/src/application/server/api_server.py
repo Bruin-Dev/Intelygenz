@@ -159,7 +159,7 @@ class DispatchServer:
             }
             return jsonify(error_response), response['status'], None
 
-        self._logger.info(f"[LIT] All Dispatches - {response['body']} - took {time.time() - start_time}")
+        self._logger.info(f"[LIT] All Dispatches - {len(response['body'])} - took {time.time() - start_time}")
         response_dispatch['vendor'] = 'LIT'
         response_dispatch['list_dispatch'] = [
             lit_mapper.map_get_dispatch(d) for d in response['body']['DispatchList']]
