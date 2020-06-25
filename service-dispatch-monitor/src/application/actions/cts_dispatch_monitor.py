@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from time import perf_counter
-
+import iso8601
 import pytz
 from shortuuid import uuid
 
@@ -74,7 +74,6 @@ class CtsDispatchMonitor:
         ]
 
         self.SITE_STATUS_REQUIRED_DISPATCH = "Requires Dispatch"
-        self._cts_timezone = timezone(f'US/Eastern')
 
     async def start_monitoring_job(self, exec_on_start):
         self._logger.info('Scheduling Service Dispatch Monitor job for CTS...')
@@ -461,6 +460,8 @@ class CtsDispatchMonitor:
                         await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
+                    date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+
                     # TODO: description to get the sms to
                     sms_to = CtsRepository.get_sms_to(dispatch)
                     if sms_to is None:
@@ -549,8 +550,12 @@ class CtsDispatchMonitor:
 
                     # Check if dispatch has a sms 24 hours note
                     if tech_24_hours_before_note_found is None:
-                        just_now = self._cts_timezone.localize(datetime.utcnow())
-                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(just_now, date_time_of_dispatch)
+                        just_now = datetime.now(pytz.utc)
+                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(date_time_of_dispatch_localized,
+                                                                                      just_now)
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} UTC - "
+                                          f"dt: {date_time_of_dispatch_localized} - now: {just_now} - "
+                                          f"diff: {hours_diff}")
                         if hours_diff > self.HOURS_24:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"SMS 24h note not needed to send now")
@@ -579,8 +584,12 @@ class CtsDispatchMonitor:
 
                     # Check if dispatch has a sms 2 hours note
                     if tech_2_hours_before_note_found is None:
-                        just_now = self._cts_timezone.localize(datetime.utcnow())
-                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(just_now, date_time_of_dispatch)
+                        just_now = datetime.now(pytz.utc)
+                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(date_time_of_dispatch_localized,
+                                                                                      just_now)
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} UTC - "
+                                          f"dt: {date_time_of_dispatch_localized} - now: {just_now} - "
+                                          f"diff: {hours_diff}")
                         if hours_diff > self.HOURS_2:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"SMS 2h note not needed to send now")
