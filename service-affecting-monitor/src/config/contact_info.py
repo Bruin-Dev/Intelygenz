@@ -1639,5 +1639,204 @@ devices_by_id = [
         "serial": "VC05200063958",
         "enterprise_id": 49,
         "email": "tixfix@blackfinsquare.com"
+    },
+    # Benchmark Senior Living
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 519,
+        "serial": "VC05200009130",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 951,
+        "serial": "VC05200025943",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 1561,
+        "serial": "VC05400003861",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 1716,
+        "serial": "VC05400005288",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2309,
+        "serial": "VC05400011490",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2329,
+        "serial": "VC05400010856",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2391,
+        "serial": "VC05400011590",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2881,
+        "serial": "VC05400018527",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2894,
+        "serial": "VC05400018222",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2933,
+        "serial": "VC05400018035",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2935,
+        "serial": "VC05400017310",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2940,
+        "serial": "VC05400017265",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2961,
+        "serial": "VC05400023022",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2962,
+        "serial": "VC05400023391",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 2963,
+        "serial": "VC05400013629",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 3040,
+        "serial": "VC05400023491",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 3047,
+        "serial": "VC05400023442",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 3058,
+        "serial": "VC05400022135",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 3089,
+        "serial": "VC05400022983",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 3145,
+        "serial": "VC05400022710",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 3312,
+        "serial": "VC05400025390",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
+    },
+    {
+        "name": "Carousel NOC",
+        "phone": "800-401-0760",
+        "host": "mettel.velocloud.net",
+        "edge_id": 3419,
+        "serial": "VC05100003098",
+        "enterprise_id": 100,
+        "email": "service@carouselindustries.com"
     }
 ]
