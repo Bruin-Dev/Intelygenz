@@ -2792,7 +2792,7 @@ class TestApiServer:
         email_data = {
             'request_id': uuid_,
             'email_data': {
-                'subject': f'[TEST] CTS - Service Submission - {ticket_id}',
+                'subject': f'CTS - Service Submission - {ticket_id}',
                 'recipient': api_server_test._config.CTS_CONFIG["email"],
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
@@ -2978,7 +2978,7 @@ class TestApiServer:
         email_data = {
             'request_id': uuid_,
             'email_data': {
-                'subject': f'[TEST] CTS - Service Submission - {ticket_id}',
+                'subject': f'CTS - Service Submission - {ticket_id}',
                 'recipient': api_server_test._config.CTS_CONFIG["email"],
                 'text': 'this is the accessible text for the email',
                 'html': email_html,
@@ -3037,7 +3037,7 @@ class TestApiServer:
         email_data = {
             'request_id': uuid_,
             'email_data': {
-                'subject': f'[TEST] CTS - Service Submission - {ticket_id}',
+                'subject': f'CTS - Service Submission - {ticket_id}',
                 'recipient': api_server_test._config.CTS_CONFIG["email"],
                 'text': 'this is the accessible text for the email',
                 'html': email_html,

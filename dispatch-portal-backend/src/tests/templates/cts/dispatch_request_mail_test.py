@@ -3,7 +3,7 @@ from application.templates.cts.dispatch_request_mail import render_email_templat
 
 expected_dispatch_request_mail = """
 <hr style="width:100%;text-align:left;margin-left:0">
-<h1>[TEST] CTS - MetTel Service Submission Portal</h1>
+<h1>CTS - MetTel Service Submission Portal</h1>
 <hr style="width:100%;text-align:left;margin-left:0">
 <p>Onsite Time Needed: 2019-11-14 6PM-8PM</p>
 <p>Onsite Timezone: Pacific Time</p>

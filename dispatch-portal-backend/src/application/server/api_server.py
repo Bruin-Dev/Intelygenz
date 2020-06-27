@@ -447,7 +447,7 @@ class DispatchServer:
             email_data = {
                 'request_id': uuid(),
                 'email_data': {
-                    'subject': f'[TEST] CTS - Service Submission - {ticket_id}',
+                    'subject': f'CTS - Service Submission - {ticket_id}',
                     'recipient': self._config.CTS_CONFIG["email"],
                     'text': 'this is the accessible text for the email',
                     'html': email_html,

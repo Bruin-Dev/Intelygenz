@@ -1,6 +1,6 @@
 CTS_DISPATCH_REQUEST_MAIL = """
 <hr style="width:100%;text-align:left;margin-left:0">
-<h1>[TEST] CTS - MetTel Service Submission Portal</h1>
+<h1>CTS - MetTel Service Submission Portal</h1>
 <hr style="width:100%;text-align:left;margin-left:0">
 <p>Onsite Time Needed: {onsite_time_needed}</p>
 <p>Onsite Timezone: {timezone_of_dispatch}</p>
