@@ -443,6 +443,12 @@ variable "cts_bridge_desired_tasks" {
   description = "Number of desired tasks of microservice cts-bridge"
 }
 
+variable "dispatch_portal_frontend_desired_tasks" {
+  default = 1
+  type = number
+  description = "Number of desired tasks of microservice dispatch-portal-frontend"
+}
+
 variable "dispatch_portal_backend_desired_tasks" {
   default = 1
   type = number

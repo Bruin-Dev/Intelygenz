@@ -471,3 +471,75 @@ resource "aws_cloudwatch_metric_alarm" "running_task_count_velocloud-bridge_alar
     Environment = var.ENVIRONMENT
   }
 }
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_cts-bridge_alarm" {
+  count = var.cts_bridge_desired_tasks > 0 ? 1 : 0
+  alarm_name = local.running_task_count_cts-bridge_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold * var.cts_bridge_desired_tasks
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of cts-bridge service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-cts-bridge"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_cts-bridge_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_dispatch-portal-frontend_alarm" {
+  count = var.dispatch_portal_frontend_desired_tasks > 0 ? 1 : 0
+  alarm_name = local.running_task_count_dispatch-portal-frontend_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold * var.dispatch_portal_frontend_desired_tasks
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of dispatch-portal-frontend service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-dispatch-portal-frontend"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_dispatch-portal-frontend_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "running_task_count_dispatch-portal-backend_alarm" {
+  count = var.dispatch_portal_backend_desired_tasks > 0 ? 1 : 0
+  alarm_name = local.running_task_count_dispatch-portal-backend_alarm-name
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods = local.running_task_count_service-alarm-evaluation_periods
+  metric_name = local.running_task_count-metric_transformation-name
+  namespace = "ECS/ContainerInsights"
+  period = local.running_task_count_service-alarm-period
+  statistic = "Sum"
+  threshold = local.running_task_count_service-alarm-threshold * var.dispatch_portal_backend_desired_tasks
+  insufficient_data_actions = []
+  alarm_description = "This metric monitors the number of running tasks of dispatch-portal-backend service in ECS cluster ${var.ENVIRONMENT}"
+  alarm_actions = [
+    aws_cloudformation_stack.sns_topic_alarms.outputs["TopicARN"]]
+  dimensions = {
+    ServiceName = "${var.ENVIRONMENT}-dispatch-portal-backend"
+    ClusterName = var.ENVIRONMENT
+  }
+  tags = {
+    Name = local.running_task_count_dispatch-portal-backend_alarm-tag-Name
+    Environment = var.ENVIRONMENT
+  }
+}

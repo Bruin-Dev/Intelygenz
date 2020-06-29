@@ -396,9 +396,21 @@ locals {
   running_task_count_last-contact-report_alarm-name = "Running tasks count of last-contact-report service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_last-contact-report_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_last-contact-report"
 
-  // alarm running_task_count_velocloud-bridge_
+  // alarm running_task_count_velocloud-bridge local variables
   running_task_count_velocloud-bridge_alarm-name = "Running tasks count of velocloud-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_velocloud-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_velocloud-bridge"
+
+  // alarm running_task_count_dispatch-portal-frontend local variables
+  running_task_count_dispatch-portal-frontend_alarm-name = "Running tasks count of dispatch-portal-frontend service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_dispatch-portal-frontend_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_dispatch-portal-frontend"
+
+  // alarm running_task_count_dispatch-portal-backend local variables
+  running_task_count_dispatch-portal-backend_alarm-name = "Running tasks count of dispatch-portal-backend service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_dispatch-portal-backend_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_dispatch-portal-backend"
+
+  // alarm running_task_count_cts-bridge local variables
+  running_task_count_cts-bridge_alarm-name = "Running tasks count of cts-bridge service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_cts-bridge_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_cts-bridge"
 
   // cloudformation local variables
   stack_alarms-errors_exceptions_messages_in_services-name = "SnsTopicMetTelAutomationAlarms-${var.ENVIRONMENT}"
