@@ -940,6 +940,17 @@ class TestLitDispatchMonitor:
         ])
 
     @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_with_general_exception_test(self, lit_dispatch_monitor):
+        confirmed_dispatches = 0  # Non valid list for filter
+        err_msg = f"Error: _monitor_confirmed_dispatches - object of type 'int' has no len()"
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches)
+
+        lit_dispatch_monitor._logger.error.assert_called_once()
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+
+    @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_exception_test(self, lit_dispatch_monitor, dispatch_confirmed):
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
         ticket_id = dispatch_confirmed.get('MetTel_Bruin_TicketID')
@@ -2562,6 +2573,18 @@ class TestLitDispatchMonitor:
             call(dispatch_number_2, ticket_id_2, sms_to_2, dispatch_tech_on_site_2.get('Tech_First_Name'))
         ])
 
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+
+    @pytest.mark.asyncio
+    async def monitor_tech_on_site_dispatches_with_general_exception_test(
+            self, lit_dispatch_monitor):
+        tech_on_site_dispatches = 0  # Non valid list for filter
+        err_msg = f"Error: _monitor_tech_on_site_dispatches - object of type 'int' has no len()"
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await lit_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches)
+
+        lit_dispatch_monitor._logger.error.assert_called_once()
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio

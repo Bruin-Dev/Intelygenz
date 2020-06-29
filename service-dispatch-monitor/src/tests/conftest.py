@@ -721,6 +721,62 @@ def cts_dispatch_confirmed(cts_dispatch_monitor, cts_dispatch):
 
 
 @pytest.fixture(scope='function')
+def cts_dispatch_confirmed_bad_date(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+
+    updated_dispatch['Local_Site_Time__c'] = None
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_skipped(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+    updated_dispatch['Ext_Ref_Num__c'] = "3544801|OTHER"
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_skipped_datetime(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+
+    updated_dispatch['Local_Site_Time__c'] = None
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_skipped_bad_phone(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace('Contact #: (202) 772-3610',
+                                                                                    'Contact #: NO CONTACT')
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def cts_dispatch_confirmed_no_contact(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
@@ -756,6 +812,10 @@ def cts_dispatch_confirmed_2(cts_dispatch_monitor, cts_dispatch_confirmed):
     updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
     updated_dispatch['Name'] = 'S-12346'
     updated_dispatch['Ext_Ref_Num__c'] = '123456'
+
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace('Contact #: (202) 772-3610',
+                                                                                    'Contact #: (202) 772-3611')
+
     return updated_dispatch
 
 
@@ -776,8 +836,32 @@ def cts_dispatch_tech_on_site(cts_dispatch_monitor, cts_dispatch_confirmed):
 
 
 @pytest.fixture(scope='function')
+def cts_dispatch_tech_on_site_2(cts_dispatch_monitor, cts_dispatch_confirmed_2):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed_2)
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_tech_on_site_bad_datetime(cts_dispatch_monitor, cts_dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
+    updated_dispatch['Local_Site_Time__c'] = None
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def cts_dispatch_tech_not_on_site(cts_dispatch_confirmed):
     updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_tech_on_site_skipped(cts_dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+    updated_dispatch["Ext_Ref_Num__c"] = "3544801|OTHER"
     return updated_dispatch
 
 
@@ -785,4 +869,12 @@ def cts_dispatch_tech_not_on_site(cts_dispatch_confirmed):
 def cts_bad_status_dispatch(dispatch):
     updated_dispatch = copy.deepcopy(dispatch)
     updated_dispatch["Status__c"] = "BAD_STATUS"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_tech_on_site_skipped_bad_phone(cts_dispatch_tech_on_site):
+    updated_dispatch = copy.deepcopy(cts_dispatch_tech_on_site)
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace(
+        'Contact #: (202) 772-3610', 'Contact #: A00123222430A 99 98989')
     return updated_dispatch

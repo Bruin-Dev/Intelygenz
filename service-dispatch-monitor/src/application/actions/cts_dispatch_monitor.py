@@ -424,21 +424,10 @@ class CtsDispatchMonitor:
         try:
             start = perf_counter()
             self._logger.info(f"Dispatches to process before filter {len(confirmed_dispatches)}")
-            _confirmed_dispatches = []
-            # cts_dispatches_from_cache = self._redis_client.hgetall(self.PENDING_DISPATCHES_KEY)
-            # for ticket_id, dispatch_number in cts_dispatches_from_cache.items():
-            #     self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} from cache.")
-            #     # find ticket_id in all dispatches
-            #     for dispatch in confirmed_dispatches:
-            #         current_ticket_id = dispatch.get('Ext_Ref_Num__c')
-            #         if current_ticket_id and current_ticket_id == ticket_id:
-            #             self._logger.info(f"Found ticket id: {current_ticket_id} "
-            #                               f"in dispatch [{dispatch.get('Name')}]")
-            #             _confirmed_dispatches.append(dispatch)
-            _confirmed_dispatches = list(filter(self._is_dispatch_confirmed, confirmed_dispatches))
-            self._logger.info(f"Total confirmed dispatches after filter: {len(_confirmed_dispatches)}")
+            confirmed_dispatches = list(filter(self._is_dispatch_confirmed, confirmed_dispatches))
+            self._logger.info(f"Total confirmed dispatches after filter: {len(confirmed_dispatches)}")
 
-            for dispatch in _confirmed_dispatches:
+            for dispatch in confirmed_dispatches:
                 try:
                     dispatch_number = dispatch.get('Name', None)
                     ticket_id = dispatch.get('Ext_Ref_Num__c', None)
@@ -450,10 +439,9 @@ class CtsDispatchMonitor:
                         continue
 
                     date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
-
                     if date_time_of_dispatch is None:
-                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                          f"Could not determine date time of dispatch: {dispatch}")
+                        self._logger.error(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                           f"Could not determine date time of dispatch: {dispatch}")
                         err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                                   f"An error occurred retrieve datetime of dispatch: " \
                                   f"{dispatch.get('Local_Site_Time__c')}"
@@ -462,7 +450,6 @@ class CtsDispatchMonitor:
 
                     date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
 
-                    # TODO: description to get the sms to
                     sms_to = CtsRepository.get_sms_to(dispatch)
                     if sms_to is None:
                         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
@@ -624,7 +611,7 @@ class CtsDispatchMonitor:
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
         except Exception as ex:
-            err_msg = f"Error: _monitor_confirmed_and_pending_dispatches - {ex}"
+            err_msg = f"Error: _monitor_confirmed_dispatches - {ex}"
             self._logger.error(f"Error: {ex}")
             await self._notifications_repository.send_slack_message(err_msg)
         stop = perf_counter()
