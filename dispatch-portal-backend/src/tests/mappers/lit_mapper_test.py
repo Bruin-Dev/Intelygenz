@@ -167,8 +167,6 @@ class TestMappers:
             "site_survey_quote_required": False,
             "local_time_of_dispatch": "6PM-8PM",
             "time_zone_local": "Pacific Time",
-            "hard_time_of_dispatch_time_zone_local": "Pacific Time",
-            "hard_time_of_dispatch_local": "6PM-8PM",
             "mettel_bruin_ticketid": "T-12345",
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",

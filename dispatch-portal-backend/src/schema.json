@@ -17,7 +17,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000/"
+      "url": "http://localhost:5001/"
     }
   ],
   "tags": [
@@ -480,20 +480,114 @@
       },
       "dispatch_lit": {
         "type": "object",
-        "required": [
-          "id"
-        ],
         "properties": {
-          "id": {
+          "date_of_dispatch": {
             "type": "string",
-            "example": "DS1208"
+            "example": "2019-11-14"
           },
-          "vendor": {
+          "site_survey_quote_required": {
+            "type": "boolean",
+            "example": false
+          },
+          "time_of_dispatch": {
             "type": "string",
-            "example": "lit"
+            "description": "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on",
+            "example": "6PM-8PM"
           },
-          "dispatch": {
-            "$ref": "#/components/schemas/new_dispatch_lit"
+          "time_zone": {
+            "enum": [
+              "Pacific Time",
+              "Eastern Time",
+              "Mountain Time",
+              "Hawaii Time",
+              "Alaska Time"
+            ],
+            "type": "string"
+          },
+          "hard_time_of_dispatch_local": {
+            "type": "string",
+            "description": "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on",
+            "example": "6PM-8PM"
+          },
+          "hard_time_of_dispatch_time_zone_local": {
+            "enum": [
+              "Pacific Time",
+              "Eastern Time",
+              "Mountain Time",
+              "Hawaii Time",
+              "Alaska Time"
+            ],
+            "type": "string"
+          },
+          "mettel_bruin_ticket_id": {
+            "type": "string"
+          },
+          "job_site": {
+            "type": "string",
+            "example": "Red Rose Inn"
+          },
+          "job_site_street": {
+            "type": "string",
+            "example": "123 Fake Street"
+          },
+          "job_site_city": {
+            "type": "string",
+            "example": "Pleasantown"
+          },
+          "job_site_state": {
+            "type": "string",
+            "example": "CA"
+          },
+          "job_site_zip_code": {
+            "type": "string",
+            "example": "99088"
+          },
+          "job_site_contact_name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "job_site_contact_number": {
+            "type": "string",
+            "example": "+1 666 6666 666"
+          },
+          "materials_needed_for_dispatch": {
+            "type": "string",
+            "example": "Laptop, cable, tuner, ladder,internet hotspot"
+          },
+          "scope_of_work": {
+            "type": "string",
+            "example": "Device is bouncing constantly"
+          },
+          "mettel_tech_call_in_instructions": {
+            "type": "string",
+            "example": "When arriving to the site call HOLMDEL NOC for telematic assistance"
+          },
+          "name_of_mettel_requester": {
+            "type": "string",
+            "example": "Karen Doe"
+          },
+          "mettel_department": {
+            "enum": [
+              "Customer Care",
+              "DSL",
+              "T1 Repair",
+              "POTs Repair",
+              "Provisioning",
+              "Advanced Services Engineering",
+              "Wireless",
+              "Holmdel Network Engineering",
+              "Advanced Services Implementations",
+              "Other"
+            ],
+            "type": "string"
+          },
+          "mettel_requester_email": {
+            "type": "string",
+            "example": "karen.doe@mettel.net"
+          },
+          "mettel_department_phone_number": {
+            "type": "string",
+            "example": "+1 666 6666 666"
           }
         }
       },
@@ -507,7 +601,7 @@
           "list_dispatch": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/new_dispatch_lit"
+              "$ref": "#/components/schemas/dispatch_lit"
             }
           }
         }
@@ -549,21 +643,6 @@
             "example": "6PM-8PM"
           },
           "time_zone": {
-            "enum": [
-              "Pacific Time",
-              "Eastern Time",
-              "Mountain Time",
-              "Hawaii Time",
-              "Alaska Time"
-            ],
-            "type": "string"
-          },
-          "hard_time_of_dispatch_local": {
-            "type": "string",
-            "description": "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on",
-            "example": "6PM-8PM"
-          },
-          "hard_time_of_dispatch_time_zone_local": {
             "enum": [
               "Pacific Time",
               "Eastern Time",
