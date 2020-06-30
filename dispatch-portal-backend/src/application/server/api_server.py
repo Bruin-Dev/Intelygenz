@@ -388,7 +388,6 @@ class DispatchServer:
         body = await request.get_json()
 
         try:
-            # import pdb;pdb.set_trace()
             validate(body, self._schema['components']['schemas']['new_dispatch_cts'])
         except jsonschema.exceptions.ValidationError as ve:
             self._logger.error(ve)
@@ -399,23 +398,10 @@ class DispatchServer:
 
         self._logger.info(f"payload: {body}")
 
-        # if self._config.ENVIRONMENT_NAME == 'production':
         return_response = dict.fromkeys(["body", "status"])
         igz_dispatch_id = f"IGZ{uuid()}"
         ticket_id = body.get('mettel_bruin_ticket_id')
 
-        # dispatches_from_cache = self._redis_client.hgetall(self.PENDING_DISPATCHES_KEY)
-        # found_ticket_id_in_cache = ticket_id in dispatches_from_cache.keys()
-        #
-        # if found_ticket_id_in_cache:
-        #     err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
-        #     self._logger.info(err_msg)
-        #     return_response['status'] = 400
-        #     return_response['body'] = err_msg
-        #     # TODO: notify slack
-        #     return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
-
-        # We can avoid this checks in the future
         # Check if already exists in bruin
         pre_existing_ticket_notes_response = await self._bruin_repository.get_ticket_details(ticket_id)
         pre_existing_ticket_notes_status = pre_existing_ticket_notes_response['status']
@@ -468,45 +454,10 @@ class DispatchServer:
             ticket_note = cts_get_dispatch_requested_note(body, igz_dispatch_id)
             await self._append_note_to_ticket(igz_dispatch_id, ticket_id, ticket_note)
             self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Note appended: {ticket_note}")
-            # Add to cache
-            # added_to_cache = self._add_dispatch_to_cache(ticket_id, igz_dispatch_id)
-            # if added_to_cache:
-            #     self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Added to cache")
 
         response_dispatch['id'] = igz_dispatch_id
         response_dispatch['vendor'] = 'CTS'
         self._logger.info(f"[CTS] Dispatch retrieved: {igz_dispatch_id} - took {time.time() - start_time}")
-
-        # Send email
-        # Append Note to bruin
-        # Return generated igz ticket id
-        # else:
-        #     dispatch_request = cts_mapper.map_create_dispatch(body)
-        #     request_body = dict()
-        #     request_body = dispatch_request
-        #
-        #     payload = {"request_id": uuid(), "body": request_body}
-        #     response = await self._event_bus.rpc_request("cts.dispatch.post", payload, timeout=30)
-        #     self._logger.info(response)
-        #
-        #     if response['status'] == 500:
-        #         error_response = {
-        #             'code': response['status'], 'message': response['body']
-        #         }
-        #         return jsonify(error_response), response['status'], None
-        #
-        #     response_dispatch = dict()
-        #     if 'body' in response and response['body'] is not None and 'Dispatch' in response['body'] \
-        #             and response['body']['Dispatch'] is not None \
-        #             and 'Dispatch_Number' in response['body']['Dispatch']:
-        #         dispatch_num = response['body']['Dispatch']['Dispatch_Number']
-        #         response_dispatch['id'] = dispatch_num
-        #         response_dispatch['vendor'] = 'CTS'
-        #         self._logger.info(f"[CTS] Dispatch retrieved: {dispatch_num} - took {time.time() - start_time}")
-        #     else:
-        #         self._logger.info(f"[CTS] Dispatch not created - {payload} - took {time.time() - start_time}")
-        #         error_response = {'code': response['status'], 'message': response['body']}
-        #         return jsonify(error_response), response['status'], None
 
         return jsonify(response_dispatch), HTTPStatus.OK, None
 

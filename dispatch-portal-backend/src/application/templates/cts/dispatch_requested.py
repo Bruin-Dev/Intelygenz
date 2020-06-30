@@ -8,6 +8,7 @@ Dispatch Number: {dispatch_number}
 Date of Dispatch: {date_of_dispatch}
 Time of Dispatch (Local): {time_of_dispatch}
 Time Zone (Local): {time_zone}
+SLA Level: {sla_level}
 
 Location Owner/Name: {job_site}
 Address: {job_site_street}, {job_site_city}, {job_site_state}, {job_site_zip_code}
@@ -42,6 +43,7 @@ def get_dispatch_requested_note(body, dispatch_number):
         date_of_dispatch=body.get('date_of_dispatch'),
         time_of_dispatch=body.get('time_of_dispatch'),
         time_zone=body.get('time_zone'),
+        sla_level=body.get('sla_level'),
         job_site=body.get('job_site'),
         job_site_street=body.get('job_site_street'),
         job_site_city=body.get('job_site_city'),
