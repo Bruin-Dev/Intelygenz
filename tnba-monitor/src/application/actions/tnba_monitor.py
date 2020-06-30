@@ -94,7 +94,7 @@ class TNBAMonitor:
         )
 
         end_time = time.time()
-        self._logger.info(f'TNBA process finished! Took {end_time - start_time} seconds.')
+        self._logger.info(f'TNBA process finished! Took {(end_time - start_time) // 60} minutes.')
 
     async def _get_all_open_tickets_with_details_for_monitored_companies(self):
         open_tickets = []

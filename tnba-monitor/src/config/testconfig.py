@@ -33,7 +33,7 @@ ENVIRONMENT = 'dev'
 
 TIMEZONE = 'US/Eastern'
 
-MONITORING_INTERVAL_SECONDS = 60 * 20
+MONITORING_INTERVAL_SECONDS = 60 * 5
 
 LOG_CONFIG = {
     'name': 'test-name',

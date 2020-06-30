@@ -68,7 +68,7 @@ class MonitoringMapRepository:
         self._monitoring_map_cache = self._temp_monitoring_map
         self._temp_monitoring_map = {}
 
-        self._logger.info(f"Processing {len(tasks)} edges took {time.time() - start_time} seconds")
+        self._logger.info(f"Processing {len(tasks)} edges took {(time.time() - start_time) // 60} minutes")
 
     async def _process_edge_and_tickets(self, edge_full_id):
         edge_identifier = EdgeIdentifier(**edge_full_id)
