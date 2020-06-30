@@ -70,6 +70,20 @@ class LitRepository:
         except NumberParseException:
             return None
 
+    @staticmethod
+    def get_sms_to_tech(dispatch):
+        # Example format->  Job_Site_Contact_Name_and_Phone_Number: "Jane Doe +1 666 6666 666"
+        sms_to = dispatch.get('Tech_Mobile_Number')
+        if sms_to is None or sms_to.strip() == '':
+            return None
+        # Remove non digits
+        sms_to = ''.join(ch for ch in sms_to if ch.isdigit())
+        try:
+            sms_to = phonenumbers.parse(sms_to, "US")
+            return phonenumbers.format_number(sms_to, phonenumbers.PhoneNumberFormat.E164)
+        except NumberParseException:
+            return None
+
     def get_dispatch_confirmed_date_time_localized(self, dispatch, dispatch_number, ticket_id):
         return_datetime_localized = None
         try:

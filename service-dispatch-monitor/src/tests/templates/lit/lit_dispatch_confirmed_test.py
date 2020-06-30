@@ -1,5 +1,5 @@
 from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_confirmed_note
-from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_24_hours_before_sms_note
+from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_12_hours_before_sms_note
 from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_2_hours_before_sms_note
 
 expected_dispatch_confirmed_note = """#*Automation Engine*#
@@ -25,18 +25,18 @@ def lit_get_dispatch_requested_note_test():
     assert dispatch_confirmed_note == expected_dispatch_confirmed_note
 
 
-expected_tech_24_hours_before_sms_note = """#*Automation Engine*#
-Dispatch 24h prior reminder SMS sent to +16666666666
+expected_tech_12_hours_before_sms_note = """#*Automation Engine*#
+Dispatch 12h prior reminder SMS sent to +16666666666
 """
 
 
-def lit_get_tech_24_hours_before_sms_note_test():
+def lit_get_tech_12_hours_before_sms_note_test():
     body = {
         'phone_number': '+16666666666'
     }
-    tech_24_hours_before_sms_note = lit_get_tech_24_hours_before_sms_note(body)
+    tech_12_hours_before_sms_note = lit_get_tech_12_hours_before_sms_note(body)
 
-    assert tech_24_hours_before_sms_note == expected_tech_24_hours_before_sms_note
+    assert tech_12_hours_before_sms_note == expected_tech_12_hours_before_sms_note
 
 
 expected_tech_2_hours_before_sms_note = """#*Automation Engine*#

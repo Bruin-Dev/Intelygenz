@@ -435,6 +435,47 @@ def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
+    confirmed_sms_ticket_note_3 = {
+        "noteId": 70805301,
+        "noteValue": "#*Automation Engine*#\n"
+                     "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595129"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_3)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_1_with_confirmation_note_but_not_tech(ticket_details_1, dispatch_confirmed):
+    updated_ticket_details = copy.deepcopy(ticket_details_1)
+    confirmed_ticket_note = {
+        "noteId": 70805301,
+        "noteValue": "#*Automation Engine*#\n"
+                     "Dispatch Management - Dispatch Confirmed\n"
+                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
+                     "Field Engineer"
+                     "{tech_name}"
+                     "{tech_phone}".format(date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
+                                           time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
+                                           time_zone=dispatch_confirmed.get('Time_Zone_Local'),
+                                           tech_name=dispatch_confirmed.get('Tech_First_Name'),
+                                           tech_phone=dispatch_confirmed.get('Tech_Mobile_Number')),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    confirmed_sms_ticket_note_2 = {
+        "noteId": 70805301,
+        "noteValue": "#*Automation Engine*#\n"
+                     "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
     updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
     return updated_ticket_details
@@ -467,48 +508,107 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
+    confirmed_sms_ticket_note_3 = {
+        "noteId": 70805304,
+        "noteValue": "#*Automation Engine*#\n"
+                     "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595126"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_3)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_2_with_confirmation_note_but_not_tech(ticket_details_2, dispatch_confirmed_2):
+    updated_ticket_details = copy.deepcopy(ticket_details_2)
+    confirmed_ticket_note = {
+        "noteId": 70805303,
+        "noteValue": "#*Automation Engine*#\n"
+                     "Dispatch Management - Dispatch Confirmed\n"
+                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
+                     "Field Engineer"
+                     "{tech_name}"
+                     "{tech_phone}".format(date_of_dispatch=dispatch_confirmed_2.get('Date_of_Dispatch'),
+                                           time_of_dispatch=dispatch_confirmed_2.get('Hard_Time_of_Dispatch_Local'),
+                                           time_zone=dispatch_confirmed_2.get('Time_Zone_Local'),
+                                           tech_name=dispatch_confirmed_2.get('Tech_First_Name'),
+                                           tech_phone=dispatch_confirmed_2.get('Tech_Mobile_Number')),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    confirmed_sms_ticket_note_2 = {
+        "noteId": 70805304,
+        "noteValue": "#*Automation Engine*#\n"
+                     "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595126"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
     updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
     return updated_ticket_details
 
 
 @pytest.fixture(scope='function')
-def ticket_details_1_with_24h_sms_note(ticket_details_1_with_confirmation_note, dispatch_confirmed):
+def ticket_details_1_with_12h_sms_note(ticket_details_1_with_confirmation_note, dispatch_confirmed):
     updated_ticket_details = copy.deepcopy(ticket_details_1_with_confirmation_note)
     sms_to = "+12123595129"
-    note_24h_sms_ticket_note = {
+    note_12h_sms_ticket_note = {
         "noteId": 70805310,
         "noteValue": "#*Automation Engine*#"
-                     "Dispatch 24h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
+                     "Dispatch 12h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
-    updated_ticket_details['body']['ticketNotes'].append(note_24h_sms_ticket_note)
+    note_12h_sms_ticket_tech_note = {
+        "noteId": 70805310,
+        "noteValue": "#*Automation Engine*#"
+                     "Dispatch 12h prior reminder tech SMS sent to {phone_number}".format(phone_number=sms_to),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(note_12h_sms_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(note_12h_sms_ticket_tech_note)
     return updated_ticket_details
 
 
 @pytest.fixture(scope='function')
-def ticket_details_2_with_24h_sms_note(ticket_details_2_with_confirmation_note, dispatch_confirmed_2):
+def ticket_details_2_with_12h_sms_note(ticket_details_2_with_confirmation_note, dispatch_confirmed_2):
     updated_ticket_details = copy.deepcopy(ticket_details_2_with_confirmation_note)
     sms_to = "+12123595126"
-    note_24h_sms_ticket_note = {
+    note_12h_sms_ticket_note = {
         "noteId": 70805310,
         "noteValue": "#*Automation Engine*#"
-                     "Dispatch 24h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
+                     "Dispatch 12h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
-    updated_ticket_details['body']['ticketNotes'].append(note_24h_sms_ticket_note)
+    note_12h_sms_ticket_tech_note = {
+        "noteId": 70805310,
+        "noteValue": "#*Automation Engine*#"
+                     "Dispatch 12h prior reminder tech SMS sent to {phone_number}".format(phone_number=sms_to),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(note_12h_sms_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(note_12h_sms_ticket_tech_note)
     return updated_ticket_details
 
 
 @pytest.fixture(scope='function')
-def ticket_details_1_with_2h_sms_note(ticket_details_1_with_24h_sms_note, dispatch_confirmed):
-    updated_ticket_details = copy.deepcopy(ticket_details_1_with_24h_sms_note)
+def ticket_details_1_with_2h_sms_note(ticket_details_1_with_12h_sms_note, dispatch_confirmed):
+    updated_ticket_details = copy.deepcopy(ticket_details_1_with_12h_sms_note)
     sms_to = "+12123595129"
-    note_24h_sms_ticket_note = {
+    note_2h_sms_ticket_note = {
         "noteId": 70805310,
         "noteValue": "#*Automation Engine*#"
                      "Dispatch 2h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
@@ -516,15 +616,15 @@ def ticket_details_1_with_2h_sms_note(ticket_details_1_with_24h_sms_note, dispat
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
-    updated_ticket_details['body']['ticketNotes'].append(note_24h_sms_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(note_2h_sms_ticket_note)
     return updated_ticket_details
 
 
 @pytest.fixture(scope='function')
-def ticket_details_2_with_2h_sms_note(ticket_details_2_with_24h_sms_note, dispatch_confirmed_2):
-    updated_ticket_details = copy.deepcopy(ticket_details_2_with_24h_sms_note)
+def ticket_details_2_with_2h_sms_note(ticket_details_2_with_12h_sms_note, dispatch_confirmed_2):
+    updated_ticket_details = copy.deepcopy(ticket_details_2_with_12h_sms_note)
     sms_to = "+12123595126"
-    note_24h_sms_ticket_note = {
+    note_2h_sms_ticket_note = {
         "noteId": 70805310,
         "noteValue": "#*Automation Engine*#"
                      "Dispatch 2h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
@@ -532,7 +632,7 @@ def ticket_details_2_with_2h_sms_note(ticket_details_2_with_24h_sms_note, dispat
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
-    updated_ticket_details['body']['ticketNotes'].append(note_24h_sms_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(note_2h_sms_ticket_note)
     return updated_ticket_details
 
 
@@ -540,7 +640,7 @@ def ticket_details_2_with_2h_sms_note(ticket_details_2_with_24h_sms_note, dispat
 def ticket_details_1_with_tech_on_site_sms_note(ticket_details_1_with_2h_sms_note, dispatch_confirmed):
     updated_ticket_details = copy.deepcopy(ticket_details_1_with_2h_sms_note)
     field_engineer_name = dispatch_confirmed.get('Tech_First_Name')
-    note_24h_sms_ticket_note = {
+    note_tech_sms_ticket_note = {
         "noteId": 70805315,
         "noteValue": "#*Automation Engine*#"
                      "Dispatch Management - Field Engineer On Site\n\n"
@@ -549,7 +649,7 @@ def ticket_details_1_with_tech_on_site_sms_note(ticket_details_1_with_2h_sms_not
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
-    updated_ticket_details['body']['ticketNotes'].append(note_24h_sms_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(note_tech_sms_ticket_note)
     return updated_ticket_details
 
 
@@ -557,7 +657,7 @@ def ticket_details_1_with_tech_on_site_sms_note(ticket_details_1_with_2h_sms_not
 def ticket_details_2_with_tech_on_site_sms_note(ticket_details_2_with_2h_sms_note, dispatch_confirmed_2):
     updated_ticket_details = copy.deepcopy(ticket_details_2_with_2h_sms_note)
     field_engineer_name = dispatch_confirmed_2.get('Tech_First_Name')
-    note_24h_sms_ticket_note = {
+    note_tech_sms_ticket_note = {
         "noteId": 70805316,
         "noteValue": "#*Automation Engine*#"
                      "Dispatch Management - Field Engineer On Site\n\n"
@@ -566,7 +666,7 @@ def ticket_details_2_with_tech_on_site_sms_note(ticket_details_2_with_2h_sms_not
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
     }
-    updated_ticket_details['body']['ticketNotes'].append(note_24h_sms_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(note_tech_sms_ticket_note)
     return updated_ticket_details
 
 

@@ -114,6 +114,22 @@ class TestLitRepository:
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = "no valid Number"
         assert LitRepository.get_sms_to(updated_dispatch) is None
 
+    def get_sms_to_tech_test(self, dispatch):
+        updated_dispatch = copy.deepcopy(dispatch)
+        updated_dispatch['Tech_Mobile_Number'] = "+1 (212) 359-5129"
+        expected_phone = "+12123595129"
+        assert LitRepository.get_sms_to_tech(updated_dispatch) == expected_phone
+
+    def get_sms_to_tech_with_error_test(self, dispatch):
+        updated_dispatch = copy.deepcopy(dispatch)
+        updated_dispatch['Tech_Mobile_Number'] = None
+        assert LitRepository.get_sms_to_tech(updated_dispatch) is None
+
+    def get_sms_to_tech_with_error_number_test(self, dispatch):
+        updated_dispatch = copy.deepcopy(dispatch)
+        updated_dispatch['Tech_Mobile_Number'] = "no valid Number"
+        assert LitRepository.get_sms_to_tech(updated_dispatch) is None
+
     def get_dispatch_confirmed_date_time_localized_regex_test(self, lit_repository, dispatch_confirmed):
         dates = [
             {'date': '4-6pm', 'am_pm': 'PM', 'final': '4:00'},

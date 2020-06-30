@@ -27,13 +27,13 @@ def cts_get_dispatch_confirmed_sms_note(body):
     )
 
 
-CTS_TECH_24_HOURS_BEFORE_SMS_NOTE = """#*Automation Engine*#
-Dispatch 24h prior reminder SMS sent to {phone_number}
+CTS_TECH_12_HOURS_BEFORE_SMS_NOTE = """#*Automation Engine*#
+Dispatch 12h prior reminder SMS sent to {phone_number}
 """
 
 
-def cts_get_tech_24_hours_before_sms_note(body):
-    return CTS_TECH_24_HOURS_BEFORE_SMS_NOTE.format(
+def cts_get_tech_12_hours_before_sms_note(body):
+    return CTS_TECH_12_HOURS_BEFORE_SMS_NOTE.format(
         phone_number=body.get('phone_number')
     )
 

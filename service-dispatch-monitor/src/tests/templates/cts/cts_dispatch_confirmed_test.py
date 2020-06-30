@@ -1,6 +1,6 @@
 from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_note
 from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_sms_note
-from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_24_hours_before_sms_note
+from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_12_hours_before_sms_note
 from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_2_hours_before_sms_note
 
 expected_dispatch_confirmed_note = """#*Automation Engine*#
@@ -38,18 +38,18 @@ def cts_get_confirmed_sms_note_test():
     assert dispatch_confirmed_sms_note == expected_cts_dispatch_confirmed_sms
 
 
-expected_tech_24_hours_before_sms_note = """#*Automation Engine*#
-Dispatch 24h prior reminder SMS sent to +16666666666
+expected_tech_12_hours_before_sms_note = """#*Automation Engine*#
+Dispatch 12h prior reminder SMS sent to +16666666666
 """
 
 
-def cts_get_tech_24_hours_before_sms_note_test():
+def cts_get_tech_12_hours_before_sms_note_test():
     body = {
         'phone_number': '+16666666666'
     }
-    tech_24_hours_before_sms_note = cts_get_tech_24_hours_before_sms_note(body)
+    tech_12_hours_before_sms_note = cts_get_tech_12_hours_before_sms_note(body)
 
-    assert tech_24_hours_before_sms_note == expected_tech_24_hours_before_sms_note
+    assert tech_12_hours_before_sms_note == expected_tech_12_hours_before_sms_note
 
 
 expected_tech_2_hours_before_sms_note = """#*Automation Engine*#
