@@ -405,7 +405,7 @@ class OutageMonitor:
             return
 
         seconds_ago_for_down_events_lookup = self._config.MONITOR_CONFIG['autoresolve_down_events_seconds']
-        timedelta_for_down_events_lookup = timedelta(seconds=seconds_ago_for_down_events_lookup)
+        timedelta_for_down_events_lookup = datetime.now(utc) - timedelta(seconds=seconds_ago_for_down_events_lookup)
         last_down_events_response = await self._velocloud_repository.get_last_down_edge_events(
             edge_full_id, timedelta_for_down_events_lookup
         )

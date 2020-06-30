@@ -2105,10 +2105,14 @@ class TestServiceOutageMonitor:
                                        triage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
         velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
 
     @pytest.mark.asyncio
@@ -2157,10 +2161,14 @@ class TestServiceOutageMonitor:
                                        triage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
         velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
         bruin_repository.get_outage_ticket_details_by_service_number.assert_not_awaited()
 
@@ -2225,10 +2233,14 @@ class TestServiceOutageMonitor:
                                        triage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
         velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
         bruin_repository.get_outage_ticket_details_by_service_number.assert_awaited_once_with(client_id, serial_number)
         outage_repository.is_outage_ticket_auto_resolvable.assert_not_called()
@@ -2294,10 +2306,14 @@ class TestServiceOutageMonitor:
                                        triage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
         velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
         bruin_repository.get_outage_ticket_details_by_service_number.assert_awaited_once_with(client_id, serial_number)
         outage_repository.is_outage_ticket_auto_resolvable.assert_not_called()
@@ -2389,10 +2405,14 @@ class TestServiceOutageMonitor:
                                        triage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
         velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
         bruin_repository.get_outage_ticket_details_by_service_number.assert_awaited_once_with(client_id, serial_number)
         outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
@@ -2590,10 +2610,14 @@ class TestServiceOutageMonitor:
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
         velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
 
         bruin_repository.get_outage_ticket_details_by_service_number.assert_awaited_once_with(client_id, serial_number)
@@ -2696,10 +2720,14 @@ class TestServiceOutageMonitor:
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
 
-        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
-            await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+                await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
+        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
         velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
         bruin_repository.get_outage_ticket_details_by_service_number.assert_awaited_once_with(client_id, serial_number)
         outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
