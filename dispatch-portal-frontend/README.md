@@ -67,6 +67,7 @@ At the time of writing this document we are using the following global versions:
 - [styled-components](https://styled-components.com/), only used to react data table.
 - [axios-mock-adapter](https://www.npmjs.com/package/axios-mock-adapter) For init project mocks, Axios adapter that allows to easily mock requests.
 - [tailwindcss](https://tailwindcss.com/docs) For css help.
+- [debounce](https://www.npmjs.com/package/lodash.debounce) For search input.
 
 # Developing flow
 
