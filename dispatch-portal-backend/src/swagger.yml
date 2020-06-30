@@ -350,14 +350,14 @@ components:
           description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
           example: "6PM-8PM"
         time_zone:
-          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time"]
+          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time"]
           type: string
         hard_time_of_dispatch_local:
           type: string
           description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
           example: "6PM-8PM"
         hard_time_of_dispatch_time_zone_local:
-          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time"]
+          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time"]
           type: string
         mettel_bruin_ticket_id:
           type: string
@@ -437,7 +437,7 @@ components:
           description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
           example: "6PM-8PM"
         time_zone:
-          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time"]
+          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time"]
           type: string
         mettel_bruin_ticket_id:
           type: string
@@ -503,7 +503,7 @@ components:
           description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
           example: "6PM-8PM"
         time_zone:
-          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time"]
+          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time"]
           type: string
         mettel_bruin_ticket_id:
           type: string
@@ -613,7 +613,7 @@ components:
           description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
           example: "6PM-8PM"
         time_zone:
-          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time"]
+          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time"]
           type: string
         mettel_bruin_ticket_id:
           type: string

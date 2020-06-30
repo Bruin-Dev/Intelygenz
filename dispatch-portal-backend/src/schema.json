@@ -500,7 +500,8 @@
               "Eastern Time",
               "Mountain Time",
               "Hawaii Time",
-              "Alaska Time"
+              "Alaska Time",
+              "Central Time"
             ],
             "type": "string"
           },
@@ -515,7 +516,8 @@
               "Eastern Time",
               "Mountain Time",
               "Hawaii Time",
-              "Alaska Time"
+              "Alaska Time",
+              "Central Time"
             ],
             "type": "string"
           },
@@ -648,7 +650,8 @@
               "Eastern Time",
               "Mountain Time",
               "Hawaii Time",
-              "Alaska Time"
+              "Alaska Time",
+              "Central Time"
             ],
             "type": "string"
           },
@@ -753,7 +756,8 @@
               "Eastern Time",
               "Mountain Time",
               "Hawaii Time",
-              "Alaska Time"
+              "Alaska Time",
+              "Central Time"
             ],
             "type": "string"
           },
@@ -909,7 +913,8 @@
               "Eastern Time",
               "Mountain Time",
               "Hawaii Time",
-              "Alaska Time"
+              "Alaska Time",
+              "Central Time"
             ],
             "type": "string"
           },
