@@ -111,6 +111,20 @@ def dispatch_confirmed_2(lit_dispatch_monitor, dispatch):
 
 
 @pytest.fixture(scope='function')
+def dispatch_confirmed_tech_phone_none(lit_dispatch_monitor, dispatch):
+    updated_dispatch = copy.deepcopy(dispatch)
+    updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "Test Client on site +12123595126"
+    updated_dispatch["Dispatch_Number"] = "DIS37407"
+    updated_dispatch["Tech_First_Name"] = "Joe Malone"
+    updated_dispatch["Tech_Mobile_Number"] = None
+    updated_dispatch["MetTel_Bruin_TicketID"] = "3544803"
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Central Time"
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "9:30AM-11:30AM"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def dispatch_confirmed_skipped(lit_dispatch_monitor, dispatch):
     updated_dispatch = copy.deepcopy(dispatch)
     updated_dispatch["Dispatch_Number"] = "DIS37406"
@@ -147,6 +161,20 @@ def dispatch_confirmed_skipped_bad_phone(lit_dispatch_monitor, dispatch):
     updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
     updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "NOT VALID PHONE"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_confirmed_skipped_bad_phone_tech(lit_dispatch_monitor, dispatch):
+    updated_dispatch = copy.deepcopy(dispatch)
+    updated_dispatch["Dispatch_Number"] = "DIS37406"
+    updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
+    updated_dispatch["Tech_Mobile_Number"] = "NOT VALID PHONE"
+    updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
+    updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "Test Client on site +12123595126"
     return updated_dispatch
 
 
@@ -362,6 +390,12 @@ def ticket_details_1(ticket_details):
 
 @pytest.fixture(scope='function')
 def ticket_details_2(ticket_details):
+    updated_ticket_details = copy.deepcopy(ticket_details)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_3(ticket_details):
     updated_ticket_details = copy.deepcopy(ticket_details)
     return updated_ticket_details
 

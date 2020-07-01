@@ -12,14 +12,15 @@ from pytz import timezone
 from application.repositories.utils_repository import UtilsRepository
 from application.repositories.cts_repository import CtsRepository
 
-from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_note, \
-    cts_get_dispatch_confirmed_sms_note, cts_get_tech_12_hours_before_sms_note, cts_get_tech_2_hours_before_sms_note
+from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_note
+from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_sms_note
+from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_12_hours_before_sms_note
+from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_2_hours_before_sms_note
 
-from application.templates.cts.sms.dispatch_confirmed import cts_get_dispatch_confirmed_sms, \
-    cts_get_tech_12_hours_before_sms, cts_get_tech_2_hours_before_sms
-
+from application.templates.cts.sms.dispatch_confirmed import cts_get_dispatch_confirmed_sms
+from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_12_hours_before_sms
+from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_2_hours_before_sms
 from application.templates.cts.sms.tech_on_site import cts_get_tech_on_site_sms
-
 from application.templates.cts.cts_tech_on_site import cts_get_tech_on_site_note
 
 
@@ -38,9 +39,6 @@ class CtsDispatchMonitor:
         self.HOURS_12 = 12
         self.HOURS_2 = 2
 
-        # Redis cache key
-        self.PENDING_DISPATCHES_KEY = 'pending_dispatches'
-
         # Dispatch Notes watermarks
         self.MAIN_WATERMARK = '#*Automation Engine*#'
         self.DISPATCH_REQUESTED_WATERMARK = 'Dispatch Management - Dispatch Requested'
@@ -50,8 +48,11 @@ class CtsDispatchMonitor:
 
         # SMS Notes watermarks
         self.DISPATCH_CONFIRMED_SMS_WATERMARK = 'Dispatch confirmation SMS sent to'
+        self.DISPATCH_CONFIRMED_SMS_TECH_WATERMARK = 'Dispatch confirmation SMS tech sent to'
         self.TECH_12_HOURS_BEFORE_SMS_WATERMARK = 'Dispatch 12h prior reminder SMS'
+        self.TECH_12_HOURS_BEFORE_SMS_TECH_WATERMARK = 'Dispatch 12h prior reminder tech SMS'
         self.TECH_2_HOURS_BEFORE_SMS_WATERMARK = 'Dispatch 2h prior reminder SMS'
+        self.TECH_2_HOURS_BEFORE_SMS_TECH_WATERMARK = 'Dispatch 2h prior reminder tech SMS'
         self.TECH_ON_SITE_SMS_WATERMARK = 'Dispatch tech on site SMS'
 
         # Dispatch Statuses
@@ -87,6 +88,24 @@ class CtsDispatchMonitor:
                                 minutes=self._config.DISPATCH_MONITOR_CONFIG['jobs_intervals']['cts_dispatch_monitor'],
                                 next_run_time=next_run_time, replace_existing=False,
                                 id='_service_dispatch_monitor_cts_process')
+
+    def _is_dispatch_confirmed(self, dispatch):
+        # A confirmed dispatch must have status: 'Scheduled'
+        # Confirmed__c set to True, API_Resource_Name__c and Resource_Phone_Number__c not None
+        return all([dispatch is not None,
+                    dispatch.get('Confirmed__c') is True,
+                    dispatch.get('Status__c') in self.DISPATCH_CONFIRMED,
+                    dispatch.get("API_Resource_Name__c") is not None,
+                    dispatch.get("Resource_Phone_Number__c") is not None])
+
+    def _is_tech_on_site(self, dispatch):
+        # Filter tech on site dispatches
+        # Dispatch Confirmed --> Field Engineer On Site:
+        # Status__c and Check_In_Date__c is not None
+        # Bruin Note:*#Automation Engine#*Dispatch Management - Field Engineer On Site<FE Name> has arrived
+        return all([dispatch is not None,
+                    dispatch.get('Status__c') == self.DISPATCH_FIELD_ENGINEER_ON_SITE,
+                    dispatch.get("Check_In_Date__c") is not None])
 
     def _get_dispatches_splitted_by_status(self, dispatches):
         dispatches_splitted_by_status = {}
@@ -126,14 +145,12 @@ class CtsDispatchMonitor:
             dispatches_splitted_by_status = self._get_dispatches_splitted_by_status(cts_dispatches)
 
             self._logger.info(f"Splitted by status: {list(dispatches_splitted_by_status.keys())}")
-            # completed = dispatches_splitted_by_status[self.DISPATCH_REPAIR_COMPLETED]
-            # completed_collateral = dispatches_splitted_by_status[self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL]
-            # completed_dispatches = completed + completed_collateral
+
             monitor_tasks = [
-                self._monitor_confirmed_dispatches(dispatches_splitted_by_status[self.DISPATCH_CONFIRMED]),
-                self._monitor_tech_on_site_dispatches(dispatches_splitted_by_status[
-                                                          self.DISPATCH_FIELD_ENGINEER_ON_SITE]),
-                # self._monitor_repair_completed(completed_dispatches)
+                self._monitor_confirmed_dispatches(
+                    dispatches_splitted_by_status[self.DISPATCH_CONFIRMED]),
+                self._monitor_tech_on_site_dispatches(
+                    dispatches_splitted_by_status[self.DISPATCH_FIELD_ENGINEER_ON_SITE])
             ]
 
             start_monitor_tasks = perf_counter()
@@ -146,24 +163,6 @@ class CtsDispatchMonitor:
             self._logger.info(f"[CTS] Elapsed time processing all dispatches: {(stop - start) / 60} minutes")
         except Exception as ex:
             self._logger.error(f"[CTS] Error: {ex}")
-
-    def _is_dispatch_confirmed(self, dispatch):
-        # A confirmed dispatch must have status: 'Scheduled'
-        # Confirmed__c set to True, API_Resource_Name__c and Resource_Phone_Number__c not None
-        return all([dispatch is not None,
-                    dispatch.get('Confirmed__c') is True,
-                    dispatch.get('Status__c') in self.DISPATCH_CONFIRMED,
-                    dispatch.get("API_Resource_Name__c") is not None,
-                    dispatch.get("Resource_Phone_Number__c") is not None])
-
-    def _is_tech_on_site(self, dispatch):
-        # Filter tech on site dispatches
-        # Dispatch Confirmed --> Field Engineer On Site:
-        # Status__c and Check_In_Date__c is not None
-        # Bruin Note:*#Automation Engine#*Dispatch Management - Field Engineer On Site<FE Name> has arrived
-        return all([dispatch is not None,
-                    dispatch.get('Status__c') == self.DISPATCH_FIELD_ENGINEER_ON_SITE,
-                    dispatch.get("Check_In_Date__c") is not None])
 
     async def _append_confirmed_note(self, dispatch_number, ticket_id, dispatch) -> bool:
         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
