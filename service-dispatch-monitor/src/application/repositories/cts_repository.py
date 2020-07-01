@@ -84,3 +84,17 @@ class CtsRepository:
             return phonenumbers.format_number(sms_to, phonenumbers.PhoneNumberFormat.E164)
         except NumberParseException:
             return None
+
+    @staticmethod
+    def get_sms_to_tech(dispatch):
+        # Example format->  Resource_Phone_Number__c: "+1 666 6666 666"
+        sms_to = dispatch.get('Resource_Phone_Number__c')
+        if sms_to is None or sms_to.strip() == '':
+            return None
+        # Remove non digits
+        sms_to = ''.join(ch for ch in sms_to if ch.isdigit())
+        try:
+            sms_to = phonenumbers.parse(sms_to, "US")
+            return phonenumbers.format_number(sms_to, phonenumbers.PhoneNumberFormat.E164)
+        except NumberParseException:
+            return None
