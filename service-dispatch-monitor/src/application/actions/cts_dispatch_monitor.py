@@ -852,7 +852,8 @@ class CtsDispatchMonitor:
                         else:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"Sending SMS 2h note")
-                            result_sms_2_sended = await self._send_tech_2_sms(dispatch_number, ticket_id, dispatch, sms_to)
+                            result_sms_2_sended = await self._send_tech_2_sms(dispatch_number, ticket_id, dispatch,
+                                                                              sms_to)
                             if not result_sms_2_sended:
                                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                                   f"- SMS 2h not sended")

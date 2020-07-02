@@ -3199,7 +3199,8 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._send_tech_12_sms = CoroutineMock(side_effect=responses_send_tech_12_sms_mock)
         cts_dispatch_monitor._append_tech_12_sms_note = CoroutineMock(side_effect=responses_send_tech_12_sms_note_mock)
         cts_dispatch_monitor._send_tech_12_sms_tech = CoroutineMock(side_effect=responses_send_tech_12_sms_mock)
-        cts_dispatch_monitor._append_tech_12_sms_tech_note = CoroutineMock(side_effect=responses_send_tech_12_sms_note_mock)
+        cts_dispatch_monitor._append_tech_12_sms_tech_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_note_mock)
         cts_dispatch_monitor._send_tech_2_sms = CoroutineMock()
         cts_dispatch_monitor._append_tech_2_sms_note = CoroutineMock()
         cts_dispatch_monitor._send_tech_2_sms_tech = CoroutineMock()
