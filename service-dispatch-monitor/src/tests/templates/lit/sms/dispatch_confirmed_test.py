@@ -1,4 +1,5 @@
-from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms
+from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms, \
+    lit_get_dispatch_confirmed_sms_tech, lit_get_tech_12_hours_before_sms_tech, lit_get_tech_2_hours_before_sms_tech
 from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_12_hours_before_sms
 from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_2_hours_before_sms
 
@@ -18,6 +19,26 @@ def lit_get_dispatch_confirmed_sms_test():
     dispatch_confirmed_sms = lit_get_dispatch_confirmed_sms(body)
 
     assert dispatch_confirmed_sms == expected_dispatch_confirmed_sms
+
+
+expected_dispatch_confirmed_sms_tech = """This is an automated message from MetTel.
+
+You have been confirmed for a dispatch on 2019-11-14 @ 6PM-8PM Pacific Time.
+For me test at 160 Broadway
+"""
+
+
+def lit_get_dispatch_confirmed_sms_tech_test():
+    body = {
+        'date_of_dispatch': '2019-11-14',
+        'time_of_dispatch': '6PM-8PM',
+        'time_zone': 'Pacific Time',
+        'site': 'me test',
+        'street': '160 Broadway'
+    }
+    dispatch_confirmed_sms_tech = lit_get_dispatch_confirmed_sms_tech(body)
+
+    assert dispatch_confirmed_sms_tech == expected_dispatch_confirmed_sms_tech
 
 
 expected_tech_12_hours_before_sms = """This is an automated message from MetTel customer support.
@@ -47,6 +68,34 @@ You will receive a text message at this number when they have arrived.
 """
 
 
+expected_tech_12_hours_before_sms_tech = """This is an automated message from MetTel.
+
+You have a dispatch coming up in 12 hours, 2019-11-14 @ 6PM-8PM Pacific Time.
+For me test at 160 Broadway
+"""
+
+
+def lit_get_tech_12_hours_before_sms_tech_test():
+    body = {
+        'date_of_dispatch': '2019-11-14',
+        'time_of_dispatch': '6PM-8PM',
+        'time_zone': 'Pacific Time',
+        'site': 'me test',
+        'street': '160 Broadway'
+    }
+    tech_12_hours_before_sms_tech = lit_get_tech_12_hours_before_sms_tech(body)
+
+    assert tech_12_hours_before_sms_tech == expected_tech_12_hours_before_sms_tech
+
+
+expected_tech_2_hours_before_sms = """This is an automated message from MetTel customer support.
+
+A field engineer will arrive in 2 hours, 2019-11-14 @ 6PM-8PM Pacific Time, at your location.
+
+You will receive a text message at this number when they have arrived.
+"""
+
+
 def lit_get_tech_2_hours_before_sms_test():
     body = {
         'date_of_dispatch': '2019-11-14',
@@ -56,3 +105,23 @@ def lit_get_tech_2_hours_before_sms_test():
     tech_2_hours_before_sms = lit_get_tech_2_hours_before_sms(body)
 
     assert tech_2_hours_before_sms == expected_tech_2_hours_before_sms
+
+
+expected_tech_2_hours_before_sms_tech = """This is an automated message from MetTel.
+
+You have a dispatch coming up in 2 hours, 2019-11-14 @ 6PM-8PM Pacific Time.
+For me test at 160 Broadway
+"""
+
+
+def lit_get_tech_2_hours_before_sms_tech_test():
+    body = {
+        'date_of_dispatch': '2019-11-14',
+        'time_of_dispatch': '6PM-8PM',
+        'time_zone': 'Pacific Time',
+        'site': 'me test',
+        'street': '160 Broadway'
+    }
+    tech_2_hours_before_sms_tech = lit_get_tech_2_hours_before_sms_tech(body)
+
+    assert tech_2_hours_before_sms_tech == expected_tech_2_hours_before_sms_tech

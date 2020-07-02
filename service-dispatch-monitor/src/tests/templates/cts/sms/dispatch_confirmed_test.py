@@ -1,4 +1,7 @@
 from application.templates.cts.sms.dispatch_confirmed import cts_get_dispatch_confirmed_sms
+from application.templates.cts.sms.dispatch_confirmed import cts_get_dispatch_confirmed_sms_tech
+from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_12_hours_before_sms_tech
+from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_2_hours_before_sms_tech
 from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_12_hours_before_sms
 from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_2_hours_before_sms
 
@@ -20,6 +23,26 @@ def cts_get_dispatch_confirmed_sms_test():
     assert dispatch_confirmed_sms == expected_dispatch_confirmed_sms
 
 
+expected_dispatch_confirmed_sms_tech = """This is an automated message from MetTel customer support.
+
+You have been confirmed for a dispatch on 2020-06-23T14:00:00.000+0000.
+For Premier Financial Bancorp at 1501 K St NW
+"""
+
+
+def cts_get_dispatch_confirmed_sms_tech_test():
+    body = {
+        'date_of_dispatch': '2020-06-23T14:00:00.000+0000',
+        'time_of_dispatch': '6PM-8PM',
+        'time_zone': 'Pacific Time',
+        'site': 'Premier Financial Bancorp',
+        'street': '1501 K St NW'
+    }
+    dispatch_confirmed_sms_tech = cts_get_dispatch_confirmed_sms_tech(body)
+
+    assert dispatch_confirmed_sms_tech == expected_dispatch_confirmed_sms_tech
+
+
 expected_tech_12_hours_before_sms = """This is an automated message from MetTel customer support.
 
 A field engineer will arrive in 12 hours, 2020-06-23T14:00:00.000+0000, at your location.
@@ -39,6 +62,26 @@ def cts_get_tech_12_hours_before_sms_test():
     assert tech_12_hours_before_sms == expected_tech_12_hours_before_sms
 
 
+expected_tech_12_hours_before_sms_tech = """This is an automated message from MetTel customer support.
+
+You have a dispatch coming up in 12 hours, 2020-06-23T14:00:00.000+0000.
+For Premier Financial Bancorp at 1501 K St NW
+"""
+
+
+def cts_get_tech_12_hours_before_sms_tech_test():
+    body = {
+        'date_of_dispatch': '2020-06-23T14:00:00.000+0000',
+        'time_of_dispatch': '6PM-8PM',
+        'time_zone': 'Pacific Time',
+        'site': 'Premier Financial Bancorp',
+        'street': '1501 K St NW'
+    }
+    tech_12_hours_before_sms_tech = cts_get_tech_12_hours_before_sms_tech(body)
+
+    assert tech_12_hours_before_sms_tech == expected_tech_12_hours_before_sms_tech
+
+
 expected_tech_2_hours_before_sms = """This is an automated message from MetTel customer support.
 
 A field engineer will arrive in 2 hours, 2020-06-23T14:00:00.000+0000, at your location.
@@ -56,3 +99,23 @@ def cts_get_tech_2_hours_before_sms_test():
     tech_2_hours_before_sms = cts_get_tech_2_hours_before_sms(body)
 
     assert tech_2_hours_before_sms == expected_tech_2_hours_before_sms
+
+
+expected_tech_2_hours_before_sms_tech = """This is an automated message from MetTel customer support.
+
+You have a dispatch coming up in 2 hours, 2020-06-23T14:00:00.000+0000.
+For Premier Financial Bancorp at 1501 K St NW
+"""
+
+
+def cts_get_tech_2_hours_before_sms_tech_test():
+    body = {
+        'date_of_dispatch': '2020-06-23T14:00:00.000+0000',
+        'time_of_dispatch': '6PM-8PM',
+        'time_zone': 'Pacific Time',
+        'site': 'Premier Financial Bancorp',
+        'street': '1501 K St NW'
+    }
+    tech_2_hours_before_sms_tech = cts_get_tech_2_hours_before_sms_tech(body)
+
+    assert tech_2_hours_before_sms_tech == expected_tech_2_hours_before_sms_tech

@@ -207,7 +207,9 @@ class CtsDispatchMonitor:
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Local_Site_Time__c')
+            'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
+            'site': dispatch.get('Lookup_Location_Owner__c'),
+            'street': dispatch.get('Street__c')
         }
 
         sms_data = cts_get_dispatch_confirmed_sms_tech(sms_data_payload)
@@ -273,7 +275,9 @@ class CtsDispatchMonitor:
         # Get SMS data
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch.get('Lookup_Location_Owner__c'),
+            'street': dispatch.get('Street__c')
         }
 
         sms_data = cts_get_tech_12_hours_before_sms_tech(sms_data_payload)
@@ -339,7 +343,9 @@ class CtsDispatchMonitor:
         # Get SMS data
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch.get('Lookup_Location_Owner__c'),
+            'street': dispatch.get('Street__c')
         }
 
         sms_data = cts_get_tech_2_hours_before_sms_tech(sms_data_payload)
