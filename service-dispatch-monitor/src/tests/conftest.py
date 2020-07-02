@@ -911,6 +911,18 @@ def cts_dispatch_confirmed_skipped_bad_phone(cts_dispatch_monitor, cts_dispatch)
 
 
 @pytest.fixture(scope='function')
+def cts_dispatch_confirmed_skipped_bad_phone_tech(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = 'NOT VALID PHONE'
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def cts_dispatch_confirmed_no_contact(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
