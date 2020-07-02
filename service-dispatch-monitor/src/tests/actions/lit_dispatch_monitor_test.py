@@ -388,7 +388,9 @@ class TestLitDispatchMonitor:
             'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street')
         }
 
         sms_data = lit_get_dispatch_confirmed_sms_tech(sms_data_payload)
@@ -448,7 +450,9 @@ class TestLitDispatchMonitor:
             'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street')
         }
 
         sms_data = lit_get_dispatch_confirmed_sms_tech(sms_data_payload)
@@ -583,7 +587,9 @@ class TestLitDispatchMonitor:
             'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street')
         }
 
         sms_data = lit_get_tech_12_hours_before_sms_tech(sms_data_payload)
@@ -633,7 +639,9 @@ class TestLitDispatchMonitor:
             'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street')
         }
 
         sms_data = lit_get_tech_12_hours_before_sms_tech(sms_data_payload)
@@ -674,7 +682,9 @@ class TestLitDispatchMonitor:
             'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street')
         }
 
         sms_data = lit_get_tech_2_hours_before_sms(sms_data_payload)
@@ -762,7 +772,9 @@ class TestLitDispatchMonitor:
             'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street')
         }
 
         sms_data = lit_get_tech_2_hours_before_sms_tech(sms_data_payload)
@@ -812,7 +824,9 @@ class TestLitDispatchMonitor:
             'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch_confirmed.get('Job_Site'),
+            'street': dispatch_confirmed.get('Job_Site_Street')
         }
 
         sms_data = lit_get_tech_2_hours_before_sms_tech(sms_data_payload)

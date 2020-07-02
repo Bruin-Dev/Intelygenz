@@ -235,7 +235,9 @@ class LitDispatchMonitor:
         sms_data_payload = {
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local')
+            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'site': dispatch.get('Job_Site'),
+            'street': dispatch.get('Job_Site_Street')
         }
 
         sms_data = lit_get_dispatch_confirmed_sms_tech(sms_data_payload)
@@ -305,7 +307,9 @@ class LitDispatchMonitor:
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch.get('Job_Site'),
+            'street': dispatch.get('Job_Site_Street')
         }
 
         sms_data = lit_get_tech_12_hours_before_sms_tech(sms_data_payload)
@@ -375,7 +379,9 @@ class LitDispatchMonitor:
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'site': dispatch.get('Job_Site'),
+            'street': dispatch.get('Job_Site_Street')
         }
 
         sms_data = lit_get_tech_2_hours_before_sms_tech(sms_data_payload)
@@ -1037,7 +1043,7 @@ class LitDispatchMonitor:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"- Watermark not found, ticket does not belong to us")
                         continue
-                    # TODO: check if we missed other notes?
+
                     if tech_on_site_note_found is None:
                         result_sms_tech_on_site_sended = await self._send_tech_on_site_sms(dispatch_number, ticket_id,
                                                                                            dispatch, sms_to)

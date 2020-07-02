@@ -1,4 +1,3 @@
-# TODO: add more fields - SLA / failure experiended / ...
 CTS_DISPATCH_REQUESTED = """#*Automation Engine*#
 Dispatch Management - Dispatch Requested
 

@@ -98,7 +98,7 @@ class CtsDispatchMonitor:
         # A confirmed dispatch must have status: 'Scheduled'
         # Confirmed__c set to True, API_Resource_Name__c and Resource_Phone_Number__c not None
         return all([dispatch is not None,
-                    dispatch.get('Confirmed__c') is True,
+                    # dispatch.get('Confirmed__c') is True,
                     dispatch.get('Status__c') in self.DISPATCH_CONFIRMED,
                     dispatch.get("API_Resource_Name__c") is not None,
                     dispatch.get("Resource_Phone_Number__c") is not None])
@@ -1008,7 +1008,7 @@ class CtsDispatchMonitor:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"- Watermark not found, ticket does not belong to us")
                         continue
-                    # TODO: check if we missed other notes?
+
                     if tech_on_site_note_found is None:
                         result_sms_tech_on_site_sended = await self._send_tech_on_site_sms(dispatch_number, ticket_id,
                                                                                            dispatch, sms_to)

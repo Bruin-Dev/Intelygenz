@@ -179,7 +179,6 @@ class DispatchServer:
             self._logger.error(error_message)
             error_response = {'code': HTTPStatus.BAD_REQUEST, 'message': ve.message}
             return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
-
         self._logger.info(f"[LIT] payload: {body}")
         dispatch_request = lit_mapper.map_create_dispatch(body)
         request_body = dict()
