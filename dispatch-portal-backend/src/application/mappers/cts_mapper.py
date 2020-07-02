@@ -28,7 +28,7 @@ def map_create_dispatch(body):
         "location_country": body['location_country'],
         "location_owner": body["job_site"],
         "location_address_1": body['job_site_street_1'],
-        "location_address_2": body['job_site_street_2'],
+        "location_address_2": body.get('job_site_street_2', ''),
         "city": body["job_site_city"],
         "state": body["job_site_state"],
         "zip": body["job_site_zip_code"],
