@@ -33,10 +33,12 @@ data "template_file" "automation-metrics-prometheus" {
     thanos_sidecar_GRPC_PORT = local.automation-metrics-thanos-sidecar-GRPC_PORT
     thanos_sidecar_HTTP_PORT = local.automation-metrics-thanos-sidecar-HTTP_PORT
     thanos_sidecar_objstore_config_file = local.automation-metrics-thanos-sidecar-objstore-config_file
+    thanos_sidecar_component_name = "sidecar"
     thanos_store_gateway_image = local.automation-metrics-thanos-store-gateway-image
     thanos_store_gateway_GRPC_PORT = local.automation-metrics-thanos-store-gateway-GRPC_PORT
     thanos_store_gateway_HTTP_PORT = local.automation-metrics-thanos-store-gateway-HTTP_PORT
     thanos_store_gateway_objstore_config_file = local.automation-metrics-thanos-store-gateway-config_file
+    thanos_store_gateway_component_name = "store-gateway"
     thanos_querier_image = local.automation-metrics-thanos-querier-image
     thanos_querier_GRPC_PORT = local.automation-metrics-thanos-querier-GRPC_PORT
     thanos_querier_HTTP_PORT = local.automation-metrics-thanos-querier-HTTP_PORT
@@ -50,6 +52,7 @@ data "template_file" "automation-metrics-prometheus" {
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT
     ENVIRONMENT_NAME = var.ENVIRONMENT_NAME
+    ENVIRONMENT = var.ENVIRONMENT
   }
 }
 

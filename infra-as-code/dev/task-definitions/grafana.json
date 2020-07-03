@@ -21,6 +21,7 @@
       {
         "name": "GF_SECURITY_ADMIN_PASSWORD",
         "value": "${GF_SECURITY_ADMIN_PASSWORD}"
-      }]
+      }
+    ]
   }
 ]

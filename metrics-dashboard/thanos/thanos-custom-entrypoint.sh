@@ -44,14 +44,14 @@ function start_store_gateway() {
 
 function check_conditions_thanos() {
     if [[ -z "${THANOS_COMPONENT}" ]]; then
-        s_err "It's necessary provide COMPONENT as environment variable"
+        s_err "It's necessary provide THANOS_COMPONENT as environment variable"
         exit 1
     elif [[ "$THANOS_COMPONENT" == "sidecar" ]]; then
         start_sidecar
     elif [[ "$THANOS_COMPONENT" == "store-gateway" ]]; then
         start_store_gateway
     else
-        s_err "COMPONENT not recognized, the only options available are sidecar or store-gateway"
+        s_err "THANOS_COMPONENT not recognized, the only options available are sidecar or store-gateway"
     fi
 }
 

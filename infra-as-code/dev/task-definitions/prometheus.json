@@ -96,6 +96,10 @@
       {
         "name": "thanos_sidecar_HTTP_PORT",
         "value": "${thanos_sidecar_HTTP_PORT}"
+      },
+      {
+        "name": "THANOS_COMPONENT",
+        "value": "${thanos_sidecar_component_name}"
       }
     ],
     "mountPoints": [
@@ -159,6 +163,10 @@
       {
         "name": "thanos_store_gateway_GRPC_PORT",
         "value": "${thanos_store_gateway_GRPC_PORT}"
+      },
+      {
+        "name": "THANOS_COMPONENT",
+        "value": "${thanos_store_gateway_component_name}"
       }
     ],
     "dependsOn": [
