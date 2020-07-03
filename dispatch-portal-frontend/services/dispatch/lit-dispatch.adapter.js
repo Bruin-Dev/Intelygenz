@@ -96,6 +96,7 @@ export const dispatchLitInAdapter = data => ({
   }
 });
 
+// Todo: trim in all fields
 export const dispatchLitOutAdapter = data => ({
   date_of_dispatch: data.dateDispatch,
   site_survey_quote_required: false,
@@ -103,7 +104,9 @@ export const dispatchLitOutAdapter = data => ({
   time_zone: data.timeZone,
   mettel_bruin_ticket_id: data.mettelId,
   job_site: data.owner,
-  job_site_street: `${data.address1} ${data.address2}`,
+  job_site_street: `${data.address1} ${
+    data.address2 && data.address2.trim() ? data.address2.trim() : ''
+  }`,
   job_site_city: data.city,
   job_site_state: data.state,
   job_site_zip_code: data.zip,

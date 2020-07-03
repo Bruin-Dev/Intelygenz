@@ -465,23 +465,13 @@ function NewDispatch({ authToken }) {
                 >
                   Address Line 2
                   <input
-                    className={
-                      errors.address2
-                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
-                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
-                    }
+                    className="appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1"
                     type="text"
                     name="address2"
                     data-testid="address2"
                     id="address2"
-                    ref={register({ required: true })}
                     placeholder="Clark"
                   />
-                  {errors.address2 && (
-                    <p className="text-red-500 text-xs italic">
-                      This field is required
-                    </p>
-                  )}
                 </label>
               </div>
 

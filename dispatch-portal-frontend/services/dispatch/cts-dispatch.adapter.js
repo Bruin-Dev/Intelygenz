@@ -93,33 +93,40 @@ export const dispatchCtsInAdapter = data => ({
   }
 });
 
-export const dispatchCtsOutAdapter = data => ({
-  date_of_dispatch: data.dateDispatch,
-  site_survey_quote_required: false,
-  time_of_dispatch: data.timeDispatch,
-  time_zone: data.timeZone,
-  mettel_bruin_ticket_id: data.mettelId,
-  job_site: data.owner,
-  job_site_street_1: data.address1,
-  job_site_street_2: data.address2,
-  job_site_city: data.city,
-  job_site_state: data.state,
-  job_site_zip_code: data.zip,
-  job_site_contact_name: data.firstName,
-  job_site_contact_lastname: data.lastName,
-  job_site_contact_number: data.phoneNumber,
-  materials_needed_for_dispatch: data.materials,
-  scope_of_work: data.issues,
-  mettel_tech_call_in_instructions: data.instructions,
-  name_of_mettel_requester: data.firstNameRequester,
-  lastname_of_mettel_requester: data.lastNameRequester,
-  mettel_department: data.department,
-  mettel_requester_email: data.emailRequester,
-  mettel_department_phone_number: data.phoneNumberRequester,
-  sla_level: data.slaLevel,
-  location_country: data.country,
-  service_type:
-    data.serviceType && data.serviceType.length
-      ? data.serviceType.join(' and ')
-      : ''
-});
+export const dispatchCtsOutAdapter = data => {
+  const dataAux = {
+    date_of_dispatch: data.dateDispatch,
+    site_survey_quote_required: false,
+    time_of_dispatch: data.timeDispatch,
+    time_zone: data.timeZone,
+    mettel_bruin_ticket_id: data.mettelId,
+    job_site: data.owner,
+    job_site_street_1: data.address1,
+    job_site_city: data.city,
+    job_site_state: data.state,
+    job_site_zip_code: data.zip,
+    job_site_contact_name: data.firstName,
+    job_site_contact_lastname: data.lastName,
+    job_site_contact_number: data.phoneNumber,
+    materials_needed_for_dispatch: data.materials,
+    scope_of_work: data.issues,
+    mettel_tech_call_in_instructions: data.instructions,
+    name_of_mettel_requester: data.firstNameRequester,
+    lastname_of_mettel_requester: data.lastNameRequester,
+    mettel_department: data.department,
+    mettel_requester_email: data.emailRequester,
+    mettel_department_phone_number: data.phoneNumberRequester,
+    sla_level: data.slaLevel,
+    location_country: data.country,
+    service_type:
+      data.serviceType && data.serviceType.length
+        ? data.serviceType.join(' and ')
+        : ''
+  };
+
+  if (data.address2 && data.address2.trim()) {
+    dataAux.job_site_street_2 = data.address2.trim();
+  }
+
+  return dataAux;
+};
