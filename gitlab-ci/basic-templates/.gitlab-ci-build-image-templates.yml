@@ -39,8 +39,8 @@
     - $(aws ecr get-login --no-include-email --region us-east-1)
   script:
     - source ci-utils/environments/environment_assign.sh
-    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/thanos/config/bucket_config.yaml
-    - cp metrics-dashboard/thanos/config/bucket_config.yaml metrics-dashboard/thanos/bucket_config.yaml
+    # - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/thanos/config/bucket_config.yaml
+    # - cp metrics-dashboard/thanos/config/bucket_config.yaml metrics-dashboard/thanos/bucket_config.yaml
     - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION} --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
     - python3 ci-utils/ecr/manage_ecr_docker_images.py -r automation-${REPOSITORY_NAME}
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest

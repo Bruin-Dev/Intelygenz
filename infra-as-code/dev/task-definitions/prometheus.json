@@ -72,18 +72,38 @@
       "startPeriod": 30,
       "timeout": 5
     },
+    "environment": [
+      {
+        "name": "ENVIRONMENT",
+        "value": "${ENVIRONMENT}"
+      },
+      {
+        "name": "prometheus_tsdb_path",
+        "value": "${prometheus_tsdb_path}"
+      },
+      {
+        "name": "prometheus_HTTP_PORT",
+        "value": "${prometheus_HTTP_PORT}"
+      },
+      {
+        "name": "thanos_sidecar_objstore_config_file",
+        "value": "${thanos_sidecar_objstore_config_file}"
+      },
+      {
+        "name": "thanos_sidecar_GRPC_PORT",
+        "value": "${thanos_sidecar_GRPC_PORT}"
+      },
+      {
+        "name": "thanos_sidecar_HTTP_PORT",
+        "value": "${thanos_sidecar_HTTP_PORT}"
+      }
+    ],
     "mountPoints": [
         {
           "sourceVolume": "${prometheus_storage_volume_name}",
           "containerPath": "${prometheus_storage_container_path}"
         }
     ],
-    "command": ["sidecar",
-                "--tsdb.path=${prometheus_tsdb_path}",
-                "--prometheus.url=http://localhost:${prometheus_HTTP_PORT}",
-                "--objstore.config-file=${thanos_sidecar_objstore_config_file}",
-                "--grpc-address=localhost:${thanos_sidecar_GRPC_PORT}",
-                "--http-address=localhost:${thanos_sidecar_HTTP_PORT}"],
     "dependsOn": [
       {
           "containerName": "metrics-prometheus",
@@ -123,11 +143,24 @@
       "startPeriod": 30,
       "timeout": 5
     },
-    "command": ["store",
-                "--data-dir=/thanos/store",
-                "--objstore.config-file=${thanos_store_gateway_objstore_config_file}",
-                "--http-address=localhost:${thanos_store_gateway_HTTP_PORT}",
-                "--grpc-address=localhost:${thanos_store_gateway_GRPC_PORT}"],
+   "environment": [
+      {
+        "name": "ENVIRONMENT",
+        "value": "${ENVIRONMENT}"
+      },
+      {
+        "name": "thanos_store_gateway_objstore_config_file",
+        "value": "${thanos_store_gateway_objstore_config_file}"
+      },
+      {
+        "name": "thanos_store_gateway_HTTP_PORT",
+        "value": "${thanos_store_gateway_HTTP_PORT}"
+      },
+      {
+        "name": "thanos_store_gateway_GRPC_PORT",
+        "value": "${thanos_store_gateway_GRPC_PORT}"
+      }
+    ],
     "dependsOn": [
       {
           "containerName": "metrics-prometheus",
