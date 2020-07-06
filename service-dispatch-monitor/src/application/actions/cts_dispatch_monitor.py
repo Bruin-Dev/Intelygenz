@@ -60,27 +60,6 @@ class CtsDispatchMonitor:
         self.TECH_2_HOURS_BEFORE_SMS_TECH_WATERMARK = 'Dispatch 2h prior reminder tech SMS'
         self.TECH_ON_SITE_SMS_WATERMARK = 'Dispatch tech on site SMS'
 
-        # Dispatch Statuses
-        self.DISPATCH_REQUESTED = 'Open'
-        self.DISPATCH_CONFIRMED = 'Scheduled'
-        self.DISPATCH_FIELD_ENGINEER_ON_SITE = 'On Site'
-        self.DISPATCH_REPAIR_COMPLETED = 'Completed'
-        self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL = 'Complete Pending Collateral'
-        self.DISPATCH_SUBMITTED_FOR_BILLING = 'Submitted for Billing'
-        self.DISPATCH_BILLED = 'Billed'
-        self.DISPATCH_ON_HOLD = 'On Hold'
-        self.DISPATCH_CANCELED = 'Canceled'
-        self.DISPATCH_RESCHEDULE = 'Reschedule'
-        self._dispatch_statuses = [
-            self.DISPATCH_REQUESTED,
-            self.DISPATCH_CONFIRMED,
-            self.DISPATCH_FIELD_ENGINEER_ON_SITE,
-            self.DISPATCH_REPAIR_COMPLETED,
-            self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL
-        ]
-
-        self.SITE_STATUS_REQUIRED_DISPATCH = "Requires Dispatch"
-
     async def start_monitoring_job(self, exec_on_start):
         self._logger.info('Scheduling Service Dispatch Monitor job for CTS...')
         next_run_time = undefined
@@ -93,33 +72,6 @@ class CtsDispatchMonitor:
                                 minutes=self._config.DISPATCH_MONITOR_CONFIG['jobs_intervals']['cts_dispatch_monitor'],
                                 next_run_time=next_run_time, replace_existing=False,
                                 id='_service_dispatch_monitor_cts_process')
-
-    def _is_dispatch_confirmed(self, dispatch):
-        # A confirmed dispatch must have status: 'Scheduled'
-        # Confirmed__c set to True, API_Resource_Name__c and Resource_Phone_Number__c not None
-        return all([dispatch is not None,
-                    # dispatch.get('Confirmed__c') is True,
-                    dispatch.get('Status__c') in self.DISPATCH_CONFIRMED,
-                    dispatch.get("API_Resource_Name__c") is not None,
-                    dispatch.get("Resource_Phone_Number__c") is not None])
-
-    def _is_tech_on_site(self, dispatch):
-        # Filter tech on site dispatches
-        # Dispatch Confirmed --> Field Engineer On Site:
-        # Status__c and Check_In_Date__c is not None
-        # Bruin Note:*#Automation Engine#*Dispatch Management - Field Engineer On Site<FE Name> has arrived
-        return all([dispatch is not None,
-                    dispatch.get('Status__c') == self.DISPATCH_FIELD_ENGINEER_ON_SITE,
-                    dispatch.get("Check_In_Date__c") is not None])
-
-    def _get_dispatches_splitted_by_status(self, dispatches):
-        dispatches_splitted_by_status = {}
-        for ds in self._dispatch_statuses:
-            dispatches_splitted_by_status[ds] = []
-        for dispatch in dispatches:
-            if dispatch.get('Status__c') in self._dispatch_statuses:
-                dispatches_splitted_by_status[dispatch.get('Status__c')].append(dispatch)
-        return dispatches_splitted_by_status
 
     async def _cts_dispatch_monitoring_process(self):
         try:
@@ -146,16 +98,15 @@ class CtsDispatchMonitor:
                 return
 
             cts_dispatches = response_cts_dispatches_body.get('records', [])
-
-            dispatches_splitted_by_status = self._get_dispatches_splitted_by_status(cts_dispatches)
+            dispatches_splitted_by_status = self._cts_repository.get_dispatches_splitted_by_status(cts_dispatches)
 
             self._logger.info(f"Splitted by status: {list(dispatches_splitted_by_status.keys())}")
 
             monitor_tasks = [
                 self._monitor_confirmed_dispatches(
-                    dispatches_splitted_by_status[self.DISPATCH_CONFIRMED]),
+                    dispatches_splitted_by_status[self._cts_repository.DISPATCH_CONFIRMED]),
                 self._monitor_tech_on_site_dispatches(
-                    dispatches_splitted_by_status[self.DISPATCH_FIELD_ENGINEER_ON_SITE])
+                    dispatches_splitted_by_status[self._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE])
             ]
 
             start_monitor_tasks = perf_counter()
@@ -604,7 +555,7 @@ class CtsDispatchMonitor:
         try:
             start = perf_counter()
             self._logger.info(f"Dispatches to process before filter {len(confirmed_dispatches)}")
-            confirmed_dispatches = list(filter(self._is_dispatch_confirmed, confirmed_dispatches))
+            confirmed_dispatches = list(filter(self._cts_repository.is_dispatch_confirmed, confirmed_dispatches))
             self._logger.info(f"Total confirmed dispatches after filter: {len(confirmed_dispatches)}")
 
             for dispatch in confirmed_dispatches:
@@ -923,7 +874,7 @@ class CtsDispatchMonitor:
         try:
             start = perf_counter()
             self._logger.info(f"Dispatches to process before filter {len(tech_on_site_dispatches)}")
-            tech_on_site_dispatches = list(filter(self._is_tech_on_site, tech_on_site_dispatches))
+            tech_on_site_dispatches = list(filter(self._cts_repository.is_tech_on_site, tech_on_site_dispatches))
             self._logger.info(f"Dispatches to process after filter {len(tech_on_site_dispatches)}")
 
             for dispatch in tech_on_site_dispatches:

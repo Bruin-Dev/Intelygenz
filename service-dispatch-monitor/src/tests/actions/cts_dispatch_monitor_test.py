@@ -97,30 +97,6 @@ class TestCtsDispatchMonitor:
             id='_service_dispatch_monitor_cts_process',
         )
 
-    def is_dispatch_confirmed_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_not_confirmed):
-        assert cts_dispatch_monitor._is_dispatch_confirmed(cts_dispatch_confirmed) is True
-        assert cts_dispatch_monitor._is_dispatch_confirmed(cts_dispatch_not_confirmed) is False
-
-    def is_tech_on_site_test(self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_not_on_site):
-        assert cts_dispatch_monitor._is_tech_on_site(cts_dispatch_tech_on_site) is True
-        assert cts_dispatch_monitor._is_tech_on_site(cts_dispatch_tech_not_on_site) is False
-
-    def get_dispatches_splitted_by_status_test(self, cts_dispatch_monitor, cts_dispatch, cts_dispatch_confirmed,
-                                               cts_dispatch_confirmed_2, cts_dispatch_tech_on_site,
-                                               cts_bad_status_dispatch):
-        dispatches = [
-            cts_dispatch, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            cts_dispatch_tech_on_site, cts_bad_status_dispatch
-        ]
-        expected_dispatches_splitted = {
-            str(cts_dispatch_monitor.DISPATCH_REQUESTED): [cts_dispatch],
-            str(cts_dispatch_monitor.DISPATCH_CONFIRMED): [cts_dispatch_confirmed, cts_dispatch_confirmed_2],
-            str(cts_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE): [cts_dispatch_tech_on_site],
-            str(cts_dispatch_monitor.DISPATCH_REPAIR_COMPLETED): [],
-            str(cts_dispatch_monitor.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL): []
-        }
-        assert cts_dispatch_monitor._get_dispatches_splitted_by_status(dispatches) == expected_dispatches_splitted
-
     @pytest.mark.asyncio
     async def cts_dispatch_monitoring_process_test(self, cts_dispatch_monitor, cts_dispatch, cts_dispatch_confirmed):
         dispatches = [cts_dispatch, cts_dispatch_confirmed]
@@ -132,14 +108,14 @@ class TestCtsDispatchMonitor:
             }
         }
         splitted_dispatches = {}
-        for ds in cts_dispatch_monitor._dispatch_statuses:
+        for ds in cts_dispatch_monitor._cts_repository._dispatch_statuses:
             splitted_dispatches[ds] = []
-        splitted_dispatches[str(cts_dispatch_monitor.DISPATCH_REQUESTED)] = [cts_dispatch]
-        splitted_dispatches[str(cts_dispatch_monitor.DISPATCH_CONFIRMED)] = [cts_dispatch_confirmed]
+        splitted_dispatches[str(cts_dispatch_monitor._cts_repository.DISPATCH_REQUESTED)] = [cts_dispatch]
+        splitted_dispatches[str(cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED)] = [cts_dispatch_confirmed]
 
         confirmed_dispatches = [cts_dispatch_confirmed]
         cts_dispatch_monitor._cts_repository.get_all_dispatches = CoroutineMock(return_value=dispatches_response)
-        cts_dispatch_monitor._get_dispatches_splitted_by_status = Mock(return_value=splitted_dispatches)
+        cts_dispatch_monitor._cts_repository.get_dispatches_splitted_by_status = Mock(return_value=splitted_dispatches)
         cts_dispatch_monitor._monitor_confirmed_dispatches = CoroutineMock()
 
         await cts_dispatch_monitor._cts_dispatch_monitoring_process()
@@ -153,11 +129,11 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_dispatch_monitoring_process = CoroutineMock(side_effect=Exception)
         cts_dispatch_monitor._monitor_confirmed_dispatches = CoroutineMock(side_effect=Exception)
         cts_dispatch_monitor._cts_repository.get_all_dispatches = CoroutineMock(side_effect=Exception)
-        cts_dispatch_monitor._get_dispatches_splitted_by_status = CoroutineMock()
+        cts_dispatch_monitor._cts_repository.get_dispatches_splitted_by_status = CoroutineMock()
         with pytest.raises(Exception):
             await cts_dispatch_monitor._cts_dispatch_monitoring_process()
             cts_dispatch_monitor._logger.error.assert_called_once()
-            cts_dispatch_monitor._get_dispatches_splitted_by_status.assert_not_awaited()
+            cts_dispatch_monitor._cts_repository.get_dispatches_splitted_by_status.assert_not_awaited()
             cts_dispatch_monitor._monitor_confirmed_dispatches.assert_not_awaited()
 
     @pytest.mark.asyncio

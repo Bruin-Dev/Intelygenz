@@ -20,19 +20,48 @@ from config import testconfig
 # - module
 # - session
 
+
 @pytest.fixture(scope='function')
-def lit_dispatch_monitor():
-    redis_client = Mock()
-    event_bus = Mock()
-    logger = Mock()
+def logger():
+    return Mock()
+
+
+@pytest.fixture(scope='function')
+def event_bus():
+    return Mock()
+
+
+@pytest.fixture(scope='function')
+def notifications_repository():
+    return Mock()
+
+
+@pytest.fixture(scope='function')
+def bruin_repository():
+    return Mock()
+
+
+@pytest.fixture(scope='function')
+def redis_client():
+    return Mock()
+
+
+@pytest.fixture(scope='function')
+def lit_repository(logger, event_bus, notifications_repository, bruin_repository):
+    config = testconfig
+    _lit_repository = LitRepository(logger, config, event_bus, notifications_repository, bruin_repository)
+    return _lit_repository
+
+
+@pytest.fixture(scope='function')
+def lit_dispatch_monitor(lit_repository, redis_client):
     scheduler = Mock()
     config = testconfig
-    lit_repository = Mock()
-    bruin_repository = Mock()
-    notifications_repository = Mock()
 
-    lit_dispatch_monitor = LitDispatchMonitor(config, redis_client, event_bus, scheduler, logger,
-                                              lit_repository, bruin_repository, notifications_repository)
+    lit_dispatch_monitor = LitDispatchMonitor(config, redis_client, lit_repository._event_bus,
+                                              scheduler, lit_repository._logger, lit_repository,
+                                              lit_repository._bruin_repository,
+                                              lit_repository._notifications_repository)
     return lit_dispatch_monitor
 
 
@@ -90,7 +119,7 @@ def dispatch_confirmed(lit_dispatch_monitor, dispatch):
     updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "Test Client on site +12123595129"
     updated_dispatch["Tech_First_Name"] = "Joe Malone"
     updated_dispatch["Tech_Mobile_Number"] = "+12123595129"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CONFIRMED
     updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Pacific Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "4PM-6PM"
     return updated_dispatch
@@ -104,7 +133,7 @@ def dispatch_confirmed_2(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
     updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CONFIRMED
     updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
     return updated_dispatch
@@ -118,7 +147,7 @@ def dispatch_confirmed_tech_phone_none(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_First_Name"] = "Joe Malone"
     updated_dispatch["Tech_Mobile_Number"] = None
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544803"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CONFIRMED
     updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Central Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "9:30AM-11:30AM"
     return updated_dispatch
@@ -131,7 +160,7 @@ def dispatch_confirmed_skipped(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
     updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544801|OTHER"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CONFIRMED
     updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
     return updated_dispatch
@@ -144,7 +173,7 @@ def dispatch_confirmed_skipped_datetime(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
     updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CONFIRMED
     updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "BAD TIME"
     return updated_dispatch
@@ -157,7 +186,7 @@ def dispatch_confirmed_skipped_bad_phone(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
     updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CONFIRMED
     updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
     updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "NOT VALID PHONE"
@@ -171,7 +200,7 @@ def dispatch_confirmed_skipped_bad_phone_tech(lit_dispatch_monitor, dispatch):
     updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
     updated_dispatch["Tech_Mobile_Number"] = "NOT VALID PHONE"
     updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CONFIRMED
     updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
     updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "Test Client on site +12123595126"
@@ -209,7 +238,7 @@ def dispatch_tech_on_site(lit_dispatch_monitor, dispatch_confirmed):
     updated_dispatch = copy.deepcopy(dispatch_confirmed)
     updated_dispatch["Tech_Arrived_On_Site"] = True
     updated_dispatch["Time_of_Check_In"] = "6"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
     return updated_dispatch
 
 
@@ -218,7 +247,7 @@ def dispatch_tech_on_site_2(lit_dispatch_monitor, dispatch_confirmed_2):
     updated_dispatch = copy.deepcopy(dispatch_confirmed_2)
     updated_dispatch["Tech_Arrived_On_Site"] = True
     updated_dispatch["Time_of_Check_In"] = "10:30"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
     return updated_dispatch
 
 
@@ -228,7 +257,7 @@ def dispatch_tech_on_site_bad_datetime(lit_dispatch_monitor, dispatch_confirmed_
     updated_dispatch["Hard_Time_of_Dispatch_Local"] = None
     updated_dispatch["Tech_Arrived_On_Site"] = True
     updated_dispatch["Time_of_Check_In"] = "10:30"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
     return updated_dispatch
 
 
@@ -263,24 +292,13 @@ def dispatch_tech_not_on_site(dispatch_confirmed):
 def dispatch_completed(lit_dispatch_monitor, dispatch_tech_on_site):
     updated_dispatch = copy.deepcopy(dispatch_tech_on_site)
     updated_dispatch["Time_of_Check_Out"] = "8"
-    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor.DISPATCH_REPAIR_COMPLETED
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_REPAIR_COMPLETED
     return updated_dispatch
 
 
 @pytest.fixture(scope='function')
 def dispatch_not_completed(dispatch_tech_on_site):
     return copy.deepcopy(dispatch_tech_on_site)
-
-
-@pytest.fixture(scope='function')
-def lit_repository():
-    event_bus = Mock()
-    logger = Mock()
-    config = testconfig
-    notifications_repository = Mock()
-
-    lit_repository = LitRepository(logger, config, event_bus, notifications_repository)
-    return lit_repository
 
 
 @pytest.fixture(scope='function')
@@ -742,31 +760,26 @@ def append_note_response_2(append_note_response):
 
 
 @pytest.fixture(scope='function')
-def cts_dispatch_monitor():
-    redis_client = Mock()
-    event_bus = Mock()
-    logger = Mock()
-    scheduler = Mock()
-    config = testconfig
-    cts_repository = Mock()
-    bruin_repository = Mock()
-    notifications_repository = Mock()
-
-    _cts_dispatch_monitor = CtsDispatchMonitor(config, redis_client, event_bus, scheduler, logger,
-                                               cts_repository, bruin_repository, notifications_repository)
-    return _cts_dispatch_monitor
-
-
-@pytest.fixture(scope='function')
-def cts_repository():
+def cts_repository(logger, event_bus, redis_client, notifications_repository):
     event_bus = Mock()
     logger = Mock()
     config = testconfig
-    notifications_repository = Mock()
     redis_client = Mock()
 
     cts_repository = CtsRepository(logger, config, event_bus, notifications_repository, redis_client)
     return cts_repository
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_monitor(cts_repository):
+    scheduler = Mock()
+    config = testconfig
+    bruin_repository = Mock()
+
+    _cts_dispatch_monitor = CtsDispatchMonitor(config, cts_repository._redis_client, cts_repository._event_bus,
+                                               scheduler, cts_repository._logger, cts_repository, bruin_repository,
+                                               cts_repository._notifications_repository)
+    return _cts_dispatch_monitor
 
 
 @pytest.fixture(scope='function')
@@ -848,7 +861,7 @@ def cts_dispatch_confirmed(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
     updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
     updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
     updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
     return updated_dispatch
@@ -859,7 +872,7 @@ def cts_dispatch_confirmed_bad_date(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
     updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
     updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
     updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
 
@@ -873,7 +886,7 @@ def cts_dispatch_confirmed_skipped(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
     updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
     updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
     updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
     updated_dispatch['Ext_Ref_Num__c'] = "3544801|OTHER"
@@ -886,7 +899,7 @@ def cts_dispatch_confirmed_skipped_datetime(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
     updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
     updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
     updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
 
@@ -900,7 +913,7 @@ def cts_dispatch_confirmed_skipped_bad_phone(cts_dispatch_monitor, cts_dispatch)
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
     updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
     updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
     updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
 
@@ -915,7 +928,7 @@ def cts_dispatch_confirmed_skipped_bad_phone_tech(cts_dispatch_monitor, cts_disp
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
     updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
     updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
     updated_dispatch['Resource_Phone_Number__c'] = 'NOT VALID PHONE'
 
@@ -927,7 +940,7 @@ def cts_dispatch_confirmed_no_contact(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
     updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
     updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
     updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
 
@@ -941,7 +954,7 @@ def cts_dispatch_confirmed_error_number(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
     updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
     updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
     updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
 
@@ -955,7 +968,7 @@ def cts_dispatch_confirmed_error_number(cts_dispatch_monitor, cts_dispatch):
 def cts_dispatch_confirmed_2(cts_dispatch_monitor, cts_dispatch_confirmed):
     updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
     updated_dispatch['Confirmed__c'] = True
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_CONFIRMED
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
     updated_dispatch['Name'] = 'S-12346'
     updated_dispatch['Ext_Ref_Num__c'] = '123456'
 
@@ -969,14 +982,14 @@ def cts_dispatch_confirmed_2(cts_dispatch_monitor, cts_dispatch_confirmed):
 def cts_dispatch_not_confirmed(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = False
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_REQUESTED
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_REQUESTED
     return updated_dispatch
 
 
 @pytest.fixture(scope='function')
 def cts_dispatch_tech_on_site(cts_dispatch_monitor, cts_dispatch_confirmed):
     updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
     updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
     return updated_dispatch
 
@@ -984,7 +997,7 @@ def cts_dispatch_tech_on_site(cts_dispatch_monitor, cts_dispatch_confirmed):
 @pytest.fixture(scope='function')
 def cts_dispatch_tech_on_site_2(cts_dispatch_monitor, cts_dispatch_confirmed_2):
     updated_dispatch = copy.deepcopy(cts_dispatch_confirmed_2)
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
     updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
     return updated_dispatch
 
@@ -992,7 +1005,7 @@ def cts_dispatch_tech_on_site_2(cts_dispatch_monitor, cts_dispatch_confirmed_2):
 @pytest.fixture(scope='function')
 def cts_dispatch_tech_on_site_bad_datetime(cts_dispatch_monitor, cts_dispatch_confirmed):
     updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
-    updated_dispatch['Status__c'] = cts_dispatch_monitor.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
     updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
     updated_dispatch['Local_Site_Time__c'] = None
     return updated_dispatch

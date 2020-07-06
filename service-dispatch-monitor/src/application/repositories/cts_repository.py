@@ -14,6 +14,25 @@ class CtsRepository:
         self._notifications_repository = notifications_repository
         self._redis_client = redis_client
 
+        # Dispatch Statuses
+        self.DISPATCH_REQUESTED = 'Open'
+        self.DISPATCH_CONFIRMED = 'Scheduled'
+        self.DISPATCH_FIELD_ENGINEER_ON_SITE = 'On Site'
+        self.DISPATCH_REPAIR_COMPLETED = 'Completed'
+        self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL = 'Complete Pending Collateral'
+        self.DISPATCH_SUBMITTED_FOR_BILLING = 'Submitted for Billing'
+        self.DISPATCH_BILLED = 'Billed'
+        self.DISPATCH_ON_HOLD = 'On Hold'
+        self.DISPATCH_CANCELED = 'Canceled'
+        self.DISPATCH_RESCHEDULE = 'Reschedule'
+        self._dispatch_statuses = [
+            self.DISPATCH_REQUESTED,
+            self.DISPATCH_CONFIRMED,
+            self.DISPATCH_FIELD_ENGINEER_ON_SITE,
+            self.DISPATCH_REPAIR_COMPLETED,
+            self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL
+        ]
+
     async def get_all_dispatches(self):
         err_msg = None
 
@@ -98,3 +117,30 @@ class CtsRepository:
             return phonenumbers.format_number(sms_to, phonenumbers.PhoneNumberFormat.E164)
         except NumberParseException:
             return None
+
+    def is_dispatch_confirmed(self, dispatch):
+        # A confirmed dispatch must have status: 'Scheduled'
+        # Confirmed__c set to True, API_Resource_Name__c and Resource_Phone_Number__c not None
+        return all([dispatch is not None,
+                    # dispatch.get('Confirmed__c') is True,
+                    dispatch.get('Status__c') in self.DISPATCH_CONFIRMED,
+                    dispatch.get("API_Resource_Name__c") is not None,
+                    dispatch.get("Resource_Phone_Number__c") is not None])
+
+    def is_tech_on_site(self, dispatch):
+        # Filter tech on site dispatches
+        # Dispatch Confirmed --> Field Engineer On Site:
+        # Status__c and Check_In_Date__c is not None
+        # Bruin Note:*#Automation Engine#*Dispatch Management - Field Engineer On Site<FE Name> has arrived
+        return all([dispatch is not None,
+                    dispatch.get('Status__c') == self.DISPATCH_FIELD_ENGINEER_ON_SITE,
+                    dispatch.get("Check_In_Date__c") is not None])
+
+    def get_dispatches_splitted_by_status(self, dispatches):
+        dispatches_splitted_by_status = {}
+        for ds in self._dispatch_statuses:
+            dispatches_splitted_by_status[ds] = []
+        for dispatch in dispatches:
+            if dispatch.get('Status__c') in self._dispatch_statuses:
+                dispatches_splitted_by_status[dispatch.get('Status__c')].append(dispatch)
+        return dispatches_splitted_by_status

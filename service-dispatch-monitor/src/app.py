@@ -39,10 +39,11 @@ class Container:
 
         self._event_bus.add_consumer(consumer=self._client2, consumer_name="consumer2")
         self._notifications_repository = NotificationsRepository(self._event_bus)
-        self._lit_repository = LitRepository(self._logger, config, self._event_bus, self._notifications_repository)
+        self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
+        self._lit_repository = LitRepository(self._logger, config, self._event_bus, self._notifications_repository,
+                                             self._bruin_repository)
         self._cts_repository = CtsRepository(self._logger, config, self._event_bus, self._notifications_repository,
                                              self._redis_client)
-        self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
         self._lit_monitor = LitDispatchMonitor(config, self._redis_client, self._event_bus, self._scheduler,
                                                self._logger, self._lit_repository, self._bruin_repository,
                                                self._notifications_repository)
