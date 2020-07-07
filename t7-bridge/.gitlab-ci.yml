@@ -4,6 +4,11 @@
 t7-bridge-linter:
   variables:
     MODULE: t7-bridge
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - t7-bridge/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .lint_module
 
 # ====================================
@@ -12,6 +17,11 @@ t7-bridge-linter:
 t7-bridge-test:
   variables:
     MODULE: t7-bridge
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - t7-bridge/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .unittest_module_python
 
 # =======================================
@@ -22,4 +32,9 @@ t7-bridge-build:
   variables:
     MODULE_NAME: t7-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - t7-bridge/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .build_app_image

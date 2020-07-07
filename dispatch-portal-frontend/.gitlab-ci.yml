@@ -4,6 +4,8 @@
 dispatch-portal-frontend-linter:
   stage: validation
   image: node:10
+  variables:
+    MODULE_NAME: dispatch-portal-frontend
   before_script:
     - npm install --prefix dispatch-portal-frontend
   script:
@@ -14,9 +16,10 @@ dispatch-portal-frontend-linter:
     paths:
       - dispatch-portal-frontend/node_modules
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
-    - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - dispatch-portal-frontend/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   tags:
     - kubernetes
 
@@ -26,6 +29,8 @@ dispatch-portal-frontend-linter:
 dispatch-portal-frontend-test:
   stage: unit_test
   image: node:10
+  variables:
+    MODULE_NAME: dispatch-portal-frontend
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   script:
     - npm run test --prefix dispatch-portal-frontend
@@ -35,9 +40,10 @@ dispatch-portal-frontend-test:
     paths:
       - dispatch-portal-frontend/node_modules
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
-    - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - dispatch-portal-frontend/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   dependencies:
     - dispatch-portal-frontend-linter
   tags:
@@ -48,15 +54,17 @@ dispatch-portal-frontend-test-e2e:
   image: cypress/base:10
   variables:
     CI: 1
+    MODULE_NAME: dispatch-portal-frontend
   before_script:
     - npm install --prefix dispatch-portal-frontend
     - npm run build --prefix dispatch-portal-frontend
   script:
     - npm run ci:test --prefix dispatch-portal-frontend
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/
-    - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - dispatch-portal-frontend/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   tags:
     - kubernetes
 
@@ -73,6 +81,11 @@ dispatch-portal-frontend-nextjs-build:
     - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - dispatch-portal-frontend/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .build_app_image
 
 dispatch-portal-frontend-nginx-build:
@@ -85,4 +98,9 @@ dispatch-portal-frontend-nginx-build:
     - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - dispatch-portal-frontend/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .build_app_image

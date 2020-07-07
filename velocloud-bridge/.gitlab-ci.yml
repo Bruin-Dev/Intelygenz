@@ -4,6 +4,11 @@
 velocloud-bridge-linter:
   variables:
     MODULE: velocloud-bridge
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - velocloud-bridge/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .lint_module
 
 # ===========================================
@@ -12,6 +17,11 @@ velocloud-bridge-linter:
 velocloud-bridge-test:
   variables:
     MODULE: velocloud-bridge
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - velocloud-bridge/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .unittest_module_python_alpine
 
 # ==============================================
@@ -22,4 +32,9 @@ velocloud-bridge-build:
   variables:
     MODULE_NAME: velocloud-bridge
     MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - velocloud-bridge/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .build_app_image

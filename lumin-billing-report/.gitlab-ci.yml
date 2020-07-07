@@ -4,6 +4,11 @@
 lumin-billing-report-linter:
   variables:
     MODULE: lumin-billing-report
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - lumin-billing-report/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .lint_module
 
 # ==============================================
@@ -16,6 +21,11 @@ lumin-billing-report-test:
     - cd ${MODULE}
     - pip install -r requirements.txt
     - pip install -r requirements_test.txt
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - lumin-billing-report/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .unittest_module_python
 
 # =================================================
@@ -26,4 +36,9 @@ lumin-billing-report-build:
   variables:
     MODULE_NAME: lumin-billing-report
     MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - lumin-billing-report/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
   extends: .build_app_image

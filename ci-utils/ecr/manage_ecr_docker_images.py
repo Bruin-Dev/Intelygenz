@@ -14,7 +14,6 @@ class EcrUtil:
     _client = boto3.client('ecr', region_name='us-east-1')
     _repositories_to_avoid = ['automation-python-3.6', 'automation-python-3.6-alpine']
     _production_tag = "automation-master"
-    _default_latest_image = 'automation-master-latest'
 
     @staticmethod
     def _write_to_json_file(filename, content):
@@ -53,8 +52,7 @@ class EcrUtil:
             total_images_to_delete += len(repository['images_to_delete'])
         return total_images_to_delete
 
-    def _get_ecr_images_to_delete_from_environment(self, environment, repositories_to_delete_images,
-                                                   image_tag_to_avoid):
+    def _get_ecr_images_to_delete_from_environment(self, environment, repositories_to_delete_images):
         docker_images_to_delete_in_repositories = []
         for repository in repositories_to_delete_images:
             images_to_delete_in_repository = []
@@ -97,8 +95,8 @@ class EcrUtil:
                 environments_deployed.append(environment['environment'])
         return environments_deployed
 
-    def _get_ecr_images_to_delete_from_environments_not_deployed(self, environments_file, repositories_to_delete_images,
-                                                                 image_tag_to_avoid):
+    def _get_ecr_images_to_delete_from_environments_not_deployed(self, environments_file,
+                                                                 repositories_to_delete_images):
         environments_deployed = self._get_environments_deployed_from_file(environments_file)
         logging.info(f'The environments actually deployed are the following: {", ".join(environments_deployed)}')
         if environments_deployed:
@@ -113,7 +111,7 @@ class EcrUtil:
                 while cont:
                     for image in docker_images['imageIds']:
                         image_tag = image.get('imageTag', None)
-                        if image_tag is not None and image_tag != image_tag_to_avoid:
+                        if image_tag is not None:
                             image_tag_environment = "-".join(image_tag.split("-")[0:2])
                             if image_tag_environment not in environments_deployed:
                                 images_to_delete_in_repository.append(image_tag)
@@ -139,7 +137,7 @@ class EcrUtil:
             logging.error("There isn't any environment deployed")
             exit(0)
 
-    def _obtain_oldest_images_of_repositories_from_environment(self, environment, ecr_repositories, image_tag_to_avoid):
+    def _obtain_oldest_images_of_repositories_from_environment(self, environment, ecr_repositories):
         logging.info(f'Obtaining oldest docker images of repositories {", ".join(ecr_repositories)} '
                      f'for environment {environment}')
         oldest_docker_images_in_repositories = []

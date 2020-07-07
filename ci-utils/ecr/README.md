@@ -1,35 +1,45 @@
 # ECR utils
 
-In this folder are stored a series of scripts implemented in bash and python used to manage the docker images stored in ECR.
+In this folder are stored a series of scripts implemented in python used to manage the docker images stored in ECR.
 
 **Table of content:**
 
-- [Script manage_ecr_docker_images](#manage_ecr_docker_images)
-  - [Description](#manage_ecr_docker_images_description)
-  - [Usage](#manage_ecr_docker_images_usage)
-- [Script assign_docker_images_build_numbers](#assign_docker_images_build_numbers)
-  - [Description](#assign_docker_images_build_numbers_description)
-  - [Usage](#assign_docker_images_build_numbers_usage)
+- [CLI manage_ecr_docker_images](#CLI-manage_ecr_docker_images)
+  - [Description](#description)
+  - [Usage](#usage)
 
-## Script manage_ecr_docker_images <a name="manage_ecr_docker_images"></a>
+## CLI manage_ecr_docker_images
 
-### Description <a name="manage_ecr_docker_images_description"></a>
+### Description
 
-This [script](./manage_ecr_docker_images_description.py) has been implemented in *Python*, it can be used for any of the following functions:
+This [command line tool](./manage_ecr_docker_images.py) has been implemented in *Python*, it can be used for any of the following functions:
 
-- Get the oldest image from an ECR repository provided as a parameter in a given environment. In case that repository has more than two images in the provided environment, it will perform the deletion of the oldest image according to the ECR upload date.
+- Get the most recent image from a repository or all repositories of the images used in the project for an environment
 
-- Obtain the most up-to-date image of all the ECR repositories used in the project by saving each one of them in a JSON file for each of the repositories with the following format
+- Delete all images in a repository or from all repositories in an environment. It is possible to delete only the oldest images, always leaving two images per repository in the environment.
 
-   ```bash
-   {
-       "tag": <ecr_repository_tag>
-   }
-   ```
+## Commands
 
-### Usage <a name="manage_ecr_docker_images_usage"></a>
+CLI supports a number of commands. These are explained below:
 
-In order to use this [script](./manage_ecr_docker_images_description.py) it is necessary to perform the following steps previously:
+- `-e`, `--environment`: String flag to indicate the name of the environment with which actions will be performed.
+  >It is necessary to provide a value for this flag.
+
+- `-g`, `--get`: Boolean flag to indicate that retrieval actions will be performed on the docker images from one or more repositories (Default value: *False*).
+
+- `-d`, `--delete`: Boolean flag to indicate that deletion actions will be performed on the docker images from one or more repositories (Default value: *False*).
+
+  > It is necessary to indicate the value *True* for one of the flags `-g/--get` or `-d/--delete`, otherwise the CLI will launch an execution error.
+
+- `-r`, `--repository`: String flag to indicate the name of the repository on which actions will be performed.
+
+- `a`, `--all_repositories`: Boolean flag to indicate whether actions will be taken on all docker image repositories or not (Default value: *False*).
+
+- `o`, `--oldest_images`: Boolean flag to indicate whether only the oldest images will be removed from the provided repositories. **Actions will only be deleted when there are more than two images for the repository, always leaving the two most recent images for each repository.** 
+
+### Usage
+
+In order to use this [CLI](./manage_ecr_docker_images.py) it is necessary to perform the following steps previously:
 
 - Define the AWS credentials, for this it is necessary to define the environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION` in the following way:
 
@@ -41,30 +51,37 @@ In order to use this [script](./manage_ecr_docker_images_description.py) it is n
 
     > The default AWS region used in the project is us-east-1
 
-- Declare the variable `ENVIRONMENT_VAR` with the value of the environment on which you it is going to to used in the following way:
+Once the AWS credentials have been configured, it is possible to use the script for the different actions:
 
+- Obtain the most recent Docker images of an environment, there are two possibilities:
+   - Get the latest images from a repository for an environment
+     ```sh
+     $ python3 manage_ecr_docker_images.py -e <environment_name> -g True -r <docker_repository_name>
+     ```
+
+   - Get the latest images from all repositories from an environment:
+     ```sh
+     $ python3 manage_ecr_docker_images.py -e <environment_name> -g True -a True
+     ```
+
+- Delete Docker images of an environment, there are four possibilities:
+
+  - Delete the oldest images from a repository for an environment In this case, images will always be deleted, keeping the two most recent ones.
     ```sh
-    $ export ENVIRONMENT_VAR=<environment_name>
+    $ python3 manage_ecr_docker_images.py -e <environment_name> -d True -o True -r <docker_repository_name>
     ```
 
-    >It is important to remember that the names for environments are `automation-master` for production, as well as `automation-<branch_identifier>` for ephemeral environments, being `branch_identifier` the result of applying `echo -n "<branch_name>" | sha256sum | cut -c1-8` on the branch name related to the ephemeral environment.
-
-Once the previous steps have been carried out, it is possible to use this [script](./check_ecs_resources.py) as shown below:
-
-- To get the oldest image from a particular repository, provide the name of the repository using the -t option, as follows:
-
+  - Delete the oldest images from all repositories for an environment In this case, images will always be deleted, keeping the two most recent ones.
     ```sh
-    $ python3 ci-utils/ecr/manage_ecr_docker_images.py -r <ecr_repository_name>
+    $ python3 manage_ecr_docker_images.py -e <environment_name> -d True -o True -a True
     ```
 
-    >The nomenclature of the images in the project is `automation-<microservice_name>`
+  - Delete all the images from a repository for an environment:
+    ```sh
+    $ python3 manage_ecr_docker_images.py -e <environment_name> -d True -r <docker_repository_name>
+    ```
 
-- To obtain the most up-to-date image for the environment provided in each of the repositories, simply indicate the -g option, as shown below:
-
-   ```sh
-   $ python3 ci-utils/ecr/manage_ecr_docker_images.py -g
-   ```
-  
- ## Script manage_ecr_docker_images <a name="assign_docker_images_build_numbers"></a>
- 
- 
+  - Delete all the images from all repositories from an environment:
+    ```sh
+    $ python3 manage_ecr_docker_images.py -e <environment_name> -d True -a True
+    ```

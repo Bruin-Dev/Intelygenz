@@ -159,8 +159,8 @@ class AWSNukeConfigurationGenerator:
     def _generate_rule_aws_nuke_equal_to_value(self, resource_name, environment_name):
         return {resource_name: self._create_dict_entry_aws_nuke_value_invert(environment_name)}
 
-    def _generate_rule_aws_nuke_regex_list_split_by_char(self, resource_name, l, split_char):
-        return {resource_name: self._create_dict_entry_aws_nuke_regex_list_split_by_char(l, split_char)}
+    def _generate_rule_aws_nuke_regex_list_split_by_char(self, resource_name, l_arg, split_char):
+        return {resource_name: self._create_dict_entry_aws_nuke_regex_list_split_by_char(l_arg, split_char)}
 
     def _generate_rule_aws_nuke_property_contains(self, resource_name, prop, value):
         return {resource_name: self._create_dict_entry_aws_nuke_property_contains(prop, value)}
@@ -173,8 +173,8 @@ class AWSNukeConfigurationGenerator:
         return [{'value': value, 'invert': True}]
 
     @staticmethod
-    def _create_dict_entry_aws_nuke_regex_list_split_by_char(l, split_char):
-        return [{'type': 'regex', 'value': split_char.join(l), 'invert': True}]
+    def _create_dict_entry_aws_nuke_regex_list_split_by_char(l_arg, split_char):
+        return [{'type': 'regex', 'value': split_char.join(l_arg), 'invert': True}]
 
     @staticmethod
     def _create_dict_entry_aws_nuke_property(prop, v):
@@ -204,10 +204,10 @@ class AWSNukeConfigurationGenerator:
         return [{'type': 'regex', 'value': dict_entry_list, 'invert': True}]
 
     @staticmethod
-    def _add_aws_entries_rule_to_config(l):
+    def _add_aws_entries_rule_to_config(l_arg):
         with open(_config_template) as file:
             config_yaml_file = yaml.load(file, Loader=yaml.FullLoader)
-        for element in l:
+        for element in l_arg:
             for k, v in element.items():
                 config_yaml_file['accounts']['374050862540']['filters'][k] = v
         with open(_config_file, 'w') as file:

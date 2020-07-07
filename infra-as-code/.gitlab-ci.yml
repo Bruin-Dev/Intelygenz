@@ -8,8 +8,10 @@ terraform-validate-basic-infra:
     - terraform init infra-as-code/basic-infra
     - terraform validate infra-as-code/basic-infra
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - infra-as-code/basic-infra/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
 
 terraform-validate-network-resources:
   stage: validation
@@ -21,8 +23,10 @@ terraform-validate-network-resources:
     - terraform init infra-as-code/network-resources
     - terraform validate infra-as-code/network-resources
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - infra-as-code/network-resources/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
 
 terraform-validate-dev:
   stage: validation
@@ -37,8 +41,10 @@ terraform-validate-dev:
     - terraform init infra-as-code/dev
     - terraform validate infra-as-code/dev
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - infra-as-code/dev/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
 
 # ==================================================
 # Terraform deployment jobs for infra-as-code module
@@ -50,8 +56,7 @@ basic-infra:
     - terraform init infra-as-code/basic-infra
     - terraform apply -auto-approve infra-as-code/basic-infra
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
 
 network-resources-infra-branches:
   stage: basic_infra
