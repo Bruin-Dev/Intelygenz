@@ -48,8 +48,8 @@
     - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER=${VELOCLOUD_HOST_3_FILTER}
     - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS=${VELOCLOUD_HOST_4}
     - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER=${VELOCLOUD_HOST_4_FILTER}
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -g
-    - source ci-utils/ecr/assign_docker_images_build_numbers.sh
+    - pip3 install -r ci-utils/ecr/requirements.txt
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -g True -a True -e ${TF_VAR_ENVIRONMENT} -p True
     - envsubst < infra-as-code/dev/init.tf > temp.tf
     - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
     - envsubst < infra-as-code/dev/references.tf > temp_references_dev.tf

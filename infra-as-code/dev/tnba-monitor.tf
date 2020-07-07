@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-tnba-monitor" {
   name = "automation-tnba-monitor"
 }
 
+data "external" "tnba-monitor-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-tnba-monitor.name
+  ]
+}
+
 data "template_file" "automation-tnba-monitor" {
   template = file("${path.module}/task-definitions/tnba_monitor.json")
 

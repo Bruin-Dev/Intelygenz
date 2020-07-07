@@ -70,7 +70,7 @@ dispatch-portal-frontend-nextjs-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   script:
     - docker build --build-arg CURRENT_ENV="PRO" --build-arg DNS_ENVIRONMENT=${DNS_ENVIRONMENT_VAR} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   extends: .build_app_image
@@ -82,7 +82,7 @@ dispatch-portal-frontend-nginx-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   script:
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   extends: .build_app_image

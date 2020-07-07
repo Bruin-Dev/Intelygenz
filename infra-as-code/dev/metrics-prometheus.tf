@@ -2,20 +2,60 @@ data "aws_ecr_repository" "automation-metrics-prometheus" {
   name = "automation-metrics-dashboard/prometheus"
 }
 
+data "external" "prometheus-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-metrics-prometheus.name
+  ]
+}
+
 data "aws_ecr_repository" "automation-metrics-thanos-sidecar" {
   name = "automation-metrics-dashboard/thanos"
+}
+
+data "external" "thanos-sidecar-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-metrics-thanos-sidecar.name
+  ]
 }
 
 data "aws_ecr_repository" "automation-metrics-thanos-querier" {
   name = "automation-metrics-dashboard/thanos-querier"
 }
 
-data "aws_ecr_repository" "automation-metrics-grafana" {
-  name = "automation-metrics-dashboard/grafana"
+data "external" "thanos-querier-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-metrics-thanos-querier.name
+  ]
 }
 
 data "aws_ecr_repository" "automation-metrics-thanos-store-gateway" {
   name = "automation-metrics-dashboard/thanos-store-gateway"
+}
+
+data "external" "thanos-store-gateway-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-metrics-thanos-store-gateway.name
+  ]
+}
+
+data "aws_ecr_repository" "automation-metrics-grafana" {
+  name = "automation-metrics-dashboard/grafana"
+}
+
+data "external" "grafana-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-metrics-grafana.name
+  ]
 }
 
 data "template_file" "automation-metrics-prometheus" {

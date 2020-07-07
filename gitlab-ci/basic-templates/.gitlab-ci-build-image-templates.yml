@@ -12,17 +12,16 @@
   before_script:
     - source ci-utils/environments/environment_assign.sh
     - $(aws ecr get-login --no-include-email --region us-east-1)
+    - pip3 install -r ci-utils/ecr/requirements.txt
   script:
     - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION} --build-arg REPOSITORY_URL=${REPOSITORY_URL} -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   after_script:
     - source ci-utils/environments/environment_assign.sh
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker rmi ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   tags:
     - kubernetes
 
@@ -37,19 +36,16 @@
   before_script:
     - source ci-utils/environments/environment_assign.sh
     - $(aws ecr get-login --no-include-email --region us-east-1)
+    - pip3 install -r ci-utils/ecr/requirements.txt
   script:
     - source ci-utils/environments/environment_assign.sh
-    # - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/thanos/config/bucket_config.yaml
-    # - cp metrics-dashboard/thanos/config/bucket_config.yaml metrics-dashboard/thanos/bucket_config.yaml
     - docker build --build-arg DOCKER_BASE_IMAGE_VERSION=${DOCKER_BASE_IMAGE_VERSION} --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -r automation-${REPOSITORY_NAME}
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${REPOSITORY_NAME} -p True
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   after_script:
     - source ci-utils/environments/environment_assign.sh
     - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   tags:
     - kubernetes

@@ -19,8 +19,8 @@ locals {
   redis-hostname = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
 
   // bruin-brige local vars
-  automation-bruin-bridge-image = "${data.aws_ecr_repository.automation-bruin-bridge.repository_url}:${var.BRUIN_BRIDGE_BUILD_NUMBER}"
-  automation-bruin-bridge-papertrail_prefix = "bruin-bridge-${element(split("-", var.BRUIN_BRIDGE_BUILD_NUMBER),2)}"
+  automation-bruin-bridge-image = "${data.aws_ecr_repository.automation-bruin-bridge.repository_url}:${data.external.bruin-bridge-build_number.result["image_tag"]}"
+  automation-bruin-bridge-papertrail_prefix = "bruin-bridge-${element(split("-", data.external.bruin-bridge-build_number.result["image_tag"]),2)}"
   automation-bruin-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-bruin-bridge"
   automation-bruin-bridge_service-security_group-name = "${var.ENVIRONMENT}-bruin-bridge"
   automation-bruin-bridge-resource-name = "${var.ENVIRONMENT}-bruin-bridge"
@@ -29,8 +29,8 @@ locals {
   automation-bruin-bridge-service_discovery_service-name = "bruin-bridge-${var.ENVIRONMENT}"
 
   // cts-brige local vars
-  automation-cts-bridge-image = "${data.aws_ecr_repository.automation-cts-bridge.repository_url}:${var.CTS_BRIDGE_BUILD_NUMBER}"
-  automation-cts-bridge-papertrail_prefix = "cts-bridge-${element(split("-", var.CTS_BRIDGE_BUILD_NUMBER),2)}"
+  automation-cts-bridge-image = "${data.aws_ecr_repository.automation-cts-bridge.repository_url}:${data.external.cts-bridge-build_number.result["image_tag"]}"
+  automation-cts-bridge-papertrail_prefix = "cts-bridge-${element(split("-", data.external.cts-bridge-build_number.result["image_tag"]),2)}"
   automation-cts-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-cts-bridge"
   automation-cts-bridge_service-security_group-name = "${var.ENVIRONMENT}-cts-bridge"
   automation-cts-bridge-resource-name = "${var.ENVIRONMENT}-cts-bridge"
@@ -40,8 +40,8 @@ locals {
 
   // automation-dispatch-portal-backend local vars
   automation-dispatch-portal-backend-ecs_task_definition-family = "${var.ENVIRONMENT}-dispatch-portal-backend"
-  automation-dispatch-portal-backend-image = "${data.aws_ecr_repository.automation-dispatch-portal-backend.repository_url}:${var.DISPATCH_PORTAL_BACKEND_BUILD_NUMBER}"
-  automation-dispatch-portal-backend-papertrail_prefix = "dispatch-portal-backend-${element(split("-", var.DISPATCH_PORTAL_BACKEND_BUILD_NUMBER),2)}"
+  automation-dispatch-portal-backend-image = "${data.aws_ecr_repository.automation-dispatch-portal-backend.repository_url}:${data.external.dispatch-portal-backend-build_number.result["image_tag"]}"
+  automation-dispatch-portal-backend-papertrail_prefix = "dispatch-portal-backend-${element(split("-", data.external.dispatch-portal-backend-build_number.result["image_tag"]),2)}"
   automation-dispatch-portal-backend-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-backend"
   automation-dispatch-portal-backend-service-security_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal-backend"
   automation-dispatch-portal-backend-resource-name = "${var.ENVIRONMENT}-dispatch-portal-backend"
@@ -49,8 +49,8 @@ locals {
   automation-dispatch-portal-backend-service_discovery_service-name = "dispatch-portal-backend-${var.ENVIRONMENT}"
 
   // automation-dispatch-portal-frontend local vars
-  automation-dispatch-portal-frontend-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nextjs.repository_url}:${var.DISPATCH_PORTAL_FRONTEND_BUILD_NUMBER}"
-  automation-dispatch-portal-frontend-nginx-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nginx.repository_url}:${var.DISPATCH_PORTAL_FRONTEND_NGINX_BUILD_NUMBER}"
+  automation-dispatch-portal-frontend-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nextjs.repository_url}:${data.external.dispatch-portal-frontend-nextjs-build_number.result["image_tag"]}"
+  automation-dispatch-portal-frontend-nginx-image = "${data.aws_ecr_repository.automation-dispatch-portal-frontend-nginx.repository_url}:${data.external.dispatch-portal-frontend-nginx-build_number.result["image_tag"]}"
   automation-dispatch-portal-service-security_group-name = "${var.ENVIRONMENT}-dispatch-portal-frontend"
   automation-dispatch-portal-frontend-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   automation-dispatch-portal-frontend-ecs_task_definition-family = "${var.ENVIRONMENT}-dispatch-portal-frontend"
@@ -66,8 +66,8 @@ locals {
 
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"
-  automation-last-contact-report-image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${var.LAST_CONTACT_REPORT_BUILD_NUMBER}"
-  automation-last-contact-report-papertrail_prefix = "last-contact-report-${element(split("-", var.LAST_CONTACT_REPORT_BUILD_NUMBER),2)}"
+  automation-last-contact-report-image = "${data.aws_ecr_repository.automation-last-contact-report.repository_url}:${data.external.dispatch-portal-backend-build_number.result["image_tag"]}"
+  automation-last-contact-report-papertrail_prefix = "last-contact-report-${element(split("-", data.external.dispatch-portal-backend-build_number.result["image_tag"]),2)}"
   automation-last-contact-report-service-security_group-name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-service-security_group-tag-Name = "${var.ENVIRONMENT}-last-contact-report"
   automation-last-contact-report-resource-name = "${var.ENVIRONMENT}-last-contact-report"
@@ -75,8 +75,8 @@ locals {
   automation-last-contact-service_discovery_service-name = "last-contact-report-${var.ENVIRONMENT}"
 
   // lit-brige local vars
-  automation-lit-bridge-image = "${data.aws_ecr_repository.automation-lit-bridge.repository_url}:${var.LIT_BRIDGE_BUILD_NUMBER}"
-  automation-lit-bridge-papertrail_prefix = "lit-bridge-${element(split("-", var.LIT_BRIDGE_BUILD_NUMBER),2)}"
+  automation-lit-bridge-image = "${data.aws_ecr_repository.automation-lit-bridge.repository_url}:${data.external.lit-bridge-build_number.result["image_tag"]}"
+  automation-lit-bridge-papertrail_prefix = "lit-bridge-${element(split("-", data.external.lit-bridge-build_number.result["image_tag"]),2)}"
   automation-lit-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-lit-bridge"
   automation-lit-bridge_service-security_group-name = "${var.ENVIRONMENT}-lit-bridge"
   automation-lit-bridge-resource-name = "${var.ENVIRONMENT}-lit-bridge"
@@ -86,22 +86,22 @@ locals {
 
   // automation-lumin-billing-report local vars
   automation-lumin-billing-report-ecs_task_definition-family = "${var.ENVIRONMENT}-lumin-billing-report"
-  automation-lumin-billing-report-image = "${data.aws_ecr_repository.automation-lumin-billing-report.repository_url}:${var.LUMIN_BILLING_REPORT_BUILD_NUMBER}"
+  automation-lumin-billing-report-image = "${data.aws_ecr_repository.automation-lumin-billing-report.repository_url}:${data.external.lumin-billing-report-build_number.result["image_tag"]}"
   automation-lumin-billing-report-service-security_group-name = "${var.ENVIRONMENT}-lumin-billing-report"
   automation-lumin-billing-report-service-security_group-tag-Name = "${var.ENVIRONMENT}-lumin-billing-report"
   automation-lumin-billing-report-resource-name = "${var.ENVIRONMENT}-lumin-billing-report"
   automation-lumin-billing-report-task_definition = "${aws_ecs_task_definition.automation-lumin-billing-report.family}:${aws_ecs_task_definition.automation-lumin-billing-report.revision}"
   automation-lumin-billing-report-service_discovery_service-name = "lumin-billing-report-${var.ENVIRONMENT}"
-  automation-lumin-billing-report-papertrail_prefix = "lumin-billing-report-${element(split("-", var.LIT_BRIDGE_BUILD_NUMBER),2)}"
+  automation-lumin-billing-report-papertrail_prefix = "lumin-billing-report-${element(split("-", data.external.lumin-billing-report-build_number.result["image_tag"]),2)}"
 
   // automation-metrics-grafana local vars
-  automation-metrics-grafana-image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${var.GRAFANA_BUILD_NUMBER}"
-  automation-grafana-papertrail_prefix = "grafana-${element(split("-", var.GRAFANA_BUILD_NUMBER),2)}"
+  automation-metrics-grafana-image = "${data.aws_ecr_repository.automation-metrics-grafana.repository_url}:${data.external.grafana-build_number.result["image_tag"]}"
+  automation-grafana-papertrail_prefix = "grafana-${element(split("-", data.external.grafana-build_number.result["image_tag"]),2)}"
   automation-metrics-grafana-target_group-name = "${var.ENVIRONMENT}-mts-grafana"
   automation-metrics-grafana-target_group-tag-Name = "${var.ENVIRONMENT}-metrics-grafana"
 
   // automation-metrics-prometheus local vars
-  automation-metrics-prometheus-image = "${data.aws_ecr_repository.automation-metrics-prometheus.repository_url}:${var.PROMETHEUS_BUILD_NUMBER}"
+  automation-metrics-prometheus-image = "${data.aws_ecr_repository.automation-metrics-prometheus.repository_url}:${data.external.prometheus-build_number.result["image_tag"]}"
   automation-metrics-prometheus-ecs_task_definition-family = "${var.ENVIRONMENT}-metrics-prometheus"
   automation-metrics-prometheus-service-security_group-name = "${var.ENVIRONMENT}-metrics-prometheus"
   automation-metrics-prometheus-service-security_group-tag-Name = "${var.ENVIRONMENT}-metrics-prometheus"
@@ -119,24 +119,24 @@ locals {
   automation-metrics-prometheus-s3-storage-tag-Name = "${var.ENVIRONMENT}-metrics-prometheus-storage"
 
   // automation-metrics-thanos-sidecar local vars
-  automation-metrics-thanos-sidecar-image = "${data.aws_ecr_repository.automation-metrics-thanos-sidecar.repository_url}:${var.THANOS_BUILD_NUMBER}"
+  automation-metrics-thanos-sidecar-image = "${data.aws_ecr_repository.automation-metrics-thanos-sidecar.repository_url}:${data.external.thanos-sidecar-build_number.result["image_tag"]}"
   automation-metrics-thanos-sidecar-GRPC_PORT = 10091
   automation-metrics-thanos-sidecar-HTTP_PORT = 10902
   automation-metrics-thanos-sidecar-objstore-config_file = "/tmp/bucket_config.yaml"
 
   // automation-metrics-thanos-store-gateway local vars
-  automation-metrics-thanos-store-gateway-image = "${data.aws_ecr_repository.automation-metrics-thanos-store-gateway.repository_url}:${var.THANOS_STORE_GATEWAY_BUILD_NUMBER}"
+  automation-metrics-thanos-store-gateway-image = "${data.aws_ecr_repository.automation-metrics-thanos-store-gateway.repository_url}:${data.external.thanos-store-gateway-build_number.result["image_tag"]}"
   automation-metrics-thanos-store-gateway-GRPC_PORT = 10901
   automation-metrics-thanos-store-gateway-HTTP_PORT = 19191
   automation-metrics-thanos-store-gateway-config_file = "/tmp/bucket_config.yaml"
 
   // automation-metrics-thanos-querier local vars
-  automation-metrics-thanos-querier-image = "${data.aws_ecr_repository.automation-metrics-thanos-querier.repository_url}:${var.THANOS_QUERIER_BUILD_NUMBER}"
+  automation-metrics-thanos-querier-image = "${data.aws_ecr_repository.automation-metrics-thanos-querier.repository_url}:${data.external.thanos-querier-build_number.result["image_tag"]}"
   automation-metrics-thanos-querier-GRPC_PORT = 10999
   automation-metrics-thanos-querier-HTTP_PORT = 19091
 
   // automation-nats-server local vars
-  automation-nats-server-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
+  automation-nats-server-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${data.external.nats-server-build_number.result["image_tag"]}"
   automation-nats-server-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server"
   automation-nats-server-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server"
@@ -146,7 +146,7 @@ locals {
   automation-nats-server-task_definition_template-natscluster = "nats://0.0.0.0:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
 
   // automation-nats-server-1 local vars
-  automation-nats-server-1-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
+  automation-nats-server-1-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${data.external.nats-server-build_number.result["image_tag"]}"
   automation-nats-server-1-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-1"
   automation-nats-server-1-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-1"
   automation-nats-server-1-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-1"
@@ -157,7 +157,7 @@ locals {
   automation-nats-server-1-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
 
   // automation-nats-server-2 local vars
-  automation-nats-server-2-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${var.NATS_SERVER_BUILD_NUMBER}"
+  automation-nats-server-2-image = "${data.aws_ecr_repository.automation-nats-server.repository_url}:${data.external.nats-server-build_number.result["image_tag"]}"
   automation-nats-server-2-ecs_task_definition-family = "${var.ENVIRONMENT}-nats-server-2"
   automation-nats-server-2-nats_service-security_group-name = "${var.ENVIRONMENT}-nats-server-2"
   automation-nats-server-2-nats_service-security_group-tag-Name = "${var.ENVIRONMENT}-nats-server-2"
@@ -168,8 +168,8 @@ locals {
   automation-nats-server-2-task_definition_template-natsroutecluster = "nats://nats-server-${var.ENVIRONMENT}.${var.ENVIRONMENT}.local:${var.NATS_SERVER_SEED_CLUSTER_PORT}"
 
   // automation-notifier local vars
-  automation-notifier-image = "${data.aws_ecr_repository.automation-notifier.repository_url}:${var.NOTIFIER_BUILD_NUMBER}"
-  automation-notifier-papertrail_prefix = "notifier-${element(split("-", var.NOTIFIER_BUILD_NUMBER),2)}"
+  automation-notifier-image = "${data.aws_ecr_repository.automation-notifier.repository_url}:${data.external.notifier-build_number.result["image_tag"]}"
+  automation-notifier-papertrail_prefix = "notifier-${element(split("-", data.external.notifier-build_number.result["image_tag"]),2)}"
   automation-notifier-ecs_task_definition-family = "${var.ENVIRONMENT}-notifier"
   automation-notifier-service-security_group-name = "${var.ENVIRONMENT}-notifier"
   automation-notifier-service-security_group-tag-Name = "${var.ENVIRONMENT}-notifier"
@@ -177,8 +177,8 @@ locals {
   automation-notifier-ecs_service-task_definition = "${aws_ecs_task_definition.automation-notifier.family}:${aws_ecs_task_definition.automation-notifier.revision}"
 
   // automation-service-affecting-monitor local vars
-  automation-service-affecting-monitor-image = "${data.aws_ecr_repository.automation-service-affecting-monitor.repository_url}:${var.SERVICE_AFFECTING_MONITOR_BUILD_NUMBER}"
-  automation-service-affecting-monitor-papertrail_prefix = "service-affecting-monitor-${element(split("-", var.SERVICE_AFFECTING_MONITOR_BUILD_NUMBER),2)}"
+  automation-service-affecting-monitor-image = "${data.aws_ecr_repository.automation-service-affecting-monitor.repository_url}:${data.external.service-affecting-monitor-build_number.result["image_tag"]}"
+  automation-service-affecting-monitor-papertrail_prefix = "service-affecting-monitor-${element(split("-", data.external.service-affecting-monitor-build_number.result["image_tag"]),2)}"
   automation-service-affecting-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-service-affecting-monitor"
   automation-service-affecting-monitor-service-security_group-name = "${var.ENVIRONMENT}-service-affecting-monitor"
   automation-service-affecting-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-affecting-monitor"
@@ -188,21 +188,21 @@ locals {
 
   // automation-service-dispatch-monitor local vars
   automation-service-dispatch-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-service-dispatch-monitor"
-  automation-service-dispatch-monitor-image = "${data.aws_ecr_repository.automation-service-dispatch-monitor.repository_url}:${var.SERVICE_DISPATCH_MONITOR_BUILD_NUMBER}"
+  automation-service-dispatch-monitor-image = "${data.aws_ecr_repository.automation-service-dispatch-monitor.repository_url}:${data.external.service-dispatch-monitor-build_number.result["image_tag"]}"
   automation-service-dispatch-monitor-service-security_group-name = "${var.ENVIRONMENT}-service-dispatch-monitor"
   automation-service-dispatch-monitor-service-security_group-tag-Name = "${var.ENVIRONMENT}-service-dispatch-monitor"
   automation-service-dispatch-monitor-resource-name = "${var.ENVIRONMENT}-service-dispatch-monitor"
   automation-service-dispatch-monitor-task_definition = "${aws_ecs_task_definition.automation-service-dispatch-monitor.family}:${aws_ecs_task_definition.automation-service-dispatch-monitor.revision}"
   automation-service-dispatch-monitor-service_discovery_service-name = "service-dispatch-monitor-${var.ENVIRONMENT}"
-  automation-service-dispatch-monitor-papertrail_prefix = "service-dispatch-monitor-${element(split("-", var.SERVICE_DISPATCH_MONITOR_BUILD_NUMBER),2)}"
+  automation-service-dispatch-monitor-papertrail_prefix = "service-dispatch-monitor-${element(split("-", data.external.service-dispatch-monitor-build_number.result["image_tag"]),2)}"
 
   // automation-service-outage-monitor local vars (for all service-outage-monitor services)
-  automation-service-outage-monitor-image = "${data.aws_ecr_repository.automation-service-outage-monitor.repository_url}:${var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER}"
+  automation-service-outage-monitor-image = "${data.aws_ecr_repository.automation-service-outage-monitor.repository_url}:${data.external.service-outage-monitor-build_number.result["image_tag"]}"
   automation-service-outage-monitor-velocloud_hosts_triage = ""
   automation-service-outage-monitor-velocloud_hosts_filter = "[]"
 
   // automation-service-outage-monitor-1 local vars
-  automation-service-outage-monitor-1-papertrail_prefix = "service-outage-monitor-1-${element(split("-", var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER),2)}"
+  automation-service-outage-monitor-1-papertrail_prefix = "service-outage-monitor-1-${element(split("-", data.external.service-outage-monitor-build_number.result["image_tag"]),2)}"
   automation-service-outage-monitor-1-container_name = "service-outage-monitor-1"
   automation-service-outage-monitor-1-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-1"
   automation-service-outage-monitor-1-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-1"
@@ -212,7 +212,7 @@ locals {
   automation-service-outage-monitor-1-service_discovery_service-name = "service-outage-monitor-1-${var.ENVIRONMENT}"
 
   // automation-service-outage-monitor-2 local vars
-  automation-service-outage-monitor-2-papertrail_prefix = "service-outage-monitor-2-${element(split("-", var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER),2)}"
+  automation-service-outage-monitor-2-papertrail_prefix = "service-outage-monitor-2-${element(split("-", data.external.service-outage-monitor-build_number.result["image_tag"]),2)}"
   automation-service-outage-monitor-2-container_name = "service-outage-monitor-2"
   automation-service-outage-monitor-2-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-2"
   automation-service-outage-monitor-2-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-2"
@@ -222,7 +222,7 @@ locals {
   automation-service-outage-monitor-2-service_discovery_service-name = "service-outage-monitor-2-${var.ENVIRONMENT}"
 
   // automation-service-outage-monitor-3 local vars
-  automation-service-outage-monitor-3-papertrail_prefix = "service-outage-monitor-3-${element(split("-", var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER),2)}"
+  automation-service-outage-monitor-3-papertrail_prefix = "service-outage-monitor-3-${element(split("-", data.external.service-outage-monitor-build_number.result["image_tag"]),2)}"
   automation-service-outage-monitor-3-container_name = "service-outage-monitor-3"
   automation-service-outage-monitor-3-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-3"
   automation-service-outage-monitor-3-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-3"
@@ -232,7 +232,7 @@ locals {
   automation-service-outage-monitor-3-service_discovery_service-name = "service-outage-monitor-3-${var.ENVIRONMENT}"
 
   // automation-service-outage-monitor-4 local vars
-  automation-service-outage-monitor-4-papertrail_prefix = "service-outage-monitor-4-${element(split("-", var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER),2)}"
+  automation-service-outage-monitor-4-papertrail_prefix = "service-outage-monitor-4-${element(split("-", data.external.service-outage-monitor-build_number.result["image_tag"]),2)}"
   automation-service-outage-monitor-4-container_name = "service-outage-monitor-4"
   automation-service-outage-monitor-4-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-4"
   automation-service-outage-monitor-4-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-4"
@@ -242,7 +242,7 @@ locals {
   automation-service-outage-monitor-4-service_discovery_service-name = "service-outage-monitor-4-${var.ENVIRONMENT}"
 
   // automation-service-outage-monitor-triage local vars
-  automation-service-outage-monitor-triage-papertrail_prefix = "service-outage-monitor-triage-${element(split("-", var.SERVICE_OUTAGE_MONITOR_BUILD_NUMBER),2)}"
+  automation-service-outage-monitor-triage-papertrail_prefix = "service-outage-monitor-triage-${element(split("-", data.external.service-outage-monitor-build_number.result["image_tag"]),2)}"
   automation-service-outage-monitor-triage-container_name = "service-outage-monitor-triage"
   automation-service-outage-monitor-triage-ecs_task_definition-family = "${var.ENVIRONMENT}-service-outage-monitor-triage"
   automation-service-outage-monitor-triage-service-security_group-name = "${var.ENVIRONMENT}-service-outage-monitor-triage"
@@ -252,8 +252,8 @@ locals {
   automation-service-outage-monitor-triage-service_discovery_service-name = "service-outage-monitor-triage-${var.ENVIRONMENT}"
 
   // automation-sites-monitor local vars
-  automation-sites-monitor-image = "${data.aws_ecr_repository.automation-sites-monitor.repository_url}:${var.SITES_MONITOR_BUILD_NUMBER}"
-  automation-sites-monitor-papertrail_prefix = "sites-monitor-${element(split("-", var.SITES_MONITOR_BUILD_NUMBER),2)}"
+  automation-sites-monitor-image = "${data.aws_ecr_repository.automation-sites-monitor.repository_url}:${data.external.sites-monitor-build_number.result["image_tag"]}"
+  automation-sites-monitor-papertrail_prefix = "sites-monitor-${element(split("-", data.external.sites-monitor-build_number.result["image_tag"]),2)}"
   automation-sites-monitor-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   automation-sites-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-sites-monitor"
   automation-sites-monitor-service-security_group-name = "${var.ENVIRONMENT}-sites-monitor"
@@ -263,8 +263,8 @@ locals {
   automation-sites-monitor-service_discovery_service-name = "sites-monitor-${var.ENVIRONMENT}"
 
   // automation-t7-brige local vars
-  automation-t7-bridge-image = "${data.aws_ecr_repository.automation-t7-bridge.repository_url}:${var.T7_BRIDGE_BUILD_NUMBER}"
-  automation-t7-bridge-papertrail_prefix = "t7-bridge-${element(split("-", var.T7_BRIDGE_BUILD_NUMBER),2)}"
+  automation-t7-bridge-image = "${data.aws_ecr_repository.automation-t7-bridge.repository_url}:${data.external.t7-bridge-build_number.result["image_tag"]}"
+  automation-t7-bridge-papertrail_prefix = "t7-bridge-${element(split("-", data.external.t7-bridge-build_number.result["image_tag"]),2)}"
   automation-t7-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-t7-bridge"
   automation-t7-bridge_service-security_group-name = "${var.ENVIRONMENT}-t7-bridge"
   automation-t7-bridge-resource-name = "${var.ENVIRONMENT}-t7-bridge"
@@ -272,18 +272,8 @@ locals {
   automation-t7-bridge-task_definition = "${aws_ecs_task_definition.automation-t7-bridge.family}:${aws_ecs_task_definition.automation-t7-bridge.revision}"
   automation-t7-bridge-service_discovery_service-name = "t7-bridge-${var.ENVIRONMENT}"
 
-  // automation-velocloud-bridge local vars
-  automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${var.VELOCLOUD_BRIDGE_BUILD_NUMBER}"
-  automation-velocloud-bridge-papertrail_prefix = "velocloud-bridge-${element(split("-", var.VELOCLOUD_BRIDGE_BUILD_NUMBER),2)}"
-  automation-velocloud-bridge-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
-  automation-velocloud-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-velocloud-bridge"
-  automation-velocloud-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-velocloud-bridge"
-  automation-velocloud-bridge-ecs_service-name = "${var.ENVIRONMENT}-velocloud-bridge"
-  automation-velocloud-bridge-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
-  automation-velocloud-bridge-service_discovery_service-name = "velocloud-bridge-${var.ENVIRONMENT}"
-
   // automation-tnba-monitor local vars
-  automation-tnba-monitor-image = "${data.aws_ecr_repository.automation-tnba-monitor.repository_url}:${var.TNBA_MONITOR_BUILD_NUMBER}"
+  automation-tnba-monitor-image = "${data.aws_ecr_repository.automation-tnba-monitor.repository_url}:${data.external.tnba-monitor-build_number.result["image_tag"]}"
   automation-tnba-monitor-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
   automation-tnba-monitor-ecs_task_definition-family = "${var.ENVIRONMENT}-tnba-monitor"
   automation-tnba-monitor-service-security_group-name = "${var.ENVIRONMENT}-tnba-monitor"
@@ -291,7 +281,17 @@ locals {
   automation-tnba-monitor-ecs_service-name = "${var.ENVIRONMENT}-tnba-monitor"
   automation-tnba-monitor-ecs_service-task_definition = "${aws_ecs_task_definition.automation-tnba-monitor.family}:${aws_ecs_task_definition.automation-tnba-monitor.revision}"
   automation-tnba-monitor-service_discovery_service-name = "tnba-monitor-${var.ENVIRONMENT}"
-  automation-tnba-monitor-papertrail_prefix = "tnba-monitor-${element(split("-", var.TNBA_MONITOR_BUILD_NUMBER),2)}"
+  automation-tnba-monitor-papertrail_prefix = "tnba-monitor-${element(split("-", data.external.tnba-monitor-build_number.result["image_tag"]),2)}"
+
+  // automation-velocloud-bridge local vars
+  automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${data.external.velocloud-bridge-build_number.result["image_tag"]}"
+  automation-velocloud-bridge-papertrail_prefix = "velocloud-bridge-${element(split("-", data.external.velocloud-bridge-build_number.result["image_tag"]),2)}"
+  automation-velocloud-bridge-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-velocloud-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-velocloud-bridge"
+  automation-velocloud-bridge-service-security_group-tag-Name = "${var.ENVIRONMENT}-velocloud-bridge"
+  automation-velocloud-bridge-ecs_service-name = "${var.ENVIRONMENT}-velocloud-bridge"
+  automation-velocloud-bridge-ecs_service-task_definition = "${aws_ecs_task_definition.automation-velocloud-bridge.family}:${aws_ecs_task_definition.automation-velocloud-bridge.revision}"
+  automation-velocloud-bridge-service_discovery_service-name = "velocloud-bridge-${var.ENVIRONMENT}"
 
   // metrics local variables
   exceptions_detected_metric-metric_transformation-name = "ExceptionMessagesDetectedInServices-${var.ENVIRONMENT}"

@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-last-contact-report" {
   name = "automation-last-contact-report"
 }
 
+data "external" "last-contact-report-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-last-contact-report.name
+  ]
+}
+
 data "template_file" "automation-last-contact-report" {
   template = file("${path.module}/task-definitions/last_contact_report.json")
 

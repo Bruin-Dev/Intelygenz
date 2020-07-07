@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-t7-bridge" {
   name = "automation-t7-bridge"
 }
 
+data "external" "t7-bridge-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-t7-bridge.name
+  ]
+}
+
 data "template_file" "automation-t7-bridge" {
   template = file("${path.module}/task-definitions/t7_bridge.json")
 

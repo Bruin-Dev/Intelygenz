@@ -1,178 +1,405 @@
-import subprocess
-import os
-import json
-import logging
-import sys
-from datetime import datetime
+#!/usr/bin/env python3
 
-ENVIRONMENT = os.environ.get("ENVIRONMENT_VAR")
+import argparse
+import os
+import logging
+import json
+import boto3
+from datetime import datetime, timedelta
 
 logging.basicConfig(level=logging.INFO)
 
-FNULL = open(os.devnull, 'w')
 
+class EcrUtil:
+    _client = boto3.client('ecr', region_name='us-east-1')
+    _repositories_to_avoid = ['automation-python-3.6', 'automation-python-3.6-alpine']
+    _production_tag = "automation-master"
+    _default_latest_image = 'automation-master-latest'
 
-class DeleteOlderDockerImage:
-    _default_repositories = ['automation-bruin-bridge',
-                             'automation-cts-bridge',
-                             'automation-dispatch-portal-frontend',
-                             'automation-dispatch-portal-frontend/nginx',
-                             'automation-dispatch-portal-backend',
-                             'automation-service-dispatch-monitor',
-                             'automation-last-contact-report',
-                             'automation-lit-bridge',
-                             'automation-lumin-billing-report',
-                             'automation-metrics-dashboard/grafana',
-                             'automation-metrics-dashboard/prometheus',
-                             'automation-metrics-dashboard/thanos',
-                             'automation-metrics-dashboard/thanos-querier',
-                             'automation-metrics-dashboard/thanos-store-gateway',
-                             'automation-nats-server',
-                             'automation-notifier',
-                             'automation-service-affecting-monitor',
-                             'automation-service-outage-monitor',
-                             'automation-sites-monitor',
-                             'automation-t7-bridge',
-                             'automation-tnba-monitor',
-                             'automation-velocloud-bridge']
+    @staticmethod
+    def _write_to_json_file(filename, content):
+        filepath = f"/tmp/{filename}.json"
+        with open(filepath, 'w+') as f:
+            f.write(json.dumps(content, indent=4, default=str))
+        return filepath
 
-    _default_route_save_repositories = '/tmp/'
+    def _get_all_ecr_repositories_from_aws(self):
+        repositories_in_ecr = []
+        repositories = self._client.describe_repositories()
+        for repository in repositories['repositories']:
+            if 'automation' in repository['repositoryName']:
+                repositories_in_ecr.append(repository['repositoryName'])
+        if len(repositories_in_ecr) > 0:
+            repositories_to_avoid = self._repositories_to_avoid
+            repositories_in_ecr = [elem for elem in repositories_in_ecr if elem not in repositories_to_avoid]
+        return repositories_in_ecr
 
-    def get_all_newer_images_and_save_in_json_file(self):
-        logging.info(f"The most recent docker images for the {ENVIRONMENT} environment will be "
-                     f"obtained from the following ECR repositories")
-        for r in self._default_repositories:
-            logging.info(f"{r}")
-        for repository in self._default_repositories:
-            self._get_newer_image(repository)
+    def _get_ecr_repositories(self):
+        ecr_repositories = []
+        if parser.parse_args().all_repositories:
+            ecr_repositories = self._get_all_ecr_repositories_from_aws()
+        else:
+            repository = parser.parse_args().repository
+            if parser.parse_args().repository is None:
+                logging.error("No value specified for repository")
+                exit(1)
+            ecr_repositories.append(repository)
+        return ecr_repositories
 
-    def _get_newer_image(self, repository_name_p):
-        newer_image = self._get_one_image_of_all_images_ordered_by_pushed_timestamp(repository_name_p, -1)
-        data_newer_image = {}
-        if newer_image['has_images']:
-            logging.info(f"The newer docker image for the ECR repository {repository_name_p} and environment "
-                         f"{ENVIRONMENT} has imageDigest {newer_image['imageDigest']}, tags {newer_image['imageTags']}"
-                         f" and was pushed at {newer_image['imagePushedAt']}")
-            for tag in newer_image['imageTags']:
-                if 'latest' not in tag.split('-'):
-                    data_newer_image['tag'] = tag
-                    break
-        if not data_newer_image:
-            logging.info(f"There isn't a newer image for the ECR repository {repository_name_p} and environment "
-                         f"{ENVIRONMENT}. It's going to be used latest stable upload to production environment")
-            if repository_name_p == 'automation-nats-server':
-                data_newer_image['tag'] = 'automation-master-2.1.0-latest'
+    @staticmethod
+    def _calculate_number_of_images_to_delete(docker_images_to_delete_in_repositories):
+        total_images_to_delete = 0
+        for repository in docker_images_to_delete_in_repositories:
+            total_images_to_delete += len(repository['images_to_delete'])
+        return total_images_to_delete
+
+    def _get_ecr_images_to_delete_from_environment(self, environment, repositories_to_delete_images,
+                                                   image_tag_to_avoid):
+        docker_images_to_delete_in_repositories = []
+        for repository in repositories_to_delete_images:
+            images_to_delete_in_repository = []
+            logging.info(f"Obtaining Docker images in ECR repository {repository}")
+            docker_images = self._client.list_images(
+                repositoryName=repository,
+            )
+            cont = True
+            while cont:
+                for image in docker_images['imageIds']:
+                    image_tag = image.get('imageTag', None)
+                    if image_tag is not None:
+                        image_tag_environment = "-".join(image_tag.split("-")[0:2])
+                        if image_tag_environment == environment:
+                            images_to_delete_in_repository.append(image_tag)
+                if 'nextToken' in docker_images:
+                    next_token = docker_images['nextToken']
+                    docker_images = self._client.list_images(
+                        repositoryName=repository,
+                        nextToken=next_token
+                    )
+                else:
+                    cont = False
+            if images_to_delete_in_repository:
+                docker_images_to_delete_in_repositories.append(
+                    {
+                        'repository': repository,
+                        'images_to_delete': images_to_delete_in_repository
+                    }
+                )
+        return repositories_to_delete_images, docker_images_to_delete_in_repositories
+
+    @staticmethod
+    def _get_environments_deployed_from_file(environments_file):
+        with open(environments_file, "r") as f:
+            environments_from_mr_opened = json.load(f)
+        environments_deployed = []
+        for environment in environments_from_mr_opened:
+            if environment['is_deployed']:
+                environments_deployed.append(environment['environment'])
+        return environments_deployed
+
+    def _get_ecr_images_to_delete_from_environments_not_deployed(self, environments_file, repositories_to_delete_images,
+                                                                 image_tag_to_avoid):
+        environments_deployed = self._get_environments_deployed_from_file(environments_file)
+        logging.info(f'The environments actually deployed are the following: {", ".join(environments_deployed)}')
+        if environments_deployed:
+            docker_images_to_delete_in_repositories = []
+            for repository in repositories_to_delete_images:
+                images_to_delete_in_repository = []
+                logging.info(f"Obtaining Docker images in ECR repository {repository}")
+                docker_images = self._client.list_images(
+                    repositoryName=repository,
+                )
+                cont = True
+                while cont:
+                    for image in docker_images['imageIds']:
+                        image_tag = image.get('imageTag', None)
+                        if image_tag is not None and image_tag != image_tag_to_avoid:
+                            image_tag_environment = "-".join(image_tag.split("-")[0:2])
+                            if image_tag_environment not in environments_deployed:
+                                images_to_delete_in_repository.append(image_tag)
+                    if 'nextToken' in docker_images:
+                        next_token = docker_images['nextToken']
+                        docker_images = self._client.list_images(
+                            repositoryName=repository,
+                            nextToken=next_token
+                        )
+                    else:
+                        cont = False
+                if images_to_delete_in_repository:
+                    docker_images_to_delete_in_repositories.append(
+                        {
+                            'repository': repository,
+                            'images_to_delete': images_to_delete_in_repository
+                        }
+                    )
+                else:
+                    logging.info(f"There aren't images to delete in repository {repository}")
+            return repositories_to_delete_images, docker_images_to_delete_in_repositories
+        else:
+            logging.error("There isn't any environment deployed")
+            exit(0)
+
+    def _obtain_oldest_images_of_repositories_from_environment(self, environment, ecr_repositories, image_tag_to_avoid):
+        logging.info(f'Obtaining oldest docker images of repositories {", ".join(ecr_repositories)} '
+                     f'for environment {environment}')
+        oldest_docker_images_in_repositories = []
+        for repository in ecr_repositories:
+            oldest_images_of_environment = []
+            logging.info(f"Obtaining oldest Docker image in ECR repository {repository}")
+            docker_images = self._client.list_images(
+                repositoryName=repository,
+            )
+            cont = True
+            while cont:
+                for image in docker_images['imageIds']:
+                    image_tag = image.get('imageTag', None)
+                    if image_tag:
+                        image_tag_environment = "-".join(image_tag.split("-")[0:2])
+                        if image_tag_environment == environment:
+                            oldest_images_of_environment.append(
+                                {
+                                    'imageTag': image_tag,
+                                    'imagePushedAt': self._obtain_image_pushed_time(repository, image_tag)
+                                }
+                            )
+                if 'nextToken' in docker_images:
+                    next_token = docker_images['nextToken']
+                    docker_images = self._client.list_images(
+                        repositoryName=repository,
+                        nextToken=next_token
+                    )
+                else:
+                    cont = False
+            if len(oldest_images_of_environment) > 2:
+                oldest_images_of_environment.sort(key=lambda image: image["imagePushedAt"])
+                oldest_docker_images_in_repositories.append(
+                    {
+                        'repository': repository,
+                        'images_to_delete': [i['imageTag'] for i in oldest_images_of_environment[:-2]]
+                    }
+                )
             else:
-                data_newer_image['tag'] = "automation-master-latest"
-        self._save_repository_name_newer_image(repository_name_p, data_newer_image)
+                oldest_images_of_environment.sort(key=lambda image: image["imagePushedAt"])
+                logging.error(f"Repository {repository} has {len(oldest_images_of_environment)} images "
+                              f"for environment {environment}. No image is going to be deleted")
+        return ecr_repositories, oldest_docker_images_in_repositories
 
-    def _save_repository_name_newer_image(self, repository_name_p, data_newer_image):
-        if '/' in repository_name_p:
-            with open(f"{self._default_route_save_repositories}{repository_name_p.split('/')[1]}.json", 'w') as outfile:
-                json.dump(data_newer_image, outfile)
+    def _delete_images_in_ecr_repositories(self, environment, ecr_repositories):
+        environments_file = parser.parse_args().file
+        if environment or environments_file:
+            if environment:
+                if parser.parse_args().oldest_images:
+                    repositories_to_delete_images, docker_images_to_delete_in_repositories = self.\
+                        _obtain_oldest_images_of_repositories_from_environment(environment,
+                                                                               ecr_repositories)
+                else:
+                    repositories_to_delete_images, docker_images_to_delete_in_repositories = \
+                            self._get_ecr_images_to_delete_from_environment(environment, ecr_repositories)
+            elif environments_file:
+                repositories_to_delete_images, docker_images_to_delete_in_repositories = \
+                    self._get_ecr_images_to_delete_from_environments_not_deployed(environments_file,
+                                                                                  ecr_repositories)
+            if docker_images_to_delete_in_repositories:
+                self._delete_images_in_batches(repositories_to_delete_images, docker_images_to_delete_in_repositories)
+            else:
+                logging.info("There aren't Docker images to delete")
         else:
-            with open(self._default_route_save_repositories + repository_name_p + '.json', 'w') as outfile:
-                json.dump(data_newer_image, outfile)
+            logging.error("It's necessary provide an environment or a file with information "
+                          "about deployed environments")
+            exit(1)
 
-    def delete_oldest_image(self, repository_name_p):
-        oldest_image_for_repository = self._get_oldest_image(repository_name_p)
-        oldest_image_for_repository_image_digest = oldest_image_for_repository['imageDigest']
-        oldest_image_for_repository_image_pushed_date = oldest_image_for_repository['imagePushedAt']
-        oldest_image_for_repository_tag = oldest_image_for_repository['imageTags'][0]
-        logging.info(f"Docker image for the ECR repository {repository_name_p} with imageDigest "
-                     f"{oldest_image_for_repository_image_digest}, pushed at "
-                     f"{oldest_image_for_repository_image_pushed_date}  and with tags "
-                     f"{oldest_image_for_repository_tag} it's going to be deleted")
-        delete_oldest_image_for_repository_exit_code = subprocess.call(
-            ['aws', 'ecr', 'batch-delete-image', '--repository-name', repository_name_p,
-             '--image-ids', 'imageDigest=' + oldest_image_for_repository_image_digest,
-             '--region', 'us-east-1'], stdout=FNULL)
-        if delete_oldest_image_for_repository_exit_code != 0:
-            logging.error(f"There were problems deleting docker image for the ECR repository "
-                          f"{repository_name_p} with imageDigest {oldest_image_for_repository_image_digest}"
-                          f" and pushed at {oldest_image_for_repository_image_pushed_date}")
+    def _delete_images_in_batches(self, repositories_to_delete_images, docker_images_to_delete_in_repositories):
+        logging.info(f"The number of images that are going to be deleted for the repository/repositories "
+                     f"{','.join(repositories_to_delete_images)} is "
+                     f"{self._calculate_number_of_images_to_delete(docker_images_to_delete_in_repositories)}")
+        for repository in docker_images_to_delete_in_repositories:
+            repository_name = repository['repository']
+            logging.info(f"The older images of the ECR repository {repository_name} are going to be deleted")
+            images_to_delete = repository['images_to_delete']
+            for i in range(0, len(images_to_delete), 100):
+                images_to_delete_chunk = images_to_delete[i:i + 100]
+                logging.info(f'Deleting from repository {repository_name} the image with tags '
+                             f'{",".join(map(str, images_to_delete_chunk))}')
+                response = self._client.batch_delete_image(
+                    repositoryName=repository_name,
+                    imageIds=[{'imageTag': str(id_)} for id_ in images_to_delete_chunk]
+                )
+                if len(response['failures']) > 0:
+                    logging.error("The following errors have occurred during image deletion")
+                    for failure in response['failures']:
+                        logging.error(f"{failure}")
+                else:
+                    logging.info("The images have been successfully deleted")
+
+    def _obtain_image_pushed_time(self, repository_name, image_tag):
+        image_pushed_time = None
+        logging.info(f"Obtaining push time of Docker image with tag {image_tag} in repository {repository_name}")
+        response = self._client.describe_images(
+            repositoryName=repository_name,
+            imageIds=[
+                {
+                    'imageTag': image_tag
+                },
+            ],
+        )
+        if response['imageDetails']:
+            image_pushed_time = response['imageDetails'][0]['imagePushedAt']
+        return image_pushed_time
+
+    def _get_latest_images_of_repository_production(self, ecr_repository):
+        logging.info(f"Obtaining latest docker image of repository {ecr_repository} for production environment")
+        docker_images = self._client.list_images(
+            repositoryName=ecr_repository,
+        )
+        images_of_environment = []
+        cont = True
+        while cont:
+            for image in docker_images['imageIds']:
+                image_tag = image.get('imageTag', None)
+                if image_tag:
+                    image_tag_environment = "-".join(image_tag.split("-")[0:2])
+                    if image_tag_environment == self._production_tag and 'latest' not in image_tag:
+                        images_of_environment.append(
+                            {
+                                'imageTag': image_tag,
+                                'imagePushedAt': self._obtain_image_pushed_time(ecr_repository, image_tag)
+                            }
+                        )
+            if 'nextToken' in docker_images:
+                next_token = docker_images['nextToken']
+                docker_images = self._client.list_images(
+                    repositoryName=ecr_repository,
+                    nextToken=next_token
+                )
+            else:
+                cont = False
+        images_of_environment.sort(key=lambda image: image["imagePushedAt"])
+        if images_of_environment:
+            return images_of_environment[-1]
         else:
-            logging.info(f"Docker image for the ECR repository {repository_name_p} with imageDigest "
-                         f"{oldest_image_for_repository_image_digest} and pushed at "
-                         f"{oldest_image_for_repository_image_pushed_date} was successfully deleted")
+            logging.error(f"There is no image in production environment for the repository {ecr_repository}")
+            exit(1)
 
-    def _get_oldest_image(self, repository_name_p):
-        oldest_image = self._get_one_image_of_all_images_ordered_by_pushed_timestamp(repository_name_p, 0)
-        if oldest_image['has_images']:
-            logging.info(f"The oldest docker image for the ECR repository {repository_name_p} "
-                         f"has imageDigest {oldest_image['imageDigest']} and was pushed "
-                         f"at {oldest_image['imagePushedAt']}")
-            return oldest_image
+    def _obtain_latest_images_of_repositories_from_environment(self, environment, ecr_repositories):
+        logging.info(f'Obtaining latest docker images of repositories {", ".join(ecr_repositories)} '
+                     f'for environment {environment}')
+        latest_docker_images_in_repositories = []
+        for repository in ecr_repositories:
+            images_of_environment = []
+            logging.info(f"Obtaining latest Docker image in ECR repository {repository}")
+            docker_images = self._client.list_images(
+                repositoryName=repository,
+            )
+            cont = True
+            while cont:
+                for image in docker_images['imageIds']:
+                    image_tag = image.get('imageTag', None)
+                    if image_tag is not None:
+                        image_tag_environment = "-".join(image_tag.split("-")[0:2])
+                        if image_tag_environment == environment and 'latest' not in image_tag:
+                            images_of_environment.append(
+                                {
+                                    'imageTag': image_tag,
+                                    'imagePushedAt': self._obtain_image_pushed_time(repository, image_tag)
+                                }
+                            )
+                if 'nextToken' in docker_images:
+                    next_token = docker_images['nextToken']
+                    docker_images = self._client.list_images(
+                        repositoryName=repository,
+                        nextToken=next_token
+                    )
+                else:
+                    cont = False
+            if images_of_environment:
+                images_of_environment.sort(key=lambda image: image["imagePushedAt"])
+                latest_image_info = images_of_environment[-1]
+                latest_docker_images_in_repositories.append(
+                    {
+                        'repository': repository,
+                        'image_tag': latest_image_info['imageTag'],
+                        'imagePushedAt': latest_image_info['imagePushedAt']
+                    }
+                )
+            else:
+                logging.error(f"There isn't a newer image in the repository {repository} for the environment "
+                              f"{environment}. Assigning latest from master")
+                latest_image_repository = self._get_latest_images_of_repository_production(repository)
+                latest_docker_images_in_repositories.append(
+                    {
+                        'repository': repository,
+                        'image_tag': latest_image_repository['imageTag'],
+                        'imagePushedAt': latest_image_repository['imagePushedAt']
+                    }
+                )
+        return ecr_repositories, latest_docker_images_in_repositories, environment
+
+    def _print_results(self, latest_images_for_ecr_repositories, print_results, repositories, environment):
+        if latest_images_for_ecr_repositories and print_results:
+            self._write_to_json_file('latest_images_for_ecr_repositories', latest_images_for_ecr_repositories)
+            logging.info(f'The result of obtaining the latest docker images for the repositories '
+                         f'{", ".join(repositories)} in environment {environment} is the following')
+            print(f"{json.dumps(latest_images_for_ecr_repositories, indent=4, default=str)}")
+
+    def do_necessary_actions(self):
+        if parser.parse_args().delete or parser.parse_args().get:
+            environment = parser.parse_args().environment
+            ecr_repositories = self._get_ecr_repositories()
+            if parser.parse_args().delete:
+                self._delete_images_in_ecr_repositories(environment,
+                                                        ecr_repositories)
+            elif parser.parse_args().get:
+                repositories, latest_images_for_ecr_repositories, environment = self.\
+                    _obtain_latest_images_of_repositories_from_environment(environment,
+                                                                           ecr_repositories)
+                self._print_results(latest_images_for_ecr_repositories,
+                                    parser.parse_args().print_results,
+                                    repositories, environment)
         else:
-            logging.info(f"There isn't an older image for repository {repository_name_p} and environment {ENVIRONMENT}")
-            sys.exit(0)
-
-    def _get_one_image_of_all_images_ordered_by_pushed_timestamp(self, repository_name_p, pos):
-        images_of_environment_ordered = {'has_images': False}
-        logging.info(f"Getting all docker images for the ECR repository {repository_name_p}")
-        get_all_images_for_repository = self._get_all_images_for_repository_of_environment(repository_name_p)
-        num_of_images_for_repository = len(get_all_images_for_repository)
-        logging.info(f"ECR repository {repository_name_p} has {num_of_images_for_repository} docker images "
-                     f"for environment {ENVIRONMENT}")
-
-        asking_for_oldest_image = pos == 0
-        at_least_two_images = num_of_images_for_repository > 1
-        asking_for_newest_image = pos == -1
-        at_least_one_image = num_of_images_for_repository > 0
-
-        if (asking_for_oldest_image and at_least_two_images) or (asking_for_newest_image and at_least_one_image):
-            repository_image = get_all_images_for_repository[pos]
-            repository_image_date = self._convert_timestamp_to_date(
-                repository_image['imagePushedAt'])
-            images_of_environment_ordered.update({'imageDigest': repository_image['imageDigest'],
-                                                  'imagePushedAt': repository_image_date,
-                                                  'imageTags': repository_image['imageTags'],
-                                                  'has_images': True})
-        elif not (asking_for_oldest_image and at_least_two_images):
-            logging.error(f"There’s just one or no images available for the environment {ENVIRONMENT}. "
-                          f"At least two of them must be preserved for each environment.")
-        else:
-            logging.error(f"No docker images were found for the ECR repository {repository_name_p} "
-                          f"and the environment {ENVIRONMENT}")
-        return images_of_environment_ordered
-
-    @staticmethod
-    def _get_all_images_for_repository_of_environment(repository_name_p):
-        get_all_images_for_repository_call = subprocess.Popen(["aws", "ecr", "describe-images", "--repository-name",
-                                                               repository_name_p, "--region", "us-east-1",
-                                                               "--query", "sort_by(imageDetails,& imagePushedAt)[*]"],
-                                                              stdout=subprocess.PIPE)
-        get_all_images_for_repository_call_output = json.loads(
-            get_all_images_for_repository_call.stdout.read())
-        images_for_environment = []
-        for element in get_all_images_for_repository_call_output:
-            if 'imageTags' in element:
-                for tag in element['imageTags']:
-                    if str(ENVIRONMENT) in tag:
-                        images_for_environment.append(element)
-        return images_for_environment
-
-    @staticmethod
-    def _convert_timestamp_to_date(timestamp_p):
-        return datetime.utcfromtimestamp(timestamp_p).strftime('%Y-%m-%d %H:%M:%S')
-
-    @staticmethod
-    def print_usage():
-        print("delete_oldest_docker_image -r <repository_name>")
+            logging.error("The only valid options are -o/--obtain or -d/--delete")
+            exit(1)
 
 
 if __name__ == '__main__':
-    delete_older_docker_image_instance = DeleteOlderDockerImage()
-    get_all_images = False
-    if sys.argv[0] == '-g' or sys.argv[1] == '-g':
-        get_all_images = True
-        delete_older_docker_image_instance.get_all_newer_images_and_save_in_json_file()
-    elif sys.argv[0] == '-r':
-        repository_name = sys.argv[1]
-    elif sys.argv[1] == '-r':
-        repository_name = sys.argv[2]
-    else:
-        delete_older_docker_image_instance.print_usage()
-        sys.exit(1)
-    if not get_all_images and repository_name:
-        delete_older_docker_image_instance.delete_oldest_image(repository_name)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--delete',
+                        type=bool,
+                        help='Boolean flag to indicate whether deleting actions are to be '
+                             'performed on ECR repositories',
+                        required=False,
+                        default=False)
+    parser.add_argument('-g', '--get',
+                        type=bool,
+                        help='Boolean flag to get latest image on ECR repositories',
+                        required=False,
+                        default=False)
+    parser.add_argument('-r', '--repository',
+                        type=str,
+                        help='Name of the Docker ECR repository to obtain images',
+                        required=False)
+    parser.add_argument('-f', '--file',
+                        type=str,
+                        help='flag to indicate the file path where '
+                             'the information of the environments actually deployed',
+                        required=False)
+    parser.add_argument('-e', '--environment',
+                        type=str,
+                        help='Name of the environment to delete images',
+                        required=False)
+    parser.add_argument('-a', '--all_repositories',
+                        type=bool,
+                        help='Indicate if all ECR repositories are going to be explored to delete older images',
+                        required=False,
+                        default=False)
+    parser.add_argument('-o', '--oldest_images',
+                        type=bool,
+                        help='Indicate oldest images is going to be deleted (leaving two always)',
+                        required=False,
+                        default=False)
+    parser.add_argument('-p', '--print_results',
+                        type=bool,
+                        help='Flag to indicate whether the results are to be printed on the screen',
+                        required=False,
+                        default=False)
+    ecr_util = EcrUtil()
+    ecr_util.do_necessary_actions()

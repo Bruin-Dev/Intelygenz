@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-service-dispatch-monitor" {
   name = "automation-service-dispatch-monitor"
 }
 
+data "external" "service-dispatch-monitor-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-service-dispatch-monitor.name
+  ]
+}
+
 data "template_file" "automation-service-dispatch-monitor" {
   template = file("${path.module}/task-definitions/service_dispatch_monitor.json")
 

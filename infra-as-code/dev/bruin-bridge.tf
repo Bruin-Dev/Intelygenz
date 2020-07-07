@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-bruin-bridge" {
   name = "automation-bruin-bridge"
 }
 
+data "external" "bruin-bridge-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-bruin-bridge.name
+  ]
+}
+
 data "template_file" "automation-bruin-bridge" {
   template = file("${path.module}/task-definitions/bruin_bridge.json")
 

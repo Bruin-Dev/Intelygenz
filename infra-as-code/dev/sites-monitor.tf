@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-sites-monitor" {
   name = "automation-sites-monitor"
 }
 
+data "external" "sites-monitor-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-sites-monitor.name
+  ]
+}
+
 data "template_file" "automation-sites-monitor" {
   template = file("${path.module}/task-definitions/sites_monitor.json")
 

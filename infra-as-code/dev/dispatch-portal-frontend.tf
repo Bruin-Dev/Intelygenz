@@ -2,8 +2,24 @@ data "aws_ecr_repository" "automation-dispatch-portal-frontend-nextjs" {
   name = "automation-dispatch-portal-frontend"
 }
 
+data "external" "dispatch-portal-frontend-nextjs-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-dispatch-portal-frontend-nextjs.name
+  ]
+}
+
 data "aws_ecr_repository" "automation-dispatch-portal-frontend-nginx" {
   name = "automation-dispatch-portal-frontend/nginx"
+}
+
+data "external" "dispatch-portal-frontend-nginx-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-dispatch-portal-frontend-nginx.name
+  ]
 }
 
 data "template_file" "automation-dispatch-portal-frontend" {

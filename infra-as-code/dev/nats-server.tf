@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-nats-server" {
   name = "automation-nats-server"
 }
 
+data "external" "nats-server-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-nats-server.name
+  ]
+}
+
 data "template_file" "automation-nats-server" {
   template = file("${path.module}/task-definitions/nats_server_seed.json")
 

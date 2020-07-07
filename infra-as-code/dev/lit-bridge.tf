@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-lit-bridge" {
   name = "automation-lit-bridge"
 }
 
+data "external" "lit-bridge-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-lit-bridge.name
+  ]
+}
+
 data "template_file" "automation-lit-bridge" {
   template = file("${path.module}/task-definitions/lit_bridge.json")
 

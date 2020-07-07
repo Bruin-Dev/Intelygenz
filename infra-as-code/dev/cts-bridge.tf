@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-cts-bridge" {
   name = "automation-cts-bridge"
 }
 
+data "external" "cts-bridge-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-cts-bridge.name
+  ]
+}
+
 data "template_file" "automation-cts-bridge" {
   template = file("${path.module}/task-definitions/cts_bridge.json")
 

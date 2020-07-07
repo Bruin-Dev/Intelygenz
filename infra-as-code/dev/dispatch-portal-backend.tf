@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-dispatch-portal-backend" {
   name = "automation-dispatch-portal-backend"
 }
 
+data "external" "dispatch-portal-backend-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-dispatch-portal-backend.name
+  ]
+}
+
 data "template_file" "automation-dispatch-portal-backend" {
   template = file("${path.module}/task-definitions/dispatch_portal_backend.json")
 

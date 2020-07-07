@@ -9,7 +9,7 @@ nats-server-build:
   extends: .build_app_image
   script:
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-${CI_PIPELINE_ID} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}-${CI_PIPELINE_ID}
   after_script:

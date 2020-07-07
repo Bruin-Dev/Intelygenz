@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-service-affecting-monitor" {
   name = "automation-service-affecting-monitor"
 }
 
+data "external" "service-affecting-monitor-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-service-affecting-monitor.name
+  ]
+}
+
 data "template_file" "automation-service-affecting-monitor" {
   template = file("${path.module}/task-definitions/service_affecting_monitor.json")
 

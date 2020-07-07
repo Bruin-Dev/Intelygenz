@@ -6,7 +6,6 @@ grafana-build:
   variables:
     MODULE_NAME: metrics-dashboard/grafana
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  extends: .build_app_image
   script:
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/grafana/config/prometheus-dev.yml
     - sed -i "s/igzpackages==[0-9]+\.[0-9]+\.[0-9]+/igzpackages==${IGZ_PACKAGES_VERSION}/g" ${MODULE_NAME}/requirements.txt
@@ -14,24 +13,39 @@ grafana-build:
     - docker build --build-arg IGZ_PACKAGES_REPOSITORY_URL --build-arg IGZ_PACKAGES_VERSION --build-arg GRAFANA_ADMIN_USER
       --build-arg GRAFANA_ADMIN_PASSWORD --build-arg GRAFANA_USER_PASSWORD --build-arg GRAFANA_USER_COMPANY --build-arg GRAFANA_USER_ROLE --build-arg GRAFANA_USER_NAME --build-arg GRAFANA_USER_LOGIN
       --build-arg GRAFANA_USER_EMAIL --build-arg GRAFANA_PORT -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      changes:
+        - metrics-dashboard/grafana/**/*
+    - changes:
+        - metrics-dashboard/grafana/README.md
+      when: never
+  extends: .build_app_image
 
 prometheus-build:
   stage: build
   variables:
     MODULE_NAME: metrics-dashboard/prometheus
     MODULE_VERSION: ${CI_PIPELINE_ID}
-  extends: .build_app_image
   script:
     - source ci-utils/environments/environment_assign.sh
     - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/prometheus/config/prometheus-dev.yml
     - cp metrics-dashboard/prometheus/config/prometheus-dev.yml metrics-dashboard/prometheus/prometheus.yml
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -r automation-${MODULE_NAME}
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      changes:
+        - metrics-dashboard/prometheus/**/*
+    - changes:
+        - metrics-dashboard/prometheus/README.md
+      when: never
+  extends: .build_app_image
 
 thanos-sidecar-build:
   stage: build
@@ -41,6 +55,13 @@ thanos-sidecar-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
     GRPC_PORT: 10091
     HTTP_PORT: 10902
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      changes:
+        - metrics-dashboard/thanos/**/*
+    - changes:
+        - metrics-dashboard/thanos/README.md
+      when: never
   extends: .build_thanos_with_config_bucket
 
 thanos-store-gateway-build:
@@ -51,6 +72,13 @@ thanos-store-gateway-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
     GRPC_PORT: 10901
     HTTP_PORT: 19191
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      changes:
+        - metrics-dashboard/thanos/**/*
+    - changes:
+        - metrics-dashboard/thanos/README.md
+      when: never
   extends: .build_thanos_with_config_bucket
 
 thanos-querier-build:
@@ -61,13 +89,20 @@ thanos-querier-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
     GRPC_PORT: 10999
     HTTP_PORT: 19091
-  extends: .build_app_image
   script:
     - docker build --build-arg GRPC_PORT=${GRPC_PORT} --build-arg HTTP_PORT=${HTTP_PORT} -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile-thanos_querier .
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -r automation-${REPOSITORY_NAME}
+    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${REPOSITORY_NAME} -p True
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker push ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
   after_script:
     - source ci-utils/environments/environment_assign.sh
     - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-latest
     - docker rmi ${REPOSITORY_URL}-${REPOSITORY_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      changes:
+        - metrics-dashboard/thanos/**/*
+    - changes:
+        - metrics-dashboard/thanos/README.md
+      when: never
+  extends: .build_app_image

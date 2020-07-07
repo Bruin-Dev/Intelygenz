@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-velocloud-bridge" {
   name = "automation-velocloud-bridge"
 }
 
+data "external" "velocloud-bridge-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-velocloud-bridge.name
+  ]
+}
+
 data "template_file" "automation-velocloud-bridge" {
   template = file("${path.module}/task-definitions/velocloud_bridge.json")
 

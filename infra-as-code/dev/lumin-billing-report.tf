@@ -2,6 +2,14 @@ data "aws_ecr_repository" "automation-lumin-billing-report" {
   name = "automation-lumin-billing-report"
 }
 
+data "external" "lumin-billing-report-build_number" {
+  program = [
+    "bash",
+    "${path.module}/scripts/obtain_latest_image_for_repository.sh",
+    data.aws_ecr_repository.automation-lumin-billing-report.name
+  ]
+}
+
 data "template_file" "automation-lumin-billing-report" {
   template = file("${path.module}/task-definitions/lumin_billing_report.json")
 
