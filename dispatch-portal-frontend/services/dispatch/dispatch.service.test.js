@@ -9,9 +9,18 @@ import { mocksInAdapterLitSingleDispatchResult } from '../mocks/data/lit/result-
 import { dispatchCtsList } from '../mocks/data/cts/list-dispatch.mock';
 import { config } from '../../config/config';
 import { mockCtsSingleDispatch } from '../mocks/data/cts/single-dispatch.mock';
-import { mocksInAdapterCtsSingleDispatchResult } from '../mocks/data/cts/result-adapter-in-dispatch.datatest';
-import { dispatchCtsInAdapter } from './cts-dispatch.adapter';
-import { dispatchLitInAdapter } from './lit-dispatch.adapter';
+import {
+  ctsDispatchMockGetAll,
+  ctsDispatchMockGetOne
+} from '../mocks/data/cts/result-adapter-in-dispatch.datatest';
+import {
+  dispatchCtsInAdapter,
+  dispatchCtsInAdapterGeAll
+} from './cts-dispatch.adapter';
+import {
+  dispatchLitInAdapter,
+  dispatchLitInAdapterGeAll
+} from './lit-dispatch.adapter';
 
 describe('dispatch service tests', () => {
   const axiosIMocksTest = axios.create();
@@ -39,8 +48,8 @@ describe('dispatch service tests', () => {
       list_dispatch: [dispatchCtsList.data[0]]
     });
     const expectedResult = [
-      dispatchLitInAdapter({ vendor: 'lit', ...dispatchLitList.data[0] }),
-      dispatchCtsInAdapter({ vendor: 'cts', ...dispatchCtsList.data[0] })
+      dispatchLitInAdapterGeAll({ vendor: 'lit', ...dispatchLitList.data[0] }),
+      dispatchCtsInAdapterGeAll({ vendor: 'cts', ...dispatchCtsList.data[0] })
     ];
 
     const res = await new DispatchService(axiosIMocksTest).getAll();
@@ -48,14 +57,14 @@ describe('dispatch service tests', () => {
     expect(res).toMatchObject({ data: expectedResult });
   });
 
-  it('fetch getAll: one of the calls fails(CTS)', async () => {
+  it('fetch getAll: one of the calls fails(LIT)', async () => {
     mockadapter.onGet(API_URLS.DISPATCH_LIT).reply(404);
     mockadapter.onGet(API_URLS.DISPATCH_CTS).reply(200, {
       vendor: 'cts',
       list_dispatch: [dispatchCtsList.data[0]]
     });
     const expectedResult = [
-      dispatchCtsInAdapter({ vendor: 'cts', ...dispatchCtsList.data[0] })
+      dispatchCtsInAdapterGeAll({ vendor: 'cts', ...dispatchCtsList.data[0] })
     ];
 
     const res = await new DispatchService(axiosIMocksTest).getAll();
@@ -65,14 +74,14 @@ describe('dispatch service tests', () => {
       error: 'Request failed with status code 404'
     });
   });
-  it('fetch getAll: one of the calls fails(LIT)', async () => {
+  it('fetch getAll: one of the calls fails(CTS)', async () => {
     mockadapter.onGet(API_URLS.DISPATCH_CTS).reply(404);
     mockadapter.onGet(API_URLS.DISPATCH_LIT).reply(200, {
       vendor: 'lit',
       list_dispatch: [dispatchLitList.data[0]]
     });
     const expectedResult = [
-      dispatchLitInAdapter({ vendor: 'lit', ...dispatchLitList.data[0] })
+      dispatchLitInAdapterGeAll({ vendor: 'lit', ...dispatchLitList.data[0] })
     ];
 
     const res = await new DispatchService(axiosIMocksTest).getAll();
@@ -122,7 +131,7 @@ describe('dispatch service tests', () => {
       config.VENDORS.CTS
     );
 
-    expect(res).toMatchObject(mocksInAdapterCtsSingleDispatchResult);
+    expect(res).toMatchObject(ctsDispatchMockGetOne);
   });
 
   it('fetch get: error 400 from an API', async () => {

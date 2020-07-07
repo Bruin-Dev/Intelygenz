@@ -1,95 +1,46 @@
 // NOTE: ORs are because we receive different API data: GET ONE and GET ALL
+import { getTimeZoneShortName } from '../../config/constants/dispatch.constants';
+
 export const dispatchCtsInAdapter = data => ({
-  id: data.name || data.id || '',
+  id: data.id || '',
   vendor: (data.vendor && data.vendor.toUpperCase()) || '',
-  slaLevel: data.slaLevel || '',
-  status: (data.dispatch && data.dispatch.status__c) || data.status__c || '',
-  dateDispatch:
-    (data.dispatch && data.dispatch.date_of_dispatch) ||
-    data.date_of_dispatch ||
-    '',
-  mettelId:
-    (data.dispatch && data.dispatch.ext_ref_num__c) ||
-    data.ext_ref_num__c ||
-    '',
-  timeDispatch:
-    (data.dispatch && data.dispatch.open_date__c) || data.open_date__c || '',
-  timeZone: (data.dispatch && data.dispatch.time_zone) || data.time_zone || '',
-  turnUp: (data.dispatch && data.dispatch.turn_up) || '',
-  hardTimeDispatch:
-    (data.dispatch && data.dispatch.hardTimeDispatch) ||
-    data.hardTimeDispatch ||
-    '',
-  hardTimeZone:
-    (data.dispatch && data.dispatch.hardTimeZone) || data.hardTimeZone || '',
+  slaLevel: '',
+  status: (data.dispatch && data.dispatch.status__c) || '',
+  dateDispatch: '',
+  mettelId: (data.dispatch && data.dispatch.ext_ref_num__c) || '',
+  timeDispatch: (data.dispatch && data.dispatch.open_date__c) || '',
+  timeZone: '',
+  turnUp: '',
+  hardTimeDispatch: '',
+  hardTimeZone: '',
   requester: {
-    name:
-      (data.dispatch && data.dispatch.resource_email__c) ||
-      data.resource_email__c ||
-      '',
-    groupEmail: (data.dispatch && data.dispatch.mettel_group_email) || '',
-    email:
-      (data.dispatch && data.dispatch.resource_email__c) ||
-      data.resource_email__c ||
-      '',
-    department:
-      (data.dispatch && data.dispatch.mettel_department) ||
-      data.mettel_department ||
-      '',
+    name: (data.dispatch && data.dispatch.resource_email__c) || '',
+    groupEmail: '',
+    email: (data.dispatch && data.dispatch.resource_email__c) || '',
+    department: '',
     phoneNumber:
-      (data.dispatch && data.dispatch.resource_phone_number__c) ||
-      data.resource_phone_number__c ||
-      '',
+      (data.dispatch && data.dispatch.resource_phone_number__c) || '',
     departmentPhoneNumber:
-      (data.dispatch && data.dispatch.resource_phone_number__c) ||
-      data.resource_phone_number__c ||
-      ''
+      (data.dispatch && data.dispatch.resource_phone_number__c) || ''
   },
   onSiteContact: {
-    site:
-      (data.dispatch && data.dispatch.lookup_location_owner__c) ||
-      data.lookup_location_owner__c ||
-      '',
-    street: (data.dispatch && data.dispatch.street__c) || data.street__c || '',
-    city: (data.dispatch && data.dispatch.city__c) || data.city__c || '',
-    state: (data.dispatch && data.dispatch.country__c) || data.country__c || '',
-    zip: (data.dispatch && data.dispatch.zip__c) || data.zip__c || '',
-    phoneNumber:
-      (data.dispatch && data.dispatch.job_site_contact_number) ||
-      data.job_site_contact_number ||
-      '',
-    name:
-      (data.dispatch && data.dispatch.job_site_contact_name) ||
-      data.job_site_contact_name ||
-      ''
+    site: (data.dispatch && data.dispatch.lookup_location_owner__c) || '',
+    street: (data.dispatch && data.dispatch.street__c) || '',
+    city: (data.dispatch && data.dispatch.city__c) || '',
+    state: (data.dispatch && data.dispatch.country__c) || '',
+    zip: (data.dispatch && data.dispatch.zip__c) || '',
+    phoneNumber: (data.dispatch && data.dispatch.job_site_contact_number) || '',
+    name: ''
   },
   details: {
     serviceType: '',
-    instructions:
-      (data.dispatch && data.dispatch.mettel_tech_call_in_instructions) ||
-      data.mettel_tech_call_in_instructions ||
-      '',
-    materials:
-      (data.dispatch && data.dispatch.materials_needed_for_dispatch) ||
-      data.materials_needed_for_dispatch ||
-      '',
-    information:
-      (data.dispatch && data.dispatch.issue_summary__c) ||
-      data.issue_summary__c ||
-      '',
+    instructions: '',
+    materials: '',
+    information: (data.dispatch && data.dispatch.issue_summary__c) || '',
     specialMaterials: '',
-    fieldEngineer:
-      data.dispatch &&
-      (data.dispatch.field_engineer_name ||
-        data.dispatch.field_engineer_last_name)
-        ? `${data.dispatch.field_engineer_name} ${data.dispatch.field_engineer_last_name}`
-        : '',
-    fieldEngineerContactNumber:
-      (data.dispatch && data.dispatch.field_engineer_contact_number) || '',
-    res:
-      data.description__c ||
-      (data.dispatch && data.dispatch.description__c) ||
-      ''
+    fieldEngineer: '',
+    fieldEngineerContactNumber: '',
+    res: (data.dispatch && data.dispatch.description__c) || ''
   }
 });
 
@@ -130,3 +81,14 @@ export const dispatchCtsOutAdapter = data => {
 
   return dataAux;
 };
+
+export const dispatchCtsInAdapterGeAll = data => ({
+  bruinTicketId: data.ext_ref_num__c || '',
+  customerLocation: `${data.street__c} ${data.city__c} ${data.country__c} ${data.zip__c}`,
+  vendor: (data.vendor && data.vendor.toUpperCase()) || '',
+  vendorDispatchId: data.name || '',
+  scheduledTime: `${data.date_of_dispatch} ${
+    data.open_date__c
+  } ${getTimeZoneShortName(data.time_zone)}`,
+  status: data.status__c || ''
+});

@@ -1,5 +1,6 @@
 import {
   dispatchLitInAdapter,
+  dispatchLitInAdapterGeAll,
   dispatchLitOutAdapter
 } from './lit-dispatch.adapter';
 import { mockLitSingleDispatch } from '../mocks/data/lit/single-dispatch.mock';
@@ -8,6 +9,7 @@ import {
   mocksInAdapterLitSingleDispatchResult
 } from '../mocks/data/lit/result-adapter-in-dispatch.datatest';
 import { dispatchLitList } from '../mocks/data/lit/list-dispatch.mock';
+import { config } from '../../config/config';
 
 describe('lit dispatch adapter tests', () => {
   it('check dispatchLitInAdapter for get(single item)', () => {
@@ -16,10 +18,54 @@ describe('lit dispatch adapter tests', () => {
     );
   });
 
+  it('check dispatchLitInAdapter for get(single item) without data', () => {
+    expect(dispatchLitInAdapter({})).toMatchObject({
+      dateDispatch: '',
+      details: {
+        fieldEngineer: '',
+        fieldEngineerContactNumber: '',
+        information: '',
+        instructions: '',
+        materials: '',
+        serviceType: '',
+        specialMaterials: ''
+      },
+      hardTimeDispatch: '',
+      hardTimeZone: '',
+      id: '',
+      mettelId: '',
+      onSiteContact: {
+        city: '',
+        name: '',
+        phoneNumber: '',
+        site: '',
+        state: '',
+        street: '',
+        zip: ''
+      },
+      requester: {
+        department: '',
+        departmentPhoneNumber: '',
+        email: '',
+        groupEmail: '',
+        name: '',
+        phoneNumber: ''
+      },
+      slaLevel: '',
+      status: '',
+      timeDispatch: '',
+      timeZone: '',
+      vendor: ''
+    });
+  });
+
   it('check dispatchLitInAdapter for getAll', () => {
-    expect(dispatchLitInAdapter(dispatchLitList.data[0])).toMatchObject(
-      mocksInAdapterLitAllDispatchResult
-    );
+    expect(
+      dispatchLitInAdapterGeAll({
+        ...dispatchLitList.data[0],
+        vendor: config.VENDORS.LIT
+      })
+    ).toMatchObject(mocksInAdapterLitAllDispatchResult);
   });
 
   it('check dispatchLitOutAdapter', () => {

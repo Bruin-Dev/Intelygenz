@@ -1,89 +1,46 @@
-// NOTE: ORs are because we receive different API data: GET ONE and GET ALL
+import { getTimeZoneShortName } from '../../config/constants/dispatch.constants';
+
 export const dispatchLitInAdapter = data => ({
-  // site_survey_quote_required, job_site_contact_name, hard_time_of_dispatch_local, hard_time_of_dispatch_time_zone_local
-  id: data.id || data.dispatch_number || '',
+  id: data.id || '',
   vendor: (data.vendor && data.vendor.toUpperCase()) || '',
   slaLevel: data.slaLevel || '',
-  status:
-    (data.dispatch && data.dispatch.dispatch_status) ||
-    data.dispatch_status ||
-    '',
-  dateDispatch:
-    (data.dispatch && data.dispatch.date_of_dispatch) ||
-    data.date_of_dispatch ||
-    '',
-  mettelId:
-    (data.dispatch && data.dispatch.mettel_bruin_ticket_id) ||
-    data.mettel_bruin_ticket_id ||
-    '',
-  timeDispatch:
-    (data.dispatch && data.dispatch.time_of_dispatch) ||
-    data.time_of_dispatch ||
-    '',
-  timeZone: (data.dispatch && data.dispatch.time_zone) || data.time_zone || '',
+  status: (data.dispatch && data.dispatch.dispatch_status) || '',
+  dateDispatch: (data.dispatch && data.dispatch.date_of_dispatch) || '',
+  mettelId: (data.dispatch && data.dispatch.mettel_bruin_ticket_id) || '',
+  timeDispatch: (data.dispatch && data.dispatch.time_of_dispatch) || '',
+  timeZone: (data.dispatch && data.dispatch.time_zone) || '',
   turnUp: (data.dispatch && data.dispatch.turn_up) || '',
   hardTimeDispatch: (data.dispatch && data.dispatch.hardTimeDispatch) || '',
   hardTimeZone: (data.dispatch && data.dispatch.hardTimeZone) || '',
   requester: {
-    name:
-      (data.dispatch && data.dispatch.name_of_mettel_requester) ||
-      data.name_of_mettel_requester ||
-      '',
+    name: (data.dispatch && data.dispatch.name_of_mettel_requester) || '',
     groupEmail: (data.dispatch && data.dispatch.mettel_group_email) || '',
-    email:
-      (data.dispatch && data.dispatch.mettel_requester_email) ||
-      data.mettel_requester_email ||
-      '',
-    department:
-      (data.dispatch && data.dispatch.mettel_department) ||
-      data.mettel_department ||
-      '',
+    email: (data.dispatch && data.dispatch.mettel_requester_email) || '',
+    department: (data.dispatch && data.dispatch.mettel_department) || '',
     phoneNumber:
       (data.dispatch && data.dispatch.mettel_requester_phone_number) || '',
     departmentPhoneNumber:
       (data.dispatch && data.dispatch.mettel_department_phone_number) || ''
   },
   onSiteContact: {
-    site: (data.dispatch && data.dispatch.job_site) || data.job_site || '',
-    street:
-      (data.dispatch && data.dispatch.job_site_street) ||
-      data.job_site_street ||
-      '',
-    city:
-      (data.dispatch && data.dispatch.job_site_city) ||
-      data.job_site_city ||
-      '',
+    site: (data.dispatch && data.dispatch.job_site) || '',
+    street: (data.dispatch && data.dispatch.job_site_street) || '',
+    city: (data.dispatch && data.dispatch.job_site_city) || '',
     state:
       (data.dispatch && data.dispatch.job_site_state) ||
       data.job_site_state ||
       '',
-    zip:
-      (data.dispatch && data.dispatch.job_site_zip_code) ||
-      data.job_site_zip_code ||
-      '',
-    phoneNumber:
-      (data.dispatch && data.dispatch.job_site_contact_number) ||
-      data.job_site_contact_number ||
-      '',
-    name:
-      (data.dispatch && data.dispatch.job_site_contact_name) ||
-      data.job_site_contact_name ||
-      ''
+    zip: (data.dispatch && data.dispatch.job_site_zip_code) || '',
+    phoneNumber: (data.dispatch && data.dispatch.job_site_contact_number) || '',
+    name: (data.dispatch && data.dispatch.job_site_contact_name) || ''
   },
   details: {
     serviceType: '',
     instructions:
-      (data.dispatch && data.dispatch.mettel_tech_call_in_instructions) ||
-      data.mettel_tech_call_in_instructions ||
-      '',
+      (data.dispatch && data.dispatch.mettel_tech_call_in_instructions) || '',
     materials:
-      (data.dispatch && data.dispatch.materials_needed_for_dispatch) ||
-      data.materials_needed_for_dispatch ||
-      '',
-    information:
-      (data.dispatch && data.dispatch.scope_of_work) ||
-      data.scope_of_work ||
-      '',
+      (data.dispatch && data.dispatch.materials_needed_for_dispatch) || '',
+    information: (data.dispatch && data.dispatch.scope_of_work) || '',
     specialMaterials: '',
     fieldEngineer:
       data.dispatch &&
@@ -96,7 +53,6 @@ export const dispatchLitInAdapter = data => ({
   }
 });
 
-// Todo: trim in all fields
 export const dispatchLitOutAdapter = data => ({
   date_of_dispatch: data.dateDispatch,
   site_survey_quote_required: false,
@@ -120,4 +76,16 @@ export const dispatchLitOutAdapter = data => ({
   mettel_requester_email: data.emailRequester,
   mettel_requester_phone_number: data.phoneNumberRequester,
   mettel_department_phone_number: data.phoneNumber
+});
+
+// Todo delete null and undefined
+export const dispatchLitInAdapterGeAll = data => ({
+  bruinTicketId: data.mettel_bruin_ticket_id || '',
+  customerLocation: `${data.job_site_street} ${data.job_site_city} ${data.job_site_state} ${data.job_site_zip_code}`,
+  vendor: (data.vendor && data.vendor.toUpperCase()) || '',
+  vendorDispatchId: data.dispatch_number || '',
+  scheduledTime: `${data.date_of_dispatch} ${
+    data.time_of_dispatch
+  } ${getTimeZoneShortName(data.time_zone)}`,
+  status: data.dispatch_status || ''
 });

@@ -1,27 +1,74 @@
 import {
   dispatchCtsInAdapter,
+  dispatchCtsInAdapterGeAll,
   dispatchCtsOutAdapter
 } from './cts-dispatch.adapter';
 
 import { dispatchCtsList } from '../mocks/data/cts/list-dispatch.mock';
-import { mocksInAdapterCtsSingleDispatchResult } from '../mocks/data/cts/result-adapter-in-dispatch.datatest';
+import {
+  ctsDispatchMockGetAll,
+  ctsDispatchMockGetOne
+} from '../mocks/data/cts/result-adapter-in-dispatch.datatest';
 import { mockCtsSingleDispatch } from '../mocks/data/cts/single-dispatch.mock';
 import { config } from '../../config/config';
 
 describe('cts dispatch adapter tests', () => {
-  it('check dispatchCtsInAdapter for get', () => {
+  it('check dispatchCtsInAdapter for get(single item)', () => {
     expect(dispatchCtsInAdapter(mockCtsSingleDispatch)).toMatchObject(
-      mocksInAdapterCtsSingleDispatchResult
+      ctsDispatchMockGetOne
     );
+  });
+
+  it('check dispatchCtsInAdapter for get(single item) without data', () => {
+    expect(dispatchCtsInAdapter({})).toMatchObject({
+      id: '',
+      vendor: '',
+      slaLevel: '',
+      status: '',
+      dateDispatch: '',
+      mettelId: '',
+      timeDispatch: '',
+      timeZone: '',
+      turnUp: '',
+      hardTimeDispatch: '',
+      hardTimeZone: '',
+      requester: {
+        name: '',
+        groupEmail: '',
+        email: '',
+        department: '',
+        phoneNumber: '',
+        departmentPhoneNumber: ''
+      },
+      onSiteContact: {
+        site: '',
+        street: '',
+        city: '',
+        state: '',
+        zip: '',
+        phoneNumber: '',
+        name: ''
+      },
+      details: {
+        serviceType: '',
+        instructions: '',
+        materials: '',
+        information: '',
+        specialMaterials: '',
+        fieldEngineer: '',
+        fieldEngineerContactNumber: '',
+        res: ''
+      }
+    });
   });
 
   it('check dispatchCtsInAdapter for getAll', () => {
     expect(
-      dispatchCtsInAdapter({
+      dispatchCtsInAdapterGeAll({
         ...dispatchCtsList.data[0],
         vendor: config.VENDORS.CTS
       })
-    ).toMatchObject(mocksInAdapterCtsSingleDispatchResult);
+    ).toMatchObject(ctsDispatchMockGetAll);
   });
 
   it('check dispatchCtsOutAdapter', () => {

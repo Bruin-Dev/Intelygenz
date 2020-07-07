@@ -2,10 +2,12 @@ import { API_URLS } from '../api.config';
 import axiosInstance from '../api';
 import {
   dispatchLitInAdapter,
+  dispatchLitInAdapterGeAll,
   dispatchLitOutAdapter
 } from './lit-dispatch.adapter';
 import {
   dispatchCtsInAdapter,
+  dispatchCtsInAdapterGeAll,
   dispatchCtsOutAdapter
 } from './cts-dispatch.adapter';
 import { config } from '../../config/config';
@@ -21,7 +23,7 @@ export class DispatchService {
         const res = await this.axiosI.get(API_URLS.DISPATCH_LIT);
 
         return res.data.list_dispatch.map(dispatch =>
-          dispatchLitInAdapter({
+          dispatchLitInAdapterGeAll({
             ...dispatch,
             vendor: res.data.vendor
           })
@@ -32,7 +34,7 @@ export class DispatchService {
         const res = await this.axiosI.get(API_URLS.DISPATCH_CTS);
 
         return res.data.list_dispatch.map(dispatch =>
-          dispatchCtsInAdapter({
+          dispatchCtsInAdapterGeAll({
             ...dispatch,
             vendor: res.data.vendor
           })

@@ -16,6 +16,8 @@ export const mockLitSingleDispatch = {
     materials_needed_for_dispatch: 'test',
     mettel_bruin_ticket_id: 'BRUINID5478525',
     mettel_department: 'T1 Repair',
+    mettel_department_phone_number: '564894568689689',
+    mettel_requester_phone_number: '5656456',
     mettel_requester_email: 'requester@mettel.net',
     mettel_tech_call_in_instructions: 'update callin instruction',
     name_of_mettel_requester: 'Test User1',

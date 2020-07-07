@@ -8,7 +8,6 @@ import { DispatchService } from '../services/dispatch/dispatch.service';
 import { privateRoute } from '../components/privateRoute/PrivateRoute';
 import Menu from '../components/menu/Menu';
 import { StatusButton } from '../ui/components/status/StatusButton';
-import { getTimeZoneShortName } from '../config/constants/dispatch.constants';
 import { Routes } from '../config/routes';
 import { config } from '../config/config';
 import './index.scss';
@@ -19,58 +18,45 @@ const columns = [
     selector: 'color',
     cell: row => (
       <span
-        className={
-          row.vendor.toUpperCase() === config.VENDORS.CTS
-            ? 'cts-row'
-            : 'lit-row'
-        }
+        className={row.vendor === config.VENDORS.CTS ? 'cts-row' : 'lit-row'}
       />
     )
   },
   {
     name: 'Bruin Ticket ID',
-    selector: 'mettelId',
+    selector: 'bruinTicketId',
     sortable: true
   },
   {
     name: 'Customer/Location',
-    cell: row => (
-      <span>{`${row.onSiteContact.street} ${row.onSiteContact.city} ${row.onSiteContact.state} ${row.onSiteContact.zip}`}</span>
-    )
+    selector: 'customerLocation',
+    sortable: true
   },
   {
     name: 'Vendor',
     selector: 'vendor',
-    sortable: true,
-    cell: row => <span>{row.vendor.toUpperCase()}</span>
+    sortable: true
   },
   {
     name: 'Vendor Dispatch ID',
-    selector: 'id',
-    sortable: true, // Todo: delete uppercase
+    selector: 'vendorDispatchId',
+    sortable: true,
     cell: row => (
       <a
         className="link"
-        data-test-id={`dispatchId-${row.id}-link`}
-        href={`${Routes.DISPATCH()}/${row.id}?vendor=${
-          row.vendor === config.VENDORS.CTS
-            ? config.VENDORS.CTS
-            : config.VENDORS.LIT
+        data-test-id={`dispatchId-${row.vendorDispatchId}-link`}
+        href={`${Routes.DISPATCH()}/${row.vendorDispatchId}?vendor=${
+          row.vendor
         }`}
       >
-        {row.id}
+        {row.vendorDispatchId}
       </a>
     )
   },
   {
     name: 'Scheduled Time',
-    selector: 'dateDispatch',
-    sortable: true,
-    cell: row => (
-      <span>{`${row.dateDispatch} ${row.timeDispatch} ${getTimeZoneShortName(
-        row.timeZone
-      )}`}</span>
-    )
+    selector: 'scheduledTime',
+    sortable: true
   },
   {
     name: 'Dispatch Status',
@@ -87,7 +73,7 @@ function Index({ authToken }) {
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
   const [searchData, setSearchData] = useState(false);
-  const [paramBySearch, setParamBySearch] = useState('id');
+  const [paramBySearch, setParamBySearch] = useState('vendorDispatchId');
 
   const getAllDispatches = async () => {
     setIsLoading(true);
@@ -111,7 +97,11 @@ function Index({ authToken }) {
 
   const searchDispatch = debounce(textSearch => {
     let auxdata = [...data];
-    auxdata = auxdata.filter(obj => obj[paramBySearch].search(textSearch) > -1);
+    auxdata = auxdata.filter(obj => {
+      const param = obj[paramBySearch].toString().toUpperCase();
+      const textSearchUpperCase = textSearch ? textSearch.toUpperCase() : '';
+      return param.search(textSearchUpperCase) > -1;
+    });
     setSearchData(auxdata);
   }, 300);
 
@@ -157,7 +147,7 @@ function Index({ authToken }) {
           )}
         </div>
 
-        <div className=" bg-white rounded flex items-center w-full p-3 shadow-sm border border-gray-200">
+        <div className=" bg-white rounded flex items-center w-full p-2 mt-3 shadow-sm border border-gray-200">
           <button type="button" className="outline-none focus:outline-none">
             <svg
               className=" w-5 text-gray-600 h-5 cursor-pointer"
@@ -182,12 +172,13 @@ function Index({ authToken }) {
               className="text-sm outline-none focus:outline-none bg-transparent"
               onChange={e => setParamBySearch(e.target.value)}
             >
-              <option value="id" selected>
+              <option value="vendorDispatchId" selected>
                 Vendor Dispatch ID
               </option>
-              <option value="mettelId">Bruin Ticket ID</option>
+              <option value="bruinTicketId">Bruin Ticket ID</option>
+              <option value="customerLocation">Customer/Location</option>
               <option value="vendor">Vendor</option>
-              <option value="dataDispatch">Scheduled Time</option>
+              <option value="scheduledTime">Scheduled Time</option>
               <option value="status">Dispatch Status</option>
             </select>
           </div>
@@ -204,7 +195,9 @@ function Index({ authToken }) {
           defaultSortAsc={false}
           onRowClicked={rowData =>
             router.push(
-              `${Routes.DISPATCH()}/${rowData.id}?vendor=${rowData.vendor}`
+              `${Routes.DISPATCH()}/${rowData.vendorDispatchId}?vendor=${
+                rowData.vendor
+              }`
             )
           }
         />
