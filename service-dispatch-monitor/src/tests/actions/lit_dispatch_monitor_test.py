@@ -18,15 +18,7 @@ from shortuuid import uuid
 from application.actions.lit_dispatch_monitor import LitDispatchMonitor
 from application.actions import lit_dispatch_monitor as lit_dispatch_monitor_module
 
-from application.repositories.lit_repository import LitRepository
-
-from application.templates.lit.sms.dispatch_confirmed import lit_get_dispatch_confirmed_sms, \
-    lit_get_tech_12_hours_before_sms, lit_get_tech_2_hours_before_sms, lit_get_dispatch_confirmed_sms_tech, \
-    lit_get_tech_12_hours_before_sms_tech, lit_get_tech_2_hours_before_sms_tech
-
 from application.repositories.utils_repository import UtilsRepository
-
-from application.templates.lit.sms.tech_on_site import lit_get_tech_on_site_sms
 from config import testconfig
 
 

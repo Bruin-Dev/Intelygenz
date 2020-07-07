@@ -776,7 +776,7 @@ def cts_dispatch_monitor(cts_repository):
     config = testconfig
     bruin_repository = Mock()
 
-    _cts_dispatch_monitor = CtsDispatchMonitor(config, cts_repository._redis_client, cts_repository._event_bus,
+    _cts_dispatch_monitor = CtsDispatchMonitor(config, redis_client, cts_repository._event_bus,
                                                scheduler, cts_repository._logger, cts_repository, bruin_repository,
                                                cts_repository._notifications_repository)
     return _cts_dispatch_monitor
