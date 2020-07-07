@@ -526,8 +526,9 @@ class TestCtsRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = '#*Automation Engine*#\nDispatch Management - Field Engineer On Site\n\n' \
-                   'Michael J. Fox has arrived\n'
+        sms_note = '#*Automation Engine*#\nDispatch Management - Field Engineer On Site\n' \
+                   'SMS notification sent to +1987654327\n\n' \
+                   'The field engineer, Michael J. Fox has arrived.\n'
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
 
@@ -549,8 +550,8 @@ class TestCtsRepository:
             'body': append_note_response,
             'status': 400
         }
-        sms_note = '#*Automation Engine*#\nDispatch Management - Field Engineer On Site\n\n' \
-                   'Michael J. Fox has arrived\n'
+        sms_note = '#*Automation Engine*#\nDispatch Management - Field Engineer On Site\n' \
+                   'SMS notification sent to +1987654327\n\nThe field engineer, Michael J. Fox has arrived.\n'
 
         send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
                                            f'- SMS tech on site note not appended'

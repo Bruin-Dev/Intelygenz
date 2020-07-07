@@ -669,7 +669,8 @@ class LitRepository:
 
     async def append_tech_on_site_sms_note(self, dispatch_number, ticket_id, sms_to, field_engineer_name) -> bool:
         sms_note_data = {
-            'field_engineer_name': field_engineer_name
+            'field_engineer_name': field_engineer_name,
+            'phone': sms_to
         }
         sms_note = lit_get_tech_on_site_note(sms_note_data)
         append_sms_note_response = await self._bruin_repository.append_note_to_ticket(

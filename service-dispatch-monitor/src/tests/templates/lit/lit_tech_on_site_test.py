@@ -2,14 +2,16 @@ from application.templates.lit.lit_tech_on_site import lit_get_tech_on_site_note
 
 expected_tech_on_site_note_note = """#*Automation Engine*#
 Dispatch Management - Field Engineer On Site
+SMS notification sent to +12123595129
 
-Michael J. Fox has arrived
+The field engineer, Michael J. Fox has arrived.
 """
 
 
 def lit_get_dispatch_requested_note_test():
     body = {
-      'field_engineer_name': 'Michael J. Fox'
+        'field_engineer_name': 'Michael J. Fox',
+        'phone': '+12123595129'
     }
     tech_on_site_note = lit_get_tech_on_site_note(body)
 
