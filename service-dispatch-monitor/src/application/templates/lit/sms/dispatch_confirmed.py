@@ -1,4 +1,4 @@
-LIT_SMS_DISPATCH_CONFIRMED = """This is an automated message from MetTel customer support.
+LIT_SMS_DISPATCH_CONFIRMED = """This is an automated message from MetTel.
 
 A dispatch has been confirmed for your location on {date_of_dispatch} @ {time_of_dispatch} {time_zone}.
 """
@@ -29,7 +29,7 @@ def lit_get_dispatch_confirmed_sms_tech(body):
     )
 
 
-LIT_SMS_DISPATCH_TECH_12_HOURS_BEFORE_SMS = """This is an automated message from MetTel customer support.
+LIT_SMS_DISPATCH_TECH_12_HOURS_BEFORE_SMS = """This is an automated message from MetTel.
 
 A field engineer will arrive in 12 hours, {date_of_dispatch} @ {time_of_dispatch} {time_zone}, at your location.
 
@@ -62,7 +62,7 @@ def lit_get_tech_12_hours_before_sms_tech(body):
     )
 
 
-LIT_SMS_DISPATCH_TECH_2_HOURS_BEFORE_SMS = """This is an automated message from MetTel customer support.
+LIT_SMS_DISPATCH_TECH_2_HOURS_BEFORE_SMS = """This is an automated message from MetTel.
 
 A field engineer will arrive in 2 hours, {date_of_dispatch} @ {time_of_dispatch} {time_zone}, at your location.
 

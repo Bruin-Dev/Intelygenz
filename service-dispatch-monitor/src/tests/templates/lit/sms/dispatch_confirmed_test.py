@@ -4,7 +4,7 @@ from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_12_hou
 from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_2_hours_before_sms
 
 
-expected_dispatch_confirmed_sms = """This is an automated message from MetTel customer support.
+expected_dispatch_confirmed_sms = """This is an automated message from MetTel.
 
 A dispatch has been confirmed for your location on 2019-11-14 @ 6PM-8PM Pacific Time.
 """
@@ -41,7 +41,7 @@ def lit_get_dispatch_confirmed_sms_tech_test():
     assert dispatch_confirmed_sms_tech == expected_dispatch_confirmed_sms_tech
 
 
-expected_tech_12_hours_before_sms = """This is an automated message from MetTel customer support.
+expected_tech_12_hours_before_sms = """This is an automated message from MetTel.
 
 A field engineer will arrive in 12 hours, 2019-11-14 @ 6PM-8PM Pacific Time, at your location.
 
@@ -88,7 +88,7 @@ def lit_get_tech_12_hours_before_sms_tech_test():
     assert tech_12_hours_before_sms_tech == expected_tech_12_hours_before_sms_tech
 
 
-expected_tech_2_hours_before_sms = """This is an automated message from MetTel customer support.
+expected_tech_2_hours_before_sms = """This is an automated message from MetTel.
 
 A field engineer will arrive in 2 hours, 2019-11-14 @ 6PM-8PM Pacific Time, at your location.
 
