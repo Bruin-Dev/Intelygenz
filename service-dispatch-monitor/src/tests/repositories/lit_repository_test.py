@@ -1025,7 +1025,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = '#*Automation Engine*#\nDispatch Management - Dispatch Confirmed\n' \
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch Management - Dispatch Confirmed\n' \
                    'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                    'Field Engineer\nJoe Malone\n+12123595129\n'
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
@@ -1049,13 +1049,14 @@ class TestLitRepository:
         }
         note_data = {
             'vendor': 'LIT',
+            'dispatch_number': dispatch_number,
             'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'tech_name': dispatch_confirmed.get('Tech_First_Name'),
             'tech_phone': dispatch_confirmed.get('Tech_Mobile_Number')
         }
-        sms_note = '#*Automation Engine*#\nDispatch Management - Dispatch Confirmed\n' \
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch Management - Dispatch Confirmed\n' \
                    'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                    'Field Engineer\nJoe Malone\n+12123595129\n'
 
@@ -1085,7 +1086,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = '#*Automation Engine*#\nDispatch confirmation SMS sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch confirmation SMS sent to +1987654327\n'
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
 
@@ -1105,7 +1106,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 400
         }
-        sms_note = '#*Automation Engine*#\nDispatch confirmation SMS sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch confirmation SMS sent to +1987654327\n'
 
         send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
                                            f'- SMS Confirmed note not appended'
@@ -1132,7 +1133,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch confirmation SMS tech sent to +1987654327\n'
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
 
@@ -1152,7 +1153,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 400
         }
-        sms_note = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch confirmation SMS tech sent to +1987654327\n'
 
         send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
                                            f'- Tech SMS Confirmed note not appended'
@@ -1179,7 +1180,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = '#*Automation Engine*#\nDispatch 12h prior reminder SMS sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch 12h prior reminder SMS sent to +1987654327\n'
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
 
@@ -1199,7 +1200,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 400
         }
-        sms_note = '#*Automation Engine*#\nDispatch 12h prior reminder SMS sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch 12h prior reminder SMS sent to +1987654327\n'
 
         send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
                                            f'- SMS 12 hours note not appended'
@@ -1226,7 +1227,8 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = '#*Automation Engine*#\nDispatch 12h prior reminder tech SMS sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch 12h prior reminder tech ' \
+                   'SMS sent to +1987654327\n'
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
 
@@ -1246,7 +1248,8 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 400
         }
-        sms_note = '#*Automation Engine*#\nDispatch 12h prior reminder tech SMS sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch 12h prior reminder tech ' \
+                   'SMS sent to +1987654327\n'
 
         send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
                                            f'- SMS tech 12 hours note not appended'
@@ -1273,7 +1276,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = '#*Automation Engine*#\nDispatch 2h prior reminder SMS sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch 2h prior reminder SMS sent to +1987654327\n'
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
 
@@ -1293,7 +1296,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 400
         }
-        sms_note = '#*Automation Engine*#\nDispatch 2h prior reminder SMS sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch 2h prior reminder SMS sent to +1987654327\n'
 
         send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
                                            f'- SMS 2 hours note not appended'
@@ -1320,7 +1323,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = '#*Automation Engine*#\nDispatch 2h prior reminder tech SMS sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch 2h prior reminder tech SMS sent to +1987654327\n'
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
 
@@ -1340,7 +1343,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 400
         }
-        sms_note = '#*Automation Engine*#\nDispatch 2h prior reminder tech SMS sent to +1987654327\n'
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch 2h prior reminder tech SMS sent to +1987654327\n'
 
         send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
                                            f'- SMS tech 2 hours note not appended'
@@ -1367,7 +1370,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 200
         }
-        sms_note = '#*Automation Engine*#\nDispatch Management - Field Engineer On Site\n' \
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch Management - Field Engineer On Site\n' \
                    'SMS notification sent to +1987654327\n\nThe field engineer, Joe Malone has arrived.\n'
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
@@ -1389,7 +1392,7 @@ class TestLitRepository:
             'body': append_note_response,
             'status': 400
         }
-        sms_note = '#*Automation Engine*#\nDispatch Management - Field Engineer On Site\n' \
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch Management - Field Engineer On Site\n' \
                    'SMS notification sent to +1987654327\n\nThe field engineer, Joe Malone has arrived.\n'
 
         send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \

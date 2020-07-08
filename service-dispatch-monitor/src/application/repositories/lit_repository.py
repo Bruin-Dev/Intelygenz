@@ -496,6 +496,7 @@ class LitRepository:
                           f"- Adding confirm note")
         note_data = {
             'vendor': 'LIT',
+            'dispatch_number': dispatch_number,
             'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
             'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
@@ -525,6 +526,7 @@ class LitRepository:
 
     async def append_confirmed_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': dispatch_number,
             'phone_number': sms_to
         }
         sms_note = lit_get_dispatch_confirmed_sms_note(sms_note_data)
@@ -549,6 +551,7 @@ class LitRepository:
 
     async def append_confirmed_sms_tech_note(self, dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': dispatch_number,
             'phone_number': sms_to
         }
         sms_note = lit_get_dispatch_confirmed_sms_tech_note(sms_note_data)
@@ -573,6 +576,7 @@ class LitRepository:
 
     async def append_tech_12_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': dispatch_number,
             'phone_number': sms_to
         }
         sms_note = lit_get_tech_12_hours_before_sms_note(sms_note_data)
@@ -598,6 +602,7 @@ class LitRepository:
 
     async def append_tech_12_sms_tech_note(self, dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': dispatch_number,
             'phone_number': sms_to
         }
         sms_note = lit_get_tech_12_hours_before_sms_tech_note(sms_note_data)
@@ -623,6 +628,7 @@ class LitRepository:
 
     async def append_tech_2_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': dispatch_number,
             'phone_number': sms_to
         }
         sms_note = lit_get_tech_2_hours_before_sms_note(sms_note_data)
@@ -646,6 +652,7 @@ class LitRepository:
 
     async def append_tech_2_sms_tech_note(self, dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': dispatch_number,
             'phone_number': sms_to
         }
         sms_note = lit_get_tech_2_hours_before_sms_tech_note(sms_note_data)
@@ -669,6 +676,7 @@ class LitRepository:
 
     async def append_tech_on_site_sms_note(self, dispatch_number, ticket_id, sms_to, field_engineer_name) -> bool:
         sms_note_data = {
+            'dispatch_number': dispatch_number,
             'field_engineer_name': field_engineer_name,
             'phone': sms_to
         }

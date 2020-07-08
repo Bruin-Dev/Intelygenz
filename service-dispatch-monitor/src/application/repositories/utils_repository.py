@@ -30,3 +30,15 @@ class UtilsRepository:
             condition=lambda note: watermark in note.get('noteValue'),
             fallback=None
         )
+
+    @staticmethod
+    def find_dispatch_number_watermark(dispatch_number_note, dispatch_number, watermark):
+        if dispatch_number_note and dispatch_number_note.get('noteValue'):
+            lines = dispatch_number_note.get('noteValue').splitlines()
+            for line in lines:
+                if watermark in line:
+                    dispatch_number_line = line.replace(
+                        f"{watermark} ", "").strip().replace(" ", "")
+                    if dispatch_number in dispatch_number_line:
+                        return dispatch_number_line
+        return ''

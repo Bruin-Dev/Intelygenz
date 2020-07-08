@@ -2,7 +2,7 @@ from application.templates.lit.lit_dispatch_confirmed import lit_get_dispatch_co
 from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_12_hours_before_sms_note
 from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_2_hours_before_sms_note
 
-expected_dispatch_confirmed_note = """#*Automation Engine*#
+expected_dispatch_confirmed_note = """#*Automation Engine*# DIS37266
 Dispatch Management - Dispatch Confirmed
 Dispatch scheduled for 2019-11-14 @ 6PM-8PM Pacific Time
 
@@ -14,6 +14,7 @@ Michael J. Fox
 
 def lit_get_dispatch_requested_note_test():
     body = {
+      'dispatch_number': 'DIS37266',
       'date_of_dispatch': '2019-11-14',
       'time_of_dispatch': '6PM-8PM',
       'time_zone': 'Pacific Time',
@@ -25,13 +26,14 @@ def lit_get_dispatch_requested_note_test():
     assert dispatch_confirmed_note == expected_dispatch_confirmed_note
 
 
-expected_tech_12_hours_before_sms_note = """#*Automation Engine*#
+expected_tech_12_hours_before_sms_note = """#*Automation Engine*# DIS37266
 Dispatch 12h prior reminder SMS sent to +16666666666
 """
 
 
 def lit_get_tech_12_hours_before_sms_note_test():
     body = {
+        'dispatch_number': 'DIS37266',
         'phone_number': '+16666666666'
     }
     tech_12_hours_before_sms_note = lit_get_tech_12_hours_before_sms_note(body)
@@ -39,13 +41,14 @@ def lit_get_tech_12_hours_before_sms_note_test():
     assert tech_12_hours_before_sms_note == expected_tech_12_hours_before_sms_note
 
 
-expected_tech_2_hours_before_sms_note = """#*Automation Engine*#
+expected_tech_2_hours_before_sms_note = """#*Automation Engine*# DIS37266
 Dispatch 2h prior reminder SMS sent to +16666666666
 """
 
 
 def lit_get_tech_2_hours_before_sms_note_test():
     body = {
+        'dispatch_number': 'DIS37266',
         'phone_number': '+16666666666'
     }
     tech_2_hours_before_sms_note = lit_get_tech_2_hours_before_sms_note(body)

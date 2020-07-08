@@ -199,12 +199,6 @@ class TestLitDispatchMonitor:
             'status': 200
         }
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
-        sms_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595126\n'
-        sms_note_3 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595126\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-        sms_tech_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595126\n'
-
         dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
         dispatch_number_3 = dispatch_confirmed_tech_phone_none.get('Dispatch_Number')
@@ -212,15 +206,23 @@ class TestLitDispatchMonitor:
         ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
         ticket_id_3 = dispatch_confirmed_tech_phone_none.get('MetTel_Bruin_TicketID')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\nDispatch confirmation SMS sent to +12123595129\n'
+        sms_note_2 = f'#*Automation Engine*# {dispatch_number_2}\nDispatch confirmation SMS sent to +12123595126\n'
+        sms_note_3 = f'#*Automation Engine*# {dispatch_number_3}\nDispatch confirmation SMS sent to +12123595126\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\nDispatch confirmation SMS tech ' \
+                          'sent to +12123595129\n'
+        sms_tech_note_2 = f'#*Automation Engine*# {dispatch_number_2}\nDispatch confirmation SMS tech ' \
+                          'sent to +12123595126\n'
+
+        confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                            'Field Engineer\nJoe Malone\n+12123595129\n'
-        confirmed_note_2 = '#*Automation Engine*#\n' \
+        confirmed_note_2 = f'#*Automation Engine*# {dispatch_number_2}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 10:30AM-11:30AM Eastern Time\n\n' \
                            'Field Engineer\nHulk Hogan\n+12123595126\n'
-        confirmed_note_3 = '#*Automation Engine*#\n' \
+        confirmed_note_3 = f'#*Automation Engine*# {dispatch_number_3}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 09:30AM-11:30AM Central Time\n\n' \
                            'Field Engineer\nJoe Malone\n+12123595126\n'

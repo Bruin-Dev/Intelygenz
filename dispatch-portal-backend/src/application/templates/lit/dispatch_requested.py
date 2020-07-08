@@ -1,9 +1,9 @@
-LIT_DISPATCH_REQUESTED = """#*Automation Engine*#
+LIT_DISPATCH_REQUESTED = """#*Automation Engine*# {dispatch_number}
 Dispatch Management - Dispatch Requested
 
 Please see the summary below.
 --
-Dispatch Number: {dispatch_number}
+Dispatch Number: {link_dispatch_number}
 Date of Dispatch: {date_of_dispatch}
 Time of Dispatch (Local): {time_of_dispatch}
 Time Zone (Local): {time_zone}
@@ -37,7 +37,8 @@ def get_dispatch_requested_note(body, dispatch_number):
         f"https://master.mettel-automation.net/dispatch_portal/dispatch/{dispatch_number}"
     )
     return LIT_DISPATCH_REQUESTED.format(
-        dispatch_number=link_to_dispatch,
+        dispatch_number=dispatch_number,
+        link_dispatch_number=link_to_dispatch,
         date_of_dispatch=body.get('date_of_dispatch'),
         time_of_dispatch=body.get('time_of_dispatch'),
         time_zone=body.get('time_zone'),
