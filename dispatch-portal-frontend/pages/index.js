@@ -147,7 +147,7 @@ function Index({ authToken }) {
           )}
         </div>
 
-        <div className=" bg-white rounded flex items-center w-full p-2 mt-3 shadow-sm border border-gray-200">
+        <div className=" bg-white rounded flex items-center w-full p-2 mt-3 mb-5 shadow-sm border border-gray-200">
           <button type="button" className="outline-none focus:outline-none">
             <svg
               className=" w-5 text-gray-600 h-5 cursor-pointer"

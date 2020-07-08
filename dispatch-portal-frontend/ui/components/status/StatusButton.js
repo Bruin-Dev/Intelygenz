@@ -37,6 +37,10 @@ export const TYPES_STATUS = {
   completePendingCollateral: {
     value: 'Complete Pending Collateral',
     color: 'bg-blue-500'
+  },
+  cancelled: {
+    value: 'Cancelled',
+    color: 'bg-red-500'
   }
 };
 
@@ -72,6 +76,9 @@ export const StatusButton = ({ status }) => {
         return;
       case TYPES_STATUS.completePendingCollateral.value:
         setButtonClass(TYPES_STATUS.completePendingCollateral.color);
+        return;
+      case TYPES_STATUS.cancelled.value:
+        setButtonClass(TYPES_STATUS.cancelled.color);
         return;
       default:
         setButtonClass(TYPES_STATUS.newDispatch.color);

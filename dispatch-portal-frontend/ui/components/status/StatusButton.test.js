@@ -107,4 +107,15 @@ describe('Status Button test', () => {
 
     button.toHaveClass(TYPES_STATUS.completePendingCollateral.color);
   });
+
+  it(`check differents status:${TYPES_STATUS.cancelled.value}`, () => {
+    const { getByTestId } = render(
+      <StatusButton status={TYPES_STATUS.cancelled.value} />
+    );
+
+    const button = expect(getByTestId('statusButton-component'));
+    button.toHaveTextContent(TYPES_STATUS.cancelled.value);
+
+    button.toHaveClass(TYPES_STATUS.cancelled.color);
+  });
 });

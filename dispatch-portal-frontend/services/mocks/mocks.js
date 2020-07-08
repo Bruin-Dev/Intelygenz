@@ -39,6 +39,11 @@ mockadapter
   .onGet(new RegExp(`${API_URLS.DISPATCH_LIT}/*`))
   .reply(200, mockLitSingleDispatch);
 
+mockadapter.onPatch(new RegExp(`${API_URLS.DISPATCH_LIT}/*`)).reply(204, {
+  ...mockLitSingleDispatch,
+  dispatch: { ...mockLitSingleDispatch.dispatch, dispatch_status: 'Cancelled' }
+});
+
 /** ****
  *
  * CTS MOCKS
@@ -55,4 +60,12 @@ mockadapter.onPost(API_URLS.DISPATCH_CTS).reply(404);
 mockadapter
   .onGet(new RegExp(`${API_URLS.DISPATCH_CTS}/*`))
   .reply(200, mockCtsSingleDispatch);
+
+mockadapter.onPatch(new RegExp(`${API_URLS.DISPATCH_CTS}/*`)).reply(204, {
+  ...mockCtsSingleDispatch,
+  dispatch: {
+    ...mockCtsSingleDispatch.dispatch,
+    status__c: 'Cancelled'
+  }
+});
 export default axiosInstanceMocks;

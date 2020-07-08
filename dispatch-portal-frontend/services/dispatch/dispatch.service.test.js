@@ -215,6 +215,68 @@ describe('dispatch service tests', () => {
 
   /** ***
    *
+   * UPDATE DISPATCH
+   * * */
+  it('fetch UPDATE DISPATCH: successfully data from an API(LIT)', async () => {
+    const apiResponseMock = {
+      id: 123,
+      dispatch: { dispatch_status: 'Cancelled' }
+    };
+    mockadapter
+      .onPatch(new RegExp(`${API_URLS.DISPATCH_LIT}/*`))
+      .reply(204, apiResponseMock);
+
+    const res = await new DispatchService(axiosIMocksTest).update(
+      123,
+      config.VENDORS.LIT,
+      { status: 'Cancelled' }
+    );
+
+    expect(res.status).toBe(apiResponseMock.dispatch.dispatch_status);
+  });
+  it('fetch UPDATE DISPATCH: successfully data from an API(CTS)', async () => {
+    const apiResponseMock = { id: 123, dispatch: { status__c: 'Cancelled' } };
+    mockadapter
+      .onPatch(new RegExp(`${API_URLS.DISPATCH_CTS}/*`))
+      .reply(204, apiResponseMock);
+
+    const res = await new DispatchService(axiosIMocksTest).update(
+      123,
+      config.VENDORS.CTS,
+      { status: 'Cancelled' }
+    );
+
+    expect(res.status).toBe(apiResponseMock.dispatch.status__c);
+  });
+
+  it('fetches UPDATE DISPATCH: error 400 from an API', async () => {
+    mockadapter.onPatch(new RegExp(`${API_URLS.DISPATCH_LIT}/*`)).reply(400);
+
+    const res = await new DispatchService(axiosIMocksTest).update(
+      123,
+      config.VENDORS.LIT,
+      { status: 'Cancelled' }
+    );
+
+    expect(res).toMatchObject({
+      error: 'Request failed with status code 400'
+    });
+  });
+
+  it('fetches UPDATE DISPATCH: but not vendor selected', async () => {
+    mockadapter.onPatch(new RegExp(`${API_URLS.DISPATCH_LIT}/*`)).reply(400);
+
+    const res = await new DispatchService(axiosIMocksTest).update(123, 'XXX', {
+      status: 'Cancelled'
+    });
+
+    expect(res).toMatchObject({
+      error: 'Not vendor selected'
+    });
+  });
+
+  /** ***
+   *
    * UPLOAD FILES
    * * */
   it('fetches uploadFiles successfully data from an API', async () => {

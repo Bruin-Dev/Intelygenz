@@ -125,6 +125,26 @@ export class DispatchService {
     }
   }
 
+  async update(id, vendor, body) {
+    try {
+      let res;
+      if (config.VENDORS.LIT === vendor) {
+        res = await this.axiosI.patch(`${API_URLS.DISPATCH_LIT}/${id}`, body);
+
+        return dispatchLitInAdapter(res.data);
+      }
+
+      if (config.VENDORS.CTS === vendor) {
+        res = await this.axiosI.patch(`${API_URLS.DISPATCH_CTS}/${id}`, body);
+
+        return dispatchCtsInAdapter(res.data);
+      }
+      return { error: 'Not vendor selected' };
+    } catch (error) {
+      return this.captureErrorGeneric(error);
+    }
+  }
+
   async uploadFiles(id, data) {
     try {
       const res = await this.axiosI.post(API_URLS.UPLOAD_FILES, data);

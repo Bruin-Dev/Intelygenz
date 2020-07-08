@@ -27,11 +27,19 @@ const env = (() => {
       };
     case ENVIRONMENTS.PRO:
       return {
+        BASE_API: '/dispatch_portal/api',
+        BASE_PATH: '/dispatch_portal/',
+        ENVIRONMENT: ENVIRONMENTS.PRO,
+        MOCKS: true
+      };
+    /* case ENVIRONMENTS.PRO:
+      return {
         BASE_API: `${process.env.DNS_ENVIRONMENT}/dispatch_portal/api`,
         BASE_PATH: '/dispatch_portal/',
         ENVIRONMENT: ENVIRONMENTS.PRO,
         MOCKS: false
       };
+     */
     default:
       return {
         BASE_API: 'BASE_API:not SET',
