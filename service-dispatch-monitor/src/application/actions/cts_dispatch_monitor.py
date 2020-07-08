@@ -219,22 +219,16 @@ class CtsDispatchMonitor:
                     ticket_notes = response_body.get('ticketNotes', [])
                     ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
 
-                    igz_dispatch_number_note = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
-                    igz_dispatch_number = ''
-                    if igz_dispatch_number_note and igz_dispatch_number_note.get('noteValue'):
-                        lines = igz_dispatch_number_note.get('noteValue').splitlines()
-                        for line in lines:
-                            if self.MAIN_WATERMARK in line:
-                                igz_dispatch_number = line.replace(
-                                    f"{self.MAIN_WATERMARK} ", "").strip().replace(" ", "")
-                                if len(igz_dispatch_number) >= 3:
-                                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                                      f"IGZ dispatch number found: {igz_dispatch_number}")
-                                    break
+                    watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
+                    igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(watermark_found,
+                                                                                         self.IGZ_DN_WATERMARK,
+                                                                                         self.MAIN_WATERMARK)
                     if len(igz_dispatch_number) == 0:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"IGZ dispatch number not found: {igz_dispatch_number}")
                         continue
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"IGZ dispatch number found: {igz_dispatch_number}")
 
                     watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
 
