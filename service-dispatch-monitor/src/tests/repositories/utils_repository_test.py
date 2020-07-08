@@ -94,7 +94,7 @@ class TestUtilsRepository:
     def find_note_test(self, lit_dispatch_monitor, ticket_details):
         expected_note_found = {
             "noteId": 70805300,
-            "noteValue": "#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n"
+            "noteValue": "#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
                          "Please see the summary below.\n--\n"
                          "Dispatch Number:  "
                          "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "

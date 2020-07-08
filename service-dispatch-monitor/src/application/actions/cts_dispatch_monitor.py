@@ -171,6 +171,23 @@ class CtsDispatchMonitor:
                     ticket_notes = response_body.get('ticketNotes', [])
                     ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
 
+                    igz_dispatch_number_note = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
+                    igz_dispatch_number = ''
+                    if igz_dispatch_number_note and igz_dispatch_number_note.get('noteValue'):
+                        lines = igz_dispatch_number_note.get('noteValue').splitlines()
+                        for line in lines:
+                            if self.MAIN_WATERMARK in line:
+                                igz_dispatch_number = line.replace(
+                                    f"{self.MAIN_WATERMARK} ", "").strip().replace(" ", "")
+                                if len(igz_dispatch_number) >= 3:
+                                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                                      f"IGZ dispatch number found: {igz_dispatch_number}")
+                                    break
+                    if len(igz_dispatch_number) == 0:
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                          f"IGZ dispatch number not found: {igz_dispatch_number}")
+                        continue
+
                     watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
                     requested_watermark_found = UtilsRepository.find_note(
                         ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
@@ -199,7 +216,11 @@ class CtsDispatchMonitor:
                                       f"tech_2_hours_before_note_found: {tech_2_hours_before_note_found} "
                                       f"tech_2_hours_before_tech_note_found: {tech_2_hours_before_tech_note_found} ")
 
-                    if watermark_found is None or requested_watermark_found is None:
+                    if watermark_found is None:
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                          f"- Watermark not found, ticket does not created through dispatch portal")
+                        continue
+                    if requested_watermark_found is None:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"- Watermark not found, ticket does not belong to us")
                         continue
@@ -210,7 +231,7 @@ class CtsDispatchMonitor:
                     # Check if dispatch has a confirmed note
                     if confirmed_note_found is None:
                         result_append_confirmed_note = await self._cts_repository.append_confirmed_note(
-                            dispatch_number, ticket_id, dispatch)
+                            dispatch_number, igz_dispatch_number, ticket_id, dispatch)
                         if not result_append_confirmed_note:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"Confirmed Note not appended")
@@ -236,7 +257,7 @@ class CtsDispatchMonitor:
                                               f"- Confirm SMS note not found")
 
                             result_append_confirmed_sms_note = await self._cts_repository.append_confirmed_sms_note(
-                                dispatch_number, ticket_id, sms_to)
+                                dispatch_number, igz_dispatch_number, ticket_id, sms_to)
 
                             if not result_append_confirmed_sms_note:
                                 self._logger.info("Confirmed SMS note not appended")
@@ -262,7 +283,7 @@ class CtsDispatchMonitor:
                                           f"- Confirm SMS tech note not found")
 
                         result_append_confirmed_sms_note = await self._cts_repository.append_confirmed_sms_tech_note(
-                            dispatch_number, ticket_id, sms_to_tech)
+                            dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
 
                         if not result_append_confirmed_sms_note:
                             self._logger.info("Confirmed SMS tech note not appended")
@@ -297,7 +318,7 @@ class CtsDispatchMonitor:
                                 # continue
                             else:
                                 result_append_tech_12_sms_note = await self._cts_repository.append_tech_12_sms_note(
-                                    dispatch_number, ticket_id, sms_to)
+                                    dispatch_number, igz_dispatch_number, ticket_id, sms_to)
                                 if not result_append_tech_12_sms_note:
                                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                                       f"- A sms tech 12 hours before note not appended")
@@ -331,7 +352,7 @@ class CtsDispatchMonitor:
                             continue
 
                         result_append_tech_12_sms_note = await self._cts_repository.append_tech_12_sms_tech_note(
-                            dispatch_number, ticket_id, sms_to_tech)
+                            dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
                         if not result_append_tech_12_sms_note:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"- A sms tech 12 hours before tech note not appended")
@@ -365,7 +386,7 @@ class CtsDispatchMonitor:
                                 # continue
                             else:
                                 result_append_tech_2_sms_note = await self._cts_repository.append_tech_2_sms_note(
-                                    dispatch_number, ticket_id, sms_to)
+                                    dispatch_number, igz_dispatch_number, ticket_id, sms_to)
                                 if not result_append_tech_2_sms_note:
                                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                                       f"- A sms tech 2 hours before note not appended")
@@ -398,7 +419,7 @@ class CtsDispatchMonitor:
                             continue
 
                         result_append_tech_2_sms_note = await self._cts_repository.append_tech_2_sms_tech_note(
-                            dispatch_number, ticket_id, sms_to_tech)
+                            dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
                         if not result_append_tech_2_sms_note:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"- A sms tech 2 hours before tech note not appended")
@@ -481,7 +502,23 @@ class CtsDispatchMonitor:
                         continue
                     ticket_notes = response_body.get('ticketNotes', [])
                     ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
-
+                    igz_dispatch_number_note = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
+                    igz_dispatch_number = ''
+                    if igz_dispatch_number_note and igz_dispatch_number_note.get('noteValue'):
+                        lines = igz_dispatch_number_note.get('noteValue').splitlines()
+                        for line in lines:
+                            if self.MAIN_WATERMARK in line:
+                                igz_dispatch_number = line.replace(
+                                    f"{self.MAIN_WATERMARK} ", "").strip().replace(" ", "")
+                                if len(igz_dispatch_number) >= 3:
+                                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                                      f"IGZ dispatch number found: {igz_dispatch_number}")
+                                    break
+                                igz_dispatch_number = ''
+                    if len(igz_dispatch_number) == 0:
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                          f"IGZ dispatch number not found: {igz_dispatch_number}")
+                        continue
                     self._logger.info(
                         f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
 
@@ -523,7 +560,8 @@ class CtsDispatchMonitor:
                             continue
 
                         result_append_tech_on_site_sms_note = await self._cts_repository.append_tech_on_site_sms_note(
-                            dispatch_number, ticket_id, sms_to, dispatch.get('API_Resource_Name__c'))
+                            dispatch_number, igz_dispatch_number, ticket_id, sms_to,
+                            dispatch.get('API_Resource_Name__c'))
                         if not result_append_tech_on_site_sms_note:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"- A sms tech on site note not appended")

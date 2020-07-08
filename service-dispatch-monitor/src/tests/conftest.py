@@ -364,7 +364,7 @@ def ticket_details():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "
@@ -407,15 +407,201 @@ def ticket_details_1(ticket_details):
 
 
 @pytest.fixture(scope='function')
-def ticket_details_2(ticket_details):
-    updated_ticket_details = copy.deepcopy(ticket_details)
-    return updated_ticket_details
+def ticket_details_2():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\n"
+                                 "Please see the summary below.\n--\n"
+                                 "Dispatch Number:  "
+                                 "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "
+                                 "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
+                                 "Time Zone (Local): Pacific Time\n\n"
+                                 "Location Owner/Name: Red Rose Inn\n"
+                                 "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n"
+                                 "Phone: +1 666 6666 666\n\n"
+                                 "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n"
+                                 "Arrival Instructions: "
+                                 "When arriving to the site call HOLMDEL NOC for telematic assistance\n"
+                                 "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n"
+                                 "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n"
+                                 "Email: karen.doe@mettel.net\nDepartment: Customer Care",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:06:40.27-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": None,
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
 
 
 @pytest.fixture(scope='function')
-def ticket_details_3(ticket_details):
-    updated_ticket_details = copy.deepcopy(ticket_details)
-    return updated_ticket_details
+def ticket_details_3():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*Automation Engine*# IGZ_0003\nDispatch Management - Dispatch Requested\n\n"
+                                 "Please see the summary below.\n--\n"
+                                 "Dispatch Number:  "
+                                 "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "
+                                 "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
+                                 "Time Zone (Local): Pacific Time\n\n"
+                                 "Location Owner/Name: Red Rose Inn\n"
+                                 "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n"
+                                 "Phone: +1 666 6666 666\n\n"
+                                 "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n"
+                                 "Arrival Instructions: "
+                                 "When arriving to the site call HOLMDEL NOC for telematic assistance\n"
+                                 "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n"
+                                 "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n"
+                                 "Email: karen.doe@mettel.net\nDepartment: Customer Care",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:06:40.27-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": None,
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
+def ticket_details_no_watermark():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*NO WATERMARK*# IGZ_0003\nDispatch Management - Dispatch Requested\n\n"
+                                 "Please see the summary below.\n--\n"
+                                 "Dispatch Number:  "
+                                 "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "
+                                 "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
+                                 "Time Zone (Local): Pacific Time\n\n"
+                                 "Location Owner/Name: Red Rose Inn\n"
+                                 "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n"
+                                 "Phone: +1 666 6666 666\n\n"
+                                 "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n"
+                                 "Arrival Instructions: "
+                                 "When arriving to the site call HOLMDEL NOC for telematic assistance\n"
+                                 "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n"
+                                 "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n"
+                                 "Email: karen.doe@mettel.net\nDepartment: Customer Care",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:06:40.27-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": None,
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
 
 
 @pytest.fixture(scope='function')
@@ -424,6 +610,49 @@ def ticket_details_2_error(ticket_details):
     updated_ticket_details['body'] = None
     updated_ticket_details['status'] = 400
     return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_2_no_ticket_id_in_watermark():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": "#*Automation Engine*# S2\n\nblah blah blah\nblah 2",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
 
 
 @pytest.fixture(scope='function')
@@ -448,6 +677,15 @@ def ticket_details_2_no_requested_watermark():
                 {
                     "noteId": 70805299,
                     "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": "#*Automation Engine*# S2\n\nblah blah blah\nblah 2",
                     "serviceNumber": [
                         "4664325"
                     ],
@@ -694,7 +932,7 @@ def ticket_details_1_with_tech_on_site_sms_note(ticket_details_1_with_2h_sms_not
     field_engineer_name = dispatch_confirmed.get('Tech_First_Name')
     note_tech_sms_ticket_note = {
         "noteId": 70805315,
-        "noteValue": "#*Automation Engine*#"
+        "noteValue": "#*Automation Engine*# IGZ_0001"
                      "Dispatch Management - Field Engineer On Site\n\n"
                      "{field_engineer_name} has arrived\n".format(field_engineer_name=field_engineer_name),
         "serviceNumber": ["4664325"],
@@ -711,7 +949,7 @@ def ticket_details_2_with_tech_on_site_sms_note(ticket_details_2_with_2h_sms_not
     field_engineer_name = dispatch_confirmed_2.get('Tech_First_Name')
     note_tech_sms_ticket_note = {
         "noteId": 70805316,
-        "noteValue": "#*Automation Engine*#"
+        "noteValue": "#*Automation Engine*# IGZ_0002"
                      "Dispatch Management - Field Engineer On Site\n\n"
                      "{field_engineer_name} has arrived\n".format(field_engineer_name=field_engineer_name),
         "serviceNumber": ["4664325"],
@@ -979,6 +1217,20 @@ def cts_dispatch_confirmed_2(cts_dispatch_monitor, cts_dispatch_confirmed):
 
 
 @pytest.fixture(scope='function')
+def cts_dispatch_confirmed_no_main_watermark(cts_dispatch_monitor, cts_dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
+    updated_dispatch['Name'] = 'S-12347'
+    updated_dispatch['Ext_Ref_Num__c'] = '123456'
+
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace('Contact #: (202) 772-3610',
+                                                                                    'Contact #: (202) 772-3611')
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def cts_dispatch_not_confirmed(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = False
@@ -997,6 +1249,15 @@ def cts_dispatch_tech_on_site(cts_dispatch_monitor, cts_dispatch_confirmed):
 @pytest.fixture(scope='function')
 def cts_dispatch_tech_on_site_2(cts_dispatch_monitor, cts_dispatch_confirmed_2):
     updated_dispatch = copy.deepcopy(cts_dispatch_confirmed_2)
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_not_valid_ticket_id(cts_dispatch_monitor, cts_dispatch_confirmed_2):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed_2)
+    updated_dispatch['Ext_Ref_Num__c'] = 'as|asdf'
     updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
     updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
     return updated_dispatch

@@ -1,6 +1,6 @@
 from application.templates.cts.cts_tech_on_site import cts_get_tech_on_site_note
 
-expected_tech_on_site_note_note = """#*Automation Engine*#
+expected_tech_on_site_note_note = """#*Automation Engine*# S-12345
 Dispatch Management - Field Engineer On Site
 SMS notification sent to +12142288983
 
@@ -10,6 +10,7 @@ The field engineer, Michael J. Fox has arrived.
 
 def cts_get_dispatch_requested_note_test():
     body = {
+        'dispatch_number': 'S-12345',
         'field_engineer_name': 'Michael J. Fox',
         'phone': '+12142288983'
     }

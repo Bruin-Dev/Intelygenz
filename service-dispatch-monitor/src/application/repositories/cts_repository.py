@@ -394,11 +394,12 @@ class CtsRepository:
             f"SMS sent Response {sms_response_body}")
         return True
 
-    async def append_confirmed_note(self, dispatch_number, ticket_id, dispatch) -> bool:
+    async def append_confirmed_note(self, dispatch_number, igz_dispatch_number, ticket_id, dispatch) -> bool:
         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                           f"- Adding confirm note")
         note_data = {
             'vendor': 'CTS',
+            'dispatch_number': igz_dispatch_number,
             'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
             'tech_name': dispatch.get('API_Resource_Name__c'),
             'tech_phone': dispatch.get('Resource_Phone_Number__c')
@@ -424,8 +425,9 @@ class CtsRepository:
             f"Confirmed Note appended. Response {append_note_response_body}")
         return True
 
-    async def append_confirmed_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
+    async def append_confirmed_sms_note(self, dispatch_number, igz_dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': igz_dispatch_number,
             'phone_number': sms_to
         }
         sms_note = cts_get_dispatch_confirmed_sms_note(sms_note_data)
@@ -448,8 +450,9 @@ class CtsRepository:
             f"SMS Confirmed note appended. Response {append_sms_note_response_body}")
         return True
 
-    async def append_confirmed_sms_tech_note(self, dispatch_number, ticket_id, sms_to) -> bool:
+    async def append_confirmed_sms_tech_note(self, dispatch_number, igz_dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': igz_dispatch_number,
             'phone_number': sms_to
         }
         sms_note = cts_get_dispatch_confirmed_sms_tech_note(sms_note_data)
@@ -472,8 +475,9 @@ class CtsRepository:
             f"SMS Tech Confirmed note appended. Response {append_sms_note_response_body}")
         return True
 
-    async def append_tech_12_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
+    async def append_tech_12_sms_note(self, dispatch_number, igz_dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': igz_dispatch_number,
             'phone_number': sms_to
         }
         sms_note = cts_get_tech_12_hours_before_sms_note(sms_note_data)
@@ -497,8 +501,9 @@ class CtsRepository:
             f"SMS 12h Note appended. Response {append_sms_note_response_body}")
         return True
 
-    async def append_tech_12_sms_tech_note(self, dispatch_number, ticket_id, sms_to) -> bool:
+    async def append_tech_12_sms_tech_note(self, dispatch_number, igz_dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': igz_dispatch_number,
             'phone_number': sms_to
         }
         sms_note = cts_get_tech_12_hours_before_sms_tech_note(sms_note_data)
@@ -522,8 +527,9 @@ class CtsRepository:
             f"SMS tech 12h Note appended. Response {append_sms_note_response_body}")
         return True
 
-    async def append_tech_2_sms_note(self, dispatch_number, ticket_id, sms_to) -> bool:
+    async def append_tech_2_sms_note(self, dispatch_number, igz_dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': igz_dispatch_number,
             'phone_number': sms_to
         }
         sms_note = cts_get_tech_2_hours_before_sms_note(sms_note_data)
@@ -545,8 +551,9 @@ class CtsRepository:
             f"SMS 2h Note appended. Response {append_sms_note_response_body}")
         return True
 
-    async def append_tech_2_sms_tech_note(self, dispatch_number, ticket_id, sms_to) -> bool:
+    async def append_tech_2_sms_tech_note(self, dispatch_number, igz_dispatch_number, ticket_id, sms_to) -> bool:
         sms_note_data = {
+            'dispatch_number': igz_dispatch_number,
             'phone_number': sms_to
         }
         sms_note = cts_get_tech_2_hours_before_sms_tech_note(sms_note_data)
@@ -568,8 +575,10 @@ class CtsRepository:
             f"SMS tech 2h Note appended. Response {append_sms_note_response_body}")
         return True
 
-    async def append_tech_on_site_sms_note(self, dispatch_number, ticket_id, sms_to, field_engineer_name) -> bool:
+    async def append_tech_on_site_sms_note(self, dispatch_number, igz_dispatch_number, ticket_id, sms_to,
+                                           field_engineer_name) -> bool:
         sms_note_data = {
+            'dispatch_number': igz_dispatch_number,
             'field_engineer_name': field_engineer_name,
             'phone': sms_to
         }

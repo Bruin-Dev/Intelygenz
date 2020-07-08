@@ -161,12 +161,14 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
-                                                cts_dispatch_confirmed_2, ticket_details_1, ticket_details_2,
+                                                cts_dispatch_confirmed_2, cts_dispatch_confirmed_no_main_watermark,
+                                                ticket_details_1, ticket_details_2, ticket_details_no_watermark,
                                                 append_note_response, append_note_response_2,
                                                 sms_success_response, sms_success_response_2):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
-            cts_dispatch_confirmed_2
+            cts_dispatch_confirmed_2,
+            cts_dispatch_confirmed_no_main_watermark
         ]
 
         response_append_note_1 = {
@@ -190,40 +192,51 @@ class TestCtsDispatchMonitor:
             'body': sms_success_response_2,
             'status': 200
         }
-
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723611\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-        sms_tech_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723611\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
+        sms_tech_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
+        dispatch_number_3 = cts_dispatch_confirmed_no_main_watermark.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
+        ticket_id_3 = cts_dispatch_confirmed_no_main_watermark.get('Ext_Ref_Num__c')
 
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
+        time_3 = cts_dispatch_confirmed_no_main_watermark.get('Local_Site_Time__c')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = '#*Automation Engine*#\n' \
+        confirmed_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_2}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
 
         sms_to = '+12027723610'
         sms_to_2 = '+12027723611'
+        sms_to_3 = '+12027723611'
 
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        sms_to_3_tech = '+12123595129'
 
         sms_data = ''
 
         responses_details_mock = [
             ticket_details_1,
-            ticket_details_2
+            ticket_details_2,
+            ticket_details_no_watermark
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -310,11 +323,16 @@ class TestCtsDispatchMonitor:
             'body': sms_success_response_2,
             'status': 200
         }
-
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723611\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-        sms_tech_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723611\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
+        sms_tech_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
@@ -324,11 +342,11 @@ class TestCtsDispatchMonitor:
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = '#*Automation Engine*#\n' \
+        confirmed_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_2}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -436,11 +454,16 @@ class TestCtsDispatchMonitor:
             'body': sms_success_response_2,
             'status': 200
         }
-
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723611\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-        sms_tech_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723611\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
+        sms_tech_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
@@ -450,11 +473,11 @@ class TestCtsDispatchMonitor:
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = '#*Automation Engine*#\n' \
+        confirmed_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_2}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -592,15 +615,18 @@ class TestCtsDispatchMonitor:
             'body': append_note_response,
             'status': 200
         }
-
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -639,7 +665,8 @@ class TestCtsDispatchMonitor:
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
-            call(ticket_id_1, sms_note_1)
+            call(ticket_id_1, sms_note_1),
+            call(ticket_id_1, sms_tech_note_1)
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
@@ -663,9 +690,12 @@ class TestCtsDispatchMonitor:
             'body': append_note_response,
             'status': 200
         }
-
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
@@ -674,7 +704,7 @@ class TestCtsDispatchMonitor:
         ticket_id_2 = cts_dispatch_confirmed_skipped_datetime.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_skipped_datetime.get('Local_Site_Time__c')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -744,9 +774,13 @@ class TestCtsDispatchMonitor:
             'body': append_note_response,
             'status': 200
         }
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
@@ -755,7 +789,7 @@ class TestCtsDispatchMonitor:
         ticket_id_2 = cts_dispatch_confirmed_skipped_bad_phone.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_skipped_bad_phone.get('Local_Site_Time__c')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -826,9 +860,13 @@ class TestCtsDispatchMonitor:
             'body': append_note_response,
             'status': 200
         }
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
@@ -837,7 +875,7 @@ class TestCtsDispatchMonitor:
         ticket_id_2 = cts_dispatch_confirmed_skipped_bad_phone_tech.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_skipped_bad_phone_tech.get('Local_Site_Time__c')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -908,9 +946,12 @@ class TestCtsDispatchMonitor:
             'body': append_note_response,
             'status': 200
         }
-
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
@@ -918,7 +959,7 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -992,16 +1033,19 @@ class TestCtsDispatchMonitor:
             'status': 200
         }
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -1177,12 +1221,21 @@ class TestCtsDispatchMonitor:
             'body': append_note_response,
             'status': 200
         }
+        dispatch_number_1 = cts_dispatch_confirmed.get('Name')
+        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
+        sms_note_2 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723611\n'
+        sms_tech_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-        sms_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723611\n'
-        sms_tech_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
@@ -1190,11 +1243,11 @@ class TestCtsDispatchMonitor:
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = '#*Automation Engine*#\n' \
+        confirmed_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_2}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -1292,7 +1345,8 @@ class TestCtsDispatchMonitor:
             'body': None,
             'status': 400
         }
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
@@ -1305,19 +1359,23 @@ class TestCtsDispatchMonitor:
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = '#*Automation Engine*#\n' \
+        confirmed_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_2}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723610\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-        sms_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12027723611\n'
-        sms_tech_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
+        sms_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723611\n'
+        sms_tech_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         responses_details_mock = [
             ticket_details_1,
@@ -1377,8 +1435,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_confirmed_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to),
-            call(dispatch_number_2, ticket_id_2, sms_to_2),
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to),
+            call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2),
         ])
 
     @pytest.mark.asyncio
@@ -1389,7 +1447,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
@@ -1468,11 +1527,105 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_tech_12_sms.assert_awaited_once_with(
             dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_note.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, sms_to)
+            dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to)
         cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech.assert_awaited_once_with(
             dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, sms_to_tech)
+            dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
+
+    @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_with_confirmed_sms_and_12h_sms_notes_not_appended_tech_sms_note_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
+            ticket_details_1_with_confirmation_note, ticket_details_2_with_confirmation_note):
+        confirmed_dispatches = [
+            cts_dispatch_confirmed,
+            cts_dispatch_confirmed_2
+        ]
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        dispatch_number_1 = cts_dispatch_confirmed.get('Name')
+        ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
+        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
+        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
+        time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
+
+        sms_to = '+12027723610'
+        sms_to_2 = '+12027723611'
+        sms_to_tech = '+12123595129'
+        sms_to_2_tech = '+12123595129'
+
+        responses_details_mock = [
+            ticket_details_1_with_confirmation_note,
+            ticket_details_2_with_confirmation_note
+        ]
+
+        responses_append_confirmed_notes_mock = [
+            True,
+            True,
+        ]
+        responses_confirmed_sms = [
+            True,
+            True
+        ]
+
+        # First not skipped, Second skipped
+        responses_get_diff_hours = [
+            cts_dispatch_monitor.HOURS_12 - 1,
+            cts_dispatch_monitor.HOURS_12 - 1,
+            cts_dispatch_monitor.HOURS_12 + 1,
+            cts_dispatch_monitor.HOURS_12 + 1
+        ]
+
+        responses_send_tech_12_sms_mock = [
+            True
+        ]
+
+        responses_send_tech_12_sms_note_mock = [
+            True
+        ]
+
+        responses_send_tech_12_sms_tech_mock = [
+            True
+        ]
+
+        responses_send_tech_12_sms_tech_note_mock = [
+            False
+        ]
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
+            side_effect=responses_append_confirmed_notes_mock)
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
+            side_effect=responses_confirmed_sms)
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_note_mock)
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_tech_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_tech_note_mock)
+
+        with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
+            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1),
+            call(ticket_id_2)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
+
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms.assert_awaited_once_with(
+            dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_note.assert_awaited_once_with(
+            dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to)
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech.assert_awaited_once_with(
+            dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
+            dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_and_confirmed_sms_notes_but_not_12h_sms_sended_test(
@@ -1482,7 +1635,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
@@ -1565,14 +1719,14 @@ class TestCtsDispatchMonitor:
             call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
         ])
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_note.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, sms_to)
+            dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to)
 
         cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
             call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
         ])
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, sms_to_tech)
+            dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_sms_and_12h_sms_and_2h_sms_notes_test(
@@ -1582,7 +1736,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
@@ -1705,7 +1860,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to)
         ])
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
@@ -1713,7 +1868,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to_tech)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
         ])
 
     @pytest.mark.asyncio
@@ -1724,7 +1879,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
@@ -1835,7 +1991,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to)
         ])
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
@@ -1844,8 +2000,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, sms_to_2_tech)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
+            call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
         ])
 
     @pytest.mark.asyncio
@@ -1856,7 +2012,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
@@ -1978,7 +2135,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to)
         ])
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
@@ -1987,8 +2144,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, sms_to_2_tech)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
+            call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
         ])
 
     @pytest.mark.asyncio
@@ -1999,7 +2156,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
@@ -2122,8 +2280,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to),
-            call(dispatch_number_2, ticket_id_2, sms_to_2)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to),
+            call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2)
         ])
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
@@ -2132,8 +2290,154 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, sms_to_2_tech)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
+            call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
+        ])
+
+    @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_with_confirmed_and_confirmed_sms_and_2h_sms_not_needed_to_send_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
+            ticket_details_1_with_12h_sms_note, ticket_details_2_with_12h_sms_note):
+        confirmed_dispatches = [
+            cts_dispatch_confirmed,
+            cts_dispatch_confirmed_2
+        ]
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        dispatch_number_1 = cts_dispatch_confirmed.get('Name')
+        ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
+        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
+        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
+        time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
+
+        sms_to = '+12027723610'
+        sms_to_2 = '+12027723611'
+        sms_to_tech = '+12123595129'
+        sms_to_2_tech = '+12123595129'
+
+        responses_details_mock = [
+            ticket_details_1_with_12h_sms_note,
+            ticket_details_2_with_12h_sms_note
+        ]
+
+        responses_append_confirmed_notes_mock = [
+            True,
+            True,
+        ]
+        responses_confirmed_sms = [
+            True,
+            True
+        ]
+
+        # First not skipped, Second skipped
+        responses_get_diff_hours = [
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 + 1,
+            cts_dispatch_monitor.HOURS_2 + 1,
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 + 1,
+            cts_dispatch_monitor.HOURS_2 + 1
+        ]
+
+        responses_send_tech_12_sms_mock = [
+            True,
+            True
+        ]
+
+        responses_send_tech_12_sms_note_mock = [
+            True,
+            True
+        ]
+
+        responses_send_tech_12_sms_tech_mock = [
+            True,
+            True
+        ]
+
+        responses_send_tech_12_sms_tech_note_mock = [
+            True,
+            True
+        ]
+
+        responses_send_tech_2_sms_mock = [
+            True,
+            True
+        ]
+
+        responses_send_tech_2_sms_note_mock = [
+            True,
+            True
+        ]
+
+        responses_send_tech_2_sms_tech_mock = [
+            True,
+            True
+        ]
+
+        responses_send_tech_2_sms_tech_note_mock = [
+            True,
+            True
+        ]
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
+            side_effect=responses_append_confirmed_notes_mock)
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
+            side_effect=responses_confirmed_sms)
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_note_mock)
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_tech_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_tech_note_mock)
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms = CoroutineMock(
+            side_effect=responses_send_tech_2_sms_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_note = CoroutineMock(
+            side_effect=responses_send_tech_2_sms_note_mock)
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech = CoroutineMock(
+            side_effect=responses_send_tech_2_sms_tech_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note = CoroutineMock(
+            side_effect=responses_send_tech_2_sms_tech_note_mock)
+
+        with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
+            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1),
+            call(ticket_id_2)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
+
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms.assert_not_awaited()
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_note.assert_not_awaited()
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech.assert_not_awaited()
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_not_awaited()
+
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
+            # call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_has_awaits([
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to),
+            # call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2)
+        ])
+
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
+            # call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
+            # call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
         ])
 
     @pytest.mark.asyncio
@@ -2144,7 +2448,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
@@ -2237,20 +2542,144 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, sms_to_2_tech)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
+            call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
+        ])
+
+    @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_with_2h_sms_and_note_not_sended_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
+            ticket_details_1_with_2h_sms_note, ticket_details_2_with_2h_sms_note):
+        confirmed_dispatches = [
+            cts_dispatch_confirmed,
+            cts_dispatch_confirmed_2
+        ]
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        dispatch_number_1 = cts_dispatch_confirmed.get('Name')
+        ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
+        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
+        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
+        time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
+
+        sms_to = '+12027723610'
+        sms_to_2 = '+12027723611'
+        sms_to_tech = '+12123595129'
+        sms_to_2_tech = '+12123595129'
+
+        responses_details_mock = [
+            ticket_details_1_with_2h_sms_note,
+            ticket_details_2_with_2h_sms_note
+        ]
+
+        responses_append_confirmed_notes_mock = [
+            True,
+            True,
+        ]
+        responses_confirmed_sms = [
+            True,
+            True
+        ]
+
+        # First not skipped, Second skipped
+        responses_get_diff_hours = [
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 + 1,
+            cts_dispatch_monitor.HOURS_2 + 1,
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 + 1,
+            cts_dispatch_monitor.HOURS_2 + 1
+        ]
+
+        responses_send_tech_12_sms_mock = [
+            True,
+            False
+        ]
+
+        responses_send_tech_12_sms_note_mock = [
+            True,
+            False
+        ]
+
+        responses_send_tech_2_sms_mock = [
+            True,
+            False
+        ]
+
+        responses_send_tech_2_sms_note_mock = [
+            False,
+            False
+        ]
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
+            side_effect=responses_append_confirmed_notes_mock)
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
+            side_effect=responses_confirmed_sms)
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_note_mock)
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_note_mock)
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms = CoroutineMock()
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_note = CoroutineMock(
+            side_effect=responses_append_confirmed_notes_mock
+        )
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech = CoroutineMock(
+            side_effect=responses_send_tech_2_sms_mock
+        )
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note = CoroutineMock(
+            side_effect=responses_send_tech_2_sms_note_mock
+        )
+
+        with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
+            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1),
+            call(ticket_id_2)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
+
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms.assert_not_awaited()
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_note.assert_not_awaited()
+
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech.assert_not_awaited()
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_not_awaited()
+
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms.assert_not_awaited()
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_not_awaited()
+
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
+            # call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
         ])
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_tech_on_site,
-                                                   cts_dispatch_tech_on_site_2, cts_dispatch_tech_on_site_bad_datetime,
+                                                   cts_dispatch_tech_on_site_2, cts_dispatch_not_valid_ticket_id,
+                                                   cts_dispatch_tech_on_site_bad_datetime,
                                                    ticket_details_1, ticket_details_2,
                                                    append_note_response, append_note_response_2,
                                                    sms_success_response, sms_success_response_2):
         tech_on_site_dispatches = [
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2,
-            cts_dispatch_tech_on_site_bad_datetime
+            cts_dispatch_tech_on_site_bad_datetime,
+            cts_dispatch_not_valid_ticket_id
         ]
 
         response_append_note_1 = {
@@ -2263,7 +2692,8 @@ class TestCtsDispatchMonitor:
             'body': append_note_response_2,
             'status': 200
         }
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_tech_on_site.get('Name')
         dispatch_number_2 = cts_dispatch_tech_on_site_2.get('Name')
         dispatch_number_3 = cts_dispatch_tech_on_site_bad_datetime.get('Name')
@@ -2323,8 +2753,10 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to, cts_dispatch_tech_on_site.get('API_Resource_Name__c')),
-            call(dispatch_number_2, ticket_id_2, sms_to_2, cts_dispatch_tech_on_site_2.get('API_Resource_Name__c'))
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to,
+                 cts_dispatch_tech_on_site.get('API_Resource_Name__c')),
+            call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2,
+                 cts_dispatch_tech_on_site_2.get('API_Resource_Name__c'))
         ])
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -2403,7 +2835,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_tech_on_site.get('Name')
         dispatch_number_2 = cts_dispatch_tech_on_site_2.get('Name')
         ticket_id_1 = cts_dispatch_tech_on_site.get('Ext_Ref_Num__c')
@@ -2449,10 +2882,65 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to, cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to,
+                 cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
         ])
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+
+    @pytest.mark.asyncio
+    async def monitor_tech_on_site_dispatches_ticket_id_in_watermark_not_found_test(
+            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2, ticket_details_1,
+            ticket_details_2_no_ticket_id_in_watermark):
+        tech_on_site_dispatches = [
+            cts_dispatch_tech_on_site,
+            cts_dispatch_tech_on_site_2
+        ]
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        dispatch_number_1 = cts_dispatch_tech_on_site.get('Name')
+        dispatch_number_2 = cts_dispatch_tech_on_site_2.get('Name')
+        ticket_id_1 = cts_dispatch_tech_on_site.get('Ext_Ref_Num__c')
+        ticket_id_2 = cts_dispatch_tech_on_site_2.get('Ext_Ref_Num__c')
+
+        sms_to = '+12027723610'
+        sms_to_2 = '+12027723611'
+
+        responses_details_mock = [
+            ticket_details_1,
+            ticket_details_2_no_ticket_id_in_watermark
+        ]
+
+        responses_sms_tech_on_site_mock = [
+            True
+        ]
+
+        responses_append_tech_on_site_sms_note_mock = [
+            True
+        ]
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+
+        cts_dispatch_monitor._cts_repository.send_tech_on_site_sms = CoroutineMock(
+            side_effect=responses_sms_tech_on_site_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note = CoroutineMock(
+            side_effect=responses_append_tech_on_site_sms_note_mock)
+
+        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1),
+            call(ticket_id_2)
+        ])
+
+        cts_dispatch_monitor._cts_repository.send_tech_on_site_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_tech_on_site, sms_to)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_has_awaits([
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to,
+                 cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
+        ])
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_watermark_not_found_test(
@@ -2462,7 +2950,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_tech_on_site.get('Name')
         dispatch_number_2 = cts_dispatch_tech_on_site_2.get('Name')
         ticket_id_1 = cts_dispatch_tech_on_site.get('Ext_Ref_Num__c')
@@ -2503,7 +2992,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to, cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to,
+                 cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
         ])
 
     @pytest.mark.asyncio
@@ -2514,7 +3004,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_tech_on_site.get('Name')
         dispatch_number_2 = cts_dispatch_tech_on_site_2.get('Name')
         ticket_id_1 = cts_dispatch_tech_on_site.get('Ext_Ref_Num__c')
@@ -2557,7 +3048,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to, cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to,
+                 cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
         ])
 
     @pytest.mark.asyncio
@@ -2568,7 +3060,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_tech_on_site.get('Name')
         dispatch_number_2 = cts_dispatch_tech_on_site_2.get('Name')
         ticket_id_1 = cts_dispatch_tech_on_site.get('Ext_Ref_Num__c')
@@ -2612,8 +3105,10 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, sms_to, cts_dispatch_tech_on_site.get('API_Resource_Name__c')),
-            call(dispatch_number_2, ticket_id_2, sms_to_2, cts_dispatch_tech_on_site_2.get('API_Resource_Name__c'))
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to,
+                 cts_dispatch_tech_on_site.get('API_Resource_Name__c')),
+            call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2,
+                 cts_dispatch_tech_on_site_2.get('API_Resource_Name__c'))
         ])
 
     @pytest.mark.asyncio

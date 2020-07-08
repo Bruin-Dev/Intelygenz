@@ -71,7 +71,7 @@ class TestMappers:
 
         assert expected_map == map_get_dispatch(content)
 
-    def map_get_dispatch_1_test(self):
+    def map_get_dispatch_contact_none_test(self):
         content = {
             "turn_up": None,
             "Time_Zone_Local": "Pacific Time",
@@ -97,7 +97,7 @@ class TestMappers:
             "Job_Site_Zip_Code": "99088",
             "Job_Site_Street": "123 Fake Street",
             "Job_Site_State": "CA",
-            "Job_Site_Contact_Name_and_Phone_Number": "Jane Doe +1 666 6666 666",
+            "Job_Site_Contact_Name_and_Phone_Number": None,
             "Job_Site_City": "Pleasantown",
             "Job_Site": "test street",
             "Information_for_Tech": None,
@@ -125,8 +125,8 @@ class TestMappers:
             "job_site_city": "Pleasantown",
             "job_site_state": "CA",
             "job_site_zip_code": "99088",
-            "job_site_contact_name": "Jane Doe",
-            "job_site_contact_number": "+1 666 6666 666",
+            "job_site_contact_name": "",
+            "job_site_contact_number": "",
             "materials_needed_for_dispatch": "Laptop, cable, tuner, ladder,internet hotspot",
             "scope_of_work": "Device is bouncing constantly",
             "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
