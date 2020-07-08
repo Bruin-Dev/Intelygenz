@@ -95,7 +95,11 @@ class TestUtilsRepository:
     def find_note_test(self, lit_dispatch_monitor, ticket_details):
         expected_note_found = {
             "noteId": 70805300,
+<<<<<<< HEAD
             "noteValue": "#*Automation Engine*# DIS37405\nDispatch Management - Dispatch Requested\n\n"
+=======
+            "noteValue": "#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
+>>>>>>> [dispatch-portal-backend/service-dispatch-monitor] CTS - Add Dispatch Number to the watermarks and notes, update tests
                          "Please see the summary below.\n--\n"
                          "Dispatch Number:  "
                          "[DIS37405|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37405] "
