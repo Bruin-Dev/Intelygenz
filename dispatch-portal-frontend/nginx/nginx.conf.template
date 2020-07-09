@@ -2,7 +2,7 @@ worker_processes 1;
 events { worker_connections 1024; }
 http {
     sendfile on;
-    log_format main '[NINGX LOGS][${BUILD_NUMBER}][${ENVIRONMENT_NAME}][$time_local] $remote_addr'
+    log_format custom_format 'NGINX ${BUILD_NUMBER} ${ENVIRONMENT_NAME} [$time_local] $remote_addr'
                                '>>> REQUEST "$request" $status'
                                '"$http_referer" >>> BODY:"$request_body"';
     server {
@@ -10,7 +10,7 @@ http {
         set $C_ENV ${CURRENT_ENVIRONMENT};
         location /dispatch_portal/api/ {
             if ($C_ENV = 'production') {
-                access_log syslog:server=${PAPERTRAIL_HOST}:${PAPERTRAIL_PORT},facility=local7,tag=nginx,severity=info main;
+                access_log syslog:server=${PAPERTRAIL_HOST}:${PAPERTRAIL_PORT},facility=local7,tag=nginx,severity=info custom_format;
             }
             resolver            169.254.169.253;
             proxy_pass          http://dispatch-portal-backend-${ENVIRONMENT}.${ENVIRONMENT}.local:5000/;
