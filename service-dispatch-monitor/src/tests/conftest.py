@@ -436,10 +436,10 @@ def ticket_details_2():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*Automation Engine*# DIS37406\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
-                                 "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "
+                                 "[DIS37406|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37406] "
                                  "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
                                  "Time Zone (Local): Pacific Time\n\n"
                                  "Location Owner/Name: Red Rose Inn\n"

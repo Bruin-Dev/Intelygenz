@@ -220,9 +220,8 @@ class CtsDispatchMonitor:
                     ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
 
                     watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
-                    igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(watermark_found,
-                                                                                         self.IGZ_DN_WATERMARK,
-                                                                                         self.MAIN_WATERMARK)
+                    igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
+                        watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
                     if len(igz_dispatch_number) == 0:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"IGZ dispatch number not found: {igz_dispatch_number}")
