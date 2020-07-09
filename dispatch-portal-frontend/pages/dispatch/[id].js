@@ -73,7 +73,8 @@ function DispatchDetail({ authToken }) {
         </button>
       ) : (
         <div>
-          {data && data.status && data.status !== TYPES_STATUS.cancelled.value && (
+          {/* Todo: disable cancel button
+          data && data.status && data.status !== TYPES_STATUS.cancelled.value && (
             <div className="flex flex-col pt-2 px-10">
               <div className="block">
                 <div className="float-right flex flex-col">
@@ -96,7 +97,7 @@ function DispatchDetail({ authToken }) {
                 </div>
               </div>
             </div>
-          )}
+          ) */}
 
           <div className="flex m-8">
             <div className="w-1/4 border-b border-l lg:h-auto lg:border-t lg:border-gray-400 flex-none rounded-t lg:rounded-t-none lg:rounded-l bg-gray-300 p-4 justify-between">

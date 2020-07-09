@@ -73,7 +73,7 @@ function Index({ authToken }) {
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
   const [searchData, setSearchData] = useState(false);
-  const [paramBySearch, setParamBySearch] = useState('vendorDispatchId');
+  const [paramBySearch, setParamBySearch] = useState('bruinTicketId');
 
   const getAllDispatches = async () => {
     setIsLoading(true);
@@ -172,12 +172,12 @@ function Index({ authToken }) {
               className="text-sm outline-none focus:outline-none bg-transparent"
               onChange={e => setParamBySearch(e.target.value)}
             >
-              <option value="vendorDispatchId" selected>
-                Vendor Dispatch ID
+              <option value="bruinTicketId" selected>
+                Bruin Ticket ID
               </option>
-              <option value="bruinTicketId">Bruin Ticket ID</option>
               <option value="customerLocation">Customer/Location</option>
               <option value="vendor">Vendor</option>
+              <option value="vendorDispatchId">Vendor Dispatch ID</option>
               <option value="scheduledTime">Scheduled Time</option>
               <option value="status">Dispatch Status</option>
             </select>
