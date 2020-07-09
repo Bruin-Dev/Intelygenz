@@ -15,6 +15,11 @@ data "template_file" "automation-dispatch-portal-frontend" {
     log_group = var.ENVIRONMENT
     log_prefix = local.log_prefix
     ENVIRONMENT = var.ENVIRONMENT
+    CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
+    ENVIRONMENT_NAME = var.ENVIRONMENT_NAME
+    PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
+    PAPERTRAIL_PORT = var.PAPERTRAIL_PORT
+    BUILD_NUMBER = var.BUILD_NUMBER
   }
 }
 

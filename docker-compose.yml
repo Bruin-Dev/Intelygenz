@@ -432,6 +432,14 @@ services:
       - 8080:8080
     depends_on:
       - dispatch-portal-frontend
+      - dispatch-portal-backend
+    environment:
+      CURRENT_ENVIRONMENT: "dev"
+      PAPERTRAIL_HOST: "logs6.papertrailapp.com"
+      PAPERTRAIL_PORT: 13957
+      ENVIRONMENT: "automation-adfadfaf"
+      ENVIRONMENT_NAME: "adfadfaf"
+      BUILD_NUMBER: "485485"
     #network_mode: "host"
 
   lumin-billing-report:

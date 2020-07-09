@@ -2,18 +2,18 @@ worker_processes 1;
 events { worker_connections 1024; }
 http {
     sendfile on;
-    log_format custom_format '[LOGS NINGX][$time_local] $remote_addr'
+    log_format main '[NINGX LOGS][${BUILD_NUMBER}][${ENVIRONMENT_NAME}][$time_local] $remote_addr'
                                '>>> REQUEST "$request" $status'
                                '"$http_referer" >>> BODY:"$request_body"';
     server {
         listen 8080;
-        set $C_ENV CURRENT_ENVIRONMENT;
+        set $C_ENV ${CURRENT_ENVIRONMENT};
         location /dispatch_portal/api/ {
             if ($C_ENV = 'production') {
-                access_log syslog:server=PAPERTRIAL_HOST:PAPERTRIAL_PORT,facility=local7,tag=nginx,severity=info custom_format;
+                access_log syslog:server=${PAPERTRAIL_HOST}:${PAPERTRAIL_PORT},facility=local7,tag=nginx,severity=info main;
             }
             resolver            169.254.169.253;
-            proxy_pass          http://dispatch-portal-backend-ENVIRONMENT.ENVIRONMENT.local:5000/;
+            proxy_pass          http://dispatch-portal-backend-${ENVIRONMENT}.${ENVIRONMENT}.local:5000/;
             proxy_set_header    Host $host;
             proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
         }

@@ -61,6 +61,32 @@
           "containerName": "dispatch-portal-frontend",
           "condition": "HEALTHY"
       }
+    ],
+    "environment": [
+      {
+        "name": "CURRENT_ENVIRONMENT",
+        "value": "${CURRENT_ENVIRONMENT}"
+      },
+      {
+        "name": "ENVIRONMENT_NAME",
+        "value": "${ENVIRONMENT_NAME}"
+      },
+      {
+        "name": "PAPERTRAIL_HOST",
+        "value": "${PAPERTRAIL_HOST}"
+      },
+      {
+        "name": "PAPERTRAIL_PORT",
+        "value": "${PAPERTRAIL_PORT}"
+      },
+      {
+        "name": "ENVIRONMENT",
+        "value": "${ENVIRONMENT}"
+      },
+      {
+        "name": "BUILD_NUMBER",
+        "value": "${BUILD_NUMBER}"
+      }
     ]
   }
 ]

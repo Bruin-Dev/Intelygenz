@@ -58,6 +58,10 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[lumin-billing-report] - logs"
                 },
                 {
+                    "query": f"[NINGX LOGS][{BUILD_NUMBER}][{ENVIRONMENT_NAME}]",
+                    "search_name": f"[nginx] - logs"
+                },
+                {
                     "query": f"service-affecting-monitor AND {ENVIRONMENT_ID} AND {BUILD_NUMBER}",
                     "search_name": f"[service-affecting-monitor] - logs"
                 },
