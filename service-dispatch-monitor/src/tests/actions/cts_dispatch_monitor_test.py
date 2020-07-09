@@ -162,7 +162,8 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
                                                 cts_dispatch_confirmed_2, cts_dispatch_confirmed_no_main_watermark,
-                                                ticket_details_1, ticket_details_2, ticket_details_no_watermark,
+                                                cts_ticket_details_1, cts_ticket_details_2,
+                                                cts_ticket_details_no_watermark,
                                                 append_note_response, append_note_response_2,
                                                 sms_success_response, sms_success_response_2):
         confirmed_dispatches = [
@@ -234,9 +235,9 @@ class TestCtsDispatchMonitor:
         sms_data = ''
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2,
-            ticket_details_no_watermark
+            cts_ticket_details_1,
+            cts_ticket_details_2,
+            cts_ticket_details_no_watermark
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -295,7 +296,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_tech_sms_not_sended_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1, ticket_details_2, append_note_response, append_note_response_2,
+            cts_ticket_details_1, cts_ticket_details_2, append_note_response, append_note_response_2,
             sms_success_response, sms_success_response_2):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
@@ -360,8 +361,8 @@ class TestCtsDispatchMonitor:
         sms_data = ''
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2
+            cts_ticket_details_1,
+            cts_ticket_details_2
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -420,7 +421,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_tech_sms_tech_note_not_appended_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1, ticket_details_2, append_note_response, append_note_response_2,
+            cts_ticket_details_1, cts_ticket_details_2, append_note_response, append_note_response_2,
             sms_success_response, sms_success_response_2):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
@@ -491,8 +492,8 @@ class TestCtsDispatchMonitor:
         sms_data = ''
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2
+            cts_ticket_details_1,
+            cts_ticket_details_2
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -603,8 +604,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_skipping_one_invalid_ticket_id_test(
-            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_skipped, ticket_details_1,
-            append_note_response):
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_skipped,
+            cts_ticket_details_1, append_note_response):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_skipped
@@ -635,7 +636,7 @@ class TestCtsDispatchMonitor:
         sms_to_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1
+            cts_ticket_details_1
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -679,7 +680,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_skipping_one_invalid_datetime_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_skipped_datetime,
-            ticket_details_1, append_note_response):
+            cts_ticket_details_1, append_note_response):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_skipped_datetime
@@ -713,7 +714,7 @@ class TestCtsDispatchMonitor:
         sms_to_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1
+            cts_ticket_details_1
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -763,7 +764,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_skipping_one_invalid_sms_to_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_skipped_bad_phone,
-            ticket_details_1, append_note_response):
+            cts_ticket_details_1, append_note_response):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_skipped_bad_phone
@@ -798,7 +799,7 @@ class TestCtsDispatchMonitor:
         sms_to_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1
+            cts_ticket_details_1
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -849,7 +850,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_skipping_one_invalid_sms_to_tech_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_skipped_bad_phone_tech,
-            ticket_details_1, append_note_response):
+            cts_ticket_details_1, append_note_response):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_skipped_bad_phone_tech
@@ -884,7 +885,7 @@ class TestCtsDispatchMonitor:
         sms_to_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1
+            cts_ticket_details_1
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -934,8 +935,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_error_getting_ticket_details_test(
-            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, ticket_details_1,
-            ticket_details_2_error, append_note_response):
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, cts_ticket_details_1,
+            cts_ticket_details_2_error, append_note_response):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -968,8 +969,8 @@ class TestCtsDispatchMonitor:
         sms_to_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2_error
+            cts_ticket_details_1,
+            cts_ticket_details_2_error
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -1020,8 +1021,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_skip_details_requested_watermark_not_found_test(
-            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, ticket_details_1,
-            ticket_details_2_no_requested_watermark, append_note_response):
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, cts_ticket_details_1,
+            cts_ticket_details_2_no_requested_watermark, append_note_response):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -1054,8 +1055,8 @@ class TestCtsDispatchMonitor:
         sms_to_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2_no_requested_watermark
+            cts_ticket_details_1,
+            cts_ticket_details_2_no_requested_watermark
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -1099,8 +1100,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_sms_sent_but_not_added_confirmed_sms_note_test(
-            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, ticket_details_1,
-            ticket_details_2, append_note_response):
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, cts_ticket_details_1,
+            cts_ticket_details_2, append_note_response):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -1146,8 +1147,8 @@ class TestCtsDispatchMonitor:
         sms_to = '+12027723610'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2
+            cts_ticket_details_1,
+            cts_ticket_details_2
         ]
 
         responses_append_confirmed_note_mock = [
@@ -1197,8 +1198,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_confirmed_sms_not_sent_test(
-            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, ticket_details_1,
-            ticket_details_2, append_note_response):
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, cts_ticket_details_1,
+            cts_ticket_details_2, append_note_response):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -1258,8 +1259,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2
+            cts_ticket_details_1,
+            cts_ticket_details_2
         ]
         responses_append_confirmed_notes_mock = [
             response_append_confirmed_note_1,
@@ -1315,8 +1316,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_confirmed_sms_sent_but_not_sms_note_appended_test(
-            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, ticket_details_1,
-            ticket_details_2, append_note_response):
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, cts_ticket_details_1,
+            cts_ticket_details_2, append_note_response):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -1378,8 +1379,8 @@ class TestCtsDispatchMonitor:
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2
+            cts_ticket_details_1,
+            cts_ticket_details_2
         ]
         responses_append_confirmed_notes_mock = [
             response_append_confirmed_note_1,
@@ -1442,7 +1443,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_sms_and_12h_sms_notes_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1_with_confirmation_note, ticket_details_2_with_confirmation_note):
+            cts_ticket_details_1_with_confirmation_note, cts_ticket_details_2_with_confirmation_note):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -1462,8 +1463,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1_with_confirmation_note,
-            ticket_details_2_with_confirmation_note
+            cts_ticket_details_1_with_confirmation_note,
+            cts_ticket_details_2_with_confirmation_note
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -1536,7 +1537,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_sms_and_12h_sms_notes_not_appended_tech_sms_note_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1_with_confirmation_note, ticket_details_2_with_confirmation_note):
+            cts_ticket_details_1_with_confirmation_note, cts_ticket_details_2_with_confirmation_note):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -1556,8 +1557,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1_with_confirmation_note,
-            ticket_details_2_with_confirmation_note
+            cts_ticket_details_1_with_confirmation_note,
+            cts_ticket_details_2_with_confirmation_note
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -1630,7 +1631,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_and_confirmed_sms_notes_but_not_12h_sms_sended_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1_with_confirmation_note, ticket_details_2_with_confirmation_note):
+            cts_ticket_details_1_with_confirmation_note, cts_ticket_details_2_with_confirmation_note):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -1650,8 +1651,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1_with_confirmation_note,
-            ticket_details_2_with_confirmation_note
+            cts_ticket_details_1_with_confirmation_note,
+            cts_ticket_details_2_with_confirmation_note
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -1731,7 +1732,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_sms_and_12h_sms_and_2h_sms_notes_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1_with_12h_sms_note, ticket_details_2_with_12h_sms_note):
+            cts_ticket_details_1_with_12h_sms_note, cts_ticket_details_2_with_12h_sms_note):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -1751,8 +1752,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1_with_12h_sms_note,
-            ticket_details_2_with_12h_sms_note
+            cts_ticket_details_1_with_12h_sms_note,
+            cts_ticket_details_2_with_12h_sms_note
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -1874,7 +1875,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_sms_and_2h_sms_notes_but_not_12h_sms_sended_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1_with_12h_sms_note, ticket_details_2_with_12h_sms_note):
+            cts_ticket_details_1_with_12h_sms_note, cts_ticket_details_2_with_12h_sms_note):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -1894,8 +1895,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1_with_12h_sms_note,
-            ticket_details_2_with_12h_sms_note
+            cts_ticket_details_1_with_12h_sms_note,
+            cts_ticket_details_2_with_12h_sms_note
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -2007,7 +2008,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_sms_and_2h_sms_notes_but_sms_2h_sms_not_sended_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1_with_12h_sms_note, ticket_details_2_with_12h_sms_note):
+            cts_ticket_details_1_with_12h_sms_note, cts_ticket_details_2_with_12h_sms_note):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -2027,8 +2028,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1_with_12h_sms_note,
-            ticket_details_2_with_12h_sms_note
+            cts_ticket_details_1_with_12h_sms_note,
+            cts_ticket_details_2_with_12h_sms_note
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -2151,7 +2152,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_and_confirmed_sms_and_2h_sms_notes_sended_ok_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1_with_12h_sms_note, ticket_details_2_with_12h_sms_note):
+            cts_ticket_details_1_with_12h_sms_note, cts_ticket_details_2_with_12h_sms_note):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -2171,8 +2172,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1_with_12h_sms_note,
-            ticket_details_2_with_12h_sms_note
+            cts_ticket_details_1_with_12h_sms_note,
+            cts_ticket_details_2_with_12h_sms_note
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -2297,7 +2298,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_and_confirmed_sms_and_2h_sms_not_needed_to_send_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1_with_12h_sms_note, ticket_details_2_with_12h_sms_note):
+            cts_ticket_details_1_with_12h_sms_note, cts_ticket_details_2_with_12h_sms_note):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -2317,8 +2318,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1_with_12h_sms_note,
-            ticket_details_2_with_12h_sms_note
+            cts_ticket_details_1_with_12h_sms_note,
+            cts_ticket_details_2_with_12h_sms_note
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -2443,7 +2444,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_2h_sms_and_note_sended_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1_with_2h_sms_note, ticket_details_2_with_2h_sms_note):
+            cts_ticket_details_1_with_2h_sms_note, cts_ticket_details_2_with_2h_sms_note):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -2463,8 +2464,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1_with_2h_sms_note,
-            ticket_details_2_with_2h_sms_note
+            cts_ticket_details_1_with_2h_sms_note,
+            cts_ticket_details_2_with_2h_sms_note
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -2549,7 +2550,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_2h_sms_and_note_not_sended_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
-            ticket_details_1_with_2h_sms_note, ticket_details_2_with_2h_sms_note):
+            cts_ticket_details_1_with_2h_sms_note, cts_ticket_details_2_with_2h_sms_note):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
@@ -2569,8 +2570,8 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
 
         responses_details_mock = [
-            ticket_details_1_with_2h_sms_note,
-            ticket_details_2_with_2h_sms_note
+            cts_ticket_details_1_with_2h_sms_note,
+            cts_ticket_details_2_with_2h_sms_note
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -2672,7 +2673,7 @@ class TestCtsDispatchMonitor:
     async def monitor_tech_on_site_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_tech_on_site,
                                                    cts_dispatch_tech_on_site_2, cts_dispatch_not_valid_ticket_id,
                                                    cts_dispatch_tech_on_site_bad_datetime,
-                                                   ticket_details_1, ticket_details_2,
+                                                   cts_ticket_details_1, cts_ticket_details_2,
                                                    append_note_response, append_note_response_2,
                                                    sms_success_response, sms_success_response_2):
         tech_on_site_dispatches = [
@@ -2705,8 +2706,8 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2
+            cts_ticket_details_1,
+            cts_ticket_details_2
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -2829,8 +2830,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_error_getting_ticket_details_test(
-            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2, ticket_details_1,
-            ticket_details_2_error):
+            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2,
+            cts_ticket_details_1, cts_ticket_details_2_error):
         tech_on_site_dispatches = [
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2
@@ -2846,8 +2847,8 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2_error
+            cts_ticket_details_1,
+            cts_ticket_details_2_error
         ]
 
         responses_sms_tech_on_site_mock = [
@@ -2890,8 +2891,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_ticket_id_in_watermark_not_found_test(
-            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2, ticket_details_1,
-            ticket_details_2_no_ticket_id_in_watermark):
+            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2,
+            cts_ticket_details_1, cts_ticket_details_2_no_ticket_id_in_watermark):
         tech_on_site_dispatches = [
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2
@@ -2907,8 +2908,8 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2_no_ticket_id_in_watermark
+            cts_ticket_details_1,
+            cts_ticket_details_2_no_ticket_id_in_watermark
         ]
 
         responses_sms_tech_on_site_mock = [
@@ -2944,8 +2945,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_watermark_not_found_test(
-            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2, ticket_details_1,
-            ticket_details_2_no_requested_watermark):
+            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2,
+            cts_ticket_details_1, cts_ticket_details_2_no_requested_watermark):
         tech_on_site_dispatches = [
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2
@@ -2961,8 +2962,8 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2_no_requested_watermark
+            cts_ticket_details_1,
+            cts_ticket_details_2_no_requested_watermark
         ]
 
         responses_sms_tech_on_site_mock = [
@@ -2998,8 +2999,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_sms_not_sended_test(
-            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2, ticket_details_1,
-            ticket_details_2):
+            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2,
+            cts_ticket_details_1, cts_ticket_details_2):
         tech_on_site_dispatches = [
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2
@@ -3015,8 +3016,8 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2
+            cts_ticket_details_1,
+            cts_ticket_details_2
         ]
 
         responses_sms_tech_on_site_mock = [
@@ -3054,8 +3055,8 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_sms_note_not_appended_test(
-            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2, ticket_details_1,
-            ticket_details_2):
+            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2,
+            cts_ticket_details_1, cts_ticket_details_2):
         tech_on_site_dispatches = [
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2
@@ -3071,8 +3072,8 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
 
         responses_details_mock = [
-            ticket_details_1,
-            ticket_details_2
+            cts_ticket_details_1,
+            cts_ticket_details_2
         ]
 
         responses_sms_tech_on_site_mock = [
@@ -3114,7 +3115,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_with_tech_on_site_note_already_sended_ok_test(
             self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2,
-            ticket_details_1_with_tech_on_site_sms_note, ticket_details_2_with_tech_on_site_sms_note):
+            cts_ticket_details_1_with_tech_on_site_sms_note, cts_ticket_details_2_with_tech_on_site_sms_note):
         tech_on_site_dispatches = [
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2
@@ -3129,8 +3130,8 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
 
         responses_details_mock = [
-            ticket_details_1_with_tech_on_site_sms_note,
-            ticket_details_2_with_tech_on_site_sms_note
+            cts_ticket_details_1_with_tech_on_site_sms_note,
+            cts_ticket_details_2_with_tech_on_site_sms_note
         ]
 
         responses_sms_tech_on_site_mock = [

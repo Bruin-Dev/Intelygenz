@@ -380,13 +380,14 @@ class TestLitDispatchMonitor:
             'status': 200
         }
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-
         dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+        sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12123595129\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                            'Field Engineer\nJoe Malone\n+12123595129\n'
@@ -464,15 +465,17 @@ class TestLitDispatchMonitor:
             'status': 200
         }
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-
         dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_skipped_datetime.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_skipped_datetime.get('MetTel_Bruin_TicketID')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12123595129\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
+
+        confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                            'Field Engineer\nJoe Malone\n+12123595129\n'
@@ -561,15 +564,17 @@ class TestLitDispatchMonitor:
             'status': 200
         }
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-
         dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_skipped_bad_phone.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_skipped_bad_phone.get('MetTel_Bruin_TicketID')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12123595129\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
+
+        confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                            'Field Engineer\nJoe Malone\n+12123595129\n'
@@ -667,15 +672,17 @@ class TestLitDispatchMonitor:
             'status': 200
         }
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-
         dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_skipped_bad_phone_tech.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_skipped_bad_phone_tech.get('MetTel_Bruin_TicketID')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12123595129\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
+
+        confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                            'Field Engineer\nJoe Malone\n+12123595129\n'
@@ -773,15 +780,16 @@ class TestLitDispatchMonitor:
             'status': 200
         }
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-
         dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
+        sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12123595129\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                            'Field Engineer\nJoe Malone\n+12123595129\n'
@@ -876,15 +884,16 @@ class TestLitDispatchMonitor:
             'status': 200
         }
 
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
-        sms_tech_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-
         dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
+        sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12123595129\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                            'Field Engineer\nJoe Malone\n+12123595129\n'
@@ -1119,17 +1128,20 @@ class TestLitDispatchMonitor:
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                            'Field Engineer\nJoe Malone\n+12123595129\n'
-        confirmed_note_2 = '#*Automation Engine*#\n' \
+        confirmed_note_2 = f'#*Automation Engine*# {dispatch_number_2}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 10:30AM-11:30AM Eastern Time\n\n' \
                            'Field Engineer\nHulk Hogan\n+12123595126\n'
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS tech sent to +12123595129\n'
-        sms_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595126\n'
+        sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12123595129\n'
+        sms_note_tech_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
+        sms_note_2 = f'#*Automation Engine*# {dispatch_number_2}\n' \
+                     f'Dispatch confirmation SMS sent to +12123595126\n'
 
         sms_to = '+12123595129'
         sms_to_tech = '+12123595129'
@@ -1247,16 +1259,18 @@ class TestLitDispatchMonitor:
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
 
-        confirmed_note_1 = '#*Automation Engine*#\n' \
+        confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 4PM-6PM Pacific Time\n\n' \
                            'Field Engineer\nJoe Malone\n+12123595129\n'
-        confirmed_note_2 = '#*Automation Engine*#\n' \
+        confirmed_note_2 = f'#*Automation Engine*# {dispatch_number_2}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            'Dispatch scheduled for 2020-03-16 @ 10:30AM-11:30AM Eastern Time\n\n' \
                            'Field Engineer\nHulk Hogan\n+12123595126\n'
-        sms_note_1 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595129\n'
-        sms_note_2 = '#*Automation Engine*#\nDispatch confirmation SMS sent to +12123595126\n'
+        sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12123595129\n'
+        sms_note_2 = f'#*Automation Engine*# {dispatch_number_2}\n' \
+                     f'Dispatch confirmation SMS sent to +12123595126\n'
 
         sms_to = '+12123595129'
         sms_to_tech = '+12123595129'

@@ -94,10 +94,10 @@ class TestUtilsRepository:
     def find_note_test(self, lit_dispatch_monitor, ticket_details):
         expected_note_found = {
             "noteId": 70805300,
-            "noteValue": "#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
+            "noteValue": "#*Automation Engine*# DIS37405\nDispatch Management - Dispatch Requested\n\n"
                          "Please see the summary below.\n--\n"
                          "Dispatch Number:  "
-                         "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "
+                         "[DIS37405|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37405] "
                          "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
                          "Time Zone (Local): Pacific Time\n\n"
                          "Location Owner/Name: Red Rose Inn\n"
