@@ -62,6 +62,7 @@ locals {
   automation-dispatch-portal-frontend-service_discovery_service-name = "dispatch-portal-frontend-${var.ENVIRONMENT}"
   automation-dispatch-portal-target_group-name = "${var.ENVIRONMENT}-disp-prtl"
   automation-dispatch-portal-target_group-tag-Name = "${var.ENVIRONMENT}-dispatch-portal"
+  automation-dispatch-portal-frontend-nginx-run-mode = "aws"
 
   // automation-last-contact-report local vars
   automation-last-contact-report-ecs_task_definition-family = "${var.ENVIRONMENT}-last-contact-report"

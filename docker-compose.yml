@@ -434,6 +434,7 @@ services:
       - dispatch-portal-frontend
       - dispatch-portal-backend
     environment:
+      RUN_MODE: "local"
       CURRENT_ENVIRONMENT: "dev"
       PAPERTRAIL_HOST: "logs6.papertrailapp.com"
       PAPERTRAIL_PORT: 13957

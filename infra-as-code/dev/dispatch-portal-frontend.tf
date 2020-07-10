@@ -20,6 +20,7 @@ data "template_file" "automation-dispatch-portal-frontend" {
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT
     BUILD_NUMBER = var.BUILD_NUMBER
+    RUN_MODE = local.automation-dispatch-portal-frontend-nginx-run-mode
   }
 }
 

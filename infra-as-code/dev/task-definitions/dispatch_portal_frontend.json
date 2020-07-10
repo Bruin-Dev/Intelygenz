@@ -86,6 +86,10 @@
       {
         "name": "BUILD_NUMBER",
         "value": "${BUILD_NUMBER}"
+      },
+      {
+        "name": "RUN_MODE",
+        "value": "${RUN_MODE}"
       }
     ]
   }
