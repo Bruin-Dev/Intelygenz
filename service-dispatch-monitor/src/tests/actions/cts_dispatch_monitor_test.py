@@ -164,7 +164,7 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
                                                 cts_dispatch_confirmed_2, cts_dispatch_confirmed_no_main_watermark,
-                                                cts_ticket_details_1, cts_ticket_details_2,
+                                                cts_ticket_details_1, cts_ticket_details_no_dispatch_2,
                                                 cts_ticket_details_no_watermark,
                                                 append_note_response, append_note_response_2,
                                                 sms_success_response, sms_success_response_2):
@@ -199,11 +199,11 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_2 = 'IGZ_0002'
         sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                      f'Dispatch confirmation SMS sent to +12027723610\n'
-        sms_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        sms_note_2 = f'#*Automation Engine*# \n' \
                      f'Dispatch confirmation SMS sent to +12027723611\n'
         sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
-        sms_tech_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        sms_tech_note_2 = f'#*Automation Engine*# \n' \
                           f'Dispatch confirmation SMS tech sent to +12123595129\n'
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
@@ -221,7 +221,7 @@ class TestCtsDispatchMonitor:
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
-        confirmed_note_2 = f'#*Automation Engine*# {igz_dispatch_number_2}\n' \
+        confirmed_note_2 = f'#*Automation Engine*# \n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_2}\n\n' \
                            'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
@@ -243,7 +243,7 @@ class TestCtsDispatchMonitor:
 
         responses_details_mock = [
             cts_ticket_details_1,
-            cts_ticket_details_2,
+            cts_ticket_details_no_dispatch_2,
             cts_ticket_details_no_watermark
         ]
         responses_append_notes_mock = [
@@ -285,23 +285,18 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
             call(ticket_id_1, sms_note_1),
-            call(ticket_id_1, sms_tech_note_1),
-            call(ticket_id_2, confirmed_note_2),
-            call(ticket_id_2, sms_note_2),
-            call(ticket_id_2, sms_tech_note_2)
+            call(ticket_id_1, sms_tech_note_1)
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
-            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
 
     @pytest.mark.asyncio
-    async def monitor_confirmed_dispatches_with_tech_sms_not_sended_test(
+    async def monitor_confirmed_dispatches_with_tech_sms_not_sent_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
             cts_ticket_details_1, cts_ticket_details_2, append_note_response, append_note_response_2,
             sms_success_response, sms_success_response_2):
@@ -1137,6 +1132,88 @@ class TestCtsDispatchMonitor:
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
+        ])
+
+    @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_skip_details_requested_watermark_not_found_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, cts_ticket_details_1,
+            cts_ticket_details_2_no_requested_watermark, append_note_response):
+        confirmed_dispatches = [
+            cts_dispatch_confirmed,
+            cts_dispatch_confirmed_2
+        ]
+
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        sms_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                     f'Dispatch confirmation SMS sent to +12027723610\n'
+        sms_tech_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                          f'Dispatch confirmation SMS tech sent to +12123595129\n'
+        dispatch_number_1 = cts_dispatch_confirmed.get('Name')
+        ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
+        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+
+        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
+        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
+
+        confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
+                           'Dispatch Management - Dispatch Confirmed\n' \
+                           f'Dispatch scheduled for {time_1}\n\n' \
+                           'Field Engineer\nMichael J. Fox\n+1 (212) 359-5129\n'
+
+        sms_to = '+12027723610'
+        sms_to_tech = '+12123595129'
+
+        responses_details_mock = [
+            cts_ticket_details_1,
+            cts_ticket_details_2_no_requested_watermark
+        ]
+        responses_append_notes_mock = [
+            response_append_note_1,
+            response_append_note_1,
+            response_append_note_1
+        ]
+        responses_confirmed_sms = [
+            True
+        ]
+        responses_confirmed_sms_tech = [
+            True
+        ]
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=responses_append_notes_mock)
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
+            side_effect=responses_confirmed_sms)
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech = CoroutineMock(
+            side_effect=responses_confirmed_sms_tech)
+
+        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1),
+            call(ticket_id_2)
+        ])
+
+        cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
+            call(ticket_id_1, confirmed_note_1),
+            call(ticket_id_1, sms_note_1),
+            call(ticket_id_1, sms_tech_note_1)
+        ])
+
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
+        ])
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
         ])
 
     @pytest.mark.asyncio
@@ -2087,7 +2164,7 @@ class TestCtsDispatchMonitor:
         ])
 
     @pytest.mark.asyncio
-    async def monitor_confirmed_dispatches_with_confirmed_sms_and_2h_sms_notes_but_sms_2h_sms_not_sended_test(
+    async def monitor_confirmed_dispatches_with_confirmed_sms_and_2h_sms_notes_but_sms_2h_sms_not_sent_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
             cts_ticket_details_1_with_12h_sms_note, cts_ticket_details_2_with_12h_sms_note):
         confirmed_dispatches = [
@@ -2236,7 +2313,7 @@ class TestCtsDispatchMonitor:
         ])
 
     @pytest.mark.asyncio
-    async def monitor_confirmed_dispatches_with_confirmed_and_confirmed_sms_and_2h_sms_notes_sended_ok_test(
+    async def monitor_confirmed_dispatches_with_confirmed_and_confirmed_sms_and_2h_sms_notes_sentok_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
             cts_ticket_details_1_with_12h_sms_note, cts_ticket_details_2_with_12h_sms_note):
         confirmed_dispatches = [
@@ -2538,7 +2615,7 @@ class TestCtsDispatchMonitor:
         ])
 
     @pytest.mark.asyncio
-    async def monitor_confirmed_dispatches_with_2h_sms_and_note_sended_test(
+    async def monitor_confirmed_dispatches_with_2h_sms_and_note_sent_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
             cts_ticket_details_1_with_2h_sms_note, cts_ticket_details_2_with_2h_sms_note):
         confirmed_dispatches = [
@@ -2649,7 +2726,7 @@ class TestCtsDispatchMonitor:
         ])
 
     @pytest.mark.asyncio
-    async def monitor_confirmed_dispatches_with_2h_sms_and_note_not_sended_test(
+    async def monitor_confirmed_dispatches_with_2h_sms_and_note_not_sent_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
             cts_ticket_details_1_with_2h_sms_note, cts_ticket_details_2_with_2h_sms_note):
         confirmed_dispatches = [
@@ -3105,7 +3182,7 @@ class TestCtsDispatchMonitor:
         ])
 
     @pytest.mark.asyncio
-    async def monitor_tech_on_site_dispatches_sms_not_sended_test(
+    async def monitor_tech_on_site_dispatches_sms_not_sent_test(
             self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2,
             cts_ticket_details_1, cts_ticket_details_2):
         tech_on_site_dispatches = [
@@ -3220,7 +3297,7 @@ class TestCtsDispatchMonitor:
         ])
 
     @pytest.mark.asyncio
-    async def monitor_tech_on_site_dispatches_with_tech_on_site_note_already_sended_ok_test(
+    async def monitor_tech_on_site_dispatches_with_tech_on_site_note_already_sent_ok_test(
             self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2,
             cts_ticket_details_1_with_tech_on_site_sms_note, cts_ticket_details_2_with_tech_on_site_sms_note):
         tech_on_site_dispatches = [

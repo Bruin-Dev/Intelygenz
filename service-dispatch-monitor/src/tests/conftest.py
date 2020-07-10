@@ -1449,6 +1449,72 @@ def cts_ticket_details_2():
 
 
 @pytest.fixture(scope='function')
+def cts_ticket_details_no_dispatch_2():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*Automation Engine*# \nDispatch Management - Dispatch Requested\n\n"
+                                 "Please see the summary below.\n--\n"
+                                 "Dispatch Number:  "
+                                 "[IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] "
+                                 "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
+                                 "Time Zone (Local): Pacific Time\n\n"
+                                 "Location Owner/Name: Red Rose Inn\n"
+                                 "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n"
+                                 "Phone: +1 666 6666 666\n\n"
+                                 "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n"
+                                 "Arrival Instructions: "
+                                 "When arriving to the site call HOLMDEL NOC for telematic assistance\n"
+                                 "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n"
+                                 "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n"
+                                 "Email: karen.doe@mettel.net\nDepartment: Customer Care",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:06:40.27-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": None,
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
 def cts_ticket_details_3():
     return {
         'request_id': '12345',
@@ -1544,7 +1610,7 @@ def cts_ticket_details_no_watermark():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*NO WATERMARK*# IGZ_0003\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*NO WATERMARK*# IGZ_0002\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[IGZ_0003|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0003] "
@@ -1618,7 +1684,7 @@ def cts_ticket_details_2_no_ticket_id_in_watermark():
                 },
                 {
                     "noteId": 70805299,
-                    "noteValue": "#*Automation Engine*# S2\n\nblah blah blah\nblah 2",
+                    "noteValue": "#*Automation Engine* # IGZ_0002\n\nblah blah blah\nblah 2",
                     "serviceNumber": [
                         "4664325"
                     ],
@@ -1661,7 +1727,7 @@ def cts_ticket_details_2_no_requested_watermark():
                 },
                 {
                     "noteId": 70805299,
-                    "noteValue": "#*Automation Engine*# S2\n\nblah blah blah\nblah 2",
+                    "noteValue": "#*Automation Engine*# IGZ_0002\n\nblah blah blah\nblah 2",
                     "serviceNumber": [
                         "4664325"
                     ],

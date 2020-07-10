@@ -175,6 +175,12 @@ class CtsDispatchMonitor:
                     ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
 
                     watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
+
+                    if watermark_found is None:
+                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                          f"- Watermark not found, ticket is not created through dispatch portal")
+                        continue
+
                     igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
                         watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
                     if len(igz_dispatch_number) == 0:
@@ -211,10 +217,6 @@ class CtsDispatchMonitor:
                                       f"tech_2_hours_before_note_found: {tech_2_hours_before_note_found} "
                                       f"tech_2_hours_before_tech_note_found: {tech_2_hours_before_tech_note_found} ")
 
-                    if watermark_found is None:
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"- Watermark not found, ticket is not created through dispatch portal")
-                        continue
                     if requested_watermark_found is None:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"- Watermark not found, ticket does not belong to us")
