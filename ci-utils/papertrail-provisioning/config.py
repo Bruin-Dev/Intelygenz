@@ -11,13 +11,12 @@ PAPERTRAIL_CLI_VERSION = os.environ['PAPERTRAIL_CLI_VERSION']
 PAPERTRAIL_CLI_DONWLOAD_URL = f"https://github.com/xoanmm/go-papertrail-cli/releases/download/v" \
                               f"{PAPERTRAIL_CLI_VERSION}/go-papertrail-cli_{PAPERTRAIL_CLI_VERSION}" \
                               f"_linux_64-bit.tar.gz"
+SYSTEM_IPS = "*"
 
 if BRANCH_NAME == "master":
-    SYSTEM_IPS = os.environ['AWS_PUBLIC_IPS_PRODUCTION']
     ENVIRONMENT_ID = "master"
     ENVIRONMENT_NAME = "production"
 else:
-    SYSTEM_IPS = os.environ['AWS_PUBLIC_IPS_DEV']
     ENVIRONMENT_NAME = ENVIRONMENT_ID
 
 
