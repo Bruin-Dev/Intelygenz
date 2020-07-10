@@ -99,6 +99,8 @@ class TestLitDispatchMonitor:
         splitted_dispatches[str(lit_dispatch_monitor._lit_repository.DISPATCH_CONFIRMED)] = [dispatch_confirmed]
 
         confirmed_dispatches = [dispatch_confirmed]
+        lit_dispatch_monitor._filter_dispatches_by_watermark = CoroutineMock(return_value=confirmed_dispatches)
+
         lit_dispatch_monitor._lit_repository.get_all_dispatches = CoroutineMock(return_value=dispatches_response)
         lit_dispatch_monitor._lit_repository._get_dispatches_splitted_by_status = \
             Mock(return_value=splitted_dispatches)

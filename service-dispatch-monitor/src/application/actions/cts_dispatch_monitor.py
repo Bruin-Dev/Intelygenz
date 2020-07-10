@@ -83,7 +83,10 @@ class CtsDispatchMonitor:
                 return
 
             cts_dispatches = response_cts_dispatches_body.get('records', [])
-            dispatches_splitted_by_status = self._cts_repository.get_dispatches_splitted_by_status(cts_dispatches)
+
+            igz_dispatches = await self._filter_dispatches_by_watermark(cts_dispatches)
+
+            dispatches_splitted_by_status = self._cts_repository.get_dispatches_splitted_by_status(igz_dispatches)
 
             self._logger.info(f"Splitted by status: {list(dispatches_splitted_by_status.keys())}")
 
@@ -104,6 +107,40 @@ class CtsDispatchMonitor:
             self._logger.info(f"[CTS] Elapsed time processing all dispatches: {(stop - start) / 60} minutes")
         except Exception as ex:
             self._logger.error(f"[CTS] Error: {ex}")
+
+    async def _filter_dispatches_by_watermark(self, confirmed_dispatches):
+        filtered_dispatches = []
+        for dispatch in confirmed_dispatches:
+            dispatch_number = dispatch.get('Name', None)
+            ticket_id = dispatch.get('Ext_Ref_Num__c', None)
+            response = await self._bruin_repository.get_ticket_details(ticket_id)
+            response_status = response['status']
+            response_body = response['body']
+            if response_status not in range(200, 300):
+                self._logger.error(f"Error: Dispatch [{dispatch_number}] "
+                                   f"Get ticket details for ticket {ticket_id}: "
+                                   f"{response_body}")
+                err_msg = f"An error occurred retrieve getting ticket details from bruin " \
+                          f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
+                await self._notifications_repository.send_slack_message(err_msg)
+                continue
+            ticket_notes = response_body.get('ticketNotes', [])
+            ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+            watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
+
+            if watermark_found is None:
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"- Watermark not found, ticket is not created through dispatch portal")
+                continue
+
+            requested_watermark_found = UtilsRepository.find_note(
+                ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
+            if requested_watermark_found is None:
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"- Watermark not found, ticket does not belong to us")
+                continue
+            filtered_dispatches.append(dispatch)
+        return filtered_dispatches
 
     async def _monitor_confirmed_dispatches(self, confirmed_dispatches):
         try:
@@ -176,11 +213,6 @@ class CtsDispatchMonitor:
 
                     watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
 
-                    if watermark_found is None:
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"- Watermark not found, ticket is not created through dispatch portal")
-                        continue
-
                     igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
                         watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
                     if len(igz_dispatch_number) == 0:
@@ -216,11 +248,6 @@ class CtsDispatchMonitor:
                                       f"tech_12_hours_before_tech_note_found: {tech_12_hours_before_tech_note_found} "
                                       f"tech_2_hours_before_note_found: {tech_2_hours_before_note_found} "
                                       f"tech_2_hours_before_tech_note_found: {tech_2_hours_before_tech_note_found} ")
-
-                    if requested_watermark_found is None:
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"- Watermark not found, ticket does not belong to us")
-                        continue
 
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"main_watermark_found: {watermark_found} "
