@@ -3,7 +3,9 @@ from unittest.mock import Mock
 from unittest.mock import call
 from unittest.mock import patch
 
+import iso8601
 import pytest
+import pytz
 
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
@@ -232,6 +234,11 @@ class TestCtsDispatchMonitor:
         sms_to_2_tech = '+12123595129'
         sms_to_3_tech = '+12123595129'
 
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
         sms_data = ''
 
         responses_details_mock = [
@@ -285,12 +292,12 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
 
     @pytest.mark.asyncio
@@ -342,6 +349,11 @@ class TestCtsDispatchMonitor:
 
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -410,11 +422,11 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
             # call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
         ])
 
@@ -473,7 +485,11 @@ class TestCtsDispatchMonitor:
 
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
-
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
@@ -545,12 +561,12 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
@@ -626,6 +642,9 @@ class TestCtsDispatchMonitor:
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -671,10 +690,10 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
     @pytest.mark.asyncio
@@ -712,6 +731,10 @@ class TestCtsDispatchMonitor:
 
         sms_to = '+12027723610'
         sms_to_tech = '+12123595129'
+
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1
@@ -753,10 +776,10 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -797,6 +820,12 @@ class TestCtsDispatchMonitor:
 
         sms_to = '+12027723610'
         sms_to_tech = '+12123595129'
+
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1
@@ -839,10 +868,10 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -875,7 +904,11 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_skipped_bad_phone_tech.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_skipped_bad_phone_tech.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_skipped_bad_phone_tech.get('Local_Site_Time__c')
-
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
@@ -925,10 +958,10 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -959,6 +992,10 @@ class TestCtsDispatchMonitor:
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
+
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1013,10 +1050,10 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
     @pytest.mark.asyncio
@@ -1053,6 +1090,10 @@ class TestCtsDispatchMonitor:
 
         sms_to = '+12027723610'
         sms_to_tech = '+12123595129'
+
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1,
@@ -1092,10 +1133,10 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
     @pytest.mark.asyncio
@@ -1143,6 +1184,11 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         sms_to = '+12027723610'
 
@@ -1193,7 +1239,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
         ])
 
     @pytest.mark.asyncio
@@ -1257,6 +1303,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1,
@@ -1306,12 +1357,12 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
 
     @pytest.mark.asyncio
@@ -1359,6 +1410,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1427,12 +1483,12 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
 
         cts_dispatch_monitor._cts_repository.append_confirmed_sms_note.assert_has_awaits([
@@ -1461,6 +1517,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1_with_confirmation_note,
@@ -1526,11 +1587,11 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
 
         cts_dispatch_monitor._cts_repository.send_tech_12_sms.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+            dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_note.assert_awaited_once_with(
             dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to)
         cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
+            dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
             dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
 
@@ -1555,6 +1616,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1_with_confirmation_note,
@@ -1620,11 +1686,11 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
 
         cts_dispatch_monitor._cts_repository.send_tech_12_sms.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+            dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_note.assert_awaited_once_with(
             dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to)
         cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
+            dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
             dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
 
@@ -1649,6 +1715,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1_with_confirmation_note,
@@ -1716,15 +1787,15 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
 
         cts_dispatch_monitor._cts_repository.send_tech_12_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
         ])
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_note.assert_awaited_once_with(
             dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to)
 
         cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
             dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
@@ -1750,6 +1821,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1_with_12h_sms_note,
@@ -1857,7 +1933,7 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech.assert_not_awaited()
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_has_awaits([
@@ -1865,7 +1941,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
@@ -1893,6 +1969,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1_with_12h_sms_note,
@@ -1987,8 +2068,8 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech.assert_not_awaited()
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_has_awaits([
@@ -1996,8 +2077,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
@@ -2026,6 +2107,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1_with_12h_sms_note,
@@ -2131,8 +2217,8 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_not_awaited()
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_has_awaits([
@@ -2140,8 +2226,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
@@ -2170,6 +2256,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1_with_12h_sms_note,
@@ -2276,8 +2367,8 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_not_awaited()
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_has_awaits([
@@ -2286,8 +2377,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
@@ -2316,6 +2407,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1_with_12h_sms_note,
@@ -2422,7 +2518,7 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_not_awaited()
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to),
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
             # call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
         ])
 
@@ -2432,7 +2528,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
             # call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
         ])
 
@@ -2462,6 +2558,11 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1_with_2h_sms_note,
@@ -2538,8 +2639,8 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_not_awaited()
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
@@ -2568,6 +2669,12 @@ class TestCtsDispatchMonitor:
         sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
         sms_to_2_tech = '+12123595129'
+
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
         responses_details_mock = [
             cts_ticket_details_1_with_2h_sms_note,
@@ -2660,8 +2767,8 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_not_awaited()
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([

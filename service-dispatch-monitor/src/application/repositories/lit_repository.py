@@ -24,6 +24,8 @@ from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_12_hou
 from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_2_hours_before_sms_note
 from application.templates.lit.lit_tech_on_site import lit_get_tech_on_site_note
 
+from application.repositories.utils_repository import UtilsRepository
+
 
 class LitRepository:
     def __init__(self, logger, config, event_bus, notifications_repository, bruin_repository):
@@ -199,7 +201,8 @@ class LitRepository:
 
         return {
             'datetime_localized': return_datetime_localized,
-            'timezone': final_timezone
+            'timezone': final_timezone,
+            'datetime_formatted_str': return_datetime_localized.strftime(UtilsRepository.DATETIME_FORMAT)
         }
 
     def is_dispatch_confirmed(self, dispatch):

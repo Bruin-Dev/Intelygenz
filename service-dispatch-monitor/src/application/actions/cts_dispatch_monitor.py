@@ -134,6 +134,8 @@ class CtsDispatchMonitor:
                         continue
 
                     date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+                    # Get datetime formatted string
+                    datetime_formatted_str = date_time_of_dispatch_localized.strftime(UtilsRepository.DATETIME_FORMAT)
 
                     sms_to = CtsRepository.get_sms_to(dispatch)
                     if sms_to is None:
@@ -240,7 +242,7 @@ class CtsDispatchMonitor:
                         self._logger.info(f"Dispatch: {dispatch_number} "
                                           f"Ticket_id: {ticket_id} - Sending confirmed SMS")
                         sms_sended = await self._cts_repository.send_confirmed_sms(
-                            dispatch_number, ticket_id, dispatch, sms_to)
+                            dispatch_number, ticket_id, datetime_formatted_str, sms_to)
                         if not sms_sended:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"SMS could not be sent to {sms_to}.")
@@ -266,7 +268,7 @@ class CtsDispatchMonitor:
                         self._logger.info(f"Dispatch: {dispatch_number} "
                                           f"Ticket_id: {ticket_id} - Sending confirmed SMS Tech")
                         sms_sended = await self._cts_repository.send_confirmed_sms_tech(
-                            dispatch_number, ticket_id, dispatch, sms_to_tech)
+                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
                         if not sms_sended:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"SMS Tech could not be sent to {sms_to_tech}.")
@@ -304,7 +306,7 @@ class CtsDispatchMonitor:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"Sending SMS 12h note")
                             result_sms_12_sended = await self._cts_repository.send_tech_12_sms(
-                                dispatch_number, ticket_id, dispatch, sms_to)
+                                dispatch_number, ticket_id, datetime_formatted_str, sms_to)
                             if not result_sms_12_sended:
                                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                                   f"- SMS 12h not sended")
@@ -338,7 +340,7 @@ class CtsDispatchMonitor:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"Sending SMS tech 12h note")
                         result_sms_12_sended = await self._cts_repository.send_tech_12_sms_tech(
-                            dispatch_number, ticket_id, dispatch, sms_to_tech)
+                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
                         if not result_sms_12_sended:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"- SMS tech 12h not sended")
@@ -372,7 +374,7 @@ class CtsDispatchMonitor:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"Sending SMS 2h note")
                             result_sms_2_sended = await self._cts_repository.send_tech_2_sms(
-                                dispatch_number, ticket_id, dispatch, sms_to)
+                                dispatch_number, ticket_id, datetime_formatted_str, sms_to)
                             if not result_sms_2_sended:
                                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                                   f"- SMS 2h not sended")
@@ -405,7 +407,7 @@ class CtsDispatchMonitor:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"Sending SMS tech 2h note")
                         result_sms_2_sended = await self._cts_repository.send_tech_2_sms_tech(
-                            dispatch_number, ticket_id, dispatch, sms_to_tech)
+                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
                         if not result_sms_2_sended:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"- SMS tech 2h not sended")

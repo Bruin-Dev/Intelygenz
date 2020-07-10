@@ -136,6 +136,7 @@ class LitDispatchMonitor:
 
                     date_time_of_dispatch = datetime_tz_response['datetime_localized']
                     tz = datetime_tz_response['timezone']
+                    datetime_formatted_str = datetime_tz_response['datetime_formatted_str']
 
                     # Client phonenumber
                     sms_to = LitRepository.get_sms_to(dispatch)

@@ -160,13 +160,13 @@ class CtsRepository:
                 dispatches_splitted_by_status[dispatch.get('Status__c')].append(dispatch)
         return dispatches_splitted_by_status
 
-    async def send_confirmed_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_confirmed_sms(self, dispatch_number, ticket_id, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Local_Site_Time__c')
+            'date_of_dispatch': dispatch_datetime
         }
 
         sms_data = cts_get_dispatch_confirmed_sms(sms_data_payload)
@@ -192,13 +192,13 @@ class CtsRepository:
             f"SMS sent Response {sms_response_body}")
         return True
 
-    async def send_confirmed_sms_tech(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_confirmed_sms_tech(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
+            'date_of_dispatch': dispatch_datetime,
             'site': dispatch.get('Lookup_Location_Owner__c'),
             'street': dispatch.get('Street__c')
         }
@@ -226,13 +226,13 @@ class CtsRepository:
             f"SMS tech sent Response {sms_response_body}")
         return True
 
-    async def send_tech_12_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_tech_12_sms(self, dispatch_number, ticket_id, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
+            'date_of_dispatch': dispatch_datetime,
             'phone_number': sms_to
         }
 
@@ -259,13 +259,13 @@ class CtsRepository:
             f"SMS sent Response {sms_response_body}")
         return True
 
-    async def send_tech_12_sms_tech(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_tech_12_sms_tech(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
+            'date_of_dispatch': dispatch_datetime,
             'phone_number': sms_to,
             'site': dispatch.get('Lookup_Location_Owner__c'),
             'street': dispatch.get('Street__c')
@@ -294,13 +294,13 @@ class CtsRepository:
             f"SMS tech sent Response {sms_response_body}")
         return True
 
-    async def send_tech_2_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_tech_2_sms(self, dispatch_number, ticket_id, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
+            'date_of_dispatch': dispatch_datetime,
             'phone_number': sms_to
         }
 
@@ -327,13 +327,13 @@ class CtsRepository:
             f"SMS sent Response {sms_response_body}")
         return True
 
-    async def send_tech_2_sms_tech(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_tech_2_sms_tech(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Local_Site_Time__c'),
+            'date_of_dispatch': dispatch_datetime,
             'phone_number': sms_to,
             'site': dispatch.get('Lookup_Location_Owner__c'),
             'street': dispatch.get('Street__c')

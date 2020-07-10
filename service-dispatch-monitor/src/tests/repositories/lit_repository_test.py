@@ -17,6 +17,8 @@ from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_12_hou
 from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_12_hours_before_sms
 from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_2_hours_before_sms
 from application.templates.lit.sms.tech_on_site import lit_get_tech_on_site_sms
+
+from application.repositories.utils_repository import UtilsRepository
 from config import testconfig
 from application.repositories.lit_repository import LitRepository
 
@@ -209,7 +211,9 @@ class TestLitRepository:
                 responses.append(res)
                 expected_response = {
                     'datetime_localized': return_datetime_localized,
-                    'timezone': final_timezone
+                    'timezone': final_timezone,
+                    'datetime_formatted_str': return_datetime_localized.strftime(
+                        UtilsRepository.DATETIME_FORMAT)
                 }
                 expected_responses.append(expected_response)
             assert res == expected_response
@@ -229,7 +233,8 @@ class TestLitRepository:
 
         expected_response = {
             'datetime_localized': return_datetime_localized,
-            'timezone': final_timezone
+            'timezone': final_timezone,
+            'datetime_formatted_str': '2020-03-16 16:00:00 PDT'
         }
 
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
@@ -244,7 +249,8 @@ class TestLitRepository:
 
         expected_response_2 = {
             'datetime_localized': return_datetime_localized_2,
-            'timezone': final_timezone_2
+            'timezone': final_timezone_2,
+            'datetime_formatted_str': '2020-03-16 10:30:00 EDT'
         }
 
         response = lit_repository.get_dispatch_confirmed_date_time_localized(
@@ -275,7 +281,8 @@ class TestLitRepository:
 
         expected_response = {
             'datetime_localized': return_datetime_localized,
-            'timezone': final_timezone
+            'timezone': final_timezone,
+            'datetime_formatted_str': '2020-03-16 16:00:00 PDT'
         }
 
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
@@ -290,7 +297,8 @@ class TestLitRepository:
 
         expected_response_2 = {
             'datetime_localized': return_datetime_localized_2,
-            'timezone': final_timezone_2
+            'timezone': final_timezone_2,
+            'datetime_formatted_str': '2020-03-16 10:30:00 EDT'
         }
 
         response = lit_repository.get_dispatch_confirmed_date_time_localized(

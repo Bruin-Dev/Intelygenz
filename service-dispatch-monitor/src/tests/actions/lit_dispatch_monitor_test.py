@@ -274,22 +274,25 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
-        tz_2 = timezone(f'US/Eastern')
-        tz_3 = timezone(f'US/Central')
-        datetime_1 = datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
-        datetime_2 = datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')
-        datetime_3 = datetime.strptime('2020-03-16 09:30AM', '%Y-%m-%d %I:%M%p')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime_1),
-            'timezone': timezone(f'US/Pacific')
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+        tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
-            'datetime_localized': tz_2.localize(datetime_2),
-            'timezone': timezone(f'US/Eastern')
+            'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+        tz_3 = timezone(f'US/Central')
+        time_3 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_3 = {
-            'datetime_localized': tz_3.localize(datetime_3),
-            'timezone': timezone(f'US/Central')
+            'datetime_localized': tz_3.localize(datetime.strptime('2020-03-16 09:30AM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_3,
+            'datetime_formatted_str': time_3.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -408,11 +411,13 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
-        datetime_1 = datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime_1),
-            'timezone': timezone(f'US/Pacific')
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+
         datetime_returns_mock = [
             datetime_return_1
         ]
@@ -496,10 +501,11 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
-        datetime_1 = datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime_1),
-            'timezone': timezone(f'US/Pacific')
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
 
         datetime_return_2 = None
@@ -599,16 +605,18 @@ class TestLitDispatchMonitor:
             True
         ]
         tz_1 = timezone(f'US/Pacific')
-        tz_2 = timezone(f'US/Eastern')
-        datetime_1 = datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
-        datetime_2 = datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime_1),
-            'timezone': timezone(f'US/Pacific')
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+        tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
-            'datetime_localized': tz_2.localize(datetime_2),
-            'timezone': timezone(f'US/Eastern')
+            'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
 
         datetime_returns_mock = [
@@ -707,16 +715,18 @@ class TestLitDispatchMonitor:
             True
         ]
         tz_1 = timezone(f'US/Pacific')
-        tz_2 = timezone(f'US/Eastern')
-        datetime_1 = datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
-        datetime_2 = datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime_1),
-            'timezone': timezone(f'US/Pacific')
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+        tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
-            'datetime_localized': tz_2.localize(datetime_2),
-            'timezone': timezone(f'US/Eastern')
+            'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
 
         datetime_returns_mock = [
@@ -811,16 +821,18 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
-        tz_2 = timezone(f'US/Eastern')
-        datetime_1 = datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
-        datetime_2 = datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime_1),
-            'timezone': timezone(f'US/Pacific')
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+        tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
-            'datetime_localized': tz_2.localize(datetime_2),
-            'timezone': timezone(f'US/Eastern')
+            'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -915,16 +927,18 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
-        tz_2 = timezone(f'US/Eastern')
-        datetime_1 = datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
-        datetime_2 = datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime_1),
-            'timezone': timezone(f'US/Pacific')
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+        tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
-            'datetime_localized': tz_2.localize(datetime_2),
-            'timezone': timezone(f'US/Eastern')
+            'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -1041,16 +1055,18 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
-        tz_2 = timezone(f'US/Eastern')
-        datetime_1 = datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
-        datetime_2 = datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime_1),
-            'timezone': timezone(f'US/Pacific')
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+        tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
-            'datetime_localized': tz_2.localize(datetime_2),
-            'timezone': timezone(f'US/Eastern')
+            'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -1161,16 +1177,18 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
-        tz_2 = timezone(f'US/Eastern')
-        datetime_1 = datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
-        datetime_2 = datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime_1),
-            'timezone': timezone(f'US/Pacific')
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+        tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
-            'datetime_localized': tz_2.localize(datetime_2),
-            'timezone': timezone(f'US/Eastern')
+            'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -1290,16 +1308,18 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
-        tz_2 = timezone(f'US/Eastern')
-        datetime_1 = datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
-        datetime_2 = datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime_1),
-            'timezone': timezone(f'US/Pacific')
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+        tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
-            'datetime_localized': tz_2.localize(datetime_2),
-            'timezone': timezone(f'US/Eastern')
+            'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -1385,14 +1405,18 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_1
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
             'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_2
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -1491,14 +1515,18 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_1
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
             'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_2
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -1603,14 +1631,18 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_1
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
             'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_2
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -1742,14 +1774,18 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_1
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
             'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_2
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -1883,14 +1919,18 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_1
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
             'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_2
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
@@ -2022,15 +2062,20 @@ class TestLitDispatchMonitor:
         ]
 
         tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_1
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
             'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_2
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
+
         datetime_returns_mock = [
             datetime_return_1,
             datetime_return_2
@@ -2161,16 +2206,19 @@ class TestLitDispatchMonitor:
             True,
             True
         ]
-
         tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
         datetime_return_1 = {
-            'datetime_localized': tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_1
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         tz_2 = timezone(f'US/Eastern')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p'))
         datetime_return_2 = {
             'datetime_localized': tz_2.localize(datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')),
-            'timezone': tz_2
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         datetime_returns_mock = [
             datetime_return_1,
