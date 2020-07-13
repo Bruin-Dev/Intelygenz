@@ -562,12 +562,6 @@ class CtsDispatchMonitor:
                                       f"tech_2_hours_before_note_found: {tech_2_hours_before_note_found} "
                                       f"tech_on_site_note_found: {tech_on_site_note_found}")
 
-                    # Check if dispatch was created by the dispatch portal
-                    if requested_watermark_found is None:
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"- Watermark not found, ticket does not belong to us")
-                        continue
-
                     if tech_on_site_note_found is None:
                         result_sms_tech_on_site_sended = await self._cts_repository.send_tech_on_site_sms(
                             dispatch_number, ticket_id, dispatch, sms_to)

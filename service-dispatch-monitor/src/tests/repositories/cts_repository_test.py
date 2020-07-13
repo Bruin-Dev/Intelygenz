@@ -124,6 +124,16 @@ class TestCtsRepository:
         expected_phone = None
         assert CtsRepository.get_sms_to(updated_dispatch) == expected_phone
 
+    def get_sms_to_tech_test(self, cts_dispatch_confirmed):
+        updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+        expected_phone = "+12123595129"
+        assert CtsRepository.get_sms_to_tech(updated_dispatch) == expected_phone
+
+    def get_sms_to_tech_with_error_test(self, cts_dispatch_confirmed):
+        updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+        updated_dispatch['Resource_Phone_Number__c'] = None
+        assert CtsRepository.get_sms_to_tech(updated_dispatch) is None
+
     def is_valid_ticket_id_test(self):
         valid_ticket_id = '4663397'
         invalid_ticket_id_1 = '4663397|IW24654081'

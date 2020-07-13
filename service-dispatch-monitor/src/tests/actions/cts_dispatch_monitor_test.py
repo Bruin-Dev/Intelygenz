@@ -162,6 +162,32 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._monitor_confirmed_dispatches.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def filter_dispatches_by_watermark_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
+                                                  cts_dispatch_confirmed_2, cts_dispatch_confirmed_no_main_watermark,
+                                                  cts_ticket_details_1,
+                                                  cts_ticket_details_2_error,
+                                                  cts_ticket_details_2_no_requested_watermark,
+                                                  cts_ticket_details_no_watermark):
+        confirmed_dispatches = [
+            cts_dispatch_confirmed,
+            cts_dispatch_confirmed_2,
+            cts_dispatch_confirmed_2,
+            cts_dispatch_confirmed_no_main_watermark
+        ]
+        responses_details_mock = [
+            cts_ticket_details_1,
+            cts_ticket_details_2_error,
+            cts_ticket_details_2_no_requested_watermark,
+            cts_ticket_details_no_watermark
+        ]
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        filtered_confirmed_dispatches = await cts_dispatch_monitor._filter_dispatches_by_watermark(confirmed_dispatches)
+
+        assert filtered_confirmed_dispatches == [cts_dispatch_confirmed]
+
+    @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
                                                 cts_dispatch_confirmed_2, cts_dispatch_confirmed_no_main_watermark,
                                                 cts_ticket_details_1, cts_ticket_details_no_dispatch_2,
@@ -2689,6 +2715,104 @@ class TestCtsDispatchMonitor:
         ])
 
     @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_with_2h_tech_sms_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed,
+            cts_ticket_details_1_with_2h_sms_tech_note):
+        confirmed_dispatches = [
+            cts_dispatch_confirmed,
+        ]
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+        dispatch_number_1 = cts_dispatch_confirmed.get('Name')
+        ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
+        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
+
+        sms_to = '+12027723610'
+        sms_to_2 = '+12027723611'
+        sms_to_tech = '+12123595129'
+        sms_to_2_tech = '+12123595129'
+
+        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
+        # Get datetime formatted string
+        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+
+        responses_details_mock = [
+            cts_ticket_details_1_with_2h_sms_tech_note,
+        ]
+
+        responses_append_confirmed_notes_mock = [
+            True,
+            True,
+        ]
+        responses_confirmed_sms = [
+            True,
+            True
+        ]
+
+        # First not skipped, Second skipped
+        responses_get_diff_hours = [
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 + 1,
+            cts_dispatch_monitor.HOURS_2 + 1,
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 - 1,
+            cts_dispatch_monitor.HOURS_2 + 1,
+            cts_dispatch_monitor.HOURS_2 + 1
+        ]
+
+        responses_send_tech_12_sms_mock = [
+            True,
+            False
+        ]
+
+        responses_send_tech_12_sms_note_mock = [
+            True,
+            False
+        ]
+
+        responses_send_tech_2_sms_mock = [
+            True,
+            False
+        ]
+
+        responses_send_tech_2_sms_note_mock = [
+            False,
+            False
+        ]
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
+            side_effect=responses_append_confirmed_notes_mock)
+        cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
+            side_effect=responses_confirmed_sms)
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_note_mock)
+        cts_dispatch_monitor._cts_repository.send_tech_12_sms_tech = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_mock)
+        cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_note_mock)
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms = CoroutineMock()
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_note = CoroutineMock(
+            side_effect=responses_append_confirmed_notes_mock
+        )
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech = CoroutineMock(
+            side_effect=responses_send_tech_2_sms_mock
+        )
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note = CoroutineMock(
+            side_effect=responses_send_tech_2_sms_note_mock
+        )
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech = CoroutineMock()
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note = CoroutineMock()
+        with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
+            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_not_awaited()
+        cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_tech_on_site,
                                                    cts_dispatch_tech_on_site_2, cts_dispatch_not_valid_ticket_id,
                                                    cts_dispatch_tech_on_site_bad_datetime,
@@ -2929,60 +3053,6 @@ class TestCtsDispatchMonitor:
         responses_details_mock = [
             cts_ticket_details_1,
             cts_ticket_details_2_no_ticket_id_in_watermark
-        ]
-
-        responses_sms_tech_on_site_mock = [
-            True
-        ]
-
-        responses_append_tech_on_site_sms_note_mock = [
-            True
-        ]
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
-
-        cts_dispatch_monitor._cts_repository.send_tech_on_site_sms = CoroutineMock(
-            side_effect=responses_sms_tech_on_site_mock)
-        cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note = CoroutineMock(
-            side_effect=responses_append_tech_on_site_sms_note_mock)
-
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
-
-        cts_dispatch_monitor._cts_repository.send_tech_on_site_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_tech_on_site, sms_to)
-        ])
-
-        cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_has_awaits([
-            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to,
-                 cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
-        ])
-
-    @pytest.mark.asyncio
-    async def monitor_tech_on_site_dispatches_watermark_not_found_test(
-            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2,
-            cts_ticket_details_1, cts_ticket_details_2_no_requested_watermark):
-        tech_on_site_dispatches = [
-            cts_dispatch_tech_on_site,
-            cts_dispatch_tech_on_site_2
-        ]
-        igz_dispatch_number_1 = 'IGZ_0001'
-        igz_dispatch_number_2 = 'IGZ_0002'
-        dispatch_number_1 = cts_dispatch_tech_on_site.get('Name')
-        dispatch_number_2 = cts_dispatch_tech_on_site_2.get('Name')
-        ticket_id_1 = cts_dispatch_tech_on_site.get('Ext_Ref_Num__c')
-        ticket_id_2 = cts_dispatch_tech_on_site_2.get('Ext_Ref_Num__c')
-
-        sms_to = '+12027723610'
-        sms_to_2 = '+12027723611'
-
-        responses_details_mock = [
-            cts_ticket_details_1,
-            cts_ticket_details_2_no_requested_watermark
         ]
 
         responses_sms_tech_on_site_mock = [
