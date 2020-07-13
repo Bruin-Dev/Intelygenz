@@ -33,7 +33,6 @@ function NewDispatch({ authToken }) {
     errors: []
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [formErrors, setFormErrors] = useState(false);
   const [blockedVendors, setBlockedVendors] = useState([]);
   const [statesOptions, setStatesOptions] = useState(statesUSA);
   const [selectedVendor, setSelectedVendor] = useState([]); // Note: ['CTS'] ['LIT'] ['CTS', 'LIT']
@@ -41,24 +40,6 @@ function NewDispatch({ authToken }) {
 
   const onSubmit = async formData => {
     setIsLoading(true);
-    setFormErrors(false);
-
-    // Check errors
-    const requesterName =
-      formData.firstNameRequester.length + formData.lastNameRequester.length;
-    if (requesterName > 14) {
-      setFormErrors('Requester');
-      setIsLoading(false);
-      return;
-    }
-
-    // Check errors
-    const onSitecontact = formData.firstName.length + formData.lastName.length;
-    if (onSitecontact > 14) {
-      setFormErrors('On-Site Contact');
-      setIsLoading(false);
-      return;
-    }
 
     const resAux = {};
     resAux.data = [];
@@ -1066,14 +1047,6 @@ function NewDispatch({ authToken }) {
               ''
             )}
 
-            {formErrors && (
-              <p
-                className="text-red-500 text-base italic py-2 mx-5"
-                data-testid="error-new-dispatch-page"
-              >
-                {formErrors}: Name and lastname must not exceed 14 characters.
-              </p>
-            )}
             {response && response.data.length ? (
               <p
                 className="text-green-500 text-base italic py-2 mx-5"
