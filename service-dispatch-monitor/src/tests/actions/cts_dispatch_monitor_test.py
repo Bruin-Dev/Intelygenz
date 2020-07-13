@@ -172,8 +172,6 @@ class TestCtsDispatchMonitor:
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2,
-            cts_dispatch_confirmed_2,
-            cts_dispatch_confirmed_2,
             cts_dispatch_confirmed_no_main_watermark
         ]
         responses_details_mock = [
