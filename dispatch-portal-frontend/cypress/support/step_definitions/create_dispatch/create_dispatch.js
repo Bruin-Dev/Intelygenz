@@ -12,7 +12,7 @@ When('I introduce valid fields for new dispatch', function() {
   cy.get('select[name=timeDispatch]').select(dataE2e.dispatch.time_of_dispatch);
   cy.get('select[name=timeZone]').select(dataE2e.dispatch.time_zone);
   cy.get(
-    `input[type="radio"][name=vendor][value=${dataE2e.dispatch.vendor}]`
+    `input[type="checkbox"][name=vendor][value=${dataE2e.dispatch.vendor}]`
   ).check();
   cy.get('input[name=mettelId]').type(dataE2e.dispatch.mettel_bruin_ticket_id);
   cy.get('input[name=owner]').type(dataE2e.dispatch.job_site);
@@ -42,9 +42,10 @@ When('I introduce valid fields for new dispatch', function() {
     dataE2e.dispatch.last_name_of_mettel_requester
   );
   cy.get('select[name=department]').select(dataE2e.dispatch.mettel_department);
-  cy.get('input[name=phoneNumberRequester]').type(
+  cy.get('select[name=phoneNumberRequester]').select(
     dataE2e.dispatch.mettel_requester_phone_number
   );
+
   cy.get('input[name=emailRequester]').type(
     dataE2e.dispatch.mettel_requester_email
   );

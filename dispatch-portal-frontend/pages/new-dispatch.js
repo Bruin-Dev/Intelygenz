@@ -19,7 +19,8 @@ import {
   timeZoneOptions,
   departmentOptions,
   serviceTypesOptions,
-  slaLevelOptions
+  slaLevelOptions,
+  requesterPhoneNumberOptions
 } from '../config/constants/dispatch.constants';
 import { config } from '../config/config';
 import './new-dispatch.scss';
@@ -56,8 +57,7 @@ function NewDispatch({ authToken }) {
      *
      */
     await Promise.all(
-      selectedVendor.map(async vendor => {
-        // Todo: change "formData.vendor.map"
+      formData.vendor.map(async vendor => {
         const resData = await dispatchService.newDispatch(formData, vendor);
 
         if (resData && resData.error) {
@@ -89,7 +89,7 @@ function NewDispatch({ authToken }) {
     router.push(`${Routes.BASE()}`);
   };
 
-  /* const changeVendor = event => {
+  const changeVendor = event => {
     const index = selectedVendor.indexOf(event.target.value);
     if (index > -1) {
       const auxSelectedVendors = [...selectedVendor];
@@ -98,10 +98,6 @@ function NewDispatch({ authToken }) {
     } else {
       setSelectedVendor([...selectedVendor, event.target.value]);
     }
-  }; */
-
-  const changeVendor = event => {
-    setSelectedVendor([event.target.value]);
   };
 
   const changeCountry = country => {
@@ -256,7 +252,7 @@ function NewDispatch({ authToken }) {
             <div className="w-full md:w-1/2 p-8">
               <div className="flex flex-col">
                 <div className="block uppercase tracking-wide text-grey-darker text-sm mb-2">
-                  Vendor (*multivendor disabled)
+                  Vendo
                 </div>
                 {vendorsOptions.map(vendorsOption =>
                   blockedVendors.find(r => vendorsOption.value === r) ? (
@@ -275,7 +271,7 @@ function NewDispatch({ authToken }) {
                         }
                       >
                         <input
-                          type="radio"
+                          type="checkbox"
                           name="vendor"
                           value={vendorsOption.value}
                           id={vendorsOption.value}
@@ -963,19 +959,42 @@ function NewDispatch({ authToken }) {
                   htmlFor="phoneNumberRequester"
                 >
                   Phone Number
-                  <input
-                    className={
-                      errors.phoneNumberRequester
-                        ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
-                        : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
-                    }
-                    type="text"
-                    name="phoneNumberRequester"
-                    data-testid="phoneNumberRequester"
-                    id="phoneNumberRequester"
-                    placeholder="+1 000000000"
-                    ref={register({ required: true })}
-                  />
+                  <div className="relative">
+                    <select
+                      name="phoneNumberRequester"
+                      data-testid="phoneNumberRequester"
+                      id="phoneNumberRequester"
+                      ref={register({ required: true })}
+                      className={
+                        errors.phoneNumberRequester
+                          ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
+                          : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
+                      }
+                    >
+                      {requesterPhoneNumberOptions.map(
+                        requesterPhoneNumberOption => (
+                          <option
+                            value={requesterPhoneNumberOption}
+                            key={`requesterPhoneNumberOption-${requesterPhoneNumberOption}`}
+                          >
+                            {requesterPhoneNumberOption}
+                          </option>
+                        )
+                      )}
+                    </select>
+                    <div
+                      className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker"
+                      style={{ top: '13px', right: '0px' }}
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                      </svg>
+                    </div>
+                  </div>
                   {errors.phoneNumberRequester && (
                     <p className="text-red-500 text-xs italic">
                       This field is required

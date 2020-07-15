@@ -15,7 +15,8 @@
 - [Project structure](#project-structure)
   * [Naming conventions](#naming-conventions)
   * [Scaffolding](#scaffolding)
-  * [Work locally](#work-locally)
+  * [Work locally - check docker-compose](#work-locally---check-docker-compose)
+  * [Work locally (Frontend)](#work-locally---frontend)
     + [1) With mocks:](#1--with-mocks-)
     + [2) Without mocks:](#2--without-mocks-)
     + [Open your terminal and browser:](#open-your-terminal-and-browser-)
@@ -128,8 +129,23 @@ Also check this, more synthesized [Naming conventions Airbnb react](https://gith
 - ui/
     - components/: visual / dumb component folder
     - styles: global and variable styles in Sass
+    
+    
+## Work locally - Check docker-compose
+1) Start docker and the back images:
+    ``docker-compose up --build redis nats-server lit-bridge cts-bridge dispatch-portal-frontend dispatch-portal-backend nginx bruin-bridge``
 
-## Work locally
+    Warning: and to login or renew the AWS token:
+    ``echo $(aws ecr get-login-password --profile mettel)|docker login --password-stdin --username AWS 374050862540.dkr.ecr.us-east-1.amazonaws.com``
+    
+2) Navigate to the following address: 
+    - http://localhost:8080/dispatch_portal/ (Real dispatch portal with Nginx)
+    
+    - http://localhost:5000/api/... (Api without Nginx)
+    - http://localhost:3000 (Dispatch portal without Nginx, it does not work well, because it is configured to work with sub-routes (.../dispatch_portal/...))
+
+
+## Work locally - frontend
 Two scenarios:
 
 ### 1) With mocks:

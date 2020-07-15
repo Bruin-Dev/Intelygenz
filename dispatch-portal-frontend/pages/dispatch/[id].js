@@ -99,8 +99,8 @@ function DispatchDetail({ authToken }) {
             </div>
           ) */}
 
-          <div className="flex m-8">
-            <div className="w-1/4 border-b border-l lg:h-auto lg:border-t lg:border-gray-400 flex-none rounded-t lg:rounded-t-none lg:rounded-l bg-gray-300 p-4 justify-between">
+          <div className="flex flex-wrap m-8 border-solid border-2 border-gray-400">
+            <div className="w-full md:w-1/4 flex-none p-4 bg-gray-300 justify-between">
               <div className="mb-8">
                 <div className="text-gray-900 font-bold text-xl mb-2">
                   Vendor Details
@@ -154,7 +154,7 @@ function DispatchDetail({ authToken }) {
                 </p>
               </div>
             </div>
-            <div className="w-2/4 border-r border-b border-l border-gray-400 lg:border-l-0 lg:border-r-0 lg:border-t lg:border-gray-400 bg-white p-4 flex flex-col justify-between leading-normal">
+            <div className="w-full md:w-1/4 bg-white p-4 flex flex-col justify-between leading-normal">
               <div className="mb-8">
                 <div className="mb-4">
                   <div className="text-gray-900 font-bold text-xl mb-2">
@@ -228,7 +228,7 @@ function DispatchDetail({ authToken }) {
               </div>
             </div>
 
-            <div className="w-2/4 border-r border-b border-l border-gray-400 lg:border-l-0 lg:border-t lg:border-gray-400 bg-white rounded-b lg:rounded-b-none lg:rounded-r p-4 flex flex-col justify-between leading-normal">
+            <div className="w-full md:w-2/4 bg-white p-4 flex flex-col justify-between leading-normal">
               <div className="mb-8">
                 <div className="text-gray-900 font-bold text-xl mb-2">
                   Details
