@@ -2871,40 +2871,6 @@ class TestApiServer:
             assert response_data == cts_expected_response
 
     @pytest.mark.asyncio
-    async def cts_create_dispatch_requested_watermark_found_test(
-            self, api_server_test, new_dispatch, ticket_details_1):
-        uuid_ = 'UUID1'
-        igz_dispatch_id = f"IGZ{uuid_}"
-        ticket_id = new_dispatch['mettel_bruin_ticket_id']
-        api_server_test._config.ENVIRONMENT_NAME = 'production'
-        payload = {"request_id": uuid_, "body": {}}
-        cts_expected_response = {}
-        cts_expected_response['id'] = igz_dispatch_id
-        cts_expected_response['vendor'] = 'CTS'
-        err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
-        payload_request = {
-            "request_id": uuid_,
-            "body": new_dispatch
-        }
-
-        return_from_cache_mock = {}
-        response_get_ticket_details_mock = ticket_details_1
-
-        # api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
-        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
-            side_effect=[response_get_ticket_details_mock])
-
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
-            client = api_server_test._app.test_client()
-            response = await client.post(f'/cts/dispatch/', json=new_dispatch)
-            response_data = await response.get_json()
-
-            # api_server_test._redis_client.hgetall.assert_called_once()
-            api_server_test._bruin_repository.get_ticket_details.assert_awaited_once()
-
-            assert response_data == cts_expected_response
-
-    @pytest.mark.asyncio
     async def cts_create_dispatch_error_send_email_test(
             self, api_server_test, new_dispatch, ticket_details_1_no_requested_watermark):
         uuid_ = 'UUID1'

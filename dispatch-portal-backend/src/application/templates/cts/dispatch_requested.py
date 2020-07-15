@@ -45,7 +45,7 @@ def get_dispatch_requested_note(body, dispatch_number):
         time_zone=body.get('time_zone'),
         sla_level=body.get('sla_level'),
         job_site=body.get('job_site'),
-        job_site_street=body.get('job_site_street'),
+        job_site_street=body.get('job_site_street_1'),
         job_site_city=body.get('job_site_city'),
         job_site_state=body.get('job_site_state'),
         job_site_zip_code=body.get('job_site_zip_code'),

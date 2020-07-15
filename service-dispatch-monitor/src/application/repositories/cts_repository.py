@@ -58,7 +58,7 @@ class CtsRepository:
 
         try:
             self._logger.info(f'Getting all dispatches from CTS...')
-            response = await self._event_bus.rpc_request("cts.dispatch.get", request, timeout=30)
+            response = await self._event_bus.rpc_request("cts.dispatch.get", request, timeout=60)
             self._logger.info(f'Got all dispatches from CTS!')
         except Exception as e:
             err_msg = (

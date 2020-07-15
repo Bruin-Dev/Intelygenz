@@ -64,7 +64,7 @@ class TestLitRepository:
         lit_repository._event_bus.rpc_request = CoroutineMock(return_value=response)
         with uuid_mock:
             result = await lit_repository.get_all_dispatches()
-        lit_repository._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", request, timeout=30)
+        lit_repository._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", request, timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
@@ -81,7 +81,7 @@ class TestLitRepository:
         with uuid_mock:
             result = await lit_repository.get_all_dispatches()
 
-        lit_repository._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", request, timeout=30)
+        lit_repository._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", request, timeout=60)
         lit_repository._notifications_repository.send_slack_message.assert_awaited_once()
         lit_repository._logger.error.assert_called_once()
         assert result == nats_error_response
@@ -104,7 +104,7 @@ class TestLitRepository:
         with uuid_mock:
             result = await lit_repository.get_all_dispatches()
 
-        lit_repository._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", request, timeout=30)
+        lit_repository._event_bus.rpc_request.assert_awaited_once_with("lit.dispatch.get", request, timeout=60)
         lit_repository._notifications_repository.send_slack_message.assert_awaited_once()
         lit_repository._logger.error.assert_called_once()
         assert result == response

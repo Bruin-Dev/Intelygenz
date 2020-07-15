@@ -120,3 +120,21 @@ class TestUtilsRepository:
         watermark_to_find = lit_dispatch_monitor.DISPATCH_REQUESTED_WATERMARK
         result = UtilsRepository.find_note(ticket_notes, watermark_to_find)
         assert result == expected_note_found
+
+    def find_dispatch_number_watermark_ok_test(self, ticket_details):
+        dispatch_number = "DIS37405"
+        watermark = '#*Automation Engine*#'
+        dispatch_note = ticket_details['body']["ticketNotes"][1]
+
+        result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
+
+        assert result == dispatch_number
+
+    def find_dispatch_number_watermark_ko_test(self, ticket_details):
+        dispatch_number = "DIS37405"
+        watermark = '#*Automation Engine*#'
+        dispatch_note = ticket_details['body']["ticketNotes"][2]
+
+        result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
+
+        assert result == ''

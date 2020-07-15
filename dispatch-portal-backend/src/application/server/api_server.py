@@ -417,42 +417,36 @@ class DispatchServer:
         ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
         ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
 
-        requested_watermark_found = UtilsRepository.get_first_element_matching(
-            iterable=ticket_notes,
-            condition=lambda note: self.DISPATCH_REQUESTED_WATERMARK in note.get('noteValue')
-        )
         response_dispatch = dict()
-        if requested_watermark_found is not None:
-            self._logger.info(f"Ticket: {ticket_id} already has a requested note dispatch portal")
-        else:
-            # Send email
-            cts_body_mapped = cts_mapper.map_create_dispatch(body)
-            email_template = render_email_template(cts_body_mapped)
-            email_html = f'<div>{email_template}</div>'
-            email_data = {
-                'request_id': uuid(),
-                'email_data': {
-                    'subject': f'CTS - Service Submission - {ticket_id}',
-                    'recipient': self._config.CTS_CONFIG["email"],
-                    'text': 'this is the accessible text for the email',
-                    'html': email_html,
-                    'images': [],
-                    'attachments': []
-                }
+
+        # Send email
+        cts_body_mapped = cts_mapper.map_create_dispatch(body)
+        email_template = render_email_template(cts_body_mapped)
+        email_html = f'<div>{email_template}</div>'
+        email_data = {
+            'request_id': uuid(),
+            'email_data': {
+                'subject': f'CTS - Service Submission - {ticket_id}',
+                'recipient': self._config.CTS_CONFIG["email"],
+                'text': 'this is the accessible text for the email',
+                'html': email_html,
+                'images': [],
+                'attachments': []
             }
-            response_send_email = await self._notifications_repository.send_email(email_data)
-            response_send_email_status = response_send_email['status']
-            if response_send_email_status not in range(200, 300):
-                self._logger.error("[CTS] we could not send the email")
-                error_response = {
-                    'code': response_send_email_status,
-                    'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
-                }
-                return jsonify(error_response), response_send_email_status, None
-            # Append Note to bruin
-            ticket_note = cts_get_dispatch_requested_note(body, igz_dispatch_id)
-            await self._append_note_to_ticket(igz_dispatch_id, ticket_id, ticket_note)
-            self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Note appended: {ticket_note}")
+        }
+        response_send_email = await self._notifications_repository.send_email(email_data)
+        response_send_email_status = response_send_email['status']
+        if response_send_email_status not in range(200, 300):
+            self._logger.error("[CTS] we could not send the email")
+            error_response = {
+                'code': response_send_email_status,
+                'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
+            }
+            return jsonify(error_response), response_send_email_status, None
+        # Append Note to bruin
+        ticket_note = cts_get_dispatch_requested_note(body, igz_dispatch_id)
+        await self._append_note_to_ticket(igz_dispatch_id, ticket_id, ticket_note)
+        self._logger.info(f"Dispatch: {igz_dispatch_id} - {ticket_id} - Note appended: {ticket_note}")
 
         response_dispatch['id'] = igz_dispatch_id
         response_dispatch['vendor'] = 'CTS'

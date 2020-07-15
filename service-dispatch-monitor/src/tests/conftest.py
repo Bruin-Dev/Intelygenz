@@ -685,7 +685,7 @@ def ticket_details_2_no_requested_watermark():
                 },
                 {
                     "noteId": 70805299,
-                    "noteValue": "#*Automation Engine*# XX\n\nblah blah blah\nblah 2",
+                    "noteValue": "#*Automation Engine*# DIS37406\n\nblah blah blah\nblah 2",
                     "serviceNumber": [
                         "4664325"
                     ],
@@ -1934,7 +1934,7 @@ def cts_ticket_details_2_with_12h_sms_note(cts_ticket_details_2_with_confirmatio
     sms_to = "+12123595126"
     note_12h_sms_ticket_note = {
         "noteId": 70805310,
-        "noteValue": "#*Automation Engine*# IGZ_0001"
+        "noteValue": "#*Automation Engine*# IGZ_0002"
                      "Dispatch 12h prior reminder SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
@@ -1942,7 +1942,7 @@ def cts_ticket_details_2_with_12h_sms_note(cts_ticket_details_2_with_confirmatio
     }
     note_12h_sms_ticket_tech_note = {
         "noteId": 70805310,
-        "noteValue": "#*Automation Engine*# IGZ_0001"
+        "noteValue": "#*Automation Engine*# IGZ_0002"
                      "Dispatch 12h prior reminder tech SMS sent to {phone_number}".format(phone_number=sms_to),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",

@@ -167,9 +167,11 @@ class TestCtsDispatchMonitor:
                                                   cts_ticket_details_1,
                                                   cts_ticket_details_2_error,
                                                   cts_ticket_details_2_no_requested_watermark,
+                                                  cts_ticket_details_no_dispatch_2,
                                                   cts_ticket_details_no_watermark):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
+            cts_dispatch_confirmed_2,
             cts_dispatch_confirmed_2,
             cts_dispatch_confirmed_2,
             cts_dispatch_confirmed_no_main_watermark
@@ -178,6 +180,7 @@ class TestCtsDispatchMonitor:
             cts_ticket_details_1,
             cts_ticket_details_2_error,
             cts_ticket_details_2_no_requested_watermark,
+            cts_ticket_details_no_dispatch_2,
             cts_ticket_details_no_watermark
         ]
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
@@ -190,14 +193,11 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
                                                 cts_dispatch_confirmed_2, cts_dispatch_confirmed_no_main_watermark,
-                                                cts_ticket_details_1, cts_ticket_details_no_dispatch_2,
-                                                cts_ticket_details_no_watermark,
+                                                cts_ticket_details_1,
                                                 append_note_response, append_note_response_2,
                                                 sms_success_response, sms_success_response_2):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
-            cts_dispatch_confirmed_2,
-            cts_dispatch_confirmed_no_main_watermark
         ]
 
         response_append_note_1 = {
@@ -269,8 +269,6 @@ class TestCtsDispatchMonitor:
 
         responses_details_mock = [
             cts_ticket_details_1,
-            cts_ticket_details_no_dispatch_2,
-            cts_ticket_details_no_watermark
         ]
         responses_append_notes_mock = [
             response_append_note_1,
@@ -304,8 +302,7 @@ class TestCtsDispatchMonitor:
         await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
 
         cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
+            call(ticket_id_1)
         ])
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
@@ -3031,60 +3028,6 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
-
-    @pytest.mark.asyncio
-    async def monitor_tech_on_site_dispatches_ticket_id_in_watermark_not_found_test(
-            self, cts_dispatch_monitor, cts_dispatch_tech_on_site, cts_dispatch_tech_on_site_2,
-            cts_ticket_details_1, cts_ticket_details_2_no_ticket_id_in_watermark):
-        tech_on_site_dispatches = [
-            cts_dispatch_tech_on_site,
-            cts_dispatch_tech_on_site_2
-        ]
-        igz_dispatch_number_1 = 'IGZ_0001'
-        igz_dispatch_number_2 = 'IGZ_0002'
-        dispatch_number_1 = cts_dispatch_tech_on_site.get('Name')
-        dispatch_number_2 = cts_dispatch_tech_on_site_2.get('Name')
-        ticket_id_1 = cts_dispatch_tech_on_site.get('Ext_Ref_Num__c')
-        ticket_id_2 = cts_dispatch_tech_on_site_2.get('Ext_Ref_Num__c')
-
-        sms_to = '+12027723610'
-        sms_to_2 = '+12027723611'
-
-        responses_details_mock = [
-            cts_ticket_details_1,
-            cts_ticket_details_2_no_ticket_id_in_watermark
-        ]
-
-        responses_sms_tech_on_site_mock = [
-            True
-        ]
-
-        responses_append_tech_on_site_sms_note_mock = [
-            True
-        ]
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
-
-        cts_dispatch_monitor._cts_repository.send_tech_on_site_sms = CoroutineMock(
-            side_effect=responses_sms_tech_on_site_mock)
-        cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note = CoroutineMock(
-            side_effect=responses_append_tech_on_site_sms_note_mock)
-
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
-
-        cts_dispatch_monitor._cts_repository.send_tech_on_site_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, cts_dispatch_tech_on_site, sms_to)
-        ])
-
-        cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_has_awaits([
-            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to,
-                 cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
-        ])
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_sms_not_sent_test(

@@ -67,7 +67,7 @@ class TestCtsRepository:
         cts_repository._event_bus.rpc_request = CoroutineMock(return_value=response)
         with uuid_mock:
             result = await cts_repository.get_all_dispatches()
-        cts_repository._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", request, timeout=30)
+        cts_repository._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", request, timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
@@ -84,7 +84,7 @@ class TestCtsRepository:
         with uuid_mock:
             result = await cts_repository.get_all_dispatches()
 
-        cts_repository._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", request, timeout=30)
+        cts_repository._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", request, timeout=60)
         cts_repository._notifications_repository.send_slack_message.assert_awaited_once()
         cts_repository._logger.error.assert_called_once()
         assert result == nats_error_response
@@ -104,7 +104,7 @@ class TestCtsRepository:
         cts_repository._notifications_repository.send_slack_message = CoroutineMock()
         with uuid_mock:
             result = await cts_repository.get_all_dispatches()
-        cts_repository._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", request, timeout=30)
+        cts_repository._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", request, timeout=60)
         cts_repository._notifications_repository.send_slack_message.assert_awaited_once()
         cts_repository._logger.error.assert_called_once()
         assert result == response

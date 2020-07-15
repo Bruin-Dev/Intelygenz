@@ -40,7 +40,7 @@ def get_dispatch_requested_note_test():
         'sla_level': 'Pre-planned',
         'mettel_bruin_ticket_id': '4656262',
         'job_site': 'Red Rose Inn',
-        'job_site_street': '123 Fake Street',
+        'job_site_street_1': '123 Fake Street',
         'job_site_city': 'Pleasantown',
         'job_site_state': 'CA',
         'job_site_zip_code': '99088',

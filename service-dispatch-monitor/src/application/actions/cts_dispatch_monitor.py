@@ -133,6 +133,14 @@ class CtsDispatchMonitor:
                                   f"- Watermark not found, ticket is not created through dispatch portal")
                 continue
 
+            note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(watermark_found,
+                                                                                  self.IGZ_DN_WATERMARK,
+                                                                                  self.MAIN_WATERMARK)
+            if len(note_dispatch_number) == 0:
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"dispatch number not found found in ticket note: {note_dispatch_number}")
+                continue
+
             requested_watermark_found = UtilsRepository.find_note(
                 ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
             if requested_watermark_found is None:
@@ -215,29 +223,38 @@ class CtsDispatchMonitor:
 
                     igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
                         watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
-                    if len(igz_dispatch_number) == 0:
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"IGZ dispatch number not found: {igz_dispatch_number}")
-                        continue
+
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"IGZ dispatch number found: {igz_dispatch_number}")
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"IGZ dispatch number found: {igz_dispatch_number}")
+                    self._logger.info(
+                        f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
+
+                    self._logger.info(ticket_notes)
+
+                    self._logger.info(f"Filtering ticket notes to contain only notes for the "
+                                      f"IGZ CTS Dispatch number[{igz_dispatch_number}]")
+                    filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
+                                                                                        igz_dispatch_number,
+                                                                                        ticket_id)
 
                     requested_watermark_found = UtilsRepository.find_note(
-                        ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
+                        filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
                     confirmed_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.DISPATCH_CONFIRMED_WATERMARK)
+                        filtered_ticket_notes, self.DISPATCH_CONFIRMED_WATERMARK)
                     confirmed_sms_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.DISPATCH_CONFIRMED_SMS_WATERMARK)
+                        filtered_ticket_notes, self.DISPATCH_CONFIRMED_SMS_WATERMARK)
                     confirmed_sms_tech_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.DISPATCH_CONFIRMED_SMS_TECH_WATERMARK)
+                        filtered_ticket_notes, self.DISPATCH_CONFIRMED_SMS_TECH_WATERMARK)
                     tech_12_hours_before_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_WATERMARK)
+                        filtered_ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_WATERMARK)
                     tech_12_hours_before_tech_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_TECH_WATERMARK)
+                        filtered_ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_TECH_WATERMARK)
                     tech_2_hours_before_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
+                        filtered_ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
                     tech_2_hours_before_tech_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_TECH_WATERMARK)
+                        filtered_ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_TECH_WATERMARK)
 
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"requested_watermark_found: {requested_watermark_found} "
@@ -249,9 +266,6 @@ class CtsDispatchMonitor:
                                       f"tech_2_hours_before_note_found: {tech_2_hours_before_note_found} "
                                       f"tech_2_hours_before_tech_note_found: {tech_2_hours_before_tech_note_found} ")
 
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"main_watermark_found: {watermark_found} "
-                                      f"requested_watermark_found: {requested_watermark_found} ")
                     # Check if dispatch has a confirmed note
                     if confirmed_note_found is None:
                         result_append_confirmed_note = await self._cts_repository.append_confirmed_note(
@@ -530,10 +544,7 @@ class CtsDispatchMonitor:
                     igz_dispatch_number_note = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
                     igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
                         igz_dispatch_number_note, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
-                    if len(igz_dispatch_number) == 0:
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"IGZ dispatch number not found: {igz_dispatch_number}")
-                        continue
+
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"IGZ dispatch number found: {igz_dispatch_number}")
                     self._logger.info(
@@ -541,19 +552,25 @@ class CtsDispatchMonitor:
 
                     self._logger.info(ticket_notes)
 
-                    # watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
+                    self._logger.info(f"Filtering ticket notes to contain only notes for the "
+                                      f"IGZ CTS Dispatch number[{igz_dispatch_number}]")
+                    filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
+                                                                                        igz_dispatch_number,
+                                                                                        ticket_id)
+                    self._logger.info(filtered_ticket_notes)
+
                     requested_watermark_found = UtilsRepository.find_note(
-                        ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
+                        filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
                     confirmed_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.DISPATCH_CONFIRMED_WATERMARK)
+                        filtered_ticket_notes, self.DISPATCH_CONFIRMED_WATERMARK)
                     confirmed_sms_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.DISPATCH_CONFIRMED_SMS_WATERMARK)
+                        filtered_ticket_notes, self.DISPATCH_CONFIRMED_SMS_WATERMARK)
                     tech_12_hours_before_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_WATERMARK)
+                        filtered_ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_WATERMARK)
                     tech_2_hours_before_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
+                        filtered_ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
                     tech_on_site_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.DISPATCH_FIELD_ENGINEER_ON_SITE_WATERMARK)
+                        filtered_ticket_notes, self.DISPATCH_FIELD_ENGINEER_ON_SITE_WATERMARK)
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"requested_watermark_found: {requested_watermark_found} "
                                       f"confirmed_note_found: {confirmed_note_found} "
@@ -594,3 +611,17 @@ class CtsDispatchMonitor:
 
         stop = perf_counter()
         self._logger.info(f"Monitor Tech on Site Dispatches took: {(stop - start) / 60} minutes")
+
+    def _filter_ticket_note_by_dispatch_number(self, ticket_notes, dispatch_number, ticket_id):
+        filtered_ticket_notes = []
+        for note in ticket_notes:
+            note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(note,
+                                                                                  dispatch_number,
+                                                                                  self.MAIN_WATERMARK)
+            if len(note_dispatch_number) == 0:
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"dispatch number not found found in ticket note: {note}")
+                continue
+            filtered_ticket_notes.append(note)
+
+        return filtered_ticket_notes
