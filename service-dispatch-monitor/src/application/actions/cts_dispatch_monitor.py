@@ -223,12 +223,21 @@ class CtsDispatchMonitor:
 
                     igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
                         watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
-                    if len(igz_dispatch_number) == 0:
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"IGZ dispatch number not found: {igz_dispatch_number}")
-                        continue
+
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"IGZ dispatch number found: {igz_dispatch_number}")
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"IGZ dispatch number found: {igz_dispatch_number}")
+                    self._logger.info(
+                        f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
+
+                    self._logger.info(ticket_notes)
+
+                    self._logger.info(f"Filtering ticket notes to contain only notes for the "
+                                      f"IGZ CTS Dispatch number[{igz_dispatch_number}]")
+                    filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
+                                                                                        igz_dispatch_number,
+                                                                                        ticket_id)
 
                     watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
 
