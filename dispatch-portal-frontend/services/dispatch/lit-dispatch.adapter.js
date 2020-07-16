@@ -74,11 +74,9 @@ export const dispatchLitOutAdapter = data => ({
   name_of_mettel_requester: `${data.firstNameRequester} ${data.lastNameRequester}`,
   mettel_department: data.department,
   mettel_requester_email: data.emailRequester,
-  mettel_requester_phone_number: data.phoneNumberRequester,
-  mettel_department_phone_number: data.phoneNumber
+  mettel_department_phone_number: data.phoneNumberRequester
 });
 
-// Todo delete null and undefined
 export const dispatchLitInAdapterGeAll = data => ({
   bruinTicketId: data.mettel_bruin_ticket_id || '',
   customerLocation: `${data.job_site_street} ${data.job_site_city} ${data.job_site_state} ${data.job_site_zip_code}`,
