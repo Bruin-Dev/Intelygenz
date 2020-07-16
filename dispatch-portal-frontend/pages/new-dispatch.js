@@ -57,7 +57,8 @@ function NewDispatch({ authToken }) {
      *
      */
     await Promise.all(
-      formData.vendor.map(async vendor => {
+      // todo: change formData.vendor
+      selectedVendor.map(async vendor => {
         const resData = await dispatchService.newDispatch(formData, vendor);
 
         if (resData && resData.error) {
@@ -89,7 +90,7 @@ function NewDispatch({ authToken }) {
     router.push(`${Routes.BASE()}`);
   };
 
-  const changeVendor = event => {
+  /* const changeVendor = event => {
     const index = selectedVendor.indexOf(event.target.value);
     if (index > -1) {
       const auxSelectedVendors = [...selectedVendor];
@@ -98,6 +99,10 @@ function NewDispatch({ authToken }) {
     } else {
       setSelectedVendor([...selectedVendor, event.target.value]);
     }
+  }; */
+
+  const changeVendor = event => {
+    setSelectedVendor([event.target.value]);
   };
 
   const changeCountry = country => {
@@ -252,7 +257,7 @@ function NewDispatch({ authToken }) {
             <div className="w-full md:w-1/2 p-8">
               <div className="flex flex-col">
                 <div className="block uppercase tracking-wide text-grey-darker text-sm mb-2">
-                  Vendo
+                  Vendor
                 </div>
                 {vendorsOptions.map(vendorsOption =>
                   blockedVendors.find(r => vendorsOption.value === r) ? (
@@ -271,7 +276,7 @@ function NewDispatch({ authToken }) {
                         }
                       >
                         <input
-                          type="checkbox"
+                          type="radio"
                           name="vendor"
                           value={vendorsOption.value}
                           id={vendorsOption.value}
@@ -974,10 +979,10 @@ function NewDispatch({ authToken }) {
                       {requesterPhoneNumberOptions.map(
                         requesterPhoneNumberOption => (
                           <option
-                            value={requesterPhoneNumberOption}
-                            key={`requesterPhoneNumberOption-${requesterPhoneNumberOption}`}
+                            value={requesterPhoneNumberOption.value}
+                            key={`requesterPhoneNumberOption-${requesterPhoneNumberOption.value}`}
                           >
-                            {requesterPhoneNumberOption}
+                            {requesterPhoneNumberOption.label}
                           </option>
                         )
                       )}
