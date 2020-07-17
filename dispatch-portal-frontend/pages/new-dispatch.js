@@ -57,8 +57,7 @@ function NewDispatch({ authToken }) {
      *
      */
     await Promise.all(
-      // todo: change formData.vendor
-      selectedVendor.map(async vendor => {
+      formData.vendor.map(async vendor => {
         const resData = await dispatchService.newDispatch(formData, vendor);
 
         if (resData && resData.error) {
@@ -90,7 +89,7 @@ function NewDispatch({ authToken }) {
     router.push(`${Routes.BASE()}`);
   };
 
-  /* const changeVendor = event => {
+  const changeVendor = event => {
     const index = selectedVendor.indexOf(event.target.value);
     if (index > -1) {
       const auxSelectedVendors = [...selectedVendor];
@@ -99,10 +98,6 @@ function NewDispatch({ authToken }) {
     } else {
       setSelectedVendor([...selectedVendor, event.target.value]);
     }
-  }; */
-
-  const changeVendor = event => {
-    setSelectedVendor([event.target.value]);
   };
 
   const changeCountry = country => {
@@ -276,7 +271,7 @@ function NewDispatch({ authToken }) {
                         }
                       >
                         <input
-                          type="radio"
+                          type="checkbox"
                           name="vendor"
                           value={vendorsOption.value}
                           id={vendorsOption.value}
