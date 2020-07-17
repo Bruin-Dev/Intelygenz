@@ -123,23 +123,16 @@ class LitDispatchMonitor:
                 continue
             ticket_notes = response_body.get('ticketNotes', [])
             ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
-            watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
-
-            if watermark_found is None:
+            filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
+                                                                                dispatch_number,
+                                                                                ticket_id)
+            if len(filtered_ticket_notes) == 0:
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"- Watermark not found, ticket is not created through dispatch portal")
-                continue
-
-            note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(watermark_found,
-                                                                                  dispatch_number,
-                                                                                  self.MAIN_WATERMARK)
-            if len(note_dispatch_number) == 0:
-                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"dispatch number not found found in ticket note: {note_dispatch_number}")
+                                  f"Watermark and dispatch number not found found in ticket notes: {ticket_notes}")
                 continue
 
             requested_watermark_found = UtilsRepository.find_note(
-                ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
+                filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
             if requested_watermark_found is None:
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"- Watermark not found, ticket does not belong to us")
