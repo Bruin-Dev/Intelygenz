@@ -383,7 +383,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--environment',
                         type=str,
                         help='Name of the environment to delete images',
-                        required=False)
+                        required=True)
     parser.add_argument('-a', '--all_repositories',
                         type=bool,
                         help='Indicate if all ECR repositories are going to be explored to delete older images',

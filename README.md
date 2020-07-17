@@ -72,28 +72,22 @@ Also check this, more synthesized [Python naming conventions](https://visualgit.
 
 ## Adding new microservices to the system
 In addition to creating the microservice folder and all the standards files inside that folder, you must add this
-new microservice and any new env variables to the system's files. This is done inorder to add 
+new microservice and any new env variables to the system's files. This is done in order to add 
 it to both the infrastructure and the pipeline.
 You will need to add/modify files in the folders of the 
-- [automation-engine](#automation-engine),  
-- [ci-utils](#ci-utils),
-- [gitlab-ci](#gitlab-ci), 
-- [infra-as-code](#infra-as-code), 
-- and [installation-utils](#installation-utils)
+- [automation-engine](#automation-engine)  
+- [gitlab-ci](#gitlab-ci) 
+- [infra-as-code](#infra-as-code) 
+- [installation-utils](#installation-utils)
 
 Any new env variables should be added to the gitlab. And if there are two different var for PRO and DEV
 specify it by appending `_PRO` or `_DEV` to the variable name on the gitlab.
 
 ### automation-engine
-In the automation-engine folder you will need to update the:
+In the automation-engine root folder it is necessary update the following files:
 - [.gitlab-ci.yml](.gitlab-ci.yml)
 - [README.md](README.md)
 - [docker-compose.yml](docker-compose.yml)
-
-### ci-utils
-In ci-utils you will need to makes changes to the following files:
--  [assign_docker_images_build_numbers.sh](ci-utils/ecr/assign_docker_images_build_numbers.sh) 
--  [manage_ecr_docker_images.py](ci-utils/ecr/manage_ecr_docker_images.py)
 
 ### gitlab-ci
 If your microservices adds any new env variables you will need to make changes to the following file:
@@ -153,6 +147,11 @@ In installation-utils you will need to make changes to the following files:
   >It is strongly recommended to always start with a `feature/<feature-name>` or `fix/<issue-name>` branch, and once the development is ready, rename it to `dev/feature/<feature-name>` or `dev/fix/<issue-name>` and push this changes to the repository.
 
 - When taking a fix or a feature, create a new branch. After first push to the remote repository, start a Merge Request with the title like the following: "WIP: your title goes here". That way, Maintainer and Approvers can read your changes while you develop them.
+- It is possible to skip the entire pipeline when uploading a new branch to the repository. To do so, the following command must be executed.
+  ```bash
+  $ git push origin <branch_name> -o ci.skip
+  ```
+  >If this command is executed in the following commits the CI/CD pipeline will be executed directly on those modules that have changed in each commit.
 - **Remember that all code must have automated tests(unit and integration and must be part of an acceptance test) in it's pipeline.** 
 - Assign that merge request to a any developer of the repository. Also add any affected developer as Approver. I.E: if you are developing a microservice wich is part of a process, you should add as Approvers both the developers of the first microservice ahead and the first behind in the process chain. Those microservices will be the more affected by your changes. 
 - When a branch is merged into master, it will be deployed in production environment.

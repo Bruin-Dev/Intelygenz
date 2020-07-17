@@ -9,7 +9,6 @@
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
-    - apk add --update-cache --upgrade curl
     - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-v${ECS_CLI_VERSION}
     - chmod +x /usr/local/bin/ecs-cli
     - export TF_VAR_ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
