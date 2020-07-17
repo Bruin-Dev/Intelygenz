@@ -453,6 +453,7 @@ function NewDispatch({ authToken }) {
                     data-testid="address2"
                     id="address2"
                     placeholder="Clark"
+                    ref={register({})}
                   />
                 </label>
               </div>
