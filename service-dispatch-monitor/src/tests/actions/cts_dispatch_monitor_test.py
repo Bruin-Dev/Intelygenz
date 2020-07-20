@@ -172,13 +172,13 @@ class TestCtsDispatchMonitor:
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2,
+            cts_dispatch_confirmed_2,
             cts_dispatch_confirmed_no_main_watermark
         ]
         responses_details_mock = [
             cts_ticket_details_1,
             cts_ticket_details_2_error,
             cts_ticket_details_2_no_requested_watermark,
-            cts_ticket_details_no_dispatch_2,
             cts_ticket_details_no_watermark
         ]
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)

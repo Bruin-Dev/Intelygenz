@@ -128,7 +128,7 @@ class LitDispatchMonitor:
                                                                                 ticket_id)
             if len(filtered_ticket_notes) == 0:
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"Watermark and dispatch number not found found in ticket notes: {ticket_notes}")
+                                  f"Watermark and dispatch number not found found in ticket notes")
                 continue
 
             requested_watermark_found = UtilsRepository.find_note(
@@ -590,7 +590,7 @@ class LitDispatchMonitor:
                                                                                   self.MAIN_WATERMARK)
             if len(note_dispatch_number) == 0:
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"dispatch number not found found in ticket note: {note}")
+                                  f"dispatch number not found found in ticket note")
                 continue
             filtered_ticket_notes.append(note)
 

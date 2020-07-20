@@ -1,28 +1,22 @@
 import base64
-import time
-from http import HTTPStatus
 import json
 import textwrap
-from datetime import datetime
-from time import perf_counter
+import time
+from http import HTTPStatus
 
-import asyncio
 import jsonschema
-from jsonschema import validate
-from quart import jsonify, request
-from quart_cors import cors
+from application.mappers import lit_mapper, cts_mapper
+from application.templates.cts.dispatch_request_mail import render_email_template
+from application.templates.cts.dispatch_requested import get_dispatch_requested_note as cts_get_dispatch_requested_note
+from application.templates.lit.dispatch_requested import get_dispatch_requested_note as lit_get_dispatch_requested_note
 from hypercorn.asyncio import serve
 from hypercorn.config import Config as HyperCornConfig
+from jsonschema import validate
+from quart import jsonify, request
 from quart.exceptions import HTTPException
 from quart_openapi import Pint
 from shortuuid import uuid
 from swagger_ui import quart_api_doc
-
-from application.mappers import lit_mapper, cts_mapper
-from application.repositories.utils_repository import UtilsRepository
-from application.templates.cts.dispatch_request_mail import render_email_template
-from application.templates.lit.dispatch_requested import get_dispatch_requested_note as lit_get_dispatch_requested_note
-from application.templates.cts.dispatch_requested import get_dispatch_requested_note as cts_get_dispatch_requested_note
 
 
 class DispatchServer:
@@ -471,45 +465,12 @@ class DispatchServer:
                               f"Ticket_id: {ticket_id} - Appended")
             self._logger.info(f"[process_note] Note appended. Response {append_note_response_body}")
 
-    def _exists_watermark_in_ticket(self, watermark, ticket_notes):
-        watermark_found = False
-
-        for ticket_note_data in ticket_notes:
-            self._logger.info(ticket_note_data)
-            ticket_note = ticket_note_data.get('noteValue')
-
-            if self.MAIN_WATERMARK in ticket_note and watermark in ticket_note:
-                watermark_found = True
-                break
-
-        return watermark_found
-
-    async def _get_ticket_details(self, ticket_id):
-        ticket_request_msg = {'request_id': uuid(),
-                              'body': {'ticket_id': ticket_id}}
-        ticket = await self._event_bus.rpc_request("bruin.ticket.details.request", ticket_request_msg, timeout=200)
-        return ticket
-
     async def _process_note(self, dispatch_number, body):
         try:
             ticket_id = body['mettel_bruin_ticket_id']
             ticket_note = lit_get_dispatch_requested_note(body, dispatch_number)
 
-            pre_existing_ticket_notes_response = await self._get_ticket_details(ticket_id)
-            pre_existing_ticket_notes_status = pre_existing_ticket_notes_response['status']
-
-            if pre_existing_ticket_notes_status not in range(200, 300):
-                self._logger.error(f"Error: could not retrieve ticket [{ticket_id}] details")
-                return
-
-            pre_existing_ticket_notes_body = pre_existing_ticket_notes_response.get('body', {})
-            pre_existing_ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
-            watermark_found = self._exists_watermark_in_ticket('Dispatch Management - Dispatch Requested',
-                                                               pre_existing_ticket_notes)
-            if watermark_found is True:
-                self._logger.info(f"Not adding note for dispatch [{dispatch_number}] to ticket {ticket_id}")
-            else:
-                await self._append_note_to_ticket(dispatch_number, body['mettel_bruin_ticket_id'], ticket_note)
+            await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
         except Exception as ex:
             self._logger.error(f"[process_note] Error: {ex}")
 
