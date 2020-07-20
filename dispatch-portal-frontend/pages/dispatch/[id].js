@@ -225,6 +225,12 @@ function DispatchDetail({ authToken }) {
                     {data.onSiteContact.phoneNumber}
                   </span>
                 </p>
+                <p className="text-gray-900 text-sm">
+                  Name:{' '}
+                  <span data-test-id="dispatch-detail-onSiteContact-phoneNumber">
+                    {data.onSiteContact.name}
+                  </span>
+                </p>
               </div>
             </div>
 
