@@ -177,7 +177,7 @@ class TestBruinRepository:
         with uuid_mock:
             result = await bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.note.append.request", request, timeout=15)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.note.append.request", request, timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
@@ -211,7 +211,7 @@ class TestBruinRepository:
         with uuid_mock:
             result = await bruin_repository.append_note_to_ticket(ticket_id, ticket_note, is_private=True)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.note.append.request", request, timeout=15)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.note.append.request", request, timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
@@ -242,7 +242,7 @@ class TestBruinRepository:
         with uuid_mock:
             result = await bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.note.append.request", request, timeout=15)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.note.append.request", request, timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
         logger.error.assert_called_once()
         assert result == nats_error_response
@@ -280,7 +280,7 @@ class TestBruinRepository:
         with uuid_mock:
             result = await bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
 
-        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.note.append.request", request, timeout=15)
+        event_bus.rpc_request.assert_awaited_once_with("bruin.ticket.note.append.request", request, timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
         logger.error.assert_called_once()
         assert result == response

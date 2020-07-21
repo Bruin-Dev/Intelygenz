@@ -662,6 +662,14 @@ class TestApiServer:
                 'ticket_id': 'T-12345'
             }
         }
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Created [{dispatch_number}] " \
+                    f"with ticket id: T-12345"
+        # api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -675,6 +683,7 @@ class TestApiServer:
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_create
+            api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
 
     @pytest.mark.asyncio
     async def lit_create_dispatch_with_error_appending_note_test(self, api_server_test):
@@ -829,6 +838,15 @@ class TestApiServer:
             }
         }
 
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Created [{dispatch_number}] " \
+                    f"with ticket id: T-12345"
+        # api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
+
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/lit/dispatch', json=payload_lit)
@@ -841,11 +859,12 @@ class TestApiServer:
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_create
+            api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
 
     @pytest.mark.asyncio
     async def lit_create_dispatch_error_exception_test(self, api_server_test):
         uuid_ = 'UUID1'
-
+        ticket_id = 'T-12345'
         dispatch_number = 'DIS37450'
         expected_response = {
             "Status": "Success",
@@ -997,7 +1016,7 @@ class TestApiServer:
         append_note_to_ticket_request = {
             'request_id': uuid_,
             'body': {
-                'ticket_id': 'T-12345',
+                'ticket_id': ticket_id,
                 'note': '#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n'
                         'Please see the summary below.\n--\n'
                         'Date of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n'
@@ -1018,6 +1037,14 @@ class TestApiServer:
             }
         }
 
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Created [{dispatch_number}] " \
+                    f"with ticket id: {ticket_id}"
+
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/lit/dispatch', json=payload_lit)
@@ -1030,6 +1057,7 @@ class TestApiServer:
 
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_create
+            api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
 
     @pytest.mark.asyncio
     async def lit_create_dispatch_validation_error_test(self, api_server_test):
@@ -2408,18 +2436,24 @@ class TestApiServer:
         }
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
-        # api_server_test._add_dispatch_to_cache = Mock(return_value=True)
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+        slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Requested by email [{igz_dispatch_id}] " \
+                    f"with ticket id: {ticket_id}"
+        # api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/cts/dispatch/', json=new_dispatch)
             response_data = await response.get_json()
 
-            # api_server_test._redis_client.hgetall.assert_called_once()
             api_server_test._bruin_repository.get_ticket_details.assert_awaited_once()
             api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
             api_server_test._append_note_to_ticket.assert_awaited_once()
-            # api_server_test._add_dispatch_to_cache.assert_called_once()
+            api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
 
             assert response_data == cts_expected_response
 
@@ -2442,39 +2476,6 @@ class TestApiServer:
             response_data = await response.get_json()
 
             assert response_data == cts_expected_response
-
-    # @pytest.mark.asyncio
-    # async def cts_create_dispatch_error_found_ticket_in_cache_test(self, api_server_test, new_dispatch):
-    #     uuid_ = 'UUID1'
-    #     igz_dispatch_id = f"IGZ{uuid_}"
-    #     ticket_id = new_dispatch['mettel_bruin_ticket_id']
-    #     api_server_test._config.ENVIRONMENT_NAME = 'production'
-    #     payload = {"request_id": uuid_, "body": {}}
-    #     err_msg = f"This ticket is already has a note in bruin: {ticket_id}"
-    #     cts_expected_response = {
-    #         'status': 400,
-    #         'body': err_msg
-    #     }
-    #     payload_request = {
-    #         "request_id": uuid_,
-    #         "body": new_dispatch
-    #     }
-    #
-    #     return_from_cache_mock = {
-    #         ticket_id: igz_dispatch_id
-    #     }
-    #
-    #     # api_server_test._redis_client.hgetall = Mock(return_value=return_from_cache_mock)
-    #     api_server_test._append_note_to_ticket = CoroutineMock()
-    #
-    #     with patch.object(api_server_module, 'uuid', return_value=uuid_):
-    #         client = api_server_test._app.test_client()
-    #         response = await client.post(f'/cts/dispatch/', json=new_dispatch)
-    #         response_data = await response.get_json()
-    #
-    #         # api_server_test._redis_client.hgetall.assert_called_once()
-    #
-    #         assert response_data == cts_expected_response
 
     @pytest.mark.asyncio
     async def cts_create_dispatch_error_could_not_retrieve_ticket_test(
@@ -2611,6 +2612,9 @@ class TestApiServer:
         response_send_email_mock = {
             'status': 200
         }
+        response_send_slack_message_mock = {
+            'status': 200
+        }
         payload_ticket_request_msg = {
             'request_id': uuid_,
             'body': {
@@ -2619,18 +2623,21 @@ class TestApiServer:
         }
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
-        # api_server_test._add_dispatch_to_cache = Mock(return_value=False)
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+        slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Requested by email [{igz_dispatch_id}] " \
+                    f"with ticket id: {ticket_id}"
+        # api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/cts/dispatch/', json=new_dispatch)
             response_data = await response.get_json()
 
-            # api_server_test._redis_client.hgetall.assert_called_once()
             api_server_test._bruin_repository.get_ticket_details.assert_awaited_once()
             api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
+            api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
             api_server_test._append_note_to_ticket.assert_awaited_once()
-            # api_server_test._add_dispatch_to_cache.assert_called_once()
 
             assert response_data == cts_expected_response
 

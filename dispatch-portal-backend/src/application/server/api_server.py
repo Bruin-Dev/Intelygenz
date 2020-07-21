@@ -197,7 +197,11 @@ class DispatchServer:
             response_dispatch['vendor'] = 'LIT'
             self._logger.info(
                 f"[LIT] Dispatch retrieved: {dispatch_num} - took {time.time() - start_time}")
-
+            ticket_id = body.get("mettel_bruin_ticket_id")
+            slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Created [{dispatch_num}] with ticket id: " \
+                        f"{ticket_id}"
+            self._logger.info(slack_msg)
+            await self._notifications_repository.send_slack_message(slack_msg)
             await self._process_note(dispatch_num, body)
         else:
             self._logger.info(f"[LIT] Dispatch not created - {payload} - took {time.time() - start_time}")
@@ -437,6 +441,12 @@ class DispatchServer:
                 'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
             }
             return jsonify(error_response), response_send_email_status, None
+
+        slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Requested by email [{igz_dispatch_id}]" \
+                    f" with ticket id: {ticket_id}"
+        self._logger.info(slack_msg)
+        await self._notifications_repository.send_slack_message(slack_msg)
+
         # Append Note to bruin
         ticket_note = cts_get_dispatch_requested_note(body, igz_dispatch_id)
         await self._append_note_to_ticket(igz_dispatch_id, ticket_id, ticket_note)

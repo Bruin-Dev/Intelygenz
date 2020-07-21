@@ -62,7 +62,7 @@ class BruinRepository:
             else:
                 self._logger.info(f'Appending note to ticket {ticket_id}... Note contents: {note}')
 
-            response = await self._event_bus.rpc_request("bruin.ticket.note.append.request", request, timeout=15)
+            response = await self._event_bus.rpc_request("bruin.ticket.note.append.request", request, timeout=60)
             self._logger.info(f'Note appended to ticket {ticket_id}!')
         except Exception as e:
             err_msg = (
