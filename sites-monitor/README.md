@@ -26,7 +26,7 @@ In the `config.py`script, there's a way to split this into an array of dictionar
 
 ## Service logic
 The service must ask for the list of edges of each host; each edge data will be paired with its enterprise and the host itself. Once it has collected
-all the edges with it's enterprises, it must create a single task for each one.
+all the edges with it's enterprises, it must create a single task to process all edges.
 
 The way to generate tasks is generate an event like this one
 
@@ -40,18 +40,17 @@ The way to generate tasks is generate an event like this one
 
 Then the Sites Monitor will publish that task to the topic `edge.status.task`.
 
-This action will be performed in cycles. The interval between them is defined in the config file, in a snippet like this:
+This action will be performed in cycles. The interval between them is defined in the env file (change this file affects 
+environment configuration), in a snippet like this:
 
 ````
-SITES_MONITOR_CONFIG = {
-    'interval_time': 600
-}
+MONITORING_SECONDS=120
 ````
 ## How to run it
+
+If you want to launch this si
 ````$
-docker-compose up --build nats-server velocloud-bridge prometheus grafana 
-# Wait until everything is up and running
-docker-compose up --build sites-monitor
+docker-compose up --build  grafana nats-server redis velocloud-bridge prometheus thanos-querier thanos-sidecar
 ````
 
 You can access to the metrics dashboards in localhost:3000 using the credentials in [here](../metrics-dashboard/grafana/Dockerfile)

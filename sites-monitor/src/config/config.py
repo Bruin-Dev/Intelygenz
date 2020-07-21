@@ -22,7 +22,8 @@ NATS_CONFIG = {
 
 SITES_MONITOR_CONFIG = {
     'monitoring_seconds': int(os.environ["MONITORING_SECONDS"]),
-    'timezone': 'US/Eastern'
+    'timezone': 'US/Eastern',
+    'semaphore': 5
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

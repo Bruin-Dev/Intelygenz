@@ -1,9 +1,7 @@
 import asyncio
 import redis
 from application.actions.edge_monitoring import EdgeMonitoring
-from application.repositories.edge_repository import EdgeRepository
 from application.repositories.prometheus_repository import PrometheusRepository
-from application.repositories.status_repository import StatusRepository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone
 
@@ -13,6 +11,8 @@ from igz.packages.eventbus.eventbus import EventBus
 from igz.packages.eventbus.storage_managers import RedisStorageManager
 from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
+from application.repositories.velocloud_repository import VelocloudRepository
+from application.repositories.notifications_repository import NotificationsRepository
 
 
 class Container:
@@ -34,12 +34,12 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         self._prometheus_repository = PrometheusRepository(config)
+        self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
 
-        self._edge_repository = EdgeRepository(self._logger)
-
-        self._status_repository = StatusRepository(self._logger)
+        self._velocloud_repository = VelocloudRepository(event_bus=self._event_bus, logger=self._logger, config=config,
+                                                         notifications_repository=self._notifications_repository)
         self._edge_monitoring = EdgeMonitoring(self._event_bus, self._logger, self._prometheus_repository,
-                                               self._scheduler, self._edge_repository, self._status_repository, config)
+                                               self._scheduler, self._velocloud_repository, config)
 
     async def _start(self):
         self._edge_monitoring.start_prometheus_metrics_server()
