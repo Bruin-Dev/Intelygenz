@@ -30,7 +30,7 @@ ENV GF_INSTALL_PLUGINS=grafana-piechart-panel
 COPY ./metrics-dashboard /metrics-dashboard
 
 RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.9/main' >> /etc/apk/repositories
-RUN apk update && apk add python3=3.6.9-r2 py3-setuptools gcc libc-dev g++ python3-dev musl-dev curl
+RUN apk update && apk add python3=3.6.9-r3 py3-setuptools gcc libc-dev g++ python3-dev musl-dev curl
 RUN pip3 install -r /metrics-dashboard/grafana/requirements.txt
 
 COPY metrics-dashboard/grafana/datasources /etc/grafana/provisioning/datasources
