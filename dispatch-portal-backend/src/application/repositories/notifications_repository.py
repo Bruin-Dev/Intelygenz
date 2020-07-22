@@ -6,7 +6,7 @@ class NotificationsRepository:
         self._event_bus = event_bus
 
     async def send_email(self, email_object: dict):
-        return await self._event_bus.rpc_request("notification.email.request", email_object, timeout=10)
+        return await self._event_bus.rpc_request("notification.email.request", email_object, timeout=60)
 
     async def send_slack_message(self, message: str):
         message = {

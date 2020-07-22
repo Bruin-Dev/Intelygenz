@@ -678,7 +678,7 @@ class TestApiServer:
             data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_has_awaits([
-                call("lit.dispatch.post", payload_request, timeout=30),
+                call("lit.dispatch.post", payload_request, timeout=60),
             ])
 
             assert response.status_code == HTTPStatus.OK
@@ -854,7 +854,7 @@ class TestApiServer:
             data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_has_awaits([
-                call("lit.dispatch.post", payload_request, timeout=30),
+                call("lit.dispatch.post", payload_request, timeout=60),
             ])
 
             assert response.status_code == HTTPStatus.OK
@@ -1052,7 +1052,7 @@ class TestApiServer:
             data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_has_awaits([
-                call("lit.dispatch.post", payload_request, timeout=30),
+                call("lit.dispatch.post", payload_request, timeout=60),
             ])
 
             assert response.status_code == HTTPStatus.OK
@@ -1390,7 +1390,7 @@ class TestApiServer:
 
             data = await response.get_json()
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
-                "lit.dispatch.post", payload_request, timeout=30)
+                "lit.dispatch.post", payload_request, timeout=60)
 
             assert response.status_code == HTTPStatus.BAD_REQUEST
             assert data == expected_response_create_error

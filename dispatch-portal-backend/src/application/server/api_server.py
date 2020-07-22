@@ -179,7 +179,7 @@ class DispatchServer:
         request_body['RequestDispatch'] = dispatch_request
 
         payload = {"request_id": uuid(), "body": request_body}
-        response = await self._event_bus.rpc_request("lit.dispatch.post", payload, timeout=30)
+        response = await self._event_bus.rpc_request("lit.dispatch.post", payload, timeout=60)
         self._logger.info(f"[LIT] Create dispatch response: {response}")
 
         if response['status'] == 500:

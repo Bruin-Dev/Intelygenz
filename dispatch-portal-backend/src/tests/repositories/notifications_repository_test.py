@@ -43,7 +43,7 @@ class TestNotificationsRepository:
 
         await notifications_repository.send_email(email_data)
 
-        event_bus.rpc_request.assert_awaited_once_with("notification.email.request", email_data, timeout=10)
+        event_bus.rpc_request.assert_awaited_once_with("notification.email.request", email_data, timeout=60)
 
     @pytest.mark.asyncio
     async def send_slack_message_test(self):
