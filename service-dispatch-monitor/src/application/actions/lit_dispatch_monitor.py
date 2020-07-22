@@ -110,6 +110,11 @@ class LitDispatchMonitor:
         for dispatch in confirmed_dispatches:
             dispatch_number = dispatch.get("Dispatch_Number", None)
             ticket_id = dispatch.get("MetTel_Bruin_TicketID", None)
+
+            if ticket_id is None or not LitRepository.is_valid_ticket_id(ticket_id) or dispatch_number is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
+                continue
+
             response = await self._bruin_repository.get_ticket_details(ticket_id)
             response_status = response['status']
             response_body = response['body']

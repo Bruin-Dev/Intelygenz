@@ -113,6 +113,11 @@ class CtsDispatchMonitor:
         for dispatch in confirmed_dispatches:
             dispatch_number = dispatch.get('Name', None)
             ticket_id = dispatch.get('Ext_Ref_Num__c', None)
+
+            if ticket_id is None or not CtsRepository.is_valid_ticket_id(ticket_id) or dispatch_number is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
+                continue
+
             response = await self._bruin_repository.get_ticket_details(ticket_id)
             response_status = response['status']
             response_body = response['body']
@@ -166,10 +171,6 @@ class CtsDispatchMonitor:
                     if date_time_of_dispatch is None:
                         self._logger.error(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                            f"Could not determine date time of dispatch: {dispatch}")
-                        err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
-                                  f"An error occurred retrieve datetime of dispatch: " \
-                                  f"{dispatch.get('Local_Site_Time__c')}"
-                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
@@ -181,10 +182,6 @@ class CtsDispatchMonitor:
                         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                           f"- Error: we could not retrieve 'sms_to' number from: "
                                           f"{dispatch.get('Description__c')}")
-                        err_msg = f"An error occurred retrieve 'sms_to' number " \
-                                  f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
-                                  f"from: {dispatch.get('Description__c')}"
-                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     # Tech phonenumber
@@ -193,10 +190,6 @@ class CtsDispatchMonitor:
                         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                           f"- Error: we could not retrieve 'sms_to_tech' number from: "
                                           f"{dispatch.get('Tech_Mobile_Number')}")
-                        err_msg = f"An error occurred retrieve 'sms_to_tech' number " \
-                                  f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
-                                  f"from: {dispatch.get('Resource_Phone_Number__c')}"
-                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     response = await self._bruin_repository.get_ticket_details(ticket_id)
