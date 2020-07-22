@@ -169,7 +169,7 @@ class CtsDispatchMonitor:
                         err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                                   f"An error occurred retrieve datetime of dispatch: " \
                                   f"{dispatch.get('Local_Site_Time__c')}"
-                        await self._notifications_repository.send_slack_message(err_msg)
+                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
@@ -184,7 +184,7 @@ class CtsDispatchMonitor:
                         err_msg = f"An error occurred retrieve 'sms_to' number " \
                                   f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                                   f"from: {dispatch.get('Description__c')}"
-                        await self._notifications_repository.send_slack_message(err_msg)
+                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     # Tech phonenumber
@@ -196,7 +196,7 @@ class CtsDispatchMonitor:
                         err_msg = f"An error occurred retrieve 'sms_to_tech' number " \
                                   f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                                   f"from: {dispatch.get('Resource_Phone_Number__c')}"
-                        await self._notifications_repository.send_slack_message(err_msg)
+                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     response = await self._bruin_repository.get_ticket_details(ticket_id)
@@ -266,9 +266,16 @@ class CtsDispatchMonitor:
                         result_append_confirmed_note = await self._cts_repository.append_confirmed_note(
                             dispatch_number, igz_dispatch_number, ticket_id, dispatch)
                         if not result_append_confirmed_note:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"Confirmed Note not appended")
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id}" \
+                                  f" Confirmed Note not appended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                             continue
+                        msg = f"[service-dispatch-monitor] [CTS] " \
+                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                              f"Confirmed Note appended"
+                        await self._notifications_repository.send_slack_message(msg)
 
                         self._logger.info(f"Dispatch: {dispatch_number} "
                                           f"Ticket_id: {ticket_id} - Sending confirmed SMS")
@@ -282,9 +289,9 @@ class CtsDispatchMonitor:
                         sms_sended = await self._cts_repository.send_confirmed_sms(
                             dispatch_number, ticket_id, datetime_formatted_str, sms_to)
                         if not sms_sended:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"SMS could not be sent to {sms_to}.")
-                            # continue
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"SMS could not be sent to {sms_to}."
                         else:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"- Confirm SMS note not found")
@@ -293,12 +300,16 @@ class CtsDispatchMonitor:
                                 dispatch_number, igz_dispatch_number, ticket_id, sms_to)
 
                             if not result_append_confirmed_sms_note:
-                                self._logger.info("Confirmed SMS note not appended")
-                                # continue
+                                msg = f"[service-dispatch-monitor] [CTS] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id}" \
+                                      f" Confirmed SMS Note not appended"
                             else:
-                                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                                  f"Confirmed Note, SMS send and Confirmed SMS note sent OK.")
-                            # continue
+                                msg = f"[service-dispatch-monitor] [CTS] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+                        self._logger.info(msg)
+                        await self._notifications_repository.send_slack_message(msg)
+
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- already has a sms confirmed note")
 
@@ -308,8 +319,11 @@ class CtsDispatchMonitor:
                         sms_sended = await self._cts_repository.send_confirmed_sms_tech(
                             dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
                         if not sms_sended:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"SMS Tech could not be sent to {sms_to_tech}.")
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"SMS Tech could not be sent to {sms_to_tech}."
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                             continue
 
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
@@ -319,11 +333,17 @@ class CtsDispatchMonitor:
                             dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
 
                         if not result_append_confirmed_sms_note:
-                            self._logger.info("Confirmed SMS tech note not appended")
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"Confirmed SMS tech note not appended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                             continue
-
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK.")
+                        msg = f"[service-dispatch-monitor] [CTS] " \
+                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                              f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+                        self._logger.info(msg)
+                        await self._notifications_repository.send_slack_message(msg)
                         continue
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- already has a sms tech confirmed note")
@@ -346,20 +366,22 @@ class CtsDispatchMonitor:
                             result_sms_12_sended = await self._cts_repository.send_tech_12_sms(
                                 dispatch_number, ticket_id, datetime_formatted_str, sms_to)
                             if not result_sms_12_sended:
-                                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                                  f"- SMS 12h not sended")
-                                # continue
+                                msg = f"[service-dispatch-monitor] [CTS] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"- SMS 12h not sended"
                             else:
                                 result_append_tech_12_sms_note = await self._cts_repository.append_tech_12_sms_note(
                                     dispatch_number, igz_dispatch_number, ticket_id, sms_to)
                                 if not result_append_tech_12_sms_note:
-                                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                                      f"- A sms tech 12 hours before note not appended")
-                                    # continue
+                                    msg = f"[service-dispatch-monitor] [CTS] " \
+                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                          f"- A sms tech 12 hours before note not appended"
                                 else:
-                                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                                      f"- A sms tech 12 hours before note appended")
-                            # continue
+                                    msg = f"[service-dispatch-monitor] [CTS] " \
+                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                          f"- A sms tech 12 hours before note appended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- Already has a sms tech 12 hours before note")
 
@@ -380,18 +402,27 @@ class CtsDispatchMonitor:
                         result_sms_12_sended = await self._cts_repository.send_tech_12_sms_tech(
                             dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
                         if not result_sms_12_sended:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"- SMS tech 12h not sended")
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"- SMS tech 12h not sended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                             continue
 
                         result_append_tech_12_sms_note = await self._cts_repository.append_tech_12_sms_tech_note(
                             dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
                         if not result_append_tech_12_sms_note:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"- A sms tech 12 hours before tech note not appended")
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"- A sms tech 12 hours before tech note not appended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                             continue
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"- A sms tech 12 hours before tech note appended")
+                        msg = f"[service-dispatch-monitor] [CTS] " \
+                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                              f"- A sms tech 12 hours before tech note appended"
+                        self._logger.info(msg)
+                        await self._notifications_repository.send_slack_message(msg)
                         continue
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- Already has a sms tech 12 hours before tech note")
@@ -414,19 +445,22 @@ class CtsDispatchMonitor:
                             result_sms_2_sended = await self._cts_repository.send_tech_2_sms(
                                 dispatch_number, ticket_id, datetime_formatted_str, sms_to)
                             if not result_sms_2_sended:
-                                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                                  f"- SMS 2h not sended")
-                                # continue
+                                msg = f"[service-dispatch-monitor] [CTS] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"- SMS 2h not sent"
                             else:
                                 result_append_tech_2_sms_note = await self._cts_repository.append_tech_2_sms_note(
                                     dispatch_number, igz_dispatch_number, ticket_id, sms_to)
                                 if not result_append_tech_2_sms_note:
-                                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                                      f"- A sms tech 2 hours before note not appended")
-                                    # continue
+                                    msg = f"[service-dispatch-monitor] [CTS] " \
+                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                          f"- A sms tech 2 hours before note not appended"
                                 else:
-                                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                                      f"- A sms tech 2 hours before note appended")
+                                    msg = f"[service-dispatch-monitor] [CTS] " \
+                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                          f"- A sms tech 2 hours before note appended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- already has a sms tech 2 hours before note")
 
@@ -447,18 +481,28 @@ class CtsDispatchMonitor:
                         result_sms_2_sended = await self._cts_repository.send_tech_2_sms_tech(
                             dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
                         if not result_sms_2_sended:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"- SMS tech 2h not sended")
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"- SMS tech 2h not sended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                             continue
 
                         result_append_tech_2_sms_note = await self._cts_repository.append_tech_2_sms_tech_note(
                             dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
                         if not result_append_tech_2_sms_note:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"- A sms tech 2 hours before tech note not appended")
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"- A sms tech 2 hours before tech note not appended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                             continue
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"- A sms tech 2 hours before tech note appended")
+                        msg = f"[service-dispatch-monitor] [CTS] " \
+                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                              f"- A sms tech 2 hours before tech note appended"
+                        self._logger.info(msg)
+                        await self._notifications_repository.send_slack_message(msg)
+
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- already has a sms tech 2 hours before tech note")
 
@@ -501,10 +545,6 @@ class CtsDispatchMonitor:
                     if date_time_of_dispatch is None:
                         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                           f"Could not determine date time of dispatch: {dispatch}")
-                        err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
-                                  f"An error occurred retrieve datetime of dispatch: " \
-                                  f"{dispatch.get('Local_Site_Time__c', None)}"
-                        await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     sms_to = CtsRepository.get_sms_to(dispatch)
@@ -513,10 +553,6 @@ class CtsDispatchMonitor:
                         self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                           f"- Error: we could not retrieve 'sms_to' number from: "
                                           f"{dispatch.get('Description__c')}")
-                        err_msg = f"An error occurred retrieve 'sms_to' number " \
-                                  f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
-                                  f"from: {dispatch.get('Description__c')}"
-                        await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     self._logger.info(f"Getting details for ticket [{ticket_id}]")
@@ -535,7 +571,6 @@ class CtsDispatchMonitor:
                         continue
                     ticket_notes = response_body.get('ticketNotes', [])
                     ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
-
                     self._logger.info(ticket_notes)
 
                     self._logger.info(f"Filtering ticket notes to contain only notes for the "
@@ -582,19 +617,28 @@ class CtsDispatchMonitor:
                         result_sms_tech_on_site_sended = await self._cts_repository.send_tech_on_site_sms(
                             dispatch_number, ticket_id, dispatch, sms_to)
                         if not result_sms_tech_on_site_sended:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"- SMS tech on site not sended")
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"- SMS tech on site not sended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                             continue
 
                         result_append_tech_on_site_sms_note = await self._cts_repository.append_tech_on_site_sms_note(
                             dispatch_number, igz_dispatch_number, ticket_id, sms_to,
                             dispatch.get('API_Resource_Name__c'))
                         if not result_append_tech_on_site_sms_note:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"- A sms tech on site note not appended")
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"- A sms tech on site note not appended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
                             continue
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"- A sms tech on site note appended")
+                        msg = f"[service-dispatch-monitor] [CTS] " \
+                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                              f"- A sms tech on site note appended"
+                        self._logger.info(msg)
+                        await self._notifications_repository.send_slack_message(msg)
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- already has a sms tech tech on site note")
                 except Exception as ex:

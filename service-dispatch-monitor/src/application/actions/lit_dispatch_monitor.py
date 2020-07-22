@@ -167,7 +167,7 @@ class LitDispatchMonitor:
                                   f"An error occurred retrieve datetime of dispatch: " \
                                   f"{dispatch.get('Hard_Time_of_Dispatch_Local', None)} - " \
                                   f"{dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)} "
-                        await self._notifications_repository.send_slack_message(err_msg)
+                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     date_time_of_dispatch = datetime_tz_response['datetime_localized']
@@ -183,7 +183,7 @@ class LitDispatchMonitor:
                         err_msg = f"An error occurred retrieve 'sms_to' number " \
                                   f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                                   f"from: {dispatch.get('Job_Site_Contact_Name_and_Phone_Number')}"
-                        await self._notifications_repository.send_slack_message(err_msg)
+                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     # Tech phonenumber
@@ -196,7 +196,7 @@ class LitDispatchMonitor:
                         err_msg = f"An error occurred retrieve 'sms_to_tech' number " \
                                   f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                                   f"from: {dispatch.get('Tech_Mobile_Number')}"
-                        await self._notifications_repository.send_slack_message(err_msg)
+                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
@@ -487,7 +487,7 @@ class LitDispatchMonitor:
                                   f"An error occurred retrieve datetime of dispatch: " \
                                   f"{dispatch.get('Hard_Time_of_Dispatch_Local', None)} - " \
                                   f"{dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local', None)} "
-                        await self._notifications_repository.send_slack_message(err_msg)
+                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     sms_to = LitRepository.get_sms_to(dispatch)
@@ -499,7 +499,7 @@ class LitDispatchMonitor:
                         err_msg = f"An error occurred retrieve 'sms_to' number " \
                                   f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
                                   f"from: {dispatch.get('Job_Site_Contact_Name_and_Phone_Number')}"
-                        await self._notifications_repository.send_slack_message(err_msg)
+                        # await self._notifications_repository.send_slack_message(err_msg)
                         continue
 
                     self._logger.info(f"Getting details for ticket [{ticket_id}]")

@@ -289,6 +289,33 @@ class TestCtsDispatchMonitor:
             True
         ]
 
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} Confirmed Note appended"
+        slack_msg_2 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} Confirmed Note appended"
+        slack_msg_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                                f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        slack_msg_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                                f"Confirmed SMS tech note not appended"
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
@@ -314,6 +341,11 @@ class TestCtsDispatchMonitor:
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_note_1),
+            call(slack_msg_tech_note_1),
         ])
 
     @pytest.mark.asyncio
@@ -412,7 +444,35 @@ class TestCtsDispatchMonitor:
             False,
             False
         ]
-
+        err_msg = f"Dispatch: {dispatch_number_2} Ticket_id: {ticket_id_2} Note: `{sms_tech_note_2}` " \
+                  f"- Tech SMS Confirmed note not appended"
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} Confirmed Note appended"
+        slack_msg_2 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} Confirmed Note appended"
+        slack_msg_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                                f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        slack_msg_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                                f"Confirmed SMS tech note not appended"
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
@@ -444,6 +504,13 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
             # call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_note_1),
+            call(slack_msg_tech_note_1),
+            call(slack_msg_2),
+            call(slack_msg_note_2),
         ])
 
     @pytest.mark.asyncio
@@ -550,7 +617,33 @@ class TestCtsDispatchMonitor:
 
         err_msg = f"Dispatch: {dispatch_number_2} Ticket_id: {ticket_id_2} Note: `{sms_tech_note_2}` " \
                   f"- Tech SMS Confirmed note not appended"
-        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} Confirmed Note appended"
+        slack_msg_2 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} Confirmed Note appended"
+        slack_msg_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                                f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        slack_msg_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                                f"Confirmed SMS tech note not appended"
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
 
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
@@ -584,7 +677,14 @@ class TestCtsDispatchMonitor:
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
             call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
         ])
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_note_1),
+            call(slack_msg_tech_note_1),
+            call(slack_msg_2),
+            call(slack_msg_note_2),
+            call(slack_msg_tech_note_2),
+        ])
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_general_exception_test(self, cts_dispatch_monitor):
@@ -614,7 +714,7 @@ class TestCtsDispatchMonitor:
         await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches)
 
         cts_dispatch_monitor._logger.error.assert_called_once()
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        # cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_bad_datetime_test(
@@ -684,6 +784,24 @@ class TestCtsDispatchMonitor:
         responses_confirmed_sms_tech = [
             True
         ]
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} Confirmed Note appended"
+        slack_msg_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                                f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
 
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
@@ -710,6 +828,11 @@ class TestCtsDispatchMonitor:
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_note_1),
+            call(slack_msg_tech_note_1),
         ])
 
     @pytest.mark.asyncio
@@ -798,7 +921,7 @@ class TestCtsDispatchMonitor:
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        # cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_skipping_one_invalid_sms_to_test(
@@ -890,7 +1013,7 @@ class TestCtsDispatchMonitor:
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        # cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_skipping_one_invalid_sms_to_tech_test(
@@ -980,7 +1103,7 @@ class TestCtsDispatchMonitor:
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        # cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_error_getting_ticket_details_test(
@@ -1042,9 +1165,39 @@ class TestCtsDispatchMonitor:
             response_slack_2
         ]
 
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            response_slack_2
+        ]
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} Confirmed Note appended"
+        slack_msg_2 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} Confirmed Note appended"
+        slack_msg_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                                f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        slack_msg_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                           f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        err_msg = f"An error occurred retrieve getting ticket details from bruin " \
+                  f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2}"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
-            side_effect=responses_send_to_slack_mock)
+            side_effect=responses_send_slack_message_mock)
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        # cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+        #     side_effect=responses_send_to_slack_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -1072,6 +1225,13 @@ class TestCtsDispatchMonitor:
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         ])
 
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_note_1),
+            call(slack_msg_tech_note_1),
+            call(err_msg),
+        ])
+
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_sms_sent_but_not_added_confirmed_sms_note_test(
             self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2, cts_ticket_details_1,
@@ -1080,36 +1240,6 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
         ]
-
-        response_append_confirmed_note_1 = {
-            'request_id': uuid_,
-            'body': append_note_response,
-            'status': 200
-        }
-
-        response_append_confirmed_note_2 = {
-            'request_id': uuid_,
-            'body': append_note_response,
-            'status': 200
-        }
-
-        response_append_confirmed_note_2_error = {
-            'request_id': uuid_,
-            'body': None,
-            'status': 400
-        }
-
-        response_append_confirmed_sms_note_1 = {
-            'request_id': uuid_,
-            'body': append_note_response,
-            'status': 200
-        }
-
-        response_append_confirmed_sms_note_2_error = {
-            'request_id': uuid_,
-            'body': None,
-            'status': 400
-        }
 
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
@@ -1151,7 +1281,32 @@ class TestCtsDispatchMonitor:
             True,
             True
         ]
-
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} Confirmed Note appended"
+        slack_msg_2 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} Confirmed Note not appended"
+        slack_msg_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                                f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        slack_msg_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2}" \
+                           f" Confirmed SMS Note not appended"
+        slack_msg_tech_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                                f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_note_mock)
@@ -1173,6 +1328,13 @@ class TestCtsDispatchMonitor:
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
+        ])
+
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_note_1),
+            call(slack_msg_tech_note_1),
+            call(slack_msg_2),
         ])
 
     @pytest.mark.asyncio
@@ -1265,6 +1427,32 @@ class TestCtsDispatchMonitor:
             response_append_confirmed_sms_note_1
         ]
 
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} Confirmed Note appended"
+        slack_msg_2 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} Confirmed Note appended"
+        slack_msg_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                                f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        slack_msg_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                           f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        err_msg = f"[service-dispatch-monitor] [CTS] " \
+                  f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                  f"SMS could not be sent to {sms_to_2}."
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
@@ -1296,6 +1484,14 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
             call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, datetime_2_str, sms_to_2_tech)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_note_1),
+            call(slack_msg_tech_note_1),
+            call(slack_msg_2),
+            call(err_msg),
+            call(slack_msg_note_2),
         ])
 
     @pytest.mark.asyncio
@@ -1391,6 +1587,32 @@ class TestCtsDispatchMonitor:
             False
         ]
 
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} Confirmed Note appended"
+        slack_msg_2 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} Confirmed Note appended"
+        slack_msg_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                           f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+        slack_msg_tech_note_1 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                                f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        slack_msg_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                           f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2}" \
+                           f" Confirmed SMS Note not appended"
+        slack_msg_tech_note_2 = f"[service-dispatch-monitor] [CTS] " \
+                                f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                                f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
@@ -1427,6 +1649,15 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_confirmed_sms_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to),
             call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2),
+        ])
+
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_note_1),
+            call(slack_msg_tech_note_1),
+            call(slack_msg_2),
+            call(slack_msg_note_2),
+            call(slack_msg_tech_note_2),
         ])
 
     @pytest.mark.asyncio
@@ -1493,6 +1724,19 @@ class TestCtsDispatchMonitor:
         responses_send_tech_12_sms_tech_note_mock = [
             True
         ]
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                f'- A sms tech 12 hours before note appended'
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
 
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
@@ -1527,6 +1771,9 @@ class TestCtsDispatchMonitor:
             dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
             dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(msg_1),
+        ])
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_sms_and_12h_sms_notes_not_appended_tech_sms_note_test(
@@ -1592,7 +1839,19 @@ class TestCtsDispatchMonitor:
         responses_send_tech_12_sms_tech_note_mock = [
             False
         ]
-
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                f'- A sms tech 12 hours before note appended'
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
@@ -1626,6 +1885,9 @@ class TestCtsDispatchMonitor:
             dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
             dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(msg_1),
+        ])
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_and_confirmed_sms_notes_but_not_12h_sms_sended_test(
@@ -1693,7 +1955,28 @@ class TestCtsDispatchMonitor:
         responses_send_tech_12_sms_tech_note_mock = [
             True
         ]
-
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                f'- A sms tech 12 hours before note not appended'
+        msg_note_1 = f'[service-dispatch-monitor] [CTS] ' \
+                     f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                     f'- A sms tech 12 hours before tech note appended'
+        msg_2 = f'[service-dispatch-monitor] [CTS] ' \
+                f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                f'- SMS 12h not sended'
+        msg_note_2 = f'[service-dispatch-monitor] [CTS] ' \
+                     f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                     f'- SMS tech 12h not sended'
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
@@ -1732,6 +2015,12 @@ class TestCtsDispatchMonitor:
         ])
         cts_dispatch_monitor._cts_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
             dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(msg_1),
+            call(msg_note_1),
+            call(msg_2),
+            call(msg_note_2),
+        ])
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_sms_and_12h_sms_and_2h_sms_notes_test(
@@ -1825,7 +2114,28 @@ class TestCtsDispatchMonitor:
             True,
             True
         ]
-
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                      f'- A sms tech 2 hours before note appended'
+        slack_msg_2 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                      f'- A sms tech 2 hours before note appended'
+        slack_msg_sms_1 = f'[service-dispatch-monitor] [CTS] ' \
+                          f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                          f'- A sms tech 2 hours before tech note appended'
+        slack_msg_sms_2 = f'[service-dispatch-monitor] [CTS] ' \
+                          f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                          f'- A sms tech 2 hours before tech note appended'
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
@@ -1879,6 +2189,12 @@ class TestCtsDispatchMonitor:
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_sms_1),
+            call(slack_msg_2),
+            call(slack_msg_sms_2),
         ])
 
     @pytest.mark.asyncio
@@ -1963,7 +2279,28 @@ class TestCtsDispatchMonitor:
             True,
             True
         ]
-
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                      f'- A sms tech 2 hours before note appended'
+        slack_msg_2 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                      f'- A sms tech 2 hours before note not appended'
+        slack_msg_sms_1 = f'[service-dispatch-monitor] [CTS] ' \
+                          f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                          f'- A sms tech 2 hours before tech note appended'
+        slack_msg_sms_2 = f'[service-dispatch-monitor] [CTS] ' \
+                          f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                          f'- A sms tech 2 hours before tech note appended'
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
@@ -2017,6 +2354,12 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
             call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_sms_1),
+            call(slack_msg_2),
+            call(slack_msg_sms_2),
         ])
 
     @pytest.mark.asyncio
@@ -2110,7 +2453,29 @@ class TestCtsDispatchMonitor:
             True,
             True
         ]
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                      f'- A sms tech 2 hours before note not appended'
+        slack_msg_sms_1 = f'[service-dispatch-monitor] [CTS] ' \
+                          f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                          f'- A sms tech 2 hours before tech note appended'
+        slack_msg_2 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                      f'- SMS 2h not sent'
+        slack_msg_sms_2 = f'[service-dispatch-monitor] [CTS] ' \
+                          f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                          f'- A sms tech 2 hours before tech note appended'
 
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
@@ -2166,6 +2531,12 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
             call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_sms_1),
+            call(slack_msg_2),
+            call(slack_msg_sms_2),
         ])
 
     @pytest.mark.asyncio
@@ -2260,6 +2631,19 @@ class TestCtsDispatchMonitor:
             True,
             True
         ]
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                      f'- A sms tech 2 hours before note appended'
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
 
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
@@ -2317,6 +2701,9 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
             call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
         ])
 
     @pytest.mark.asyncio
@@ -2411,7 +2798,19 @@ class TestCtsDispatchMonitor:
             True,
             True
         ]
-
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                      f'- A sms tech 2 hours before note appended'
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
@@ -2452,22 +2851,21 @@ class TestCtsDispatchMonitor:
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
-            # call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to),
-            # call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2)
         ])
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
-            # call(dispatch_number_2, ticket_id_2, cts_dispatch_confirmed_2, sms_to_2_tech)
         ])
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
-            # call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
         ])
 
     @pytest.mark.asyncio
@@ -2533,6 +2931,22 @@ class TestCtsDispatchMonitor:
             True
         ]
 
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                      f'- A sms tech 2 hours before tech note appended'
+        slack_msg_2 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                      f'- A sms tech 2 hours before tech note appended'
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
@@ -2579,6 +2993,10 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
             call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_2),
         ])
 
     @pytest.mark.asyncio
@@ -2655,6 +3073,23 @@ class TestCtsDispatchMonitor:
             False
         ]
 
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                      f'- A sms tech 2 hours before tech note not appended'
+        slack_msg_2 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                      f'- SMS tech 2h not sended'
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
+
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
@@ -2706,7 +3141,10 @@ class TestCtsDispatchMonitor:
 
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech),
-            # call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2_tech)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_2),
         ])
 
     @pytest.mark.asyncio
@@ -2898,7 +3336,7 @@ class TestCtsDispatchMonitor:
                  cts_dispatch_tech_on_site_2.get('API_Resource_Name__c'))
         ])
 
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        # cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_with_general_exception_test(
@@ -2964,7 +3402,7 @@ class TestCtsDispatchMonitor:
 
         await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
 
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        # cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_error_getting_ticket_details_test(
@@ -3025,7 +3463,7 @@ class TestCtsDispatchMonitor:
                  cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
         ])
 
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        # cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_sms_not_sent_test(
@@ -3058,7 +3496,22 @@ class TestCtsDispatchMonitor:
         responses_append_tech_on_site_sms_note_mock = [
             True
         ]
-
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                      f"- A sms tech on site note appended"
+        slack_msg_2 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                      f"- SMS tech on site not sended"
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
 
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms = CoroutineMock(
@@ -3081,6 +3534,10 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to,
                  cts_dispatch_tech_on_site.get('API_Resource_Name__c'))
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_2),
         ])
 
     @pytest.mark.asyncio
@@ -3115,7 +3572,22 @@ class TestCtsDispatchMonitor:
             True,
             False
         ]
-
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} ' \
+                      f"- A sms tech on site note appended"
+        slack_msg_2 = f'[service-dispatch-monitor] [CTS] ' \
+                      f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} ' \
+                      f"- A sms tech on site note not appended"
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
 
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms = CoroutineMock(
@@ -3140,6 +3612,10 @@ class TestCtsDispatchMonitor:
                  cts_dispatch_tech_on_site.get('API_Resource_Name__c')),
             call(dispatch_number_2, igz_dispatch_number_2, ticket_id_2, sms_to_2,
                  cts_dispatch_tech_on_site_2.get('API_Resource_Name__c'))
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(slack_msg_1),
+            call(slack_msg_2),
         ])
 
     @pytest.mark.asyncio

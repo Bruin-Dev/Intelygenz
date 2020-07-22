@@ -333,7 +333,7 @@ class TestCtsRepository:
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, sms_note)
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_not_awaited()
         assert response is False
 
     @pytest.mark.asyncio

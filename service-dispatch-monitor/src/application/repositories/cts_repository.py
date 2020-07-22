@@ -466,7 +466,7 @@ class CtsRepository:
                               f"Ticket_id: {ticket_id} - Tech SMS Confirmed note not appended")
             err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
                       f"- Tech SMS Confirmed note not appended"
-            await self._notifications_repository.send_slack_message(err_msg)
+            # await self._notifications_repository.send_slack_message(err_msg)
             return False
         self._logger.info(f"Note: `{sms_note}` "
                           f"Dispatch: {dispatch_number} "
