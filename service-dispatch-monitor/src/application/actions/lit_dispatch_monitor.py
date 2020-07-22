@@ -458,7 +458,7 @@ class LitDispatchMonitor:
                             continue
 
                         result_append_tech_2_sms_note = await self._lit_repository.append_tech_2_sms_tech_note(
-                            dispatch_number, ticket_id, sms_to)
+                            dispatch_number, ticket_id, sms_to_tech)
                         if not result_append_tech_2_sms_note:
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
