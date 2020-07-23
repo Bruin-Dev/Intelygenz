@@ -235,15 +235,13 @@ class LitRepository:
                 dispatches_splitted_by_status[dispatch.get('Dispatch_Status')].append(dispatch)
         return dispatches_splitted_by_status
 
-    async def send_confirmed_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_confirmed_sms(self, dispatch_number, ticket_id, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local')
+            'date_of_dispatch': dispatch_datetime
         }
 
         sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
@@ -269,15 +267,13 @@ class LitRepository:
             f"SMS sent Response {sms_response_body}")
         return True
 
-    async def send_confirmed_sms_tech(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_confirmed_sms_tech(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': dispatch_datetime,
             'site': dispatch.get('Job_Site'),
             'street': dispatch.get('Job_Site_Street')
         }
@@ -305,15 +301,13 @@ class LitRepository:
             f"SMS tech sent Response {sms_response_body}")
         return True
 
-    async def send_tech_12_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_tech_12_sms(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': dispatch_datetime,
             'phone_number': sms_to
         }
 
@@ -340,15 +334,13 @@ class LitRepository:
             f"SMS sent Response {sms_response_body}")
         return True
 
-    async def send_tech_12_sms_tech(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_tech_12_sms_tech(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': dispatch_datetime,
             'phone_number': sms_to,
             'site': dispatch.get('Job_Site'),
             'street': dispatch.get('Job_Site_Street')
@@ -377,15 +369,13 @@ class LitRepository:
             f"SMS tech sent Response {sms_response_body}")
         return True
 
-    async def send_tech_2_sms(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_tech_2_sms(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': dispatch_datetime,
             'phone_number': sms_to
         }
 
@@ -412,15 +402,13 @@ class LitRepository:
             f"SMS sent Response {sms_response_body}")
         return True
 
-    async def send_tech_2_sms_tech(self, dispatch_number, ticket_id, dispatch, sms_to) -> bool:
+    async def send_tech_2_sms_tech(self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': dispatch_datetime,
             'phone_number': sms_to,
             'site': dispatch.get('Job_Site'),
             'street': dispatch.get('Job_Site_Street')

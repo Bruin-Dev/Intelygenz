@@ -278,7 +278,7 @@ class LitDispatchMonitor:
                         self._logger.info(f"Dispatch: {dispatch_number} "
                                           f"Ticket_id: {ticket_id} - Sending confirmed SMS")
                         sms_sended = await self._lit_repository.send_confirmed_sms(
-                            dispatch_number, ticket_id, dispatch, sms_to)
+                            dispatch_number, ticket_id, datetime_formatted_str, sms_to)
                         if not sms_sended:
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
@@ -307,7 +307,7 @@ class LitDispatchMonitor:
                         self._logger.info(f"Dispatch: {dispatch_number} "
                                           f"Ticket_id: {ticket_id} - Sending confirmed SMS Tech")
                         sms_sended = await self._lit_repository.send_confirmed_sms_tech(
-                            dispatch_number, ticket_id, dispatch, sms_to_tech)
+                            dispatch_number, ticket_id, datetime_formatted_str, sms_to_tech)
                         if not sms_sended:
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
@@ -348,7 +348,7 @@ class LitDispatchMonitor:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"Sending SMS 12h note")
                             result_sms_12_sended = await self._lit_repository.send_tech_12_sms(
-                                dispatch_number, ticket_id, dispatch, sms_to)
+                                dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to)
                             if not result_sms_12_sended:
                                 msg = f"[service-dispatch-monitor] [LIT] " \
                                       f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
@@ -382,7 +382,7 @@ class LitDispatchMonitor:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"Sending SMS tech 12h note")
                         result_sms_12_sended = await self._lit_repository.send_tech_12_sms_tech(
-                            dispatch_number, ticket_id, dispatch, sms_to_tech)
+                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
                         if not result_sms_12_sended:
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
@@ -420,7 +420,7 @@ class LitDispatchMonitor:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"Sending SMS 2h note")
                             result_sms_2_sended = await self._lit_repository.send_tech_2_sms(
-                                dispatch_number, ticket_id, dispatch, sms_to)
+                                dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to)
                             if not result_sms_2_sended:
                                 msg = f"[service-dispatch-monitor] [LIT] " \
                                       f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
@@ -453,7 +453,7 @@ class LitDispatchMonitor:
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"Sending SMS tech 2h note")
                         result_sms_2_sended = await self._lit_repository.send_tech_2_sms_tech(
-                            dispatch_number, ticket_id, dispatch, sms_to_tech)
+                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
                         if not result_sms_2_sended:
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \

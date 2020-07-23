@@ -183,6 +183,7 @@ class TestLitDispatchMonitor:
             dispatch_confirmed_2,
             dispatch_confirmed_2,
             dispatch_confirmed_2,
+            dispatch_confirmed_skipped,
         ]
         responses_details_mock = [
             ticket_details_1,
@@ -382,13 +383,13 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2)
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2_tech)
         ])
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
@@ -521,11 +522,11 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech)
+            dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to_tech)
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_note_1),
@@ -623,14 +624,12 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to_tech)
         ])
-
-        # lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_skipping_one_invalid_sms_to_test(
@@ -734,10 +733,10 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
         ])
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to_tech)
         ])
 
         # lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -844,10 +843,10 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
         ])
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to_tech)
         ])
 
         # lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -969,10 +968,10 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
         ])
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to_tech)
         ])
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
@@ -1097,10 +1096,10 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
         ])
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to_tech)
         ])
 
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
@@ -1257,11 +1256,11 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2)
         ])
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to_tech)
         ])
 
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
@@ -1423,8 +1422,8 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to),
+            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2)
         ])
 
         lit_dispatch_monitor._lit_repository.append_confirmed_sms_note.assert_has_awaits([
@@ -1562,11 +1561,13 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
 
         lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+            dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+            sms_to)
         lit_dispatch_monitor._lit_repository.append_tech_12_sms_note.assert_awaited_once_with(
             dispatch_number_1, ticket_id_1, sms_to)
         lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech.assert_awaited_once_with(
-            dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech)
+            dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+            sms_to_tech)
         lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
             dispatch_number_1, ticket_id_1, sms_to_tech)
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
@@ -1704,14 +1705,18 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
 
         lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                 sms_to),
+            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
+                 sms_to_2)
         ])
         lit_dispatch_monitor._lit_repository.append_tech_12_sms_note.assert_awaited_once_with(
             dispatch_number_1, ticket_id_1, sms_to)
         lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                 sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
+                 sms_to_2_tech)
         ])
         lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_awaited_once_with(
             dispatch_number_1, ticket_id_1, sms_to_tech)
@@ -1873,14 +1878,16 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_not_awaited()
 
         lit_dispatch_monitor._lit_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to)
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                 sms_to)
         ])
 
         lit_dispatch_monitor._lit_repository.append_tech_2_sms_note.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, sms_to)
         ])
         lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                 sms_to_tech)
         ])
 
         lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note.assert_has_awaits([
@@ -2042,8 +2049,10 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_not_awaited()
 
         lit_dispatch_monitor._lit_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                 sms_to),
+            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
+                 sms_to_2)
         ])
 
         lit_dispatch_monitor._lit_repository.append_tech_2_sms_note.assert_has_awaits([
@@ -2051,7 +2060,8 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech)
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                 sms_to_tech)
         ])
 
         lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note.assert_has_awaits([
@@ -2213,16 +2223,20 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_not_awaited()
 
         lit_dispatch_monitor._lit_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                 sms_to),
+            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
+                 sms_to_2)
         ])
 
         lit_dispatch_monitor._lit_repository.append_tech_2_sms_note.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, sms_to)
         ])
         lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                 sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
+                 sms_to_2_tech)
         ])
 
         lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note.assert_has_awaits([
@@ -2384,8 +2398,10 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note.assert_not_awaited()
 
         lit_dispatch_monitor._lit_repository.send_tech_2_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                 sms_to),
+            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
+                 sms_to_2)
         ])
 
         lit_dispatch_monitor._lit_repository.append_tech_2_sms_note.assert_has_awaits([
@@ -2393,8 +2409,10 @@ class TestLitDispatchMonitor:
             call(dispatch_number_2, ticket_id_2, sms_to_2)
         ])
         lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                 sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
+                 sms_to_2_tech)
         ])
 
         lit_dispatch_monitor._lit_repository.append_tech_2_sms_tech_note.assert_has_awaits([
@@ -2536,8 +2554,8 @@ class TestLitDispatchMonitor:
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_not_awaited()
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, dispatch_confirmed, sms_to_tech),
-            call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, sms_to_2_tech)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to_tech),
+            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2_tech)
         ])
 
         lit_dispatch_monitor._lit_repository.send_tech_12_sms.assert_not_awaited()

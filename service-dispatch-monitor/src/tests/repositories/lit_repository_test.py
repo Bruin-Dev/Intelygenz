@@ -341,13 +341,16 @@ class TestLitRepository:
     async def send_confirmed_sms_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
-        # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
-        # sms_to = LitRepository.get_sms_to(dispatch)
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to
         }
 
@@ -356,16 +359,6 @@ class TestLitRepository:
         sms_payload = {
             'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
-        }
-
-        request = {
-            'request_id': uuid_,
-            'body': sms_payload,
-        }
-        response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from LIT',
-            'status': 500,
         }
 
         send_sms_response = {
@@ -377,7 +370,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
         response = await lit_dispatch_monitor._lit_repository.send_confirmed_sms(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -387,13 +380,20 @@ class TestLitRepository:
         updated_dispatch = dispatch.copy()
         ticket_id = '3544800'
         dispatch_number = updated_dispatch.get('Dispatch_Number')
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = 'NOT VALID PHONE'
         sms_to = None
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_confirmed_sms(
-            dispatch_number, ticket_id, updated_dispatch, sms_to)
+            dispatch_number, ticket_id, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
@@ -402,13 +402,16 @@ class TestLitRepository:
     async def send_confirmed_sms_with_error_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
-        # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
-        # sms_to = LitRepository.get_sms_to(dispatch)
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to
         }
 
@@ -417,11 +420,6 @@ class TestLitRepository:
         sms_payload = {
             'sms_to': sms_to.replace('+', ''),
             'sms_data': sms_data
-        }
-
-        request = {
-            'request_id': uuid_,
-            'body': sms_payload,
         }
 
         send_sms_response = {
@@ -438,7 +436,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_confirmed_sms(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -449,13 +447,16 @@ class TestLitRepository:
     async def send_confirmed_sms_tech_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
-        # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
-        # sms_to = LitRepository.get_sms_to(dispatch)
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to,
             'site': dispatch_confirmed.get('Job_Site'),
             'street': dispatch_confirmed.get('Job_Site_Street')
@@ -468,16 +469,6 @@ class TestLitRepository:
             'sms_data': sms_data
         }
 
-        request = {
-            'request_id': uuid_,
-            'body': sms_payload,
-        }
-        response = {
-            'request_id': uuid_,
-            'body': 'Got internal error from LIT',
-            'status': 500,
-        }
-
         send_sms_response = {
             'request_id': uuid_,
             'body': sms_success_response,
@@ -487,7 +478,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
         response = await lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, dispatch_confirmed, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -497,13 +488,20 @@ class TestLitRepository:
         updated_dispatch = dispatch.copy()
         ticket_id = '3544800'
         dispatch_number = updated_dispatch.get('Dispatch_Number')
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = 'NOT VALID PHONE'
         sms_to = None
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech(
-            dispatch_number, ticket_id, updated_dispatch, sms_to)
+            dispatch_number, ticket_id, dispatch, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
@@ -513,11 +511,16 @@ class TestLitRepository:
             self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to,
             'site': dispatch_confirmed.get('Job_Site'),
             'street': dispatch_confirmed.get('Job_Site_Street')
@@ -550,7 +553,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, dispatch_confirmed, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -561,11 +564,16 @@ class TestLitRepository:
     async def send_tech_12_sms_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to
         }
 
@@ -585,7 +593,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_12_sms(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, dispatch_confirmed, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -595,13 +603,20 @@ class TestLitRepository:
         updated_dispatch = dispatch.copy()
         ticket_id = '3544800'
         dispatch_number = updated_dispatch.get('Dispatch_Number')
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = 'NOT VALID PHONE'
         sms_to = None
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_12_sms(
-            dispatch_number, ticket_id, updated_dispatch, sms_to)
+            dispatch_number, ticket_id, updated_dispatch, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
@@ -610,13 +625,16 @@ class TestLitRepository:
     async def send_tech_12_sms_with_error_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
-        # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
-        # sms_to = LitRepository.get_sms_to(dispatch)
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to
         }
 
@@ -642,7 +660,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_12_sms(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, dispatch_confirmed, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -653,11 +671,16 @@ class TestLitRepository:
     async def send_tech_12_sms_tech_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to,
             'site': dispatch_confirmed.get('Job_Site'),
             'street': dispatch_confirmed.get('Job_Site_Street')
@@ -679,7 +702,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, dispatch_confirmed, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -689,13 +712,20 @@ class TestLitRepository:
         updated_dispatch = dispatch.copy()
         ticket_id = '3544800'
         dispatch_number = updated_dispatch.get('Dispatch_Number')
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = 'NOT VALID PHONE'
         sms_to = None
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech(
-            dispatch_number, ticket_id, updated_dispatch, sms_to)
+            dispatch_number, ticket_id, updated_dispatch, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
@@ -705,11 +735,16 @@ class TestLitRepository:
             self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to,
             'site': dispatch_confirmed.get('Job_Site'),
             'street': dispatch_confirmed.get('Job_Site_Street')
@@ -737,7 +772,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, dispatch_confirmed, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -748,11 +783,16 @@ class TestLitRepository:
     async def send_tech_2_sms_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to,
             'site': dispatch_confirmed.get('Job_Site'),
             'street': dispatch_confirmed.get('Job_Site_Street')
@@ -774,7 +814,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_2_sms(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, dispatch_confirmed, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -786,11 +826,17 @@ class TestLitRepository:
         dispatch_number = updated_dispatch.get('Dispatch_Number')
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = 'NOT VALID PHONE'
         sms_to = None
-
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_2_sms(
-            dispatch_number, ticket_id, updated_dispatch, sms_to)
+            dispatch_number, ticket_id, updated_dispatch, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
@@ -799,11 +845,16 @@ class TestLitRepository:
     async def send_tech_2_sms_with_error_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
-        # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
-        # sms_to = LitRepository.get_sms_to(dispatch)
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_to = '+1987654327'
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
             'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
             'phone_number': sms_to
@@ -830,7 +881,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_2_sms(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, dispatch_confirmed, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -842,10 +893,15 @@ class TestLitRepository:
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
         sms_to = '+1987654327'
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to,
             'site': dispatch_confirmed.get('Job_Site'),
             'street': dispatch_confirmed.get('Job_Site_Street')
@@ -867,7 +923,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, dispatch_confirmed, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -877,13 +933,20 @@ class TestLitRepository:
         updated_dispatch = dispatch_confirmed.copy()
         ticket_id = '3544800'
         dispatch_number = updated_dispatch.get('Dispatch_Number')
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = 'NOT VALID PHONE'
         sms_to = None
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech(
-            dispatch_number, ticket_id, updated_dispatch, sms_to)
+            dispatch_number, ticket_id, updated_dispatch, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
@@ -894,10 +957,15 @@ class TestLitRepository:
         ticket_id = '3544800'
         dispatch_number = dispatch_confirmed.get('Dispatch_Number')
         sms_to = '+1987654327'
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
         sms_data_payload = {
-            'date_of_dispatch': dispatch_confirmed.get('Date_of_Dispatch'),
-            'time_of_dispatch': dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-            'time_zone': dispatch_confirmed.get('Hard_Time_of_Dispatch_Time_Zone_Local'),
+            'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
             'phone_number': sms_to,
             'site': dispatch_confirmed.get('Job_Site'),
             'street': dispatch_confirmed.get('Job_Site_Street')
@@ -925,7 +993,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_tech_2_sms_tech(
-            dispatch_number, ticket_id, dispatch_confirmed, sms_to)
+            dispatch_number, ticket_id, dispatch_confirmed, datetime_return_1['datetime_formatted_str'], sms_to)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)

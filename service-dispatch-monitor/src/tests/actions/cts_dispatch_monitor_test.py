@@ -167,8 +167,8 @@ class TestCtsDispatchMonitor:
                                                   cts_ticket_details_1,
                                                   cts_ticket_details_2_error,
                                                   cts_ticket_details_2_no_requested_watermark,
-                                                  cts_ticket_details_no_watermark,
-                                                  cts_dispatch_confirmed_skipped):
+                                                  cts_dispatch_confirmed_skipped,
+                                                  cts_ticket_details_no_watermark):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2,

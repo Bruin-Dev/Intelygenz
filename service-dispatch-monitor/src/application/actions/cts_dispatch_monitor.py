@@ -588,8 +588,6 @@ class CtsDispatchMonitor:
 
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"IGZ dispatch number found: {igz_dispatch_number}")
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"IGZ dispatch number found: {igz_dispatch_number}")
 
                     requested_watermark_found = UtilsRepository.find_note(
                         filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
@@ -763,7 +761,7 @@ class CtsDispatchMonitor:
                                                                                   self.MAIN_WATERMARK)
             if len(note_dispatch_number) == 0:
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"dispatch number not found found in ticket note")
+                                  f"dispatch number not found in ticket note")
                 continue
             filtered_ticket_notes.append(note)
 
