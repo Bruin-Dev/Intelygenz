@@ -11,6 +11,7 @@ from typing import Callable
 from application.repositories import EdgeIdentifier
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
+from dateutil.parser import parse
 from pytz import timezone
 from pytz import utc
 from tenacity import retry
@@ -239,28 +240,6 @@ class OutageMonitor:
             async with self._semaphore:
                 self._logger.info("[add_edge_to_temp_cache] Starting process_edges job")
 
-                past_moment_for_events_lookup = datetime.now(utc) - timedelta(days=7)
-                recent_events_response = await self._velocloud_repository.get_last_edge_events(
-                    edge_full_id, since=past_moment_for_events_lookup,
-                    event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD'],
-                )
-
-                recent_events_response_status = recent_events_response['status']
-                if recent_events_response_status not in range(200, 300):
-                    return
-
-                recent_events_response_body = recent_events_response['body']
-                if not recent_events_response_body or len(recent_events_response_body) == 0:
-                    self._logger.info(
-                        f'[add_edge_to_temp_cache] No events were found for edge {edge_identifier} starting from '
-                        f'{past_moment_for_events_lookup}. Skipping...'
-                    )
-                    return
-
-                self._logger.info(
-                    f'[add_edge_to_temp_cache] Got link and edge events activity in the last 7 days'
-                    f' {edge_identifier}!')
-
                 edge_status_response = await self._velocloud_repository.get_edge_status(edge_full_id)
                 edge_status_response_body = edge_status_response['body']
                 edge_status_response_status = edge_status_response['status']
@@ -273,6 +252,17 @@ class OutageMonitor:
                 if not edge_serial:
                     self._logger.info(f"[add_edge_to_temp_cache] Edge {edge_identifier} doesn't have "
                                       f"any serial associated. Skipping...")
+                    return
+
+                last_contact_moment: str = edge_data['edges']['lastContact']
+                if not self._is_valid_last_contact_moment(last_contact_moment):
+                    self._logger.info(f'[add_edge_to_temp_cache] Last moment that edge {edge_identifier} was '
+                                      f'contacted could not be determined. Skipping...')
+                    return
+
+                if not self._was_edge_last_contacted_recently(last_contact_moment):
+                    self._logger.info(f'[add_edge_to_temp_cache] Edge {edge_identifier} was contacted for the '
+                                      f'last time long time ago. Skipping...')
                     return
 
                 autoresolve_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter'].keys()
@@ -650,3 +640,14 @@ class OutageMonitor:
                 outage_links_states[link_data['interface']] = link_state
 
         return outage_causes or None
+
+    @staticmethod
+    def _is_valid_last_contact_moment(last_contact_moment: str):
+        return last_contact_moment != '0000-00-00 00:00:00'
+
+    @staticmethod
+    def _was_edge_last_contacted_recently(last_contact_moment: str):
+        last_contact_datetime = parse(last_contact_moment).astimezone(utc)
+        current_datetime = datetime.now(utc)
+
+        return (current_datetime - last_contact_datetime) <= timedelta(days=7)

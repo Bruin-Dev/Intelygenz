@@ -10,6 +10,7 @@ import pytest
 from apscheduler.jobstores.base import ConflictingIdError
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
+from dateutil.parser import parse
 from shortuuid import uuid
 
 from application.actions import outage_monitoring as outage_monitoring_module
@@ -645,192 +646,8 @@ class TestServiceOutageMonitor:
         outage_monitor._start_build_cache_job.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def add_edge_to_temp_cache_having_events_returning_non_2xx_status_test(self):
-        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {'edges': {'serialNumber': 'testSN'}},
-            'status': 500
-        }
-
-        edge_status_response = {
-            'body': {
-                'edge_id': edge_full_id,
-                'edge_info': {
-                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': None},
-                    'links': [
-                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-                    ],
-                    'enterprise_name': 'EVIL-CORP|12345|',
-                },
-            },
-            'status': 200,
-        }
-
-        logger = Mock()
-        config = testconfig
-        scheduler = Mock()
-        event_bus = Mock()
-        outage_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-
-        velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
-        velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-        bruin_repository.get_management_status = CoroutineMock()
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, metrics_repository)
-        outage_monitor._start_build_cache_job = CoroutineMock()
-
-        datetime_mock = Mock()
-        current_time = datetime.now()
-        datetime_mock.now = Mock(return_value=current_time)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            await outage_monitor._add_edge_to_temp_cache(edge_full_id)
-
-        velocloud_repository.get_last_edge_events.assert_awaited_once_with(
-            edge_full_id,
-            since=current_time - timedelta(days=7),
-            event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-        )
-        velocloud_repository.get_edge_status.assert_not_awaited()
-        bruin_repository.get_management_status.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def add_edge_to_temp_cache_having_empty_event_test(self):
-        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {},
-            'status': 200
-        }
-
-        edge_status_response = {
-            'body': {
-                'edge_id': edge_full_id,
-                'edge_info': {
-                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': None},
-                    'links': [
-                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-                    ],
-                    'enterprise_name': 'EVIL-CORP|12345|',
-                },
-            },
-            'status': 200,
-        }
-
-        logger = Mock()
-        config = testconfig
-        scheduler = Mock()
-        event_bus = Mock()
-        outage_repository = Mock()
-        notifications_repository = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_management_status = CoroutineMock()
-
-        velocloud_repository = Mock()
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
-        velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, metrics_repository)
-        outage_monitor._start_build_cache_job = CoroutineMock()
-
-        datetime_mock = Mock()
-        current_time = datetime.now()
-        datetime_mock.now = Mock(return_value=current_time)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            await outage_monitor._add_edge_to_temp_cache(edge_full_id)
-
-        velocloud_repository.get_last_edge_events.assert_awaited_once_with(
-            edge_full_id,
-            since=current_time - timedelta(days=7),
-            event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-        )
-        velocloud_repository.get_edge_status.assert_not_awaited()
-        bruin_repository.get_management_status.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def add_edge_to_temp_cache_having_a_null_serial_test(self):
-        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {'edges': {'serialNumber': 'testSN'}},
-            'status': 200
-        }
-
-        edge_status_response = {
-            'body': {
-                'edge_id': edge_full_id,
-                'edge_info': {
-                    'edges': {'edgeState': 'OFFLINE', 'serialNumber': None},
-                    'links': [
-                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
-                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
-                    ],
-                    'enterprise_name': 'EVIL-CORP|12345|',
-                },
-            },
-            'status': 200,
-        }
-
-        logger = Mock()
-        config = testconfig
-        scheduler = Mock()
-        event_bus = Mock()
-        outage_repository = Mock()
-        notifications_repository = Mock()
-        triage_repository = Mock()
-        metrics_repository = Mock()
-
-        bruin_repository = Mock()
-        bruin_repository.get_management_status = CoroutineMock()
-
-        velocloud_repository = Mock()
-        velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
-
-        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
-                                       bruin_repository, velocloud_repository, notifications_repository,
-                                       triage_repository, metrics_repository)
-
-        datetime_mock = Mock()
-        current_time = datetime.now()
-        datetime_mock.now = Mock(return_value=current_time)
-        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
-            await outage_monitor._add_edge_to_temp_cache(edge_full_id)
-
-        velocloud_repository.get_last_edge_events.assert_awaited_once_with(
-            edge_full_id,
-            since=current_time - timedelta(days=7),
-            event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-        )
-        velocloud_repository.get_edge_status.assert_awaited_once_with(edge_full_id)
-        bruin_repository.get_management_status.assert_not_awaited()
-
-    @pytest.mark.asyncio
     async def add_edge_to_temp_cache_with_retrieval_of_edge_status_returning_non_2XX_status_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
-
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {'edges': {'serialNumber': 'testSN'}},
-            'status': 200
-        }
 
         edge_status_response_body = 'Got internal error from Velocloud'
         edge_status_response_status = 500
@@ -853,7 +670,6 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
@@ -865,11 +681,162 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
-        velocloud_repository.get_last_edge_events.assert_awaited_once_with(
-                edge_full_id,
-                since=current_time - timedelta(days=7),
-                event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-            )
+        velocloud_repository.get_edge_status.assert_awaited_once_with(edge_full_id)
+        bruin_repository.get_management_status.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def add_edge_to_temp_cache_with_null_serial_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+
+        edge_status_response = {
+            'body': {
+                'edge_id': edge_full_id,
+                'edge_info': {
+                    'edges': {
+                        'edgeState': 'CONNECTED',
+                        'serialNumber': None,
+                        'lastContact': '2020-07-05T10:13:06.000Z',
+                    },
+                    'links': [
+                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                    ],
+                    'enterprise_name': 'EVIL-CORP|12345|',
+                },
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        config = testconfig
+        scheduler = Mock()
+        event_bus = Mock()
+        outage_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_management_status = CoroutineMock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, metrics_repository)
+
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            await outage_monitor._add_edge_to_temp_cache(edge_full_id)
+
+        velocloud_repository.get_edge_status.assert_awaited_once_with(edge_full_id)
+        bruin_repository.get_management_status.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def add_edge_to_temp_cache_with_invalid_last_contact_moment_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+
+        edge_status_response = {
+            'body': {
+                'edge_id': edge_full_id,
+                'edge_info': {
+                    'edges': {
+                        'edgeState': 'CONNECTED',
+                        'serialNumber': 'VC1234567',
+                        'lastContact': '0000-00-00 00:00:00',
+                    },
+                    'links': [
+                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                    ],
+                    'enterprise_name': 'EVIL-CORP|12345|',
+                },
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        config = testconfig
+        scheduler = Mock()
+        event_bus = Mock()
+        outage_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_management_status = CoroutineMock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, metrics_repository)
+        outage_monitor._is_valid_last_contact_moment = Mock(return_value=False)
+
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            await outage_monitor._add_edge_to_temp_cache(edge_full_id)
+
+        velocloud_repository.get_edge_status.assert_awaited_once_with(edge_full_id)
+        bruin_repository.get_management_status.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def add_edge_to_temp_cache_with_edge_last_contacted_long_time_ago_test(self):
+        edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
+
+        edge_status_response = {
+            'body': {
+                'edge_id': edge_full_id,
+                'edge_info': {
+                    'edges': {
+                        'edgeState': 'CONNECTED',
+                        'serialNumber': 'VC1234567',
+                        'lastContact': '2020-07-05T10:13:06.000Z',
+                    },
+                    'links': [
+                        {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                        {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+                    ],
+                    'enterprise_name': 'EVIL-CORP|12345|',
+                },
+            },
+            'status': 200,
+        }
+
+        logger = Mock()
+        config = testconfig
+        scheduler = Mock()
+        event_bus = Mock()
+        outage_repository = Mock()
+        notifications_repository = Mock()
+        triage_repository = Mock()
+        metrics_repository = Mock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_management_status = CoroutineMock()
+
+        velocloud_repository = Mock()
+        velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
+
+        outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
+                                       bruin_repository, velocloud_repository, notifications_repository,
+                                       triage_repository, metrics_repository)
+        outage_monitor._is_valid_last_contact_moment = Mock(return_value=True)
+        outage_monitor._was_edge_last_contacted_recently = Mock(return_value=False)
+
+        datetime_mock = Mock()
+        current_time = datetime.now()
+        datetime_mock.now = Mock(return_value=current_time)
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            await outage_monitor._add_edge_to_temp_cache(edge_full_id)
+
         velocloud_repository.get_edge_status.assert_awaited_once_with(edge_full_id)
         bruin_repository.get_management_status.assert_not_awaited()
 
@@ -877,15 +844,13 @@ class TestServiceOutageMonitor:
     async def add_edge_to_temp_cache_with_retrieval_of_bruin_client_info_returning_non_2xx_status_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {'edges': {'serialNumber': 'testSN'}},
-            'status': 200
-        }
-
         edge_serial = 'VC1234567'
         edge_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_serial},
+            'edges': {
+                'edgeState': 'CONNECTED',
+                'serialNumber': edge_serial,
+                'lastContact': '2020-07-05T10:13:06.000Z',
+            },
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -922,11 +887,12 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, metrics_repository)
+        outage_monitor._is_valid_last_contact_moment = Mock(return_value=True)
+        outage_monitor._was_edge_last_contacted_recently = Mock(return_value=True)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
 
         datetime_mock = Mock()
@@ -935,11 +901,6 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
-        velocloud_repository.get_last_edge_events.assert_awaited_once_with(
-                edge_full_id,
-                since=current_time - timedelta(days=7),
-                event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-            )
         velocloud_repository.get_edge_status.assert_awaited_once_with(edge_full_id)
         bruin_repository.get_client_info.assert_awaited_once_with(edge_serial)
         bruin_repository.get_management_status.assert_not_awaited()
@@ -948,15 +909,13 @@ class TestServiceOutageMonitor:
     async def add_edge_to_temp_cache_with_bruin_client_info_having_null_client_id_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {'edges': {'serialNumber': 'testSN'}},
-            'status': 200
-        }
-
         edge_serial = 'VC1234567'
         edge_status_data = {
-            'edges': {'edgeState': 'CONNECTED', 'serialNumber': edge_serial},
+            'edges': {
+                'edgeState': 'CONNECTED',
+                'serialNumber': edge_serial,
+                'lastContact': '2020-07-05T10:13:06.000Z',
+            },
             'links': [
                 {'linkId': 1234, 'link': {'state': 'STABLE', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -994,11 +953,12 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, metrics_repository)
+        outage_monitor._is_valid_last_contact_moment = Mock(return_value=True)
+        outage_monitor._was_edge_last_contacted_recently = Mock(return_value=True)
         outage_monitor._run_ticket_autoresolve_for_edge = CoroutineMock()
 
         datetime_mock = Mock()
@@ -1007,11 +967,6 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
-        velocloud_repository.get_last_edge_events.assert_awaited_once_with(
-            edge_full_id,
-            since=current_time - timedelta(days=7),
-            event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-        )
         velocloud_repository.get_edge_status.assert_awaited_once_with(edge_full_id)
         bruin_repository.get_client_info.assert_awaited_once_with(edge_serial)
         bruin_repository.get_management_status.assert_not_awaited()
@@ -1020,15 +975,13 @@ class TestServiceOutageMonitor:
     async def add_edge_to_temp_cache_with_retrieval_of_management_status_returning_non_2XX_status_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {'edges': {'serialNumber': 'testSN'}},
-            'status': 200
-        }
-
         edge_serial = 'VC1234567'
         edge_data = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'edges': {
+                'edgeState': 'OFFLINE',
+                'serialNumber': edge_serial,
+                'lastContact': '2020-07-05T10:13:06.000Z',
+            },
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -1074,11 +1027,12 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, metrics_repository)
+        outage_monitor._is_valid_last_contact_moment = Mock(return_value=True)
+        outage_monitor._was_edge_last_contacted_recently = Mock(return_value=True)
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -1086,11 +1040,6 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
-        velocloud_repository.get_last_edge_events.assert_awaited_once_with(
-            edge_full_id,
-            since=current_time - timedelta(days=7),
-            event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-        )
         velocloud_repository.get_edge_status.assert_awaited_once_with(edge_full_id)
         bruin_repository.get_client_info.assert_awaited_once_with(edge_serial)
         bruin_repository.get_management_status.assert_awaited_once_with(client_id, edge_serial)
@@ -1100,15 +1049,13 @@ class TestServiceOutageMonitor:
     async def add_edge_to_temp_cache_with_management_status_inactive_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {'edges': {'serialNumber': 'testSN'}},
-            'status': 200
-        }
-
         edge_serial = 'VC1234567'
         edge_data = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'edges': {
+                'edgeState': 'OFFLINE',
+                'serialNumber': edge_serial,
+                'lastContact': '2020-07-05T10:13:06.000Z',
+            },
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -1155,11 +1102,12 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, metrics_repository)
+        outage_monitor._is_valid_last_contact_moment = Mock(return_value=True)
+        outage_monitor._was_edge_last_contacted_recently = Mock(return_value=True)
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -1167,11 +1115,6 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
-        velocloud_repository.get_last_edge_events.assert_awaited_once_with(
-            edge_full_id,
-            since=current_time - timedelta(days=7),
-            event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-        )
         velocloud_repository.get_edge_status.assert_awaited_once_with(edge_full_id)
         bruin_repository.get_client_info.assert_awaited_once_with(edge_serial)
         bruin_repository.get_management_status.assert_awaited_once_with(client_id, edge_serial)
@@ -1181,15 +1124,13 @@ class TestServiceOutageMonitor:
     async def add_edge_to_temp_cache_with_management_status_active_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {'edges': {'serialNumber': 'testSN'}},
-            'status': 200
-        }
-
         edge_serial = 'VC1234567'
         edge_data = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'edges': {
+                'edgeState': 'OFFLINE',
+                'serialNumber': edge_serial,
+                'lastContact': '2020-07-05T10:13:06.000Z',
+            },
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -1241,11 +1182,12 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, metrics_repository)
+        outage_monitor._is_valid_last_contact_moment = Mock(return_value=True)
+        outage_monitor._was_edge_last_contacted_recently = Mock(return_value=True)
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -1253,11 +1195,6 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             await outage_monitor._add_edge_to_temp_cache(edge_full_id)
 
-        velocloud_repository.get_last_edge_events.assert_awaited_once_with(
-            edge_full_id,
-            since=current_time - timedelta(days=7),
-            event_types=['EDGE_UP', 'EDGE_DOWN', 'LINK_ALIVE', 'LINK_DEAD']
-        )
         velocloud_repository.get_edge_status.assert_awaited_once_with(edge_full_id)
         bruin_repository.get_client_info.assert_awaited_once_with(edge_serial)
         bruin_repository.get_management_status.assert_awaited_once_with(client_id, edge_serial)
@@ -1268,15 +1205,13 @@ class TestServiceOutageMonitor:
     async def add_edge_to_temp_cache_with_side_effects_over_autoresolve_whitelist_with_autoresolve_filter_test(self):
         edge_full_id = {"host": "metvco02.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {'edges': {'serialNumber': 'testSN'}},
-            'status': 200
-        }
-
         edge_serial = 'VC1234567'
         edge_data = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'edges': {
+                'edgeState': 'OFFLINE',
+                'serialNumber': edge_serial,
+                'lastContact': '2020-07-05T10:13:06.000Z',
+            },
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -1327,13 +1262,14 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
 
         outage_repository = Mock()
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, metrics_repository)
+        outage_monitor._is_valid_last_contact_moment = Mock(return_value=True)
+        outage_monitor._was_edge_last_contacted_recently = Mock(return_value=True)
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._add_edge_to_temp_cache(edge_full_id)
@@ -1344,15 +1280,13 @@ class TestServiceOutageMonitor:
     async def add_edge_to_temp_cache_with_side_effects_over_autoresolve_whitelist_without_autoresolve_filter_test(self):
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
 
-        fake_events_response = {
-            'request_id': 's8ixRY7ShDpYpZzJ34zk5P',
-            'body': {'edges': {'serialNumber': 'testSN'}},
-            'status': 200
-        }
-
         edge_serial = 'VC1234567'
         edge_data = {
-            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'edges': {
+                'edgeState': 'CONNECTED',
+                'serialNumber': edge_serial,
+                'lastContact': '2020-07-05T10:13:06.000Z',
+            },
             'links': [
                 {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
                 {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
@@ -1398,11 +1332,12 @@ class TestServiceOutageMonitor:
 
         velocloud_repository = Mock()
         velocloud_repository.get_edge_status = CoroutineMock(return_value=edge_status_response)
-        velocloud_repository.get_last_edge_events = CoroutineMock(return_value=fake_events_response)
 
         outage_monitor = OutageMonitor(event_bus, logger, scheduler, config, outage_repository,
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, metrics_repository)
+        outage_monitor._is_valid_last_contact_moment = Mock(return_value=True)
+        outage_monitor._was_edge_last_contacted_recently = Mock(return_value=True)
 
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config['velocloud_instances_filter'] = {}
@@ -4051,3 +3986,35 @@ class TestServiceOutageMonitor:
         }
         result = OutageMonitor._is_detail_resolved(ticket_detail)
         assert result is True
+
+    def is_valid_last_contact_moment_test(self):
+        last_contact_moment = '0000-00-00 00:00:00'
+        result = OutageMonitor._is_valid_last_contact_moment(last_contact_moment)
+        assert result is False
+
+        last_contact_moment = '2020-07-05T10:13:06.000Z'
+        result = OutageMonitor._is_valid_last_contact_moment(last_contact_moment)
+        assert result is True
+
+    def was_edge_last_contacted_recently_test(self):
+        last_contact_moment = '2020-07-05T10:13:06.000Z'
+
+        datetime_mock = Mock()
+
+        timestamp = '2020-07-12T10:12:06.000Z'  # Less than 7 days elapsed since last contact moment
+        datetime_mock.now = Mock(return_value=parse(timestamp))
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = OutageMonitor._was_edge_last_contacted_recently(last_contact_moment)
+        assert result is True
+
+        timestamp = '2020-07-12T10:13:06.000Z'  # Exactly 7 days elapsed since last contact moment
+        datetime_mock.now = Mock(return_value=parse(timestamp))
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = OutageMonitor._was_edge_last_contacted_recently(last_contact_moment)
+        assert result is True
+
+        timestamp = '2020-07-12T10:14:06.000Z'  # More than 7 days elapsed since last contact moment
+        datetime_mock.now = Mock(return_value=parse(timestamp))
+        with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
+            result = OutageMonitor._was_edge_last_contacted_recently(last_contact_moment)
+        assert result is False
