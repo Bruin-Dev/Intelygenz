@@ -11,6 +11,19 @@ Human error can and does occur when carrying out these boring and repetitive tas
 All of the automation is made with Gitlab CI technology, taking advantage of all the tools that Gitlab has.
 We separate the automatation in two parts, [continuous integration](#continuous-integration-ci) and [continuous delivery](#continuous-delivery-cd), that are explained in the next sections.
 
+To improve the speed and optimization of the pipelines, **only the jobs and stages will be executed on those modules that change in each commit**. 
+
+**Exceptionally, it is possible to launch a pipeline with all the jobs and stages on a branch using the web interface, as shown in the following image**. To do so, the following steps must be followed:
+
+   1. From the project repository select the `CI/CD` option in the left sidebar and this `Pipelines`, as shown in the following image where these options are marked in red.
+   ![IMAGE: Select_CI_option](./img/pipelines/Select_CI_option.png)
+   
+   2. Choose the `Run Pipeline` option, as shown in the image below in red.
+   ![IMAGE: select_run_pipeline](./img/pipelines/select_run_pipeline.png)
+   
+   3. Indicate the branch where you want to run the pipeline in the `Run for` box and then click on `Run pipeline`. It's possible see an example in the following image, where the box `Run for` is shown in green and `Run pipeline` is shown in red.
+   ![IMAGE: select_run_pipeline_branch](./img/pipelines/select_run_pipeline_branch.png)
+
 # Environments
 
 In the project there are two types of environments in the project:
