@@ -134,18 +134,6 @@ class TestCtsRepository:
         updated_dispatch['Resource_Phone_Number__c'] = None
         assert CtsRepository.get_sms_to_tech(updated_dispatch) is None
 
-    def is_valid_ticket_id_test(self):
-        valid_ticket_id = '4663397'
-        invalid_ticket_id_1 = '4663397|IW24654081'
-        invalid_ticket_id_2 = '712637/IW76236'
-        invalid_ticket_id_3 = '123-3123'
-        invalid_ticket_id_4 = '4485610(Order)/4520284(Port)'
-        assert CtsRepository.is_valid_ticket_id(ticket_id=valid_ticket_id) is True
-        assert CtsRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_1) is False
-        assert CtsRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_2) is False
-        assert CtsRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_3) is False
-        assert CtsRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_4) is False
-
     def is_dispatch_confirmed_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_not_confirmed):
         assert cts_dispatch_monitor._cts_repository.is_dispatch_confirmed(cts_dispatch_confirmed) is True
         assert cts_dispatch_monitor._cts_repository.is_dispatch_confirmed(cts_dispatch_not_confirmed) is False

@@ -141,18 +141,6 @@ class TestLitRepository:
         updated_dispatch['Tech_Mobile_Number'] = "no valid Number"
         assert LitRepository.get_sms_to_tech(updated_dispatch) is None
 
-    def is_valid_ticket_id_test(self):
-        valid_ticket_id = '4663397'
-        invalid_ticket_id_1 = '4663397|IW24654081'
-        invalid_ticket_id_2 = '712637/IW76236'
-        invalid_ticket_id_3 = '123-3123'
-        invalid_ticket_id_4 = '4485610(Order)/4520284(Port)'
-        assert LitRepository.is_valid_ticket_id(ticket_id=valid_ticket_id) is True
-        assert LitRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_1) is False
-        assert LitRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_2) is False
-        assert LitRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_3) is False
-        assert LitRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_4) is False
-
     def get_dispatch_confirmed_date_time_localized_regex_test(self, lit_repository, dispatch_confirmed):
         dates = [
             {'date': '4-6pm', 'am_pm': 'PM', 'final': '4:00'},

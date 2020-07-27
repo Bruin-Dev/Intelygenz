@@ -87,25 +87,6 @@ class LitRepository:
         return response
 
     @staticmethod
-    def is_valid_ticket_id(ticket_id):
-        # Check ticket id format for example: '4663397|IW24654081'
-        # Bruin ticket ID like 712637/IW76236 and 123-3123 are likely to be from other
-        # kind of tickets (like new installations), thus other teams that are not his,
-        # 4485610(Order)/4520284(Port)
-        # Discard All with more than one ticket
-        ticket_id = ticket_id.replace(' ', '')
-        ticket_id_1 = ticket_id.split('|')
-        ticket_id_2 = ticket_id.split('-')
-        ticket_id_3 = ticket_id.split('/')
-        if len(ticket_id_1) > 1:
-            return False
-        elif len(ticket_id_2) > 1:
-            return False
-        elif len(ticket_id_3) > 1:
-            return False
-        return True
-
-    @staticmethod
     def get_sms_to(dispatch):
         # Example format->  Job_Site_Contact_Name_and_Phone_Number: "Jane Doe +1 666 6666 666"
         sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')

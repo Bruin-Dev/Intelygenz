@@ -31,6 +31,22 @@ class TestBruinRepository:
         assert bruin_repository._config is config
         assert bruin_repository._notifications_repository is notifications_repository
 
+    def is_valid_ticket_id_test(self):
+        valid_ticket_id = '4663397'
+        invalid_ticket_id_1 = '4663397|IW24654081'
+        invalid_ticket_id_2 = '712637/IW76236'
+        invalid_ticket_id_3 = '123-3123'
+        invalid_ticket_id_4 = '4485610(Order)/4520284(Port)'
+        invalid_ticket_id_5 = 'Store #12345'
+        invalid_ticket_id_6 = 'PON 12345'
+        assert BruinRepository.is_valid_ticket_id(ticket_id=valid_ticket_id) is True
+        assert BruinRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_1) is False
+        assert BruinRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_2) is False
+        assert BruinRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_3) is False
+        assert BruinRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_4) is False
+        assert BruinRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_5) is False
+        assert BruinRepository.is_valid_ticket_id(ticket_id=invalid_ticket_id_6) is False
+
     @pytest.mark.asyncio
     async def get_ticket_details_test(self):
         ticket_id = 11111

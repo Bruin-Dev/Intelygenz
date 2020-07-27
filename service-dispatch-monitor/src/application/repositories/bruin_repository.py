@@ -1,4 +1,5 @@
 from shortuuid import uuid
+import re
 
 from application.repositories import nats_error_response
 
@@ -9,6 +10,20 @@ class BruinRepository:
         self._logger = logger
         self._config = config
         self._notifications_repository = notifications_repository
+
+    @staticmethod
+    def is_valid_ticket_id(ticket_id):
+        # Check ticket id format for example: '4663397|IW24654081'
+        # Bruin ticket ID like 712637/IW76236 and 123-3123 are likely to be from other
+        # kind of tickets (like new installations), thus other teams that are not his,
+        # 4485610(Order)/4520284(Port)
+        # Store #1234
+        # PON 1234
+        # Discard All with more than one ticket
+        if re.match("[0-9]+$", ticket_id):
+            return True
+        else:
+            return False
 
     async def get_ticket_details(self, ticket_id: int):
         err_msg = None
