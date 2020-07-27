@@ -6,6 +6,8 @@ from http import HTTPStatus
 
 import jsonschema
 from application.mappers import lit_mapper, cts_mapper
+from application.templates.cts.dispatch_cancel import get_dispatch_cancel_request_note
+from application.templates.cts.dispatch_cancel_mail import render_cancel_email_template
 from application.templates.cts.dispatch_request_mail import render_email_template
 from application.templates.cts.dispatch_requested import get_dispatch_requested_note as cts_get_dispatch_requested_note
 from application.templates.lit.dispatch_requested import get_dispatch_requested_note as lit_get_dispatch_requested_note
@@ -88,6 +90,8 @@ class DispatchServer:
                                methods=['GET'], strict_slashes=False)
         self._app.add_url_rule("/cts/dispatch", None, self.cts_create_dispatch,
                                methods=['POST'], strict_slashes=False)
+        self._app.add_url_rule("/cts/dispatch/<dispatch_number>/cancel", None, self.cts_cancel_dispatch,
+                               methods=['GET'], strict_slashes=False)
 
     def _health(self):
         return jsonify(None), self._status, None
@@ -458,6 +462,77 @@ class DispatchServer:
 
         return jsonify(response_dispatch), HTTPStatus.OK, None
 
+    # Cancel Dispatch - PATCH - /cts/dispatch/<dispatch_number>/cancel
+    async def cts_cancel_dispatch(self, dispatch_number):
+        self._logger.info(f"[CTS] Cancel Dispatch: {dispatch_number}")
+        start_time = time.time()
+        payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
+        response = await self._event_bus.rpc_request("cts.dispatch.get", payload, timeout=30)
+        self._logger.info(f"[CTS] Response get dispatch: {response}")
+        if response['status'] == 500:
+            error_response = {
+                'code': response['status'], 'message': response['body']
+            }
+            return jsonify(error_response), response['status'], None
+        if 'body' not in response or 'done' not in response['body'] or response['body']['done'] is False or \
+                'records' not in response['body'] or response['body']['records'] is None or \
+                len(response['body']['records']) == 0:
+            self._logger.error(f"[CTS] Could not retrieve dispatch, reason: {response['body']}")
+            error_response = {
+                'code': response['status'], 'message': response['body']
+            }
+            return jsonify(error_response), response['status'], None
+
+        self._logger.info(f"[CTS] Dispatch [{dispatch_number}] - {response['body']} "
+                          f"- took {time.time() - start_time}")
+        dispatch = response['body']['records'][0]
+        ticket_id = dispatch['Ext_Ref_Num__c']
+
+        response_dispatch = dict()
+        body = {
+            'dispatch_number': dispatch_number,
+            'ticket_id': ticket_id
+        }
+        # Send email
+        email_template = render_cancel_email_template(body)
+        email_html = f'<div>{email_template}</div>'
+        email_data = {
+            'request_id': uuid(),
+            'email_data': {
+                'subject': f'CTS - Service Submission - {ticket_id}',
+                'recipient': self._config.CTS_CONFIG["email"],
+                'text': 'this is the accessible text for the email',
+                'html': email_html,
+                'images': [],
+                'attachments': []
+            }
+        }
+        response_send_email = await self._notifications_repository.send_email(email_data)
+        response_send_email_status = response_send_email['status']
+        if response_send_email_status not in range(200, 300):
+            self._logger.error("[CTS] we could not send the email")
+            error_response = {
+                'code': response_send_email_status,
+                'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
+            }
+            return jsonify(error_response), response_send_email_status, None
+
+        slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email [{dispatch_number}]" \
+                    f" with ticket id: {ticket_id}"
+        self._logger.info(slack_msg)
+        await self._notifications_repository.send_slack_message(slack_msg)
+
+        # Append Note to bruin
+        ticket_note = get_dispatch_cancel_request_note(body, dispatch_number)
+        await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
+        self._logger.info(f"Dispatch: {dispatch_number} - {ticket_id} - Cancel Note appended: {ticket_note}")
+
+        response_dispatch['id'] = dispatch_number
+        response_dispatch['vendor'] = 'CTS'
+        self._logger.info(f"[CTS] Dispatch cancel request: {dispatch_number} - took {time.time() - start_time}")
+
+        return jsonify(response_dispatch), HTTPStatus.OK, None
+
     async def _append_note_to_ticket(self, dispatch_number, ticket_id, ticket_note):
         # Split the note if needed
         ticket_notes = textwrap.wrap(ticket_note, self.MAX_TICKET_NOTE, replace_whitespace=False)
@@ -483,16 +558,3 @@ class DispatchServer:
             await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
         except Exception as ex:
             self._logger.error(f"[process_note] Error: {ex}")
-
-    def _add_dispatch_to_cache(self, ticket_id, igz_dispatch_id):
-        dispatch_from_cache = self._redis_client.hmget(self.PENDING_DISPATCHES_KEY, ticket_id)
-        dispatch_from_cache = [d for d in dispatch_from_cache if d]
-        if len(dispatch_from_cache) == 0:
-            pending_dispatch = {
-                ticket_id: igz_dispatch_id
-            }
-            self._logger.info(f"Adding {pending_dispatch} to cache")
-            return self._redis_client.hmset(self.PENDING_DISPATCHES_KEY, pending_dispatch)
-        else:
-            self._logger.info(f"Error: {ticket_id} - {igz_dispatch_id} already exists in cache.")
-            return False
