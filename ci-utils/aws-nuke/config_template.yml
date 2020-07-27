@@ -36,6 +36,7 @@ accounts:
         value: environment
       ElasticacheCacheCluster:
       - invert: true
+        type: contains
         value: environment
       ElasticacheSubnetGroup:
       - invert: true

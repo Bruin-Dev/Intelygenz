@@ -344,6 +344,7 @@ services:
     depends_on:
       - "nats-server"
       - redis
+      - redis-customer-cache
     ports:
       - 5013:5000
 
@@ -353,6 +354,13 @@ services:
       - 6379:6379
     expose:
       - 6379
+
+  redis-customer-cache:
+    image: redis:5.0.4
+    ports:
+      - 6380:6379
+    expose:
+      - 6380
 
   grafana:
     build:

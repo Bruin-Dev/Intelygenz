@@ -68,3 +68,7 @@ QUART_CONFIG = {
 REDIS = {
     "host": "redis"
 }
+
+REDIS_CUSTOMER_CACHE = {
+    "host": "redis-customer-cache"
+}

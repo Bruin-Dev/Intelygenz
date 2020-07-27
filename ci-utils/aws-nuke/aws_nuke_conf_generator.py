@@ -65,7 +65,7 @@ class AWSNukeConfigurationGenerator:
                 self._generate_rules_aws_nuke_contains('CloudWatchAlarm', environment_name),
                 self._generate_rules_aws_nuke_has_property('CloudFormationStack', 'tag:Environment',
                                                            environment_name),
-                self._generate_rule_aws_nuke_equal_to_value('ElasticacheCacheCluster', environment_name),
+                self._generate_rules_aws_nuke_contains('ElasticacheCacheCluster', environment_name),
                 self._generate_rules_aws_nuke_contains('ElasticacheSubnetGroup', environment_name),
                 self._generate_rules_aws_nuke_contains('ECSService', environment_name),
                 self._generate_rules_aws_nuke_contains('ECSTaskDefinition', environment_name),

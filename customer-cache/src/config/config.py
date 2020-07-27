@@ -68,3 +68,7 @@ QUART_CONFIG = {
 REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
 }
+
+REDIS_CUSTOMER_CACHE = {
+    "host": os.environ["REDIS_CUSTOMER_CACHE_HOSTNAME"]
+}

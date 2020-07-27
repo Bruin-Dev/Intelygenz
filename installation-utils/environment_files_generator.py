@@ -100,6 +100,7 @@ NATS_CLUSTER_MODE3 = 'n'
 
 # Redis variables
 REDIS_HOSTNAME = 'redis'
+REDIS_CUSTOMER_CACHE_HOSTNAME = 'redis-customer-cache'
 
 # Slack variables
 SLACK_URL = var_dict["SLACK_URL_DEV"]
@@ -163,6 +164,16 @@ env_dict = {
         f'CTS_CLIENT_SECURITY_TOKEN={CTS_CLIENT_SECURITY_TOKEN}\n'
         f'CTS_LOGIN_URL={CTS_LOGIN_URL}\n'
         f'CTS_DOMAIN={CTS_DOMAIN}\n'
+        f'PAPERTRAIL_ACTIVE=False\n'
+        f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
+        f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',
+    os.path.join('customer-cache', 'src', 'config', 'env'):
+        f'ENVIRONMENT_NAME={ENVIRONMENT_NAME}\n'
+        f'NATS_SERVER1={NATS_SERVER1}\n'
+        f'NATS_CLUSTER_NAME={NATS_CLUSTER_NAME}\n'
+        f'REDIS_HOSTNAME={REDIS_HOSTNAME}\n'
+        f'REDIS_CUSTOMER_CACHE_HOSTNAME={REDIS_CUSTOMER_CACHE_HOSTNAME}\n'
+        f'CURRENT_ENVIRONMENT={CURRENT_ENVIRONMENT}\n'
         f'PAPERTRAIL_ACTIVE=False\n'
         f'PAPERTRAIL_HOST={PAPERTRAIL_HOST}\n'
         f'PAPERTRAIL_PORT={PAPERTRAIL_PORT}',

@@ -18,7 +18,15 @@ locals {
   automation-redis-security_group-tag-Name = "${var.ENVIRONMENT}-redis"
   redis-hostname = aws_elasticache_cluster.automation-redis.cache_nodes[0].address
 
-  // bruin-brige local vars
+  // automation-redis-customer-cache local vars
+  automation-redis-customer-cache-cluster_id = "${var.ENVIRONMENT}-customer-cache-redis"
+  automation-redis-customer-cache-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-customer-cache-redis"
+  automation-redis-customer-cache-subnet_group-name = "${var.ENVIRONMENT}-customer-cache-redis-subnet"
+  automation-redis-customer-cache-security_group-name = "${var.ENVIRONMENT}-customer-cache-redis-sg"
+  automation-redis-customer-cache-security_group-tag-Name = "${var.ENVIRONMENT}-customer-cache-redis"
+  automation-redis-customer-cache-hostname = aws_elasticache_cluster.automation-redis-customer-cache[0].cache_nodes[0].address
+
+  // automation-bruin-brige local vars
   automation-bruin-bridge-image = "${data.aws_ecr_repository.automation-bruin-bridge.repository_url}:${data.external.bruin-bridge-build_number.result["image_tag"]}"
   automation-bruin-bridge-papertrail_prefix = "bruin-bridge-${element(split("-", data.external.bruin-bridge-build_number.result["image_tag"]),2)}"
   automation-bruin-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-bruin-bridge"
@@ -45,7 +53,7 @@ locals {
   automation-customer-cache_service-security_group-name = "${var.ENVIRONMENT}-customer-cache"
   automation-customer-cache-resource-name = "${var.ENVIRONMENT}-customer-cache"
   automation-customer-cache-service-security_group-tag-Name = "${var.ENVIRONMENT}-customer-cache"
-  automation-customer-cache-task_definition = "${aws_ecs_task_definition.automation-customer-cache.family}:${aws_ecs_task_definition.automation-customer-cache.revision}"
+  automation-customer-cache-task_definition = "${aws_ecs_task_definition.automation-customer-cache[0].family}:${aws_ecs_task_definition.automation-customer-cache[0].revision}"
   automation-customer-cache-service_discovery_service-name = "customer-cache-${var.ENVIRONMENT}"
 
   // automation-dispatch-portal-backend local vars
@@ -84,7 +92,7 @@ locals {
   automation-last-contact-report-task_definition = "${aws_ecs_task_definition.automation-last-contact-report.family}:${aws_ecs_task_definition.automation-last-contact-report.revision}"
   automation-last-contact-service_discovery_service-name = "last-contact-report-${var.ENVIRONMENT}"
 
-  // lit-brige local vars
+  // automation-lit-bridge local vars
   automation-lit-bridge-image = "${data.aws_ecr_repository.automation-lit-bridge.repository_url}:${data.external.lit-bridge-build_number.result["image_tag"]}"
   automation-lit-bridge-papertrail_prefix = "lit-bridge-${element(split("-", data.external.lit-bridge-build_number.result["image_tag"]),2)}"
   automation-lit-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-lit-bridge"

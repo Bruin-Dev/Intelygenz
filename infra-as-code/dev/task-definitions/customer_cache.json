@@ -59,6 +59,10 @@
       {
         "name": "ENVIRONMENT_NAME",
         "value": "${ENVIRONMENT_NAME}"
+      },
+      {
+        "name": "REDIS_CUSTOMER_CACHE_HOSTNAME",
+        "value": "${REDIS_CUSTOMER_CACHE_HOSTNAME}"
       }
     ]
   }

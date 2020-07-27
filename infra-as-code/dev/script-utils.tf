@@ -5,6 +5,7 @@ resource "null_resource" "papertrail_provisioning" {
   depends_on = [
       aws_ecs_service.automation-bruin-bridge,
       aws_ecs_service.automation-cts-bridge,
+      aws_ecs_service.automation-customer-cache[0],
       aws_ecs_service.automation-dispatch-portal-backend,
       aws_ecs_service.automation-dispatch-portal-frontend,
       aws_ecs_service.automation-last-contact-report,

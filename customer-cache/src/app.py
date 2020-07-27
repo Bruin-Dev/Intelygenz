@@ -27,6 +27,10 @@ class Container:
         self._redis_client = redis.Redis(host=config.REDIS["host"], port=6379, decode_responses=True)
         self._redis_client.ping()
 
+        self._redis_customer_cache_client = redis.Redis(host=config.REDIS_CUSTOMER_CACHE["host"], port=6379,
+                                                        decode_responses=True)
+        self._redis_customer_cache_client.ping()
+
         # SCHEDULER
         self._scheduler = AsyncIOScheduler(timezone=config.SCHEDULER_CONFIG['timezone'])
 
@@ -46,7 +50,7 @@ class Container:
         # REPOSITORIES
         self._bruin_repository = BruinRepository(config, self._logger, self._event_bus)
         self._velocloud_repository = VelocloudRepository(config, self._logger, self._event_bus)
-        self._storage_repository = StorageRepository(config, self._logger, self._redis_client)
+        self._storage_repository = StorageRepository(config, self._logger, self._redis_customer_cache_client)
 
         # ACTIONS
         self._refresh_cache = RefreshCache(config, self._event_bus, self._logger, self._scheduler,

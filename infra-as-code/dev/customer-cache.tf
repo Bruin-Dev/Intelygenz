@@ -11,6 +11,8 @@ data "external" "customer-cache-build_number" {
 }
 
 data "template_file" "automation-customer-cache" {
+  count = var.customer_cache_desired_tasks > 0 ? 1 : 0
+
   template = file("${path.module}/task-definitions/customer_cache.json")
 
   vars = {
@@ -26,12 +28,15 @@ data "template_file" "automation-customer-cache" {
     PAPERTRAIL_HOST = var.PAPERTRAIL_HOST
     PAPERTRAIL_PORT = var.PAPERTRAIL_PORT
     ENVIRONMENT_NAME = var.ENVIRONMENT_NAME
+    REDIS_CUSTOMER_CACHE_HOSTNAME = local.automation-redis-customer-cache-hostname
   }
 }
 
 resource "aws_ecs_task_definition" "automation-customer-cache" {
+  count = var.customer_cache_desired_tasks > 0 ? 1 : 0
+
   family = local.automation-customer-cache-ecs_task_definition-family
-  container_definitions = data.template_file.automation-customer-cache.rendered
+  container_definitions = data.template_file.automation-customer-cache[0].rendered
   requires_compatibilities = [
     "FARGATE"]
   network_mode = "awsvpc"
@@ -42,6 +47,8 @@ resource "aws_ecs_task_definition" "automation-customer-cache" {
 }
 
 resource "aws_security_group" "automation-customer-cache_service" {
+  count = var.customer_cache_desired_tasks > 0 ? 1 : 0
+
   vpc_id = data.terraform_remote_state.tfstate-network-resources.outputs.vpc_automation_id
   name = local.automation-customer-cache_service-security_group-name
   description = "Allow egress from container"
@@ -78,6 +85,8 @@ resource "aws_security_group" "automation-customer-cache_service" {
 }
 
 resource "aws_service_discovery_service" "customer-cache" {
+  count = var.customer_cache_desired_tasks > 0 ? 1 : 0
+
   name = local.automation-customer-cache-service_discovery_service-name
 
   dns_config {
@@ -97,16 +106,17 @@ resource "aws_service_discovery_service" "customer-cache" {
 }
 
 resource "aws_ecs_service" "automation-customer-cache" {
+  count = var.customer_cache_desired_tasks > 0 ? 1 : 0
+
   name = local.automation-customer-cache-resource-name
   task_definition = local.automation-customer-cache-task_definition
   desired_count = var.customer_cache_desired_tasks
   launch_type = "FARGATE"
   cluster = aws_ecs_cluster.automation.id
-  count = var.customer_cache_desired_tasks != 0 ? 1 : 0
 
   network_configuration {
     security_groups = [
-      aws_security_group.automation-customer-cache_service.id]
+      aws_security_group.automation-customer-cache_service[0].id]
     subnets = [
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1a.id,
       data.terraform_remote_state.tfstate-network-resources.outputs.subnet_automation-private-1b.id]
@@ -114,7 +124,7 @@ resource "aws_ecs_service" "automation-customer-cache" {
   }
 
   service_registries {
-    registry_arn = aws_service_discovery_service.customer-cache.arn
+    registry_arn = aws_service_discovery_service.customer-cache[0].arn
   }
 
   depends_on = [ null_resource.bruin-bridge-healthcheck,
