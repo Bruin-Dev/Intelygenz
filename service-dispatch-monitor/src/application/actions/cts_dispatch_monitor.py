@@ -36,6 +36,7 @@ class CtsDispatchMonitor:
         self.DISPATCH_CONFIRMED_WATERMARK = 'Dispatch Management - Dispatch Confirmed'
         self.DISPATCH_FIELD_ENGINEER_ON_SITE_WATERMARK = 'Dispatch Management - Field Engineer On Site'
         self.DISPATCH_REPAIR_COMPLETED_WATERMARK = 'Dispatch Management - Repair Completed'
+        self.DISPATCH_CANCELLED_WATERMARK = 'Dispatch Management - Dispatch Cancelled'
 
         # SMS Notes watermarks
         self.DISPATCH_CONFIRMED_SMS_WATERMARK = 'Dispatch confirmation SMS sent to'
@@ -95,7 +96,9 @@ class CtsDispatchMonitor:
                 self._monitor_confirmed_dispatches(
                     dispatches_splitted_by_status[self._cts_repository.DISPATCH_CONFIRMED]),
                 self._monitor_tech_on_site_dispatches(
-                    dispatches_splitted_by_status[self._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE])
+                    dispatches_splitted_by_status[self._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE]),
+                self._monitor_cancelled_dispatches(
+                    dispatches_splitted_by_status[self._cts_repository.DISPATCH_CANCELLED])
             ]
 
             start_monitor_tasks = perf_counter()
@@ -649,6 +652,108 @@ class CtsDispatchMonitor:
 
         stop = perf_counter()
         self._logger.info(f"Monitor Tech on Site Dispatches took: {(stop - start) / 60} minutes")
+
+    async def _monitor_cancelled_dispatches(self, cancelled_dispatches):
+        try:
+            start = perf_counter()
+            self._logger.info("Monitor cancelled dispatches")
+            self._logger.info(f"Dispatches to process before filter {len(cancelled_dispatches)}")
+            cancelled_dispatches = list(filter(self._cts_repository.is_dispatch_cancelled, cancelled_dispatches))
+            self._logger.info(f"Dispatches to process after filter {len(cancelled_dispatches)}")
+
+            for dispatch in cancelled_dispatches:
+                try:
+                    dispatch_number = dispatch.get('Name', None)
+                    ticket_id = dispatch.get('Ext_Ref_Num__c', None)
+
+                    self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id}")
+                    if ticket_id is None or not BruinRepository.is_valid_ticket_id(ticket_id) \
+                            or dispatch_number is None:
+                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
+                        continue
+
+                    date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
+
+                    if date_time_of_dispatch is None:
+                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                          f"Could not determine date time of dispatch: {dispatch}")
+                        continue
+
+                    self._logger.info(f"Getting details for ticket [{ticket_id}]")
+
+                    response = await self._bruin_repository.get_ticket_details(ticket_id)
+                    response_status = response['status']
+                    response_body = response['body']
+
+                    if response_status not in range(200, 300):
+                        self._logger.error(f"Error: Dispatch [{dispatch_number}] "
+                                           f"Get ticket details for ticket {ticket_id}: "
+                                           f"{response_body}")
+                        err_msg = f"An error occurred retrieve getting ticket details from bruin " \
+                                  f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
+                        await self._notifications_repository.send_slack_message(err_msg)
+                        continue
+                    ticket_notes = response_body.get('ticketNotes', [])
+                    ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+                    self._logger.info(ticket_notes)
+
+                    self._logger.info(f"Filtering ticket notes to contain only notes for the "
+                                      f"IGZ CTS Dispatch numbers only")
+                    filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
+                                                                                        self.IGZ_DN_WATERMARK,
+                                                                                        ticket_id)
+                    self._logger.info(filtered_ticket_notes)
+
+                    self._logger.info(
+                        f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
+
+                    watermark_found = UtilsRepository.find_note(filtered_ticket_notes, self.MAIN_WATERMARK)
+
+                    igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
+                        watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
+
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"IGZ dispatch number found: {igz_dispatch_number}")
+
+                    requested_watermark_found = UtilsRepository.find_note(
+                        filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
+                    cancelled_watermark_note_found = UtilsRepository.find_note(
+                        filtered_ticket_notes, self.DISPATCH_CANCELLED_WATERMARK)
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"requested_watermark_found: {requested_watermark_found} "
+                                      f"cancelled_watermark_note_found: {cancelled_watermark_note_found}")
+
+                    if cancelled_watermark_note_found is None:
+                        result_append_cancelled_note = await self._cts_repository.append_dispatch_cancelled_note(
+                            dispatch_number, igz_dispatch_number, ticket_id, dispatch)
+                        if not result_append_cancelled_note:
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"- A cancelled dispatch note not appended"
+                            self._logger.info(msg)
+                            await self._notifications_repository.send_slack_message(msg)
+                            continue
+                        msg = f"[service-dispatch-monitor] [CTS] " \
+                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                              f"- A cancelled dispatch note appended"
+                        self._logger.info(msg)
+                        await self._notifications_repository.send_slack_message(msg)
+
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"- already has a cancelled dispatch note")
+                except Exception as ex:
+                    err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "\
+                              f"- {dispatch}"
+                    self._logger.error(err_msg)
+                    await self._notifications_repository.send_slack_message(err_msg)
+                    continue
+        except Exception as ex:
+            err_msg = f"Error: _monitor_cancelled_dispatches - {ex}"
+            self._logger.error(f"Error: {ex}")
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        stop = perf_counter()
+        self._logger.info(f"Monitor Cancelled Dispatches took: {(stop - start) / 60} minutes")
 
     def _filter_ticket_note_by_dispatch_number(self, ticket_notes, dispatch_number, ticket_id):
         filtered_ticket_notes = []

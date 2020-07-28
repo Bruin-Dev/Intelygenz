@@ -167,13 +167,14 @@ class TestCtsDispatchMonitor:
                                                   cts_ticket_details_1,
                                                   cts_ticket_details_2_error,
                                                   cts_ticket_details_2_no_requested_watermark,
-                                                  cts_ticket_details_no_dispatch_2,
-                                                  cts_ticket_details_no_watermark):
+                                                  cts_ticket_details_no_watermark,
+                                                  cts_dispatch_confirmed_skipped):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2,
             cts_dispatch_confirmed_2,
-            cts_dispatch_confirmed_no_main_watermark
+            cts_dispatch_confirmed_no_main_watermark,
+            cts_dispatch_confirmed_skipped
         ]
         responses_details_mock = [
             cts_ticket_details_1,
@@ -3250,8 +3251,7 @@ class TestCtsDispatchMonitor:
                                                    cts_dispatch_tech_on_site_2, cts_dispatch_not_valid_ticket_id,
                                                    cts_dispatch_tech_on_site_bad_datetime,
                                                    cts_ticket_details_1, cts_ticket_details_2,
-                                                   append_note_response, append_note_response_2,
-                                                   sms_success_response, sms_success_response_2):
+                                                   append_note_response, append_note_response_2):
         tech_on_site_dispatches = [
             cts_dispatch_tech_on_site,
             cts_dispatch_tech_on_site_2,
@@ -3264,11 +3264,7 @@ class TestCtsDispatchMonitor:
             'body': append_note_response,
             'status': 200
         }
-        response_append_note_2 = {
-            'request_id': uuid_,
-            'body': append_note_response_2,
-            'status': 200
-        }
+
         igz_dispatch_number_1 = 'IGZ_0001'
         igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_tech_on_site.get('Name')
@@ -3285,16 +3281,6 @@ class TestCtsDispatchMonitor:
             cts_ticket_details_1,
             cts_ticket_details_2
         ]
-        responses_append_notes_mock = [
-            response_append_note_1,
-            response_append_note_2,
-            response_append_note_1,
-            response_append_note_2
-        ]
-        responses_confirmed_sms = [
-            True,
-            True
-        ]
 
         responses_sms_tech_on_site_mock = [
             True,
@@ -3305,9 +3291,6 @@ class TestCtsDispatchMonitor:
             True,
             True
         ]
-
-        err_msg = 'Dispatch: S-12345 - Ticket_id: 4694961 - ' \
-                  'An error occurred retrieve datetime of dispatch: None'
 
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
             side_effect=responses_details_mock)
@@ -3664,3 +3647,48 @@ class TestCtsDispatchMonitor:
 
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def monitor_cancelled_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_cancelled,
+                                                cts_ticket_details_1, append_note_response):
+        cancelled_dispatches = [
+            cts_dispatch_cancelled
+        ]
+
+        responses_details_mock = [
+            cts_ticket_details_1
+        ]
+
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+
+        igz_dispatch_number_1 = 'IGZ_0001'
+        dispatch_number_1 = cts_dispatch_cancelled.get('Name')
+        ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
+
+        responses_append_dispatch_cancelled_note_mock = [
+            True
+        ]
+        slack_msg = f"[service-dispatch-monitor] [CTS] " \
+                    f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                    f"- A cancelled dispatch note appended"
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
+            side_effect=responses_details_mock)
+
+        cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note = CoroutineMock(
+            side_effect=responses_append_dispatch_cancelled_note_mock)
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches=cancelled_dispatches)
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_has_awaits([
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, cts_dispatch_cancelled)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_msg)

@@ -1133,6 +1133,13 @@ def cts_dispatch_confirmed(cts_dispatch_monitor, cts_dispatch):
 
 
 @pytest.fixture(scope='function')
+def cts_dispatch_cancelled(cts_dispatch_monitor, cts_dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CANCELLED
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def cts_dispatch_confirmed_bad_date(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True

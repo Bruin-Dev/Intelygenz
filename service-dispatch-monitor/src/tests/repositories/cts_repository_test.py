@@ -142,9 +142,13 @@ class TestCtsRepository:
         assert cts_dispatch_monitor._cts_repository.is_tech_on_site(cts_dispatch_tech_on_site) is True
         assert cts_dispatch_monitor._cts_repository.is_tech_on_site(cts_dispatch_tech_not_on_site) is False
 
+    def is_cancelled_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_cancelled):
+        assert cts_dispatch_monitor._cts_repository.is_dispatch_cancelled(cts_dispatch_confirmed) is False
+        assert cts_dispatch_monitor._cts_repository.is_dispatch_cancelled(cts_dispatch_cancelled) is True
+
     def get_dispatches_splitted_by_status_test(self, cts_dispatch_monitor, cts_dispatch, cts_dispatch_confirmed,
                                                cts_dispatch_confirmed_2, cts_dispatch_tech_on_site,
-                                               cts_bad_status_dispatch):
+                                               cts_bad_status_dispatch, cts_dispatch_cancelled):
         dispatches = [
             cts_dispatch, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
             cts_dispatch_tech_on_site, cts_bad_status_dispatch
@@ -155,7 +159,8 @@ class TestCtsRepository:
                 cts_dispatch_confirmed, cts_dispatch_confirmed_2],
             str(cts_dispatch_monitor._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE): [cts_dispatch_tech_on_site],
             str(cts_dispatch_monitor._cts_repository.DISPATCH_REPAIR_COMPLETED): [],
-            str(cts_dispatch_monitor._cts_repository.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL): []
+            str(cts_dispatch_monitor._cts_repository.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL): [],
+            str(cts_dispatch_monitor._cts_repository.DISPATCH_CANCELLED): []
         }
         result = cts_dispatch_monitor._cts_repository.get_dispatches_splitted_by_status(dispatches)
         assert result == expected_dispatches_splitted

@@ -20,6 +20,8 @@ from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_2_hour
 from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_2_hours_before_sms_tech_note
 from application.templates.cts.cts_tech_on_site import cts_get_tech_on_site_note
 
+from application.templates.cts.cts_dispatch_cancel import cts_get_dispatch_cancel_note
+
 
 class CtsRepository:
     def __init__(self, logger, config, event_bus, notifications_repository, bruin_repository):
@@ -38,14 +40,15 @@ class CtsRepository:
         self.DISPATCH_SUBMITTED_FOR_BILLING = 'Submitted for Billing'
         self.DISPATCH_BILLED = 'Billed'
         self.DISPATCH_ON_HOLD = 'On Hold'
-        self.DISPATCH_CANCELED = 'Canceled'
+        self.DISPATCH_CANCELLED = 'Canceled'
         self.DISPATCH_RESCHEDULE = 'Reschedule'
         self._dispatch_statuses = [
             self.DISPATCH_REQUESTED,
             self.DISPATCH_CONFIRMED,
             self.DISPATCH_FIELD_ENGINEER_ON_SITE,
             self.DISPATCH_REPAIR_COMPLETED,
-            self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL
+            self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL,
+            self.DISPATCH_CANCELLED
         ]
 
     async def get_all_dispatches(self):
@@ -131,6 +134,9 @@ class CtsRepository:
         return all([dispatch is not None,
                     dispatch.get('Status__c') == self.DISPATCH_FIELD_ENGINEER_ON_SITE,
                     dispatch.get("Check_In_Date__c") is not None])
+
+    def is_dispatch_cancelled(self, dispatch):
+        return all([dispatch is not None, dispatch.get('Status__c') == self.DISPATCH_CANCELLED])
 
     def get_dispatches_splitted_by_status(self, dispatches):
         dispatches_splitted_by_status = {}
@@ -580,4 +586,28 @@ class CtsRepository:
                           f"Ticket_id: {ticket_id} - SMS tech on site note Appended")
         self._logger.info(
             f"Tech on site note appended. Response {append_sms_note_response_body}")
+        return True
+
+    async def append_dispatch_cancelled_note(self, dispatch_number, igz_dispatch_number, ticket_id, dispatch) -> bool:
+        cancelled_note_data = {
+            'dispatch_number': igz_dispatch_number,
+            'date_of_dispatch': dispatch.get('Local_Site_Time__c')
+        }
+        cancelled_note = cts_get_dispatch_cancel_note(cancelled_note_data)
+        append_cancelled_note_response = await self._bruin_repository.append_note_to_ticket(
+            ticket_id, cancelled_note)
+        append_sms_note_response_status = append_cancelled_note_response['status']
+        append_sms_note_response_body = append_cancelled_note_response['body']
+        if append_sms_note_response_status not in range(200, 300):
+            self._logger.info(f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{cancelled_note}` "
+                              f"- Cancelled note not appended")
+            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{cancelled_note}` " \
+                      f"- Cancelled note not appended"
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(f"Note: `{cancelled_note}` "
+                          f"Dispatch: {dispatch_number} "
+                          f"Ticket_id: {ticket_id} - Cancelled note Appended")
+        self._logger.info(
+            f"Cancelled note appended. Response: {append_sms_note_response_body}")
         return True
