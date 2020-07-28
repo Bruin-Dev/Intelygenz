@@ -1140,6 +1140,13 @@ def cts_dispatch_cancelled(cts_dispatch_monitor, cts_dispatch_confirmed):
 
 
 @pytest.fixture(scope='function')
+def cts_dispatch_cancelled_2(cts_dispatch_monitor, cts_dispatch_confirmed_2):
+    updated_dispatch = copy.deepcopy(cts_dispatch_confirmed_2)
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CANCELLED
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def cts_dispatch_confirmed_bad_date(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch = copy.deepcopy(cts_dispatch)
     updated_dispatch['Confirmed__c'] = True
@@ -1294,6 +1301,22 @@ def cts_dispatch_not_valid_ticket_id(cts_dispatch_monitor, cts_dispatch_confirme
     updated_dispatch['Ext_Ref_Num__c'] = 'as|asdf'
     updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
     updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_cancelled_not_valid_ticket_id(cts_dispatch_monitor, cts_dispatch_cancelled):
+    updated_dispatch = copy.deepcopy(cts_dispatch_cancelled)
+    updated_dispatch['Ext_Ref_Num__c'] = 'as|asdf'
+    updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_cts_dispatch_cancelled_bad_datetime(cts_dispatch_monitor, cts_dispatch_cancelled):
+    updated_dispatch = copy.deepcopy(cts_dispatch_cancelled)
+    updated_dispatch['Check_In_Date__c'] = '2020-06-19T18:29:45.000+0000'
+    updated_dispatch['Local_Site_Time__c'] = None
     return updated_dispatch
 
 
@@ -2039,4 +2062,22 @@ def cts_ticket_details_2_with_tech_on_site_sms_note(cts_ticket_details_2_with_2h
         "creator": None
     }
     updated_ticket_details['body']['ticketNotes'].append(note_tech_sms_ticket_note)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details_1_with_cancelled_note(cts_ticket_details_1, cts_dispatch_confirmed):
+    updated_ticket_details = copy.deepcopy(cts_ticket_details_1)
+    date_of_dispatch = cts_dispatch_confirmed.get('Date_of_Dispatch')
+    field_engineer_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+    note_cancelled_note = {
+        "noteId": 70805315,
+        "noteValue": "#*Automation Engine*# IGZ_0001"
+                     "Dispatch Management - Dispatch Cancelled\n\n"
+                     "Dispatch for {date_of_dispatch} has been cancelled.\n".format(date_of_dispatch=date_of_dispatch),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(note_cancelled_note)
     return updated_ticket_details

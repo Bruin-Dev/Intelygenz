@@ -170,6 +170,7 @@ class TestLitDispatchMonitor:
     @pytest.mark.asyncio
     async def filter_dispatches_by_watermark_test(self, lit_dispatch_monitor, dispatch_confirmed,
                                                   dispatch_confirmed_2,
+                                                  dispatch_confirmed_skipped,
                                                   ticket_details_1,
                                                   ticket_details_2_error,
                                                   ticket_details_2_no_requested_watermark,
@@ -177,6 +178,7 @@ class TestLitDispatchMonitor:
                                                   ticket_details_2_no_ticket_id_in_watermark):
         confirmed_dispatches = [
             dispatch_confirmed,
+            dispatch_confirmed_skipped,
             dispatch_confirmed_2,
             dispatch_confirmed_2,
             dispatch_confirmed_2,

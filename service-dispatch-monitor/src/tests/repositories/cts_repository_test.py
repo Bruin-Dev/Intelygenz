@@ -602,6 +602,62 @@ class TestCtsRepository:
         assert response is False
 
     @pytest.mark.asyncio
+    async def append_dispatch_cancelled_note_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
+                                                  append_note_response):
+        ticket_id = '12345'
+        dispatch_number = cts_dispatch_confirmed.get('Dispatch_Number')
+        date_of_dispatch = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        igz_dispatch_number = 'IGZ_0001'
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+        sms_note = f'#*Automation Engine*# {igz_dispatch_number}\nDispatch Management - Dispatch Cancelled\n' \
+                   f'Dispatch for {date_of_dispatch} has been cancelled.\n'
+
+        cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+
+        response = await cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note(
+            dispatch_number, igz_dispatch_number, ticket_id, cts_dispatch_confirmed)
+
+        cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, sms_note)
+        assert response is True
+
+    @pytest.mark.asyncio
+    async def append_dispatch_cancelled_note_error_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
+                                                        append_note_response):
+        ticket_id = '12345'
+        dispatch_number = cts_dispatch_confirmed.get('Dispatch_Number')
+        date_of_dispatch = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        igz_dispatch_number = 'IGZ_0001'
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 400
+        }
+        sms_note = f'#*Automation Engine*# {igz_dispatch_number}\nDispatch Management - Dispatch Cancelled\n' \
+                   f'Dispatch for {date_of_dispatch} has been cancelled.\n'
+        send_error_sms_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` ' \
+                                           f'- Cancelled note not appended'
+
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+
+        response = await cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note(
+            dispatch_number, igz_dispatch_number, ticket_id, cts_dispatch_confirmed)
+
+        cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, sms_note)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
+            send_error_sms_to_slack_response)
+        assert response is False
+
+    @pytest.mark.asyncio
     async def send_confirmed_sms_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, sms_success_response):
         ticket_id = '12345'
         dispatch_number = cts_dispatch_confirmed.get('Name')

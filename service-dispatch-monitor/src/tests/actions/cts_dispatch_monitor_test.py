@@ -3650,9 +3650,13 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_cancelled_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_cancelled,
+                                                cts_dispatch_cancelled_not_valid_ticket_id,
+                                                cts_dispatch_cts_dispatch_cancelled_bad_datetime,
                                                 cts_ticket_details_1, append_note_response):
         cancelled_dispatches = [
-            cts_dispatch_cancelled
+            cts_dispatch_cancelled_not_valid_ticket_id,
+            cts_dispatch_cancelled,
+            cts_dispatch_cts_dispatch_cancelled_bad_datetime
         ]
 
         responses_details_mock = [
@@ -3675,6 +3679,169 @@ class TestCtsDispatchMonitor:
         slack_msg = f"[service-dispatch-monitor] [CTS] " \
                     f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
                     f"- A cancelled dispatch note appended"
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
+            side_effect=responses_details_mock)
+
+        cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note = CoroutineMock(
+            side_effect=responses_append_dispatch_cancelled_note_mock)
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches=cancelled_dispatches)
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_has_awaits([
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, cts_dispatch_cancelled)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_msg)
+
+    @pytest.mark.asyncio
+    async def monitor_cancelled_dispatches_with_general_exception_test(
+            self, cts_dispatch_monitor):
+        cancelled_dispatches = 0  # Non valid list for filter
+        err_msg = f"Error: _monitor_cancelled_dispatches - object of type 'int' has no len()"
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches)
+
+        cts_dispatch_monitor._logger.error.assert_called_once()
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+
+    @pytest.mark.asyncio
+    async def monitor_cancelled_dispatches_with_exception_test(
+            self, cts_dispatch_monitor, cts_dispatch_cancelled):
+        cancelled_dispatches = [
+            cts_dispatch_cancelled,
+        ]
+        err_msg = f"Error: Dispatch [{cts_dispatch_cancelled.get('Name')}] " \
+                  f"in ticket_id: {cts_dispatch_cancelled.get('Ext_Ref_Num__c')} " \
+                  f"- {cts_dispatch_cancelled}"
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches)
+
+        cts_dispatch_monitor._logger.error.assert_called_once()
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+
+    @pytest.mark.asyncio
+    async def monitor_cancelled_dispatches_error_getting_details_test(self, cts_dispatch_monitor,
+                                                                      cts_dispatch_cancelled,
+                                                                      cts_dispatch_cancelled_2,
+                                                                      cts_ticket_details_1, cts_ticket_details_2_error,
+                                                                      append_note_response):
+        cancelled_dispatches = [
+            cts_dispatch_cancelled,
+            cts_dispatch_cancelled_2,
+        ]
+
+        responses_details_mock = [
+            cts_ticket_details_1,
+            cts_ticket_details_2_error
+        ]
+
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
+
+        dispatch_number_1 = cts_dispatch_cancelled.get('Name')
+        dispatch_number_2 = cts_dispatch_cancelled_2.get('Name')
+
+        ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
+        ticket_id_2 = cts_dispatch_cancelled_2.get('Ext_Ref_Num__c')
+
+        responses_append_dispatch_cancelled_note_mock = [
+            True
+        ]
+        slack_msg = f"[service-dispatch-monitor] [CTS] " \
+                    f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                    f"- A cancelled dispatch note appended"
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
+            side_effect=responses_details_mock)
+
+        cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note = CoroutineMock(
+            side_effect=responses_append_dispatch_cancelled_note_mock)
+        err_msg = f"An error occurred retrieve getting ticket details from bruin " \
+                  f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2}"
+
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches=cancelled_dispatches)
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1),
+            call(ticket_id_2)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_has_awaits([
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, cts_dispatch_cancelled)
+        ])
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([call(slack_msg),
+                                                                                             call(err_msg)])
+
+    @pytest.mark.asyncio
+    async def monitor_already_cancelled_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_cancelled,
+                                                        cts_ticket_details_1_with_cancelled_note, append_note_response):
+        cancelled_dispatches = [
+            cts_dispatch_cancelled,
+        ]
+
+        responses_details_mock = [
+            cts_ticket_details_1_with_cancelled_note
+        ]
+
+        dispatch_number_1 = cts_dispatch_cancelled.get('Name')
+        ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
+
+        responses_append_dispatch_cancelled_note_mock = [
+            True
+        ]
+        slack_msg = f"[service-dispatch-monitor] [CTS] " \
+                    f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                    f"- A cancelled dispatch note appended"
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
+            side_effect=responses_details_mock)
+
+        cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note = CoroutineMock(
+            side_effect=responses_append_dispatch_cancelled_note_mock)
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches=cancelled_dispatches)
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1)
+        ])
+
+        cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_not_awaited()
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def monitor_cancelled_dispatches_not_appended_test(self, cts_dispatch_monitor, cts_dispatch_cancelled,
+                                                             cts_ticket_details_1, append_note_response):
+        cancelled_dispatches = [
+            cts_dispatch_cancelled,
+        ]
+
+        responses_details_mock = [
+            cts_ticket_details_1
+        ]
+
+        igz_dispatch_number_1 = 'IGZ_0001'
+        dispatch_number_1 = cts_dispatch_cancelled.get('Name')
+        ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
+
+        responses_append_dispatch_cancelled_note_mock = [
+            False
+        ]
+        slack_msg = f"[service-dispatch-monitor] [CTS] " \
+                    f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                    f"- A cancelled dispatch note not appended"
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
             side_effect=responses_details_mock)
 
