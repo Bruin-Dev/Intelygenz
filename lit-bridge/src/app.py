@@ -15,6 +15,7 @@ from igz.packages.nats.clients import NATSClient
 from igz.packages.server.api import QuartServer
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from application.actions.cancel_dispatch import CancelDispatch
 from config import config
 
 
@@ -37,6 +38,7 @@ class Container:
         # NATS clients
         self._publisher = NATSClient(config, logger=self._logger)
         self._subscriber_create_dispatch = NATSClient(config, logger=self._logger)
+        self._subscriber_cancel_dispatch = NATSClient(config, logger=self._logger)
         self._subscriber_get_dispatch = NATSClient(config, logger=self._logger)
         self._subscriber_update_dispatch = NATSClient(config, logger=self._logger)
         self._subscriber_upload_file = NATSClient(config, logger=self._logger)
@@ -45,12 +47,15 @@ class Container:
         self._event_bus = EventBus(self._message_storage_manager, logger=self._logger)
         self._event_bus.set_producer(self._publisher)
         self._event_bus.add_consumer(self._subscriber_create_dispatch, consumer_name="create_dispatch")
+        self._event_bus.add_consumer(self._subscriber_cancel_dispatch, consumer_name="cancel_dispatch")
         self._event_bus.add_consumer(self._subscriber_get_dispatch, consumer_name="get_dispatch")
         self._event_bus.add_consumer(self._subscriber_update_dispatch, consumer_name="update_dispatch")
         self._event_bus.add_consumer(self._subscriber_upload_file, consumer_name="upload_file")
 
         # actions
         self._create_dispatch = CreateDispatch(self._logger, config.LIT_CONFIG, self._event_bus,
+                                               self._lit_repository)
+        self._cancel_dispatch = CancelDispatch(self._logger, config.LIT_CONFIG, self._event_bus,
                                                self._lit_repository)
         self._get_dispatch = GetDispatch(self._logger, config.LIT_CONFIG, self._event_bus,
                                          self._lit_repository)
@@ -60,7 +65,9 @@ class Container:
                                        self._lit_repository)
 
         # action wrappers
-        self._action_create_disptch = ActionWrapper(self._create_dispatch, "create_dispatch",
+        self._action_create_dispatch = ActionWrapper(self._create_dispatch, "create_dispatch",
+                                                    is_async=True, logger=self._logger)
+        self._action_cancel_dispatch = ActionWrapper(self._cancel_dispatch, "cancel_dispatch",
                                                     is_async=True, logger=self._logger)
         self._action_get_dispatch = ActionWrapper(self._get_dispatch, "get_dispatch",
                                                   is_async=True, logger=self._logger)
@@ -77,7 +84,10 @@ class Container:
         self._scheduler.start()
 
         await self._event_bus.subscribe_consumer(consumer_name="create_dispatch", topic="lit.dispatch.post",
-                                                 action_wrapper=self._action_create_disptch,
+                                                 action_wrapper=self._action_create_dispatch,
+                                                 queue="lit_bridge")
+        await self._event_bus.subscribe_consumer(consumer_name="cancel_dispatch", topic="lit.dispatch.cancel",
+                                                 action_wrapper=self._action_cancel_dispatch,
                                                  queue="lit_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="get_dispatch", topic="lit.dispatch.get",
                                                  action_wrapper=self._action_get_dispatch,

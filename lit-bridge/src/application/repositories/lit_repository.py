@@ -27,6 +27,10 @@ class LitRepository:
         response = self._lit_client.create_dispatch(payload)
         return response
 
+    def cancel_dispatch(self, payload):
+        response = self._lit_client.cancel_dispatch(payload)
+        return response
+
     def get_dispatch(self, dispatch_number):
         response = self._lit_client.get_dispatch(dispatch_number)
         return response
