@@ -330,6 +330,127 @@ class TestLitClient:
                 mock_apexecute.assert_called()
                 assert mock_apexecute.call_count == 3
 
+    def post_cancel_dispatch_test(self):
+        logger = Mock()
+        config = testconfig
+        logger.error = Mock()
+
+        payload = {"dispatch_number": "D123"}
+
+        expected_dispatch_response = {
+            "APIRequestID": "a130v000001hWcNAAU",
+            "Message": "Cancellation Request Submitted for,D123",
+            "Status": "Success"
+        }
+
+        lit_client = LitClient(logger, config)
+        lit_client._bearer_token = "Someverysecretaccesstoken"
+        lit_client._base_url = "https://cs66.salesforce.com"
+        lit_client._salesforce_sdk = Mock()
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=expected_dispatch_response)
+        response_mock.status_code = 200
+
+        with patch.object(lit_client._salesforce_sdk, 'apexecute',
+                          return_value=expected_dispatch_response) as mock_apexecute:
+            post_response = lit_client.cancel_dispatch(payload)
+
+            mock_apexecute.assert_called_once()
+
+            assert post_response["body"] == expected_dispatch_response
+            assert post_response["status"] == HTTPStatus.OK
+
+    def post_cancel_dispatch_400_test(self):
+        logger = Mock()
+        config = testconfig
+        logger.error = Mock()
+
+        payload = {"dispatch_number": "D123"}
+
+        expected_dispatch_response = {
+            "APIRequestID": "a130v000001hWcNAAU",
+            "Message": None,
+            "Status": "error"
+        }
+
+        lit_client = LitClient(logger, config)
+        lit_client._bearer_token = "Someverysecretaccesstoken"
+        lit_client._base_url = "https://cs66.salesforce.com"
+        lit_client._salesforce_sdk = Mock()
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=expected_dispatch_response)
+        response_mock.status_code = 400
+
+        with patch.object(lit_client._salesforce_sdk, 'apexecute',
+                          return_value=expected_dispatch_response) as mock_apexecute:
+            post_response = lit_client.cancel_dispatch(payload)
+
+            mock_apexecute.assert_called_once()
+
+            assert post_response["body"] == expected_dispatch_response
+            assert post_response["status"] == HTTPStatus.BAD_REQUEST
+
+    def post_cancel_dispatch_500_test(self):
+        logger = Mock()
+        config = testconfig
+        logger.error = Mock()
+
+        payload = {"dispatch_number": "D123"}
+
+        expected_dispatch_response = {
+            "Message": None,
+            "Status": "error"
+        }
+
+        lit_client = LitClient(logger, config)
+        lit_client._bearer_token = "Someverysecretaccesstoken"
+        lit_client._base_url = "https://cs66.salesforce.com"
+        lit_client._salesforce_sdk = Mock()
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=expected_dispatch_response)
+        response_mock.status_code = 500
+
+        with patch.object(lit_client._salesforce_sdk, 'apexecute',
+                          side_effect=Exception("Error")) as mock_apexecute:
+            post_response = lit_client.cancel_dispatch(payload)
+            mock_apexecute.assert_called()
+            assert mock_apexecute.call_count == 3
+            assert post_response == "Error"
+
+    def post_cancel_dispatch_salesforce_exception_test(self):
+        logger = Mock()
+        config = testconfig
+        logger.error = Mock()
+
+        payload = {"dispatch_number": "D123"}
+
+        expected_dispatch_response = {
+            "Message": None,
+            "Status": "error"
+        }
+
+        lit_client = LitClient(logger, config)
+        lit_client._bearer_token = "Someverysecretaccesstoken"
+        lit_client._base_url = "https://cs66.salesforce.com"
+        lit_client._salesforce_sdk = Mock()
+
+        response_mock = Mock()
+        response_mock.json = Mock(return_value=expected_dispatch_response)
+        response_mock.status_code = 400
+
+        salesforce_exception = SalesforceError('url', 500, 'resource_name', 'content')
+        with patch.object(lit_client._salesforce_sdk, 'apexecute',
+                          side_effect=salesforce_exception) as mock_apexecute:
+            try:
+                post_response = lit_client.cancel_dispatch(payload)
+            except SalesforceError as sfe:
+                assert isinstance(sfe, SalesforceError)
+                mock_apexecute.assert_called()
+                assert mock_apexecute.call_count == 3
+
     def get_dispatch_test(self):
         logger = Mock()
         config = testconfig

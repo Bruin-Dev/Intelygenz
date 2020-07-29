@@ -83,7 +83,7 @@ class LitClient:
         @retry(wait=wait_exponential(multiplier=self._config.LIT_CONFIG['multiplier'],
                                      min=self._config.LIT_CONFIG['min']),
                stop=stop_after_delay(self._config.LIT_CONFIG['stop_delay']), reraise=True)
-        def create_dispatch():
+        def cancel_dispatch():
             self._logger.info(f'Requesting cancel dispatch...')
             self._logger.info(f'Payload that will be applied : {payload}')
             return_response = dict.fromkeys(["body", "status"])
@@ -105,7 +105,7 @@ class LitClient:
                 return_response["status"] = 500
                 return return_response
         try:
-            return create_dispatch()
+            return cancel_dispatch()
         except Exception as e:
             return e.args[0]
 

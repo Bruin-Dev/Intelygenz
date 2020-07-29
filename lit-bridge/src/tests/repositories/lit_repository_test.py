@@ -83,6 +83,21 @@ class TestLitRepository:
 
         lit_client.create_dispatch.assert_called_with(payload)
 
+    def cancel_dispatch_test(self):
+        lit_client = Mock()
+        lit_client.cancel_dispatch = Mock()
+
+        logger = Mock()
+        scheduler = Mock()
+        config = Mock()
+
+        payload = {"dispatch_number": "D123"}
+
+        lit_repo = LitRepository(lit_client, logger, scheduler, config)
+        lit_repo.cancel_dispatch(payload)
+
+        lit_client.cancel_dispatch.assert_called_with(payload)
+
     def get_dispatch_test(self):
         lit_client = Mock()
         lit_client.get_dispatch = Mock()
