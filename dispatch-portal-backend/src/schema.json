@@ -89,6 +89,48 @@
         }
       }
     },
+    "/lit/dispatch/{dispatch_number}/cancel": {
+      "get": {
+        "description": "Cancel dispatch from LIT",
+        "tags": [
+          "lit"
+        ],
+        "operationId": "cancel_dispatch",
+        "parameters": [
+          {
+            "name": "dispatch_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the dispatch"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancel dispatch response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/cancel_dispatch_response"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lit/dispatch": {
       "get": {
         "description": "Returns all dispatches from LIT that match a filter",
@@ -338,6 +380,48 @@
         }
       }
     },
+    "/cts/dispatch/{dispatch_number}/cancel": {
+      "get": {
+        "description": "Cancel dispatch from CTS",
+        "tags": [
+          "cts"
+        ],
+        "operationId": "cancel_dispatch_cts",
+        "parameters": [
+          {
+            "name": "dispatch_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the dispatch"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancel dispatch response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dispatch_cancel_cts"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/cts/dispatch": {
       "get": {
         "description": "Returns all dispatches from CTS that match a filter",
@@ -443,6 +527,23 @@
           }
         }
       },
+      "cancel_dispatch_response": {
+        "type": "object",
+        "required": [
+          "id",
+          "vendor"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "DS1208"
+          },
+          "vendor": {
+            "type": "string",
+            "example": "lit"
+          }
+        }
+      },
       "update_dispatch_response": {
         "type": "object",
         "required": [
@@ -453,6 +554,10 @@
           "id": {
             "type": "string",
             "example": "DS1208"
+          },
+          "vendor": {
+            "type": "string",
+            "example": "lit"
           }
         }
       },
@@ -480,116 +585,20 @@
       },
       "dispatch_lit": {
         "type": "object",
+        "required": [
+          "id"
+        ],
         "properties": {
-          "date_of_dispatch": {
+          "id": {
             "type": "string",
-            "example": "2019-11-14"
+            "example": "DS1208"
           },
-          "site_survey_quote_required": {
-            "type": "boolean",
-            "example": false
-          },
-          "time_of_dispatch": {
+          "vendor": {
             "type": "string",
-            "description": "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on",
-            "example": "6PM-8PM"
+            "example": "lit"
           },
-          "time_zone": {
-            "enum": [
-              "Pacific Time",
-              "Eastern Time",
-              "Mountain Time",
-              "Hawaii Time",
-              "Alaska Time",
-              "Central Time"
-            ],
-            "type": "string"
-          },
-          "hard_time_of_dispatch_local": {
-            "type": "string",
-            "description": "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on",
-            "example": "6PM-8PM"
-          },
-          "hard_time_of_dispatch_time_zone_local": {
-            "enum": [
-              "Pacific Time",
-              "Eastern Time",
-              "Mountain Time",
-              "Hawaii Time",
-              "Alaska Time",
-              "Central Time"
-            ],
-            "type": "string"
-          },
-          "mettel_bruin_ticket_id": {
-            "type": "string"
-          },
-          "job_site": {
-            "type": "string",
-            "example": "Red Rose Inn"
-          },
-          "job_site_street": {
-            "type": "string",
-            "example": "123 Fake Street"
-          },
-          "job_site_city": {
-            "type": "string",
-            "example": "Pleasantown"
-          },
-          "job_site_state": {
-            "type": "string",
-            "example": "CA"
-          },
-          "job_site_zip_code": {
-            "type": "string",
-            "example": "99088"
-          },
-          "job_site_contact_name": {
-            "type": "string",
-            "example": "Jane Doe"
-          },
-          "job_site_contact_number": {
-            "type": "string",
-            "example": "+1 666 6666 666"
-          },
-          "materials_needed_for_dispatch": {
-            "type": "string",
-            "example": "Laptop, cable, tuner, ladder,internet hotspot"
-          },
-          "scope_of_work": {
-            "type": "string",
-            "example": "Device is bouncing constantly"
-          },
-          "mettel_tech_call_in_instructions": {
-            "type": "string",
-            "example": "When arriving to the site call HOLMDEL NOC for telematic assistance"
-          },
-          "name_of_mettel_requester": {
-            "type": "string",
-            "example": "Karen Doe"
-          },
-          "mettel_department": {
-            "enum": [
-              "Customer Care",
-              "DSL",
-              "T1 Repair",
-              "POTs Repair",
-              "Provisioning",
-              "Advanced Services Engineering",
-              "Wireless",
-              "Holmdel Network Engineering",
-              "Advanced Services Implementations",
-              "Other"
-            ],
-            "type": "string"
-          },
-          "mettel_requester_email": {
-            "type": "string",
-            "example": "karen.doe@mettel.net"
-          },
-          "mettel_department_phone_number": {
-            "type": "string",
-            "example": "+1 666 6666 666"
+          "dispatch": {
+            "$ref": "#/components/schemas/new_dispatch_lit"
           }
         }
       },
@@ -841,7 +850,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "example": "DS1208"
+            "example": "S-12345"
           },
           "vendor": {
             "type": "string",
@@ -849,6 +858,22 @@
           },
           "dispatch": {
             "$ref": "#/components/schemas/new_dispatch_cts"
+          }
+        }
+      },
+      "dispatch_cancel_cts": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "S-12345"
+          },
+          "vendor": {
+            "type": "string",
+            "example": "cts"
           }
         }
       },
