@@ -6,6 +6,7 @@ from http import HTTPStatus
 
 import jsonschema
 from application.mappers import lit_mapper, cts_mapper
+from application.repositories.utils_repository import UtilsRepository
 from application.templates.cts.dispatch_cancel import get_dispatch_cancel_request_note
 from application.templates.cts.dispatch_cancel_mail import render_cancel_email_template
 from application.templates.cts.dispatch_request_mail import render_email_template
@@ -34,6 +35,7 @@ class DispatchServer:
         self._logger = logger
         self._status = HTTPStatus.OK
         self.MAIN_WATERMARK = '#*Automation Engine*#'
+        self.IGZ_DN_WATERMARK = 'IGZ'
         self.DISPATCH_REQUESTED_WATERMARK = 'Dispatch Management - Dispatch Requested'
         self.PENDING_DISPATCHES_KEY = 'pending_dispatches'
         self.MAX_TICKET_NOTE = 1500
@@ -130,81 +132,87 @@ class DispatchServer:
         return jsonify(response_dispatch), response["status"], None
 
     # Cancel Dispatch - GET - /lit/dispatch/<dispatch_number>/cancel
-    async def lit_cancel_dispatch(self, dispatch_number):
-        self._logger.info(f"[LIT] Cancel Dispatch [{dispatch_number}] from lit-bridge")
-        start_time = time.time()
-
-        payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
-        response = await self._event_bus.rpc_request("lit.dispatch.get", payload, timeout=30)
-        self._logger.info(f"[LIT] Response get dispatch: {response}")
-        if response['status'] == 500:
-            error_response = {
-                'code': response['status'], 'message': response['body']
-            }
-            return jsonify(error_response), response['status'], None
-        if 'body' not in response or 'Dispatch' not in response['body'] \
-                or response['body']['Dispatch'] is None \
-                or 'Dispatch_Number' not in response['body']['Dispatch']:
-            self._logger.error(f"[LIT] Could not retrieve dispatch, reason: {response['body']}")
-            error_response = {
-                'code': response['status'], 'message': response['body']
-            }
-            return jsonify(error_response), response['status'], None
-
-        self._logger.info(f"[CTS] Dispatch [{dispatch_number}] - {response['body']} "
-                          f"- took {time.time() - start_time}")
-        dispatch = response['body']['Dispatch']
-        dispatch_number = dispatch['Dispatch_Number']
-        ticket_id = dispatch['MetTel_Bruin_TicketID']
-        body = {
-            'dispatch_number': dispatch_number,
-            'ticket_id': ticket_id
-        }
-        # TODO: Cancellation_Reason and Cancellation_Requested_By
-        cancel_request = {
-            "CancelDispatchRequest": {
-                "Dispatch_Number": dispatch_number,
-                "Cancellation_Reason": "Test API cancel",
-                "Cancellation_Requested_By": "API Tester"
-            }
-        }
-        payload = {"request_id": uuid(), "body": cancel_request}
-        response = await self._event_bus.rpc_request("lit.dispatch.cancel", payload, timeout=30)
-        self._logger.info(f"[LIT] Cancel dispatch [{dispatch_number}]: {response}")
-        response_dispatch = dict()
-        if response['status'] == 500:
-            error_response = {
-                'code': response['status'], 'message': response['body']
-            }
-            return jsonify(error_response), response['status'], None
-        if 'body' not in response or 'CancelDispatchServiceResponse' not in response['body'] \
-                or response['body']['CancelDispatchServiceResponse'] is None \
-                or 'Status' not in response['body']['CancelDispatchServiceResponse'] \
-                or response['body']['CancelDispatchServiceResponse']['Status'] != 'Success':
-            self._logger.error(f"[LIT] Could not cancel dispatch, reason: {response['body']}")
-            error_response = {
-                'code': response['status'], 'message': response['body']
-            }
-            return jsonify(error_response), response['status'], None
-
-        self._logger.info(f"[LIT] Dispatch cancel request [{dispatch_number}] - {response['body']} "
-                          f"- took {time.time() - start_time}")
-        # Append Note to bruin
-        ticket_note = get_dispatch_cancel_request_note(body, dispatch_number)
-        await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
-        self._logger.info(f"Dispatch: {dispatch_number} - {ticket_id} - Cancel Note appended: {ticket_note}")
-        response_dispatch['id'] = dispatch_number
-        response_dispatch['vendor'] = 'LIT'
-
-        self._logger.info(f"[CTS] Dispatch cancel request: {dispatch_number} - took {time.time() - start_time}")
-
-        return jsonify(response_dispatch), response["status"], None
+    # async def lit_cancel_dispatch_endpoint(self, dispatch_number):
+    #     self._logger.info(f"[LIT] Cancel Dispatch [{dispatch_number}] from lit-bridge")
+    #     start_time = time.time()
+    #
+    #     payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
+    #     response = await self._event_bus.rpc_request("lit.dispatch.get", payload, timeout=30)
+    #     self._logger.info(f"[LIT] Response get dispatch: {response}")
+    #     if response['status'] == 500:
+    #         error_response = {
+    #             'code': response['status'], 'message': response['body']
+    #         }
+    #         return jsonify(error_response), response['status'], None
+    #     if 'body' not in response or 'Dispatch' not in response['body'] \
+    #             or response['body']['Dispatch'] is None \
+    #             or 'Dispatch_Number' not in response['body']['Dispatch']:
+    #         self._logger.error(f"[LIT] Could not retrieve dispatch, reason: {response['body']}")
+    #         error_response = {
+    #             'code': response['status'], 'message': response['body']
+    #         }
+    #         return jsonify(error_response), response['status'], None
+    #
+    #     self._logger.info(f"[LIT] Dispatch [{dispatch_number}] - {response['body']} "
+    #                       f"- took {time.time() - start_time}")
+    #     dispatch = response['body']['Dispatch']
+    #     dispatch_number = dispatch['Dispatch_Number']
+    #     ticket_id = dispatch['MetTel_Bruin_TicketID']
+    #     body = {
+    #         'dispatch_number': dispatch_number,
+    #         'ticket_id': ticket_id,
+    #         'date_of_dispatch': ''
+    #     }
+    #     # TODO: Cancellation_Reason and Cancellation_Requested_By
+    #     cancel_request = {
+    #         "CancelDispatchRequest": {
+    #             "Dispatch_Number": dispatch_number,
+    #             "Cancellation_Reason": "Test API cancel",
+    #             "Cancellation_Requested_By": "API Tester"
+    #         }
+    #     }
+    #     payload = {"request_id": uuid(), "body": cancel_request}
+    #     response = await self._event_bus.rpc_request("lit.dispatch.cancel", payload, timeout=30)
+    #     self._logger.info(f"[LIT] Cancel dispatch [{dispatch_number}]: {response}")
+    #     response_dispatch = dict()
+    #     if response['status'] == 500:
+    #         error_response = {
+    #             'code': response['status'], 'message': response['body']
+    #         }
+    #         return jsonify(error_response), response['status'], None
+    #     if 'body' not in response or 'CancelDispatchServiceResponse' not in response['body'] \
+    #             or response['body']['CancelDispatchServiceResponse'] is None \
+    #             or 'Status' not in response['body']['CancelDispatchServiceResponse'] \
+    #             or response['body']['CancelDispatchServiceResponse']['Status'] != 'Success':
+    #         self._logger.error(f"[LIT] Could not cancel dispatch, reason: {response['body']}")
+    #         error_response = {
+    #             'code': response['status'], 'message': response['body']
+    #         }
+    #         return jsonify(error_response), response['status'], None
+    #
+    #     self._logger.info(f"[LIT] Dispatch cancel request [{dispatch_number}] - {response['body']} "
+    #                       f"- took {time.time() - start_time}")
+    #     # Append Note to bruin
+    #     ticket_note = get_dispatch_cancel_request_note(body, dispatch_number)
+    #     await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
+    #     self._logger.info(f"Dispatch: {dispatch_number} - {ticket_id} - Cancel Note appended: {ticket_note}")
+    #     response_dispatch['id'] = dispatch_number
+    #     response_dispatch['vendor'] = 'LIT'
+    #
+    #     self._logger.info(f"[LIT] Dispatch cancel request: {dispatch_number} - took {time.time() - start_time}")
+    #
+    #     return jsonify(response_dispatch), response["status"], None
 
     # Cancel Dispatch - GET - /lit/dispatch/<dispatch_number>/cancel
-    async def lit_cancel_dispatch_by_email(self, dispatch_number):
-        self._logger.info(f"[LIT] Cancel Dispatch by email [{dispatch_number}] from lit-bridge")
+    async def lit_cancel_dispatch(self, dispatch_number):
+        # 1 - Get Dispatch
+        # 2 - Get Bruin ticket
+        # 3? - Get ticket notes
+        # 4? - Check that ticket has no cancel watermark
+        # 5 - Send cancel request by email
+        # 6 - Append note to bruin
+        self._logger.info(f"[LIT] Cancel Dispatch by email request: [{dispatch_number}]")
         start_time = time.time()
-        # TODO: Ask for dispatch and get bruin ticket id for the email
         payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
         response = await self._event_bus.rpc_request("lit.dispatch.get", payload, timeout=30)
         self._logger.info(f"[LIT] Cancel dispatch [{dispatch_number}]: {response}")
@@ -228,8 +236,49 @@ class DispatchServer:
         response_dispatch['id'] = response['body']['Dispatch']['Dispatch_Number']
         response_dispatch['vendor'] = 'lit'
         ticket_id = response['body']['Dispatch']['MetTel_Bruin_TicketID']
-        # response_dispatch['dispatch'] = lit_mapper.map_get_dispatch(response['body']['Dispatch'])
-        # TODO: send email and append note to bruin
+
+        # Append Note to bruin
+        # TODO: get date of dispatch formatted
+        body = {
+            'dispatch_number': dispatch_number,
+            'ticket_id': ticket_id,
+            'date_of_dispatch': ''
+        }
+        # Send email
+        email_template = render_cancel_email_template(body)
+        email_html = f'<div>{email_template}</div>'
+        email_data = {
+            'request_id': uuid(),
+            'email_data': {
+                'subject': f'LIT - Service Submission - {ticket_id}',
+                'recipient': self._config.LIT_CONFIG["email"],
+                'text': 'this is the accessible text for the email',
+                'html': email_html,
+                'images': [],
+                'attachments': []
+            }
+        }
+        response_send_email = await self._notifications_repository.send_email(email_data)
+        response_send_email_status = response_send_email['status']
+        if response_send_email_status not in range(200, 300):
+            self._logger.error("[LIT] we could not send the email")
+            error_response = {
+                'code': response_send_email_status,
+                'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
+            }
+            return jsonify(error_response), response_send_email_status, None
+
+        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}]" \
+                    f" with ticket id: {ticket_id}"
+        self._logger.info(slack_msg)
+        await self._notifications_repository.send_slack_message(slack_msg)
+        ticket_note = get_dispatch_cancel_request_note(body, dispatch_number)
+        await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
+        self._logger.info(f"[LIT] Dispatch: {dispatch_number} - {ticket_id} "
+                          f"- Cancel Note appended: {ticket_note}")
+        response_dispatch['id'] = dispatch_number
+        response_dispatch['vendor'] = 'LIT'
+
         return jsonify(response_dispatch), response["status"], None
 
     # Get Dispatch - GET - /lit/dispatch
@@ -592,10 +641,11 @@ class DispatchServer:
                           f"- took {time.time() - start_time}")
         dispatch = response['body']['records'][0]
         ticket_id = dispatch['Ext_Ref_Num__c']
-
+        igz_ticket_id = await self._get_igz_dispatch_number(dispatch_number, ticket_id)
         response_dispatch = dict()
         body = {
             'dispatch_number': dispatch_number,
+            'date_of_dispatch': dispatch.get("Local_Site_Time__c"),
             'ticket_id': ticket_id
         }
         # Send email
@@ -628,7 +678,7 @@ class DispatchServer:
         await self._notifications_repository.send_slack_message(slack_msg)
 
         # Append Note to bruin
-        ticket_note = get_dispatch_cancel_request_note(body, dispatch_number)
+        ticket_note = get_dispatch_cancel_request_note(body, igz_ticket_id)
         await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
         self._logger.info(f"Dispatch: {dispatch_number} - {ticket_id} - Cancel Note appended: {ticket_note}")
 
@@ -663,3 +713,26 @@ class DispatchServer:
             await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
         except Exception as ex:
             self._logger.error(f"[process_note] Error: {ex}")
+
+    async def _get_igz_dispatch_number(self, dispatch_number, ticket_id):
+        note_dispatch_number = ''
+        response = await self._bruin_repository.get_ticket_details(ticket_id)
+        response_status = response['status']
+        response_body = response['body']
+        if response_status not in range(200, 300):
+            self._logger.error(f"Error: Dispatch [{dispatch_number}] "
+                               f"Get ticket details for ticket {ticket_id}: "
+                               f"{response_body}")
+            err_msg = f"An error occurred retrieve getting ticket details from bruin " \
+                      f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
+            await self._notifications_repository.send_slack_message(err_msg)
+            return note_dispatch_number
+        ticket_notes = response_body.get('ticketNotes', [])
+        ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+        for note in ticket_notes:
+            temp_note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
+                note, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
+            if temp_note_dispatch_number != '':
+                note_dispatch_number = temp_note_dispatch_number
+                break
+        return note_dispatch_number

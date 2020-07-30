@@ -40,7 +40,7 @@ class CtsRepository:
         self.DISPATCH_SUBMITTED_FOR_BILLING = 'Submitted for Billing'
         self.DISPATCH_BILLED = 'Billed'
         self.DISPATCH_ON_HOLD = 'On Hold'
-        self.DISPATCH_CANCELLED = 'Cancelled'
+        self.DISPATCH_CANCELLED = 'Canceled'
         self.DISPATCH_RESCHEDULE = 'Reschedule'
         self._dispatch_statuses = [
             self.DISPATCH_REQUESTED,

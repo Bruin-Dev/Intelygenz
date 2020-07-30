@@ -2572,6 +2572,7 @@ class TestApiServer:
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
+        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
         response_send_slack_message_mock = {
             'status': 200
         }
@@ -2634,6 +2635,7 @@ class TestApiServer:
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
+        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
         response_send_slack_message_mock = {
             'status': 200
         }
@@ -2698,6 +2700,7 @@ class TestApiServer:
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
+        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
         response_send_slack_message_mock = {
             'status': 200
         }
@@ -2759,6 +2762,7 @@ class TestApiServer:
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
+        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
         response_send_slack_message_mock = {
             'status': 200
         }
@@ -2808,3 +2812,23 @@ class TestApiServer:
             call(ticket_id, note_1),
             call(ticket_id, note_2)
         ])
+
+    @pytest.mark.asyncio
+    async def get_igz_dispatch_number_test(self, api_server_test, cts_ticket_details_1, cts_ticket_details_2):
+        dispatch_number_1 = 'IGZ_0001'
+        ticket_id_1 = '4664325'
+        dispatch_number_2 = 'IGZ_0002'
+        ticket_id_2 = '4664325'
+        response_ticket_details_mock = [
+            cts_ticket_details_1,
+            cts_ticket_details_2
+        ]
+        err_msg = f"An error occurred retrieve getting ticket details from bruin " \
+                  f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2}"
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(side_effect=response_ticket_details_mock)
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock()
+        response_1 = await api_server_test._get_igz_dispatch_number(dispatch_number_1, ticket_id_1)
+        response_2 = await api_server_test._get_igz_dispatch_number(dispatch_number_2, ticket_id_2)
+        assert response_1 == dispatch_number_1
+        assert response_2 == ''
+        api_server_test._notifications_repository.send_slack_message.assert_awaited_with(err_msg)

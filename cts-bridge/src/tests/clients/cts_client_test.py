@@ -295,7 +295,8 @@ class TestCTSClient:
           }
         }
 
-        where = " WHERE Status__c in ('Open', 'Scheduled', 'On Site', 'Completed', 'Complete Pending Collateral') " \
+        where = " WHERE Status__c in ('Open', 'Scheduled', 'On Site', 'Completed', 'Complete Pending Collateral', " \
+                "'Canceled') " \
                 "and Open_Date__c >= LAST_MONTH"
         query = "SELECT {} FROM Service__c {}".format(cts_repository._cts_query_fields, where)
 

@@ -72,31 +72,20 @@ class TestUtilsRepository:
 
         assert result == fallback_value
 
-    # def find_note_test(self, lit_dispatch_monitor, ticket_details):
-    #     expected_note_found = {
-    #         "noteId": 70805300,
-    #         "noteValue": "#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n"
-    #                      "Please see the summary below.\n--\n"
-    #                      "Dispatch Number:  "
-    #                      "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "
-    #                      "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
-    #                      "Time Zone (Local): Pacific Time\n\n"
-    #                      "Location Owner/Name: Red Rose Inn\n"
-    #                      "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n"
-    #                      "Phone: +1 666 6666 666\n\n"
-    #                      "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n"
-    #                      "Arrival Instructions: "
-    #                      "When arriving to the site call HOLMDEL NOC for telematic assistance\n"
-    #                      "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n"
-    #                      "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n"
-    #                      "Email: karen.doe@mettel.net\nDepartment: Customer Care",
-    #         "serviceNumber": [
-    #             "4664325"
-    #         ],
-    #         "createdDate": "2020-05-28T06:06:40.27-04:00",
-    #         "creator": None
-    #     }
-    #     ticket_notes = ticket_details.get('body').get('ticketNotes')
-    #     watermark_to_find = lit_dispatch_monitor.DISPATCH_REQUESTED_WATERMARK
-    #     result = UtilsRepository.find_note(ticket_notes, watermark_to_find)
-    #     assert result == expected_note_found
+    def find_dispatch_number_watermark_ok_test(self, ticket_details):
+        dispatch_number = "DIS37561"
+        watermark = '#*Automation Engine*#'
+        dispatch_note = ticket_details['body']["ticketNotes"][1]
+
+        result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
+
+        assert result == dispatch_number
+
+    def find_dispatch_number_watermark_ko_test(self, ticket_details):
+        dispatch_number = "DIS37405"
+        watermark = '#*Automation Engine*#'
+        dispatch_note = ticket_details['body']["ticketNotes"][2]
+
+        result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
+
+        assert result == ''

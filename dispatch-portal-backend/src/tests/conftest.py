@@ -322,7 +322,7 @@ def ticket_details():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*#\nDispatch Management - Dispatch Requested\n\n"
+                    "noteValue": "#*Automation Engine*# DIS37561\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[DIS37561|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS37561] "
@@ -443,4 +443,143 @@ def ticket_details_2_no_requested_watermark():
             ]
         },
         'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
+                                 "Please see the summary below.\n--\n"
+                                 "Dispatch Number:  "
+                                 "[IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] "
+                                 "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
+                                 "Time Zone (Local): Pacific Time\n\n"
+                                 "Location Owner/Name: Red Rose Inn\n"
+                                 "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n"
+                                 "Phone: +1 666 6666 666\n\n"
+                                 "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n"
+                                 "Arrival Instructions: "
+                                 "When arriving to the site call HOLMDEL NOC for telematic assistance\n"
+                                 "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n"
+                                 "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n"
+                                 "Email: karen.doe@mettel.net\nDepartment: Customer Care",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:06:40.27-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": None,
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details_1(cts_ticket_details):
+    updated_ticket_details = copy.deepcopy(cts_ticket_details)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details_2():
+    # NOT VALID
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664326",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664326"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*Automation Engine*# NOT_FOUND\nDispatch Management - Dispatch Requested\n\n"
+                                 "Please see the summary below.\n--\n"
+                                 "Dispatch Number:  "
+                                 "[IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] "
+                                 "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
+                                 "Time Zone (Local): Pacific Time\n\n"
+                                 "Location Owner/Name: Red Rose Inn\n"
+                                 "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n"
+                                 "Phone: +1 666 6666 666\n\n"
+                                 "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n"
+                                 "Arrival Instructions: "
+                                 "When arriving to the site call HOLMDEL NOC for telematic assistance\n"
+                                 "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n"
+                                 "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n"
+                                 "Email: karen.doe@mettel.net\nDepartment: Customer Care",
+                    "serviceNumber": [
+                        "4664326"
+                    ],
+                    "createdDate": "2020-05-28T06:06:40.27-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": None,
+                    "serviceNumber": [
+                        "4664326"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 400
     }
