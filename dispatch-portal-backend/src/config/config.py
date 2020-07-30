@@ -42,6 +42,11 @@ CTS_CONFIG = {
     'email': 'CTS-MettelService@core-techs.com'
 }
 
+LIT_CONFIG = {
+    # Email for requests and cancellations
+    'email': 'dispatch@litnetworking.com'
+}
+
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 
 LOG_CONFIG = {
