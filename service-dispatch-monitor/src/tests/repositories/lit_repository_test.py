@@ -305,16 +305,18 @@ class TestLitRepository:
 
     def get_dispatches_splitted_by_status_test(self, lit_dispatch_monitor, dispatch, dispatch_confirmed,
                                                dispatch_confirmed_2, dispatch_tech_on_site, dispatch_completed,
+                                               dispatch_cancelled,
                                                bad_status_dispatch):
         dispatches = [
             dispatch, dispatch_confirmed, dispatch_confirmed_2,
-            dispatch_tech_on_site, dispatch_completed, bad_status_dispatch
+            dispatch_tech_on_site, dispatch_completed, dispatch_cancelled, bad_status_dispatch
         ]
         expected_dispatches_splitted = {
             str(lit_dispatch_monitor._lit_repository.DISPATCH_REQUESTED): [dispatch],
             str(lit_dispatch_monitor._lit_repository.DISPATCH_CONFIRMED): [dispatch_confirmed, dispatch_confirmed_2],
             str(lit_dispatch_monitor._lit_repository.DISPATCH_FIELD_ENGINEER_ON_SITE): [dispatch_tech_on_site],
-            str(lit_dispatch_monitor._lit_repository.DISPATCH_REPAIR_COMPLETED): [dispatch_completed]
+            str(lit_dispatch_monitor._lit_repository.DISPATCH_REPAIR_COMPLETED): [dispatch_completed],
+            str(lit_dispatch_monitor._lit_repository.DISPATCH_CANCELLED): [dispatch_cancelled]
         }
         result = lit_dispatch_monitor._lit_repository.get_dispatches_splitted_by_status(dispatches)
         assert result == expected_dispatches_splitted
@@ -330,6 +332,10 @@ class TestLitRepository:
     def is_repair_completed_test(self, lit_dispatch_monitor, dispatch_completed, dispatch_not_completed):
         assert lit_dispatch_monitor._lit_repository.is_repair_completed(dispatch_completed) is True
         assert lit_dispatch_monitor._lit_repository.is_repair_completed(dispatch_not_completed) is False
+
+    def is_cancelled_test(self, lit_dispatch_monitor, dispatch_confirmed, dispatch_cancelled):
+        assert lit_dispatch_monitor._lit_repository.is_dispatch_cancelled(dispatch_confirmed) is False
+        assert lit_dispatch_monitor._lit_repository.is_dispatch_cancelled(dispatch_cancelled) is True
 
     @pytest.mark.asyncio
     async def send_confirmed_sms_test(self, lit_dispatch_monitor, dispatch_confirmed, sms_success_response):
@@ -1404,4 +1410,64 @@ class TestLitRepository:
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
         lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
             send_error_sms_to_slack_response)
+        assert response is False
+
+    @pytest.mark.asyncio
+    async def append_dispatch_cancelled_note_test(self, lit_dispatch_monitor, dispatch_cancelled,
+                                                  append_note_response):
+        ticket_id = '12345'
+        dispatch_number = dispatch_cancelled.get('Dispatch_Number')
+        date_of_dispatch_tz = lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized(
+            dispatch_cancelled, dispatch_number, ticket_id)
+        date_of_dispatch = date_of_dispatch_tz['datetime_formatted_str']
+
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+        sms_note = f'#*Automation Engine*# {dispatch_number}\nDispatch Management - Dispatch Cancelled\n' \
+                   f'Dispatch for {date_of_dispatch} has been cancelled.\n'
+
+        lit_dispatch_monitor._lit_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+
+        response = await lit_dispatch_monitor._lit_repository.append_dispatch_cancelled_note(
+            dispatch_number, ticket_id, date_of_dispatch)
+
+        lit_dispatch_monitor._lit_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, sms_note)
+        assert response is True
+
+    @pytest.mark.asyncio
+    async def append_dispatch_cancelled_note_error_test(self, lit_dispatch_monitor, dispatch_cancelled,
+                                                        append_note_response):
+        ticket_id = '12345'
+        dispatch_number = dispatch_cancelled.get('Dispatch_Number')
+        date_of_dispatch_tz = lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized(
+            dispatch_cancelled, dispatch_number, ticket_id)
+        date_of_dispatch = date_of_dispatch_tz['datetime_formatted_str']
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 400
+        }
+        cancel_note = f'#*Automation Engine*# {dispatch_number}\nDispatch Management - Dispatch Cancelled\n' \
+                      f'Dispatch for {date_of_dispatch} has been cancelled.\n'
+        send_error_cancel_to_slack_response = f'Dispatch: {dispatch_number} Ticket_id: {ticket_id} ' \
+                                              f'Note: `{cancel_note}` ' \
+                                              f'- Cancelled note not appended'
+
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        lit_dispatch_monitor._lit_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+
+        response = await lit_dispatch_monitor._lit_repository.append_dispatch_cancelled_note(
+            dispatch_number, ticket_id, date_of_dispatch)
+
+        lit_dispatch_monitor._lit_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, cancel_note)
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
+            send_error_cancel_to_slack_response)
         assert response is False

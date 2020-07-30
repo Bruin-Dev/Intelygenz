@@ -602,11 +602,11 @@ class TestCtsRepository:
         assert response is False
 
     @pytest.mark.asyncio
-    async def append_dispatch_cancelled_note_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
+    async def append_dispatch_cancelled_note_test(self, cts_dispatch_monitor, cts_dispatch_cancelled,
                                                   append_note_response):
         ticket_id = '12345'
-        dispatch_number = cts_dispatch_confirmed.get('Dispatch_Number')
-        date_of_dispatch = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        dispatch_number = cts_dispatch_cancelled.get('Dispatch_Number')
+        date_of_dispatch = cts_dispatch_cancelled.get('Local_Site_Time__c')
         igz_dispatch_number = 'IGZ_0001'
         response_append_note_1 = {
             'request_id': uuid_,
@@ -620,18 +620,18 @@ class TestCtsRepository:
             side_effect=[response_append_note_1])
 
         response = await cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note(
-            dispatch_number, igz_dispatch_number, ticket_id, cts_dispatch_confirmed)
+            dispatch_number, igz_dispatch_number, ticket_id, cts_dispatch_cancelled)
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, sms_note)
         assert response is True
 
     @pytest.mark.asyncio
-    async def append_dispatch_cancelled_note_error_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
+    async def append_dispatch_cancelled_note_error_test(self, cts_dispatch_monitor, cts_dispatch_cancelled,
                                                         append_note_response):
         ticket_id = '12345'
-        dispatch_number = cts_dispatch_confirmed.get('Dispatch_Number')
-        date_of_dispatch = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        dispatch_number = cts_dispatch_cancelled.get('Dispatch_Number')
+        date_of_dispatch = cts_dispatch_cancelled.get('Local_Site_Time__c')
         igz_dispatch_number = 'IGZ_0001'
         response_append_note_1 = {
             'request_id': uuid_,
@@ -649,7 +649,7 @@ class TestCtsRepository:
             side_effect=[response_append_note_1])
 
         response = await cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note(
-            dispatch_number, igz_dispatch_number, ticket_id, cts_dispatch_confirmed)
+            dispatch_number, igz_dispatch_number, ticket_id, cts_dispatch_cancelled)
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, sms_note)

@@ -25,6 +25,7 @@ from application.templates.lit.lit_dispatch_confirmed import lit_get_tech_2_hour
 from application.templates.lit.lit_tech_on_site import lit_get_tech_on_site_note
 
 from application.repositories.utils_repository import UtilsRepository
+from application.templates.lit.lit_dispatch_cancel import lit_get_dispatch_cancel_note
 
 
 class LitRepository:
@@ -46,11 +47,13 @@ class LitRepository:
         self.DISPATCH_CONFIRMED = 'Request Confirmed'
         self.DISPATCH_FIELD_ENGINEER_ON_SITE = 'Tech Arrived'
         self.DISPATCH_REPAIR_COMPLETED = 'Close Out'
+        self.DISPATCH_CANCELLED = 'Cancelled'
         self._dispatch_statuses = [
             self.DISPATCH_REQUESTED,
             self.DISPATCH_CONFIRMED,
             self.DISPATCH_FIELD_ENGINEER_ON_SITE,
-            self.DISPATCH_REPAIR_COMPLETED
+            self.DISPATCH_REPAIR_COMPLETED,
+            self.DISPATCH_CANCELLED
         ]
 
     async def get_all_dispatches(self):
@@ -219,6 +222,9 @@ class LitRepository:
                     dispatch.get("Tech_Arrived_On_Site") is True,
                     dispatch.get("Time_of_Check_In") is not None,
                     dispatch.get("Time_of_Check_Out") is not None])
+
+    def is_dispatch_cancelled(self, dispatch):
+        return all([dispatch is not None, dispatch.get('Dispatch_Status') == self.DISPATCH_CANCELLED])
 
     def get_dispatches_splitted_by_status(self, dispatches):
         dispatches_splitted_by_status = {}
@@ -681,4 +687,28 @@ class LitRepository:
                           f"Ticket_id: {ticket_id} - SMS tech on site note Appended")
         self._logger.info(
             f"Tech on site note appended. Response {append_sms_note_response_body}")
+        return True
+
+    async def append_dispatch_cancelled_note(self, dispatch_number, ticket_id, datetime_formatted) -> bool:
+        cancelled_note_data = {
+            'dispatch_number': dispatch_number,
+            'date_of_dispatch': datetime_formatted
+        }
+        cancelled_note = lit_get_dispatch_cancel_note(cancelled_note_data)
+        append_cancelled_note_response = await self._bruin_repository.append_note_to_ticket(
+            ticket_id, cancelled_note)
+        append_sms_note_response_status = append_cancelled_note_response['status']
+        append_sms_note_response_body = append_cancelled_note_response['body']
+        if append_sms_note_response_status not in range(200, 300):
+            self._logger.info(f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{cancelled_note}` "
+                              f"- Cancelled note not appended")
+            err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{cancelled_note}` " \
+                      f"- Cancelled note not appended"
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(f"Note: `{cancelled_note}` "
+                          f"Dispatch: {dispatch_number} "
+                          f"Ticket_id: {ticket_id} - Cancelled note Appended")
+        self._logger.info(
+            f"Cancelled note appended. Response: {append_sms_note_response_body}")
         return True

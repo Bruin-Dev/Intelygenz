@@ -140,6 +140,40 @@ def dispatch_confirmed_2(lit_dispatch_monitor, dispatch):
 
 
 @pytest.fixture(scope='function')
+def dispatch_cancelled(lit_dispatch_monitor, dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed)
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CANCELLED
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_not_valid_ticket_id(lit_dispatch_monitor, dispatch_confirmed_2):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed_2)
+    updated_dispatch['MetTel_Bruin_TicketID'] = 'as|asdf'
+    updated_dispatch['Status__c'] = lit_dispatch_monitor._lit_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_cancelled_not_valid_ticket_id(lit_dispatch_monitor, dispatch_cancelled_2):
+    updated_dispatch = copy.deepcopy(dispatch_cancelled_2)
+    updated_dispatch['MetTel_Bruin_TicketID'] = 'as|asdf'
+    updated_dispatch['Status__c'] = lit_dispatch_monitor._lit_repository.DISPATCH_CANCELLED
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_cancelled_2(lit_dispatch_monitor, dispatch_confirmed_2):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed_2)
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CANCELLED
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def dispatch_confirmed_tech_phone_none(lit_dispatch_monitor, dispatch):
     updated_dispatch = copy.deepcopy(dispatch)
     updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "Test Client on site +12123595126"
@@ -258,6 +292,16 @@ def dispatch_tech_on_site_bad_datetime(lit_dispatch_monitor, dispatch_confirmed_
     updated_dispatch["Tech_Arrived_On_Site"] = True
     updated_dispatch["Time_of_Check_In"] = "10:30"
     updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_FIELD_ENGINEER_ON_SITE
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_cancelled_bad_datetime(lit_dispatch_monitor, dispatch_cancelled_2):
+    updated_dispatch = copy.deepcopy(dispatch_cancelled_2)
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = None
+    updated_dispatch["Tech_Arrived_On_Site"] = True
+    updated_dispatch["Time_of_Check_In"] = "10:30"
+    updated_dispatch["Dispatch_Status"] = lit_dispatch_monitor._lit_repository.DISPATCH_CANCELLED
     return updated_dispatch
 
 
@@ -770,6 +814,22 @@ def ticket_details_1_with_confirmation_note_but_not_tech(ticket_details_1, dispa
     }
     updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def ticket_details_1_with_cancelled_note(ticket_details_1, dispatch_confirmed):
+    updated_ticket_details = copy.deepcopy(ticket_details_1)
+    note_cancelled_note = {
+        "noteId": 70805315,
+        "noteValue": "#*Automation Engine*# DIS12345"
+                     "Dispatch Management - Dispatch Cancelled\n\n"
+                     "Dispatch for {date_of_dispatch} has been cancelled.\n".format(date_of_dispatch='AAA'),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(note_cancelled_note)
     return updated_ticket_details
 
 

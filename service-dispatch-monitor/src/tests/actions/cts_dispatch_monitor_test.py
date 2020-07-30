@@ -3787,7 +3787,7 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_already_cancelled_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_cancelled,
-                                                        cts_ticket_details_1_with_cancelled_note, append_note_response):
+                                                        cts_ticket_details_1_with_cancelled_note):
         cancelled_dispatches = [
             cts_dispatch_cancelled,
         ]
@@ -3823,7 +3823,7 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_cancelled_dispatches_not_appended_test(self, cts_dispatch_monitor, cts_dispatch_cancelled,
-                                                             cts_ticket_details_1, append_note_response):
+                                                             cts_ticket_details_1):
         cancelled_dispatches = [
             cts_dispatch_cancelled,
         ]
