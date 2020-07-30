@@ -6,13 +6,12 @@ class CancelDispatch:
         self._event_bus = event_bus
         self._lit_repository = lit_repository
 
-    async def create_dispatch(self, msg):
+    async def cancel_dispatch(self, msg):
         cancel_dispatch_response = {
             "request_id": msg["request_id"],
             "body": None,
             "status": None
         }
-
         if msg.get("body") is None:
             cancel_dispatch_response["status"] = 400
             cancel_dispatch_response["body"] = 'Must include "body" in request'
