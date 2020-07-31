@@ -27,14 +27,18 @@ class TestApiServer:
         event_bus = Mock()
 
         bruin_repository = Mock()
+        lit_repository = Mock()
         notifications_repository = Mock()
 
         api_server_test = DispatchServer(config, redis_client, event_bus, logger, bruin_repository,
-                                         notifications_repository)
+                                         lit_repository, notifications_repository)
 
         assert api_server_test._logger is logger
         assert api_server_test._redis_client is redis_client
         assert api_server_test._event_bus is event_bus
+        assert api_server_test._bruin_repository is bruin_repository
+        assert api_server_test._lit_repository is lit_repository
+        assert api_server_test._notifications_repository is notifications_repository
 
         assert api_server_test._title == config.QUART_CONFIG['title']
         assert api_server_test._port == config.QUART_CONFIG['port']

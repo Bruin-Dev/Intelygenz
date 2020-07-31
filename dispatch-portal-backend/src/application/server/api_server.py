@@ -28,7 +28,8 @@ class DispatchServer:
     _hypercorn_config = None
     _new_bind = None
 
-    def __init__(self, config, redis_client, event_bus, logger, bruin_repository, notifications_repository):
+    def __init__(self, config, redis_client, event_bus, logger, bruin_repository, lit_repository,
+                 notifications_repository):
         self._config = config
         self._redis_client = redis_client
         self._event_bus = event_bus
@@ -52,6 +53,7 @@ class DispatchServer:
         # self._app = cors(self._app, allow_origin="*")
         self._app.config['MAX_CONTENT_LENGTH'] = self._max_content_length
         self._bruin_repository = bruin_repository
+        self._lit_repository = lit_repository
         self._notifications_repository = notifications_repository
         self.attach_swagger()
         self.register_endpoints()
@@ -233,16 +235,27 @@ class DispatchServer:
 
         self._logger.info(f"[LIT] Dispatch [{dispatch_number}] - {response['body']} "
                           f"- took {time.time() - start_time}")
-        response_dispatch['id'] = response['body']['Dispatch']['Dispatch_Number']
+        dispatch = response['body']['Dispatch']
+        response_dispatch['id'] = dispatch['Dispatch_Number']
         response_dispatch['vendor'] = 'lit'
-        ticket_id = response['body']['Dispatch']['MetTel_Bruin_TicketID']
+        ticket_id = dispatch['MetTel_Bruin_TicketID']
+
+        # TODO: get ticket details and check if already has a request cancel note
 
         # Append Note to bruin
-        # TODO: get date of dispatch formatted
+        response_datetime = self._lit_repository.get_dispatch_confirmed_date_time_localized(dispatch)
+        if response_datetime is None:
+            self._logger.error(f"[LIT] Could not retrieve datetime of dispatch: {dispatch}")
+            error_response = {
+                'code': 400,
+                'message': f"[LIT] Could not retrieve datetime of dispatch: {dispatch}"
+            }
+            return jsonify(error_response), response['status'], None
+        datetime_formatted_str = response_datetime['datetime_formatted_str']
         body = {
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id,
-            'date_of_dispatch': ''
+            'date_of_dispatch': datetime_formatted_str
         }
         # Send email
         email_template = render_cancel_email_template(body)
@@ -642,6 +655,9 @@ class DispatchServer:
         dispatch = response['body']['records'][0]
         ticket_id = dispatch['Ext_Ref_Num__c']
         igz_ticket_id = await self._get_igz_dispatch_number(dispatch_number, ticket_id)
+
+        # TODO: get ticket details and check if already has a request cancel note
+
         response_dispatch = dict()
         body = {
             'dispatch_number': dispatch_number,
