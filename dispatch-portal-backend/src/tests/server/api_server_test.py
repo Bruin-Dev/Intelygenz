@@ -2536,7 +2536,7 @@ class TestApiServer:
             assert response_data == cts_expected_response
 
     @pytest.mark.asyncio
-    async def cts_cancel_dispatch_test(self, api_server_test, cts_dispatch):
+    async def cts_cancel_dispatch_test(self, api_server_test, cts_dispatch, ticket_details_1_no_requested_watermark):
         uuid_ = 'UUID1'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
@@ -2573,6 +2573,8 @@ class TestApiServer:
             'vendor': 'CTS'
         }
 
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+                                                                return_value=ticket_details_1_no_requested_watermark)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
@@ -2599,7 +2601,7 @@ class TestApiServer:
 
     @pytest.mark.asyncio
     async def cts_cancel_dispatch_error_could_not_retrieve_dispatch_test(
-            self, api_server_test, cts_dispatch):
+            self, api_server_test, cts_dispatch, ticket_details_1_no_requested_watermark):
         uuid_ = 'UUID1'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
@@ -2636,6 +2638,8 @@ class TestApiServer:
             'vendor': 'CTS'
         }
 
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+                                                                return_value=ticket_details_1_no_requested_watermark)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
@@ -2661,7 +2665,7 @@ class TestApiServer:
 
     @pytest.mark.asyncio
     async def cts_cancel_dispatch_error_retrieve_valid_dispatch_test(
-            self, api_server_test, cts_dispatch):
+            self, api_server_test, cts_dispatch, ticket_details_1_no_requested_watermark):
         uuid_ = 'UUID1'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
@@ -2701,6 +2705,8 @@ class TestApiServer:
             'vendor': 'CTS'
         }
 
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+                                                                return_value=ticket_details_1_no_requested_watermark)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
@@ -2726,7 +2732,7 @@ class TestApiServer:
 
     @pytest.mark.asyncio
     async def cts_cancel_dispatch_error_send_email_test(
-            self, api_server_test, cts_dispatch):
+            self, api_server_test, cts_dispatch, ticket_details_1_no_requested_watermark):
         uuid_ = 'UUID1'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
@@ -2763,6 +2769,8 @@ class TestApiServer:
             'vendor': 'CTS'
         }
 
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+                                                                return_value=ticket_details_1_no_requested_watermark)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
@@ -2819,20 +2827,9 @@ class TestApiServer:
 
     @pytest.mark.asyncio
     async def get_igz_dispatch_number_test(self, api_server_test, cts_ticket_details_1, cts_ticket_details_2):
-        dispatch_number_1 = 'IGZ_0001'
-        ticket_id_1 = '4664325'
-        dispatch_number_2 = 'IGZ_0002'
-        ticket_id_2 = '4664325'
-        response_ticket_details_mock = [
-            cts_ticket_details_1,
-            cts_ticket_details_2
-        ]
-        err_msg = f"An error occurred retrieve getting ticket details from bruin " \
-                  f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2}"
-        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(side_effect=response_ticket_details_mock)
-        api_server_test._notifications_repository.send_slack_message = CoroutineMock()
-        response_1 = await api_server_test._get_igz_dispatch_number(dispatch_number_1, ticket_id_1)
-        response_2 = await api_server_test._get_igz_dispatch_number(dispatch_number_2, ticket_id_2)
-        assert response_1 == dispatch_number_1
+        ticket_notes_1 = cts_ticket_details_1['body'].get('ticketNotes', [])
+        ticket_notes_2 = cts_ticket_details_2['body'].get('ticketNotes', [])
+        response_1 = await api_server_test._get_igz_dispatch_number(ticket_notes_1)
+        response_2 = await api_server_test._get_igz_dispatch_number(ticket_notes_2)
+        assert response_1 == 'IGZ_0001'
         assert response_2 == ''
-        api_server_test._notifications_repository.send_slack_message.assert_awaited_with(err_msg)

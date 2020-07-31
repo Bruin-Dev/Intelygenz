@@ -38,6 +38,7 @@ class DispatchServer:
         self.MAIN_WATERMARK = '#*Automation Engine*#'
         self.IGZ_DN_WATERMARK = 'IGZ'
         self.DISPATCH_REQUESTED_WATERMARK = 'Dispatch Management - Dispatch Requested'
+        self.DISPATCH_CANCEL_WATERMARK = 'Dispatch Management - Dispatch Cancel Requested'
         self.PENDING_DISPATCHES_KEY = 'pending_dispatches'
         self.MAX_TICKET_NOTE = 1500
         self._one_mega = (1024 * 1024)  # 1mb
@@ -654,49 +655,71 @@ class DispatchServer:
                           f"- took {time.time() - start_time}")
         dispatch = response['body']['records'][0]
         ticket_id = dispatch['Ext_Ref_Num__c']
-        igz_ticket_id = await self._get_igz_dispatch_number(dispatch_number, ticket_id)
 
-        # TODO: get ticket details and check if already has a request cancel note
+        return_response = dict.fromkeys(["body", "status"])
+        pre_existing_ticket_notes_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        pre_existing_ticket_notes_status = pre_existing_ticket_notes_response['status']
+        pre_existing_ticket_notes_body = pre_existing_ticket_notes_response['body']
 
+        if pre_existing_ticket_notes_status not in range(200, 300):
+            err_msg = f"Error: could not retrieve ticket [{ticket_id}] details"
+            self._logger.error(err_msg)
+            return_response['status'] = 400
+            return_response['body'] = err_msg
+            return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
+
+        ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
+        ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+
+        requested_watermark_found = UtilsRepository.get_first_element_matching(
+            iterable=ticket_notes,
+            condition=lambda note: self.DISPATCH_CANCEL_WATERMARK in note.get('noteValue')
+        )
         response_dispatch = dict()
-        body = {
-            'dispatch_number': dispatch_number,
-            'date_of_dispatch': dispatch.get("Local_Site_Time__c"),
-            'ticket_id': ticket_id
-        }
-        # Send email
-        email_template = render_cancel_email_template(body)
-        email_html = f'<div>{email_template}</div>'
-        email_data = {
-            'request_id': uuid(),
-            'email_data': {
-                'subject': f'CTS - Service Submission - {ticket_id}',
-                'recipient': self._config.CTS_CONFIG["email"],
-                'text': 'this is the accessible text for the email',
-                'html': email_html,
-                'images': [],
-                'attachments': []
-            }
-        }
-        response_send_email = await self._notifications_repository.send_email(email_data)
-        response_send_email_status = response_send_email['status']
-        if response_send_email_status not in range(200, 300):
-            self._logger.error("[CTS] we could not send the email")
-            error_response = {
-                'code': response_send_email_status,
-                'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
-            }
-            return jsonify(error_response), response_send_email_status, None
+        if requested_watermark_found is not None:
+            self._logger.info(f"Ticket: {ticket_id} already has a requested cancel dispatch note")
 
-        slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email [{dispatch_number}]" \
-                    f" with ticket id: {ticket_id}"
-        self._logger.info(slack_msg)
-        await self._notifications_repository.send_slack_message(slack_msg)
+        else:
+            igz_ticket_id = await self._get_igz_dispatch_number(ticket_notes)
 
-        # Append Note to bruin
-        ticket_note = get_dispatch_cancel_request_note(body, igz_ticket_id)
-        await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
-        self._logger.info(f"Dispatch: {dispatch_number} - {ticket_id} - Cancel Note appended: {ticket_note}")
+            body = {
+                'dispatch_number': dispatch_number,
+                'date_of_dispatch': dispatch.get("Local_Site_Time__c"),
+                'ticket_id': ticket_id
+            }
+            # Send email
+            email_template = render_cancel_email_template(body)
+            email_html = f'<div>{email_template}</div>'
+            email_data = {
+                'request_id': uuid(),
+                'email_data': {
+                    'subject': f'CTS - Service Submission - {ticket_id}',
+                    'recipient': self._config.CTS_CONFIG["email"],
+                    'text': 'this is the accessible text for the email',
+                    'html': email_html,
+                    'images': [],
+                    'attachments': []
+                }
+            }
+            response_send_email = await self._notifications_repository.send_email(email_data)
+            response_send_email_status = response_send_email['status']
+            if response_send_email_status not in range(200, 300):
+                self._logger.error("[CTS] we could not send the email")
+                error_response = {
+                    'code': response_send_email_status,
+                    'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
+                }
+                return jsonify(error_response), response_send_email_status, None
+
+            slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email [{dispatch_number}]" \
+                        f" with ticket id: {ticket_id}"
+            self._logger.info(slack_msg)
+            await self._notifications_repository.send_slack_message(slack_msg)
+
+            # Append Note to bruin
+            ticket_note = get_dispatch_cancel_request_note(body, igz_ticket_id)
+            await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
+            self._logger.info(f"Dispatch: {dispatch_number} - {ticket_id} - Cancel Note appended: {ticket_note}")
 
         response_dispatch['id'] = dispatch_number
         response_dispatch['vendor'] = 'CTS'
@@ -730,21 +753,8 @@ class DispatchServer:
         except Exception as ex:
             self._logger.error(f"[process_note] Error: {ex}")
 
-    async def _get_igz_dispatch_number(self, dispatch_number, ticket_id):
+    async def _get_igz_dispatch_number(self, ticket_notes):
         note_dispatch_number = ''
-        response = await self._bruin_repository.get_ticket_details(ticket_id)
-        response_status = response['status']
-        response_body = response['body']
-        if response_status not in range(200, 300):
-            self._logger.error(f"Error: Dispatch [{dispatch_number}] "
-                               f"Get ticket details for ticket {ticket_id}: "
-                               f"{response_body}")
-            err_msg = f"An error occurred retrieve getting ticket details from bruin " \
-                      f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
-            await self._notifications_repository.send_slack_message(err_msg)
-            return note_dispatch_number
-        ticket_notes = response_body.get('ticketNotes', [])
-        ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
         for note in ticket_notes:
             temp_note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
                 note, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)

@@ -42,7 +42,7 @@ class Container:
                                                    self._bruin_repository, self._lit_repository,
                                                    self._notifications_repository)
 
-    self._logger.info("Container created")
+        self._logger.info("Container created")
 
     async def start(self):
         await self._event_bus.connect()
