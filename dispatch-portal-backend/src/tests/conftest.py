@@ -563,7 +563,7 @@ def ticket_details_1_with_cancel_requested_watermark():
                 },
                 {
                     "noteId": 70805300,
-                    "noteValue": "#*Automation Engine*# DIS12345\n"
+                    "noteValue": "#*Automation Engine*# DIS37405\n"
                                  "Dispatch Management - Dispatch Cancel Requested\n\n"
                                  "The rest of the note\n--\n",
                     "serviceNumber": [

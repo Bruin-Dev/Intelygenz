@@ -11,7 +11,10 @@ import pytz
 from application.mappers import lit_mapper, cts_mapper
 from application.repositories.utils_repository import UtilsRepository
 from application.templates.cts.dispatch_cancel import get_dispatch_cancel_request_note
-from application.templates.cts.dispatch_cancel_mail import render_cancel_email_template
+from application.templates.cts.dispatch_cancel_mail import render_cancel_email_template \
+    as cts_render_cancel_email_template
+from application.templates.lit.dispatch_cancel_mail import render_cancel_email_template \
+    as lit_render_cancel_email_template
 from application.templates.cts.dispatch_request_mail import render_email_template
 from application.templates.cts.dispatch_requested import get_dispatch_requested_note as cts_get_dispatch_requested_note
 from application.templates.lit.dispatch_requested import get_dispatch_requested_note as lit_get_dispatch_requested_note
@@ -262,8 +265,12 @@ class DispatchServer:
         ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
         ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
 
+        filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
+                                                                            dispatch_number,
+                                                                            ticket_id)
+
         requested_watermark_found = UtilsRepository.get_first_element_matching(
-            iterable=ticket_notes,
+            iterable=filtered_ticket_notes,
             condition=lambda note: self.DISPATCH_CANCEL_WATERMARK in note.get('noteValue')
         )
         if requested_watermark_found is not None:
@@ -285,7 +292,7 @@ class DispatchServer:
                 'date_of_dispatch': datetime_formatted_str
             }
             # Send email
-            email_template = render_cancel_email_template(body)
+            email_template = lit_render_cancel_email_template(body)
             email_html = f'<div>{email_template}</div>'
             email_data = {
                 'request_id': uuid(),
@@ -723,8 +730,12 @@ class DispatchServer:
         ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
         ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
 
+        filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
+                                                                            self.IGZ_DN_WATERMARK,
+                                                                            ticket_id)
+
         requested_watermark_found = UtilsRepository.get_first_element_matching(
-            iterable=ticket_notes,
+            iterable=filtered_ticket_notes,
             condition=lambda note: self.DISPATCH_CANCEL_WATERMARK in note.get('noteValue')
         )
         response_dispatch = dict()
@@ -732,7 +743,14 @@ class DispatchServer:
             self._logger.info(f"[CTS] Dispatch: [{dispatch_number}] Ticket: {ticket_id} "
                               f"already has a requested cancel dispatch note")
         else:
-            igz_dispatch_number = await self._get_igz_dispatch_number(ticket_notes)
+
+            requested_watermark_found = UtilsRepository.get_first_element_matching(
+                iterable=filtered_ticket_notes,
+                condition=lambda note: self.MAIN_WATERMARK in note.get('noteValue')
+            )
+
+            igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
+                requested_watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
 
             date_time_of_dispatch = dispatch.get("Local_Site_Time__c")
             date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
@@ -746,7 +764,7 @@ class DispatchServer:
                 'ticket_id': ticket_id
             }
             # Send email
-            email_template = render_cancel_email_template(body)
+            email_template = cts_render_cancel_email_template(body)
             email_html = f'<div>{email_template}</div>'
             email_data = {
                 'request_id': uuid(),
@@ -814,12 +832,16 @@ class DispatchServer:
         except Exception as ex:
             self._logger.error(f"[process_note] Error: {ex}")
 
-    async def _get_igz_dispatch_number(self, ticket_notes):
-        note_dispatch_number = ''
+    def _filter_ticket_note_by_dispatch_number(self, ticket_notes, dispatch_number, ticket_id):
+        filtered_ticket_notes = []
         for note in ticket_notes:
-            temp_note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
-                note, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
-            if temp_note_dispatch_number != '':
-                note_dispatch_number = temp_note_dispatch_number
-                break
-        return note_dispatch_number
+            note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(note,
+                                                                                  dispatch_number,
+                                                                                  self.MAIN_WATERMARK)
+            if len(note_dispatch_number) == 0:
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"dispatch number not found found in ticket note")
+                continue
+            filtered_ticket_notes.append(note)
+
+        return filtered_ticket_notes

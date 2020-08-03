@@ -9,7 +9,10 @@ from quart.exceptions import HTTPException
 
 import application
 from application.mappers import cts_mapper
-from application.templates.cts.dispatch_cancel_mail import render_cancel_email_template
+from application.templates.cts.dispatch_cancel_mail import render_cancel_email_template \
+    as cts_render_cancel_email_template
+from application.templates.lit.dispatch_cancel_mail import render_cancel_email_template \
+    as lit_render_cancel_email_template
 from application.templates.cts.dispatch_request_mail import render_email_template
 from config import testconfig as config
 from application.server.api_server import DispatchServer
@@ -1412,7 +1415,7 @@ class TestApiServer:
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
         }
-        email_template = render_cancel_email_template(body)
+        email_template = lit_render_cancel_email_template(body)
         email_html = f'<div>{email_template}</div>'
         email_data = {
             'request_id': uuid_,
@@ -1477,7 +1480,7 @@ class TestApiServer:
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
         }
-        email_template = render_cancel_email_template(body)
+        email_template = lit_render_cancel_email_template(body)
         email_html = f'<div>{email_template}</div>'
         email_data = {
             'request_id': uuid_,
@@ -1539,7 +1542,7 @@ class TestApiServer:
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
         }
-        email_template = render_cancel_email_template(body)
+        email_template = lit_render_cancel_email_template(body)
         email_html = f'<div>{email_template}</div>'
         email_data = {
             'request_id': uuid_,
@@ -1601,7 +1604,7 @@ class TestApiServer:
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
         }
-        email_template = render_cancel_email_template(body)
+        email_template = lit_render_cancel_email_template(body)
         email_html = f'<div>{email_template}</div>'
         email_data = {
             'request_id': uuid_,
@@ -1758,7 +1761,7 @@ class TestApiServer:
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
         }
-        email_template = render_cancel_email_template(body)
+        email_template = lit_render_cancel_email_template(body)
         email_html = f'<div>{email_template}</div>'
         email_data = {
             'request_id': uuid_,
@@ -2947,9 +2950,9 @@ class TestApiServer:
 
     @pytest.mark.asyncio
     async def cts_cancel_dispatch_test(
-            self, api_server_test, cts_dispatch, cts_ticket_details_1_no_requested_watermark):
+            self, api_server_test, cts_dispatch, cts_ticket_details):
         uuid_ = 'UUID1'
-        igz_dispatch_number = 'IGZ001'
+        igz_dispatch_number = 'IGZ_0001'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
         ticket_id = dispatch['Ext_Ref_Num__c']
@@ -2959,7 +2962,7 @@ class TestApiServer:
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
         }
-        email_template = render_cancel_email_template(body)
+        email_template = cts_render_cancel_email_template(body)
         email_html = f'<div>{email_template}</div>'
         email_data = {
             'request_id': uuid_,
@@ -2986,11 +2989,10 @@ class TestApiServer:
         }
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
-            return_value=cts_ticket_details_1_no_requested_watermark)
+            return_value=cts_ticket_details)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
-        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
         response_send_slack_message_mock = {
             'status': 200
         }
@@ -3014,7 +3016,7 @@ class TestApiServer:
 
     @pytest.mark.asyncio
     async def cts_cancel_dispatch_error_could_not_retrieve_dispatch_test(
-            self, api_server_test, cts_dispatch, cts_ticket_details_1_no_requested_watermark):
+            self, api_server_test, cts_dispatch, cts_ticket_details):
         uuid_ = 'UUID1'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
@@ -3025,7 +3027,7 @@ class TestApiServer:
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
         }
-        email_template = render_cancel_email_template(body)
+        email_template = cts_render_cancel_email_template(body)
         email_html = f'<div>{email_template}</div>'
         email_data = {
             'request_id': uuid_,
@@ -3052,11 +3054,10 @@ class TestApiServer:
         }
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
-            return_value=cts_ticket_details_1_no_requested_watermark)
+            return_value=cts_ticket_details)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
-        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
         response_send_slack_message_mock = {
             'status': 200
         }
@@ -3078,7 +3079,7 @@ class TestApiServer:
 
     @pytest.mark.asyncio
     async def cts_cancel_dispatch_error_retrieve_valid_dispatch_test(
-            self, api_server_test, cts_dispatch, cts_ticket_details_1_no_requested_watermark):
+            self, api_server_test, cts_dispatch, cts_ticket_details):
         uuid_ = 'UUID1'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
@@ -3089,7 +3090,7 @@ class TestApiServer:
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
         }
-        email_template = render_cancel_email_template(body)
+        email_template = cts_render_cancel_email_template(body)
         email_html = f'<div>{email_template}</div>'
         email_data = {
             'request_id': uuid_,
@@ -3119,11 +3120,10 @@ class TestApiServer:
         }
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
-            return_value=cts_ticket_details_1_no_requested_watermark)
+            return_value=cts_ticket_details)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
-        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
         response_send_slack_message_mock = {
             'status': 200
         }
@@ -3147,7 +3147,6 @@ class TestApiServer:
     async def cts_cancel_dispatch_with_error_getting_ticket_details_test(
             self, api_server_test, cts_dispatch, cts_ticket_details_1_error):
         uuid_ = 'UUID1'
-        igz_dispatch_number = 'IGZ001'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
         ticket_id = dispatch['Ext_Ref_Num__c']
@@ -3172,7 +3171,6 @@ class TestApiServer:
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
-        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
         response_send_slack_message_mock = {
             'status': 200
         }
@@ -3194,7 +3192,6 @@ class TestApiServer:
     async def cts_cancel_dispatch_with_existing_cancel_watermark_test(
             self, api_server_test, cts_dispatch, cts_ticket_details_1_with_cancel_requested_watermark):
         uuid_ = 'UUID1'
-        igz_dispatch_number = 'IGZ001'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
         ticket_id = dispatch['Ext_Ref_Num__c']
@@ -3219,7 +3216,6 @@ class TestApiServer:
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
-        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
         response_send_slack_message_mock = {
             'status': 200
         }
@@ -3250,7 +3246,7 @@ class TestApiServer:
             'dispatch_number': dispatch_number,
             'ticket_id': ticket_id
         }
-        email_template = render_cancel_email_template(body)
+        email_template = cts_render_cancel_email_template(body)
         email_html = f'<div>{email_template}</div>'
         email_data = {
             'request_id': uuid_,
@@ -3281,7 +3277,6 @@ class TestApiServer:
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
-        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
         response_send_slack_message_mock = {
             'status': 200
         }
@@ -3331,12 +3326,3 @@ class TestApiServer:
             call(ticket_id, note_1),
             call(ticket_id, note_2)
         ])
-
-    @pytest.mark.asyncio
-    async def get_igz_dispatch_number_test(self, api_server_test, cts_ticket_details_1, cts_ticket_details_2):
-        ticket_notes_1 = cts_ticket_details_1['body'].get('ticketNotes', [])
-        ticket_notes_2 = cts_ticket_details_2['body'].get('ticketNotes', [])
-        response_1 = await api_server_test._get_igz_dispatch_number(ticket_notes_1)
-        response_2 = await api_server_test._get_igz_dispatch_number(ticket_notes_2)
-        assert response_1 == 'IGZ_0001'
-        assert response_2 == ''
