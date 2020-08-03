@@ -1,11 +1,9 @@
-import json
 import asyncio
 
 from time import perf_counter
 from datetime import datetime
 from pytz import timezone
 from apscheduler.util import undefined
-from shortuuid import uuid
 from application.repositories import EdgeIdentifier
 
 from igz.packages.eventbus.eventbus import EventBus

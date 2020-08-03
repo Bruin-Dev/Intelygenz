@@ -34,7 +34,7 @@ class Container:
         self._event_bus.set_producer(self._publisher)
 
         self._prometheus_repository = PrometheusRepository(config)
-        self._notifications_repository = NotificationsRepository(event_bus=self._event_bus)
+        self._notifications_repository = NotificationsRepository(event_bus=self._event_bus, config=config)
 
         self._velocloud_repository = VelocloudRepository(event_bus=self._event_bus, logger=self._logger, config=config,
                                                          notifications_repository=self._notifications_repository)

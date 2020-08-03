@@ -5,6 +5,7 @@ import pytest
 
 from asynctest import CoroutineMock
 from shortuuid import uuid
+from config import testconfig as config
 
 from application.repositories import notifications_repository as notifications_repository_module
 from application.repositories.notifications_repository import NotificationsRepository
@@ -18,7 +19,7 @@ class TestNotificationsRepository:
     def instance_test(self):
         event_bus = Mock()
 
-        notifications_repository = NotificationsRepository(event_bus)
+        notifications_repository = NotificationsRepository(event_bus, config)
 
         assert notifications_repository._event_bus is event_bus
 
@@ -29,7 +30,7 @@ class TestNotificationsRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock()
 
-        notifications_repository = NotificationsRepository(event_bus)
+        notifications_repository = NotificationsRepository(event_bus, config)
 
         with uuid_mock:
             await notifications_repository.send_slack_message(message)
@@ -38,7 +39,7 @@ class TestNotificationsRepository:
             "notification.slack.request",
             {
                 'request_id': uuid_,
-                'message': message,
+                'message': f"[{notifications_repository._config.LOG_CONFIG['name']}]: {message}",
             },
             timeout=10,
         )

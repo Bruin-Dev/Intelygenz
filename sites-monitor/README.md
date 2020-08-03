@@ -49,8 +49,12 @@ MONITORING_SECONDS=120
 ## How to run it
 
 If you want to launch this si
-````$
-docker-compose up --build  grafana nats-server redis velocloud-bridge prometheus thanos-querier thanos-sidecar
+````
+docker-compose up --build velocloud-bridge grafana prometheus thanos-querier thanos-sidecar
+````   
+Wait until everything is up and running, and then run:
+````
+docker-compose up --build sites-monitor
 ````
 
 You can access to the metrics dashboards in localhost:3000 using the credentials in [here](../metrics-dashboard/grafana/Dockerfile)
