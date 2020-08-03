@@ -19,15 +19,6 @@ devices_by_id = [
         "name": "Radley Brown"
     },
     {
-        "serial": "VC05200026138",
-        "host": "mettel.velocloud.net",
-        "enterprise_id": 137,
-        "edge_id": 958,
-        "email": "mettel_alerts@titanamerica.com",
-        "phone": "757-533-7151",
-        "name": "Gary Clark"
-    },
-    {
         "serial": "VC05400001485",
         "host": "mettel.velocloud.net",
         "enterprise_id": 137,
