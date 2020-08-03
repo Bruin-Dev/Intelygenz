@@ -31,6 +31,8 @@ class CtsRepository:
         self._notifications_repository = notifications_repository
         self._bruin_repository = bruin_repository
 
+        self.DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+
         # Dispatch Statuses
         self.DISPATCH_REQUESTED = 'Open'
         self.DISPATCH_CONFIRMED = 'Scheduled'
@@ -588,10 +590,11 @@ class CtsRepository:
             f"Tech on site note appended. Response {append_sms_note_response_body}")
         return True
 
-    async def append_dispatch_cancelled_note(self, dispatch_number, igz_dispatch_number, ticket_id, dispatch) -> bool:
+    async def append_dispatch_cancelled_note(
+            self, dispatch_number, igz_dispatch_number, ticket_id, dispatch_datetime_str) -> bool:
         cancelled_note_data = {
             'dispatch_number': igz_dispatch_number,
-            'date_of_dispatch': dispatch.get('Local_Site_Time__c')
+            'date_of_dispatch': dispatch_datetime_str
         }
         cancelled_note = cts_get_dispatch_cancel_note(cancelled_note_data)
         append_cancelled_note_response = await self._bruin_repository.append_note_to_ticket(

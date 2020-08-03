@@ -201,7 +201,7 @@ class TestLitRepository:
                     'datetime_localized': return_datetime_localized,
                     'timezone': final_timezone,
                     'datetime_formatted_str': return_datetime_localized.strftime(
-                        UtilsRepository.DATETIME_FORMAT)
+                        lit_repository.DATETIME_FORMAT.format(time_zone_of_dispatch='Pacific'))
                 }
                 expected_responses.append(expected_response)
             assert res == expected_response
@@ -222,7 +222,7 @@ class TestLitRepository:
         expected_response = {
             'datetime_localized': return_datetime_localized,
             'timezone': final_timezone,
-            'datetime_formatted_str': '2020-03-16 16:00:00 PDT'
+            'datetime_formatted_str': 'Mar 16, 2020 @ 04:00 PM Pacific'
         }
 
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
@@ -238,7 +238,7 @@ class TestLitRepository:
         expected_response_2 = {
             'datetime_localized': return_datetime_localized_2,
             'timezone': final_timezone_2,
-            'datetime_formatted_str': '2020-03-16 10:30:00 EDT'
+            'datetime_formatted_str': 'Mar 16, 2020 @ 10:30 AM Eastern'
         }
 
         response = lit_repository.get_dispatch_confirmed_date_time_localized(
@@ -270,7 +270,7 @@ class TestLitRepository:
         expected_response = {
             'datetime_localized': return_datetime_localized,
             'timezone': final_timezone,
-            'datetime_formatted_str': '2020-03-16 16:00:00 PDT'
+            'datetime_formatted_str': 'Mar 16, 2020 @ 04:00 PM Pacific'
         }
 
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
@@ -286,7 +286,7 @@ class TestLitRepository:
         expected_response_2 = {
             'datetime_localized': return_datetime_localized_2,
             'timezone': final_timezone_2,
-            'datetime_formatted_str': '2020-03-16 10:30:00 EDT'
+            'datetime_formatted_str': 'Mar 16, 2020 @ 10:30 AM Eastern'
         }
 
         response = lit_repository.get_dispatch_confirmed_date_time_localized(

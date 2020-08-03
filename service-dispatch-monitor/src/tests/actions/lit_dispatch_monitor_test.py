@@ -3171,7 +3171,7 @@ class TestLitDispatchMonitor:
 
         dispatch_number_1 = dispatch_cancelled.get('Dispatch_Number')
         ticket_id_1 = dispatch_cancelled.get('MetTel_Bruin_TicketID')
-        datetime_str_1 = '2020-03-16 16:00:00 PDT'
+        datetime_str_1 = 'Mar 16, 2020 @ 04:00 PM Pacific'
         responses_append_dispatch_cancelled_note_mock = [
             True
         ]

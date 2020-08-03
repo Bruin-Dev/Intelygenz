@@ -262,8 +262,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+
         sms_data = ''
 
         responses_details_mock = [
@@ -401,8 +401,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -572,8 +572,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
@@ -761,7 +761,7 @@ class TestCtsDispatchMonitor:
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -874,7 +874,7 @@ class TestCtsDispatchMonitor:
 
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1
@@ -964,8 +964,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1
@@ -1047,8 +1047,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
@@ -1135,7 +1135,7 @@ class TestCtsDispatchMonitor:
 
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1251,8 +1251,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         sms_to = '+12027723610'
 
@@ -1402,8 +1402,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1,
@@ -1543,8 +1543,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1685,8 +1685,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_confirmation_note,
@@ -1800,8 +1800,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_confirmation_note,
@@ -1914,8 +1914,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_confirmation_note,
@@ -2047,8 +2047,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_12h_sms_note,
@@ -2222,8 +2222,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_12h_sms_note,
@@ -2387,8 +2387,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_12h_sms_note,
@@ -2564,8 +2564,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_12h_sms_note,
@@ -2731,8 +2731,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_12h_sms_note,
@@ -2893,8 +2893,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_2h_sms_note,
@@ -3013,6 +3013,7 @@ class TestCtsDispatchMonitor:
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
+
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
@@ -3025,8 +3026,8 @@ class TestCtsDispatchMonitor:
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
-        datetime_1_str = datetime_1_localized.strftime(UtilsRepository.DATETIME_FORMAT)
-        datetime_2_str = datetime_2_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
+        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_details_mock = [
             cts_ticket_details_1_with_2h_sms_note,
@@ -3672,6 +3673,7 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_1 = 'IGZ_0001'
         dispatch_number_1 = cts_dispatch_cancelled.get('Name')
         ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
+        datetime_of_dispatch_1 = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_append_dispatch_cancelled_note_mock = [
             True
@@ -3693,7 +3695,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_has_awaits([
-            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, cts_dispatch_cancelled)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, datetime_of_dispatch_1)
         ])
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_msg)
 
@@ -3756,6 +3758,8 @@ class TestCtsDispatchMonitor:
         ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
         ticket_id_2 = cts_dispatch_cancelled_2.get('Ext_Ref_Num__c')
 
+        datetime_of_dispatch_1 = 'Jun 23, 2020 @ 01:00 PM UTC'
+
         responses_append_dispatch_cancelled_note_mock = [
             True
         ]
@@ -3780,7 +3784,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_has_awaits([
-            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, cts_dispatch_cancelled)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, datetime_of_dispatch_1)
         ])
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([call(slack_msg),
                                                                                              call(err_msg)])
@@ -3835,6 +3839,7 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_1 = 'IGZ_0001'
         dispatch_number_1 = cts_dispatch_cancelled.get('Name')
         ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
+        datetime_of_dispatch_1 = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_append_dispatch_cancelled_note_mock = [
             False
@@ -3856,6 +3861,6 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_has_awaits([
-            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, cts_dispatch_cancelled)
+            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, datetime_of_dispatch_1)
         ])
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(slack_msg)

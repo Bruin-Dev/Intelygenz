@@ -180,7 +180,8 @@ class CtsDispatchMonitor:
 
                     date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
                     # Get datetime formatted string
-                    datetime_formatted_str = date_time_of_dispatch_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+                    DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+                    datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
 
                     sms_to = CtsRepository.get_sms_to(dispatch)
                     if sms_to is None:
@@ -677,6 +678,11 @@ class CtsDispatchMonitor:
                                           f"Could not determine date time of dispatch: {dispatch}")
                         continue
 
+                    date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+                    # Get datetime formatted string
+                    DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+                    datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
+
                     self._logger.info(f"Getting details for ticket [{ticket_id}]")
 
                     response = await self._bruin_repository.get_ticket_details(ticket_id)
@@ -723,7 +729,7 @@ class CtsDispatchMonitor:
 
                     if cancelled_watermark_note_found is None:
                         result_append_cancelled_note = await self._cts_repository.append_dispatch_cancelled_note(
-                            dispatch_number, igz_dispatch_number, ticket_id, dispatch)
+                            dispatch_number, igz_dispatch_number, ticket_id, datetime_formatted_str)
                         if not result_append_cancelled_note:
                             msg = f"[service-dispatch-monitor] [CTS] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \

@@ -36,6 +36,7 @@ class LitRepository:
         self._notifications_repository = notifications_repository
         self._bruin_repository = bruin_repository
         self.DATETIME_TZ_FORMAT = "%Y-%m-%d %I:%M%p"
+        self.DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p {time_zone_of_dispatch}'
         self._reg = r"\d(\d)?([:,]\d\d)?[( )|(-)]?((am)|(AM)|(Am)|(aM)|(pm)|(PM)|(Pm)|(pM)|(P)|(p)|(A)|(a))?"
         self._compiled = re.compile(self._reg)
         self._reg_am_pm = r"((am)|(AM)|(Am)|(pm)|(PM)|(Pm)|(P)|(p)|(A)|(a))"
@@ -186,7 +187,8 @@ class LitRepository:
         return {
             'datetime_localized': return_datetime_localized,
             'timezone': final_timezone,
-            'datetime_formatted_str': return_datetime_localized.strftime(UtilsRepository.DATETIME_FORMAT)
+            'datetime_formatted_str': return_datetime_localized.strftime(
+                self.DATETIME_FORMAT.format(time_zone_of_dispatch=time_zone_of_dispatch))
         }
 
     def is_dispatch_confirmed(self, dispatch):

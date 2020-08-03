@@ -2,7 +2,10 @@ import copy
 from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import patch
+
+import iso8601
 import pytest
+import pytz
 
 from asynctest import CoroutineMock
 from pytz import timezone
@@ -607,6 +610,10 @@ class TestCtsRepository:
         ticket_id = '12345'
         dispatch_number = cts_dispatch_cancelled.get('Dispatch_Number')
         date_of_dispatch = cts_dispatch_cancelled.get('Local_Site_Time__c')
+        date_time_of_dispatch_localized = iso8601.parse_date(date_of_dispatch, pytz.utc)
+        # Get datetime formatted string
+        DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+        date_of_dispatch = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
         igz_dispatch_number = 'IGZ_0001'
         response_append_note_1 = {
             'request_id': uuid_,
@@ -620,7 +627,7 @@ class TestCtsRepository:
             side_effect=[response_append_note_1])
 
         response = await cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note(
-            dispatch_number, igz_dispatch_number, ticket_id, cts_dispatch_cancelled)
+            dispatch_number, igz_dispatch_number, ticket_id, date_of_dispatch)
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, sms_note)
@@ -632,6 +639,10 @@ class TestCtsRepository:
         ticket_id = '12345'
         dispatch_number = cts_dispatch_cancelled.get('Dispatch_Number')
         date_of_dispatch = cts_dispatch_cancelled.get('Local_Site_Time__c')
+        date_time_of_dispatch_localized = iso8601.parse_date(date_of_dispatch, pytz.utc)
+        # Get datetime formatted string
+        DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+        date_of_dispatch = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
         igz_dispatch_number = 'IGZ_0001'
         response_append_note_1 = {
             'request_id': uuid_,
@@ -649,7 +660,7 @@ class TestCtsRepository:
             side_effect=[response_append_note_1])
 
         response = await cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note(
-            dispatch_number, igz_dispatch_number, ticket_id, cts_dispatch_cancelled)
+            dispatch_number, igz_dispatch_number, ticket_id, date_of_dispatch)
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, sms_note)
