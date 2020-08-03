@@ -82,8 +82,6 @@ export const dispatchLitInAdapterGeAll = data => ({
   customerLocation: `${data.job_site_street} ${data.job_site_city} ${data.job_site_state} ${data.job_site_zip_code}`,
   vendor: (data.vendor && data.vendor.toUpperCase()) || '',
   vendorDispatchId: data.dispatch_number || '',
-  scheduledTime: `${data.date_of_dispatch} ${
-    data.time_of_dispatch
-  } ${getTimeZoneShortName(data.time_zone)}`,
+  scheduledTime: data.date_of_dispatch || '',
   status: data.dispatch_status || ''
 });

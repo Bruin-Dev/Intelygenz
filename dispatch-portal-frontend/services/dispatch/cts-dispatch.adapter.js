@@ -6,7 +6,7 @@ export const dispatchCtsInAdapter = data => ({
   vendor: (data.vendor && data.vendor.toUpperCase()) || '',
   slaLevel: '',
   status: (data.dispatch && data.dispatch.status__c) || '',
-  dateDispatch: '',
+  dateDispatch: data.dateDispatch,
   mettelId: (data.dispatch && data.dispatch.ext_ref_num__c) || '',
   timeDispatch: (data.dispatch && data.dispatch.open_date__c) || '',
   timeZone: '',
@@ -87,8 +87,6 @@ export const dispatchCtsInAdapterGeAll = data => ({
   customerLocation: `${data.street__c} ${data.city__c} ${data.country__c} ${data.zip__c}`,
   vendor: (data.vendor && data.vendor.toUpperCase()) || '',
   vendorDispatchId: data.name || '',
-  scheduledTime: `${data.date_of_dispatch} ${
-    data.open_date__c
-  } ${getTimeZoneShortName(data.time_zone)}`,
+  scheduledTime: data.date_of_dispatch || '',
   status: data.status__c || ''
 });
