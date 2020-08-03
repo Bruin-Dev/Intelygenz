@@ -1,4 +1,4 @@
-def map_get_dispatch(body):
+def map_get_dispatch(body, datetime_formatted):
     '''
     From lit to dispatch portal
     '''
@@ -11,7 +11,7 @@ def map_get_dispatch(body):
         job_site_contact_number = ' '.join(body['job_site_contact_name_and_phone_number'].split(' ')[2:])
     dispatch_request = {
         "dispatch_number": body.get('dispatch_number'),
-        "date_of_dispatch": body.get('date_of_dispatch'),
+        "date_of_dispatch": datetime_formatted,
         "site_survey_quote_required": body.get('site_survey_quote_required'),
         "hard_time_of_dispatch_local": body.get('hard_time_of_dispatch_local'),
         "hard_time_of_dispatch_time_zone_local": body.get('hard_time_of_dispatch_time_zone_local'),

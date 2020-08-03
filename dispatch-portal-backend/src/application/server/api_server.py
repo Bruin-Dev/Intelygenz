@@ -4,7 +4,10 @@ import textwrap
 import time
 from http import HTTPStatus
 
+import iso8601
 import jsonschema
+import pytz
+
 from application.mappers import lit_mapper, cts_mapper
 from application.repositories.utils_repository import UtilsRepository
 from application.templates.cts.dispatch_cancel import get_dispatch_cancel_request_note
@@ -128,9 +131,14 @@ class DispatchServer:
 
         self._logger.info(f"[LIT] Dispatch [{dispatch_number}] - {response['body']} "
                           f"- took {time.time() - start_time}")
-        response_dispatch['id'] = response['body']['Dispatch']['Dispatch_Number']
+        dispatch = response['body']['Dispatch']
+        response_datetime = self._lit_repository.get_dispatch_confirmed_date_time_localized(dispatch)
+        datetime_formatted_str = ''
+        if response_datetime is not None:
+            datetime_formatted_str = response_datetime['datetime_formatted_str']
+        response_dispatch['id'] = dispatch['Dispatch_Number']
         response_dispatch['vendor'] = 'lit'
-        response_dispatch['dispatch'] = lit_mapper.map_get_dispatch(response['body']['Dispatch'])
+        response_dispatch['dispatch'] = lit_mapper.map_get_dispatch(dispatch, datetime_formatted_str)
 
         return jsonify(response_dispatch), response["status"], None
 
@@ -348,8 +356,16 @@ class DispatchServer:
 
         self._logger.info(f"[LIT] All Dispatches - {len(response['body'])} - took {time.time() - start_time}")
         response_dispatch['vendor'] = 'LIT'
-        response_dispatch['list_dispatch'] = [
-            lit_mapper.map_get_dispatch(d) for d in response['body']['DispatchList']]
+        # response_dispatch['list_dispatch'] = [
+        #     lit_mapper.map_get_dispatch(d) for d in response['body']['DispatchList']
+        # ]
+        response_dispatch['list_dispatch'] = []
+        for d in response['body']['DispatchList']:
+            response_datetime = self._lit_repository.get_dispatch_confirmed_date_time_localized(d)
+            datetime_formatted_str = ''
+            if response_datetime is not None:
+                datetime_formatted_str = response_datetime['datetime_formatted_str']
+            response_dispatch['list_dispatch'].append(lit_mapper.map_get_dispatch(d, datetime_formatted_str))
 
         return jsonify(response_dispatch), response["status"], None
 
@@ -536,9 +552,16 @@ class DispatchServer:
         self._logger.info(f"[CTS] Dispatch [{dispatch_number}] - {response['body']} "
                           f"- took {time.time() - start_time}")
         dispatch = response['body']['records'][0]
+
+        date_time_of_dispatch = dispatch.get("Local_Site_Time__c")
+        date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+        # Get datetime formatted string
+        DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+        datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
+
         response_dispatch['id'] = dispatch.get('Name') if dispatch.get('Name') else dispatch_number
         response_dispatch['vendor'] = 'cts'
-        response_dispatch['dispatch'] = cts_mapper.map_get_dispatch(dispatch)
+        response_dispatch['dispatch'] = cts_mapper.map_get_dispatch(dispatch, datetime_formatted_str)
 
         return jsonify(response_dispatch), response["status"], None
 
@@ -567,7 +590,16 @@ class DispatchServer:
         all_dispatches = response['body'].get('records', [])
         self._logger.info(f"[CTS] All Dispatches - {len(all_dispatches)} - took {time.time() - start_time}")
         response_dispatch['vendor'] = 'cts'
-        response_dispatch['list_dispatch'] = [cts_mapper.map_get_dispatch(d) for d in all_dispatches]
+        # response_dispatch['list_dispatch'] = [cts_mapper.map_get_dispatch(d) for d in all_dispatches]
+
+        response_dispatch['list_dispatch'] = []
+        for d in all_dispatches:
+            date_time_of_dispatch = d.get("Local_Site_Time__c")
+            date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+            # Get datetime formatted string
+            DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+            datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
+            response_dispatch['list_dispatch'].append(cts_mapper.map_get_dispatch(d, datetime_formatted_str))
 
         return jsonify(response_dispatch), response["status"], None
 
@@ -602,7 +634,6 @@ class DispatchServer:
             self._logger.error(err_msg)
             return_response['status'] = 400
             return_response['body'] = err_msg
-            # TODO: notify slack
             return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
 
         ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
@@ -703,9 +734,15 @@ class DispatchServer:
         else:
             igz_dispatch_number = await self._get_igz_dispatch_number(ticket_notes)
 
+            date_time_of_dispatch = dispatch.get("Local_Site_Time__c")
+            date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+            # Get datetime formatted string
+            DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+            datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
+
             body = {
                 'dispatch_number': dispatch_number,
-                'date_of_dispatch': dispatch.get("Local_Site_Time__c"),
+                'date_of_dispatch': datetime_formatted_str,
                 'ticket_id': ticket_id
             }
             # Send email
