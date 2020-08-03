@@ -33,6 +33,12 @@ CTS_CONFIG = {
     'email': 'mettel.automation@intelygenz.com'
 }
 
+LIT_CONFIG = {
+    # Email for requests and cancellations
+    # 'email': 'dispatch@litnetworking.com'
+    'email': 'mettel.automation@intelygenz.com'
+}
+
 LOG_CONFIG = {
     'name': 'dispatch-portal-backend-test',
     'level': logging.DEBUG,

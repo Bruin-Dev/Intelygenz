@@ -1401,6 +1401,416 @@ class TestApiServer:
             assert data == expected_response_create_error
 
     @pytest.mark.asyncio
+    async def lit_cancel_dispatch_test(
+            self, api_server_test, dispatch_confirmed, ticket_details_1_no_requested_watermark):
+        uuid_ = 'UUID1'
+        dispatch_number = dispatch_confirmed['Dispatch_Number']
+        ticket_id = dispatch_confirmed['MetTel_Bruin_TicketID']
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+        body = {
+            'dispatch_number': dispatch_number,
+            'ticket_id': ticket_id
+        }
+        email_template = render_cancel_email_template(body)
+        email_html = f'<div>{email_template}</div>'
+        email_data = {
+            'request_id': uuid_,
+            'email_data': {
+                'subject': f'LIT - Service Submission - {ticket_id}',
+                'recipient': api_server_test._config.LIT_CONFIG["email"],
+                'text': 'this is the accessible text for the email',
+                'html': email_html,
+                'images': [],
+                'attachments': []
+            }
+        }
+        response_send_email_mock = {
+            'status': 200
+        }
+        response_rpc_request_mock = {
+            'body': {
+                'Dispatch': dispatch_confirmed
+            },
+            'status': 200
+        }
+
+        expected_response = {
+            'id': dispatch_number,
+            'vendor': 'LIT'
+        }
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            return_value=ticket_details_1_no_requested_watermark)
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email " \
+                    f"[{dispatch_number}] with ticket id: {ticket_id}"
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response_data = await response.get_json()
+
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                'lit.dispatch.get', payload, timeout=30)
+            api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
+            api_server_test._append_note_to_ticket.assert_awaited_once()
+            api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
+            assert response_data == expected_response
+
+    @pytest.mark.asyncio
+    async def lit_cancel_dispatch_error_could_not_retrieve_dispatch_test(
+            self, api_server_test, dispatch_confirmed, ticket_details_1_no_requested_watermark):
+        uuid_ = 'UUID1'
+        dispatch_number = dispatch_confirmed['Dispatch_Number']
+        ticket_id = dispatch_confirmed['MetTel_Bruin_TicketID']
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+        body = {
+            'dispatch_number': dispatch_number,
+            'ticket_id': ticket_id
+        }
+        email_template = render_cancel_email_template(body)
+        email_html = f'<div>{email_template}</div>'
+        email_data = {
+            'request_id': uuid_,
+            'email_data': {
+                'subject': f'LIT - Service Submission - {ticket_id}',
+                'recipient': api_server_test._config.LIT_CONFIG["email"],
+                'text': 'this is the accessible text for the email',
+                'html': email_html,
+                'images': [],
+                'attachments': []
+            }
+        }
+        response_send_email_mock = {
+            'status': 200
+        }
+        response_rpc_request_mock = {
+            'body': {},
+            'status': 500
+        }
+
+        expected_response = {
+            'id': dispatch_number,
+            'vendor': 'LIT'
+        }
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            return_value=ticket_details_1_no_requested_watermark)
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}] " \
+                    f"with ticket id: {ticket_id}"
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response_data = await response.get_json()
+            assert response_data['code'] == 500
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                'lit.dispatch.get', payload, timeout=30)
+            api_server_test._notifications_repository.send_email.assert_not_awaited()
+            api_server_test._append_note_to_ticket.assert_not_awaited()
+            api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def lit_cancel_dispatch_error_retrieve_valid_dispatch_test(
+            self, api_server_test, dispatch_confirmed, ticket_details_1_no_requested_watermark):
+        uuid_ = 'UUID1'
+        dispatch_number = dispatch_confirmed['Dispatch_Number']
+        ticket_id = dispatch_confirmed['MetTel_Bruin_TicketID']
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+        body = {
+            'dispatch_number': dispatch_number,
+            'ticket_id': ticket_id
+        }
+        email_template = render_cancel_email_template(body)
+        email_html = f'<div>{email_template}</div>'
+        email_data = {
+            'request_id': uuid_,
+            'email_data': {
+                'subject': f'LIT - Service Submission - {ticket_id}',
+                'recipient': api_server_test._config.LIT_CONFIG["email"],
+                'text': 'this is the accessible text for the email',
+                'html': email_html,
+                'images': [],
+                'attachments': []
+            }
+        }
+        response_send_email_mock = {
+            'status': 200
+        }
+        response_rpc_request_mock = {
+            'body': {},
+            'status': 400
+        }
+
+        expected_response = {
+            'id': dispatch_number,
+            'vendor': 'LIT'
+        }
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            return_value=ticket_details_1_no_requested_watermark)
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}] " \
+                    f"with ticket id: {ticket_id}"
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response_data = await response.get_json()
+            assert response_data['code'] == 400
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                'lit.dispatch.get', payload, timeout=30)
+            api_server_test._notifications_repository.send_email.assert_not_awaited()
+            api_server_test._append_note_to_ticket.assert_not_awaited()
+            api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def lit_cancel_dispatch_error_dispatch_datetime_test(
+            self, api_server_test, dispatch, ticket_details_1_no_requested_watermark):
+        uuid_ = 'UUID1'
+        dispatch_number = dispatch['Dispatch_Number']
+        ticket_id = dispatch['MetTel_Bruin_TicketID']
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+        body = {
+            'dispatch_number': dispatch_number,
+            'ticket_id': ticket_id
+        }
+        email_template = render_cancel_email_template(body)
+        email_html = f'<div>{email_template}</div>'
+        email_data = {
+            'request_id': uuid_,
+            'email_data': {
+                'subject': f'LIT - Service Submission - {ticket_id}',
+                'recipient': api_server_test._config.LIT_CONFIG["email"],
+                'text': 'this is the accessible text for the email',
+                'html': email_html,
+                'images': [],
+                'attachments': []
+            }
+        }
+        response_send_email_mock = {
+            'status': 200
+        }
+        response_rpc_request_mock = {
+            'body': {
+                'Dispatch': dispatch
+            },
+            'status': 200
+        }
+
+        expected_response = {
+            'id': dispatch_number,
+            'vendor': 'LIT'
+        }
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            return_value=ticket_details_1_no_requested_watermark)
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}] " \
+                    f"with ticket id: {ticket_id}"
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response_data = await response.get_json()
+            assert response_data['code'] == 400
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                'lit.dispatch.get', payload, timeout=30)
+            api_server_test._notifications_repository.send_email.assert_not_awaited()
+            api_server_test._append_note_to_ticket.assert_not_awaited()
+            api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def lit_cancel_dispatch_with_error_getting_ticket_details_test(
+            self, api_server_test, dispatch_confirmed, ticket_details_1_error):
+        uuid_ = 'UUID1'
+        dispatch_number = dispatch_confirmed['Dispatch_Number']
+        ticket_id = dispatch_confirmed['MetTel_Bruin_TicketID']
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+
+        response_send_email_mock = {
+            'status': 200
+        }
+        response_rpc_request_mock = {
+            'body': {
+                'Dispatch': dispatch_confirmed
+            },
+            'status': 200
+        }
+
+        expected_response = {
+            'body': f"[LIT] Error: could not retrieve ticket [{ticket_id}] details",
+            'status': 400
+        }
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            return_value=ticket_details_1_error)
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response_data = await response.get_json()
+
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                'lit.dispatch.get', payload, timeout=30)
+            api_server_test._notifications_repository.send_email.assert_not_awaited()
+            api_server_test._append_note_to_ticket.assert_not_awaited()
+            assert response_data == expected_response
+
+    @pytest.mark.asyncio
+    async def lit_cancel_dispatch_with_existing_cancel_watermark_test(
+            self, api_server_test, dispatch_confirmed, ticket_details_1_with_cancel_requested_watermark):
+        uuid_ = 'UUID1'
+        dispatch_number = dispatch_confirmed['Dispatch_Number']
+        ticket_id = dispatch_confirmed['MetTel_Bruin_TicketID']
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+
+        response_send_email_mock = {
+            'status': 200
+        }
+        response_rpc_request_mock = {
+            'body': {
+                'Dispatch': dispatch_confirmed
+            },
+            'status': 200
+        }
+
+        expected_response = {
+            'id': dispatch_number,
+            'vendor': 'LIT'
+        }
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            return_value=ticket_details_1_with_cancel_requested_watermark)
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response_data = await response.get_json()
+
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                'lit.dispatch.get', payload, timeout=30)
+            api_server_test._notifications_repository.send_email.assert_not_awaited()
+            api_server_test._append_note_to_ticket.assert_not_awaited()
+            assert response_data == expected_response
+
+    @pytest.mark.asyncio
+    async def lit_cancel_dispatch_error_send_email_test(
+            self, api_server_test, dispatch_confirmed, ticket_details_1_no_requested_watermark):
+        uuid_ = 'UUID1'
+        dispatch_number = dispatch_confirmed['Dispatch_Number']
+        ticket_id = dispatch_confirmed['MetTel_Bruin_TicketID']
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+        body = {
+            'dispatch_number': dispatch_number,
+            'ticket_id': ticket_id
+        }
+        email_template = render_cancel_email_template(body)
+        email_html = f'<div>{email_template}</div>'
+        email_data = {
+            'request_id': uuid_,
+            'email_data': {
+                'subject': f'LIT - Service Submission - {ticket_id}',
+                'recipient': api_server_test._config.CTS_CONFIG["email"],
+                'text': 'this is the accessible text for the email',
+                'html': email_html,
+                'images': [],
+                'attachments': []
+            }
+        }
+        response_send_email_mock = {
+            'status': 400
+        }
+        response_rpc_request_mock = {
+            'body': {
+                'Dispatch': dispatch_confirmed
+            },
+            'status': 200
+        }
+
+        expected_response = {
+            'id': dispatch_number,
+            'vendor': 'LIT'
+        }
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            return_value=ticket_details_1_no_requested_watermark)
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}] " \
+                    f"with ticket id: {ticket_id}"
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response_data = await response.get_json()
+
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                'lit.dispatch.get', payload, timeout=30)
+            api_server_test._notifications_repository.send_email.assert_awaited_once_with(email_data)
+            api_server_test._append_note_to_ticket.assert_not_awaited()
+            api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def lit_update_dispatch_test(self, api_server_test):
         uuid_ = 'UUID1'
 
@@ -2471,7 +2881,7 @@ class TestApiServer:
         igz_dispatch_id = f"IGZ{uuid_}"
         ticket_id = new_dispatch['mettel_bruin_ticket_id']
         api_server_test._config.ENVIRONMENT_NAME = 'production'
-        err_msg = f"Error: could not retrieve ticket [{ticket_id}] details"
+        err_msg = f"[CTS] Error: could not retrieve ticket [{ticket_id}] details"
         cts_expected_response = {
             'status': 400,
             'body': err_msg
@@ -2499,7 +2909,7 @@ class TestApiServer:
         api_server_test._config.ENVIRONMENT_NAME = 'production'
         cts_expected_response = {
             'code': 400,
-            'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
+            'message': f'[CTS] An error ocurred sending the email for ticket id: {ticket_id}'
         }
 
         response_get_ticket_details_mock = ticket_details_1_no_requested_watermark
@@ -2536,8 +2946,10 @@ class TestApiServer:
             assert response_data == cts_expected_response
 
     @pytest.mark.asyncio
-    async def cts_cancel_dispatch_test(self, api_server_test, cts_dispatch, ticket_details_1_no_requested_watermark):
+    async def cts_cancel_dispatch_test(
+            self, api_server_test, cts_dispatch, cts_ticket_details_1_no_requested_watermark):
         uuid_ = 'UUID1'
+        igz_dispatch_number = 'IGZ001'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
         ticket_id = dispatch['Ext_Ref_Num__c']
@@ -2574,7 +2986,7 @@ class TestApiServer:
         }
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
-                                                                return_value=ticket_details_1_no_requested_watermark)
+            return_value=cts_ticket_details_1_no_requested_watermark)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
@@ -2584,7 +2996,8 @@ class TestApiServer:
         }
         api_server_test._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=[response_send_slack_message_mock])
-        slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email [{dispatch_number}] " \
+        slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email " \
+                    f"[{dispatch_number}] [{igz_dispatch_number}] " \
                     f"with ticket id: {ticket_id}"
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
@@ -2601,7 +3014,7 @@ class TestApiServer:
 
     @pytest.mark.asyncio
     async def cts_cancel_dispatch_error_could_not_retrieve_dispatch_test(
-            self, api_server_test, cts_dispatch, ticket_details_1_no_requested_watermark):
+            self, api_server_test, cts_dispatch, cts_ticket_details_1_no_requested_watermark):
         uuid_ = 'UUID1'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
@@ -2639,7 +3052,7 @@ class TestApiServer:
         }
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
-                                                                return_value=ticket_details_1_no_requested_watermark)
+            return_value=cts_ticket_details_1_no_requested_watermark)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
@@ -2665,7 +3078,7 @@ class TestApiServer:
 
     @pytest.mark.asyncio
     async def cts_cancel_dispatch_error_retrieve_valid_dispatch_test(
-            self, api_server_test, cts_dispatch, ticket_details_1_no_requested_watermark):
+            self, api_server_test, cts_dispatch, cts_ticket_details_1_no_requested_watermark):
         uuid_ = 'UUID1'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
@@ -2706,7 +3119,7 @@ class TestApiServer:
         }
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
-                                                                return_value=ticket_details_1_no_requested_watermark)
+            return_value=cts_ticket_details_1_no_requested_watermark)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()
@@ -2731,8 +3144,102 @@ class TestApiServer:
             api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def cts_cancel_dispatch_with_error_getting_ticket_details_test(
+            self, api_server_test, cts_dispatch, cts_ticket_details_1_error):
+        uuid_ = 'UUID1'
+        igz_dispatch_number = 'IGZ001'
+        dispatch = cts_dispatch["records"][0]
+        dispatch_number = dispatch['Name']
+        ticket_id = dispatch['Ext_Ref_Num__c']
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+
+        response_send_email_mock = {
+            'status': 200
+        }
+        response_rpc_request_mock = {
+            'body': cts_dispatch,
+            'status': 200
+        }
+
+        expected_response = {
+            'body': f"[CTS] Error: could not retrieve ticket [{ticket_id}] details",
+            'status': 400
+        }
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            return_value=cts_ticket_details_1_error)
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/{dispatch_number}/cancel')
+            response_data = await response.get_json()
+
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                'cts.dispatch.get', payload, timeout=30)
+            api_server_test._notifications_repository.send_email.assert_not_awaited()
+            api_server_test._append_note_to_ticket.assert_not_awaited()
+            assert response_data == expected_response
+
+    @pytest.mark.asyncio
+    async def cts_cancel_dispatch_with_existing_cancel_watermark_test(
+            self, api_server_test, cts_dispatch, cts_ticket_details_1_with_cancel_requested_watermark):
+        uuid_ = 'UUID1'
+        igz_dispatch_number = 'IGZ001'
+        dispatch = cts_dispatch["records"][0]
+        dispatch_number = dispatch['Name']
+        ticket_id = dispatch['Ext_Ref_Num__c']
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+
+        response_send_email_mock = {
+            'status': 200
+        }
+        response_rpc_request_mock = {
+            'body': cts_dispatch,
+            'status': 200
+        }
+
+        expected_response = {
+            'id': dispatch_number,
+            'vendor': 'CTS'
+        }
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            return_value=cts_ticket_details_1_with_cancel_requested_watermark)
+        api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        api_server_test._get_igz_dispatch_number = CoroutineMock(return_value='IGZ001')
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/{dispatch_number}/cancel')
+            response_data = await response.get_json()
+
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with(
+                'cts.dispatch.get', payload, timeout=30)
+            api_server_test._notifications_repository.send_email.assert_not_awaited()
+            api_server_test._append_note_to_ticket.assert_not_awaited()
+            assert response_data == expected_response
+
+    @pytest.mark.asyncio
     async def cts_cancel_dispatch_error_send_email_test(
-            self, api_server_test, cts_dispatch, ticket_details_1_no_requested_watermark):
+            self, api_server_test, cts_dispatch, cts_ticket_details_1_no_requested_watermark):
         uuid_ = 'UUID1'
         dispatch = cts_dispatch["records"][0]
         dispatch_number = dispatch['Name']
@@ -2770,7 +3277,7 @@ class TestApiServer:
         }
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
-                                                                return_value=ticket_details_1_no_requested_watermark)
+            return_value=cts_ticket_details_1_no_requested_watermark)
         api_server_test._event_bus.rpc_request = CoroutineMock(side_effect=[response_rpc_request_mock])
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
         api_server_test._append_note_to_ticket = CoroutineMock()

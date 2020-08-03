@@ -210,15 +210,15 @@ class DispatchServer:
     async def lit_cancel_dispatch(self, dispatch_number):
         # 1 - Get Dispatch
         # 2 - Get Bruin ticket
-        # 3? - Get ticket notes
-        # 4? - Check that ticket has no cancel watermark
+        # 3 - Get ticket notes
+        # 4 - Check that ticket has no cancel watermark
         # 5 - Send cancel request by email
         # 6 - Append note to bruin
         self._logger.info(f"[LIT] Cancel Dispatch by email request: [{dispatch_number}]")
         start_time = time.time()
         payload = {"request_id": uuid(), "body": {"dispatch_number": dispatch_number}}
         response = await self._event_bus.rpc_request("lit.dispatch.get", payload, timeout=30)
-        self._logger.info(f"[LIT] Cancel dispatch [{dispatch_number}]: {response}")
+        self._logger.info(f"[LIT] Response get dispatch [{dispatch_number}]: {response}")
         response_dispatch = dict()
         if response['status'] == 500:
             error_response = {
@@ -237,61 +237,82 @@ class DispatchServer:
         self._logger.info(f"[LIT] Dispatch [{dispatch_number}] - {response['body']} "
                           f"- took {time.time() - start_time}")
         dispatch = response['body']['Dispatch']
-        response_dispatch['id'] = dispatch['Dispatch_Number']
-        response_dispatch['vendor'] = 'lit'
         ticket_id = dispatch['MetTel_Bruin_TicketID']
 
-        # TODO: get ticket details and check if already has a request cancel note
+        return_response = dict.fromkeys(["body", "status"])
+        pre_existing_ticket_notes_response = await self._bruin_repository.get_ticket_details(ticket_id)
+        pre_existing_ticket_notes_status = pre_existing_ticket_notes_response['status']
+        pre_existing_ticket_notes_body = pre_existing_ticket_notes_response['body']
 
-        # Append Note to bruin
-        response_datetime = self._lit_repository.get_dispatch_confirmed_date_time_localized(dispatch)
-        if response_datetime is None:
-            self._logger.error(f"[LIT] Could not retrieve datetime of dispatch: {dispatch}")
-            error_response = {
-                'code': 400,
-                'message': f"[LIT] Could not retrieve datetime of dispatch: {dispatch}"
-            }
-            return jsonify(error_response), response['status'], None
-        datetime_formatted_str = response_datetime['datetime_formatted_str']
-        body = {
-            'dispatch_number': dispatch_number,
-            'ticket_id': ticket_id,
-            'date_of_dispatch': datetime_formatted_str
-        }
-        # Send email
-        email_template = render_cancel_email_template(body)
-        email_html = f'<div>{email_template}</div>'
-        email_data = {
-            'request_id': uuid(),
-            'email_data': {
-                'subject': f'LIT - Service Submission - {ticket_id}',
-                'recipient': self._config.LIT_CONFIG["email"],
-                'text': 'this is the accessible text for the email',
-                'html': email_html,
-                'images': [],
-                'attachments': []
-            }
-        }
-        response_send_email = await self._notifications_repository.send_email(email_data)
-        response_send_email_status = response_send_email['status']
-        if response_send_email_status not in range(200, 300):
-            self._logger.error("[LIT] we could not send the email")
-            error_response = {
-                'code': response_send_email_status,
-                'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
-            }
-            return jsonify(error_response), response_send_email_status, None
+        if pre_existing_ticket_notes_status not in range(200, 300):
+            err_msg = f"[LIT] Error: could not retrieve ticket [{ticket_id}] details"
+            self._logger.error(err_msg)
+            return_response['status'] = 400
+            return_response['body'] = err_msg
+            return jsonify(return_response), HTTPStatus.BAD_REQUEST, None
 
-        slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}]" \
-                    f" with ticket id: {ticket_id}"
-        self._logger.info(slack_msg)
-        await self._notifications_repository.send_slack_message(slack_msg)
-        ticket_note = get_dispatch_cancel_request_note(body, dispatch_number)
-        await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
-        self._logger.info(f"[LIT] Dispatch: {dispatch_number} - {ticket_id} "
-                          f"- Cancel Note appended: {ticket_note}")
+        ticket_notes = pre_existing_ticket_notes_body.get('ticketNotes', [])
+        ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+
+        requested_watermark_found = UtilsRepository.get_first_element_matching(
+            iterable=ticket_notes,
+            condition=lambda note: self.DISPATCH_CANCEL_WATERMARK in note.get('noteValue')
+        )
+        if requested_watermark_found is not None:
+            self._logger.info(f"[LIT] Dispatch: [{dispatch_number}] Ticket: {ticket_id} "
+                              f"already has a requested cancel dispatch note")
+        else:
+            response_datetime = self._lit_repository.get_dispatch_confirmed_date_time_localized(dispatch)
+            if response_datetime is None:
+                self._logger.error(f"[LIT] Could not retrieve datetime of dispatch: {dispatch}")
+                error_response = {
+                    'code': 400,
+                    'message': f"[LIT] Could not retrieve datetime of dispatch: {dispatch}"
+                }
+                return jsonify(error_response), response['status'], None
+            datetime_formatted_str = response_datetime['datetime_formatted_str']
+            body = {
+                'dispatch_number': dispatch_number,
+                'ticket_id': ticket_id,
+                'date_of_dispatch': datetime_formatted_str
+            }
+            # Send email
+            email_template = render_cancel_email_template(body)
+            email_html = f'<div>{email_template}</div>'
+            email_data = {
+                'request_id': uuid(),
+                'email_data': {
+                    'subject': f'LIT - Service Submission - {ticket_id}',
+                    'recipient': self._config.LIT_CONFIG["email"],
+                    'text': 'this is the accessible text for the email',
+                    'html': email_html,
+                    'images': [],
+                    'attachments': []
+                }
+            }
+            response_send_email = await self._notifications_repository.send_email(email_data)
+            response_send_email_status = response_send_email['status']
+            if response_send_email_status not in range(200, 300):
+                self._logger.error("[LIT] we could not send the email")
+                error_response = {
+                    'code': response_send_email_status,
+                    'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
+                }
+                return jsonify(error_response), response_send_email_status, None
+
+            slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Cancel Requested by email [{dispatch_number}]" \
+                        f" with ticket id: {ticket_id}"
+            self._logger.info(slack_msg)
+            await self._notifications_repository.send_slack_message(slack_msg)
+            ticket_note = get_dispatch_cancel_request_note(body, dispatch_number)
+            await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
+            self._logger.info(f"[LIT] Dispatch: {dispatch_number} - {ticket_id} "
+                              f"- Cancel Note appended: {ticket_note}")
+
         response_dispatch['id'] = dispatch_number
         response_dispatch['vendor'] = 'LIT'
+        self._logger.info(f"[LIT] Dispatch cancel request: {dispatch_number} - {ticket_id}"
+                          f"- took {time.time() - start_time}")
 
         return jsonify(response_dispatch), response["status"], None
 
@@ -577,7 +598,7 @@ class DispatchServer:
         pre_existing_ticket_notes_body = pre_existing_ticket_notes_response['body']
 
         if pre_existing_ticket_notes_status not in range(200, 300):
-            err_msg = f"Error: could not retrieve ticket [{ticket_id}] details"
+            err_msg = f"[CTS] Error: could not retrieve ticket [{ticket_id}] details"
             self._logger.error(err_msg)
             return_response['status'] = 400
             return_response['body'] = err_msg
@@ -610,7 +631,7 @@ class DispatchServer:
             self._logger.error("[CTS] we could not send the email")
             error_response = {
                 'code': response_send_email_status,
-                'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
+                'message': f'[CTS] An error ocurred sending the email for ticket id: {ticket_id}'
             }
             return jsonify(error_response), response_send_email_status, None
 
@@ -662,7 +683,7 @@ class DispatchServer:
         pre_existing_ticket_notes_body = pre_existing_ticket_notes_response['body']
 
         if pre_existing_ticket_notes_status not in range(200, 300):
-            err_msg = f"Error: could not retrieve ticket [{ticket_id}] details"
+            err_msg = f"[CTS] Error: could not retrieve ticket [{ticket_id}] details"
             self._logger.error(err_msg)
             return_response['status'] = 400
             return_response['body'] = err_msg
@@ -677,10 +698,10 @@ class DispatchServer:
         )
         response_dispatch = dict()
         if requested_watermark_found is not None:
-            self._logger.info(f"Ticket: {ticket_id} already has a requested cancel dispatch note")
-
+            self._logger.info(f"[CTS] Dispatch: [{dispatch_number}] Ticket: {ticket_id} "
+                              f"already has a requested cancel dispatch note")
         else:
-            igz_ticket_id = await self._get_igz_dispatch_number(ticket_notes)
+            igz_dispatch_number = await self._get_igz_dispatch_number(ticket_notes)
 
             body = {
                 'dispatch_number': dispatch_number,
@@ -707,23 +728,26 @@ class DispatchServer:
                 self._logger.error("[CTS] we could not send the email")
                 error_response = {
                     'code': response_send_email_status,
-                    'message': f'An error ocurred sending the email for ticket id: {ticket_id}'
+                    'message': f'[CTS] An error ocurred sending the email for ticket id: {ticket_id}'
                 }
                 return jsonify(error_response), response_send_email_status, None
 
-            slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email [{dispatch_number}]" \
+            slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email " \
+                        f"[{dispatch_number}] [{igz_dispatch_number}]" \
                         f" with ticket id: {ticket_id}"
             self._logger.info(slack_msg)
             await self._notifications_repository.send_slack_message(slack_msg)
 
             # Append Note to bruin
-            ticket_note = get_dispatch_cancel_request_note(body, igz_ticket_id)
+            ticket_note = get_dispatch_cancel_request_note(body, igz_dispatch_number)
             await self._append_note_to_ticket(dispatch_number, ticket_id, ticket_note)
-            self._logger.info(f"Dispatch: {dispatch_number} - {ticket_id} - Cancel Note appended: {ticket_note}")
+            self._logger.info(f"Dispatch: {dispatch_number} - {igz_dispatch_number} - {ticket_id} - "
+                              f"Cancel Note appended: {ticket_note}")
 
         response_dispatch['id'] = dispatch_number
         response_dispatch['vendor'] = 'CTS'
-        self._logger.info(f"[CTS] Dispatch cancel request: {dispatch_number} - took {time.time() - start_time}")
+        self._logger.info(f"[CTS] Dispatch cancel request: {dispatch_number} - {ticket_id}"
+                          f"- took {time.time() - start_time}")
 
         return jsonify(response_dispatch), HTTPStatus.OK, None
 

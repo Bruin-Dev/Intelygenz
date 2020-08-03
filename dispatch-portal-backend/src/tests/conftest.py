@@ -105,6 +105,41 @@ def dispatch_confirmed(lit_repository, dispatch):
 
 
 @pytest.fixture(scope='function')
+def dispatch_confirmed_2(lit_repository, dispatch):
+    updated_dispatch = copy.deepcopy(dispatch)
+    updated_dispatch["Job_Site_Contact_Name_and_Phone_Number"] = "Test Client on site +12123595126"
+    updated_dispatch["Dispatch_Number"] = "DIS37406"
+    updated_dispatch["Tech_First_Name"] = "Hulk Hogan"
+    updated_dispatch["Tech_Mobile_Number"] = "+12123595126"
+    updated_dispatch["MetTel_Bruin_TicketID"] = "3544801"
+    updated_dispatch["Dispatch_Status"] = lit_repository.DISPATCH_CONFIRMED
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = "Eastern Time"
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30AM-11:30AM"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_confirmed_error(dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed)
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = "10:30-11:30"
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_confirmed_error_2(dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed)
+    updated_dispatch["Hard_Time_of_Dispatch_Local"] = None
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def dispatch_confirmed_error_3(dispatch_confirmed):
+    updated_dispatch = copy.deepcopy(dispatch_confirmed)
+    updated_dispatch["Hard_Time_of_Dispatch_Time_Zone_Local"] = None
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
 def new_dispatch():
     return {
         "date_of_dispatch": "2019-11-14",
@@ -456,6 +491,15 @@ def ticket_details_2_error(ticket_details):
 
 
 @pytest.fixture(scope='function')
+def ticket_details_1_error():
+    return {
+        'request_id': '12345',
+        'body': {},
+        'status': 400
+    }
+
+
+@pytest.fixture(scope='function')
 def ticket_details_1_no_requested_watermark():
     return {
         'request_id': '12345',
@@ -477,6 +521,51 @@ def ticket_details_1_no_requested_watermark():
                 {
                     "noteId": 70805299,
                     "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
+def ticket_details_1_with_cancel_requested_watermark():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*Automation Engine*# DIS12345\n"
+                                 "Dispatch Management - Dispatch Cancel Requested\n\n"
+                                 "The rest of the note\n--\n",
                     "serviceNumber": [
                         "4664325"
                     ],
@@ -659,4 +748,92 @@ def cts_ticket_details_2():
             ]
         },
         'status': 400
+    }
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details_1_error():
+    return {
+        'request_id': '12345',
+        'body': {},
+        'status': 400
+    }
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details_1_no_requested_watermark():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details_1_with_cancel_requested_watermark():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*Automation Engine*# IGZ_0001\n"
+                                 "Dispatch Management - Dispatch Cancel Requested\n\n"
+                                 "The rest of the note\n--\n",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
     }
