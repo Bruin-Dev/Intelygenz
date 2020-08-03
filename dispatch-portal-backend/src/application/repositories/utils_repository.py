@@ -3,7 +3,7 @@ from typing import Callable
 
 class UtilsRepository:
     FULL_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f %Z%z'
-    DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S %Z'
+    DATETIME_FORMAT = '%Y-%m-%d %H:%M %Z'
 
     @staticmethod
     def get_first_element_matching(iterable, condition: Callable, fallback=None):
