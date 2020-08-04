@@ -70,7 +70,7 @@ MONITOR_CONFIG = {
         # Federal edge that is inside a non-federal Velocloud instance
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
     ],
-    'autoresolve_down_events_seconds': 45 * 60,
+    'autoresolve_down_events_seconds': 60 * 60,
     'semaphore': 10,
     'process_semaphore': 10,
     'process_errors_semaphore': 10
