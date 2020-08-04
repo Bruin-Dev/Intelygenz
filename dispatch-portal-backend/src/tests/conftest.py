@@ -264,7 +264,7 @@ def cts_dispatch_mapped():
             'api_resource_name__c': 'Tech Name',
             "billing_invoice_date__c": None,
             "billing_invoice_number__c": None,
-            "billing_total__c": 0,
+            "billing_total__c": 0.0,
             "carrier__c": None,
             "carrier_id_num__c": None,
             "check_in_date__c": None,
@@ -344,7 +344,8 @@ def cts_dispatch_mapped():
             "status__c": "Requires Dispatch",
             "resource_trained__c": False,
             "service_type__c": "a250n000000PMQ2AAO",
-            "zip__c": "94102"
+            "zip__c": "94102",
+            'date_of_dispatch': 'Jun 21, 2020 @ 08:00 PM UTC'
         }]
     }
 
@@ -365,19 +366,13 @@ def cts_dispatch_mapped_without_done_false(cts_dispatch_mapped):
 
 
 @pytest.fixture(scope='function')
-def cts_all_dispatches(cts_dispatch_mapped):
-    return {
-        "done": True,
-        "records": [cts_dispatch_mapped]
-    }
+def cts_all_dispatches(cts_dispatch):
+    return cts_dispatch
 
 
 @pytest.fixture(scope='function')
 def cts_all_dispatches_mapped(cts_dispatch_mapped):
-    return {
-        "done": True,
-        "records": [cts_dispatch_mapped]
-    }
+    return cts_dispatch_mapped
 
 
 @pytest.fixture(scope='function')

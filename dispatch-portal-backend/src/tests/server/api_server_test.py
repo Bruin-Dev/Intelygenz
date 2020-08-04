@@ -137,7 +137,7 @@ class TestApiServer:
             "vendor": "lit",
             "dispatch": {
                 "dispatch_number": "DIS37450",
-                "date_of_dispatch": "2019-11-14",
+                "date_of_dispatch": "Nov 14, 2019 @ 07:00 AM Pacific",
                 "site_survey_quote_required": False,
                 "time_of_dispatch": "7AM-8PM",
                 "time_zone": "Pacific Time",
@@ -343,7 +343,7 @@ class TestApiServer:
             "list_dispatch": [
                 {
                     "dispatch_number": "DIS37263",
-                    "date_of_dispatch": "2019-11-14",
+                    "date_of_dispatch": "Nov 14, 2019 @ 02:00 PM Pacific",
                     "site_survey_quote_required": True,
                     "time_of_dispatch": "2:00pm",
                     "time_zone": "Pacific Time",
@@ -368,7 +368,7 @@ class TestApiServer:
                 },
                 {
                     "dispatch_number": "DIS37264",
-                    "date_of_dispatch": "2019-11-14",
+                    "date_of_dispatch": "Nov 14, 2019 @ 12:30 AM Pacific",
                     "site_survey_quote_required": False,
                     "time_of_dispatch": "12.30AM",
                     "time_zone": "Pacific Time",
@@ -2595,19 +2595,19 @@ class TestApiServer:
             assert data == expected_response_upload_error
 
     @pytest.mark.asyncio
-    async def cts_get_dispatch_test(self, api_server_test, cts_dispatch_mapped):
+    async def cts_get_dispatch_test(self, api_server_test, cts_dispatch, cts_dispatch_mapped):
         uuid_ = 'UUID1'
         dispatch_number = 'S-147735'
-        expected_response_mapped = cts_dispatch_mapped
+
         expected_response_cts = {
             "request_id": uuid_,
-            "body": expected_response_mapped,
+            "body": cts_dispatch,
             "status": 200
         }
         cts_expected_response = {
             'id': 'S-147735',
             'vendor': "cts",
-            'dispatch': expected_response_cts['body']['records'][0]
+            'dispatch': cts_dispatch_mapped['records'][0]
         }
         api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
 
@@ -2706,16 +2706,16 @@ class TestApiServer:
             assert data == cts_expected_response
 
     @pytest.mark.asyncio
-    async def cts_get_all_dispatches_test(self, api_server_test, cts_all_dispatches_mapped):
+    async def cts_get_all_dispatches_test(self, api_server_test, cts_all_dispatches, cts_dispatch_mapped):
         uuid_ = 'UUID1'
         expected_response_cts = {
             "request_id": uuid_,
-            "body": cts_all_dispatches_mapped,
+            "body": cts_all_dispatches,
             "status": 200
         }
         cts_expected_response = {
             'vendor': "cts",
-            'list_dispatch': [expected_response_cts['body']['records'][0]]
+            'list_dispatch': [cts_dispatch_mapped['records'][0]]
         }
         api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
 

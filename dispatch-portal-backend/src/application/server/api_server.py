@@ -136,9 +136,7 @@ class DispatchServer:
                           f"- took {time.time() - start_time}")
         dispatch = response['body']['Dispatch']
         response_datetime = self._lit_repository.get_dispatch_confirmed_date_time_localized(dispatch)
-        datetime_formatted_str = ''
-        if response_datetime is not None:
-            datetime_formatted_str = response_datetime['datetime_formatted_str']
+        datetime_formatted_str = response_datetime['datetime_formatted_str'] if response_datetime is not None else ''
         response_dispatch['id'] = dispatch['Dispatch_Number']
         response_dispatch['vendor'] = 'lit'
         response_dispatch['dispatch'] = lit_mapper.map_get_dispatch(dispatch, datetime_formatted_str)
@@ -369,9 +367,8 @@ class DispatchServer:
         response_dispatch['list_dispatch'] = []
         for d in response['body']['DispatchList']:
             response_datetime = self._lit_repository.get_dispatch_confirmed_date_time_localized(d)
-            datetime_formatted_str = ''
-            if response_datetime is not None:
-                datetime_formatted_str = response_datetime['datetime_formatted_str']
+            datetime_formatted_str = response_datetime[
+                'datetime_formatted_str'] if response_datetime is not None else ''
             response_dispatch['list_dispatch'].append(lit_mapper.map_get_dispatch(d, datetime_formatted_str))
 
         return jsonify(response_dispatch), response["status"], None

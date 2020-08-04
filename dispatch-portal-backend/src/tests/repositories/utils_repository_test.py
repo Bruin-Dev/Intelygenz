@@ -89,3 +89,12 @@ class TestUtilsRepository:
         result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
 
         assert result == ''
+
+    def find_dispatch_number_wrong_dispatch_number_ko_test(self, ticket_details):
+        dispatch_number = "DIS123"
+        watermark = '#*Automation Engine*#'
+        dispatch_note = ticket_details['body']["ticketNotes"][1]
+
+        result = UtilsRepository.find_dispatch_number_watermark(dispatch_note, dispatch_number, watermark)
+
+        assert result == ''

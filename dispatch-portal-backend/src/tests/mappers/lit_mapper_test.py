@@ -45,7 +45,7 @@ class TestMappers:
 
         expected_map = {
             "dispatch_number": "DIS37450",
-            "date_of_dispatch": "2019-11-14",
+            "date_of_dispatch": "Nov 14, 2019 @ 12:30 AM Pacific",
             "site_survey_quote_required": False,
             "time_of_dispatch": "5.30AM",
             "time_zone": "Pacific Time",
@@ -68,8 +68,9 @@ class TestMappers:
             "mettel_requester_phone_number": '(111) 111-1111',
             "dispatch_status": "New Dispatch"
         }
+        datetime_formatted = 'Nov 14, 2019 @ 12:30 AM Pacific'
 
-        assert expected_map == map_get_dispatch(content)
+        assert expected_map == map_get_dispatch(content, datetime_formatted)
 
     def map_get_dispatch_contact_none_test(self):
         content = {
@@ -113,7 +114,7 @@ class TestMappers:
 
         expected_map = {
             "dispatch_number": "DIS37450",
-            "date_of_dispatch": "2019-11-14",
+            "date_of_dispatch": "Nov 14, 2019 @ 12:30 AM Pacific",
             "site_survey_quote_required": False,
             "time_of_dispatch": "5.30AM",
             "time_zone": "Pacific Time",
@@ -137,7 +138,9 @@ class TestMappers:
             "dispatch_status": "New Dispatch"
         }
 
-        assert expected_map == map_get_dispatch(content)
+        datetime_formatted = 'Nov 14, 2019 @ 12:30 AM Pacific'
+
+        assert expected_map == map_get_dispatch(content, datetime_formatted)
 
     def map_create_dispatch_test(self):
         content = {
