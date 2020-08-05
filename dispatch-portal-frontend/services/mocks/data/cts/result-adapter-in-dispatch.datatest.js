@@ -3,7 +3,7 @@ export const ctsDispatchMockGetOne = {
   vendor: 'CTS',
   slaLevel: '',
   status: 'Completed',
-  dateDispatch: '',
+  dateDispatch: undefined,
   mettelId: '4694961',
   timeDispatch: '2020-06-22T20:14:00.000+0000',
   timeZone: '',
@@ -46,6 +46,6 @@ export const ctsDispatchMockGetAll = {
   customerLocation: '1501 K St NW Washington United States 20005',
   vendor: 'CTS',
   vendorDispatchId: 'S-151959',
-  scheduledTime: 'undefined 2020-06-22T20:14:00.000+0000 ',
+  scheduledTime: '',
   status: 'Completed'
 };

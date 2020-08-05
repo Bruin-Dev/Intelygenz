@@ -42,6 +42,6 @@ export const mocksInAdapterLitAllDispatchResult = {
   customerLocation: 'test job site street test job site city ALABAMA 10041',
   vendor: 'LIT',
   vendorDispatchId: 'DIS17918',
-  scheduledTime: '2020-01-31 7AM-9AM PT',
+  scheduledTime: '2020-01-31',
   status: 'New Dispatch'
 };

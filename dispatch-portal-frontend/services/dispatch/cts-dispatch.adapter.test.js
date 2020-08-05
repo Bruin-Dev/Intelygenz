@@ -25,7 +25,7 @@ describe('cts dispatch adapter tests', () => {
       vendor: '',
       slaLevel: '',
       status: '',
-      dateDispatch: '',
+      dateDispatch: undefined,
       mettelId: '',
       timeDispatch: '',
       timeZone: '',

@@ -5,7 +5,7 @@ import DispatchDetail from '../pages/dispatch/[id]';
 import { withTestRouter } from '../components/menu/Menu.test';
 import axiosI from '../services/api';
 import { API_URLS } from '../services/api.config';
-import {  } from '../services/mocks/data/cts/single-dispatch.mock';
+import { mockCtsSingleDispatch } from '../services/mocks/data/cts/single-dispatch.mock';
 
 describe('DISPATCH DETAIL PAGE tests', () => {
   let mockadapter;
