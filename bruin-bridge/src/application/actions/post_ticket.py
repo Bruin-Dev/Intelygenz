@@ -39,7 +39,7 @@ class PostTicket:
 
         self._logger.info(f'Creating ticket for client id: {payload["clientId"]}...')
 
-        result = self._bruin_repository.post_ticket(payload)
+        result = await self._bruin_repository.post_ticket(payload)
 
         response['body'] = result["body"]
         response["status"] = result["status"]

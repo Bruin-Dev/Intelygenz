@@ -31,7 +31,7 @@ class TestGetManagementStatus:
             "body": "Active – Platinum Monitoring",
             "status": 200
         }
-        bruin_repository.get_management_status = Mock(return_value=management_status)
+        bruin_repository.get_management_status = CoroutineMock(return_value=management_status)
 
         filters = {
             "client_id": 9994,
@@ -53,7 +53,7 @@ class TestGetManagementStatus:
 
         get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
         await get_management_status.get_management_status(event_bus_request)
-        bruin_repository.get_management_status.assert_called_once_with(filters)
+        bruin_repository.get_management_status.assert_awaited_once_with(filters)
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
         assert logger.info.called
 
@@ -65,7 +65,7 @@ class TestGetManagementStatus:
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        bruin_repository.get_management_status = Mock()
+        bruin_repository.get_management_status = CoroutineMock()
 
         event_bus_request = {
             "request_id": 19,
@@ -80,7 +80,7 @@ class TestGetManagementStatus:
 
         get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
         await get_management_status.get_management_status(event_bus_request)
-        bruin_repository.get_management_status.assert_not_called()
+        bruin_repository.get_management_status.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
 
     @pytest.mark.asyncio
@@ -91,7 +91,7 @@ class TestGetManagementStatus:
         event_bus.publish_message = CoroutineMock()
         bruin_repository = Mock()
 
-        bruin_repository.get_management_status = Mock()
+        bruin_repository.get_management_status = CoroutineMock()
 
         filters = {
             "client_id": 9994,
@@ -112,5 +112,5 @@ class TestGetManagementStatus:
 
         get_management_status = GetManagementStatus(logger, event_bus, bruin_repository)
         await get_management_status.get_management_status(event_bus_request)
-        bruin_repository.get_management_status.assert_not_called()
+        bruin_repository.get_management_status.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)

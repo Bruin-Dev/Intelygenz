@@ -158,7 +158,7 @@ class Container:
 
     async def start(self):
         await self._event_bus.connect()
-        self._bruin_client.login()
+        await self._bruin_client.login()
         await self._event_bus.subscribe_consumer(consumer_name="tickets", topic="bruin.ticket.request",
                                                  action_wrapper=self._report_bruin_ticket,
                                                  queue="bruin_bridge")

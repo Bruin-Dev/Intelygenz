@@ -49,15 +49,15 @@ class TestPostTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_ticket = Mock(return_value={'body': post_ticket_response,
-                                                          'status': 200})
+        bruin_repository.post_ticket = CoroutineMock(return_value={'body': post_ticket_response,
+                                                     'status': 200})
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(msg)
 
         logger.error.assert_not_called()
 
-        post_ticket._bruin_repository.post_ticket.assert_called_once_with(
+        post_ticket._bruin_repository.post_ticket.assert_awaited_once_with(
             msg['body']
         )
         post_ticket._event_bus.publish_message.assert_awaited_once_with(
@@ -97,15 +97,15 @@ class TestPostTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_ticket = Mock(return_value={'body': post_ticket_response,
-                                                          'status': 400})
+        bruin_repository.post_ticket = CoroutineMock(return_value={'body': post_ticket_response,
+                                                     'status': 400})
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(msg)
 
         logger.error.assert_called()
 
-        post_ticket._bruin_repository.post_ticket.assert_called_once_with(
+        post_ticket._bruin_repository.post_ticket.assert_awaited_once_with(
             msg['body']
         )
         post_ticket._event_bus.publish_message.assert_awaited_once_with(
@@ -144,13 +144,13 @@ class TestPostTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_ticket = Mock(return_value={'body': post_ticket_response,
-                                                          'status': 200})
+        bruin_repository.post_ticket = CoroutineMock(return_value={'body': post_ticket_response,
+                                                     'status': 200})
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(msg)
 
-        post_ticket._bruin_repository.post_ticket.assert_called_once_with(
+        post_ticket._bruin_repository.post_ticket.assert_awaited_once_with(
             payload_copy
         )
         post_ticket._event_bus.publish_message.assert_awaited_once_with(
@@ -185,13 +185,13 @@ class TestPostTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_ticket = Mock(return_value={'body': post_ticket_response,
-                                                          'status': 200})
+        bruin_repository.post_ticket = CoroutineMock(return_value={'body': post_ticket_response,
+                                                     'status': 200})
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(msg)
 
-        post_ticket._bruin_repository.post_ticket.assert_not_called()
+        post_ticket._bruin_repository.post_ticket.assert_not_awaited()
         post_ticket._event_bus.publish_message.assert_awaited_once_with(
             response_topic, msg_published_in_topic
         )
@@ -219,13 +219,13 @@ class TestPostTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_ticket = Mock(return_value={'body': post_ticket_response,
-                                                          'status': 200})
+        bruin_repository.post_ticket = CoroutineMock(return_value={'body': post_ticket_response,
+                                                     'status': 200})
 
         post_ticket = PostTicket(logger, event_bus, bruin_repository)
         await post_ticket.post_ticket(msg)
 
-        post_ticket._bruin_repository.post_ticket.assert_not_called()
+        post_ticket._bruin_repository.post_ticket.assert_not_awaited()
         post_ticket._event_bus.publish_message.assert_awaited_once_with(
             response_topic, msg_published_in_topic
         )

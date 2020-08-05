@@ -29,12 +29,12 @@ class TestResolveTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repo = Mock()
-        bruin_repo.resolve_ticket = Mock(return_value={'body': 'Success', 'status': 200})
+        bruin_repo.resolve_ticket = CoroutineMock(return_value={'body': 'Success', 'status': 200})
 
         resolve_ticket = ResolveTicket(mock_logger, event_bus, bruin_repo)
         await resolve_ticket.resolve_ticket(msg)
 
-        bruin_repo.resolve_ticket.assert_not_called()
+        bruin_repo.resolve_ticket.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic,
                                                            dict(request_id=request_id,
                                                                 body='Must include "body" in request',
@@ -52,12 +52,12 @@ class TestResolveTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repo = Mock()
-        bruin_repo.resolve_ticket = Mock(return_value={'body': 'Success', 'status': 200})
+        bruin_repo.resolve_ticket = CoroutineMock(return_value={'body': 'Success', 'status': 200})
 
         resolve_ticket = ResolveTicket(mock_logger, event_bus, bruin_repo)
         await resolve_ticket.resolve_ticket(msg)
 
-        bruin_repo.resolve_ticket.assert_not_called()
+        bruin_repo.resolve_ticket.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic,
                                                            dict(request_id=request_id,
                                                                 body='You must include ticket_id'
@@ -79,11 +79,11 @@ class TestResolveTicket:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repo = Mock()
-        bruin_repo.resolve_ticket = Mock(return_value={'body': 'Success', 'status': 200})
+        bruin_repo.resolve_ticket = CoroutineMock(return_value={'body': 'Success', 'status': 200})
 
         resolve_ticket = ResolveTicket(mock_logger, event_bus, bruin_repo)
         await resolve_ticket.resolve_ticket(msg)
 
-        bruin_repo.resolve_ticket.assert_called_once_with(ticket_id, detail_id)
+        bruin_repo.resolve_ticket.assert_awaited_once_with(ticket_id, detail_id)
         event_bus.publish_message.assert_awaited_once_with(response_topic,
                                                            dict(request_id=request_id, body="Success", status=200))

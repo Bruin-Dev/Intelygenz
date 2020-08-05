@@ -127,13 +127,13 @@ class TestGetNextResultsForTicketDetail:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_next_results_for_ticket_detail = Mock(return_value=repository_response)
+        bruin_repository.get_next_results_for_ticket_detail = CoroutineMock(return_value=repository_response)
 
         get_next_results = GetNextResultsForTicketDetail(logger, event_bus, bruin_repository)
 
         await get_next_results.get_next_results_for_ticket_detail(request)
 
-        bruin_repository.get_next_results_for_ticket_detail.assert_called_once_with(
+        bruin_repository.get_next_results_for_ticket_detail.assert_awaited_once_with(
             ticket_id, detail_id, service_number
         )
         event_bus.publish_message.assert_awaited_once_with(response_topic, rpc_response)

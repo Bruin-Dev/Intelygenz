@@ -38,12 +38,12 @@ class TestPostNote:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
+        bruin_repository.post_ticket_note = CoroutineMock(return_value=append_note_response)
 
         post_note = PostNote(logger, event_bus, bruin_repository)
         await post_note.post_note(msg)
 
-        post_note._bruin_repository.post_ticket_note.assert_not_called()
+        post_note._bruin_repository.post_ticket_note.assert_not_awaited()
         post_note._event_bus.publish_message.assert_awaited_once_with(
             response_topic, msg_published_in_topic
         )
@@ -69,12 +69,12 @@ class TestPostNote:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
+        bruin_repository.post_ticket_note = CoroutineMock(return_value=append_note_response)
 
         post_note = PostNote(logger, event_bus, bruin_repository)
         await post_note.post_note(msg)
 
-        post_note._bruin_repository.post_ticket_note.assert_not_called()
+        post_note._bruin_repository.post_ticket_note.assert_not_awaited()
         post_note._event_bus.publish_message.assert_awaited_once_with(
             response_topic, msg_published_in_topic
         )
@@ -105,12 +105,12 @@ class TestPostNote:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
+        bruin_repository.post_ticket_note = CoroutineMock(return_value=append_note_response)
 
         post_note = PostNote(logger, event_bus, bruin_repository)
         await post_note.post_note(msg)
 
-        post_note._bruin_repository.post_ticket_note.assert_not_called()
+        post_note._bruin_repository.post_ticket_note.assert_not_awaited()
         post_note._event_bus.publish_message.assert_awaited_once_with(
             response_topic, msg_published_in_topic
         )
@@ -141,12 +141,12 @@ class TestPostNote:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_ticket_note = Mock(return_value=append_note_response)
+        bruin_repository.post_ticket_note = CoroutineMock(return_value=append_note_response)
 
         post_note = PostNote(logger, event_bus, bruin_repository)
         await post_note.post_note(msg)
 
-        post_note._bruin_repository.post_ticket_note.assert_called_once_with(
+        post_note._bruin_repository.post_ticket_note.assert_awaited_once_with(
             ticket_id, note_contents
         )
         post_note._event_bus.publish_message.assert_awaited_once_with(

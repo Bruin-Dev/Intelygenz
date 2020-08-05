@@ -39,7 +39,7 @@ class GetManagementStatus:
             f'Getting management status with filters: {json.dumps(filters)}'
         )
 
-        management_status = self._bruin_repository.get_management_status(filters)
+        management_status = await self._bruin_repository.get_management_status(filters)
 
         response["body"] = management_status["body"]
         response["status"] = management_status["status"]

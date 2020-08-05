@@ -39,7 +39,8 @@ class GetNextResultsForTicketDetail:
         service_number = request_body['service_number']
 
         self._logger.info(f'Claiming all available next results for ticket {ticket_id} and detail {detail_id}...')
-        next_results = self._bruin_repository.get_next_results_for_ticket_detail(ticket_id, detail_id, service_number)
+        next_results = await self._bruin_repository.get_next_results_for_ticket_detail(
+            ticket_id, detail_id, service_number)
         self._logger.info(f'Got all available next results for ticket {ticket_id} and detail {detail_id}!')
 
         response["body"] = next_results["body"]

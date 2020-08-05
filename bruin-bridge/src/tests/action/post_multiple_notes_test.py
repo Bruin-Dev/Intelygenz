@@ -95,13 +95,13 @@ class TestPostMultipleNotes:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_multiple_ticket_notes = Mock(return_value=post_multiple_notes_response)
+        bruin_repository.post_multiple_ticket_notes = CoroutineMock(return_value=post_multiple_notes_response)
 
         post_multiple_notes = PostMultipleNotes(logger, event_bus, bruin_repository)
 
         await post_multiple_notes.post_multiple_notes(request)
 
-        bruin_repository.post_multiple_ticket_notes.assert_called_once_with(ticket_id, notes)
+        bruin_repository.post_multiple_ticket_notes.assert_awaited_once_with(ticket_id, notes)
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
 
     @pytest.mark.asyncio
@@ -120,7 +120,9 @@ class TestPostMultipleNotes:
         }
 
         logger = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.post_multiple_ticket_notes = CoroutineMock()
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -129,7 +131,7 @@ class TestPostMultipleNotes:
 
         await post_multiple_notes.post_multiple_notes(request)
 
-        bruin_repository.post_multiple_ticket_notes.assert_not_called()
+        bruin_repository.post_multiple_ticket_notes.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
 
     @pytest.mark.asyncio
@@ -161,7 +163,9 @@ class TestPostMultipleNotes:
         }
 
         logger = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.post_multiple_ticket_notes = CoroutineMock()
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -170,7 +174,7 @@ class TestPostMultipleNotes:
 
         await post_multiple_notes.post_multiple_notes(request)
 
-        bruin_repository.post_multiple_ticket_notes.assert_not_called()
+        bruin_repository.post_multiple_ticket_notes.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
 
     @pytest.mark.asyncio
@@ -204,7 +208,9 @@ class TestPostMultipleNotes:
         }
 
         logger = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.post_multiple_ticket_notes = CoroutineMock()
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -213,7 +219,7 @@ class TestPostMultipleNotes:
 
         await post_multiple_notes.post_multiple_notes(request)
 
-        bruin_repository.post_multiple_ticket_notes.assert_not_called()
+        bruin_repository.post_multiple_ticket_notes.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
 
     @pytest.mark.asyncio
@@ -247,7 +253,9 @@ class TestPostMultipleNotes:
         }
 
         logger = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.post_multiple_ticket_notes = CoroutineMock()
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -256,7 +264,7 @@ class TestPostMultipleNotes:
 
         await post_multiple_notes.post_multiple_notes(request)
 
-        bruin_repository.post_multiple_ticket_notes.assert_not_called()
+        bruin_repository.post_multiple_ticket_notes.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)
 
     @pytest.mark.asyncio
@@ -358,11 +366,11 @@ class TestPostMultipleNotes:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.post_multiple_ticket_notes = Mock(return_value=post_multiple_notes_response)
+        bruin_repository.post_multiple_ticket_notes = CoroutineMock(return_value=post_multiple_notes_response)
 
         post_multiple_notes = PostMultipleNotes(logger, event_bus, bruin_repository)
 
         await post_multiple_notes.post_multiple_notes(request)
 
-        bruin_repository.post_multiple_ticket_notes.assert_called_once_with(ticket_id, notes)
+        bruin_repository.post_multiple_ticket_notes.assert_awaited_once_with(ticket_id, notes)
         event_bus.publish_message.assert_awaited_once_with(response_topic, event_bus_response)

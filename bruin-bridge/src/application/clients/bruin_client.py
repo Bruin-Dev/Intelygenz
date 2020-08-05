@@ -1,27 +1,34 @@
 import base64
 import json
 
+import aiohttp
 import humps
-import requests
-from tenacity import retry, wait_exponential, stop_after_delay
+
+from tenacity import retry
+from tenacity import stop_after_delay
+from tenacity import wait_exponential
 
 
 class BruinClient:
     def __init__(self, logger, config):
         self._config = config
         self._logger = logger
-        self._bearer_token = ""
 
-    def login(self):
+        self._bearer_token = ""
+        self._session = aiohttp.ClientSession()
+
+    async def login(self):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']))
-        def login():
+        async def login():
             self._logger.info("Logging into Bruin...")
-            creds = str.encode(self._config.BRUIN_CONFIG["client_id"] + ":" + self._config.BRUIN_CONFIG["client_secret"]
-                               )
+            login_credentials = f'{self._config.BRUIN_CONFIG["client_id"]}:{self._config.BRUIN_CONFIG["client_secret"]}'
+            login_credentials = login_credentials.encode()
+            login_credentials_b64 = base64.b64encode(login_credentials).decode()
+
             headers = {
-                "authorization": f"Basic {base64.b64encode(creds).decode()}",
+                "authorization": f"Basic {login_credentials_b64}",
                 "Content-Type": "application/x-www-form-urlencoded"
             }
             form_data = {
@@ -30,17 +37,19 @@ class BruinClient:
             }
 
             try:
-                response = requests.post(f'{self._config.BRUIN_CONFIG["login_url"]}/identity/connect/token',
-                                         data=form_data,
-                                         headers=headers)
-                self._bearer_token = response.json()["access_token"]
-                self._logger.info("Logged into Bruin!")
+                response = await self._session.post(
+                    f'{self._config.BRUIN_CONFIG["login_url"]}/identity/connect/token',
+                    data=form_data,
+                    headers=headers,
+                )
 
+                self._bearer_token = (await response.json())["access_token"]
+                self._logger.info("Logged into Bruin!")
             except Exception as err:
                 self._logger.error("An error occurred while trying to login to Bruin")
                 self._logger.error(f"{err}")
 
-        login()
+        await login()
 
     def _get_request_headers(self):
         if not self._bearer_token:
@@ -53,101 +62,113 @@ class BruinClient:
         }
         return headers
 
-    def get_all_tickets(self, params):
+    async def get_all_tickets(self, params):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def get_all_tickets():
+        async def get_all_tickets():
             self._logger.info(f'Getting all tickets for client id: {params["client_id"]}')
 
             parsed_params = humps.pascalize(params)
 
             self._logger.info(f'Params that will be applied (parsed to PascalCase): {json.dumps(parsed_params)}')
 
-            response = requests.get(f"{self._config.BRUIN_CONFIG['base_url']}/api/Ticket",
-                                    headers=self._get_request_headers(),
-                                    verify=False, params=parsed_params)
+            response = await self._session.get(
+                f"{self._config.BRUIN_CONFIG['base_url']}/api/Ticket",
+                params=parsed_params,
+                headers=self._get_request_headers(),
+                ssl=False,
+            )
 
             return_response = dict.fromkeys(["body", "status"])
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()['responses']
-                return_response["status"] = response.status_code
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json['responses']
+                return_response["status"] = response.status
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin, re-login and retrying getting tickets")
-                self.login()
+                await self.login()
                 return_response["body"] = f"Maximum retries while relogin"
-                return_response["status"] = response.status_code
+                return_response["status"] = response.status
                 raise Exception(return_response)
 
-            if response.status_code == 403:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Forbidden error from Bruin {response.json()}")
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Forbidden error from Bruin {response_json}")
 
-            if response.status_code == 404:
+            if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not found for params {parsed_params}")
                 return_response["body"] = "Resource not found"
-                return_response["status"] = response.status_code
+                return_response["status"] = response.status
 
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}. Retrying...")
                 return_response["body"] = "Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
 
             return return_response
         try:
-            return get_all_tickets()
+            return await get_all_tickets()
         except Exception as e:
             return e.args[0]
 
-    def get_ticket_details(self, ticket_id):
+    async def get_ticket_details(self, ticket_id):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def get_ticket_details():
+        async def get_ticket_details():
             self._logger.info(f'Getting ticket details for ticket id: {ticket_id}')
-            response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details',
-                                    headers=self._get_request_headers(),
-                                    verify=False)
+
+            response = await self._session.get(
+                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details',
+                headers=self._get_request_headers(),
+                ssl=False,
+            )
 
             return_response = dict.fromkeys(["body", "status"])
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin, re-login and retrying getting ticket details")
-                self.login()
+                await self.login()
                 return_response["body"] = "Maximum retries while relogin"
-                return_response["status"] = response.status_code
+                return_response["status"] = response.status
                 raise Exception(return_response)
 
-            if response.status_code == 403:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Forbidden error from Bruin {response.json()}")
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Forbidden error from Bruin {response_json}")
 
-            if response.status_code == 404:
+            if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not found for ticket id {ticket_id}")
                 return_response["body"] = "Resource not found"
-                return_response["status"] = response.status_code
+                return_response["status"] = response.status
 
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}. Retrying...")
                 return_response["body"] = "Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
@@ -155,55 +176,60 @@ class BruinClient:
             return return_response
 
         try:
-            return get_ticket_details()
+            return await get_ticket_details()
         except Exception as e:
             return e.args[0]
 
-    def post_ticket_note(self, ticket_id, payload):
+    async def post_ticket_note(self, ticket_id, payload):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def post_ticket_note():
+        async def post_ticket_note():
             self._logger.info(f'Getting posting notes for ticket id: {ticket_id}')
 
             self._logger.info(f'Payload that will be applied: {json.dumps(payload)}')
 
-            response = requests.post(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/notes',
-                                     headers=self._get_request_headers(),
-                                     json=payload,
-                                     verify=False)
+            response = await self._session.post(
+                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/notes',
+                json=payload,
+                headers=self._get_request_headers(),
+                ssl=False,
+            )
 
             return_response = dict.fromkeys(["body", "status"])
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin, re-login and retrying posting ticket note")
                 self.login()
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
 
-            if response.status_code == 403:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Forbidden error from Bruin {response.json()}")
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Forbidden error from Bruin {response_json}")
 
-            if response.status_code == 404:
+            if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not posted for ticket_id {ticket_id} with "
                                    f"payload {payload}")
                 return_response["body"] = "Resource not found"
                 return_response["status"] = 404
 
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}. Retrying...")
                 return_response["body"] = "Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
@@ -211,61 +237,64 @@ class BruinClient:
             return return_response
 
         try:
-            return post_ticket_note()
+            return await post_ticket_note()
         except Exception as e:
             return e.args[0]
 
-    def post_multiple_ticket_notes(self, ticket_id, payload):
+    async def post_multiple_ticket_notes(self, ticket_id, payload):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def post_multiple_ticket_notes():
+        async def post_multiple_ticket_notes():
             self._logger.info(f'Posting multiple notes for ticket id: {ticket_id}. Payload {json.dumps(payload)}')
 
             return_response = dict.fromkeys(["body", "status"])
 
             try:
-                response = requests.post(
+                response = await self._session.post(
                     f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/notes/advanced',
-                    headers=self._get_request_headers(),
                     json=payload,
-                    verify=False,
+                    headers=self._get_request_headers(),
+                    ssl=False,
                 )
-            except ConnectionError as e:
+            except aiohttp.ClientConnectionError as e:
                 self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
                 return_response["body"] = f"Connection error in Bruin API. Cause: {e}"
                 return_response["status"] = 500
                 raise Exception(return_response)
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin, re-login and retrying posting several ticket notes")
                 self.login()
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
 
-            if response.status_code == 403:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Forbidden error from Bruin {response.json()}")
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Forbidden error from Bruin {response_json}")
 
-            if response.status_code == 404:
+            if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resources not posted for ticket_id {ticket_id} with "
                                    f"payload {payload}")
                 return_response["body"] = "Resource not found"
                 return_response["status"] = 404
 
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}. Retrying...")
                 return_response["body"] = "Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
@@ -273,53 +302,58 @@ class BruinClient:
             return return_response
 
         try:
-            return post_multiple_ticket_notes()
+            return await post_multiple_ticket_notes()
         except Exception as e:
             return e.args[0]
 
-    def post_ticket(self, payload):
+    async def post_ticket(self, payload):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def post_ticket():
+        async def post_ticket():
             self._logger.info(f'Posting ticket for client id:{payload["clientId"]}')
             self._logger.info(f'Payload that will be applied : {json.dumps(payload, indent=2)}')
 
-            response = requests.post(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/',
-                                     headers=self._get_request_headers(),
-                                     json=payload,
-                                     verify=False)
+            response = await self._session.post(
+                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/',
+                json=payload,
+                headers=self._get_request_headers(),
+                ssl=False,
+            )
 
             return_response = dict.fromkeys(["body", "status"])
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin, re-login and retrying posting ticket")
                 self.login()
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
 
-            if response.status_code == 403:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Forbidden error from Bruin {response.json()}")
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Forbidden error from Bruin {response_json}")
 
-            if response.status_code == 404:
+            if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not posted for payload of {payload}")
                 return_response["body"] = "Resource not found"
                 return_response["status"] = 404
 
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}. Retrying...")
                 return_response["body"] = "Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
@@ -327,54 +361,58 @@ class BruinClient:
             return return_response
 
         try:
-            return post_ticket()
+            return await post_ticket()
         except Exception as e:
             return e.args[0]
 
-    def update_ticket_status(self, ticket_id, detail_id, payload):
+    async def update_ticket_status(self, ticket_id, detail_id, payload):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def update_ticket_status():
+        async def update_ticket_status():
             self._logger.info(f'Updating ticket status for ticket id: {ticket_id}')
 
             self._logger.info(f'Payload that will be applied (parsed to PascalCase): {json.dumps(payload)}')
 
-            response = requests.put(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details'
-                                    f'/{detail_id}/status',
-                                    headers=self._get_request_headers(),
-                                    json=payload,
-                                    verify=False)
+            response = await self._session.put(
+                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/{detail_id}/status',
+                json=payload,
+                headers=self._get_request_headers(),
+                ssl=False,
+            )
             return_response = dict.fromkeys(["body", "status"])
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin, re-login and retrying updating ticket status")
                 self.login()
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
 
-            if response.status_code == 403:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Forbidden error from Bruin {response.json()}")
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Forbidden error from Bruin {response_json}")
 
-            if response.status_code == 404:
+            if response.status == 404:
                 self._logger.error(f"Got 404 from Bruin, resource not posted for payload of {payload}")
                 return_response["body"] = "Resource not found"
                 return_response["status"] = 404
 
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}. Retrying...")
                 return_response["body"] = "Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
@@ -382,54 +420,59 @@ class BruinClient:
             return return_response
 
         try:
-            return update_ticket_status()
+            return await update_ticket_status()
         except Exception as e:
             return e.args[0]
 
-    def get_management_status(self, filters):
+    async def get_management_status(self, filters):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def get_management_status():
+        async def get_management_status():
             self._logger.info(f'Getting management status for client ID: {filters["client_id"]}')
             parsed_filters = humps.pascalize(filters)
             self._logger.info(f'Filters that will be applied (parsed to PascalCase): {json.dumps(parsed_filters)}')
             return_response = dict.fromkeys(["body", "status"])
 
             try:
-                response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
-                                        headers=self._get_request_headers(),
-                                        params=parsed_filters,
-                                        verify=False)
-            except ConnectionError as e:
+                response = await self._session.get(
+                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory/Attribute',
+                    params=parsed_filters,
+                    headers=self._get_request_headers(),
+                    ssl=False,
+                )
+            except aiohttp.ClientConnectionError as e:
                 self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
                 return_response["body"] = f"Connection error in Bruin API. {e}"
                 return_response["status"] = 500
                 raise Exception(return_response)
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying get management status")
                 self.login()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
 
-            if response.status_code == 403:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Forbidden error from Bruin {response.json()}")
+            if response.status == 403:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Forbidden error from Bruin {response_json}")
 
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}. Retrying...")
                 return_response["body"] = f"Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
@@ -437,15 +480,15 @@ class BruinClient:
             return return_response
 
         try:
-            return get_management_status()
+            return await get_management_status()
         except Exception as e:
             return e.args[0]
 
-    def post_outage_ticket(self, client_id, service_number):
+    async def post_outage_ticket(self, client_id, service_number):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def post_outage_ticket():
+        async def post_outage_ticket():
             self._logger.info(
                 f'Posting outage ticket for client with ID {client_id} and for service number {service_number}'
             )
@@ -461,20 +504,20 @@ class BruinClient:
             url = f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/repair'
 
             try:
-                response = requests.post(url, headers=self._get_request_headers(),
-                                         json=payload, verify=False)
-            except ConnectionError as err:
+                response = await self._session.post(url, json=payload, headers=self._get_request_headers(), ssl=False)
+            except aiohttp.ClientConnectionError as err:
                 self._logger.error(f"A connection error happened while trying to connect to Bruin API. Cause: {err}")
                 return_response["body"] = f"Connection error in Bruin API. Cause: {err}"
                 return_response["status"] = 500
                 raise Exception(return_response)
 
-            status_code = response.status_code
+            status_code = response.status
             if status_code in range(200, 300):
+                response_json = await response.json()
                 # The root key may differ depending on the status code...
-                ticket_data = response.json().get(
+                ticket_data = response_json.get(
                     'assets',
-                    response.json().get('items')
+                    response_json.get('items')
                 )[0]
 
                 # HTTP 409 means the service number is already under an in-progress ticket
@@ -497,11 +540,12 @@ class BruinClient:
                 return_response["status"] = status_code
 
             if status_code == 400:
-                return_response["body"] = response.json()
+                response_json = await response.json()
+                return_response["body"] = response_json
                 return_response["status"] = status_code
                 self._logger.error(
                     f"Got HTTP 400 from Bruin when posting outage ticket with payload {json.dumps(payload)}. "
-                    f"Reason: {response.json()}"
+                    f"Reason: {response_json}"
                 )
 
             if status_code == 401:
@@ -542,40 +586,44 @@ class BruinClient:
             return return_response
 
         try:
-            return post_outage_ticket()
+            return await post_outage_ticket()
         except Exception as e:
             return e.args[0]
 
-    def get_client_info(self, filters):
+    async def get_client_info(self, filters):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def get_client_info():
+        async def get_client_info():
             self._logger.info(f'Getting Bruin client ID for filters: {filters}')
             parsed_filters = humps.pascalize(filters)
             return_response = dict.fromkeys(["body", "status"])
 
             try:
-                response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
-                                        headers=self._get_request_headers(),
-                                        params=parsed_filters,
-                                        verify=False)
-            except ConnectionError as e:
+                response = await self._session.get(
+                    f'{self._config.BRUIN_CONFIG["base_url"]}/api/Inventory',
+                    params=parsed_filters,
+                    headers=self._get_request_headers(),
+                    ssl=False,
+                )
+            except aiohttp.ClientConnectionError as e:
                 self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
                 return_response["body"] = f"Connection error in Bruin API. {e}"
                 return_response["status"] = 500
                 return return_response
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying")
                 self.login()
 
@@ -583,49 +631,51 @@ class BruinClient:
                 return_response["status"] = 401
                 raise Exception(return_response)
 
-            if response.status_code in range(500, 513):
+            if response.status in range(500, 513):
                 return_response["body"] = f"Got internal error from Bruin"
                 return_response["status"] = 500
 
             return return_response
 
         try:
-            return get_client_info()
+            return await get_client_info()
         except Exception as e:
             return e.args[0]
 
-    def change_detail_work_queue(self, ticket_id, filters):
+    async def change_detail_work_queue(self, ticket_id, filters):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def change_detail_work_queue():
+        async def change_detail_work_queue():
             self._logger.info(f'Changing work queue for ticket detail: {filters} and ticket id : {ticket_id}')
-            response = requests.put(
+            response = await self._session.put(
                 f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/details/work',
                 json=filters,
                 headers=self._get_request_headers(),
-                verify=False)
+                ssl=False)
             return_response = dict.fromkeys(["body", "status"])
 
-            if response.status_code in range(200, 299):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            if response.status in range(200, 299):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
                 self._logger.info(f'Work queue changed for ticket detail: {filters}')
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error 400 from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error 400 from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying get management status")
                 self.login()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
 
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}. Retrying...")
                 return_response["body"] = f"Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
@@ -633,41 +683,45 @@ class BruinClient:
             return return_response
 
         try:
-            return change_detail_work_queue()
+            return await change_detail_work_queue()
         except Exception as e:
             return e.args[0]
 
-    def get_possible_detail_next_result(self, ticket_id, filters):
+    async def get_possible_detail_next_result(self, ticket_id, filters):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def get_possible_detail_next_result():
+        async def get_possible_detail_next_result():
             self._logger.info(f'Getting work queues for ticket detail: {filters}')
-            response = requests.get(f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
-                                    headers=self._get_request_headers(),
-                                    params=filters,
-                                    verify=False)
+            response = await self._session.get(
+                f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/{ticket_id}/nextresult',
+                params=filters,
+                headers=self._get_request_headers(),
+                ssl=False,
+            )
             return_response = dict.fromkeys(["body", "status"])
 
-            if response.status_code in range(200, 299):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            if response.status in range(200, 299):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
                 self._logger.info(f'Got possible next work queue results for : {filters}')
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error 400 from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error 400 from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying get management status")
                 self.login()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
 
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}. Retrying...")
                 return_response["body"] = f"Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
@@ -675,47 +729,50 @@ class BruinClient:
             return return_response
 
         try:
-            return get_possible_detail_next_result()
+            return await get_possible_detail_next_result()
         except Exception as e:
             return e.args[0]
 
-    def get_ticket_task_history(self, filters):
+    async def get_ticket_task_history(self, filters):
         @retry(wait=wait_exponential(multiplier=self._config.BRUIN_CONFIG['multiplier'],
                                      min=self._config.BRUIN_CONFIG['min']),
                stop=stop_after_delay(self._config.BRUIN_CONFIG['stop_delay']), reraise=True)
-        def get_ticket_task_history():
+        async def get_ticket_task_history():
             self._logger.info(f'Getting ticket task history for ticket: {filters}')
             return_response = dict.fromkeys(["body", "status"])
             try:
-                response = requests.get(
+                response = await self._session.get(
                     f'{self._config.BRUIN_CONFIG["base_url"]}/api/Ticket/AITicketData?ticketId={filters["ticket_id"]}',
                     headers=self._get_request_headers(),
-                    verify=False)
-            except ConnectionError as e:
+                    ssl=False,
+                )
+            except aiohttp.ClientConnectionError as e:
                 self._logger.error(f"A connection error happened while trying to connect to Bruin API. {e}")
                 return_response["body"] = f"Connection error in Bruin API. {e}"
                 return_response["status"] = 500
                 raise Exception(return_response)
 
-            if response.status_code in range(200, 300):
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
+            if response.status in range(200, 300):
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
                 self._logger.info(f'Got ticket task history for : {filters}')
 
-            if response.status_code == 400:
-                return_response["body"] = response.json()
-                return_response["status"] = response.status_code
-                self._logger.error(f"Got error 400 from Bruin {response.json()}")
+            if response.status == 400:
+                response_json = await response.json()
+                return_response["body"] = response_json
+                return_response["status"] = response.status
+                self._logger.error(f"Got error 400 from Bruin {response_json}")
 
-            if response.status_code == 401:
+            if response.status == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying get ticket current task")
                 self.login()
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
 
-            if response.status_code in range(500, 513):
-                self._logger.error(f"Got {response.status_code}. Retrying...")
+            if response.status in range(500, 513):
+                self._logger.error(f"Got {response.status}. Retrying...")
                 return_response["body"] = "Got internal error from Bruin"
                 return_response["status"] = 500
                 raise Exception(return_response)
@@ -723,6 +780,6 @@ class BruinClient:
             return return_response
 
         try:
-            return get_ticket_task_history()
+            return await get_ticket_task_history()
         except Exception as e:
             return e.args[0]

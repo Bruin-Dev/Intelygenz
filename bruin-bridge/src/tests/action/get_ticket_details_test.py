@@ -39,12 +39,12 @@ class TestGetTicketDetails:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details = Mock(return_value=ticket_details)
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details)
 
         ticket_details = GetTicketDetails(logger, event_bus, bruin_repository)
         await ticket_details.send_ticket_details(msg)
 
-        ticket_details._bruin_repository.get_ticket_details.assert_not_called()
+        ticket_details._bruin_repository.get_ticket_details.assert_not_awaited()
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
             response_topic, send_details_response
         )
@@ -70,12 +70,12 @@ class TestGetTicketDetails:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details = Mock(return_value=ticket_details)
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details)
 
         ticket_details = GetTicketDetails(logger, event_bus, bruin_repository)
         await ticket_details.send_ticket_details(msg)
 
-        ticket_details._bruin_repository.get_ticket_details.assert_not_called()
+        ticket_details._bruin_repository.get_ticket_details.assert_not_awaited()
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
             response_topic, send_details_response
         )
@@ -104,12 +104,12 @@ class TestGetTicketDetails:
         event_bus.publish_message = CoroutineMock()
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_details = Mock(return_value=ticket_details)
+        bruin_repository.get_ticket_details = CoroutineMock(return_value=ticket_details)
 
         ticket_details = GetTicketDetails(logger, event_bus, bruin_repository)
         await ticket_details.send_ticket_details(msg)
 
-        ticket_details._bruin_repository.get_ticket_details.assert_called_once_with(ticket_id)
+        ticket_details._bruin_repository.get_ticket_details.assert_awaited_once_with(ticket_id)
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
             response_topic, send_details_response
         )

@@ -30,7 +30,7 @@ class TestGetTicketTaskHistory:
         bruin_repository_task_history_return = {'body': return_body,
                                                 'status': return_status}
         bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = Mock(return_value=bruin_repository_task_history_return)
+        bruin_repository.get_ticket_task_history = CoroutineMock(return_value=bruin_repository_task_history_return)
 
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
@@ -60,7 +60,7 @@ class TestGetTicketTaskHistory:
         return_status = 400
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock()
 
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
@@ -89,7 +89,7 @@ class TestGetTicketTaskHistory:
         return_status = 400
 
         bruin_repository = Mock()
-        bruin_repository.get_ticket_task_history = Mock()
+        bruin_repository.get_ticket_task_history = CoroutineMock()
 
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"

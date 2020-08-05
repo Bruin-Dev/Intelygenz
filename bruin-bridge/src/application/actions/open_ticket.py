@@ -34,7 +34,7 @@ class OpenTicket:
             return
 
         self._logger.info(f'Updating the ticket status for ticket id: {ticket_id} to OPEN')
-        result = self._bruin_repository.open_ticket(ticket_id, detail_id)
+        result = await self._bruin_repository.open_ticket(ticket_id, detail_id)
 
         response['body'] = result['body']
         response["status"] = result["status"]

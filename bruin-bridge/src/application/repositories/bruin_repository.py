@@ -14,13 +14,8 @@ class BruinRepository:
         response['body'] = []
         response['status'] = 200
 
-        loop = asyncio.get_event_loop()
         futures = [
-            loop.run_in_executor(
-                None,
-                self._get_tickets_by_status,
-                status, params.copy(), response
-            )
+            self._get_tickets_by_status(status, params.copy(), response)
             for status in ticket_status
         ]
         try:
@@ -33,18 +28,17 @@ class BruinRepository:
 
         return response
 
-    def _get_tickets_by_status(self, status, params, response):
+    async def _get_tickets_by_status(self, status, params, response):
         params["TicketStatus"] = status
-        status_ticket_list = self._bruin_client.get_all_tickets(params)
+        status_ticket_list = await self._bruin_client.get_all_tickets(params)
         response['status'] = status_ticket_list['status']
         if status_ticket_list["status"] not in range(200, 300):
-            response['body'] = status_ticket_list['body']
-            raise Exception()
+            return []
 
         return status_ticket_list["body"]
 
-    def get_ticket_details(self, ticket_id):
-        return self._bruin_client.get_ticket_details(ticket_id)
+    async def get_ticket_details(self, ticket_id):
+        return await self._bruin_client.get_ticket_details(ticket_id)
 
     async def get_ticket_details_by_edge_serial(self, edge_serial, params, ticket_statuses):
         response = dict.fromkeys(["body", "status"])
@@ -57,13 +51,8 @@ class BruinRepository:
         if filtered_tickets['status'] not in range(200, 300):
             return filtered_tickets
 
-        loop = asyncio.get_event_loop()
         futures = [
-            loop.run_in_executor(
-                None,
-                self._search_ticket_details_for_serial,
-                edge_serial, ticket, response
-            )
+            self._search_ticket_details_for_serial(edge_serial, ticket, response)
             for ticket in filtered_tickets['body']
         ]
 
@@ -75,10 +64,10 @@ class BruinRepository:
 
         return response
 
-    def _search_ticket_details_for_serial(self, edge_serial, ticket, response):
+    async def _search_ticket_details_for_serial(self, edge_serial, ticket, response):
         results = []
         ticket_id = ticket['ticketID']
-        ticket_details_dict = self.get_ticket_details(ticket_id)
+        ticket_details_dict = await self.get_ticket_details(ticket_id)
 
         ticket_details_response_status = ticket_details_dict['status']
         if ticket_details_response_status not in range(200, 300):
@@ -135,11 +124,11 @@ class BruinRepository:
 
         return ticket_details_list
 
-    def post_ticket_note(self, ticket_id, note):
+    async def post_ticket_note(self, ticket_id, note):
         payload = {"note": note}
-        return self._bruin_client.post_ticket_note(ticket_id, payload)
+        return await self._bruin_client.post_ticket_note(ticket_id, payload)
 
-    def post_multiple_ticket_notes(self, ticket_id: int, notes: List[dict]) -> dict:
+    async def post_multiple_ticket_notes(self, ticket_id: int, notes: List[dict]) -> dict:
         payload = {
             'notes': [],
         }
@@ -162,7 +151,7 @@ class BruinRepository:
 
             payload['notes'].append(note_for_payload)
 
-        response = self._bruin_client.post_multiple_ticket_notes(ticket_id, payload)
+        response = await self._bruin_client.post_multiple_ticket_notes(ticket_id, payload)
 
         if response['status'] not in range(200, 300):
             return response
@@ -170,19 +159,19 @@ class BruinRepository:
         response['body'] = response['body']['ticketNotes']
         return response
 
-    def post_ticket(self, payload):
-        return self._bruin_client.post_ticket(payload)
+    async def post_ticket(self, payload):
+        return await self._bruin_client.post_ticket(payload)
 
-    def open_ticket(self, ticket_id, detail_id):
+    async def open_ticket(self, ticket_id, detail_id):
         payload = {"Status": "O"}
-        return self._bruin_client.update_ticket_status(ticket_id, detail_id, payload)
+        return await self._bruin_client.update_ticket_status(ticket_id, detail_id, payload)
 
-    def resolve_ticket(self, ticket_id, detail_id):
+    async def resolve_ticket(self, ticket_id, detail_id):
         payload = {"Status": "R"}
-        return self._bruin_client.update_ticket_status(ticket_id, detail_id, payload)
+        return await self._bruin_client.update_ticket_status(ticket_id, detail_id, payload)
 
-    def get_management_status(self, filters):
-        response = self._bruin_client.get_management_status(filters)
+    async def get_management_status(self, filters):
+        response = await self._bruin_client.get_management_status(filters)
 
         if response["status"] not in range(200, 300):
             return response
@@ -199,8 +188,8 @@ class BruinRepository:
 
         return response
 
-    def post_outage_ticket(self, client_id, service_number):
-        response = self._bruin_client.post_outage_ticket(client_id, service_number)
+    async def post_outage_ticket(self, client_id, service_number):
+        response = await self._bruin_client.post_outage_ticket(client_id, service_number)
 
         status_code = response['status']
         if not (status_code in range(200, 300) or status_code == 409 or status_code == 471):
@@ -209,8 +198,8 @@ class BruinRepository:
         response['body'] = response['body']['ticketId']
         return response
 
-    def get_client_info(self, filters):
-        response = self._bruin_client.get_client_info(filters)
+    async def get_client_info(self, filters):
+        response = await self._bruin_client.get_client_info(filters)
 
         if response["status"] not in range(200, 300):
             return response
@@ -233,18 +222,18 @@ class BruinRepository:
         response["body"] = response_body
         return response
 
-    def get_next_results_for_ticket_detail(self, ticket_id, detail_id, service_number):
+    async def get_next_results_for_ticket_detail(self, ticket_id, detail_id, service_number):
         get_work_queues_filters = {
             "ServiceNumber": service_number,
             "DetailId": detail_id,
         }
 
-        next_results_response = self._bruin_client.get_possible_detail_next_result(
+        next_results_response = await self._bruin_client.get_possible_detail_next_result(
             ticket_id, get_work_queues_filters
         )
         return next_results_response
 
-    def change_detail_work_queue(self, ticket_id, filters):
+    async def change_detail_work_queue(self, ticket_id, filters):
         service_number = filters["service_number"]
         ticket_detail_id = filters["detail_id"]
 
@@ -253,7 +242,7 @@ class BruinRepository:
             "DetailId": ticket_detail_id,
         }
 
-        possible_work_queues_response = self._bruin_client.get_possible_detail_next_result(
+        possible_work_queues_response = await self._bruin_client.get_possible_detail_next_result(
             ticket_id, get_work_queues_filters
         )
         possible_work_queues_response_body = possible_work_queues_response['body']
@@ -297,10 +286,10 @@ class BruinRepository:
             "notes": [],
             "resultTypeId": work_queue_id
         }
-        return self._bruin_client.change_detail_work_queue(ticket_id, put_work_queue_payload)
+        return await self._bruin_client.change_detail_work_queue(ticket_id, put_work_queue_payload)
 
-    def get_ticket_task_history(self, filters):
-        ticket_current_task = self._bruin_client.get_ticket_task_history(filters)
+    async def get_ticket_task_history(self, filters):
+        ticket_current_task = await self._bruin_client.get_ticket_task_history(filters)
         if ticket_current_task["status"] in range(200, 300):
             ticket_current_task["body"] = ticket_current_task["body"]["result"]
         return ticket_current_task

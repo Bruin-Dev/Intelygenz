@@ -21,7 +21,9 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_missing_client_id_test(self):
         logger = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.post_outage_ticket = CoroutineMock()
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -36,7 +38,7 @@ class TestPostOutageTicket:
 
         await post_outage_ticket.post_outage_ticket(event_bus_request)
 
-        bruin_repository.post_outage_ticket.assert_not_called()
+        bruin_repository.post_outage_ticket.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(
             "some.topic",
             {
@@ -49,7 +51,9 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_missing_service_number_test(self):
         logger = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.post_outage_ticket = CoroutineMock()
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -64,7 +68,7 @@ class TestPostOutageTicket:
 
         await post_outage_ticket.post_outage_ticket(event_bus_request)
 
-        bruin_repository.post_outage_ticket.assert_not_called()
+        bruin_repository.post_outage_ticket.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(
             "some.topic",
             {
@@ -77,7 +81,9 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_missing_body_test(self):
         logger = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.post_outage_ticket = CoroutineMock()
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -89,7 +95,7 @@ class TestPostOutageTicket:
 
         await post_outage_ticket.post_outage_ticket(event_bus_request)
 
-        bruin_repository.post_outage_ticket.assert_not_called()
+        bruin_repository.post_outage_ticket.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(
             "some.topic",
             {
@@ -102,7 +108,9 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_invalid_client_id_test(self):
         logger = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.post_outage_ticket = CoroutineMock()
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -118,7 +126,7 @@ class TestPostOutageTicket:
 
         await post_outage_ticket.post_outage_ticket(event_bus_request)
 
-        bruin_repository.post_outage_ticket.assert_not_called()
+        bruin_repository.post_outage_ticket.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(
             "some.topic",
             {
@@ -131,7 +139,9 @@ class TestPostOutageTicket:
     @pytest.mark.asyncio
     async def post_outage_ticket_with_invalid_client_id_test(self):
         logger = Mock()
+
         bruin_repository = Mock()
+        bruin_repository.post_outage_ticket = CoroutineMock()
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -147,7 +157,7 @@ class TestPostOutageTicket:
 
         await post_outage_ticket.post_outage_ticket(event_bus_request)
 
-        bruin_repository.post_outage_ticket.assert_not_called()
+        bruin_repository.post_outage_ticket.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with(
             "some.topic",
             {
@@ -173,7 +183,7 @@ class TestPostOutageTicket:
         logger = Mock()
 
         bruin_repository = Mock()
-        bruin_repository.post_outage_ticket = Mock(return_value=repository_response)
+        bruin_repository.post_outage_ticket = CoroutineMock(return_value=repository_response)
 
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
@@ -189,7 +199,7 @@ class TestPostOutageTicket:
 
         await post_outage_ticket.post_outage_ticket(event_bus_request)
 
-        bruin_repository.post_outage_ticket.assert_called_once_with(client_id, service_number)
+        bruin_repository.post_outage_ticket.assert_awaited_once_with(client_id, service_number)
         event_bus.publish_message.assert_awaited_once_with(
             "some.topic",
             {

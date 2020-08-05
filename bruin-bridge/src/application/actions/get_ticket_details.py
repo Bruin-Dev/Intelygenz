@@ -30,7 +30,7 @@ class GetTicketDetails:
             return
 
         self._logger.info(f'Collecting ticket details for ticket id: {ticket_id}...')
-        ticket_details = self._bruin_repository.get_ticket_details(ticket_id)
+        ticket_details = await self._bruin_repository.get_ticket_details(ticket_id)
 
         detail_response['body'] = ticket_details['body']
         detail_response['status'] = ticket_details['status']

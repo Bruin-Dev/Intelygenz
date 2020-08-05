@@ -34,7 +34,7 @@ class TestGetClientInfo:
             },
             "status": 200
         }
-        bruin_repository.get_client_info = Mock(return_value=client_info)
+        bruin_repository.get_client_info = CoroutineMock(return_value=client_info)
 
         filters = {
             "service_number": "VC05400009999"
@@ -53,7 +53,7 @@ class TestGetClientInfo:
 
         get_client_info = GetClientInfo(logger, event_bus, bruin_repository)
         await get_client_info.get_client_info(event_bus_request)
-        bruin_repository.get_client_info.assert_called_once_with(filters)
+        bruin_repository.get_client_info.assert_awaited_once_with(filters)
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
         assert logger.info.called
 
@@ -63,7 +63,9 @@ class TestGetClientInfo:
         logger.info = Mock()
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
+
         bruin_repository = Mock()
+        bruin_repository.get_client_info = CoroutineMock()
 
         event_bus_request = {
             "request_id": 19,
@@ -79,7 +81,7 @@ class TestGetClientInfo:
 
         get_client_info = GetClientInfo(logger, event_bus, bruin_repository)
         await get_client_info.get_client_info(event_bus_request)
-        bruin_repository.get_client_info.assert_not_called()
+        bruin_repository.get_client_info.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
         assert logger.error.called
 
@@ -89,7 +91,9 @@ class TestGetClientInfo:
         logger.info = Mock()
         event_bus = Mock()
         event_bus.publish_message = CoroutineMock()
+
         bruin_repository = Mock()
+        bruin_repository.get_client_info = CoroutineMock()
 
         event_bus_request = {
             "request_id": 19,
@@ -105,6 +109,6 @@ class TestGetClientInfo:
 
         get_client_info = GetClientInfo(logger, event_bus, bruin_repository)
         await get_client_info.get_client_info(event_bus_request)
-        bruin_repository.get_client_info.assert_not_called()
+        bruin_repository.get_client_info.assert_not_awaited()
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
         assert logger.error.called

@@ -39,7 +39,7 @@ class GetTicketTaskHistory:
             f'Getting ticket task history with filters: {json.dumps(filters)}'
         )
 
-        ticket_task_history = self._bruin_repository.get_ticket_task_history(filters)
+        ticket_task_history = await self._bruin_repository.get_ticket_task_history(filters)
 
         response["body"] = ticket_task_history["body"]
         response["status"] = ticket_task_history["status"]

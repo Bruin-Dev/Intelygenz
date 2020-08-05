@@ -33,7 +33,7 @@ class TestChangeDetailWorkQueue:
             },
             "status": 200
         }
-        bruin_repository.change_detail_work_queue = Mock(return_value=put_response)
+        bruin_repository.change_detail_work_queue = CoroutineMock(return_value=put_response)
 
         ticket_id = 4503440
         msg_body = {
@@ -61,7 +61,7 @@ class TestChangeDetailWorkQueue:
 
         change_detail_work_queue = ChangeDetailWorkQueue(logger, event_bus, bruin_repository)
         await change_detail_work_queue.change_detail_work_queue(event_bus_request)
-        bruin_repository.change_detail_work_queue.assert_called_once_with(ticket_id, filters=filters)
+        bruin_repository.change_detail_work_queue.assert_awaited_once_with(ticket_id, filters=filters)
         event_bus.publish_message.assert_awaited_once_with("some.topic", event_bus_response)
 
     @pytest.mark.asyncio
