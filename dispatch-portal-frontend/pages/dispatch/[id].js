@@ -13,6 +13,7 @@ import Modal from '../../components/modal/Modal';
 import { config } from '../../config/config';
 
 import './id.scss';
+import { Routes } from '../../config/routes';
 
 function DispatchDetail({ authToken }) {
   const router = useRouter();
@@ -29,7 +30,7 @@ function DispatchDetail({ authToken }) {
     const response = await new DispatchService().update(id, vendor);
 
     if (response && !response.error) {
-      setData(response);
+      router.push(`${Routes.BASE()}?redirect=?true`);
     } else {
       setCancelError(true);
     }
@@ -71,8 +72,7 @@ function DispatchDetail({ authToken }) {
         </button>
       ) : (
         <div>
-          {
-          data && data.status && data.status !== TYPES_STATUS.cancelled.value && (
+          {data && data.status && data.status !== TYPES_STATUS.cancelled.value && (
             <div className="flex flex-col pt-2 px-10">
               <div className="block">
                 <div className="float-right flex flex-col">

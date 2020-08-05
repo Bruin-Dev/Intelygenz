@@ -217,7 +217,7 @@ describe('dispatch service tests', () => {
    *
    * UPDATE DISPATCH
    * * */
-  /*
+  /** ***
   it('fetch UPDATE DISPATCH: successfully data from an API(LIT)', async () => {
     const apiResponseMock = {
       id: 123,
@@ -275,7 +275,7 @@ describe('dispatch service tests', () => {
       error: 'Not vendor selected'
     });
   });
-  */
+   * * */
   /** ***
    *
    * UPLOAD FILES

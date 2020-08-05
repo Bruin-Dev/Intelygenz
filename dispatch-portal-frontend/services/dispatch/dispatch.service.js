@@ -132,13 +132,13 @@ export class DispatchService {
       if (config.VENDORS.LIT === vendor) {
         res = await this.axiosI.get(`${API_URLS.DISPATCH_LIT}/${id}/cancel`);
 
-        return res;
+        return res.data;
       }
 
       if (config.VENDORS.CTS === vendor) {
         res = await this.axiosI.get(`${API_URLS.DISPATCH_CTS}/${id}/cancel`);
 
-        return res;
+        return res.data;
       }
       return { error: 'Not vendor selected' };
     } catch (error) {
