@@ -2,7 +2,6 @@ from unittest.mock import Mock
 
 import pytest
 from application.actions.create_dispatch import CreateDispatch
-from asynctest import CoroutineMock
 
 from config import testconfig as config
 
@@ -23,218 +22,73 @@ class TestCreateDispatch:
         assert create_dispatch._lit_repository == lit_repo
 
     @pytest.mark.asyncio
-    async def create_dispatch_200_ok_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+    async def create_dispatch_200_ok_2_test(self, instance_dispatch, dispatch, msg, return_msg):
         return_body = {'Dispatch': {'Dispatch_Number': 123}}
         return_status = 200
         create_dispatch_return = {'body': return_body, 'status': return_status}
-        lit_repo = Mock()
-        lit_repo.create_dispatch = Mock(return_value=create_dispatch_return)
 
-        dipatch_contents = {
-            "RequestDispatch": {
-                "Date_of_Dispatch": "2016-11-16",
-                "MetTel_Bruin_TicketID": "D123",
-                "Site_Survey_Quote_Required": False,
-                "Local_Time_of_Dispatch": "7AM-9AM",
-                "Time_Zone_Local": "Pacific Time",
-                "Turn_Up": "Yes",
-                "Hard_Time_of_Dispatch_Local": "7AM-9AM",
-                "Hard_Time_of_Dispatch_Time_Zone_Local": "Eastern Time",
-                "Name_of_MetTel_Requester": "Test User1",
-                "MetTel_Group_Email": "test@mettel.net",
-                "MetTel_Requester_Email": "test@mettel.net",
-                "MetTel_Department": "Customer Care",
-                "MetTel_Department_Phone_Number": "1233211234",
-                "Backup_MetTel_Department_Phone_Number": "1233211234",
-                "Job_Site": "test",
-                "Job_Site_Street": "test street",
-                "Job_Site_City": "test city",
-                "Job_Site_State": "test state2",
-                "Job_Site_Zip_Code": "123321",
-                "Scope_of_Work": "test",
-                "MetTel_Tech_Call_In_Instructions": "test",
-                "Special_Dispatch_Notes": "Test Create No Special Dispatch Notes to Pass Forward",
-                "Job_Site_Contact_Name_and_Phone_Number": "test",
-                "Information_for_Tech": "test",
-                "Special_Materials_Needed_for_Dispatch": "test"
-            }
-        }
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': dipatch_contents
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': return_body,
-            'status': return_status
-        }
-        create_dispatch_action = CreateDispatch(logger, configs, event_bus, lit_repo)
-        await create_dispatch_action.create_dispatch(msg)
+        instance_dispatch._lit_repository.create_dispatch = Mock(return_value=create_dispatch_return)
 
-        lit_repo.create_dispatch.assert_called_once_with(dipatch_contents)
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        msg['body'] = dispatch
+        await instance_dispatch.create_dispatch(msg)
+
+        instance_dispatch._lit_repository.create_dispatch.assert_called_once_with(dispatch)
+        return_msg['status'] = return_status
+        return_msg['body'] = return_body
+        instance_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def create_dispatch_400_ok_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+    async def create_dispatch_400_ok_test(self, instance_dispatch, dispatch, msg, return_msg):
         return_body = {'status': 'Error'}
         return_status = 400
         create_dispatch_return = {'body': return_body, 'status': return_status}
-        lit_repo = Mock()
-        lit_repo.create_dispatch = Mock(return_value=create_dispatch_return)
 
-        dipatch_contents = {
-            "RequestDispatch": {
-                "Date_of_Dispatch": "2016-11-16",
-                "MetTel_Bruin_TicketID": "D123",
-                "Site_Survey_Quote_Required": False,
-                "Local_Time_of_Dispatch": "7AM-9AM",
-                "Time_Zone_Local": "Pacific Time",
-                "Hard_Time_of_Dispatch_Local": "7AM-9AM",
-                "Hard_Time_of_Dispatch_Time_Zone_Local": "Pacific Time",
-                "Turn_Up": "Yes",
-                "Name_of_MetTel_Requester": "Test User1",
-                "MetTel_Group_Email": "test@mettel.net",
-                "MetTel_Requester_Email": "test@mettel.net",
-                "MetTel_Department": "Customer Care",
-                "MetTel_Department_Phone_Number": "1233211234",
-                "Backup_MetTel_Department_Phone_Number": "1233211234",
-                "Job_Site": "test",
-                "Job_Site_Street": "test street",
-                "Job_Site_City": "test city",
-                "Job_Site_State": "test state2",
-                "Job_Site_Zip_Code": "123321",
-                "Scope_of_Work": "test",
-                "MetTel_Tech_Call_In_Instructions": "test",
-                "Special_Dispatch_Notes": "Test Create No Special Dispatch Notes to Pass Forward",
-                "Job_Site_Contact_Name_and_Phone_Number": "test",
-                "Information_for_Tech": "test",
-                "Special_Materials_Needed_for_Dispatch": "test"
-            }
-        }
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-                'request_id': request_id,
-                'response_topic': response_topic,
-                'body': dipatch_contents
-        }
-        expected_return = {
-                            'request_id': request_id,
-                            'body': return_body,
-                            'status': return_status
+        instance_dispatch._lit_repository.create_dispatch = Mock(return_value=create_dispatch_return)
 
-        }
-        create_dispatch_action = CreateDispatch(logger, configs, event_bus, lit_repo)
-        await create_dispatch_action.create_dispatch(msg)
+        msg['body'] = dispatch
+        await instance_dispatch.create_dispatch(msg)
 
-        lit_repo.create_dispatch.assert_called_once_with(dipatch_contents)
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_dispatch._lit_repository.create_dispatch.assert_called_once_with(dispatch)
+        return_msg['status'] = return_status
+        return_msg['body'] = return_body
+        instance_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def create_dispatch_missing_keys_ko_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        lit_repo = Mock()
-
-        dipatch_contents = {
+    async def create_dispatch_missing_keys_ko_test(self, instance_dispatch, required_dispatch_keys, msg, return_msg):
+        msg['body'] = {
             "RequestDispatch": {
                 "Special_Materials_Needed_for_Dispatch": "test"
             }
         }
-        dispatch_required_keys = ["date_of_dispatch", "mettel_bruin_ticketid", "site_survey_quote_required",
-                                  "local_time_of_dispatch", "time_zone_local",
-                                  "job_site", "job_site_street",
-                                  "job_site_city", "job_site_state", "job_site_zip_code",
-                                  "job_site_contact_name_and_phone_number", "special_materials_needed_for_dispatch",
-                                  "scope_of_work", "mettel_tech_call_in_instructions", "name_of_mettel_requester",
-                                  "mettel_department", "mettel_requester_email", "mettel_department_phone_number"]
-        request_id = '123'
-        response_topic = 'some.response.topic'
 
-        msg = {
-                'request_id': request_id,
-                'response_topic': response_topic,
-                'body': dipatch_contents
-        }
+        await instance_dispatch.create_dispatch(msg=msg)
 
-        expected_return = {
-                            'request_id': request_id,
-                            'body': f'Must include the following keys in request: {dispatch_required_keys}',
-                            'status': 400
+        return_msg['status'] = 400
+        return_msg['body'] = f'Must include the following keys in request: {required_dispatch_keys}'
 
-        }
-        create_dispatch_action = CreateDispatch(logger, configs, event_bus, lit_repo)
-        await create_dispatch_action.create_dispatch(msg)
-
-        lit_repo.create_dispatch.assert_not_called()
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_dispatch._lit_repository.create_dispatch.assert_not_called()
+        instance_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def create_dispatch_missing_request_dispatch_ko_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        lit_repo = Mock()
+    async def create_dispatch_missing_request_dispatch_ko_test(self, instance_dispatch, msg, return_msg):
+        msg['body'] = {}
 
-        request_id = '123'
-        response_topic = 'some.response.topic'
+        await instance_dispatch.create_dispatch(msg)
 
-        msg = {
-                'request_id': request_id,
-                'response_topic': response_topic,
-                'body': {}
-        }
+        return_msg['status'] = 400
+        return_msg['body'] = 'Must include "RequestDispatch" in request'
 
-        expected_return = {
-                            'request_id': request_id,
-                            'body': 'Must include "RequestDispatch" in request',
-                            'status': 400
-
-        }
-        create_dispatch_action = CreateDispatch(logger, configs, event_bus, lit_repo)
-        await create_dispatch_action.create_dispatch(msg)
-
-        lit_repo.create_dispatch.assert_not_called()
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_dispatch._lit_repository.create_dispatch.assert_not_called()
+        instance_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def create_dispatch_missing_body_ko_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        lit_repo = Mock()
+    async def create_dispatch_missing_body_ko_test(self, instance_dispatch, msg, return_msg):
+        del msg['body']
 
-        request_id = '123'
-        response_topic = 'some.response.topic'
+        await instance_dispatch.create_dispatch(msg)
 
-        msg = {
-                'request_id': request_id,
-                'response_topic': response_topic,
-        }
+        return_msg['status'] = 400
+        return_msg['body'] = 'Must include "body" in request'
 
-        expected_return = {
-                            'request_id': request_id,
-                            'body': 'Must include "body" in request',
-                            'status': 400
-
-        }
-        create_dispatch_action = CreateDispatch(logger, configs, event_bus, lit_repo)
-        await create_dispatch_action.create_dispatch(msg)
-
-        lit_repo.create_dispatch.assert_not_called()
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_dispatch._lit_repository.create_dispatch.assert_not_called()
+        instance_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)

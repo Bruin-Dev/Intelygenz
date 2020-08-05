@@ -23,144 +23,80 @@ class TestUpdateDispatch:
         assert upload_file._lit_repository == lit_repo
 
     @pytest.mark.asyncio
-    async def upload_file_test_ok_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+    async def upload_file_test_ok_test(self, instance_upload_dispatch, msg, return_msg):
         return_body = 'Sucessfully uploaded'
         return_status = 200
-        upload_file_return = {'body': return_body, 'status': return_status}
 
-        lit_repo = Mock()
-        lit_repo.upload_file = Mock(return_value=upload_file_return)
+        instance_upload_dispatch._lit_repository.upload_file = Mock(
+            return_value={'body': return_body, 'status': return_status})
 
         dispatch_number = '123'
         payload = 'some payload'
         file_name = 'test.pdf'
-        content_type = "application/octet-stream"
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': {
-                      'dispatch_number': dispatch_number,
-                      'payload': payload,
-                      'file_name': file_name}
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': return_body,
-            'status': return_status
 
-        }
-        upload_file_action = UploadFile(logger, configs, event_bus, lit_repo)
-        await upload_file_action.upload_file(msg)
+        msg['body'] = {
+            'dispatch_number': '123',
+            'payload': payload,
+            'file_name': file_name}
+        return_msg['status'] = return_status
+        return_msg['body'] = return_body
 
-        lit_repo.upload_file.assert_called_once_with(dispatch_number, payload, file_name, content_type)
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        await instance_upload_dispatch.upload_file(msg)
+
+        instance_upload_dispatch._lit_repository.upload_file.assert_called_once_with(dispatch_number, payload,
+                                                                                     file_name,
+                                                                                     "application/octet-stream")
+        instance_upload_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def upload_file_test_file_content_provided_ok_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+    async def upload_file_test_file_content_provided_ok_test(self, instance_upload_dispatch, msg, return_msg):
         return_body = 'Sucessfully uploaded'
         return_status = 200
-        upload_file_return = {'body': return_body, 'status': return_status}
 
-        lit_repo = Mock()
-        lit_repo.upload_file = Mock(return_value=upload_file_return)
+        instance_upload_dispatch._lit_repository.upload_file = Mock(
+            return_value={'body': return_body, 'status': return_status})
 
         dispatch_number = '123'
         payload = 'some payload'
         file_name = 'test.pdf'
         content_type = "application/pdf"
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': {
-                      'dispatch_number': dispatch_number,
-                      'payload': payload,
-                      'file_name': file_name,
-                      'file_content_type': content_type}
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': return_body,
-            'status': return_status
+        msg['body'] = {
+            'dispatch_number': dispatch_number,
+            'payload': payload,
+            'file_name': file_name,
+            'file_content_type': content_type}
+        return_msg['status'] = return_status
+        return_msg['body'] = return_body
 
-        }
-        upload_file_action = UploadFile(logger, configs, event_bus, lit_repo)
-        await upload_file_action.upload_file(msg)
+        await instance_upload_dispatch.upload_file(msg)
 
-        lit_repo.upload_file.assert_called_once_with(dispatch_number, payload, file_name, content_type)
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_upload_dispatch._lit_repository.upload_file.assert_called_once_with(dispatch_number, payload,
+                                                                                     file_name, content_type)
+        instance_upload_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def upload_file_test_missing_keys_ko_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
-        lit_repo = Mock()
-
-        upload_file_required_keys = ["dispatch_number", "payload", "file_name"]
-
+    async def upload_file_test_missing_keys_ko_test(self, instance_upload_dispatch, msg, return_msg):
         dispatch_number = '123'
-        payload = 'some payload'
         file_name = 'test.pdf'
-        content_type = "application/octet-stream"
 
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': {
-                      'dispatch_number': dispatch_number,
-                      'file_name': file_name}
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': f'Must include the following keys in request: {upload_file_required_keys}',
-            'status': 400
+        msg['body'] = {
+            'dispatch_number': dispatch_number,
+            'file_name': file_name}
+        return_msg['status'] = 400
+        return_msg['body'] = f"Must include the following keys in request: ['dispatch_number', 'payload', 'file_name']"
 
-        }
-        upload_file_action = UploadFile(logger, configs, event_bus, lit_repo)
-        await upload_file_action.upload_file(msg)
+        await instance_upload_dispatch.upload_file(msg)
 
-        lit_repo.upload_file.assert_not_called()
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_upload_dispatch._lit_repository.upload_file.assert_not_called()
+        instance_upload_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def upload_file_test_missing_body_ko_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+    async def upload_file_test_missing_body_ko_test(self, instance_upload_dispatch, msg, return_msg):
+        del msg['body']
+        return_msg['status'] = 400
+        return_msg['body'] = 'Must include "body" in request'
 
-        lit_repo = Mock()
+        await instance_upload_dispatch.upload_file(msg)
 
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': 'Must include "body" in request',
-            'status': 400
-
-        }
-        upload_file_action = UploadFile(logger, configs, event_bus, lit_repo)
-        await upload_file_action.upload_file(msg)
-
-        lit_repo.upload_file.assert_not_called()
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_upload_dispatch._lit_repository.upload_file.assert_not_called()
+        instance_upload_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)

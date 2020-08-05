@@ -23,17 +23,12 @@ class TestUpdateDispatch:
         assert update_dispatch._lit_repository == lit_repo
 
     @pytest.mark.asyncio
-    async def update_dispatch_200_ok_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+    async def update_dispatch_200_ok_test(self, instance_update_dispatch, msg, return_msg):
         dispatch_number = 123
         return_body = {'Dispatch': {'Dispatch_Number': dispatch_number}}
         return_status = 200
-        update_dispatch_return = {'body': return_body, 'status': return_status}
-        lit_repo = Mock()
-        lit_repo.update_dispatch = Mock(return_value=update_dispatch_return)
+        instance_update_dispatch._lit_repository.update_dispatch = Mock(
+            return_value={'body': return_body, 'status': return_status})
 
         dipatch_contents = {
             "RequestDispatch": {
@@ -44,105 +39,50 @@ class TestUpdateDispatch:
         }
         request_id = '123'
         response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': dipatch_contents
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': return_body,
-            'status': return_status
+        msg['request_id'] = request_id
+        msg['response_topic'] = response_topic
+        msg['body'] = dipatch_contents
+        return_msg['request_id'] = request_id
+        return_msg['status'] = return_status
+        return_msg['body'] = return_body
 
-        }
-        update_dispatch_action = UpdateDispatch(logger, configs, event_bus, lit_repo)
-        await update_dispatch_action.update_dispatch(msg)
+        await instance_update_dispatch.update_dispatch(msg)
 
-        lit_repo.update_dispatch.assert_called_once_with(dipatch_contents)
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_update_dispatch._lit_repository.update_dispatch.assert_called_once_with(dipatch_contents)
+        instance_update_dispatch._event_bus.publish_message.assert_called_once_with(response_topic, return_msg)
 
     @pytest.mark.asyncio
-    async def update_dispatch_no_dispatch_number_ko_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        lit_repo = Mock()
-
-        dipatch_contents = {
+    async def update_dispatch_no_dispatch_number_ko_test(self, instance_update_dispatch, msg, return_msg):
+        msg['body'] = {
             "RequestDispatch": {
                 "information_for_tech": "test",
                 "special_materials_needed_for_dispatch": "test"
             }
         }
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': dipatch_contents
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': 'Must include "Dispatch_Number" in request',
-            'status': 400
+        return_msg['status'] = 400
+        return_msg['body'] = 'Must include "Dispatch_Number" in request'
+        await instance_update_dispatch.update_dispatch(msg)
 
-        }
-        update_dispatch_action = UpdateDispatch(logger, configs, event_bus, lit_repo)
-        await update_dispatch_action.update_dispatch(msg)
-
-        lit_repo.update_dispatch.assert_not_called()
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_update_dispatch._lit_repository.update_dispatch.assert_not_called()
+        instance_update_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def update_dispatch_no_dispatch_ko_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        lit_repo = Mock()
+    async def update_dispatch_no_dispatch_ko_test(self, instance_update_dispatch, msg, return_msg):
+        msg['body'] = {}
+        return_msg['status'] = 400
+        return_msg['body'] = 'Must include "RequestDispatch" in request'
+        await instance_update_dispatch.update_dispatch(msg)
 
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': {}
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': 'Must include "RequestDispatch" in request',
-            'status': 400
-
-        }
-        update_dispatch_action = UpdateDispatch(logger, configs, event_bus, lit_repo)
-        await update_dispatch_action.update_dispatch(msg)
-
-        lit_repo.update_dispatch.assert_not_called()
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_update_dispatch._lit_repository.update_dispatch.assert_not_called()
+        instance_update_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def update_dispatch_no_body_ko_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        lit_repo = Mock()
+    async def update_dispatch_no_body_ko_test(self, instance_update_dispatch, msg, return_msg):
+        del msg['body']
+        return_msg['status'] = 400
+        return_msg['body'] = 'Must include "body" in request'
 
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': 'Must include "body" in request',
-            'status': 400
+        await instance_update_dispatch.update_dispatch(msg)
 
-        }
-        update_dispatch_action = UpdateDispatch(logger, configs, event_bus, lit_repo)
-        await update_dispatch_action.update_dispatch(msg)
-
-        lit_repo.update_dispatch.assert_not_called()
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_update_dispatch._lit_repository.update_dispatch.assert_not_called()
+        instance_update_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)

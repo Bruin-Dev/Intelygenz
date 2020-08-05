@@ -2,7 +2,6 @@ from unittest.mock import Mock
 
 import pytest
 from application.actions.get_dispatch import GetDispatch
-from asynctest import CoroutineMock
 
 from config import testconfig as config
 
@@ -23,137 +22,77 @@ class TestGetDispatch:
         assert get_dispatch._lit_repository == lit_repo
 
     @pytest.mark.asyncio
-    async def get_dispatch_ok_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
+    async def get_dispatch_ok_test(self, instance_get_dispatch, msg, return_msg):
         return_body = {'Dispatch': {'Dispatch_Number': 123}}
         return_status = 200
-        get_dispatch_return = {'body': return_body, 'status': return_status}
-        lit_repo = Mock()
-        lit_repo.get_dispatch = Mock(return_value=get_dispatch_return)
+        instance_get_dispatch._lit_repository.get_dispatch = Mock(
+            return_value={'body': return_body, 'status': return_status})
 
-        request_id = '123'
-        response_topic = 'some.response.topic'
         dispatch_number = '123'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': {'dispatch_number': dispatch_number}
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': return_body,
-            'status': return_status
+        msg['body'] = {'dispatch_number': dispatch_number}
+        return_msg['status'] = return_status
+        return_msg['body'] = return_body
 
-        }
-        get_dispatch_action = GetDispatch(logger, configs, event_bus, lit_repo)
-        await get_dispatch_action.get_dispatch(msg)
-        lit_repo.get_dispatch.assert_called_once_with(dispatch_number)
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        await instance_get_dispatch.get_dispatch(msg)
+        instance_get_dispatch._lit_repository.get_dispatch.assert_called_once_with(dispatch_number)
+        instance_get_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def get_dispatch_no_body_ko_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-        lit_repo = Mock()
-
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': 'Must include "body" in request',
-            'status': 400
-
-        }
-        get_dispatch_action = GetDispatch(logger, configs, event_bus, lit_repo)
-        await get_dispatch_action.get_dispatch(msg)
-        lit_repo.get_dispatch.assert_not_called()
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+    async def get_dispatch_no_body_ko_test(self, instance_get_dispatch, msg, return_msg):
+        del msg['body']
+        return_msg['status'] = 400
+        return_msg['body'] = 'Must include "body" in request'
+        await instance_get_dispatch.get_dispatch(msg)
+        instance_get_dispatch._lit_repository.get_dispatch.assert_not_called()
+        instance_get_dispatch._event_bus.publish_message.assert_called_once_with('some.response.topic', return_msg)
 
     @pytest.mark.asyncio
-    async def get_dispatch_no_dispatch_number_ok_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
+    async def get_dispatch_no_dispatch_number_ok_test(self, instance_get_dispatch, msg, return_msg):
         return_body = {'DispatchList': [{'Dispatch_Number': 123}]}
         return_status = 200
-        get_dispatch_return = {'body': return_body, 'status': return_status}
 
-        lit_repo = Mock()
-        lit_repo.get_dispatch = Mock()
-        lit_repo.get_all_dispatches = Mock(return_value=get_dispatch_return)
+        instance_get_dispatch._lit_repository.get_all_dispatches = Mock(
+            return_value={'body': return_body, 'status': return_status})
 
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': {}
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': return_body,
-            'status': return_status
+        msg['body'] = {}
+        return_msg['status'] = return_status
+        return_msg['body'] = return_body
 
-        }
-        get_dispatch_action = GetDispatch(logger, configs, event_bus, lit_repo)
-        await get_dispatch_action.get_dispatch(msg)
+        await instance_get_dispatch.get_dispatch(msg)
 
-        lit_repo.get_dispatch.assert_not_called()
-        lit_repo.get_all_dispatches.assert_called_once()
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_get_dispatch._lit_repository.get_dispatch.assert_not_called()
+        instance_get_dispatch._lit_repository.get_all_dispatches.assert_called_once()
 
     @pytest.mark.asyncio
-    async def get_all_dispatches_filtered_test(self):
-        configs = config
-        logger = Mock()
-        event_bus = Mock()
-        event_bus.publish_message = CoroutineMock()
-
-        dispatch_1 = {'Dispatch_Number': 123}
-        all_dispatches = [dispatch_1]
-        all_dispatches_for_filter = {
-            'DispatchList': all_dispatches
-        }
-        return_body = {'DispatchList': all_dispatches}
+    async def get_dispatch_with_igz_dispatches_only_true_test(self, instance_get_dispatch, msg, return_msg):
+        return_body = {'DispatchList': [{'Dispatch_Number': 123}], 'igz_dispatches_only': True}
         return_status = 200
-        get_dispatch_return = {'body': return_body, 'status': return_status}
 
-        lit_repo = Mock()
-        lit_repo._redis_client.get(side_effect=[dispatch_1])
-        lit_repo.get_dispatch = Mock()
-        lit_repo.filter_dispatches = Mock(return_value=all_dispatches)
-        lit_repo.get_all_dispatches = Mock(return_value=get_dispatch_return)
+        instance_get_dispatch._lit_repository.get_all_dispatches = Mock(
+            return_value={'body': return_body, 'status': return_status})
 
-        request_id = '123'
-        response_topic = 'some.response.topic'
-        msg = {
-            'request_id': request_id,
-            'response_topic': response_topic,
-            'body': {
-                'igz_dispatches_only': True
-            }
-        }
-        expected_return = {
-            'request_id': request_id,
-            'body': return_body,
-            'status': return_status
+        msg['body'] = return_body
+        return_msg['status'] = return_status
+        return_msg['body'] = return_body
 
-        }
-        get_dispatch_action = GetDispatch(logger, configs, event_bus, lit_repo)
-        await get_dispatch_action.get_dispatch(msg)
+        await instance_get_dispatch.get_dispatch(msg)
 
-        lit_repo.get_dispatch.assert_not_called()
-        lit_repo.get_all_dispatches.assert_called_once()
-        lit_repo.filter_dispatches.assert_called_once_with(all_dispatches_for_filter)
-        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+        instance_get_dispatch._lit_repository.get_dispatch.assert_not_called()
+        instance_get_dispatch._lit_repository.get_all_dispatches.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def get_dispatch_with_igz_dispatches_only_false_test(self, instance_get_dispatch, msg, return_msg):
+        return_body = {'DispatchList': [{'Dispatch_Number': 123}], 'igz_dispatches_only': False}
+        return_status = 400
+
+        instance_get_dispatch._lit_repository.get_all_dispatches = Mock(
+            return_value={'body': return_body, 'status': return_status})
+
+        msg['body'] = return_body
+        return_msg['status'] = return_status
+        return_msg['body'] = return_body
+
+        await instance_get_dispatch.get_dispatch(msg)
+
+        instance_get_dispatch._lit_repository.get_dispatch.assert_not_called()
+        instance_get_dispatch._lit_repository.get_all_dispatches.assert_called_once()
