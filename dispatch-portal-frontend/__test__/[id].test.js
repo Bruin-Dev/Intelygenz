@@ -27,7 +27,7 @@ describe('DISPATCH DETAIL PAGE tests', () => {
 
   it('renders correctly with loading', () => {
     mockadapter
-      .onGet(new RegExp(`${API_URLS.DISPATCH_CTS}/.*(?<!\/cancel)$`))
+      .onGet(new RegExp(`${API_URLS.DISPATCH_CTS}/*`))
       .reply(200, mockCtsSingleDispatch);
     const { queryByTestId } = render(component);
     expect(queryByTestId('dispatch-detail-loading-page')).toBeTruthy();
@@ -35,7 +35,7 @@ describe('DISPATCH DETAIL PAGE tests', () => {
 
   it('renders correctly with not found dispatch data', async () => {
     mockadapter
-      .onGet(new RegExp(`${API_URLS.DISPATCH_LIT}/.*(?<!\/cancel)$`))
+      .onGet(new RegExp(`${API_URLS.DISPATCH_LIT}/*`))
       .reply(400, { error: 'Error!' });
     render(component);
     expect(

@@ -275,7 +275,7 @@ describe('dispatch service tests', () => {
       error: 'Not vendor selected'
     });
   });
-   * * */
+  * * */
   /** ***
    *
    * UPLOAD FILES

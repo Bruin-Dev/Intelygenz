@@ -56,8 +56,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-  /lit/dispatch/{dispatch_number}/cancel:
-    get:
+    delete:
       description: Cancel dispatch from LIT
       tags:
         - lit
@@ -241,8 +240,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-  /cts/dispatch/{dispatch_number}/cancel:
-    get:
+    delete:
       description: Cancel dispatch from CTS
       tags:
         - cts

@@ -1458,7 +1458,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -1521,7 +1521,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
             assert response_data['code'] == 500
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -1583,7 +1583,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
             assert response_data['code'] == 400
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -1647,7 +1647,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
             assert response_data['code'] == 400
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -1693,7 +1693,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -1740,7 +1740,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -1804,7 +1804,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/lit/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/lit/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -3004,7 +3004,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/cts/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -3068,7 +3068,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/cts/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
             assert response_data['code'] == 500
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -3134,7 +3134,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/cts/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
             assert response_data['code'] == 200
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -3179,7 +3179,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/cts/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -3224,7 +3224,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/cts/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(
@@ -3287,7 +3287,7 @@ class TestApiServer:
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
-            response = await client.get(f'/cts/dispatch/{dispatch_number}/cancel')
+            response = await client.delete(f'/cts/dispatch/{dispatch_number}')
             response_data = await response.get_json()
 
             api_server_test._event_bus.rpc_request.assert_awaited_once_with(

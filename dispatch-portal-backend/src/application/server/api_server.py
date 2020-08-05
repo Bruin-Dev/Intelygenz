@@ -88,8 +88,8 @@ class DispatchServer:
                                methods=['GET'], strict_slashes=False)
         self._app.add_url_rule("/lit/dispatch/<dispatch_number>", None, self.lit_get_dispatch,
                                methods=['GET'], strict_slashes=False)
-        self._app.add_url_rule("/lit/dispatch/<dispatch_number>/cancel", None, self.lit_cancel_dispatch,
-                               methods=['GET'], strict_slashes=False)
+        self._app.add_url_rule("/lit/dispatch/<dispatch_number>", None, self.lit_cancel_dispatch,
+                               methods=['DELETE'], strict_slashes=False)
         self._app.add_url_rule("/lit/dispatch", None, self.lit_create_dispatch,
                                methods=['POST'], strict_slashes=False)
         self._app.add_url_rule("/lit/dispatch", None, self.lit_update_dispatch,
@@ -103,8 +103,8 @@ class DispatchServer:
                                methods=['GET'], strict_slashes=False)
         self._app.add_url_rule("/cts/dispatch", None, self.cts_create_dispatch,
                                methods=['POST'], strict_slashes=False)
-        self._app.add_url_rule("/cts/dispatch/<dispatch_number>/cancel", None, self.cts_cancel_dispatch,
-                               methods=['GET'], strict_slashes=False)
+        self._app.add_url_rule("/cts/dispatch/<dispatch_number>", None, self.cts_cancel_dispatch,
+                               methods=['DELETE'], strict_slashes=False)
 
     def _health(self):
         return jsonify(None), self._status, None
@@ -215,7 +215,7 @@ class DispatchServer:
     #
     #     return jsonify(response_dispatch), response["status"], None
 
-    # Cancel Dispatch - GET - /lit/dispatch/<dispatch_number>/cancel
+    # Cancel Dispatch - DELETE - /lit/dispatch/<dispatch_number>/cancel
     async def lit_cancel_dispatch(self, dispatch_number):
         # 1 - Get Dispatch
         # 2 - Get Bruin ticket
@@ -690,7 +690,7 @@ class DispatchServer:
 
         return jsonify(response_dispatch), HTTPStatus.OK, None
 
-    # Cancel Dispatch - GET - /cts/dispatch/<dispatch_number>/cancel
+    # Cancel Dispatch - DELETE - /cts/dispatch/<dispatch_number>/cancel
     async def cts_cancel_dispatch(self, dispatch_number):
         self._logger.info(f"[CTS] Cancel Dispatch: {dispatch_number}")
         start_time = time.time()

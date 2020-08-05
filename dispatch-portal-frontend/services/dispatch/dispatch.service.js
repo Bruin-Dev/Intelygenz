@@ -130,13 +130,13 @@ export class DispatchService {
     try {
       let res;
       if (config.VENDORS.LIT === vendor) {
-        res = await this.axiosI.get(`${API_URLS.DISPATCH_LIT}/${id}/cancel`);
+        res = await this.axiosI.delete(`${API_URLS.DISPATCH_LIT}/${id}`);
 
         return res.data;
       }
 
       if (config.VENDORS.CTS === vendor) {
-        res = await this.axiosI.get(`${API_URLS.DISPATCH_CTS}/${id}/cancel`);
+        res = await this.axiosI.delete(`${API_URLS.DISPATCH_CTS}/${id}`);
 
         return res.data;
       }
