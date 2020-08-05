@@ -26,9 +26,7 @@ function DispatchDetail({ authToken }) {
   const cancelDispatch = async res => {
     setIsLoading(true);
     setCancelError(false);
-    const response = await new DispatchService().update(id, vendor, {
-      status: 'Cancelled'
-    });
+    const response = await new DispatchService().update(id, vendor);
 
     if (response && !response.error) {
       setData(response);
@@ -73,7 +71,7 @@ function DispatchDetail({ authToken }) {
         </button>
       ) : (
         <div>
-          {/* Todo: disable cancel button
+          {
           data && data.status && data.status !== TYPES_STATUS.cancelled.value && (
             <div className="flex flex-col pt-2 px-10">
               <div className="block">
@@ -97,7 +95,7 @@ function DispatchDetail({ authToken }) {
                 </div>
               </div>
             </div>
-          ) */}
+          )}
 
           <div className="flex flex-wrap m-8 border-solid border-2 border-gray-400">
             <div className="w-full md:w-1/4 flex-none p-4 bg-gray-300 justify-between">

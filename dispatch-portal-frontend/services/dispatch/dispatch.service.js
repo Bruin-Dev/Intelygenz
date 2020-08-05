@@ -125,19 +125,20 @@ export class DispatchService {
     }
   }
 
-  async update(id, vendor, body) {
+  /* Cancel Dispatch */
+  async update(id, vendor) {
     try {
       let res;
       if (config.VENDORS.LIT === vendor) {
-        res = await this.axiosI.patch(`${API_URLS.DISPATCH_LIT}/${id}`, body);
+        res = await this.axiosI.get(`${API_URLS.DISPATCH_LIT}/${id}/cancel`);
 
-        return dispatchLitInAdapter(res.data);
+        return res;
       }
 
       if (config.VENDORS.CTS === vendor) {
-        res = await this.axiosI.patch(`${API_URLS.DISPATCH_CTS}/${id}`, body);
+        res = await this.axiosI.get(`${API_URLS.DISPATCH_CTS}/${id}/cancel`);
 
-        return dispatchCtsInAdapter(res.data);
+        return res;
       }
       return { error: 'Not vendor selected' };
     } catch (error) {

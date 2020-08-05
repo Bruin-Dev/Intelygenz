@@ -557,11 +557,13 @@ class DispatchServer:
                           f"- took {time.time() - start_time}")
         dispatch = response['body']['records'][0]
 
-        date_time_of_dispatch = dispatch.get("Local_Site_Time__c")
-        date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
-        # Get datetime formatted string
-        DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
-        datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
+        date_time_of_dispatch = dispatch.get("Local_Site_Time__c", None)
+        datetime_formatted_str = ''
+        if date_time_of_dispatch and len(date_time_of_dispatch) > 0:
+            date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+            # Get datetime formatted string
+            DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+            datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
 
         response_dispatch['id'] = dispatch.get('Name') if dispatch.get('Name') else dispatch_number
         response_dispatch['vendor'] = 'cts'
@@ -598,11 +600,13 @@ class DispatchServer:
 
         response_dispatch['list_dispatch'] = []
         for d in all_dispatches:
-            date_time_of_dispatch = d.get("Local_Site_Time__c")
-            date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
-            # Get datetime formatted string
-            DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
-            datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
+            date_time_of_dispatch = d.get("Local_Site_Time__c", None)
+            datetime_formatted_str = ''
+            if date_time_of_dispatch and len(date_time_of_dispatch) > 0:
+                date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+                # Get datetime formatted string
+                DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+                datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
             response_dispatch['list_dispatch'].append(cts_mapper.map_get_dispatch(d, datetime_formatted_str))
 
         return jsonify(response_dispatch), response["status"], None
