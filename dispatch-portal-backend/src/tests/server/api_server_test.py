@@ -678,6 +678,7 @@ class TestApiServer:
         slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Created [{dispatch_number}] " \
                     f"with ticket id: T-12345"
         # api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
+        api_server_test._redis_client.set = Mock()
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -692,6 +693,7 @@ class TestApiServer:
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_create
             api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
+            api_server_test._redis_client.set.assert_called_once()
 
     @pytest.mark.asyncio
     async def lit_create_dispatch_with_error_appending_note_test(self, api_server_test):

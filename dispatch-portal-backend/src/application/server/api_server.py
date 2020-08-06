@@ -416,6 +416,9 @@ class DispatchServer:
             self._logger.info(slack_msg)
             await self._notifications_repository.send_slack_message(slack_msg)
             await self._process_note(dispatch_num, body)
+
+            redis_data = {"ticket_id": ticket_id}
+            self._redis_client.set(dispatch_num, redis_data, ex=259200)
         else:
             self._logger.info(f"[LIT] Dispatch not created - {payload} - took {time.time() - start_time}")
             error_response = {'code': response['status'], 'message': response['body']}
