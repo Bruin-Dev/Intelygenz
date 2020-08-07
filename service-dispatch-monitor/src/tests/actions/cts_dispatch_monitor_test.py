@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import call
@@ -169,6 +170,13 @@ class TestCtsDispatchMonitor:
                                                   cts_ticket_details_2_no_requested_watermark,
                                                   cts_dispatch_confirmed_skipped,
                                                   cts_ticket_details_no_watermark):
+        dispatch_number_1 = cts_dispatch_confirmed.get('Name')
+        ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
+        redis_data_1 = {
+            "ticket_id": ticket_id_1,
+            "dispatch_number": dispatch_number_1
+        }
+        redis_expire_ttl = cts_dispatch_monitor._config.DISPATCH_MONITOR_CONFIG['redis_ttl']
         confirmed_dispatches = [
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2,
@@ -182,12 +190,17 @@ class TestCtsDispatchMonitor:
             cts_ticket_details_2_no_requested_watermark,
             cts_ticket_details_no_watermark
         ]
+        cts_dispatch_monitor._redis_client.get = Mock(side_effect=[None])
+        cts_dispatch_monitor._redis_client.set = Mock()
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         filtered_confirmed_dispatches = await cts_dispatch_monitor._filter_dispatches_by_watermark(confirmed_dispatches)
 
         assert filtered_confirmed_dispatches == [cts_dispatch_confirmed]
+        cts_dispatch_monitor._redis_client.get.assert_called_once_with(dispatch_number_1)
+        cts_dispatch_monitor._redis_client.set.assert_called_once_with(
+            dispatch_number_1, json.dumps(redis_data_1), ex=redis_expire_ttl)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,

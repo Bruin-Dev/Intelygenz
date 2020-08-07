@@ -24,6 +24,8 @@ DISPATCH_MONITOR_CONFIG = {
         'lit_dispatch_monitor': 15,  # minutes
         'cts_dispatch_monitor': 15  # minutes
     },
+    # 3 days in seconds
+    'redis_ttl': 259200
 }
 
 LOG_CONFIG = {

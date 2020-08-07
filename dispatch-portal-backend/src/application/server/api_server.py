@@ -427,6 +427,8 @@ class DispatchServer:
                 "ticket_id": ticket_id,
                 "dispatch_number": dispatch_num
             }
+            self._logger.info(f"Dispatch [{dispatch_num}] in ticket_id: {ticket_id} "
+                              f"Adding to redis lit dispatch")
             self._redis_client.set(dispatch_num, json.dumps(redis_data), ex=self._expires_ttl)
         else:
             self._logger.info(f"[LIT] Dispatch not created - {payload} - took {time.time() - start_time}")

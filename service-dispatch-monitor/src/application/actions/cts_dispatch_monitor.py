@@ -1,3 +1,5 @@
+import json
+
 import asyncio
 from datetime import datetime
 from time import perf_counter
@@ -150,6 +152,15 @@ class CtsDispatchMonitor:
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"- Request Watermark not found, ticket does not belong to us")
                 continue
+            if self._redis_client.get(dispatch_number) is None:
+                redis_data = {
+                    'ticket_id': ticket_id,
+                    'dispatch_number': dispatch_number
+                }
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"Adding to redis cts dispatch")
+                self._redis_client.set(
+                    dispatch_number, json.dumps(redis_data), ex=self._config.DISPATCH_MONITOR_CONFIG['redis_ttl'])
             filtered_dispatches.append(dispatch)
         return filtered_dispatches
 
