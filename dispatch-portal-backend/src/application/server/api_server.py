@@ -425,7 +425,6 @@ class DispatchServer:
 
             redis_data = {
                 "ticket_id": ticket_id,
-                "dispatch_number": dispatch_num
             }
             self._logger.info(f"Dispatch [{dispatch_num}] in ticket_id: {ticket_id} "
                               f"Adding to redis lit dispatch")

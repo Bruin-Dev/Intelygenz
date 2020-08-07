@@ -683,7 +683,6 @@ class TestApiServer:
 
         redis_data = {
             "ticket_id": ticket_id,
-            "dispatch_number": dispatch_number
         }
 
         api_server_test._notifications_repository.send_slack_message = CoroutineMock(

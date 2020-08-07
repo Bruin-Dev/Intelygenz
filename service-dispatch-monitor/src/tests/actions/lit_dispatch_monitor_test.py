@@ -1,26 +1,19 @@
-import os
-
-from collections import OrderedDict
+import json
 from datetime import datetime
-from datetime import timedelta
-from typing import Generator
 from unittest.mock import Mock
 from unittest.mock import call
 from unittest.mock import patch
 
 import pytest
-
+from application.actions.lit_dispatch_monitor import LitDispatchMonitor
+from application.repositories.utils_repository import UtilsRepository
 from apscheduler.util import undefined
 from asynctest import CoroutineMock
 from pytz import timezone
 from shortuuid import uuid
 
-from application.actions.lit_dispatch_monitor import LitDispatchMonitor
 from application.actions import lit_dispatch_monitor as lit_dispatch_monitor_module
-
-from application.repositories.utils_repository import UtilsRepository
 from config import testconfig
-
 
 uuid_ = uuid()
 uuid_mock = patch.object(lit_dispatch_monitor_module, 'uuid', return_value=uuid_)
@@ -178,6 +171,7 @@ class TestLitDispatchMonitor:
                                                   ticket_details_2_no_ticket_id_in_watermark):
         confirmed_dispatches = [
             dispatch_confirmed,
+            dispatch_confirmed,
             dispatch_confirmed_skipped,
             dispatch_confirmed_2,
             dispatch_confirmed_2,
@@ -187,17 +181,32 @@ class TestLitDispatchMonitor:
         ]
         responses_details_mock = [
             ticket_details_1,
+            ticket_details_1,
             ticket_details_2_error,
             ticket_details_2_no_requested_watermark,
             ticket_details_no_watermark,
             ticket_details_2_no_ticket_id_in_watermark
         ]
+        dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
+        ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+
+        redis_data_1 = {
+            "ticket_id": ticket_id_1,
+        }
+        redis_expire_ttl = lit_dispatch_monitor._config.DISPATCH_MONITOR_CONFIG['redis_ttl']
+
+        lit_dispatch_monitor._redis_client.get = Mock(side_effect=[None, redis_data_1])
+        lit_dispatch_monitor._redis_client.set = Mock()
         lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         filtered_confirmed_dispatches = await lit_dispatch_monitor._filter_dispatches_by_watermark(confirmed_dispatches)
 
-        assert filtered_confirmed_dispatches == [dispatch_confirmed]
+        assert filtered_confirmed_dispatches == [dispatch_confirmed, dispatch_confirmed]
+        lit_dispatch_monitor._redis_client.get.assert_has_calls([call(dispatch_number_1), call(dispatch_number_1)],
+                                                                any_order=False)
+        lit_dispatch_monitor._redis_client.set.assert_called_once_with(
+            dispatch_number_1, json.dumps(redis_data_1), ex=redis_expire_ttl)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, lit_dispatch_monitor, dispatch_confirmed, dispatch_confirmed_2,

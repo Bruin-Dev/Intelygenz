@@ -1,15 +1,13 @@
-import asyncio
+import json
 from datetime import datetime
 from time import perf_counter
-from shortuuid import uuid
 
-
+import asyncio
+from application.repositories.bruin_repository import BruinRepository
+from application.repositories.lit_repository import LitRepository
+from application.repositories.utils_repository import UtilsRepository
 from apscheduler.util import undefined
 from pytz import timezone
-
-from application.repositories.bruin_repository import BruinRepository
-from application.repositories.utils_repository import UtilsRepository
-from application.repositories.lit_repository import LitRepository
 
 
 class LitDispatchMonitor:
@@ -146,6 +144,16 @@ class LitDispatchMonitor:
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"- Watermark not found, ticket does not belong to us")
                 continue
+
+            if self._redis_client.get(dispatch_number) is None:
+                redis_data = {
+                    'ticket_id': ticket_id,
+                }
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"Adding to redis lit dispatch")
+                self._redis_client.set(
+                    dispatch_number, json.dumps(redis_data), ex=self._config.DISPATCH_MONITOR_CONFIG['redis_ttl'])
+
             filtered_dispatches.append(dispatch)
         return filtered_dispatches
 

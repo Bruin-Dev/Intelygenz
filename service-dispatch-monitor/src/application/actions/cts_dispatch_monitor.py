@@ -152,10 +152,14 @@ class CtsDispatchMonitor:
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"- Request Watermark not found, ticket does not belong to us")
                 continue
+
+            igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
+                requested_watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
+
             if self._redis_client.get(dispatch_number) is None:
                 redis_data = {
                     'ticket_id': ticket_id,
-                    'dispatch_number': dispatch_number
+                    'igz_dispatch_number': igz_dispatch_number,
                 }
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                   f"Adding to redis cts dispatch")
