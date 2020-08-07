@@ -1,4 +1,5 @@
 import datetime
+import json
 from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -17,13 +18,15 @@ class TestCTSRepository:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
+        redis_client = Mock()
 
-        cts_repo = CtsRepository(cts_client, logger, scheduler, config)
+        cts_repo = CtsRepository(cts_client, logger, scheduler, config, redis_client)
 
         assert cts_repo._cts_client == cts_client
         assert cts_repo._logger == logger
         assert cts_repo._scheduler == scheduler
         assert cts_repo._config == config
+        assert cts_repo._redis_client == redis_client
 
     def login_job_false_exec_on_start_test(self, cts_client, cts_repository):
         cts_client.login = Mock()
@@ -61,13 +64,14 @@ class TestCTSRepository:
         logger = Mock()
         scheduler = Mock()
         config = Mock()
+        redis_client = Mock()
 
         cts_client = CtsClient(logger, config)
         cts_client.create_dispatch = Mock()
 
         payload = {"Request_Dispatch": {"test": "dispatch"}}
 
-        cts_repo = CtsRepository(cts_client, logger, scheduler, config)
+        cts_repo = CtsRepository(cts_client, logger, scheduler, config, redis_client)
 
         cts_repo.create_dispatch(payload)
 
@@ -96,3 +100,29 @@ class TestCTSRepository:
         cts_repository.update_dispatch(dispatch_number, payload)
 
         cts_client.update_dispatch.assert_called_with(dispatch_number, payload)
+
+    def filter_dispatches_test(self, cts_repository, cts_dispatch_confirmed_1, cts_dispatch_confirmed_2,
+                               cts_all_dispatches_response):
+
+        dispatch_number_1 = cts_dispatch_confirmed_1.get('Name')
+        ticket_id_1 = cts_dispatch_confirmed_1.get('Ext_Ref_Num__c')
+        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
+        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
+
+        redis_dispatch_1 = json.dumps({
+            'dispatch_number': dispatch_number_1,
+            'ticket_id': ticket_id_1
+        })
+        redis_dispatch_2 = json.dumps({
+            'dispatch_number': dispatch_number_2,
+            'ticket_id': ticket_id_2
+        })
+
+        redis_get_mock = [redis_dispatch_1, redis_dispatch_2]
+        cts_repository._redis_client.get = Mock(side_effect=redis_get_mock)
+
+        expected_filtered_dispatches = [cts_dispatch_confirmed_1, cts_dispatch_confirmed_2]
+
+        response = cts_repository.filter_dispatches(cts_all_dispatches_response)
+
+        assert response == expected_filtered_dispatches

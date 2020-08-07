@@ -107,3 +107,40 @@ class TestGetDispatch:
         await get_dispatch_action.get_dispatch(msg)
         cts_repo.get_all_dispatches.assert_called_once()
         event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+
+    @pytest.mark.asyncio
+    async def get_all_dispatches_filtered_test(self, cts_repository, cts_all_dispatches_response,
+                                               cts_dispatch_confirmed_1, cts_dispatch_confirmed_2):
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+        return_status = 200
+        get_dispatch_return = {'body': cts_all_dispatches_response, 'status': return_status}
+
+        cts_repository.get_all_dispatches = Mock(return_value=get_dispatch_return)
+
+        request_id = '123'
+        response_topic = 'some.response.topic'
+        msg = {
+            'request_id': request_id,
+            'response_topic': response_topic,
+            'body': {
+                'igz_dispatches_only': True
+            }
+        }
+        expected_return = {
+            'request_id': request_id,
+            'body': cts_all_dispatches_response,
+            'status': return_status
+        }
+        all_dispatches = [
+            cts_dispatch_confirmed_1,
+            cts_dispatch_confirmed_2
+        ]
+        cts_repository._redis_client.get(side_effect=[cts_dispatch_confirmed_1, cts_dispatch_confirmed_2])
+        get_dispatch_action = GetDispatch(cts_repository._logger, cts_repository._config,
+                                          event_bus, cts_repository)
+        cts_repository.filter_dispatches = Mock(return_value=all_dispatches)
+        await get_dispatch_action.get_dispatch(msg)
+        cts_repository.get_all_dispatches.assert_called_once()
+        cts_repository.filter_dispatches.assert_called_once_with(cts_all_dispatches_response)
+        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)

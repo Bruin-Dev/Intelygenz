@@ -6,11 +6,12 @@ from pytz import timezone
 
 class CtsRepository:
 
-    def __init__(self, cts_client, logger, scheduler, config):
+    def __init__(self, cts_client, logger, scheduler, config, redis_client):
         self._cts_client = cts_client
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
+        self._redis_client = redis_client
         self._cts_excluded_fields = [
             'Billing_Invoice_Date__c',
             'Billing_Invoice_Number__c',
@@ -230,6 +231,8 @@ class CtsRepository:
         self._cts_query_fields = ','.join(self._cts_common_fields)
         self._cts_query_all_fields = ','.join(self._cts_all_fields)
         self._cts_query_all_fields_dev = ','.join(self._cts_all_fields_dev)
+        self.DISPATCH_REQUESTED = 'Open'
+        self.DISPATCH_CONFIRMED = 'Scheduled'
 
     def login_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: logging in cts api')
@@ -263,3 +266,13 @@ class CtsRepository:
     def update_dispatch(self, dispatch_id, payload):
         response = self._cts_client.update_dispatch(dispatch_id, payload)
         return response
+
+    def filter_dispatches(self, dispatches):
+        return_dispatches = []
+        for dispatch in dispatches.get('records', []):
+            dispatch_number = dispatch.get('Name')
+            # ticket_id = dispatch.get('Ext_Ref_Num__c')
+            redis_dispatch = self._redis_client.get(dispatch_number)
+            if redis_dispatch is not None:
+                return_dispatches.append(dispatch)
+        return return_dispatches

@@ -45,7 +45,8 @@ class Container:
         self._event_bus.add_consumer(self._subscriber_upload_file, consumer_name="upload_file")
 
         self._cts_client = CtsClient(self._logger, config)
-        self._cts_repository = CtsRepository(self._cts_client, self._logger, self._scheduler, config)
+        self._cts_repository = CtsRepository(
+            self._cts_client, self._logger, self._scheduler, config, self._redis_client)
 
         # actions
         self._create_dispatch = CreateDispatch(self._logger, config.CTS_CONFIG, self._event_bus, self._cts_repository)
