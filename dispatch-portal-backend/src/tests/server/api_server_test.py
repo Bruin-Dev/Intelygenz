@@ -1,4 +1,5 @@
 import base64
+import json
 from http import HTTPStatus
 
 import pytest
@@ -394,7 +395,12 @@ class TestApiServer:
             ]
         }
 
-        payload = {"request_id": uuid_, "body": {}}
+        payload = {
+            "request_id": uuid_,
+            "body": {
+                'igz_dispatches_only': True
+            }
+        }
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -508,7 +514,8 @@ class TestApiServer:
     @pytest.mark.asyncio
     async def lit_create_dispatch_with_note_test(self, api_server_test):
         uuid_ = 'UUID1'
-
+        expires_ttl = config.DISPATCH_PORTAL_CONFIG['redis_ttl']
+        ticket_id = "T-12345"
         dispatch_number = 'DIS37450'
         expected_response = {
             "Status": "Success",
@@ -534,7 +541,7 @@ class TestApiServer:
                 "MetTel_Group_Email": None,
                 "MetTel_Department_Phone_Number": None,
                 "MetTel_Department": "Customer Care",
-                "MetTel_Bruin_TicketID": None,
+                "MetTel_Bruin_TicketID": ticket_id,
                 "Local_Time_of_Dispatch": None,
                 "Job_Site_Zip_Code": "99088",
                 "Job_Site_Street": "123 Fake Street",
@@ -582,7 +589,7 @@ class TestApiServer:
             "site_survey_quote_required": False,
             "time_of_dispatch": "6PM-8PM",
             "time_zone": "Pacific Time",
-            "mettel_bruin_ticket_id": "T-12345",
+            "mettel_bruin_ticket_id": ticket_id,
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -606,7 +613,7 @@ class TestApiServer:
             "hard_time_of_dispatch_local": "6PM-8PM",
             "time_zone_local": "Pacific Time",
             "hard_time_of_dispatch_time_zone_local": "Pacific Time",
-            "mettel_bruin_ticketid": "T-12345",
+            "mettel_bruin_ticketid": ticket_id,
             "job_site": "Red Rose Inn",
             "job_site_street": "123 Fake Street",
             "job_site_city": "Pleasantown",
@@ -667,16 +674,22 @@ class TestApiServer:
         payload_ticket_request_msg = {
             'request_id': uuid_,
             'body': {
-                'ticket_id': 'T-12345'
+                'ticket_id': ticket_id
             }
         }
         response_send_slack_message_mock = {
             'status': 200
         }
+
+        redis_data = {
+            "ticket_id": ticket_id,
+            "dispatch_number": dispatch_number
+        }
+
         api_server_test._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=[response_send_slack_message_mock])
         slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Created [{dispatch_number}] " \
-                    f"with ticket id: T-12345"
+                    f"with ticket id: {ticket_id}"
         # api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
         api_server_test._redis_client.set = Mock()
 
@@ -693,7 +706,8 @@ class TestApiServer:
             assert response.status_code == HTTPStatus.OK
             assert data == expected_response_create
             api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
-            api_server_test._redis_client.set.assert_called_once()
+            api_server_test._redis_client.set.assert_called_once_with(
+                dispatch_number, json.dumps(redis_data), ex=expires_ttl)
 
     @pytest.mark.asyncio
     async def lit_create_dispatch_with_error_appending_note_test(self, api_server_test):
@@ -2721,7 +2735,12 @@ class TestApiServer:
         }
         api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
 
-        payload = {"request_id": uuid_, "body": {}}
+        payload = {
+            "request_id": uuid_,
+            "body": {
+                'igz_dispatches_only': True
+            }
+        }
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -2746,7 +2765,12 @@ class TestApiServer:
         }
         api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
 
-        payload = {"request_id": uuid_, "body": {}}
+        payload = {
+            "request_id": uuid_,
+            "body": {
+                'igz_dispatches_only': True
+            }
+        }
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -2772,7 +2796,12 @@ class TestApiServer:
         }
         api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
 
-        payload = {"request_id": uuid_, "body": {}}
+        payload = {
+            "request_id": uuid_,
+            "body": {
+                'igz_dispatches_only': True
+            }
+        }
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -2798,7 +2827,12 @@ class TestApiServer:
         }
         api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
 
-        payload = {"request_id": uuid_, "body": {}}
+        payload = {
+            "request_id": uuid_,
+            "body": {
+                'igz_dispatches_only': True
+            }
+        }
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()

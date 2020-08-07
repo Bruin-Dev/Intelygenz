@@ -47,6 +47,7 @@ class DispatchServer:
         self.DISPATCH_CANCEL_WATERMARK = 'Dispatch Management - Dispatch Cancel Requested'
         self.PENDING_DISPATCHES_KEY = 'pending_dispatches'
         self.MAX_TICKET_NOTE = 1500
+        self._expires_ttl = config.DISPATCH_PORTAL_CONFIG['redis_ttl']
         self._one_mega = (1024 * 1024)  # 1mb
         self._max_content_length = 16 * self._one_mega  # 16mb
         self._title = config.DISPATCH_PORTAL_CONFIG['title']
@@ -333,7 +334,12 @@ class DispatchServer:
     async def lit_get_all_dispatches(self):
         self._logger.info(f"[LIT] Getting all dispatches from lit-bridge")
         start_time = time.time()
-        payload = {"request_id": uuid(), "body": {}}
+        payload = {
+            "request_id": uuid(),
+            "body": {
+                'igz_dispatches_only': True
+            }
+        }
         response = await self._event_bus.rpc_request("lit.dispatch.get", payload, timeout=30)
         self._logger.info(f"[LIT] Got all dispatches")
         response_dispatch = dict()
@@ -417,8 +423,11 @@ class DispatchServer:
             await self._notifications_repository.send_slack_message(slack_msg)
             await self._process_note(dispatch_num, body)
 
-            redis_data = {"ticket_id": ticket_id}
-            self._redis_client.set(dispatch_num, redis_data, ex=259200)
+            redis_data = {
+                "ticket_id": ticket_id,
+                "dispatch_number": dispatch_num
+            }
+            self._redis_client.set(dispatch_num, json.dumps(redis_data), ex=self._expires_ttl)
         else:
             self._logger.info(f"[LIT] Dispatch not created - {payload} - took {time.time() - start_time}")
             error_response = {'code': response['status'], 'message': response['body']}
@@ -578,7 +587,12 @@ class DispatchServer:
     async def cts_get_all_dispatches(self):
         self._logger.info(f"[CTS] Getting all dispatches from cts-bridge")
         start_time = time.time()
-        payload = {"request_id": uuid(), "body": {}}
+        payload = {
+            "request_id": uuid(),
+            "body": {
+                'igz_dispatches_only': True
+            }
+        }
         response = await self._event_bus.rpc_request("cts.dispatch.get", payload, timeout=30)
         self._logger.info(f"[CTS] Got all dispatches")
         response_dispatch = dict()

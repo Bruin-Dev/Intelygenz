@@ -34,7 +34,9 @@ DISPATCH_PORTAL_CONFIG = {
     'schema_path': './src/schema.json',
     'swagger_path': './src/swagger.yml',
     'swagger_url_prefix': '/api/doc',
-    'swagger_title': 'Dispatch Portal API doc'
+    'swagger_title': 'Dispatch Portal API doc',
+    # 3 days in seconds
+    'redis_ttl': 259200
 }
 
 CTS_CONFIG = {
