@@ -31,7 +31,8 @@ class Container:
         self._scheduler = AsyncIOScheduler(timezone=config.LIT_CONFIG['timezone'])
 
         self._lit_client = LitClient(self._logger, config)
-        self._lit_repository = LitRepository(self._lit_client, self._logger, self._scheduler, config)
+        self._lit_repository = LitRepository(
+            self._lit_client, self._logger, self._scheduler, config, self._redis_client)
 
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
 

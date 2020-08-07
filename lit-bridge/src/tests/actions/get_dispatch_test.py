@@ -112,3 +112,48 @@ class TestGetDispatch:
         lit_repo.get_dispatch.assert_not_called()
         lit_repo.get_all_dispatches.assert_called_once()
         event_bus.publish_message.assert_called_once_with(response_topic, expected_return)
+
+    @pytest.mark.asyncio
+    async def get_all_dispatches_filtered_test(self):
+        configs = config
+        logger = Mock()
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+
+        dispatch_1 = {'Dispatch_Number': 123}
+        all_dispatches = [dispatch_1]
+        all_dispatches_for_filter = {
+            'DispatchList': all_dispatches
+        }
+        return_body = {'DispatchList': all_dispatches}
+        return_status = 200
+        get_dispatch_return = {'body': return_body, 'status': return_status}
+
+        lit_repo = Mock()
+        lit_repo._redis_client.get(side_effect=[dispatch_1])
+        lit_repo.get_dispatch = Mock()
+        lit_repo.filter_dispatches = Mock(return_value=all_dispatches)
+        lit_repo.get_all_dispatches = Mock(return_value=get_dispatch_return)
+
+        request_id = '123'
+        response_topic = 'some.response.topic'
+        msg = {
+            'request_id': request_id,
+            'response_topic': response_topic,
+            'body': {
+                'igz_dispatches_only': True
+            }
+        }
+        expected_return = {
+            'request_id': request_id,
+            'body': return_body,
+            'status': return_status
+
+        }
+        get_dispatch_action = GetDispatch(logger, configs, event_bus, lit_repo)
+        await get_dispatch_action.get_dispatch(msg)
+
+        lit_repo.get_dispatch.assert_not_called()
+        lit_repo.get_all_dispatches.assert_called_once()
+        lit_repo.filter_dispatches.assert_called_once_with(all_dispatches_for_filter)
+        event_bus.publish_message.assert_called_once_with(response_topic, expected_return)

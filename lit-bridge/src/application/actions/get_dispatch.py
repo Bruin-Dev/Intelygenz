@@ -22,8 +22,15 @@ class GetDispatch:
             get_dispatch_response["status"] = get_dispatch["status"]
 
         else:
-            self._logger.info("Getting all dispatches")
+            igz_dispatches_only = msg['body'].get('igz_dispatches_only', False)
+            self._logger.info(f"Getting all dispatches, igz_dispatches_only: {igz_dispatches_only}")
             get_all_dispatches = self._lit_repository.get_all_dispatches()
+
+            if igz_dispatches_only is True and get_all_dispatches["status"] == 200:
+                # filter response with redis
+                final_dispatch_list = self._lit_repository.filter_dispatches(get_all_dispatches['body'])
+                get_all_dispatches["body"]['DispatchList'] = final_dispatch_list
+
             get_dispatch_response["body"] = get_all_dispatches["body"]
             get_dispatch_response["status"] = get_all_dispatches["status"]
 

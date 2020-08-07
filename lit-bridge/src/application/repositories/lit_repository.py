@@ -6,11 +6,12 @@ from pytz import timezone
 
 class LitRepository:
 
-    def __init__(self, lit_client, logger, scheduler, config):
+    def __init__(self, lit_client, logger, scheduler, config, redis_client):
         self._lit_client = lit_client
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
+        self._redis_client = redis_client
 
     def login_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: logging in lit api')
@@ -46,3 +47,13 @@ class LitRepository:
     def upload_file(self, dispatch_number, payload, file_name, file_content_type):
         response = self._lit_client.upload_file(dispatch_number, payload, file_name, file_content_type)
         return response
+
+    def filter_dispatches(self, dispatches):
+        return_dispatches = []
+        for dispatch in dispatches.get('DispatchList', []):
+            dispatch_number = dispatch.get('Dispatch_Number')
+            # ticket_id = dispatch.get('MetTel_Bruin_TicketID')
+            redis_dispatch = self._redis_client.get(dispatch_number)
+            if redis_dispatch is not None:
+                return_dispatches.append(dispatch)
+        return return_dispatches
