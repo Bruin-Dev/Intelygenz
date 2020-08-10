@@ -179,6 +179,7 @@ class CtsDispatchMonitor:
                 try:
                     dispatch_number = dispatch.get('Name', None)
                     ticket_id = dispatch.get('Ext_Ref_Num__c', None)
+                    tech_name = dispatch.get('API_Resource_Name__c')
 
                     self._logger.info(f"Processing Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - {dispatch}")
 
@@ -300,7 +301,6 @@ class CtsDispatchMonitor:
                     if confirmed_sms_note_found is None:
                         self._logger.info(f"Dispatch: {dispatch_number} "
                                           f"Ticket_id: {ticket_id} - Sending confirmed SMS")
-                        tech_name = dispatch.get('API_Resource_Name__c')
                         sms_sended = await self._cts_repository.send_confirmed_sms(
                             dispatch_number, ticket_id, datetime_formatted_str, sms_to, tech_name)
                         if not sms_sended:

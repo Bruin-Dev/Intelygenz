@@ -751,8 +751,8 @@ def ticket_details_1_with_confirmation_note(ticket_details_1, dispatch_confirmed
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer"
-                     "{tech_name}"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
                      "{tech_phone}".format(date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
                                            time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
                                            time_zone=dispatch_confirmed.get('Time_Zone_Local'),
@@ -793,8 +793,8 @@ def ticket_details_1_with_confirmation_note_but_not_tech(ticket_details_1, dispa
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer"
-                     "{tech_name}"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
                      "{tech_phone}".format(date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
                                            time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
                                            time_zone=dispatch_confirmed.get('Time_Zone_Local'),
@@ -842,8 +842,8 @@ def ticket_details_2_with_confirmation_note(ticket_details_2, dispatch_confirmed
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer"
-                     "{tech_name}"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
                      "{tech_phone}".format(date_of_dispatch=dispatch_confirmed_2.get('Date_of_Dispatch'),
                                            time_of_dispatch=dispatch_confirmed_2.get('Hard_Time_of_Dispatch_Local'),
                                            time_zone=dispatch_confirmed_2.get('Time_Zone_Local'),
@@ -884,8 +884,8 @@ def ticket_details_2_with_confirmation_note_but_not_tech(ticket_details_2, dispa
         "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer"
-                     "{tech_name}"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
                      "{tech_phone}".format(date_of_dispatch=dispatch_confirmed_2.get('Date_of_Dispatch'),
                                            time_of_dispatch=dispatch_confirmed_2.get('Hard_Time_of_Dispatch_Local'),
                                            time_zone=dispatch_confirmed_2.get('Time_Zone_Local'),
@@ -1855,8 +1855,8 @@ def cts_ticket_details_1_with_confirmation_note(cts_ticket_details_1, cts_dispat
         "noteValue": "#*Automation Engine*# IGZ_0001\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer"
-                     "{tech_name}"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
                      "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed.get('Date_of_Dispatch'),
                                            time_of_dispatch=cts_dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
                                            time_zone=cts_dispatch_confirmed.get('Time_Zone_Local'),
@@ -1896,8 +1896,8 @@ def cts_ticket_details_1_with_confirmation_note_but_not_tech(cts_ticket_details_
         "noteValue": "#*Automation Engine*# IGZ_0001\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer"
-                     "{tech_name}"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
                      "{tech_phone}".format(date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
                                            time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
                                            time_zone=dispatch_confirmed.get('Time_Zone_Local'),
@@ -1928,8 +1928,8 @@ def cts_ticket_details_2_with_confirmation_note(cts_ticket_details_2, cts_dispat
         "noteValue": "#*Automation Engine*# IGZ_0002\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer"
-                     "{tech_name}"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
                      "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed_2.get('Date_of_Dispatch'),
                                            time_of_dispatch=cts_dispatch_confirmed_2.get('Hard_Time_of_Dispatch_Local'),
                                            time_zone=cts_dispatch_confirmed_2.get('Time_Zone_Local'),
@@ -1969,8 +1969,8 @@ def cts_ticket_details_2_with_confirmation_note_but_not_tech(cts_ticket_details_
         "noteValue": "#*Automation Engine*# IGZ_0002\n"
                      "Dispatch Management - Dispatch Confirmed\n"
                      "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
-                     "Field Engineer"
-                     "{tech_name}"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
                      "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed_2.get('Date_of_Dispatch'),
                                            time_of_dispatch=cts_dispatch_confirmed_2.get('Hard_Time_of_Dispatch_Local'),
                                            time_zone=cts_dispatch_confirmed_2.get('Time_Zone_Local'),

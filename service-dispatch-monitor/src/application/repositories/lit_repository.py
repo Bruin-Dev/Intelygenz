@@ -27,6 +27,10 @@ from application.templates.lit.lit_tech_on_site import lit_get_tech_on_site_note
 from application.repositories.utils_repository import UtilsRepository
 from application.templates.lit.lit_dispatch_cancel import lit_get_dispatch_cancel_note
 
+from application.templates.lit.lit_updated_tech import lit_get_updated_tech_note
+
+from application.templates.lit.sms.updated_tech import lit_get_updated_tech_sms, lit_get_updated_tech_sms_tech
+
 
 class LitRepository:
     def __init__(self, logger, config, event_bus, notifications_repository, bruin_repository):
@@ -472,6 +476,74 @@ class LitRepository:
             f"SMS sent Response {sms_response_body}")
         return True
 
+    async def send_updated_tech_sms(
+            self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to, tech_name) -> bool:
+        if sms_to is None:
+            return False
+
+        # Get SMS data
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'tech_name': tech_name
+        }
+
+        sms_data = lit_get_updated_tech_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+        self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_data}`")
+        sms_response = await self._notifications_repository.send_sms(sms_payload)
+        sms_response_status = sms_response['status']
+        sms_response_body = sms_response['body']
+        if sms_response_status not in range(200, 300):
+            self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
+                              f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} - SMS NOT sent")
+            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                      f'An error occurred when sending Updated tech SMS with notifier client. ' \
+                      f'payload: {sms_payload}'
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(f"SMS sent Response {sms_response_body}")
+        return True
+
+    async def send_updated_tech_sms_tech(
+            self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
+        if sms_to is None:
+            return False
+
+        # Get SMS data
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'site': dispatch.get('Job_Site'),
+            'street': dispatch.get('Job_Site_Street')
+        }
+
+        sms_data = lit_get_updated_tech_sms_tech(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+        self._logger.info(f"Sending SMS tech to {sms_to} with data: `{sms_data}`")
+        sms_response = await self._notifications_repository.send_sms(sms_payload)
+        sms_response_status = sms_response['status']
+        sms_response_body = sms_response['body']
+        if sms_response_status not in range(200, 300):
+            self._logger.info(f"SMS tech: `{sms_data}` TO: {sms_to} "
+                              f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} - SMS NOT sent")
+            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                      f'An error occurred when sending Updated tech SMS tech with notifier client. ' \
+                      f'payload: {sms_payload}'
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(
+            f"SMS tech sent Response {sms_response_body}")
+        return True
+
     async def append_confirmed_note(self, dispatch_number, ticket_id, dispatch) -> bool:
         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                           f"- Adding confirm note")
@@ -702,4 +774,35 @@ class LitRepository:
                           f"Ticket_id: {ticket_id} - Cancelled note Appended")
         self._logger.info(
             f"Cancelled note appended. Response: {append_sms_note_response_body}")
+        return True
+
+    async def append_updated_tech_note(self, dispatch_number, ticket_id, dispatch) -> bool:
+        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                          f"- Adding updated tech note")
+        note_data = {
+            'vendor': 'LIT',
+            'dispatch_number': dispatch_number,
+            'ticket_id': ticket_id,
+            'tech_name': dispatch.get('Tech_First_Name'),
+            'tech_phone': dispatch.get('Tech_Mobile_Number')
+        }
+        note = lit_get_updated_tech_note(note_data)
+
+        append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, note)
+
+        append_note_response_status = append_note_response['status']
+        append_note_response_body = append_note_response['body']
+        if append_note_response_status not in range(200, 300):
+            self._logger.info(f"Note: `{note}` "
+                              f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} - Not appended")
+            err_msg = f'An error occurred when appending an updated tech note with bruin client. ' \
+                      f'Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - payload: {note_data}'
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(f"Note: `{note}` "
+                          f"Dispatch: {dispatch_number} "
+                          f"Ticket_id: {ticket_id} - Updated tech note appended")
+        self._logger.info(
+            f"Updated tech Note appended. Response {append_note_response_body}")
         return True
