@@ -249,6 +249,9 @@ class TestLitDispatchMonitor:
         ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
         ticket_id_3 = dispatch_confirmed_tech_phone_none.get('MetTel_Bruin_TicketID')
 
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
+        tech_name_2 = dispatch_confirmed_2.get('Tech_First_Name')
+
         sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\nDispatch confirmation SMS sent to +12123595129\n'
         sms_note_2 = f'#*Automation Engine*# {dispatch_number_2}\nDispatch confirmation SMS sent to +12123595126\n'
         sms_note_3 = f'#*Automation Engine*# {dispatch_number_3}\nDispatch confirmation SMS sent to +12123595126\n'
@@ -392,8 +395,8 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to),
-            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to, tech_name),
+            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2, tech_name_2)
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
@@ -453,6 +456,7 @@ class TestLitDispatchMonitor:
 
         dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
         sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                      f'Dispatch confirmation SMS sent to +12123595129\n'
         sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
@@ -533,7 +537,7 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to, tech_name)
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_awaited_once_with(
@@ -564,7 +568,8 @@ class TestLitDispatchMonitor:
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_skipped_datetime.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_skipped_datetime.get('MetTel_Bruin_TicketID')
-
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
+        tech_name_2 = dispatch_confirmed_skipped_datetime.get('Tech_First_Name')
         sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                      f'Dispatch confirmation SMS sent to +12123595129\n'
         sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
@@ -636,7 +641,7 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to, tech_name)
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
@@ -663,7 +668,8 @@ class TestLitDispatchMonitor:
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_skipped_bad_phone.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_skipped_bad_phone.get('MetTel_Bruin_TicketID')
-
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
+        tech_name_2 = dispatch_confirmed_skipped_bad_phone.get('Tech_First_Name')
         sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                      f'Dispatch confirmation SMS sent to +12123595129\n'
         sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
@@ -746,7 +752,7 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to, tech_name)
         ])
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
@@ -774,7 +780,8 @@ class TestLitDispatchMonitor:
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_skipped_bad_phone_tech.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_skipped_bad_phone_tech.get('MetTel_Bruin_TicketID')
-
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
+        tech_name_2 = dispatch_confirmed_skipped_bad_phone_tech.get('Tech_First_Name')
         sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                      f'Dispatch confirmation SMS sent to +12123595129\n'
         sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
@@ -857,7 +864,7 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to, tech_name)
         ])
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
@@ -885,6 +892,8 @@ class TestLitDispatchMonitor:
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
+        tech_name_2 = dispatch_confirmed_2.get('Tech_First_Name')
         sms_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                      f'Dispatch confirmation SMS sent to +12123595129\n'
         sms_tech_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
@@ -983,7 +992,7 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to, tech_name)
         ])
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
@@ -1021,6 +1030,8 @@ class TestLitDispatchMonitor:
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
+        tech_name_2 = dispatch_confirmed_2.get('Tech_First_Name')
 
         sms_to = '+12123595129'
         sms_to_tech = '+12123595129'
@@ -1112,7 +1123,7 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to, tech_name)
         ])
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
@@ -1157,6 +1168,8 @@ class TestLitDispatchMonitor:
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
+        tech_name_2 = dispatch_confirmed_2.get('Tech_First_Name')
 
         confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1273,8 +1286,8 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to),
-            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to, tech_name),
+            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2, tech_name_2)
         ])
         lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
@@ -1327,6 +1340,8 @@ class TestLitDispatchMonitor:
         ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
         dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
         ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
+        tech_name_2 = dispatch_confirmed_2.get('Tech_First_Name')
 
         confirmed_note_1 = f'#*Automation Engine*# {dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1440,8 +1455,8 @@ class TestLitDispatchMonitor:
         ])
 
         lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to),
-            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_return_1['datetime_formatted_str'], sms_to, tech_name),
+            call(dispatch_number_2, ticket_id_2, datetime_return_2['datetime_formatted_str'], sms_to_2, tech_name_2)
         ])
 
         lit_dispatch_monitor._lit_repository.append_confirmed_sms_note.assert_has_awaits([

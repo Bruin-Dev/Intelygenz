@@ -349,9 +349,11 @@ class TestLitRepository:
             'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         sms_to = '+1987654327'
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
         sms_data_payload = {
             'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'tech_name': tech_name
         }
 
         sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
@@ -370,7 +372,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
         response = await lit_dispatch_monitor._lit_repository.send_confirmed_sms(
-            dispatch_number, ticket_id, datetime_return_1['datetime_formatted_str'], sms_to)
+            dispatch_number, ticket_id, datetime_return_1['datetime_formatted_str'], sms_to, tech_name)
         assert response is True
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -389,11 +391,12 @@ class TestLitRepository:
         }
         updated_dispatch['Job_Site_Contact_Name_and_Phone_Number'] = 'NOT VALID PHONE'
         sms_to = None
+        tech_name = updated_dispatch.get('Tech_First_Name')
 
         lit_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_confirmed_sms(
-            dispatch_number, ticket_id, datetime_return_1['datetime_formatted_str'], sms_to)
+            dispatch_number, ticket_id, datetime_return_1['datetime_formatted_str'], sms_to, tech_name)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
@@ -410,9 +413,11 @@ class TestLitRepository:
             'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
         }
         sms_to = '+1987654327'
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
         sms_data_payload = {
             'date_of_dispatch': datetime_return_1['datetime_formatted_str'],
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'tech_name': tech_name
         }
 
         sms_data = lit_get_dispatch_confirmed_sms(sms_data_payload)
@@ -436,7 +441,7 @@ class TestLitRepository:
         lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await lit_dispatch_monitor._lit_repository.send_confirmed_sms(
-            dispatch_number, ticket_id, datetime_return_1['datetime_formatted_str'], sms_to)
+            dispatch_number, ticket_id, datetime_return_1['datetime_formatted_str'], sms_to, tech_name)
         assert response is False
 
         lit_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)

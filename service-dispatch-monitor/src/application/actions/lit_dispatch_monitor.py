@@ -285,8 +285,9 @@ class LitDispatchMonitor:
                     if confirmed_sms_note_found is None:
                         self._logger.info(f"Dispatch: {dispatch_number} "
                                           f"Ticket_id: {ticket_id} - Sending confirmed SMS")
+                        tech_name = dispatch.get('Tech_First_Name')
                         sms_sended = await self._lit_repository.send_confirmed_sms(
-                            dispatch_number, ticket_id, datetime_formatted_str, sms_to)
+                            dispatch_number, ticket_id, datetime_formatted_str, sms_to, tech_name)
                         if not sms_sended:
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \

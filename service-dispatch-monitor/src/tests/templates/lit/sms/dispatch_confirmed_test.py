@@ -7,12 +7,14 @@ from application.templates.lit.sms.dispatch_confirmed import lit_get_tech_2_hour
 expected_dispatch_confirmed_sms = """This is an automated message from MetTel.
 
 A dispatch has been confirmed for your location on 2020-03-16 16:00:00 PDT.
+The field engineer handling this dispatch will be Larry Andershock.
 """
 
 
 def lit_get_dispatch_confirmed_sms_test():
     body = {
-        'date_of_dispatch': '2020-03-16 16:00:00 PDT'
+        'date_of_dispatch': '2020-03-16 16:00:00 PDT',
+        'tech_name': 'Larry Andershock'
     }
     dispatch_confirmed_sms = lit_get_dispatch_confirmed_sms(body)
 
