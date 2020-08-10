@@ -81,7 +81,7 @@ class Container:
         self._server = QuartServer(config)
 
     async def start(self):
-        self._velocloud_repository.connect_to_all_servers()
+        await self._velocloud_repository.connect_to_all_servers()
         # self._ids_by_serial_repository.start_ids_by_serial_storage_job(exec_on_start=True)
         await self._event_bus.connect()
         self._scheduler.start()

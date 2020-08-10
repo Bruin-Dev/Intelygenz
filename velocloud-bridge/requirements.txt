@@ -1,3 +1,4 @@
+aiohttp==3.6.2
 APScheduler==3.6.0
 requests==2.22.0
 -f https://s3pypi.mettel-automation.net/igzpackages/index.html

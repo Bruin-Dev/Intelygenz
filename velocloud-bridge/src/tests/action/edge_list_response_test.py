@@ -34,7 +34,7 @@ class TestEdgeListResponse:
         actions._logger.info = Mock()
         msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123", 'body': {"filter": []}}
         edges = {"body": ["task1", "task2"], "status": 200}
-        velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
+        velocloud_repo.get_all_enterprises_edges_with_host = CoroutineMock(return_value=edges)
         await actions.report_edge_list(msg_dict)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprises_edges_with_host.called
@@ -55,7 +55,7 @@ class TestEdgeListResponse:
         actions._logger.info = Mock()
         msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123", 'body': {"filter": []}}
         edges = {"body": None, "status": 500}
-        velocloud_repo.get_all_enterprises_edges_with_host = Mock(return_value=edges)
+        velocloud_repo.get_all_enterprises_edges_with_host = CoroutineMock(return_value=edges)
         await actions.report_edge_list(msg_dict)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprises_edges_with_host.called
@@ -75,7 +75,7 @@ class TestEdgeListResponse:
         actions = ReportEdgeList(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
         msg_dict = {"request_id": "123", "response_topic": "edge.list.response.123"}
-        velocloud_repo.get_all_enterprises_edges_with_host = Mock()
+        velocloud_repo.get_all_enterprises_edges_with_host = CoroutineMock()
 
         await actions.report_edge_list(msg_dict)
         assert actions._logger.info.called

@@ -1,11 +1,9 @@
-import json
 from unittest.mock import Mock
 
 import pytest
 from application.actions.enterprise_name_list_response import EnterpriseNameList
 from asynctest import CoroutineMock
 
-from config import testconfig as config
 from igz.packages.eventbus.eventbus import EventBus
 
 
@@ -37,7 +35,7 @@ class TestEnterpriseNameListResponse:
             "body": [{"enterprise_name": "A Name"}, {"enterprise_name": "Another Name"}],
             "status": 200
         }
-        velocloud_repo.get_all_enterprise_names = Mock(return_value=enterprises)
+        velocloud_repo.get_all_enterprise_names = CoroutineMock(return_value=enterprises)
         await actions.enterprise_name_list(msg_dict)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprise_names.called
@@ -63,13 +61,12 @@ class TestEnterpriseNameListResponse:
             "body": [{"enterprise_name": "A Name"}, {"enterprise_name": "Another Name"}],
             "status": 200
         }
-        velocloud_repo.get_all_enterprise_names = Mock(return_value=enterprises)
+        velocloud_repo.get_all_enterprise_names = CoroutineMock(return_value=enterprises)
         await actions.enterprise_name_list(msg_dict)
         assert not velocloud_repo.get_all_enterprise_names.called
         assert test_bus.publish_message.call_args[0][0] == msg_dict["response_topic"]
         assert test_bus.publish_message.call_args[0][1] == {"request_id": "123",
-                                                            "body": 'Must include "body" in request',
-                                                            "status": 400}
+                                                            "body": 'Must include "body" in request', "status": 400}
 
     @pytest.mark.asyncio
     async def report_enterprise_name_list_response_error_500_test(self):
@@ -86,7 +83,7 @@ class TestEnterpriseNameListResponse:
             "body": None,
             "status": 500
         }
-        velocloud_repo.get_all_enterprise_names = Mock(return_value=enterprises)
+        velocloud_repo.get_all_enterprise_names = CoroutineMock(return_value=enterprises)
         await actions.enterprise_name_list(msg_dict)
         assert actions._logger.info.called
         assert velocloud_repo.get_all_enterprise_names.called

@@ -26,9 +26,9 @@ class ReportEdgeStatus:
                 self._logger.info(f'Processing edge with data {msg}')
                 interval = msg["body"].pop("interval") if "interval" in msg["body"].keys() else interval
                 edgeids = msg["body"]
-                enterprise_name = self._velocloud_repository.get_enterprise_information(edgeids)
-                edge_status_vr = self._velocloud_repository.get_edge_information(edgeids)
-                link_status = self._velocloud_repository.get_link_information(edgeids, interval)
+                enterprise_name = await self._velocloud_repository.get_enterprise_information(edgeids)
+                edge_status_vr = await self._velocloud_repository.get_edge_information(edgeids)
+                link_status = await self._velocloud_repository.get_link_information(edgeids, interval)
                 status_list = (enterprise_name["status"],
                                edge_status_vr["status"],
                                link_status["status"])

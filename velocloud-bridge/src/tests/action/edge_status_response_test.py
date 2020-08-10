@@ -33,11 +33,11 @@ class TestEdgeStatusResponse:
         actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
         enterprise_info = {"body": "TEST", "status": 200}
-        velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
+        velocloud_repo.get_enterprise_information = CoroutineMock(return_value=enterprise_info)
         edge_information = {"body": [], "status": 200}
-        velocloud_repo.get_edge_information = Mock(return_value=edge_information)
+        velocloud_repo.get_edge_information = CoroutineMock(return_value=edge_information)
         link_information = {"body": [{"link_data": "STABLE", "linkId": "123"}], "status": 200}
-        velocloud_repo.get_link_information = Mock(return_value=link_information)
+        velocloud_repo.get_link_information = CoroutineMock(return_value=link_information)
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
                     "body": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(edge_msg)
@@ -74,11 +74,11 @@ class TestEdgeStatusResponse:
         actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
         enterprise_info = {"body": "TEST", "status": 200}
-        velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
+        velocloud_repo.get_enterprise_information = CoroutineMock(return_value=enterprise_info)
         edge_information = {"body": [], "status": 200}
-        velocloud_repo.get_edge_information = Mock(return_value=edge_information)
+        velocloud_repo.get_edge_information = CoroutineMock(return_value=edge_information)
         link_information = {"body": [{"link_data": "STABLE", "linkId": "123"}], "status": 200}
-        velocloud_repo.get_link_information = Mock(return_value=link_information)
+        velocloud_repo.get_link_information = CoroutineMock(return_value=link_information)
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
                     "body": {
                         "host": "host", "enterprise_id": "2", "edge_id": "1",
@@ -121,11 +121,11 @@ class TestEdgeStatusResponse:
         actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
         enterprise_info = {"body": "TEST", "status": 200}
-        velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
+        velocloud_repo.get_enterprise_information = CoroutineMock(return_value=enterprise_info)
         edge_information = {"body": [], "status": 200}
-        velocloud_repo.get_edge_information = Mock(return_value=edge_information)
+        velocloud_repo.get_edge_information = CoroutineMock(return_value=edge_information)
         link_information = {"body": None, "status": 500}
-        velocloud_repo.get_link_information = Mock(return_value=link_information)
+        velocloud_repo.get_link_information = CoroutineMock(return_value=link_information)
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
                     "body": {"host": "host", "enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(edge_msg)
@@ -153,9 +153,9 @@ class TestEdgeStatusResponse:
         velocloud_repo = Mock()
         actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
-        velocloud_repo.get_enterprise_information = Mock()
-        velocloud_repo.get_edge_information = Mock()
-        velocloud_repo.get_link_information = Mock()
+        velocloud_repo.get_enterprise_information = CoroutineMock()
+        velocloud_repo.get_edge_information = CoroutineMock()
+        velocloud_repo.get_link_information = CoroutineMock()
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123"}
 
         await actions.report_edge_status(edge_msg)
@@ -179,11 +179,11 @@ class TestEdgeStatusResponse:
         actions = ReportEdgeStatus(config, test_bus, velocloud_repo, mock_logger)
         actions._logger.info = Mock()
         enterprise_info = {"body": "TEST", "status": 200}
-        velocloud_repo.get_enterprise_information = Mock(return_value=enterprise_info)
+        velocloud_repo.get_enterprise_information = CoroutineMock(return_value=enterprise_info)
         edge_information = {"body": [], "status": 200}
-        velocloud_repo.get_edge_information = Mock(return_value=edge_information)
+        velocloud_repo.get_edge_information = CoroutineMock(return_value=edge_information)
         link_information = {"body": [{"link_data": "STABLE", "linkId": "123"}], "status": 200}
-        velocloud_repo.get_link_information = Mock(return_value=link_information)
+        velocloud_repo.get_link_information = CoroutineMock(return_value=link_information)
         edge_msg = {"request_id": "123", "response_topic": "edge.status.response.123",
                     "body": {"enterprise_id": "2", "edge_id": "1"}}
         await actions.report_edge_status(edge_msg)

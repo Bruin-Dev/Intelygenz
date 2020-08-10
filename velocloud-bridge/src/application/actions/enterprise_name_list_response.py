@@ -22,7 +22,7 @@ class EnterpriseNameList:
             await self._event_bus.publish_message(msg['response_topic'], enterprise_name_list_response)
             return
 
-        enterprise_names = self._velocloud_repository.get_all_enterprise_names(msg["body"])
+        enterprise_names = await self._velocloud_repository.get_all_enterprise_names(msg["body"])
 
         enterprise_name_list_response["body"] = enterprise_names["body"]
 

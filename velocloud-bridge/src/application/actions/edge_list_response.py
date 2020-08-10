@@ -17,7 +17,7 @@ class ReportEdgeList:
             edges_by_enterprise["body"] = 'Must include "body" in request'
             edges_by_enterprise["status"] = 400
         else:
-            edges_by_enterprise = self._velocloud_repository.get_all_enterprises_edges_with_host(msg['body'])
+            edges_by_enterprise = await self._velocloud_repository.get_all_enterprises_edges_with_host(msg['body'])
 
         edge_list_response = {"request_id": msg['request_id'],
                               "body": edges_by_enterprise["body"],

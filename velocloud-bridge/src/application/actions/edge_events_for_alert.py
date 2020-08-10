@@ -31,7 +31,7 @@ class EventEdgesForAlert:
                 limit = msg["body"]["limit"]
 
             self._logger.info(f'Sending events for edge with data {edgeids} for alerts')
-            events_by_edge = self._velocloud_repository.get_all_edge_events(edgeids, start, end, limit, filter)
+            events_by_edge = await self._velocloud_repository.get_all_edge_events(edgeids, start, end, limit, filter)
             edge_event_response["body"] = events_by_edge["body"]
             edge_event_response["status"] = events_by_edge["status"]
 
