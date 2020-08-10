@@ -1,12 +1,14 @@
 CTS_SMS_DISPATCH_CONFIRMED = """This is an automated message from MetTel.
 
 A dispatch has been confirmed for your location on {date_of_dispatch}.
+The field engineer handling this dispatch will be {tech_name}.
 """
 
 
 def cts_get_dispatch_confirmed_sms(body):
     return CTS_SMS_DISPATCH_CONFIRMED.format(
-        date_of_dispatch=body.get('date_of_dispatch')
+        date_of_dispatch=body.get('date_of_dispatch'),
+        tech_name=body.get('tech_name')
     )
 
 

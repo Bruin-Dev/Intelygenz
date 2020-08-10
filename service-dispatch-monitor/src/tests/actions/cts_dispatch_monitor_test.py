@@ -253,7 +253,8 @@ class TestCtsDispatchMonitor:
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
         ticket_id_3 = cts_dispatch_confirmed_no_main_watermark.get('Ext_Ref_Num__c')
-
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
         time_3 = cts_dispatch_confirmed_no_main_watermark.get('Local_Site_Time__c')
@@ -354,7 +355,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name),
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
@@ -411,7 +412,8 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
-
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
@@ -515,8 +517,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
-            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2, tech_name)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
@@ -582,6 +584,8 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
 
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
@@ -687,8 +691,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
-            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2, tech_name_2)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
@@ -775,6 +779,7 @@ class TestCtsDispatchMonitor:
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         # Get datetime formatted string
         datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
@@ -841,7 +846,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
@@ -879,7 +884,8 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_skipped_datetime.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_skipped_datetime.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_skipped_datetime.get('Local_Site_Time__c')
-
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_name_2 = cts_dispatch_confirmed_skipped_datetime.get('API_Resource_Name__c')
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
                            f'Dispatch scheduled for {time_1}\n\n' \
@@ -932,7 +938,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
@@ -968,6 +974,8 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_skipped_bad_phone.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_skipped_bad_phone.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_skipped_bad_phone.get('Local_Site_Time__c')
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_name_2 = cts_dispatch_confirmed_skipped_bad_phone.get('API_Resource_Name__c')
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1024,7 +1032,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
@@ -1060,6 +1068,8 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_skipped_bad_phone_tech.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_skipped_bad_phone_tech.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_skipped_bad_phone_tech.get('Local_Site_Time__c')
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_name_2 = cts_dispatch_confirmed_skipped_bad_phone_tech.get('API_Resource_Name__c')
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
@@ -1114,7 +1124,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
@@ -1148,7 +1158,8 @@ class TestCtsDispatchMonitor:
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
-
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         # Get datetime formatted string
         datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
@@ -1236,7 +1247,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech)
@@ -1264,6 +1275,8 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
         datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
         datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
@@ -1344,7 +1357,7 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name)
         ])
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
@@ -1401,6 +1414,8 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
 
         confirmed_note_1 = f'#*Automation Engine*# {igz_dispatch_number_1}\n' \
                            'Dispatch Management - Dispatch Confirmed\n' \
@@ -1495,8 +1510,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
-            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2, tech_name_2)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),
@@ -1551,6 +1566,8 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
         time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_name_2 = cts_dispatch_confirmed_2.get('API_Resource_Name__c')
 
         sms_to = '+12027723610'
         sms_to_2 = '+12027723611'
@@ -1655,8 +1672,8 @@ class TestCtsDispatchMonitor:
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
-            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to),
-            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2)
+            call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name),
+            call(dispatch_number_2, ticket_id_2, datetime_2_str, sms_to_2, tech_name_2)
         ])
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_confirmed, datetime_1_str, sms_to_tech),

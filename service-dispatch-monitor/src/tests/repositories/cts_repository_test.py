@@ -672,11 +672,13 @@ class TestCtsRepository:
     async def send_confirmed_sms_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, sms_success_response):
         ticket_id = '12345'
         dispatch_number = cts_dispatch_confirmed.get('Name')
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
         sms_to = '+1987654327'
         dispatch_datetime = '2020-03-16 16:00:00 PDT'
         sms_data_payload = {
             'date_of_dispatch': dispatch_datetime,
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'tech_name': tech_name
         }
 
         sms_data = cts_get_dispatch_confirmed_sms(sms_data_payload)
@@ -705,7 +707,7 @@ class TestCtsRepository:
         cts_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
 
         response = await cts_dispatch_monitor._cts_repository.send_confirmed_sms(
-            dispatch_number, ticket_id, dispatch_datetime, sms_to)
+            dispatch_number, ticket_id, dispatch_datetime, sms_to, tech_name)
         assert response is True
 
         cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
@@ -716,13 +718,14 @@ class TestCtsRepository:
         updated_dispatch = cts_dispatch_confirmed_no_contact.copy()
         ticket_id = '12345'
         dispatch_number = updated_dispatch.get('Name')
+        tech_name = updated_dispatch.get('API_Resource_Name__c')
         sms_to = None
         dispatch_datetime = '2020-03-16 16:00:00 PDT'
 
         cts_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
 
         response = await cts_dispatch_monitor._cts_repository.send_confirmed_sms(
-            dispatch_number, ticket_id, dispatch_datetime, sms_to)
+            dispatch_number, ticket_id, dispatch_datetime, sms_to, tech_name)
         assert response is False
 
         cts_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
@@ -735,10 +738,12 @@ class TestCtsRepository:
         # sms_to = dispatch.get('Job_Site_Contact_Name_and_Phone_Number')
         # sms_to = LitRepository.get_sms_to(dispatch)
         sms_to = '+1987654327'
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
         dispatch_datetime = '2020-03-16 16:00:00 PDT'
         sms_data_payload = {
             'date_of_dispatch': dispatch_datetime,
-            'phone_number': sms_to
+            'phone_number': sms_to,
+            'tech_name': tech_name
         }
 
         sms_data = cts_get_dispatch_confirmed_sms(sms_data_payload)
@@ -767,7 +772,7 @@ class TestCtsRepository:
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         response = await cts_dispatch_monitor._cts_repository.send_confirmed_sms(
-            dispatch_number, ticket_id, dispatch_datetime, sms_to)
+            dispatch_number, ticket_id, dispatch_datetime, sms_to, tech_name)
         assert response is False
 
         cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)

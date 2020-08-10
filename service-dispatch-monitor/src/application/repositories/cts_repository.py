@@ -149,13 +149,14 @@ class CtsRepository:
                 dispatches_splitted_by_status[dispatch.get('Status__c')].append(dispatch)
         return dispatches_splitted_by_status
 
-    async def send_confirmed_sms(self, dispatch_number, ticket_id, dispatch_datetime, sms_to) -> bool:
+    async def send_confirmed_sms(self, dispatch_number, ticket_id, dispatch_datetime, sms_to, tech_name) -> bool:
         if sms_to is None:
             return False
 
         # Get SMS data
         sms_data_payload = {
-            'date_of_dispatch': dispatch_datetime
+            'date_of_dispatch': dispatch_datetime,
+            'tech_name': tech_name
         }
 
         sms_data = cts_get_dispatch_confirmed_sms(sms_data_payload)
