@@ -4,7 +4,7 @@ expected_updated_tech_note = """#*Automation Engine*# DIS37266
 The Field Engineer assigned to this dispatch has changed.
 Reference: 12345
 
-New Field Engineer
+Field Engineer
 Michael J. Fox
 +12123595129
 """

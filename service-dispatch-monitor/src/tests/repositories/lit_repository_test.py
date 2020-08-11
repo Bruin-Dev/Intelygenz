@@ -1790,7 +1790,7 @@ class TestLitRepository:
         sms_note = f'#*Automation Engine*# {dispatch_number}\n' \
                    f'The Field Engineer assigned to this dispatch has changed.\n' \
                    f'Reference: {ticket_id}\n\n' \
-                   'New Field Engineer\nJoe Malone\n+12123595129\n'
+                   'Field Engineer\nJoe Malone\n+12123595129\n'
         lit_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[response_append_note_1])
 
@@ -1820,7 +1820,7 @@ class TestLitRepository:
         sms_note = f'#*Automation Engine*# {dispatch_number}\n' \
                    f'The Field Engineer assigned to this dispatch has changed.\n' \
                    f'Reference: {ticket_id}\n\n' \
-                   'New Field Engineer\nJoe Malone\n+12123595129\n'
+                   'Field Engineer\nJoe Malone\n+12123595129\n'
 
         send_error_sms_to_slack_response = f'An error occurred when appending an updated tech note ' \
                                            f'with bruin client. ' \

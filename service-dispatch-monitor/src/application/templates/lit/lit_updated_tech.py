@@ -2,7 +2,7 @@ LIT_UPDATED_TECH = """#*Automation Engine*# {dispatch_number}
 The Field Engineer assigned to this dispatch has changed.
 Reference: {ticket_id}
 
-New Field Engineer
+Field Engineer
 {tech_name}
 {tech_phone}
 """

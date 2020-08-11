@@ -377,14 +377,6 @@ class LitDispatchMonitor:
                         self._logger.info(msg)
                         await self._notifications_repository.send_slack_message(msg)
 
-                        # TODO: check if we still need to send the 12 and 2 hours sms and notes if a tech has change
-                        # resend_12_and_2_hours = False
-                        # if resend_12_and_2_hours:
-                        #     tech_12_hours_before_note_found = None
-                        #     tech_12_hours_before_tech_note_found = None
-                        #     tech_2_hours_before_note_found = None
-                        #     tech_2_hours_before_tech_note_found = None
-
                         # Send sms client
                         result_sms_update_tech_sended = await self._lit_repository.send_updated_tech_sms(
                             dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to, tech_name
