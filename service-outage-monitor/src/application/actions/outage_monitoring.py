@@ -638,15 +638,17 @@ class OutageMonitor:
         return outage_causes or None
 
     def _can_autoresolve_ticket_by_age(self, outage_ticket_info):
+        ticket_id = outage_ticket_info["ticketID"]
         outage_ticket_creation_date_utc = datetime.strptime(outage_ticket_info["createDate"], "%m/%d/%Y %I:%M:%S %p")
         now = datetime.utcnow()
         seconds_from_creation = (now - outage_ticket_creation_date_utc).seconds
         max_ticket_age_seconds = self._config.MONITOR_CONFIG['autoresolve_ticket_creation_seconds']
-        self._logger.info(f'It has been {int(seconds_from_creation / 60)} minutes since ticket creation')
+        self._logger.info(f'It has been {int(seconds_from_creation / 60)} minutes '
+                          f'since ticket creation for ticket {ticket_id}')
 
         if seconds_from_creation > max_ticket_age_seconds:
-            self._logger.info(f"Ticket age is greater than {int(max_ticket_age_seconds / 60)} minutes. "
-                              f"Skipping autoresolve...")
+            self._logger.info(f"Ticket age is greater than {int(max_ticket_age_seconds / 60)} minutes "
+                              f"for ticket {ticket_id}. Skipping autoresolve...")
             return False
         return True
 
