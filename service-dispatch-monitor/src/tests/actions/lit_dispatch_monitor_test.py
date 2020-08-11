@@ -1633,6 +1633,211 @@ class TestLitDispatchMonitor:
         )
 
     @pytest.mark.asyncio
+    async def monitor_confirmed_dispatches_update_tech_with_errors_test(
+            self, lit_dispatch_monitor, dispatch_confirmed, dispatch_confirmed_2,
+            ticket_details_1_with_confirmation_and_outdated_tech_note,
+            ticket_details_2_with_confirmation_and_outdated_tech_note):
+        confirmed_dispatches = [
+            dispatch_confirmed,
+            dispatch_confirmed_2
+        ]
+        tech_name = dispatch_confirmed.get('Tech_First_Name')
+        dispatch_number_1 = dispatch_confirmed.get('Dispatch_Number')
+        ticket_id_1 = dispatch_confirmed.get('MetTel_Bruin_TicketID')
+
+        tech_name_2 = dispatch_confirmed_2.get('Tech_First_Name')
+        dispatch_number_2 = dispatch_confirmed_2.get('Dispatch_Number')
+        ticket_id_2 = dispatch_confirmed_2.get('MetTel_Bruin_TicketID')
+
+        responses_details_mock = [
+            ticket_details_1_with_confirmation_and_outdated_tech_note,
+            ticket_details_2_with_confirmation_and_outdated_tech_note
+        ]
+
+        tz_1 = timezone(f'US/Pacific')
+        time_1 = tz_1.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_1 = {
+            'datetime_localized': time_1,
+            'timezone': tz_1,
+            'datetime_formatted_str': time_1.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
+        tz_2 = timezone(f'US/Pacific')
+        time_2 = tz_2.localize(datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p'))
+        datetime_return_2 = {
+            'datetime_localized': time_2,
+            'timezone': tz_2,
+            'datetime_formatted_str': time_2.strftime(UtilsRepository.DATETIME_FORMAT)
+        }
+
+        # First not skipped, Second skipped
+        responses_get_diff_hours = [
+            lit_dispatch_monitor.HOURS_12 - 1,
+            lit_dispatch_monitor.HOURS_12 - 1,
+            lit_dispatch_monitor.HOURS_12 + 1,
+            lit_dispatch_monitor.HOURS_12 + 1
+        ]
+
+        responses_append_confirmed_notes_mock = [
+            True,
+            False,
+        ]
+        responses_confirmed_sms = [
+            True,
+            False
+        ]
+        response_append_updated_sms_mock = [
+            True,
+            False
+        ]
+        response_send_updated_sms_mock = [
+            True,
+            False
+        ]
+        response_send_tech_updated_sms_mock = [
+            True,
+            False
+        ]
+
+        responses_send_tech_12_sms_mock = [
+            True,
+            True
+        ]
+
+        responses_send_tech_12_sms_note_mock = [
+            True,
+            True
+        ]
+
+        sms_to = '+12123595129'
+        sms_to_tech = '+12123595129'
+        sms_to_2 = '+12123595126'
+        sms_to_tech_2 = '+12123595126'
+
+        responses_send_slack_message_mock = [
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+            {'status': 200},
+        ]
+        slack_msg_1 = f"[service-dispatch-monitor] [LIT] " \
+                      f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                      f"- A sms tech 12 hours before note appended"
+        slack_msg_note_1 = f"[service-dispatch-monitor] [LIT] " \
+                           f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                           f"- A sms tech 12 hours before note tech appended"
+        lit_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=responses_send_slack_message_mock)
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized = Mock(
+            return_value=datetime_return_1)
+        lit_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
+            side_effect=responses_details_mock)
+        lit_dispatch_monitor._lit_repository.append_confirmed_note = CoroutineMock(
+            side_effect=responses_append_confirmed_notes_mock)
+        lit_dispatch_monitor._lit_repository.send_confirmed_sms = CoroutineMock(
+            side_effect=responses_confirmed_sms)
+        lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech = CoroutineMock(
+            side_effect=responses_confirmed_sms)
+        lit_dispatch_monitor._lit_repository.append_updated_tech_note = CoroutineMock(
+            side_effect=response_append_updated_sms_mock)
+        lit_dispatch_monitor._lit_repository.send_updated_tech_sms = CoroutineMock(
+            side_effect=response_send_updated_sms_mock)
+        lit_dispatch_monitor._lit_repository.send_updated_tech_sms_tech = CoroutineMock(
+            side_effect=response_send_tech_updated_sms_mock)
+        lit_dispatch_monitor._lit_repository.send_tech_12_sms = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_mock)
+        lit_dispatch_monitor._lit_repository.send_tech_12_sms_tech = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_mock)
+        lit_dispatch_monitor._lit_repository.append_tech_12_sms_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_note_mock)
+        lit_dispatch_monitor._lit_repository.append_tech_12_sms_tech_note = CoroutineMock(
+            side_effect=responses_send_tech_12_sms_note_mock)
+
+        with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
+            await lit_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+
+        lit_dispatch_monitor._lit_repository.get_dispatch_confirmed_date_time_localized.assert_has_calls([
+            call(dispatch_confirmed, dispatch_number_1, ticket_id_1),
+        ])
+
+        lit_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
+            call(ticket_id_1),
+        ])
+
+        lit_dispatch_monitor._lit_repository.append_confirmed_note.assert_not_awaited()
+        lit_dispatch_monitor._lit_repository.send_confirmed_sms.assert_not_awaited()
+        lit_dispatch_monitor._lit_repository.send_confirmed_sms_tech.assert_not_awaited()
+
+        lit_dispatch_monitor._lit_repository.append_updated_tech_note.assert_has_awaits(
+            [
+                call(dispatch_number_1, ticket_id_1, dispatch_confirmed),
+                call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2)
+            ],
+            any_order=False
+        )
+        lit_dispatch_monitor._lit_repository.send_updated_tech_sms.assert_has_awaits(
+            [
+                call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                     sms_to, tech_name),
+                call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
+                     sms_to_2, tech_name_2)
+            ],
+            any_order=False
+        )
+        lit_dispatch_monitor._lit_repository.send_updated_tech_sms_tech.assert_has_awaits(
+            [
+                call(dispatch_number_1, ticket_id_1, dispatch_confirmed, datetime_return_1['datetime_formatted_str'],
+                     sms_to_tech),
+                call(dispatch_number_2, ticket_id_2, dispatch_confirmed_2, datetime_return_2['datetime_formatted_str'],
+                     sms_to_tech_2)
+            ],
+            any_order=False
+        )
+
+        updated_tech_note_1 = f"[service-dispatch-monitor] [LIT] " \
+                              f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                              f"- A updated tech note appended"
+        updated_tech_sms_1 = f"[service-dispatch-monitor] [LIT] " \
+                             f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                             f"- A updated tech sms sent"
+        updated_tech_sms_tech_1 = f"[service-dispatch-monitor] [LIT] " \
+                                  f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                                  f"- A updated tech sms tech sent"
+        sms_tech_12_note_1 = f"[service-dispatch-monitor] [LIT] " \
+                             f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                             f"- A sms tech 12 hours before note appended"
+        sms_tech_12_tech_note_1 = f"[service-dispatch-monitor] [LIT] " \
+                                  f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                                  f"- A sms tech 12 hours before note tech appended"
+        updated_tech_note_2 = f"[service-dispatch-monitor] [LIT] " \
+                              f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                              f"- An updated tech note not appended"
+        updated_tech_sms_2 = f"[service-dispatch-monitor] [LIT] " \
+                             f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                             f"- An updated tech sms not sent"
+        updated_tech_sms_tech_2 = f"[service-dispatch-monitor] [LIT] " \
+                                  f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
+                                  f"- An updated tech sms tech not sent"
+
+        lit_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
+            call(updated_tech_note_1),
+            call(updated_tech_sms_1),
+            call(updated_tech_sms_tech_1),
+            call(sms_tech_12_note_1),
+            call(sms_tech_12_tech_note_1),
+            call(updated_tech_note_2),
+            call(updated_tech_sms_2),
+            call(updated_tech_sms_tech_2),
+        ])
+
+    @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_confirmed_sms_and_12h_sms_notes_test(
             self, lit_dispatch_monitor, dispatch_confirmed, dispatch_confirmed_2,
             ticket_details_1_with_confirmation_note, ticket_details_2_with_confirmation_note):

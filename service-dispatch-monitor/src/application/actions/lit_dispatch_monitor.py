@@ -347,7 +347,7 @@ class LitDispatchMonitor:
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- already has a sms tech confirmed note")
 
-                    # TODO: check for Tech updates
+                    # Check for Tech updates
                     # First retrieve original tech name from confirmed note
                     updated_tech_notes = [confirmed_note_found]
                     for ticket_note in filtered_ticket_notes:
