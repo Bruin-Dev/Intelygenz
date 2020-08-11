@@ -526,7 +526,7 @@ class CtsDispatchMonitor:
 
                 except Exception as ex:
                     err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} - {dispatch}"
-                    self._logger.error(f"Error: {ex}")
+                    self._logger.error(f"{err_msg} - {ex}")
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
         except Exception as ex:
@@ -656,7 +656,7 @@ class CtsDispatchMonitor:
                 except Exception as ex:
                     err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "\
                               f"- {dispatch}"
-                    self._logger.error(err_msg)
+                    self._logger.error(f"{err_msg} - {ex}")
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
         except Exception as ex:
@@ -763,7 +763,7 @@ class CtsDispatchMonitor:
                 except Exception as ex:
                     err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "\
                               f"- {dispatch}"
-                    self._logger.error(err_msg)
+                    self._logger.error(f"{err_msg} - {ex}")
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
         except Exception as ex:

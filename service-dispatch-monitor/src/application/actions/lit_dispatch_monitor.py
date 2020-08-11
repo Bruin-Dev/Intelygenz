@@ -315,7 +315,7 @@ class LitDispatchMonitor:
                         self._logger.info(f"Dispatch: {dispatch_number} "
                                           f"Ticket_id: {ticket_id} - Sending confirmed SMS Tech")
                         sms_sended = await self._lit_repository.send_confirmed_sms_tech(
-                            dispatch_number, ticket_id, datetime_formatted_str, sms_to_tech)
+                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
                         if not sms_sended:
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
@@ -493,7 +493,7 @@ class LitDispatchMonitor:
                 except Exception as ex:
                     err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
                               f"- {dispatch}"
-                    self._logger.error(err_msg)
+                    self._logger.error(f"{err_msg} - {ex}")
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
         except Exception as ex:
@@ -615,7 +615,7 @@ class LitDispatchMonitor:
                 except Exception as ex:
                     err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "\
                               f"- {dispatch}"
-                    self._logger.error(err_msg)
+                    self._logger.error(f"{err_msg} - {ex}")
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
         except Exception as ex:
@@ -710,7 +710,7 @@ class LitDispatchMonitor:
                 except Exception as ex:
                     err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "\
                               f"- {dispatch}"
-                    self._logger.error(err_msg)
+                    self._logger.error(f"{err_msg} - {ex}")
                     await self._notifications_repository.send_slack_message(err_msg)
                     continue
         except Exception as ex:
