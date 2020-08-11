@@ -1357,8 +1357,8 @@ class TestServiceOutageMonitor:
         }
 
         edge_status_response = {
-                                'body': 'Got internal error from Velocloud',
-                                'status': 500,
+            'body': 'Got internal error from Velocloud',
+            'status': 500,
         }
 
         logger = Mock()
@@ -1975,6 +1975,8 @@ class TestServiceOutageMonitor:
         logger = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
+        bruin_repository.get_outage_ticket_details_by_service_number = CoroutineMock()
+        bruin_repository.resolve_ticket = CoroutineMock()
         notifications_repository = Mock()
         triage_repository = Mock()
         metrics_repository = Mock()
@@ -1994,10 +1996,10 @@ class TestServiceOutageMonitor:
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        velocloud_repository.get_last_down_edge_events.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_retrieval_of_down_events_returning_non_2xx_status_test(self):
+    async def run_ticket_autoresolve_ticket_older_than_config_age_test(self):
         serial_number = 'VC1234567'
 
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
@@ -2014,22 +2016,20 @@ class TestServiceOutageMonitor:
             },
         }
 
-        last_down_events_response = {
-            'body': "Invalid parameters",
-            'status': 400,
-        }
-
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
         outage_repository = Mock()
         bruin_repository = Mock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.get_outage_ticket_details_by_service_number = CoroutineMock()
+        bruin_repository.get_ticket_info = CoroutineMock()
+
         notifications_repository = Mock()
         triage_repository = Mock()
         metrics_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_down_edge_events = CoroutineMock(return_value=last_down_events_response)
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
@@ -2039,6 +2039,7 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=False)
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -2047,11 +2048,10 @@ class TestServiceOutageMonitor:
             with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
                 await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
-        velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
+        bruin_repository.resolve_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_prod_and_no_down_events_test(self):
+    async def run_ticket_autoresolve_with_prod_and_ticket_too_old_test(self):
         serial_number = 'VC1234567'
 
         edge_full_id = {"host": "metvco04.mettel.net", "enterprise_id": 1, "edge_id": 1234}
@@ -2068,11 +2068,6 @@ class TestServiceOutageMonitor:
             }
         }
 
-        last_down_events_response = {
-            'body': [],
-            'status': 200,
-        }
-
         event_bus = Mock()
         scheduler = Mock()
         logger = Mock()
@@ -2082,9 +2077,10 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_down_edge_events = CoroutineMock(return_value=last_down_events_response)
 
         bruin_repository = Mock()
+        bruin_repository.resolve_ticket = CoroutineMock()
+        bruin_repository.get_ticket_info = CoroutineMock()
         bruin_repository.get_outage_ticket_details_by_service_number = CoroutineMock()
 
         config = testconfig
@@ -2095,6 +2091,7 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=False)
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -2103,12 +2100,10 @@ class TestServiceOutageMonitor:
             with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
                 await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
-        velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
-        bruin_repository.get_outage_ticket_details_by_service_number.assert_not_awaited()
+        bruin_repository.resolve_ticket.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_down_events_and_retrieval_of_ticket_returning_non_2xx_status_test(self):
+    async def run_ticket_autoresolve_retrieval_of_ticket_returning_non_2xx_status_test(self):
         serial_number = 'VC1234567'
         client_id = 9994
 
@@ -2124,18 +2119,6 @@ class TestServiceOutageMonitor:
                 'client_id': client_id,
                 'client_name': 'METTEL/NEW YORK',
             },
-        }
-
-        last_down_events_response = {
-            'body': [
-                {
-                    'event': 'LINK_ALIVE',
-                    'category': 'NETWORK',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'GE2 alive'
-                }
-            ],
-            'status': 200,
         }
 
         outage_ticket_response = {
@@ -2152,12 +2135,13 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_down_edge_events = CoroutineMock(return_value=last_down_events_response)
+        velocloud_repository.get_last_down_edge_events = CoroutineMock()
 
         bruin_repository = Mock()
         bruin_repository.get_outage_ticket_details_by_service_number = CoroutineMock(
             return_value=outage_ticket_response
         )
+        bruin_repository.get_ticket_info = CoroutineMock()
 
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
@@ -2175,13 +2159,12 @@ class TestServiceOutageMonitor:
             with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
                 await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
-        velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
         bruin_repository.get_outage_ticket_details_by_service_number.assert_awaited_once_with(client_id, serial_number)
         outage_repository.is_outage_ticket_auto_resolvable.assert_not_called()
+        bruin_repository.get_ticket_info.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_prod_and_and_down_events_and_no_ticket_found_test(self):
+    async def run_ticket_autoresolve_with_prod_and_no_ticket_found_test(self):
         serial_number = 'VC1234567'
         client_id = 9994
 
@@ -2197,18 +2180,6 @@ class TestServiceOutageMonitor:
                 'client_id': client_id,
                 'client_name': 'METTEL/NEW YORK',
             },
-        }
-
-        last_down_events_response = {
-            'body': [
-                {
-                    'event': 'LINK_ALIVE',
-                    'category': 'NETWORK',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'GE2 alive'
-                }
-            ],
-            'status': 200,
         }
 
         outage_ticket_response = {
@@ -2225,7 +2196,6 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_down_edge_events = CoroutineMock(return_value=last_down_events_response)
 
         bruin_repository = Mock()
         bruin_repository.get_outage_ticket_details_by_service_number = CoroutineMock(
@@ -2248,13 +2218,11 @@ class TestServiceOutageMonitor:
             with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
                 await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
-        velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
         bruin_repository.get_outage_ticket_details_by_service_number.assert_awaited_once_with(client_id, serial_number)
         outage_repository.is_outage_ticket_auto_resolvable.assert_not_called()
 
     @pytest.mark.asyncio
-    async def run_ticket_autoresolve_with_down_events_and_ticket_and_resolve_limit_exceeded_test(self):
+    async def run_ticket_autoresolve_fresh_enough_ticket_and_resolve_limit_exceeded_test(self):
         serial_number = 'VC1234567'
         client_id = 9994
 
@@ -2270,18 +2238,6 @@ class TestServiceOutageMonitor:
                 'client_id': client_id,
                 'client_name': 'METTEL/NEW YORK',
             },
-        }
-
-        last_down_events_response = {
-            'body': [
-                {
-                    'event': 'LINK_ALIVE',
-                    'category': 'NETWORK',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'GE2 alive'
-                }
-            ],
-            'status': 200,
         }
 
         outage_ticket_notes = [
@@ -2321,9 +2277,9 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_down_edge_events = CoroutineMock(return_value=last_down_events_response)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_info = CoroutineMock()
         bruin_repository.get_outage_ticket_details_by_service_number = CoroutineMock(
             return_value=outage_ticket_response
         )
@@ -2339,6 +2295,7 @@ class TestServiceOutageMonitor:
                                        bruin_repository, velocloud_repository, notifications_repository,
                                        triage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
+        outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=True)
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -2347,8 +2304,6 @@ class TestServiceOutageMonitor:
             with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
                 await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
-        velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
         bruin_repository.get_outage_ticket_details_by_service_number.assert_awaited_once_with(client_id, serial_number)
         outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
             outage_ticket_notes, max_autoresolves=3
@@ -2374,18 +2329,6 @@ class TestServiceOutageMonitor:
         }
 
         uuid_ = uuid()
-
-        last_down_events_response = {
-            'body': [
-                {
-                    'event': 'LINK_ALIVE',
-                    'category': 'NETWORK',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'GE2 alive'
-                }
-            ],
-            'status': 200,
-        }
 
         outage_ticket_id = 12345
         outage_ticket_detail_id = 2746937
@@ -2421,9 +2364,9 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_down_edge_events = CoroutineMock(return_value=last_down_events_response)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_info = CoroutineMock()
         bruin_repository.get_outage_ticket_details_by_service_number = CoroutineMock(
             return_value=outage_ticket_response
         )
@@ -2443,6 +2386,7 @@ class TestServiceOutageMonitor:
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._is_detail_resolved = Mock(return_value=True)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
+        outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=True)
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
@@ -2468,18 +2412,6 @@ class TestServiceOutageMonitor:
                 'client_id': client_id,
                 'client_name': 'METTEL/NEW YORK',
             },
-        }
-
-        last_down_events_response = {
-            'body': [
-                {
-                    'event': 'LINK_ALIVE',
-                    'category': 'NETWORK',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'GE2 alive'
-                }
-            ],
-            'status': 200,
         }
 
         outage_ticket_id = 12345
@@ -2522,9 +2454,9 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_down_edge_events = CoroutineMock(return_value=last_down_events_response)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_info = CoroutineMock()
         bruin_repository.get_outage_ticket_details_by_service_number = CoroutineMock(
             return_value=outage_ticket_response
         )
@@ -2544,6 +2476,7 @@ class TestServiceOutageMonitor:
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._is_detail_resolved = Mock(return_value=False)
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
+        outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=True)
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -2551,9 +2484,6 @@ class TestServiceOutageMonitor:
         with patch.object(outage_monitoring_module, 'datetime', new=datetime_mock):
             with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
                 await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
-
-        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
-        velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
 
         bruin_repository.get_outage_ticket_details_by_service_number.assert_awaited_once_with(client_id, serial_number)
         outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
@@ -2583,17 +2513,17 @@ class TestServiceOutageMonitor:
             },
         }
 
-        last_down_events_response = {
-            'body': [
-                {
-                    'event': 'LINK_ALIVE',
-                    'category': 'NETWORK',
-                    'eventTime': '2019-07-30 07:38:00+00:00',
-                    'message': 'GE2 alive'
-                }
-            ],
-            'status': 200,
-        }
+        # createDate here won't be used to check age, is an example of date format
+        outage_ticket_info = {'clientID': 9999, 'clientName': 'CustomerCorp',
+                              'ticketID': 1919, 'category': 'SD-WAN', 'topic': 'Service Outage Trouble',
+                              'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                              'address': {'address': '9493 Some Place', 'city': 'Sausalito',
+                                          'state': 'IL', 'zip': '212122', 'country': 'USA'},
+                              'createDate': '8/11/2020 4:37:34 PM', 'createdBy': 'Intelygenz Ai', 'creationNote': None,
+                              'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                              'lastUpdate': None, 'updatedBy': None,
+                              'mostRecentNote': '8/11/2020 8:37:54 PM Intelygenz Ai',
+                              'nextScheduledDate': '8/25/2020 9:37:57 AM', 'flags': 'Frozen', 'severity': '2'}
 
         outage_ticket_id = 12345
         outage_ticket_detail_id = 2746937
@@ -2633,9 +2563,9 @@ class TestServiceOutageMonitor:
         metrics_repository = Mock()
 
         velocloud_repository = Mock()
-        velocloud_repository.get_last_down_edge_events = CoroutineMock(return_value=last_down_events_response)
 
         bruin_repository = Mock()
+        bruin_repository.get_ticket_info = CoroutineMock(return_value=outage_ticket_info)
         bruin_repository.get_outage_ticket_details_by_service_number = CoroutineMock(
             return_value=outage_ticket_response
         )
@@ -2654,6 +2584,7 @@ class TestServiceOutageMonitor:
                                        triage_repository, metrics_repository)
         outage_monitor._autoresolve_serials_whitelist = {serial_number}
         outage_monitor._notify_successful_autoresolve = CoroutineMock()
+        outage_monitor._can_autoresolve_ticket_by_age = Mock(return_value=True)
 
         datetime_mock = Mock()
         current_time = datetime.now()
@@ -2662,8 +2593,6 @@ class TestServiceOutageMonitor:
             with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
                 await outage_monitor._run_ticket_autoresolve_for_edge(edge_full_id, edge_status)
 
-        down_events_since = current_time - timedelta(seconds=config.MONITOR_CONFIG['autoresolve_down_events_seconds'])
-        velocloud_repository.get_last_down_edge_events.assert_awaited_once_with(edge_full_id, down_events_since)
         bruin_repository.get_outage_ticket_details_by_service_number.assert_awaited_once_with(client_id, serial_number)
         outage_repository.is_outage_ticket_auto_resolvable.assert_called_once_with(
             outage_ticket_notes, max_autoresolves=3

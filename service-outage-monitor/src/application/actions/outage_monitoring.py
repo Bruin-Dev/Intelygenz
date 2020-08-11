@@ -99,7 +99,7 @@ class OutageMonitor:
         if len(self._monitoring_map_cache) == 0:
             self._logger.info(f"[outage_monitoring_process] Starting initial build of cache and "
                               f"scheduling job to refresh cache every "
-                              f"{self._config.MONITOR_CONFIG['jobs_intervals']['build_cache']/3600} hours")
+                              f"{self._config.MONITOR_CONFIG['jobs_intervals']['build_cache'] / 3600} hours")
             await self._build_cache()
             await self._start_build_cache_job(exec_on_start=False)
 
@@ -122,7 +122,7 @@ class OutageMonitor:
         stop = perf_counter()
 
         self._logger.info(f"[outage_monitoring_process] Elapsed time processing hosts with cache"
-                          f": {(stop - start)/60} minutes")
+                          f": {(stop - start) / 60} minutes")
 
         self._logger.info(f'[outage_monitoring_process] Outage monitoring process finished! Elapsed time:'
                           f'{(time.time() - total_start_time) // 60} minutes')
@@ -157,7 +157,7 @@ class OutageMonitor:
         stop = perf_counter()
 
         self._logger.info(f"[build_cache] Elapsed time building cache of edges for outage monitoring in minutes ....: "
-                          f"{(stop - start)/60}")
+                          f"{(stop - start) / 60}")
 
         self._monitoring_map_cache = self._temp_monitoring_map
         self._autoresolve_serials_whitelist = self._temp_autoresolve_serials_whitelist
@@ -309,6 +309,7 @@ class OutageMonitor:
                     'edge_data': edge_data,
                     'bruin_client_info': bruin_client_info_response_body
                 })
+
         try:
             await _add_edge_to_temp_cache()
         except Exception as ex:
@@ -363,6 +364,7 @@ class OutageMonitor:
                 else:
                     self._logger.info(f'[process_edge_after_error] {edge_identifier} is in healthy state.')
                     await self._run_ticket_autoresolve_for_edge(edge_full_id, edge_data)
+
         try:
             await _process_edge_after_error()
         except Exception as ex:
@@ -388,27 +390,6 @@ class OutageMonitor:
                               f'serial ({serial_number}) is not whitelisted.')
             return
 
-        working_environment = self._config.MONITOR_CONFIG['environment']
-        if working_environment != 'production':
-            self._logger.info(f'[ticket-autoresolve] Skipping autoresolve for edge {edge_identifier} since the current '
-                              f'environment is {working_environment.upper()}.')
-            return
-
-        seconds_ago_for_down_events_lookup = self._config.MONITOR_CONFIG['autoresolve_down_events_seconds']
-        timedelta_for_down_events_lookup = datetime.now(utc) - timedelta(seconds=seconds_ago_for_down_events_lookup)
-        last_down_events_response = await self._velocloud_repository.get_last_down_edge_events(
-            edge_full_id, timedelta_for_down_events_lookup
-        )
-        last_down_events_body = last_down_events_response['body']
-        last_down_events_status = last_down_events_response['status']
-        if last_down_events_status not in range(200, 300):
-            return
-
-        if not last_down_events_body:
-            self._logger.info(f'[ticket-autoresolve] No DOWN events found for edge {edge_identifier} in the '
-                              f'last {seconds_ago_for_down_events_lookup / 60} minutes. Skipping autoresolve...')
-            return
-
         client_id = edge_status['bruin_client_info']['client_id']
         outage_ticket_response = await self._bruin_repository.get_outage_ticket_details_by_service_number(
             client_id, serial_number
@@ -424,6 +405,15 @@ class OutageMonitor:
             return
 
         outage_ticket_id = outage_ticket_response_body['ticketID']
+        outage_ticket_info = await self._bruin_repository.get_ticket_info(client_id, outage_ticket_id)
+        if not outage_ticket_info:
+            self._logger.error(f"Can't get creation date for outage ticket {outage_ticket_id}. "
+                               f"Can't proceed with autoresolve")
+            return
+
+        if not self._can_autoresolve_ticket_by_age(outage_ticket_info):
+            return
+
         notes_from_outage_ticket = outage_ticket_response_body['ticketNotes']
         if not self._outage_repository.is_outage_ticket_auto_resolvable(notes_from_outage_ticket, max_autoresolves=3):
             self._logger.info(f'[ticket-autoresolve] Limit to autoresolve ticket {outage_ticket_id} linked to edge '
@@ -438,6 +428,12 @@ class OutageMonitor:
 
         if self._is_detail_resolved(detail_for_ticket_resolution):
             self._logger.info(f'Ticket {outage_ticket_id} is already resolved. Skipping autoresolve...')
+            return
+
+        working_environment = self._config.MONITOR_CONFIG['environment']
+        if working_environment != 'production':
+            self._logger.info(f'[ticket-autoresolve] Skipping autoresolve for edge {edge_identifier} since the current '
+                              f'environment is {working_environment.upper()}.')
             return
 
         self._logger.info(f'Autoresolving ticket {outage_ticket_id} linked to edge {edge_identifier} '
@@ -640,6 +636,19 @@ class OutageMonitor:
                 outage_links_states[link_data['interface']] = link_state
 
         return outage_causes or None
+
+    def _can_autoresolve_ticket_by_age(self, outage_ticket_info):
+        outage_ticket_creation_date_utc = datetime.strptime(outage_ticket_info["createDate"], "%m/%d/%Y %I:%M:%S %p")
+        now = datetime.utcnow()
+        seconds_from_creation = (now - outage_ticket_creation_date_utc).seconds
+        max_ticket_age_seconds = self._config.MONITOR_CONFIG['autoresolve_ticket_creation_seconds']
+        self._logger.info(f'It has been {int(seconds_from_creation / 60)} minutes since ticket creation')
+
+        if seconds_from_creation > max_ticket_age_seconds:
+            self._logger.info(f"Ticket age is greater than {int(max_ticket_age_seconds / 60)} minutes. "
+                              f"Skipping autoresolve...")
+            return False
+        return True
 
     @staticmethod
     def _is_valid_last_contact_moment(last_contact_moment: str):

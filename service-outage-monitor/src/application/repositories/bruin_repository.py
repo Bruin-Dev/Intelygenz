@@ -15,6 +15,41 @@ class BruinRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
+    async def get_ticket_info(self, client_id, ticket_id):
+        try:
+            self._logger.info(
+                f'Getting ticket info for app.bruin.com/t/{ticket_id} that belongs to client: {client_id}')
+            request_msg = {
+                "request_id": uuid(),
+                "body": {"client_id": client_id,
+                         "category": "SD-WAN",
+                         "ticket_topic": "VOO",
+                         "ticket_status": ['New', 'InProgress', 'Draft'],
+                         "ticket_id": ticket_id
+                         }
+            }
+            response = await self._event_bus.rpc_request("bruin.ticket.request", request_msg, timeout=60)
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'[service-outage-monitor]Error trying to get ticket info for ticket {ticket_id} '
+                    f'that belongs to customer: {client_id}. Response: {response_body}'
+                )
+                self._logger.error(err_msg)
+                await self._notifications_repository.send_slack_message(err_msg)
+                return None
+            self._logger.info(
+                f'Got ticket info for {ticket_id}: {response_body[0]}')
+            return response_body[0]
+        except Exception as e:
+            err_msg = (f'[service-outage-monitor]Error trying to get ticket info for ticket {ticket_id} '
+                       f'that belongs to customer: {client_id}. Error: {e}')
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+            return None
+
     async def get_tickets(self, client_id: int, ticket_topic: str, ticket_statuses: list):
         err_msg = None
 
