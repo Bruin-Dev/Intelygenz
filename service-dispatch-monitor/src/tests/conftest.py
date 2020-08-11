@@ -1972,14 +1972,12 @@ def cts_ticket_details_1_with_confirmation_note(cts_ticket_details_1, cts_dispat
         "noteId": 70805301,
         "noteValue": "#*Automation Engine*# IGZ_0001\n"
                      "Dispatch Management - Dispatch Confirmed\n"
-                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
+                     "Dispatch scheduled for {date_of_dispatch}\n\n"
                      "Field Engineer\n"
                      "{tech_name}\n"
-                     "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed.get('Date_of_Dispatch'),
-                                           time_of_dispatch=cts_dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-                                           time_zone=cts_dispatch_confirmed.get('Time_Zone_Local'),
-                                           tech_name=cts_dispatch_confirmed.get('Tech_First_Name'),
-                                           tech_phone=cts_dispatch_confirmed.get('Tech_Mobile_Number')),
+                     "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed.get('Local_Site_Time__c'),
+                                           tech_name=cts_dispatch_confirmed.get('API_Resource_Name__c'),
+                                           tech_phone=cts_dispatch_confirmed.get('Resource_Phone_Number__c')),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
@@ -2013,14 +2011,12 @@ def cts_ticket_details_1_with_confirmation_note_but_not_tech(cts_ticket_details_
         "noteId": 70805301,
         "noteValue": "#*Automation Engine*# IGZ_0001\n"
                      "Dispatch Management - Dispatch Confirmed\n"
-                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
+                     "Dispatch scheduled for {date_of_dispatch}\n\n"
                      "Field Engineer\n"
                      "{tech_name}\n"
-                     "{tech_phone}".format(date_of_dispatch=dispatch_confirmed.get('Date_of_Dispatch'),
-                                           time_of_dispatch=dispatch_confirmed.get('Hard_Time_of_Dispatch_Local'),
-                                           time_zone=dispatch_confirmed.get('Time_Zone_Local'),
-                                           tech_name=dispatch_confirmed.get('Tech_First_Name'),
-                                           tech_phone=dispatch_confirmed.get('Tech_Mobile_Number')),
+                     "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed.get('Local_Site_Time__c'),
+                                           tech_name=cts_dispatch_confirmed.get('API_Resource_Name__c'),
+                                           tech_phone=cts_dispatch_confirmed.get('Resource_Phone_Number__c')),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
@@ -2045,14 +2041,12 @@ def cts_ticket_details_2_with_confirmation_note(cts_ticket_details_2, cts_dispat
         "noteId": 70805303,
         "noteValue": "#*Automation Engine*# IGZ_0002\n"
                      "Dispatch Management - Dispatch Confirmed\n"
-                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
+                     "Dispatch scheduled for {date_of_dispatch}\n\n"
                      "Field Engineer\n"
                      "{tech_name}\n"
-                     "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed_2.get('Date_of_Dispatch'),
-                                           time_of_dispatch=cts_dispatch_confirmed_2.get('Hard_Time_of_Dispatch_Local'),
-                                           time_zone=cts_dispatch_confirmed_2.get('Time_Zone_Local'),
-                                           tech_name=cts_dispatch_confirmed_2.get('Tech_First_Name'),
-                                           tech_phone=cts_dispatch_confirmed_2.get('Tech_Mobile_Number')),
+                     "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed_2.get('Local_Site_Time__c'),
+                                           tech_name=cts_dispatch_confirmed_2.get('API_Resource_Name__c'),
+                                           tech_phone=cts_dispatch_confirmed_2.get('Resource_Phone_Number__c')),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None
@@ -2086,14 +2080,12 @@ def cts_ticket_details_2_with_confirmation_note_but_not_tech(cts_ticket_details_
         "noteId": 70805303,
         "noteValue": "#*Automation Engine*# IGZ_0002\n"
                      "Dispatch Management - Dispatch Confirmed\n"
-                     "Dispatch scheduled for {date_of_dispatch} @ {time_of_dispatch} {time_zone}\n\n"
+                     "Dispatch scheduled for {date_of_dispatch}\n\n"
                      "Field Engineer\n"
                      "{tech_name}\n"
-                     "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed_2.get('Date_of_Dispatch'),
-                                           time_of_dispatch=cts_dispatch_confirmed_2.get('Hard_Time_of_Dispatch_Local'),
-                                           time_zone=cts_dispatch_confirmed_2.get('Time_Zone_Local'),
-                                           tech_name=cts_dispatch_confirmed_2.get('Tech_First_Name'),
-                                           tech_phone=cts_dispatch_confirmed_2.get('Tech_Mobile_Number')),
+                     "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed_2.get('Local_Site_Time__c'),
+                                           tech_name=cts_dispatch_confirmed_2.get('API_Resource_Name__c'),
+                                           tech_phone=cts_dispatch_confirmed_2.get('Resource_Phone_Number__c')),
         "serviceNumber": ["4664325"],
         "createdDate": "2020-05-28T06:06:40.27-04:00",
         "creator": None

@@ -1,16 +1,5 @@
-from shortuuid import uuid
-import re
-from phonenumbers import NumberParseException
 import phonenumbers
-
-from application.repositories import nats_error_response
-from application.templates.cts.sms.dispatch_confirmed import cts_get_dispatch_confirmed_sms
-from application.templates.cts.sms.dispatch_confirmed import cts_get_dispatch_confirmed_sms_tech
-from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_12_hours_before_sms
-from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_2_hours_before_sms
-from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_12_hours_before_sms_tech
-from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_2_hours_before_sms_tech
-from application.templates.cts.sms.tech_on_site import cts_get_tech_on_site_sms
+from application.templates.cts.cts_dispatch_cancel import cts_get_dispatch_cancel_note
 from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_note
 from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_sms_note
 from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_sms_tech_note
@@ -19,8 +8,19 @@ from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_12_hou
 from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_2_hours_before_sms_note
 from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_2_hours_before_sms_tech_note
 from application.templates.cts.cts_tech_on_site import cts_get_tech_on_site_note
+from application.templates.cts.cts_updated_tech import cts_get_updated_tech_note
+from application.templates.cts.sms.dispatch_confirmed import cts_get_dispatch_confirmed_sms
+from application.templates.cts.sms.dispatch_confirmed import cts_get_dispatch_confirmed_sms_tech
+from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_12_hours_before_sms
+from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_12_hours_before_sms_tech
+from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_2_hours_before_sms
+from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_2_hours_before_sms_tech
+from application.templates.cts.sms.tech_on_site import cts_get_tech_on_site_sms
+from application.templates.cts.sms.updated_tech import cts_get_updated_tech_sms, cts_get_updated_tech_sms_tech
+from phonenumbers import NumberParseException
+from shortuuid import uuid
 
-from application.templates.cts.cts_dispatch_cancel import cts_get_dispatch_cancel_note
+from application.repositories import nats_error_response
 
 
 class CtsRepository:
@@ -384,6 +384,74 @@ class CtsRepository:
             f"SMS sent Response {sms_response_body}")
         return True
 
+    async def send_updated_tech_sms(
+            self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to, tech_name) -> bool:
+        if sms_to is None:
+            return False
+
+        # Get SMS data
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'tech_name': tech_name
+        }
+
+        sms_data = cts_get_updated_tech_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+        self._logger.info(f"Sending SMS to {sms_to} with data: `{sms_data}`")
+        sms_response = await self._notifications_repository.send_sms(sms_payload)
+        sms_response_status = sms_response['status']
+        sms_response_body = sms_response['body']
+        if sms_response_status not in range(200, 300):
+            self._logger.info(f"SMS: `{sms_data}` TO: {sms_to} "
+                              f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} - SMS NOT sent")
+            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                      f'An error occurred when sending Updated tech SMS with notifier client. ' \
+                      f'payload: {sms_payload}'
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(f"SMS sent Response {sms_response_body}")
+        return True
+
+    async def send_updated_tech_sms_tech(
+            self, dispatch_number, ticket_id, dispatch, dispatch_datetime, sms_to) -> bool:
+        if sms_to is None:
+            return False
+
+        # Get SMS data
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'site': dispatch.get('Lookup_Location_Owner__c'),
+            'street': dispatch.get('Street__c')
+        }
+
+        sms_data = cts_get_updated_tech_sms_tech(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+        self._logger.info(f"Sending SMS tech to {sms_to} with data: `{sms_data}`")
+        sms_response = await self._notifications_repository.send_sms(sms_payload)
+        sms_response_status = sms_response['status']
+        sms_response_body = sms_response['body']
+        if sms_response_status not in range(200, 300):
+            self._logger.info(f"SMS tech: `{sms_data}` TO: {sms_to} "
+                              f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} - SMS NOT sent")
+            err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                      f'An error occurred when sending Updated tech SMS tech with notifier client. ' \
+                      f'payload: {sms_payload}'
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(
+            f"SMS tech sent Response {sms_response_body}")
+        return True
+
     async def append_confirmed_note(self, dispatch_number, igz_dispatch_number, ticket_id, dispatch) -> bool:
         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                           f"- Adding confirm note")
@@ -614,4 +682,35 @@ class CtsRepository:
                           f"Ticket_id: {ticket_id} - Cancelled note Appended")
         self._logger.info(
             f"Cancelled note appended. Response: {append_sms_note_response_body}")
+        return True
+
+    async def append_updated_tech_note(self, dispatch_number, ticket_id, dispatch) -> bool:
+        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                          f"- Adding updated tech note")
+        note_data = {
+            'vendor': 'CTS',
+            'dispatch_number': dispatch_number,
+            'ticket_id': ticket_id,
+            'tech_name': dispatch.get('API_Resource_Name__c'),
+            'tech_phone': dispatch.get('Resource_Phone_Number__c')
+        }
+        note = cts_get_updated_tech_note(note_data)
+
+        append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, note)
+
+        append_note_response_status = append_note_response['status']
+        append_note_response_body = append_note_response['body']
+        if append_note_response_status not in range(200, 300):
+            self._logger.info(f"Note: `{note}` "
+                              f"Dispatch: {dispatch_number} "
+                              f"Ticket_id: {ticket_id} - Not appended")
+            err_msg = f'An error occurred when appending an updated tech note with bruin client. ' \
+                      f'Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - payload: {note_data}'
+            await self._notifications_repository.send_slack_message(err_msg)
+            return False
+        self._logger.info(f"Note: `{note}` "
+                          f"Dispatch: {dispatch_number} "
+                          f"Ticket_id: {ticket_id} - Updated tech note appended")
+        self._logger.info(
+            f"Updated tech Note appended. Response {append_note_response_body}")
         return True
