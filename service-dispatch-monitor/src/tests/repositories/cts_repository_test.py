@@ -25,6 +25,8 @@ from application.templates.cts.sms.dispatch_confirmed import cts_get_dispatch_co
 from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_12_hours_before_sms_tech
 from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_2_hours_before_sms_tech
 from application.templates.cts.sms.tech_on_site import cts_get_tech_on_site_sms
+
+from application.templates.cts.sms.updated_tech import cts_get_updated_tech_sms, cts_get_updated_tech_sms_tech
 from config import testconfig
 
 
@@ -1333,6 +1335,277 @@ class TestCtsRepository:
 
         response = await cts_dispatch_monitor._cts_repository.send_tech_on_site_sms(
             dispatch_number, ticket_id, cts_dispatch_confirmed, sms_to)
+        assert response is False
+
+        cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
+            send_error_sms_to_slack_response)
+
+    @pytest.mark.asyncio
+    async def append_updated_tech_note_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, append_note_response):
+        ticket_id = '3544800'
+        dispatch_number = cts_dispatch_confirmed.get('Name')
+        sms_to = '+1987654327'
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_phone = cts_dispatch_confirmed.get('Resource_Phone_Number__c')
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 200
+        }
+        sms_note = f'#*Automation Engine*# {dispatch_number}\n' \
+                   f'The Field Engineer assigned to this dispatch has changed.\n' \
+                   f'Reference: {ticket_id}\n\n' \
+                   f'Field Engineer\n{tech_name}\n{tech_phone}\n'
+        cts_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+
+        response = await cts_dispatch_monitor._cts_repository.append_updated_tech_note(
+            dispatch_number, ticket_id, cts_dispatch_confirmed)
+
+        cts_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
+        assert response is True
+
+    @pytest.mark.asyncio
+    async def append_updated_tech_note_error_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
+                                                  append_note_response):
+        ticket_id = '3544800'
+        dispatch_number = cts_dispatch_confirmed.get('Name')
+        sms_to = '+1987654327'
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_phone = cts_dispatch_confirmed.get('Resource_Phone_Number__c')
+        response_append_note_1 = {
+            'request_id': uuid_,
+            'body': append_note_response,
+            'status': 400
+        }
+        note_data = {
+            'vendor': 'CTS',
+            'dispatch_number': dispatch_number,
+            'ticket_id': ticket_id,
+            'tech_name': cts_dispatch_confirmed.get('API_Resource_Name__c'),
+            'tech_phone': cts_dispatch_confirmed.get('Resource_Phone_Number__c')
+        }
+        sms_note = f'#*Automation Engine*# {dispatch_number}\n' \
+                   f'The Field Engineer assigned to this dispatch has changed.\n' \
+                   f'Reference: {ticket_id}\n\n' \
+                   f'Field Engineer\n{tech_name}\n{tech_phone}\n'
+
+        send_error_sms_to_slack_response = f'An error occurred when appending an updated tech note ' \
+                                           f'with bruin client. ' \
+                                           f'Dispatch: {dispatch_number} - ' \
+                                           f'Ticket_id: {ticket_id} - payload: {note_data}'
+
+        cts_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[response_append_note_1])
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        response = await cts_dispatch_monitor._cts_repository.append_updated_tech_note(
+            dispatch_number, ticket_id, cts_dispatch_confirmed)
+
+        cts_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, sms_note)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
+            send_error_sms_to_slack_response)
+        assert response is False
+
+    @pytest.mark.asyncio
+    async def send_updated_tech_sms_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, sms_success_response):
+        ticket_id = '3544800'
+        dispatch_number = cts_dispatch_confirmed.get('Name')
+        dispatch_datetime = '2020-03-16 16:00:00 PDT'
+        sms_to = '+1987654327'
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_phone = cts_dispatch_confirmed.get('Resource_Phone_Number__c')
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'phone_number': sms_to,
+            'tech_name': tech_name
+        }
+
+        sms_data = cts_get_updated_tech_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+
+        send_sms_response = {
+            'request_id': uuid_,
+            'body': sms_success_response,
+            'status': 200
+        }
+
+        cts_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
+
+        response = await cts_dispatch_monitor._cts_repository.send_updated_tech_sms(
+            dispatch_number, ticket_id, cts_dispatch_confirmed, dispatch_datetime,
+            sms_to, tech_name)
+        assert response is True
+
+        cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
+
+    @pytest.mark.asyncio
+    async def send_updated_tech_sms_with_not_valid_sms_to_phone_test(self, cts_dispatch_monitor,
+                                                                     cts_dispatch_confirmed_skipped_bad_phone):
+        updated_dispatch = cts_dispatch_confirmed_skipped_bad_phone.copy()
+        ticket_id = '3544800'
+        dispatch_number = updated_dispatch.get('Name')
+        dispatch_datetime = '2020-03-16 16:00:00 PDT'
+        sms_to = None
+        tech_name = updated_dispatch.get('API_Resource_Name__c')
+
+        cts_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
+
+        response = await cts_dispatch_monitor._cts_repository.send_updated_tech_sms(
+            dispatch_number, ticket_id, cts_dispatch_confirmed_skipped_bad_phone, dispatch_datetime, sms_to, tech_name)
+        assert response is False
+
+        cts_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def send_updated_tech_sms_with_error_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, sms_success_response):
+        ticket_id = '3544800'
+        dispatch_number = cts_dispatch_confirmed.get('Name')
+        dispatch_datetime = '2020-03-16 16:00:00 PDT'
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        sms_to = '+1987654327'
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'phone_number': sms_to,
+            'tech_name': tech_name
+        }
+
+        sms_data = cts_get_updated_tech_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+
+        send_sms_response = {
+            'request_id': uuid_,
+            'body': sms_success_response,
+            'status': 400
+        }
+
+        send_error_sms_to_slack_response = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                                           f'An error occurred when sending Updated tech SMS with notifier client. ' \
+                                           f'payload: {sms_payload}'
+
+        cts_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        response = await cts_dispatch_monitor._cts_repository.send_updated_tech_sms(
+            dispatch_number, ticket_id, cts_dispatch_confirmed, dispatch_datetime,
+            sms_to, tech_name)
+        assert response is False
+
+        cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
+            send_error_sms_to_slack_response)
+
+    @pytest.mark.asyncio
+    async def send_updated_tech_sms_tech_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, sms_success_response):
+        ticket_id = '3544800'
+        dispatch_number = cts_dispatch_confirmed.get('Name')
+        dispatch_datetime = '2020-03-16 16:00:00 PDT'
+        sms_to = '+1987654327'
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_phone = cts_dispatch_confirmed.get('Resource_Phone_Number__c')
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'phone_number': sms_to,
+            'tech_name': tech_name,
+            'site': cts_dispatch_confirmed.get('Lookup_Location_Owner__c'),
+            'street': cts_dispatch_confirmed.get('Street__c')
+        }
+
+        sms_data = cts_get_updated_tech_sms_tech(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+
+        send_sms_response = {
+            'request_id': uuid_,
+            'body': sms_success_response,
+            'status': 200
+        }
+
+        cts_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
+
+        response = await cts_dispatch_monitor._cts_repository.send_updated_tech_sms_tech(
+            dispatch_number, ticket_id, cts_dispatch_confirmed, dispatch_datetime, sms_to)
+        assert response is True
+
+        cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
+
+    @pytest.mark.asyncio
+    async def send_updated_tech_sms_tech_with_not_valid_sms_to_phone_test(self, cts_dispatch_monitor, cts_dispatch):
+        ticket_id = '3544800'
+        dispatch_number = cts_dispatch.get('Name')
+        dispatch_datetime = '2020-03-16 16:00:00 PDT'
+        sms_to = None
+        tech_name = cts_dispatch.get('API_Resource_Name__c')
+        tech_phone = cts_dispatch.get('Resource_Phone_Number__c')
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'phone_number': sms_to,
+            'tech_name': tech_name,
+            'site': cts_dispatch.get('Lookup_Location_Owner__c'),
+            'street': cts_dispatch.get('Street__c')
+        }
+
+        cts_dispatch_monitor._notifications_repository.send_sms = CoroutineMock()
+
+        response = await cts_dispatch_monitor._cts_repository.send_updated_tech_sms_tech(
+            dispatch_number, ticket_id, cts_dispatch, dispatch_datetime, sms_to)
+        assert response is False
+
+        cts_dispatch_monitor._notifications_repository.send_sms.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def send_updated_tech_sms_tech_with_error_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, sms_success_response):
+        ticket_id = '3544800'
+        dispatch_number = cts_dispatch_confirmed.get('Name')
+        dispatch_datetime = '2020-03-16 16:00:00 PDT'
+        sms_to = '+1987654327'
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        tech_phone = cts_dispatch_confirmed.get('Resource_Phone_Number__c')
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'phone_number': sms_to,
+            'tech_name': tech_name,
+            'site': cts_dispatch_confirmed.get('Lookup_Location_Owner__c'),
+            'street': cts_dispatch_confirmed.get('Street__c')
+        }
+
+        sms_data = cts_get_updated_tech_sms_tech(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+
+        send_sms_response = {
+            'request_id': uuid_,
+            'body': sms_success_response,
+            'status': 400
+        }
+
+        send_error_sms_to_slack_response = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                                           f'An error occurred when sending Updated tech SMS tech ' \
+                                           f'with notifier client. ' \
+                                           f'payload: {sms_payload}'
+
+        cts_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(side_effect=[send_sms_response])
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        response = await cts_dispatch_monitor._cts_repository.send_updated_tech_sms_tech(
+            dispatch_number, ticket_id, cts_dispatch_confirmed, dispatch_datetime, sms_to)
         assert response is False
 
         cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)

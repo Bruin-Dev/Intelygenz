@@ -381,9 +381,13 @@ class CtsDispatchMonitor:
                                       f"Latest tech name assigned: {latest_tech_name_assigned}")
                     if latest_tech_name_assigned is not None and latest_tech_name_assigned != tech_name:
                         # Latest tech in notes is different than the actual tech
+                        self._logger.info(f"[service-dispatch-monitor] [CTS] "
+                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} - "
+                                          f"The tech has changed. "
+                                          f"Actual: {tech_name} latest: {latest_tech_name_assigned}")
                         # Append update tech note
                         result_append_updated_tech_note = await self._cts_repository.append_updated_tech_note(
-                            dispatch_number, ticket_id, dispatch)
+                            igz_dispatch_number, ticket_id, dispatch)
                         msg = f"[service-dispatch-monitor] [CTS] " \
                               f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
                               f"- A updated tech note appended"

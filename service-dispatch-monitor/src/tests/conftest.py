@@ -1214,13 +1214,13 @@ def cts_repository(logger, event_bus, redis_client, notifications_repository):
 
 
 @pytest.fixture(scope='function')
-def cts_dispatch_monitor(cts_repository):
+def cts_dispatch_monitor(cts_repository, bruin_repository):
     scheduler = Mock()
     config = testconfig
-    bruin_repository = Mock()
 
     _cts_dispatch_monitor = CtsDispatchMonitor(config, redis_client, cts_repository._event_bus,
-                                               scheduler, cts_repository._logger, cts_repository, bruin_repository,
+                                               scheduler, cts_repository._logger, cts_repository,
+                                               cts_repository._bruin_repository,
                                                cts_repository._notifications_repository)
     return _cts_dispatch_monitor
 
@@ -2250,4 +2250,122 @@ def cts_ticket_details_1_with_cancelled_note(cts_ticket_details_1, cts_dispatch_
         "creator": None
     }
     updated_ticket_details['body']['ticketNotes'].append(note_cancelled_note)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details_1_with_confirmation_and_outdated_tech_note(cts_ticket_details_1, cts_dispatch_confirmed):
+    updated_ticket_details = copy.deepcopy(cts_ticket_details_1)
+    dispatch_number = cts_dispatch_confirmed.get('Name')
+    dispatch_number = 'IGZ_0001'
+    confirmed_ticket_note = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     "Dispatch Management - Dispatch Confirmed\n"
+                     "Dispatch scheduled for {date_of_dispatch}\n\n"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
+                     "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed.get('Local_Site_Time__c'),
+                                           tech_name='Test TechName',
+                                           tech_phone=cts_dispatch_confirmed.get('Resource_Phone_Number__c')),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    confirmed_sms_ticket_note_2 = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    confirmed_sms_ticket_note_3 = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595129"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_3)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details_2_with_confirmation_and_outdated_tech_note(cts_ticket_details_2, cts_dispatch_confirmed_2):
+    updated_ticket_details = copy.deepcopy(cts_ticket_details_2)
+    dispatch_number = cts_dispatch_confirmed_2.get('Name')
+    dispatch_number = 'IGZ_0002'
+    confirmed_ticket_note = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     "Dispatch Management - Dispatch Confirmed\n"
+                     "Dispatch scheduled for {date_of_dispatch}\n\n"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
+                     "{tech_phone}".format(date_of_dispatch=cts_dispatch_confirmed_2.get('Local_Site_Time__c'),
+                                           tech_name='Test TechName',
+                                           tech_phone=cts_dispatch_confirmed_2.get('Resource_Phone_Number__c')),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    confirmed_sms_ticket_note_2 = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     "Dispatch confirmation SMS sent to {phone_number}".format(phone_number="+12123595129"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    confirmed_sms_ticket_note_3 = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     "Dispatch confirmation SMS tech sent to {phone_number}".format(phone_number="+12123595129"),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_2)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_sms_ticket_note_3)
+    return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details_1_with_confirmation_and_multiple_outdated_tech_note(
+        cts_ticket_details_1_with_confirmation_and_outdated_tech_note, cts_dispatch_confirmed):
+    updated_ticket_details = copy.deepcopy(cts_ticket_details_1_with_confirmation_and_outdated_tech_note)
+    dispatch_number = cts_dispatch_confirmed.get('Name')
+    dispatch_number = 'IGZ_0001'
+    confirmed_ticket_note = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     "The Field Engineer assigned to this dispatch has changed.\n"
+                     "Reference: {ticket_id}\n\n"
+                     "Field Engineer\n"
+                     "{tech_name}\n"
+                     "{tech_phone}".format(ticket_id=cts_dispatch_confirmed.get('Ext_Ref_Num__c'),
+                                           tech_name='SecondTest TechName',
+                                           tech_phone=cts_dispatch_confirmed.get('Resource_Phone_Number__c')
+                                           ),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    confirmed_ticket_note_2 = {
+        "noteId": 70805301,
+        "noteValue": f"#*Automation Engine*# {dispatch_number}\n"
+                     "The Field Engineer assigned to this dispatch has changed.\n"
+                     "Reference: {ticket_id}\n\n"
+                     "Field Engineer\n".format(ticket_id=cts_dispatch_confirmed.get('Ext_Ref_Num__c')),
+        "serviceNumber": ["4664325"],
+        "createdDate": "2020-05-28T06:06:40.27-04:00",
+        "creator": None
+    }
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
+    updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note_2)
     return updated_ticket_details
