@@ -137,8 +137,7 @@ class CtsDispatchMonitor:
                 await self._notifications_repository.send_slack_message(err_msg)
                 continue
             ticket_notes = response_body.get('ticketNotes', [])
-            ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
-
+            ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
             filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
                                                                                 self.IGZ_DN_WATERMARK,
                                                                                 ticket_id)
@@ -227,7 +226,7 @@ class CtsDispatchMonitor:
                         await self._notifications_repository.send_slack_message(err_msg)
                         continue
                     ticket_notes = response_body.get('ticketNotes', [])
-                    ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+                    ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
 
                     self._logger.info(ticket_notes)
 
@@ -648,7 +647,7 @@ class CtsDispatchMonitor:
                         await self._notifications_repository.send_slack_message(err_msg)
                         continue
                     ticket_notes = response_body.get('ticketNotes', [])
-                    ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+                    ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
                     self._logger.info(ticket_notes)
 
                     self._logger.info(f"Filtering ticket notes to contain only notes for the "
@@ -777,7 +776,7 @@ class CtsDispatchMonitor:
                         await self._notifications_repository.send_slack_message(err_msg)
                         continue
                     ticket_notes = response_body.get('ticketNotes', [])
-                    ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+                    ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
                     self._logger.info(ticket_notes)
 
                     self._logger.info(f"Filtering ticket notes to contain only notes for the "

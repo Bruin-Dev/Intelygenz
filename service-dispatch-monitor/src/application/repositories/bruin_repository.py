@@ -1,3 +1,4 @@
+import iso8601
 from shortuuid import uuid
 import re
 
@@ -100,3 +101,9 @@ class BruinRepository:
             await self._notifications_repository.send_slack_message(err_msg)
 
         return response
+
+    @staticmethod
+    def sort_ticket_notes_by_created_date(ticket_notes):
+        ticket_notes = [tn for tn in ticket_notes if tn if 'noteValue' in tn if tn.get('noteValue')]
+        ticket_notes = sorted(ticket_notes, key=lambda tn: iso8601.parse_date(tn.get('createdDate')))
+        return ticket_notes

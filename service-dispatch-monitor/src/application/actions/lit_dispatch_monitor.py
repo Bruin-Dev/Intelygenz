@@ -7,6 +7,7 @@ from application.repositories.bruin_repository import BruinRepository
 from application.repositories.lit_repository import LitRepository
 from application.repositories.utils_repository import UtilsRepository
 from apscheduler.util import undefined
+import iso8601
 from pytz import timezone
 
 
@@ -130,7 +131,7 @@ class LitDispatchMonitor:
                 await self._notifications_repository.send_slack_message(err_msg)
                 continue
             ticket_notes = response_body.get('ticketNotes', [])
-            ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+            ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
             filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
                                                                                 dispatch_number,
                                                                                 ticket_id)
@@ -222,7 +223,7 @@ class LitDispatchMonitor:
                         await self._notifications_repository.send_slack_message(err_msg)
                         continue
                     ticket_notes = response_body.get('ticketNotes', [])
-                    ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+                    ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
 
                     self._logger.info(
                         f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
@@ -615,7 +616,7 @@ class LitDispatchMonitor:
                         await self._notifications_repository.send_slack_message(err_msg)
                         continue
                     ticket_notes = response_body.get('ticketNotes', [])
-                    ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+                    ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
 
                     self._logger.info(f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
 
@@ -735,7 +736,7 @@ class LitDispatchMonitor:
                         await self._notifications_repository.send_slack_message(err_msg)
                         continue
                     ticket_notes = response_body.get('ticketNotes', [])
-                    ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
+                    ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
                     self._logger.info(ticket_notes)
 
                     self._logger.info(
