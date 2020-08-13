@@ -100,7 +100,7 @@ class TestBruinClient:
         assert mock_get.call_args[1]['params']['ClientId'] == params['client_id']
         assert mock_get.call_args[1]['params']['TicketId'] == params['ticket_id']
         assert mock_get.call_args[1]['params']['TicketStatus'] == params['ticket_status']
-        assert mock_get.call_args[1]['params']['Category'] == params['category']
+        assert mock_get.call_args[1]['params']['ProductCategory'] == params['product_category']
         assert mock_get.call_args[1]['params']['TicketTopic'] == params['ticket_topic']
         assert tickets['body'] == get_response['responses']
         assert tickets['status'] == 200
