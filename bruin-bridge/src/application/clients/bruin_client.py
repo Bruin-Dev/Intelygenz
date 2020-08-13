@@ -69,6 +69,10 @@ class BruinClient:
         async def get_all_tickets():
             self._logger.info(f'Getting all tickets for client id: {params["client_id"]}')
 
+            if params.get("category"):
+                params["product_category"] = params["category"]
+                del(params["category"])
+
             parsed_params = humps.pascalize(params)
 
             self._logger.info(f'Params that will be applied (parsed to PascalCase): {json.dumps(parsed_params)}')
