@@ -40,9 +40,13 @@ class BruinRepository:
                 self._logger.error(err_msg)
                 await self._notifications_repository.send_slack_message(err_msg)
                 return None
-            self._logger.info(
-                f'Got ticket info for {ticket_id}: {response_body[0]}')
-            return response_body[0]
+
+            if response_body:
+                self._logger.info(f'Got ticket info for {ticket_id} (client {client_id}): {response_body[0]}')
+                return response_body[0]
+
+            self._logger.info(f'Could not claim any info for {ticket_id} (client {client_id})')
+            return None
         except Exception as e:
             err_msg = (f'[service-outage-monitor]Error trying to get ticket info for ticket {ticket_id} '
                        f'that belongs to customer: {client_id}. Error: {e}')
