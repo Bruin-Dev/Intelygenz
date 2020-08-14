@@ -89,7 +89,11 @@ class CtsDispatchMonitor:
 
             cts_dispatches = response_cts_dispatches_body.get('records', [])
 
+            self._logger.info("Filtering dispatches to only be igz created dispatches")
+            self._logger.info(f"Length of dispatches before filter: {len(cts_dispatches)}")
+
             igz_dispatches = await self._filter_dispatches_by_watermark(cts_dispatches)
+            self._logger.info(f"Length of dispatches after filter: {len(igz_dispatches)}")
 
             dispatches_splitted_by_status = self._cts_repository.get_dispatches_splitted_by_status(igz_dispatches)
 
@@ -142,15 +146,11 @@ class CtsDispatchMonitor:
                                                                                 self.IGZ_DN_WATERMARK,
                                                                                 ticket_id)
             if len(filtered_ticket_notes) == 0:
-                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"Watermark and dispatch number not found found in ticket notes")
                 continue
 
             requested_watermark_found = UtilsRepository.find_note(
                 filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
             if requested_watermark_found is None:
-                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"- Request Watermark not found, ticket does not belong to us")
                 continue
 
             igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
@@ -232,9 +232,12 @@ class CtsDispatchMonitor:
 
                     self._logger.info(f"Filtering ticket notes to contain only notes for the "
                                       f"IGZ CTS Dispatch numbers only")
+                    self._logger.info(f"Length of notes before filter: {len(ticket_notes)}")
+
                     filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
                                                                                         self.IGZ_DN_WATERMARK,
                                                                                         ticket_id)
+                    self._logger.info(f"Length of notes after filter: {len(filtered_ticket_notes)}")
 
                     self._logger.info(filtered_ticket_notes)
 
@@ -652,9 +655,13 @@ class CtsDispatchMonitor:
 
                     self._logger.info(f"Filtering ticket notes to contain only notes for the "
                                       f"IGZ CTS Dispatch numbers only")
+                    self._logger.info(f"Length of notes before filter: {len(ticket_notes)}")
+
                     filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
                                                                                         self.IGZ_DN_WATERMARK,
                                                                                         ticket_id)
+                    self._logger.info(f"Length of notes after filter: {len(filtered_ticket_notes)}")
+
                     self._logger.info(filtered_ticket_notes)
 
                     self._logger.info(
@@ -781,9 +788,13 @@ class CtsDispatchMonitor:
 
                     self._logger.info(f"Filtering ticket notes to contain only notes for the "
                                       f"IGZ CTS Dispatch numbers only")
+                    self._logger.info(f"Length of notes before filter: {len(ticket_notes)}")
+
                     filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
                                                                                         self.IGZ_DN_WATERMARK,
                                                                                         ticket_id)
+                    self._logger.info(f"Length of notes after filter: {len(filtered_ticket_notes)}")
+
                     self._logger.info(filtered_ticket_notes)
 
                     self._logger.info(
@@ -844,8 +855,6 @@ class CtsDispatchMonitor:
                                                                                   dispatch_number,
                                                                                   self.MAIN_WATERMARK)
             if len(note_dispatch_number) == 0:
-                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"dispatch number not found in ticket note")
                 continue
             filtered_ticket_notes.append(note)
 

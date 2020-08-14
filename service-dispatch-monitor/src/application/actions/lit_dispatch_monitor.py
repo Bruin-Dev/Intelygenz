@@ -83,7 +83,13 @@ class LitDispatchMonitor:
                 return
 
             lit_dispatches = response_lit_dispatches_body.get('DispatchList', [])
+            self._logger.info("Filtering dispatches to only be igz created dispatches")
+            self._logger.info(f"Length of dispatches before filter: {len(lit_dispatches)}")
+
             igz_dispatches = await self._filter_dispatches_by_watermark(lit_dispatches)
+
+            self._logger.info(f"Length of dispatches after filter: {len(igz_dispatches)}")
+
             dispatches_splitted_by_status = self._lit_repository.get_dispatches_splitted_by_status(igz_dispatches)
 
             self._logger.info(f"Splitted by status: "
@@ -136,15 +142,11 @@ class LitDispatchMonitor:
                                                                                 dispatch_number,
                                                                                 ticket_id)
             if len(filtered_ticket_notes) == 0:
-                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"Watermark and dispatch number not found found in ticket notes")
                 continue
 
             requested_watermark_found = UtilsRepository.find_note(
                 filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
             if requested_watermark_found is None:
-                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"- Watermark not found, ticket does not belong to us")
                 continue
 
             if self._redis_client.get(dispatch_number) is None:
@@ -231,9 +233,12 @@ class LitDispatchMonitor:
                     self._logger.info(ticket_notes)
                     self._logger.info(f"Filtering ticket notes to contain only notes for the "
                                       f"Lit Dispatch[{dispatch_number}]")
+                    self._logger.info(f"Length of notes before filter: {len(ticket_notes)}")
                     filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
                                                                                         dispatch_number,
                                                                                         ticket_id)
+                    self._logger.info(f"Length of notes after filter: {len(filtered_ticket_notes)}")
+
                     self._logger.info(filtered_ticket_notes)
 
                     requested_watermark_found = UtilsRepository.find_note(filtered_ticket_notes,
@@ -623,9 +628,13 @@ class LitDispatchMonitor:
                     self._logger.info(ticket_notes)
                     self._logger.info(f"Filtering ticket notes to contain only notes for the "
                                       f"Lit Dispatch[{dispatch_number}]")
+
+                    self._logger.info(f"Length of notes before filter: {len(ticket_notes)}")
                     filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
                                                                                         dispatch_number,
                                                                                         ticket_id)
+                    self._logger.info(f"Length of notes after filter: {len(filtered_ticket_notes)}")
+
                     self._logger.info(filtered_ticket_notes)
 
                     requested_watermark_found = UtilsRepository.find_note(filtered_ticket_notes,
@@ -739,15 +748,26 @@ class LitDispatchMonitor:
                     ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
                     self._logger.info(ticket_notes)
 
+                    self._logger.info(f"Filtering ticket notes to contain only notes for the "
+                                      f"Lit Dispatch[{dispatch_number}]")
+
+                    self._logger.info(f"Length of notes before filter: {len(ticket_notes)}")
+                    filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
+                                                                                        dispatch_number,
+                                                                                        ticket_id)
+                    self._logger.info(f"Length of notes after filter: {len(filtered_ticket_notes)}")
+
+                    self._logger.info(filtered_ticket_notes)
+
                     self._logger.info(
                         f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
 
-                    watermark_found = UtilsRepository.find_note(ticket_notes, self.MAIN_WATERMARK)
+                    watermark_found = UtilsRepository.find_note(filtered_ticket_notes, self.MAIN_WATERMARK)
 
                     requested_watermark_found = UtilsRepository.find_note(
-                        ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
+                        filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
                     cancelled_watermark_note_found = UtilsRepository.find_note(
-                        ticket_notes, self.DISPATCH_CANCELLED_WATERMARK)
+                        filtered_ticket_notes, self.DISPATCH_CANCELLED_WATERMARK)
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"watermark_found: {watermark_found} "
                                       f"requested_watermark_found: {requested_watermark_found} "
@@ -792,8 +812,6 @@ class LitDispatchMonitor:
                                                                                   dispatch_number,
                                                                                   self.MAIN_WATERMARK)
             if len(note_dispatch_number) == 0:
-                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"dispatch number not found found in ticket note")
                 continue
             filtered_ticket_notes.append(note)
 

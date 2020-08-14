@@ -822,7 +822,7 @@ def ticket_details_1_with_cancelled_note(ticket_details_1, dispatch_confirmed):
     updated_ticket_details = copy.deepcopy(ticket_details_1)
     note_cancelled_note = {
         "noteId": 70805315,
-        "noteValue": "#*Automation Engine*# DIS12345"
+        "noteValue": "#*Automation Engine*# DIS37405\n"
                      "Dispatch Management - Dispatch Cancelled\n\n"
                      "Dispatch for {date_of_dispatch} has been cancelled.\n".format(date_of_dispatch='AAA'),
         "serviceNumber": ["4664325"],
