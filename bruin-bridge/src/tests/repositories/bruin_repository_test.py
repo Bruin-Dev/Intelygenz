@@ -613,6 +613,7 @@ class TestBruinRepository:
                 client_id=client_id,
                 category=category),
             ticket_statuses=ticket_statuses,
+            stop_on_find=True
         )
         assert outage_ticket_details_by_edge["body"] == ticket_details
         assert outage_ticket_details_by_edge["status"] == 200
@@ -654,7 +655,7 @@ class TestBruinRepository:
 
         outage_ticket_details_by_edge = await bruin_repository.get_outage_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
-            category=category, ticket_statuses=ticket_statuses,
+            category=category, ticket_statuses=ticket_statuses
         )
 
         bruin_repository.get_ticket_details_by_edge_serial.assert_awaited_once_with(
@@ -664,6 +665,7 @@ class TestBruinRepository:
                 client_id=client_id,
                 category=category),
             ticket_statuses=ticket_statuses,
+            stop_on_find=True
         )
         assert outage_ticket_details_by_edge["body"] == []
         assert outage_ticket_details_by_edge["status"] == 200
@@ -705,7 +707,7 @@ class TestBruinRepository:
 
         outage_ticket_details_by_edge = await bruin_repository.get_outage_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
-            category=category, ticket_statuses=ticket_statuses,
+            category=category, ticket_statuses=ticket_statuses
         )
 
         bruin_repository.get_ticket_details_by_edge_serial.assert_awaited_once_with(
@@ -715,6 +717,7 @@ class TestBruinRepository:
                 client_id=client_id,
                 category=category),
             ticket_statuses=ticket_statuses,
+            stop_on_find=True
         )
         assert outage_ticket_details_by_edge["body"] == 'Failed'
         assert outage_ticket_details_by_edge["status"] == 404
