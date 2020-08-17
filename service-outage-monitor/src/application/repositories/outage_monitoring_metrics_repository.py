@@ -19,7 +19,7 @@ class OutageMonitoringMetricsRepository:  # pragma: no cover
         self._tickets_autoresolved.inc()
 
     def increment_tickets_reopened(self):
-        self._tickets_autoresolved.inc()
+        self._tickets_reopened.inc()
 
     def increment_edges_processed(self):
         self._edges_processed.inc()

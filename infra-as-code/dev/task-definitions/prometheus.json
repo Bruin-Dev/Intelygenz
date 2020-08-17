@@ -33,12 +33,28 @@
           "containerPath": "${prometheus_storage_container_path}"
         }
     ],
-    "command": ["--config.file=/etc/prometheus/prometheus.yml",
-                "--storage.tsdb.path=${prometheus_storage_container_path}",
-                "--storage.tsdb.retention.time=${prometheus_tsdb_retention_time}",
-                "--storage.tsdb.min-block-duration=${prometheus_tsdb_block_duration}",
-                "--storage.tsdb.max-block-duration=${prometheus_tsdb_block_duration}"],
-    "environment": []
+    "environment": [
+      {
+        "name": "ENVIRONMENT",
+        "value": "${ENVIRONMENT}"
+      },
+      {
+        "name": "prometheus_storage_container_path",
+        "value": "${prometheus_storage_container_path}"
+      },
+      {
+        "name": "prometheus_tsdb_retention_time",
+        "value": "${prometheus_tsdb_retention_time}"
+      },
+      {
+        "name": "prometheus_tsdb_block_duration",
+        "value": "${prometheus_tsdb_block_duration}"
+      },
+      {
+        "name": "prometheus_tsdb_block_duration",
+        "value": "${prometheus_tsdb_block_duration}"
+      }
+    ]
   },
   {
     "name": "metrics-thanos-sidecar",

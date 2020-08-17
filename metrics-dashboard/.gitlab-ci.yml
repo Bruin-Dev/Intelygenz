@@ -7,7 +7,6 @@ grafana-build:
     MODULE_NAME: metrics-dashboard/grafana
     MODULE_VERSION: ${CI_PIPELINE_ID}
   script:
-    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/grafana/config/prometheus-dev.yml
     - sed -i "s/igzpackages==[0-9]+\.[0-9]+\.[0-9]+/igzpackages==${IGZ_PACKAGES_VERSION}/g" ${MODULE_NAME}/requirements.txt
     - cp metrics-dashboard/grafana/config/prometheus-dev.yml metrics-dashboard/grafana/datasources/prometheus.yml
     - docker build --build-arg IGZ_PACKAGES_REPOSITORY_URL --build-arg IGZ_PACKAGES_VERSION --build-arg GRAFANA_ADMIN_USER
@@ -31,8 +30,6 @@ prometheus-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   script:
     - source ci-utils/environments/environment_assign.sh
-    - sed -i "s/ENVIRONMENT/${ENVIRONMENT_VAR}/g" metrics-dashboard/prometheus/config/prometheus-dev.yml
-    - cp metrics-dashboard/prometheus/config/prometheus-dev.yml metrics-dashboard/prometheus/prometheus.yml
     - docker build -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest -t ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-${MODULE_VERSION} -f ${MODULE_NAME}/Dockerfile .
     - python3 ci-utils/ecr/manage_ecr_docker_images.py -d True -o True -e ${ENVIRONMENT_VAR} -r automation-${MODULE_NAME} -p True
     - docker push ${REPOSITORY_URL}-${MODULE_NAME}:${ENVIRONMENT_VAR}-latest

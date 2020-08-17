@@ -360,9 +360,7 @@ services:
       - ./metrics-dashboard/grafana/dashboards-definitions:/var/lib/grafana/dashboards
 
   prometheus:
-    build:
-      context: .
-      dockerfile: metrics-dashboard/prometheus/Dockerfile
+    image: prom/prometheus:v2.7.2
     restart: unless-stopped
     volumes:
       - ./metrics-dashboard/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
