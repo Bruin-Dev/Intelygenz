@@ -75,7 +75,7 @@ class EdgeMonitoring:
         try:
             async with self._semaphore:
                 self._logger.info(f"Getting edge status for request: {request}")
-                edge = await self._event_bus.rpc_request("edge.status.request", request, timeout=10)
+                edge = await self._event_bus.rpc_request("edge.status.request", request, timeout=120)
                 self._logger.info(f'Edge received from event bus: {edge}')
                 if edge["status"] not in range(200, 300):
                     self._logger.info(f"Not edge status for {request}")
