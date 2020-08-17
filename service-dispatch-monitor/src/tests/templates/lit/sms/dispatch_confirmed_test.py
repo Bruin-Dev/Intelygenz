@@ -56,7 +56,7 @@ def lit_get_tech_12_hours_before_sms_test():
     assert tech_12_hours_before_sms == expected_tech_12_hours_before_sms
 
 
-expected_tech_2_hours_before_sms = """This is an automated message from MetTel customer support.
+expected_tech_2_hours_before_sms = """This is an automated message from MetTel.
 
 A field engineer will arrive in 2 hours, 2019-11-14 @ 6PM-8PM Pacific Time, at your location.
 

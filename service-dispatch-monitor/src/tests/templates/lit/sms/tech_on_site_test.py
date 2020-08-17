@@ -1,6 +1,6 @@
 from application.templates.lit.sms.tech_on_site import lit_get_tech_on_site_sms
 
-expected_tech_on_site_sms = """This is an automated message from MetTel customer support.
+expected_tech_on_site_sms = """This is an automated message from MetTel.
 Michael Jordan, the field engineer handling today's repair has arrived on-site.
 """
 

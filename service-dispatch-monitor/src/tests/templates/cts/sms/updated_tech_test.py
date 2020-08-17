@@ -2,7 +2,7 @@ from application.templates.cts.sms.updated_tech import cts_get_updated_tech_sms
 from application.templates.cts.sms.updated_tech import cts_get_updated_tech_sms_tech
 
 
-expected_updated_tech_sms = """This is an automated message from MetTel customer support.
+expected_updated_tech_sms = """This is an automated message from MetTel.
 
 The field engineer handling your dispatch on 2019-11-14 @ 6PM-8PM Pacific Time has changed.
 The new field engineer will be: Larry Andershock

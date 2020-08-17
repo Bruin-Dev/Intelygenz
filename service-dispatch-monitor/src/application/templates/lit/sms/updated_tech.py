@@ -1,4 +1,4 @@
-LIT_SMS_UPDATED_TECH = """This is an automated message from MetTel customer support.
+LIT_SMS_UPDATED_TECH = """This is an automated message from MetTel.
 
 The field engineer handling your dispatch on {date_of_dispatch} has changed.
 The new field engineer will be: {tech_name}
