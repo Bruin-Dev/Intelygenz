@@ -60,7 +60,7 @@ class Container:
         self._bruin_repository = BruinRepository(event_bus=self._event_bus, logger=self._logger, config=config,
                                                  notifications_repository=self._notifications_repository)
         self._utils_repository = UtilsRepository()
-        self._triage_repository = TriageRepository(config, self._utils_repository)
+        self._triage_repository = TriageRepository(config, self._utils_repository, self._triage_metrics_repository)
         self._monitoring_map_repository = MonitoringMapRepository(config=config, scheduler=self._scheduler,
                                                                   event_bus=self._event_bus, logger=self._logger,
                                                                   velocloud_repository=self._velocloud_repository,

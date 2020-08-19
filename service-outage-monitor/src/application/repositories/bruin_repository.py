@@ -1,5 +1,5 @@
+import math
 import os
-
 from datetime import datetime
 
 from pytz import timezone
@@ -9,11 +9,12 @@ from application.repositories import nats_error_response
 
 
 class BruinRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository):
+    def __init__(self, event_bus, logger, config, notifications_repository, metric_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._config = config
         self._notifications_repository = notifications_repository
+        self._metrics_repository = metric_repository
 
     async def get_ticket_info(self, client_id, ticket_id):
         try:
@@ -444,3 +445,47 @@ class BruinRepository:
     @staticmethod
     def is_management_status_active(management_status: str):
         return management_status in {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"}
+
+    async def append_triage_note(self, ticket_id, ticket_note, edge_status):
+        if self._config.TRIAGE_CONFIG['environment'] == 'dev':
+            serial_number = edge_status['edges']['serialNumber']
+            triage_message = (
+                f'Triage note would have been appended to ticket {ticket_id} (serial: {serial_number}).'
+                f'Note: {ticket_note}. Details at app.bruin.com/t/{ticket_id}'
+            )
+            self._logger.info(triage_message)
+            await self._notifications_repository.send_slack_message(triage_message)
+        elif self._config.TRIAGE_CONFIG['environment'] == 'production':
+            if len(ticket_note) < 1500:
+
+                append_note_response = await self.append_note_to_ticket(ticket_id, ticket_note)
+
+                if append_note_response['status'] == 503:
+                    self._metrics_repository.increment_note_append_errors()
+
+                if append_note_response['status'] not in range(200, 300):
+                    return
+            else:
+                lines = ticket_note.split('\n')
+                accumulator = ""
+                counter = 1
+                total_notes = math.ceil(len(ticket_note) / 1000)
+
+                for line in lines:
+                    accumulator = accumulator + line + '\n'
+                    is_last_index = lines.index(line) == (len(lines) - 1)
+                    if len(accumulator) > 1000 or is_last_index:
+
+                        note_page = f'Triage note: {counter}/{total_notes}'
+                        accumulator = accumulator + note_page
+                        append_note_response = await self.append_note_to_ticket(ticket_id, accumulator)
+                        if append_note_response['status'] == 503:
+                            self._metrics_repository.increment_note_append_errors()
+
+                        if append_note_response['status'] not in range(200, 300):
+                            return
+                        counter = counter + 1
+                        accumulator = "#*Automation Engine*#\n" \
+                                      "Triage\n"
+
+            self._metrics_repository.increment_tickets_without_triage_processed()

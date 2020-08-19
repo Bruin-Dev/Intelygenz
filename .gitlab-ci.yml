@@ -15,7 +15,7 @@ variables:
   IGZ_PACKAGES_VERSION: 2.0.0
   DOCKER_BASE_IMAGE_VERSION: 2.0.0
   DOCKER_IMAGE_UTILS_VERSION: 1.1.2
-  bruin_bridge_desired_tasks: 5
+  bruin_bridge_desired_tasks: 2
   cts_bridge_desired_tasks: 1
   dispatch_portal_backend_desired_tasks: 1
   dispatch_portal_frontend_desired_tasks: 1
