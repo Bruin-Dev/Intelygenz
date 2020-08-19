@@ -1,6 +1,7 @@
 import asyncio
 import re
 import time
+import math
 
 from collections import ChainMap
 from datetime import datetime
@@ -379,13 +380,37 @@ class Triage:
             self._logger.info(triage_message)
             await self._notifications_repository.send_slack_message(triage_message)
         elif self._config.TRIAGE_CONFIG['environment'] == 'production':
-            append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
+            if len(ticket_note) < 1500:
 
-            if append_note_response['status'] == 503:
-                self._metrics_repository.increment_note_append_errors()
+                append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
 
-            if append_note_response['status'] not in range(200, 300):
-                return
+                if append_note_response['status'] == 503:
+                    self._metrics_repository.increment_note_append_errors()
+
+                if append_note_response['status'] not in range(200, 300):
+                    return
+            else:
+                lines = ticket_note.split('\n')
+                accumulator = ""
+                counter = 1
+                total_notes = math.ceil(len(ticket_note) / 1000)
+
+                for line in lines:
+                    accumulator = accumulator + line + '\n'
+
+                    if len(accumulator + line) > 1000 or lines.index(line) == (len(lines) - 1):
+
+                        note_page = f'Triage note: {counter}/{total_notes}'
+                        accumulator = accumulator + note_page
+                        append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id,
+                                                                                                  accumulator)
+                        if append_note_response['status'] == 503:
+                            self._metrics_repository.increment_note_append_errors()
+
+                        if append_note_response['status'] not in range(200, 300):
+                            return
+                        counter = counter + 1
+                        accumulator = "#*Automation Engine*#\n"
 
             self._metrics_repository.increment_tickets_without_triage_processed()
 
