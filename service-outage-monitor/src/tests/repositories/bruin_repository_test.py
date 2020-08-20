@@ -23,13 +23,15 @@ class TestBruinRepository:
         logger = Mock()
         config = testconfig
         notifications_repository = Mock()
+        metrics_repository = Mock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         assert bruin_repository._event_bus is event_bus
         assert bruin_repository._logger is logger
         assert bruin_repository._config is config
         assert bruin_repository._notifications_repository is notifications_repository
+        assert bruin_repository._metrics_repository is metrics_repository
 
     @pytest.mark.asyncio
     async def get_tickets_test(self):
@@ -62,7 +64,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
@@ -111,7 +115,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_info(bruin_client_id, ticket_id)
@@ -144,7 +150,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
@@ -184,7 +192,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_tickets(bruin_client_id, ticket_topic, ticket_statuses)
@@ -236,7 +246,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_details(ticket_id)
@@ -264,7 +276,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_details(ticket_id)
@@ -299,7 +313,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_ticket_details(ticket_id)
@@ -334,7 +350,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
@@ -364,7 +382,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
@@ -401,7 +421,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
@@ -437,7 +459,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_client_info(service_number)
@@ -465,7 +489,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_client_info(service_number)
@@ -500,8 +526,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
 
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
         with uuid_mock:
             result = await bruin_repository.get_client_info(service_number)
 
@@ -536,8 +563,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
 
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
         with uuid_mock:
             result = await bruin_repository.get_management_status(client_id, service_number)
 
@@ -567,7 +595,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_management_status(client_id, service_number)
@@ -605,7 +635,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_management_status(client_id, service_number)
@@ -641,7 +673,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_outage_ticket_details_by_service_number(client_id, service_number)
@@ -677,7 +711,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_outage_ticket_details_by_service_number(client_id, service_number,
@@ -710,7 +746,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_outage_ticket_details_by_service_number(client_id, service_number)
@@ -749,7 +787,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.get_outage_ticket_details_by_service_number(client_id, service_number)
@@ -785,7 +825,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.resolve_ticket(ticket_id, detail_id)
@@ -815,7 +857,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.resolve_ticket(ticket_id, detail_id)
@@ -852,7 +896,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.resolve_ticket(ticket_id, detail_id)
@@ -887,7 +933,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.open_ticket(ticket_id, detail_id)
@@ -917,7 +965,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.open_ticket(ticket_id, detail_id)
@@ -954,7 +1004,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.open_ticket(ticket_id, detail_id)
@@ -989,7 +1041,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.create_outage_ticket(client_id, service_number)
@@ -1022,7 +1076,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.create_outage_ticket(client_id, service_number)
@@ -1055,7 +1111,9 @@ class TestBruinRepository:
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(return_value=response)
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.create_outage_ticket(client_id, service_number)
@@ -1085,7 +1143,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.create_outage_ticket(client_id, service_number)
@@ -1122,7 +1182,9 @@ class TestBruinRepository:
         notifications_repository = Mock()
         notifications_repository.send_slack_message = CoroutineMock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
 
         with uuid_mock:
             result = await bruin_repository.create_outage_ticket(client_id, service_number)
@@ -1155,7 +1217,9 @@ class TestBruinRepository:
         config = testconfig
         notifications_repository = Mock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock(return_value=response)
 
         datetime_mock = Mock()
@@ -1190,7 +1254,9 @@ class TestBruinRepository:
         config = testconfig
         notifications_repository = Mock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        metrics_repository = Mock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
         bruin_repository.append_note_to_ticket = CoroutineMock(return_value=response)
 
         datetime_mock = Mock()
@@ -1212,8 +1278,9 @@ class TestBruinRepository:
         logger = Mock()
         config = testconfig
         notifications_repository = Mock()
+        metrics_repository = Mock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
         bruin_repository.get_tickets = CoroutineMock()
 
         with uuid_mock:
@@ -1231,8 +1298,9 @@ class TestBruinRepository:
         logger = Mock()
         config = testconfig
         notifications_repository = Mock()
+        metrics_repository = Mock()
 
-        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
         bruin_repository.get_tickets = CoroutineMock()
 
         with uuid_mock:
@@ -1256,3 +1324,335 @@ class TestBruinRepository:
         management_status = "Fake status"
         result = BruinRepository.is_management_status_active(management_status)
         assert result is False
+
+    @pytest.mark.asyncio
+    async def process_single_ticket_without_triage_with_dev_environment_test(self):
+        edge_serial = 'VC1234567'
+
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
+        }
+
+        ticket_note = 'This is the first ticket note'
+        ticket_id = 12345
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        metrics_repository = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock()
+
+        await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
+
+        notifications_repository.send_slack_message.assert_awaited_once()
+        bruin_repository.append_note_to_ticket.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_single_ticket_without_triage_with_production_environment_test(self):
+        edge_serial = 'VC1234567'
+
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
+        }
+
+        ticket_note = 'This is the first ticket note'
+        ticket_id = 12345
+
+        append_note_to_ticket_response = {
+            'body': 'Note appended with success',
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        metrics_repository = Mock()
+        metrics_repository.increment_tickets_without_triage_processed = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_to_ticket_response)
+
+        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config['environment'] = 'production'
+        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note)
+        metrics_repository.increment_tickets_without_triage_processed.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def process_single_ticket_without_triage_with_unknown_environment_test(self):
+        edge_serial = 'VC1234567'
+
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
+        }
+
+        ticket_note = 'This is the first ticket note'
+        ticket_id = 12345
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        metrics_repository = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock()
+
+        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config['environment'] = 'unknown'
+        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
+
+        bruin_repository.append_note_to_ticket.assert_not_awaited()
+        notifications_repository.send_slack_message.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_single_ticket_without_triage_with_triage_note_greater_than_1500_char_test(self):
+        edge_serial = 'VC1234567'
+
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
+        }
+
+        ticket_id = 12345
+
+        ticket_note = "#Automation Engine#\n" \
+                      "Triage\n" \
+                      "Orchestrator Instance: mettel.velocloud.net\n" \
+                      "Edge Name: 540 - Gore Mountain Lodge-Active Velocloud\n" \
+                      "Links: Edge - QoE - Transport - Events\n" \
+                      "Edge Status: CONNECTED\n" \
+                      "Serial: VC05400016539\n" \
+                      "Interface GE2\n" \
+                      "Interface GE2 Label: Frontier Comm - Becks TAVERN (MetTel - 10.RBCB.131243)\n" \
+                      "Interface GE2 Status: STABLE\n" \
+                      "Interface GE1\n" \
+                      "Interface GE1 Label: MetTel WR54 4G - Gore Lodge Hotel LAN1 (Mettel - 5338765010)\n" \
+                      "Interface GE1 Status: DISCONNECTED\n" \
+                      "Interface SFP1\n" \
+                      "Interface SFP1 Label: Frontier Comm - Gore Lodge Hotel (MetTel - 10.RBCB.131242)\n" \
+                      "Interface SFP1 Status: STABLE\n" \
+                      "Interface SFP2\n" \
+                      "Interface SFP2 Label: MetTel WR54 4G - Gore Lodge Hotel LAN4\n" \
+                      "Interface SFP2 Status: STABLE\n" \
+                      "Last Edge Online: 2020-08-07 01:08:46-04:00\n" \
+                      "Last Edge Offline: 2020-08-07 00:04:16-04:00\n" \
+                      "Last GE2 Interface Online: 2020-08-07 10:02:22-04:00\n" \
+                      "Last GE2 Interface Offline: 2020-08-07 00:02:36-04:00\n" \
+                      "Last GE1 Interface Online: 2020-08-12 02:03:05-04:00\n" \
+                      "Last GE1 Interface Offline: 2020-08-12 22:06:46-04:00\n" \
+                      "Last SFP1 Interface Online: 2020-08-07 10:02:22-04:00\n" \
+                      "Last SFP1 Interface Offline: 2020-08-07 00:02:36-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Offline: 2020-08-13 14:13:25-04:00.\n" \
+                      "Last SFP2 Interface Offline: 2020-08-13 14:13:25-04:00.\n" \
+                      "End"
+
+        append_note_to_ticket_response = {
+            'body': 'Note appended with success',
+            'status': 200,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        metrics_repository = Mock()
+        metrics_repository.increment_tickets_without_triage_processed = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_to_ticket_response)
+
+        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config['environment'] = 'production'
+        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
+
+        assert len(bruin_repository.append_note_to_ticket.call_args_list) == 2
+        metrics_repository.increment_tickets_without_triage_processed.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def process_single_ticket_without_triage_with_append_note_request_not_having_2xx_status_test(self):
+        edge_serial = 'VC1234567'
+
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
+        }
+
+        ticket_note = 'This is the first ticket note'
+        ticket_id = 12345
+
+        append_note_to_ticket_response = {
+            'body': 'Note appended with success',
+            'status': 503,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+
+        metrics_repository = Mock()
+        metrics_repository.increment_tickets_without_triage_processed = Mock()
+        metrics_repository.increment_note_append_errors = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_to_ticket_response)
+
+        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config['environment'] = 'production'
+        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
+
+        bruin_repository.append_note_to_ticket.assert_awaited_once_with(ticket_id, ticket_note)
+        metrics_repository.increment_tickets_without_triage_processed.assert_not_called()
+        metrics_repository.increment_note_append_errors.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def process_single_ticket_without_triage_with_triage_note_greater_than_1500_char_return_non_2xx_test(self):
+        edge_serial = 'VC1234567'
+
+        edge_status = {
+            'edges': {'edgeState': 'OFFLINE', 'serialNumber': edge_serial},
+            'links': [
+                {'linkId': 1234, 'link': {'state': 'DISCONNECTED', 'interface': 'GE1'}},
+                {'linkId': 5678, 'link': {'state': 'STABLE', 'interface': 'GE2'}},
+            ],
+            'enterprise_name': 'EVIL-CORP|12345|',
+            'bruin_client_info': {
+                'client_id': 12345,
+                'client_name': 'METTEL/NEW YORK',
+            },
+        }
+
+        ticket_id = 12345
+
+        ticket_note = "#Automation Engine#\n" \
+                      "Triage\n" \
+                      "Orchestrator Instance: mettel.velocloud.net\n" \
+                      "Edge Name: 540 - Gore Mountain Lodge-Active Velocloud\n" \
+                      "Links: Edge - QoE - Transport - Events\n" \
+                      "Edge Status: CONNECTED\n" \
+                      "Serial: VC05400016539\n" \
+                      "Interface GE2\n" \
+                      "Interface GE2 Label: Frontier Comm - Becks TAVERN (MetTel - 10.RBCB.131243)\n" \
+                      "Interface GE2 Status: STABLE\n" \
+                      "Interface GE1\n" \
+                      "Interface GE1 Label: MetTel WR54 4G - Gore Lodge Hotel LAN1 (Mettel - 5338765010)\n" \
+                      "Interface GE1 Status: DISCONNECTED\n" \
+                      "Interface SFP1\n" \
+                      "Interface SFP1 Label: Frontier Comm - Gore Lodge Hotel (MetTel - 10.RBCB.131242)\n" \
+                      "Interface SFP1 Status: STABLE\n" \
+                      "Interface SFP2\n" \
+                      "Interface SFP2 Label: MetTel WR54 4G - Gore Lodge Hotel LAN4\n" \
+                      "Interface SFP2 Status: STABLE\n" \
+                      "Last Edge Online: 2020-08-07 01:08:46-04:00\n" \
+                      "Last Edge Offline: 2020-08-07 00:04:16-04:00\n" \
+                      "Last GE2 Interface Online: 2020-08-07 10:02:22-04:00\n" \
+                      "Last GE2 Interface Offline: 2020-08-07 00:02:36-04:00\n" \
+                      "Last GE1 Interface Online: 2020-08-12 02:03:05-04:00\n" \
+                      "Last GE1 Interface Offline: 2020-08-12 22:06:46-04:00\n" \
+                      "Last SFP1 Interface Online: 2020-08-07 10:02:22-04:00\n" \
+                      "Last SFP1 Interface Offline: 2020-08-07 00:02:36-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Online: 2020-08-13 14:19:04-04:00\n" \
+                      "Last SFP2 Interface Offline: 2020-08-13 14:13:25-04:00.\n" \
+                      "Last SFP2 Interface Offline: 2020-08-13 14:13:25-04:00.\n" \
+                      "End"
+
+        append_note_to_ticket_response = {
+            'body': 'Note appended with success',
+            'status': 503,
+        }
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+
+        metrics_repository = Mock()
+        metrics_repository.increment_tickets_without_triage_processed = Mock()
+        metrics_repository.increment_note_append_errors = Mock()
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository, metrics_repository)
+        bruin_repository.append_note_to_ticket = CoroutineMock(return_value=append_note_to_ticket_response)
+
+        custom_triage_config = config.TRIAGE_CONFIG.copy()
+        custom_triage_config['environment'] = 'production'
+        with patch.dict(config.TRIAGE_CONFIG, custom_triage_config):
+            await bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
+
+        metrics_repository.increment_tickets_without_triage_processed.assert_not_called()
+        metrics_repository.increment_note_append_errors.assert_called_once()
