@@ -43,6 +43,13 @@ class GetTicket:
             "ticket_topic": body["ticket_topic"]
         }
 
+        # Valid date format: datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        start_date = body.get("start_date")
+        end_date = body.get("end_date")
+        if start_date and end_date:
+            params["start_date"] = start_date
+            params["end_date"] = end_date
+
         self._logger.info(f'Collecting all tickets for client id: {params["client_id"]}...')
 
         filtered_tickets = await self._bruin_repository.get_all_filtered_tickets(params, ticket_status)
