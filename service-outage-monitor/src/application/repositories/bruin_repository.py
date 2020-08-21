@@ -9,12 +9,11 @@ from application.repositories import nats_error_response
 
 
 class BruinRepository:
-    def __init__(self, event_bus, logger, config, notifications_repository, metric_repository):
+    def __init__(self, event_bus, logger, config, notifications_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._config = config
         self._notifications_repository = notifications_repository
-        self._metrics_repository = metric_repository
 
     async def get_ticket_info(self, client_id, ticket_id):
         try:
@@ -455,16 +454,17 @@ class BruinRepository:
             )
             self._logger.info(triage_message)
             await self._notifications_repository.send_slack_message(triage_message)
+            return None
         elif self._config.TRIAGE_CONFIG['environment'] == 'production':
             if len(ticket_note) < 1500:
 
                 append_note_response = await self.append_note_to_ticket(ticket_id, ticket_note)
 
                 if append_note_response['status'] == 503:
-                    self._metrics_repository.increment_note_append_errors()
+                    return 503
 
                 if append_note_response['status'] not in range(200, 300):
-                    return
+                    return None
             else:
                 lines = ticket_note.split('\n')
                 accumulator = ""
@@ -480,12 +480,11 @@ class BruinRepository:
                         accumulator = accumulator + note_page
                         append_note_response = await self.append_note_to_ticket(ticket_id, accumulator)
                         if append_note_response['status'] == 503:
-                            self._metrics_repository.increment_note_append_errors()
+                            return 503
 
                         if append_note_response['status'] not in range(200, 300):
-                            return
+                            return None
                         counter = counter + 1
                         accumulator = "#*Automation Engine*#\n" \
                                       "Triage\n"
-
-            self._metrics_repository.increment_tickets_without_triage_processed()
+            return 200

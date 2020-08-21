@@ -370,6 +370,11 @@ class Triage:
 
         ticket_note = self._triage_repository.build_triage_note(edge_full_id, edge_status, recent_events_response_body)
 
-        await self._bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
+        note_appended = await self._bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
+
+        if note_appended == 200:
+            self._metrics_repository.increment_tickets_without_triage_processed()
+        if note_appended == 503:
+            self._metrics_repository.increment_note_append_errors()
 
         self._logger.info(f'Finished processing ticket without triage {ticket_id}!')

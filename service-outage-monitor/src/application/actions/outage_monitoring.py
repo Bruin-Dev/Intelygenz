@@ -560,19 +560,10 @@ class OutageMonitor:
 
         ticket_note = self._triage_repository.build_triage_note(edge_full_id, edge_status, recent_events_response_body)
 
-        if self._config.TRIAGE_CONFIG['environment'] == 'dev':
-            serial_number = edge_status['edges']['serialNumber']
-            triage_message = (
-                f'Triage note would have been appended to ticket {ticket_id} (serial: {serial_number}).'
-                f'Note: {ticket_note}. Details at app.bruin.com/t/{ticket_id}'
-            )
-            self._logger.info(triage_message)
-            await self._notifications_repository.send_slack_message(triage_message)
-        elif self._config.TRIAGE_CONFIG['environment'] == 'production':
-            append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
+        note_appended = await self._bruin_repository.append_triage_note(ticket_id, ticket_note, edge_status)
 
-            if append_note_response['status'] == 503:
-                self._metrics_repository.increment_first_triage_errors()
+        if note_appended == 503:
+            self._metrics_repository.increment_first_triage_errors()
 
     async def _reopen_outage_ticket(self, ticket_id, edge_status):
         self._logger.info(f'[outage-ticket-reopening] Reopening outage ticket {ticket_id}...')
