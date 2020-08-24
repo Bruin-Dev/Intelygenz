@@ -301,6 +301,17 @@ locals {
   automation-tnba-monitor-service_discovery_service-name = "tnba-monitor-${var.ENVIRONMENT}"
   automation-tnba-monitor-papertrail_prefix = "tnba-monitor-${element(split("-", data.external.tnba-monitor-build_number.result["image_tag"]),2)}"
 
+  // automation-tnba-feedback local vars
+  automation-tnba-feedback-image = "${data.aws_ecr_repository.automation-tnba-feedback.repository_url}:${data.external.tnba-feedback-build_number.result["image_tag"]}"
+  automation-tnba-feedback-log_prefix = "${var.ENVIRONMENT}-${var.BUILD_NUMBER}"
+  automation-tnba-feedback-ecs_task_definition-family = "${var.ENVIRONMENT}-tnba-feedback"
+  automation-tnba-feedback-service-security_group-name = "${var.ENVIRONMENT}-tnba-feedback"
+  automation-tnba-feedback-service-security_group-tag-Name = "${var.ENVIRONMENT}-tnba-feedback"
+  automation-tnba-feedback-ecs_service-name = "${var.ENVIRONMENT}-tnba-feedback"
+  automation-tnba-feedback-ecs_service-task_definition = "${aws_ecs_task_definition.automation-tnba-feedback[0].family}:${aws_ecs_task_definition.automation-tnba-feedback[0].revision}"
+  automation-tnba-feedback-service_discovery_service-name = "tnba-feedback-${var.ENVIRONMENT}"
+  automation-tnba-feedback-papertrail_prefix = "tnba-feedback-${element(split("-", data.external.tnba-feedback-build_number.result["image_tag"]),2)}"
+
   // automation-velocloud-bridge local vars
   automation-velocloud-bridge-image = "${data.aws_ecr_repository.automation-velocloud-bridge.repository_url}:${data.external.velocloud-bridge-build_number.result["image_tag"]}"
   automation-velocloud-bridge-papertrail_prefix = "velocloud-bridge-${element(split("-", data.external.velocloud-bridge-build_number.result["image_tag"]),2)}"
@@ -342,6 +353,10 @@ locals {
   // alarm running_task_count_sites-monitor local variables
   running_task_count_sites-monitor_alarm-name = "Running tasks count of sites-monitor service in ECS cluster with name ${var.ENVIRONMENT}"
   running_task_count_sites-monitor_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_sites-monitor"
+
+    // alarm running_task_count_tnba-feedback local variables
+  running_task_count_tnba-feedback_alarm-name = "Running tasks count of tnba-feedback service in ECS cluster with name ${var.ENVIRONMENT}"
+  running_task_count_tnba-feedback_alarm-tag-Name = "${var.ENVIRONMENT}-running_task_count_tnba-feedback"
 
   // alarm running_task_count_tnba-monitor local variables
   running_task_count_tnba-monitor_alarm-name = "Running tasks count of tnba-monitor service in ECS cluster with name ${var.ENVIRONMENT}"

@@ -1,0 +1,40 @@
+# ========================================================
+# Linter validation jobs for tnba-feedback module
+# ========================================================
+tnba-feedback-linter:
+  variables:
+    MODULE: tnba-feedback
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - tnba-feedback/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
+  extends: .lint_module
+
+# =================================================
+# Unit tests jobs for tnba-feedback module
+# =================================================
+tnba-feedback-test:
+ variables:
+   MODULE: tnba-feedback
+ rules:
+   - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+     changes:
+       - tnba-feedback/**/*
+   - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
+ extends: .unittest_module_python
+
+# ====================================================
+# Images builds jobs for tnba-feedback module
+# ====================================================
+tnba-feedback-build:
+  stage: build
+  variables:
+    MODULE_NAME: tnba-feedback
+    MODULE_VERSION: ${CI_PIPELINE_ID}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - tnba-feedback/**/*
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
+  extends: .build_app_image

@@ -23,6 +23,7 @@ resource "null_resource" "papertrail_provisioning" {
       aws_ecs_service.automation-service-outage-monitor-triage,
       aws_ecs_service.automation-sites-monitor,
       aws_ecs_service.automation-t7-bridge,
+      aws_ecs_service.automation-tnba-feedback,
       aws_ecs_service.automation-tnba-monitor,
       aws_ecs_service.automation-velocloud-bridge,
       aws_elasticache_cluster.automation-redis

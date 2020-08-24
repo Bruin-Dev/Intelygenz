@@ -74,6 +74,10 @@ resource "aws_ecr_repository" "automation-dispatch-portal-frontend-nginx" {
   name = "automation-dispatch-portal-frontend/nginx"
 }
 
+resource "aws_ecr_repository" "automation-tnba-feedback" {
+  name = "automation-tnba-feedback"
+}
+
 resource "aws_ecr_repository" "automation-tnba-monitor" {
   name = "automation-tnba-monitor"
 }

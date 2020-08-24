@@ -21,6 +21,7 @@
 | service-outage-monitor|[![service-outage-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=service-outage-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | sites-monitor|[![sites-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=sites-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | t7-bridge|[![t7-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=t7-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
+| tnba-feedback|[![tnba-feedback-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=tnba-feedback-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | tnba-monitor|[![tnba-monitor-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=tnba-monitor-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 | velocloud-bridge|[![velocloud-bridge-test](https://gitlab.intelygenz.com/mettel/automation-engine/badges/master/coverage.svg?job=velocloud-bridge-test)](https://gitlab.intelygenz.com/mettel/automation-engine/commits/master)
 
@@ -363,6 +364,7 @@ Run:
 - [Base microservice](base-microservice/README.md)
 - [Sites monitor](sites-monitor/README.md)
 - [TNBA monitor](tnba-monitor/README.md)
+- [TNBA feedback](tnba-feedback/README.md)
 - [Velocloud bridge](velocloud-bridge/README.md)
 - [Notifier](notifier/README.md)
 
