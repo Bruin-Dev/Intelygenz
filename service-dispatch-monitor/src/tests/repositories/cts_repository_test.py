@@ -129,6 +129,209 @@ class TestCtsRepository:
         expected_phone = None
         assert CtsRepository.get_sms_to(updated_dispatch) == expected_phone
 
+    def get_sms_to_from_note_test(self):
+        note = "#*Automation Engine*# DIS57079\n" \
+               "Dispatch Management - Dispatch Requested\n\n" \
+               "Please see the summary below.\n--\n" \
+               "Dispatch Number: " \
+               "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n" \
+               "Date of Dispatch: 2020-08-07\n" \
+               "Time of Dispatch (Local): 10.00AM\n" \
+               "Time Zone (Local): Eastern Time\n\n" \
+               "Location Owner/Name: Marine Max\n" \
+               "Location ID: 750 S Federal Hwy , Pompano Beach, Florida, 33062\n" \
+               "On-Site Contact: MOD manager\n" \
+               "Phone: (202) 772-3610\n\n" \
+               "Issues Experienced:\n" \
+               "Please check their Wifi Network and other equipment as per the customer\n" \
+               "Arrival Instructions: Please call HNOC and work with engineer\n" \
+               "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, " \
+               "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n" \
+               "Requester\nName: Holmdel  NOC\nPhone: 8775206829\n" \
+               "Email: holmdelnoc@mettel.net\n" \
+               "Department: Holmdel Network Engineering"
+        expected_phone = '+12027723610'
+        assert CtsRepository.get_sms_to_from_note(note) == expected_phone
+
+    def get_sms_to_from_note_error_no_contact_test(self):
+        note = "#*Automation Engine*# DIS57079\n" \
+               "Dispatch Management - Dispatch Requested\n\n" \
+               "Please see the summary below.\n--\n" \
+               "Dispatch Number: " \
+               "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n" \
+               "Date of Dispatch: 2020-08-07\n" \
+               "Time of Dispatch (Local): 10.00AM\n" \
+               "Time Zone (Local): Eastern Time\n\n" \
+               "Location Owner/Name: Marine Max\n" \
+               "Location ID: 750 S Federal Hwy , Pompano Beach, Florida, 33062\n" \
+               "On-Site Contact: MOD manager\n" \
+               "Phone: NO CONTACT\n\n" \
+               "Issues Experienced:\n" \
+               "Please check their Wifi Network and other equipment as per the customer\n" \
+               "Arrival Instructions: Please call HNOC and work with engineer\n" \
+               "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, " \
+               "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n" \
+               "Requester\nName: Holmdel  NOC\nPhone: 8775206829\n" \
+               "Email: holmdelnoc@mettel.net\n" \
+               "Department: Holmdel Network Engineering"
+        expected_phone = None
+        assert CtsRepository.get_sms_to_from_note(note) == expected_phone
+
+    def get_sms_to_from_note_error_number_test(self):
+        note = "#*Automation Engine*# DIS57079\n" \
+               "Dispatch Management - Dispatch Requested\n\n" \
+               "Please see the summary below.\n--\n" \
+               "Dispatch Number: " \
+               "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n" \
+               "Date of Dispatch: 2020-08-07\n" \
+               "Time of Dispatch (Local): 10.00AM\n" \
+               "Time Zone (Local): Eastern Time\n\n" \
+               "Location Owner/Name: Marine Max\n" \
+               "Location ID: 750 S Federal Hwy , Pompano Beach, Florida, 33062\n" \
+               "On-Site Contact: MOD manager\n" \
+               "Phone: (7) \n\n" \
+               "Issues Experienced:\n" \
+               "Please check their Wifi Network and other equipment as per the customer\n" \
+               "Arrival Instructions: Please call HNOC and work with engineer\n" \
+               "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, " \
+               "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n" \
+               "Requester\nName: Holmdel  NOC\nPhone: 8775206829\n" \
+               "Email: holmdelnoc@mettel.net\n" \
+               "Department: Holmdel Network Engineering"
+        expected_phone = None
+        assert CtsRepository.get_sms_to_from_note(note) == expected_phone
+
+    def get_sms_to_from_note_with_note_none_test(self):
+        note = None
+        expected_phone = None
+        assert CtsRepository.get_sms_to_from_note(note) == expected_phone
+
+    def get_onsite_contact_test(self, cts_dispatch_confirmed):
+        updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+        expected_phone = 'Manager On Duty'
+        assert CtsRepository.get_onsite_contact(updated_dispatch) == expected_phone
+
+    def get_onsite_contact_no_contact_test(self, cts_dispatch_confirmed_no_contact_name):
+        updated_dispatch = copy.deepcopy(cts_dispatch_confirmed_no_contact_name)
+        expected_phone = None
+        assert CtsRepository.get_onsite_contact(updated_dispatch) == expected_phone
+
+    def get_onsite_contact_from_note_test(self):
+        note = "#*Automation Engine*# DIS57079\n" \
+               "Dispatch Management - Dispatch Requested\n\n" \
+               "Please see the summary below.\n--\n" \
+               "Dispatch Number: " \
+               "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n" \
+               "Date of Dispatch: 2020-08-07\n" \
+               "Time of Dispatch (Local): 10.00AM\n" \
+               "Time Zone (Local): Eastern Time\n\n" \
+               "Location Owner/Name: Marine Max\n" \
+               "Address: 750 S Federal Hwy , Pompano Beach, Florida, 33062\n" \
+               "On-Site Contact: MOD manager\n" \
+               "Phone: (7) \n\n" \
+               "Issues Experienced:\n" \
+               "Please check their Wifi Network and other equipment as per the customer\n" \
+               "Arrival Instructions: Please call HNOC and work with engineer\n" \
+               "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, " \
+               "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n" \
+               "Requester\nName: Holmdel  NOC\nPhone: 8775206829\n" \
+               "Email: holmdelnoc@mettel.net\n" \
+               "Department: Holmdel Network Engineering"
+        expected_name = 'MOD manager'
+        assert CtsRepository.get_onsite_contact_from_note(note) == expected_name
+
+    def get_onsite_contact_from_note_none_note_test(self):
+        note = None
+        expected_name = None
+        assert CtsRepository.get_onsite_contact_from_note(note) == expected_name
+
+    def get_onsite_contact_from_note_no_contact_test(self):
+        note = "#*Automation Engine*# DIS57079\n" \
+               "Dispatch Management - Dispatch Requested\n\n" \
+               "Please see the summary below.\n--\n" \
+               "Dispatch Number: " \
+               "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n" \
+               "Date of Dispatch: 2020-08-07\n" \
+               "Time of Dispatch (Local): 10.00AM\n" \
+               "Time Zone (Local): Eastern Time\n\n" \
+               "Location Owner/Name: Marine Max\n" \
+               "Address: 750 S Federal Hwy , Pompano Beach, Florida, 33062\n" \
+               "NO_CONTACT: MOD manager\n" \
+               "Phone: (7) \n\n" \
+               "Issues Experienced:\n" \
+               "Please check their Wifi Network and other equipment as per the customer\n" \
+               "Arrival Instructions: Please call HNOC and work with engineer\n" \
+               "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, " \
+               "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n" \
+               "Requester\nName: Holmdel  NOC\nPhone: 8775206829\n" \
+               "Email: holmdelnoc@mettel.net\n" \
+               "Department: Holmdel Network Engineering"
+        expected_name = None
+        assert CtsRepository.get_onsite_contact_from_note(note) == expected_name
+
+    def get_location_test(self, cts_dispatch_confirmed):
+        updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
+        expected = '750 S Federal Hwy , Pompano Beach, Florida, 33062'
+        assert CtsRepository.get_location(updated_dispatch) == expected
+
+    def get_location_no_location_test(self, cts_dispatch_confirmed_no_address):
+        updated_dispatch = copy.deepcopy(cts_dispatch_confirmed_no_address)
+        expected_phone = None
+        assert CtsRepository.get_location(updated_dispatch) == expected_phone
+
+    def get_location_from_note_test(self):
+        note = "#*Automation Engine*# DIS57079\n" \
+               "Dispatch Management - Dispatch Requested\n\n" \
+               "Please see the summary below.\n--\n" \
+               "Dispatch Number: " \
+               "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n" \
+               "Date of Dispatch: 2020-08-07\n" \
+               "Time of Dispatch (Local): 10.00AM\n" \
+               "Time Zone (Local): Eastern Time\n\n" \
+               "Location Owner/Name: Marine Max\n" \
+               "Address: 750 S Federal Hwy , Pompano Beach, Florida, 33062\n" \
+               "On-Site Contact: MOD manager\n" \
+               "Phone: (7) \n\n" \
+               "Issues Experienced:\n" \
+               "Please check their Wifi Network and other equipment as per the customer\n" \
+               "Arrival Instructions: Please call HNOC and work with engineer\n" \
+               "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, " \
+               "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n" \
+               "Requester\nName: Holmdel  NOC\nPhone: 8775206829\n" \
+               "Email: holmdelnoc@mettel.net\n" \
+               "Department: Holmdel Network Engineering"
+        expected_name = '750 S Federal Hwy , Pompano Beach, Florida, 33062'
+        assert CtsRepository.get_location_from_note(note) == expected_name
+
+    def get_location_from_note_none_note_test(self):
+        note = None
+        expected = None
+        assert CtsRepository.get_location_from_note(note) == expected
+
+    def get_location_from_note_test(self):
+        note = "#*Automation Engine*# DIS57079\n" \
+               "Dispatch Management - Dispatch Requested\n\n" \
+               "Please see the summary below.\n--\n" \
+               "Dispatch Number: " \
+               "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n" \
+               "Date of Dispatch: 2020-08-07\n" \
+               "Time of Dispatch (Local): 10.00AM\n" \
+               "Time Zone (Local): Eastern Time\n\n" \
+               "Location Owner/Name: Marine Max\n" \
+               "NO_ADDRESS: 750 S Federal Hwy , Pompano Beach, Florida, 33062\n" \
+               "NO_CONTACT: MOD manager\n" \
+               "Phone: (7) \n\n" \
+               "Issues Experienced:\n" \
+               "Please check their Wifi Network and other equipment as per the customer\n" \
+               "Arrival Instructions: Please call HNOC and work with engineer\n" \
+               "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, " \
+               "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n" \
+               "Requester\nName: Holmdel  NOC\nPhone: 8775206829\n" \
+               "Email: holmdelnoc@mettel.net\n" \
+               "Department: Holmdel Network Engineering"
+        expected = None
+        assert CtsRepository.get_location_from_note(note) == expected
+
     def get_sms_to_tech_test(self, cts_dispatch_confirmed):
         updated_dispatch = copy.deepcopy(cts_dispatch_confirmed)
         expected_phone = "+12123595129"
@@ -1611,3 +1814,105 @@ class TestCtsRepository:
         cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(
             send_error_sms_to_slack_response)
+
+    def get_latest_tech_name_assigned_from_notes_test(self, cts_dispatch_monitor, cts_filtered_tickets_1,
+                                                      cts_filtered_tickets_2):
+        updated_notes = [cts_filtered_tickets_1[0]]
+        expected = 'Berge, Keith'
+        result = cts_dispatch_monitor._cts_repository.get_latest_tech_name_assigned_from_notes(
+            updated_notes, cts_filtered_tickets_1, cts_dispatch_monitor.DISPATCH_UPDATED_TECH_WATERMARK
+        )
+        assert result == expected
+        updated_notes = [cts_filtered_tickets_2[0]]
+        expected = None
+        result = cts_dispatch_monitor._cts_repository.get_latest_tech_name_assigned_from_notes(
+            updated_notes, cts_filtered_tickets_2, cts_dispatch_monitor.DISPATCH_UPDATED_TECH_WATERMARK
+        )
+        assert result == expected
+
+    def determine_final_igz_id_for_dispatch_with_no_igz_id_test(self, cts_dispatch_monitor, cts_dispatch_confirmed):
+        ticket_id = '12345'
+        ticket_notes_by_id = {}
+        expected = None
+        result = cts_dispatch_monitor._cts_repository.determine_final_igz_id_for_dispatch(
+            cts_dispatch_confirmed, 'S-11111', ticket_id, ticket_notes_by_id,
+            cts_dispatch_monitor.DISPATCH_REQUESTED_WATERMARK)
+        assert expected == result
+
+    def determine_final_igz_id_for_dispatch_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
+                                                 cts_ticket_details_1, cts_ticket_details_2):
+        ticket_id = '12345'
+        cts_dispatch_confirmed['Name'] = 'S-11111'
+        cts_dispatch_confirmed['Description__c'] = \
+            "Onsite Time Needed: Jun 22, 2020 03:00 PM\r\n\r\nReference: 4694961\r\n\r\n" \
+            "SLA Level: 4-Hour\r\n\r\nLocation Country: United States\r\n\r\n" \
+            "Location - US: 1501 K St NW\r\nWashington, DC 20005\r\n\r\n" \
+            "Location ID: 88377\r\n\r\n" \
+            "Location Owner: Premier Financial Bancorp\r\n\r\nOnsite Contact: Jane Doe\r\n\r\n" \
+            "Contact #: +16666666666\r\n\r\nFailure Experienced: Comcast cable internet circuit is down. " \
+            "Comcast shows the modem offline without cause.\r\nBasic troubleshooting already done including power " \
+            "cycling of the VCE and modem. Client added it's showing red led on the VCE cloud.\r\n" \
+            "Need to check the cabling and check out the Velo device and see if it needs replaced.\r\n\r\n" \
+            "Static IP Address 50.211.140.109\r\nStatic IP Block 50.211.140.108/30\r\nGateway IP 50.211.140.110\r\n" \
+            "Subnet Mask 255.255.255.252\r\nPrimary DNS 75.75.75.75\r\nSecondary DNS 75.75.76.76\r\n\r\n\r\n" \
+            "Onsite SOW: phone # 877-515-0911 and email address for pictures to " \
+            "be sent to T1repair@mettel.net\r\n\r\n" \
+            "LCON: Mgr on Duty\r\nPhone: (202) 772-3610\r\nAcccess: M-F 9AM-5PM\r\n\r\n" \
+            "Materials Needed: Laptop, Ethernet cable, console cable, Jetpack/Mobile Hotspot, " \
+            "TeamViewer installed, other IW tools (CAT5e, punch down, wall jacks, telecom standard toolkit)\r\n\r\n" \
+            "Service Category: Troubleshoot\r\n\r\nName: Brad Gunnell\r\n\r\nPhone: (877) 515-0911\r\n\r\n" \
+            "Email: t1repair@mettel.net"
+        ticket_notes_by_id = {
+            'IGZ_0001': cts_ticket_details_1['body'].get('ticketNotes'),
+            'IGZ_0002': cts_ticket_details_2['body'].get('ticketNotes'),
+        }
+        expected = 'IGZ_0001'
+        result = cts_dispatch_monitor._cts_repository.determine_final_igz_id_for_dispatch(
+            cts_dispatch_confirmed, 'S-11111', ticket_id, ticket_notes_by_id,
+            cts_dispatch_monitor.DISPATCH_REQUESTED_WATERMARK)
+        assert expected == result
+
+    def determine_final_igz_id_for_dispatch_with_no_requested_note_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_ticket_details_1,
+            cts_filtered_tickets_2_no_requested_note):
+        ticket_id = '12345'
+        cts_dispatch_confirmed['Name'] = 'S-11111'
+        cts_dispatch_confirmed['Description__c'] = \
+            "Onsite Time Needed: Jun 22, 2020 03:00 PM\r\n\r\nReference: 4694961\r\n\r\n" \
+            "SLA Level: 4-Hour\r\n\r\nLocation Country: United States\r\n\r\n" \
+            "Location - US: 1501 K St NW\r\nWashington, DC 20005\r\n\r\n" \
+            "Location ID: 88377\r\n\r\n" \
+            "Location Owner: Premier Financial Bancorp\r\n\r\nOnsite Contact: Jane Doe\r\n\r\n" \
+            "Contact #: +16666666666\r\n\r\nFailure Experienced: Comcast cable internet circuit is down. " \
+            "Comcast shows the modem offline without cause.\r\nBasic troubleshooting already done including power " \
+            "cycling of the VCE and modem. Client added it's showing red led on the VCE cloud.\r\n" \
+            "Need to check the cabling and check out the Velo device and see if it needs replaced.\r\n\r\n" \
+            "Static IP Address 50.211.140.109\r\nStatic IP Block 50.211.140.108/30\r\nGateway IP 50.211.140.110\r\n" \
+            "Subnet Mask 255.255.255.252\r\nPrimary DNS 75.75.75.75\r\nSecondary DNS 75.75.76.76\r\n\r\n\r\n" \
+            "Onsite SOW: phone # 877-515-0911 and email address for pictures to " \
+            "be sent to T1repair@mettel.net\r\n\r\n" \
+            "LCON: Mgr on Duty\r\nPhone: (202) 772-3610\r\nAcccess: M-F 9AM-5PM\r\n\r\n" \
+            "Materials Needed: Laptop, Ethernet cable, console cable, Jetpack/Mobile Hotspot, " \
+            "TeamViewer installed, other IW tools (CAT5e, punch down, wall jacks, telecom standard toolkit)\r\n\r\n" \
+            "Service Category: Troubleshoot\r\n\r\nName: Brad Gunnell\r\n\r\nPhone: (877) 515-0911\r\n\r\n" \
+            "Email: t1repair@mettel.net"
+        ticket_notes_by_id = {
+            'IGZ_0001': cts_ticket_details_1['body'].get('ticketNotes'),
+            'IGZ_0002': cts_filtered_tickets_2_no_requested_note,
+        }
+        expected = 'IGZ_0001'
+        result = cts_dispatch_monitor._cts_repository.determine_final_igz_id_for_dispatch(
+            cts_dispatch_confirmed, 'S-11111', ticket_id, ticket_notes_by_id,
+            cts_dispatch_monitor.DISPATCH_REQUESTED_WATERMARK)
+        assert expected == result
+
+    def filter_ticket_notes_by_dispatch_number_test(self, cts_dispatch_monitor, cts_ticket_notes_with_2_dispatches):
+        igz_id_2 = 'IGZWtpGZCJopULhsiUhbWjUYf'
+        expected = []
+        for note in cts_ticket_notes_with_2_dispatches['ticketNotes']:
+            if 'IGZWtpGZCJopULhsiUhbWjUYf' in note.get('noteValue'):
+                expected.append(note)
+        ticket_notes = cts_ticket_notes_with_2_dispatches.get('ticketNotes')
+        result = cts_dispatch_monitor._cts_repository.filter_ticket_notes_by_dispatch_number(ticket_notes, igz_id_2)
+        assert expected == result
+        assert len(result) == 2

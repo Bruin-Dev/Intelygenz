@@ -1248,7 +1248,8 @@ def cts_dispatch():
         'Description__c': "Onsite Time Needed: Jun 22, 2020 03:00 PM\r\n\r\nReference: 4694961\r\n\r\n"
                           "SLA Level: 4-Hour\r\n\r\nLocation Country: United States\r\n\r\n"
                           "Location - US: 1501 K St NW\r\nWashington, DC 20005\r\n\r\n"
-                          "Location ID: 88377\r\n\r\nLocation Owner: Premier Financial Bancorp\r\n\r\n"
+                          "Location ID: 750 S Federal Hwy , Pompano Beach, Florida, 33062\r\n\r\n"
+                          "Location Owner: Premier Financial Bancorp\r\n\r\n"
                           "Onsite Contact: Manager On Duty\r\n\r\nContact #: (202) 772-3610\r\n\r\n"
                           "Failure Experienced: Comcast cable internet circuit is down. "
                           "Comcast shows the modem offline without cause.\r\n"
@@ -1402,6 +1403,34 @@ def cts_dispatch_confirmed_no_contact(cts_dispatch_monitor, cts_dispatch):
     updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
 
     updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace('Contact #:', 'NO CONTACT')
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_no_contact_name(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace('Onsite Contact:', 'NO CONTACT')
+
+    return updated_dispatch
+
+
+@pytest.fixture(scope='function')
+def cts_dispatch_confirmed_no_address(cts_dispatch_monitor, cts_dispatch):
+    updated_dispatch = copy.deepcopy(cts_dispatch)
+    updated_dispatch['Confirmed__c'] = True
+    updated_dispatch['Resource_Assigned_Timestamp__c'] = '2020-06-22T22:44:32.000+0000'
+    updated_dispatch['Status__c'] = cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED
+    updated_dispatch['API_Resource_Name__c'] = 'Michael J. Fox'
+    updated_dispatch['Resource_Phone_Number__c'] = '+1 (212) 359-5129'
+
+    updated_dispatch['Description__c'] = updated_dispatch['Description__c'].replace('Location ID:', '')
 
     return updated_dispatch
 
@@ -1836,6 +1865,72 @@ def cts_ticket_details_no_watermark():
                 {
                     "noteId": 70805300,
                     "noteValue": "#*NO WATERMARK*# IGZ_0002\nDispatch Management - Dispatch Requested\n\n"
+                                 "Please see the summary below.\n--\n"
+                                 "Dispatch Number:  "
+                                 "[IGZ_0003|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0003] "
+                                 "\nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\n"
+                                 "Time Zone (Local): Pacific Time\n\n"
+                                 "Location Owner/Name: Red Rose Inn\n"
+                                 "Address: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\n"
+                                 "Phone: +1 666 6666 666\n\n"
+                                 "Issues Experienced:\nDevice is bouncing constantly TEST LUNES\n"
+                                 "Arrival Instructions: "
+                                 "When arriving to the site call HOLMDEL NOC for telematic assistance\n"
+                                 "Materials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\n"
+                                 "Requester\nName: Karen Doe\nPhone: +1 666 6666 666\n"
+                                 "Email: karen.doe@mettel.net\nDepartment: Customer Care",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:06:40.27-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805299,
+                    "noteValue": None,
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                }
+            ]
+        },
+        'status': 200
+    }
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_details_no_watermark_1():
+    return {
+        'request_id': '12345',
+        'body': {
+            "ticketDetails": [
+                {
+                    "detailID": 5016058,
+                    "detailType": "TicketId",
+                    "detailStatus": "I",
+                    "detailValue": "4664325",
+                    "assignedToName": "0",
+                    "currentTaskID": None,
+                    "currentTaskName": None,
+                    "lastUpdatedBy": 0,
+                    "lastUpdatedAt": "2020-05-28T06:05:58.55-04:00"
+                }
+            ],
+            "ticketNotes": [
+                {
+                    "noteId": 70805299,
+                    "noteValue": "TEST first note",
+                    "serviceNumber": [
+                        "4664325"
+                    ],
+                    "createdDate": "2020-05-28T06:05:54.987-04:00",
+                    "creator": None
+                },
+                {
+                    "noteId": 70805300,
+                    "noteValue": "#*NO WATERMARK*# IGZ_0001\nDispatch Management - Dispatch Requested\n\n"
                                  "Please see the summary below.\n--\n"
                                  "Dispatch Number:  "
                                  "[IGZ_0003|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0003] "
@@ -2369,3 +2464,330 @@ def cts_ticket_details_1_with_confirmation_and_multiple_outdated_tech_note(
     updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note)
     updated_ticket_details['body']['ticketNotes'].append(confirmed_ticket_note_2)
     return updated_ticket_details
+
+
+@pytest.fixture(scope='function')
+def cts_ticket_notes_with_2_dispatches():
+    ticket_details = {
+        "ticketDetails": [
+            {
+              "detailID": 5136345,
+              "detailType": "Repair_WTN",
+              "detailStatus": "R",
+              "detailValue": "16.RBCB.126453",
+              "assignedToName": "0",
+              "currentTaskID": None,
+              "currentTaskName": None,
+              "lastUpdatedBy": 172916,
+              "lastUpdatedAt": "2020-08-20T12:38:42.84-04:00"
+            },
+            {
+              "detailID": 5136346,
+              "detailType": "Repair_WTN",
+              "detailStatus": "I",
+              "detailValue": "20302019050959",
+              "assignedToName": "0",
+              "currentTaskID": None,
+              "currentTaskName": None,
+              "lastUpdatedBy": 422935,
+              "lastUpdatedAt": "2020-08-19T12:21:13.313-04:00"
+            }
+      ],
+        "ticketNotes": [
+            {
+              "noteId": 72227702,
+              "noteValue": "Fist Note",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-04T14:56:20.137-04:00",
+              "creator": "hevans@mettel.net"
+            },
+            {
+              "noteId": 72287442,
+              "noteValue": "#*Automation Engine*# DIS57079\n"
+                           "Dispatch Management - Dispatch Requested\n\n"
+                           "Please see the summary below.\n--\n"
+                           "Dispatch Number:  "
+                           "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n"
+                           "Date of Dispatch: 2020-08-07\n"
+                           "Time of Dispatch (Local): 10.00AM\n"
+                           "Time Zone (Local): Eastern Time\n\n"
+                           "Location Owner/Name: Marine Max\n"
+                           "Address: 750 S Federal Hwy , Pompano Beach, Florida, 33062\n"
+                           "On-Site Contact: MOD manager\n"
+                           "Phone: (954) 618-0440\n\n"
+                           "Issues Experienced:\n"
+                           "Please check their Wifi Network and other equipment as per the customer\n"
+                           "Arrival Instructions: Please call HNOC and work with engineer\n"
+                           "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, "
+                           "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n"
+                           "Requester\nName: Holmdel  NOC\nPhone: 8775206829\n"
+                           "Email: holmdelnoc@mettel.net\n"
+                           "Department: Holmdel Network Engineering",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-06T18:08:47.317-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72342652,
+              "noteValue": "#*Automation Engine*# DIS57135\n"
+                           "Dispatch Management - Dispatch Requested\n\n"
+                           "Please see the summary below.\n--\n"
+                           "Dispatch Number:  "
+                           "[DIS57135|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57135] \n"
+                           "Date of Dispatch: 2020-08-11\n"
+                           "Time of Dispatch (Local): 10.00AM\n"
+                           "Time Zone (Local): Eastern Time\n\n"
+                           "Location Owner/Name: Marine Max\n"
+                           "Address: PYC- 750 S Federal Hwy , Pompano beach, Florida, 33062\n"
+                           "On-Site Contact: MOD manager\n"
+                           "Phone: (954) 618-0440\n\n"
+                           "Issues Experienced:\n"
+                           "Please check their Wifi Network and other equipment as per the customer\n"
+                           "Arrival Instructions: Please call HNOC, tier 3 engineer at 732-444-8643 "
+                           "and work with engineer\n"
+                           "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, "
+                           "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n"
+                           "Requester\nName: holmdel  noc\n"
+                           "Phone: 8775206829\nEmail: holmdelnoc@mettel.net\nDepartment: Holmdel Network Engineering",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-10T11:28:26.41-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72342989,
+              "noteValue": "#*Automation Engine*# DIS57135\n"
+                           "Dispatch Management - Dispatch Confirmed\n"
+                           "Dispatch scheduled for 2020-08-11 @ 9.00AM Eastern Time\n\n"
+                           "Field Engineer\nJohn\n(954) 557-3956\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-10T11:39:02.74-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72342991,
+              "noteValue": "#*Automation Engine*# DIS57135\nDispatch confirmation SMS sent to +19546180440\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-10T11:39:03.833-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72365685,
+              "noteValue": "#*Automation Engine*# DIS57135\nDispatch confirmation SMS tech sent to +19545573956\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-11T04:23:38.58-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72365686,
+              "noteValue": "#*Automation Engine*# DIS57135\nDispatch 12h prior reminder SMS sent to +19546180440\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-11T04:24:09.817-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72365687,
+              "noteValue": "#*Automation Engine*# DIS57135\n"
+                           "Dispatch 12h prior reminder tech SMS sent to +19545573956\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-11T04:24:11.033-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72366659,
+              "noteValue": "#*Automation Engine*# DIS57135\nDispatch 2h prior reminder SMS sent to +19546180440\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-11T07:11:20.72-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72366660,
+              "noteValue": "#*Automation Engine*# DIS57135\n"
+                           "Dispatch 2h prior reminder tech SMS sent to +19545573956\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-11T07:11:21.563-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72369442,
+              "noteValue": "#*Automation Engine*# DIS57135\n"
+                           "Dispatch Management - Field Engineer On Site\n"
+                           "SMS notification sent to +19546180440\n\n"
+                           "The field engineer, John has arrived.\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-11T09:25:21.153-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72666025,
+              "noteValue": "#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\n"
+                           "Dispatch Management - Dispatch Requested\n\n"
+                           "Please see the summary below.\n--\n"
+                           "Dispatch Number:  [IGZTqSAzuvj2wehMXzqYxixxd|https://master.mettel-automation.net/"
+                           "dispatch_portal/dispatch/IGZTqSAzuvj2wehMXzqYxixxd] \n"
+                           "Date of Dispatch: 2020-08-24\nTime of Dispatch (Local): 2.00PM\n"
+                           "Time Zone (Local): Eastern Time\n"
+                           "SLA Level: Pre-planned\n\n"
+                           "Location Owner/Name: Marine Max\n"
+                           "Address: 20300 County Road 81 , Rogers, Florida, 55374\n"
+                           "On-Site Contact: Manager on Duty\n"
+                           "Phone: 763-428-4126\n\n"
+                           "Issues Experienced:\nsite is still experiencing speed issues on the wireless. "
+                           "And sometimes service even bounces.  \n"
+                           "Arrival Instructions: Please call into the bridge (872)-240-3311 Bridge 341801069 "
+                           "access code 151 audio pin\nMaterials Needed:\nlaptop (supporting both 2.4GHz & 5GHz on "
+                           "their laptops would be ideal)\nserial console cable \nDB9 Male to DB9 Female "
+                           "Null Modem Cable\nputty\nteamviewer \nt1/ethernet cable and loop back \n"
+                           "tuner (wire tracer) \npunch down tool \nbutt set (test dial tone) \n"
+                           "internet hotspot or phone as hotspot \ncrimp tool \nCAT5/6 cable and heads\n\n"
+                           "Requester\nName: Michael\nPhone: 8775206829\nEmail: holmdelnoc@mettel.net\n"
+                           "Department: Holmdel Network Engineering",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-21T18:11:33.227-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72666100,
+              "noteValue": "#*Automation Engine*# IGZWtpGZCJopULhsiUhbWjUYf\n"
+                           "Dispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\n"
+                           "Dispatch Number:  [IGZWtpGZCJopULhsiUhbWjUYf|https://master.mettel-automation.net/"
+                           "dispatch_portal/dispatch/IGZWtpGZCJopULhsiUhbWjUYf] \n"
+                           "Date of Dispatch: 2020-08-24\n"
+                           "Time of Dispatch (Local): 2.00PM\n"
+                           "Time Zone (Local): Eastern Time\n"
+                           "SLA Level: Pre-planned\n\n"
+                           "Location Owner/Name: Marine Max\n"
+                           "Address: 750 Federal Hwy, Pompano Beach, Florida, 33062\n"
+                           "On-Site Contact: Paul \n"
+                           "Phone: 754-222-3314\n\n"
+                           "Issues Experienced:\nsite is still experiencing speed issues on the wireless. "
+                           "And sometimes service even bounces.  \n"
+                           "Arrival Instructions: call into the bridge (872)-240-3311 Bridge 341801069 "
+                           "access code 151 audio pin\nMaterials Needed:\nlaptop (supporting both 2.4GHz & 5GHz on "
+                           "their laptops would be ideal)\nserial console cable \nDB9 Male to DB9 Female Null "
+                           "Modem Cable\nputty\nteamviewer \nt1/ethernet cable and loop back \n"
+                           "tuner (wire tracer) \npunch down tool \nbutt set (test dial tone) \n"
+                           "internet hotspot or phone as hotspot \ncrimp tool \nCAT5/6 cable and heads\n\n"
+                           "Requester\nName: Michael\n"
+                           "Phone: 8775206829\nEmail: holmdelnoc@mettel.net\nDepartment: Holmdel Network Engineering",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-21T18:15:38.997-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72667158,
+              "noteValue": "#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\n"
+                           "Dispatch Management - Dispatch Confirmed\n"
+                           "Dispatch scheduled for 2020-08-24T18:00:00.000+0000\n\n"
+                           "Field Engineer\nGreen, Jeffrey\n267-670-1876\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-21T19:34:15.333-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72667159,
+              "noteValue": "#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\n"
+                           "Dispatch confirmation SMS sent to +17542223314\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-21T19:34:17.147-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72667160,
+              "noteValue": "#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\n"
+                           "Dispatch confirmation SMS tech sent to +12676701876\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-21T19:34:18.037-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+              "noteId": 72667273,
+              "noteValue": "#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\n"
+                           "The Field Engineer assigned to this dispatch has changed.\n"
+                           "Reference: 4746812\n\n"
+                           "Field Engineer\nBerge, Keith\n651-302-4429\n",
+              "serviceNumber": [
+                "16.RBCB.126453",
+                "20302019050959"
+              ],
+              "createdDate": "2020-08-21T19:48:05.32-04:00",
+              "creator": "api_1@bruin.com"
+            },
+            {
+                'noteId': 72667158,
+                'noteValue': '#*Automation Engine*# IGZWtpGZCJopULhsiUhbWjUYf\n'
+                             'Dispatch Management - Dispatch Confirmed\n'
+                             'Dispatch scheduled for 2020-08-24T18:00:00.000+0000\n\n'
+                             'Field Engineer\nGreen, Jeffrey\n267-670-1876\n',
+                'serviceNumber': ['16.RBCB.126453', '20302019050959'],
+                'createdDate': '2020-08-21T19:34:15.333-04:00',
+                'creator': 'api_1@bruin.com'
+            }
+          ]
+    }  # noqa
+    return ticket_details
+
+
+@pytest.fixture(scope='function')
+def cts_filtered_tickets_1():
+    igz_id_1 = 'IGZTqSAzuvj2wehMXzqYxixxd'
+    return [{'noteId': 72666025, 'noteValue': '#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZTqSAzuvj2wehMXzqYxixxd|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZTqSAzuvj2wehMXzqYxixxd] \nDate of Dispatch: 2020-08-24\nTime of Dispatch (Local): 2.00PM\nTime Zone (Local): Eastern Time\nSLA Level: Pre-planned\n\nLocation Owner/Name: Marine Max\nAddress: 20300 County Road 81 , Rogers, Florida, 55374\nOn-Site Contact: Manager on Duty\nPhone: 763-428-4126\n\nIssues Experienced:\nsite is still experiencing speed issues on the wireless. And sometimes service even bounces.  \nArrival Instructions: Please call into the bridge (872)-240-3311 Bridge 341801069 access code 151 audio pin\nMaterials Needed:\nlaptop (supporting both 2.4GHz & 5GHz on their laptops would be ideal)\nserial console cable \nDB9 Male to DB9 Female Null Modem Cable\nputty\nteamviewer \nt1/ethernet cable and loop back \ntuner (wire tracer) \npunch down tool \nbutt set (test dial tone) \ninternet hotspot or phone as hotspot \ncrimp tool \nCAT5/6 cable and heads\n\nRequester\nName: Michael\nPhone: 8775206829\nEmail: holmdelnoc@mettel.net\nDepartment: Holmdel Network Engineering', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T18:11:33.227-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667158, 'noteValue': '#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch Management - Dispatch Confirmed\nDispatch scheduled for 2020-08-24T18:00:00.000+0000\n\nField Engineer\nGreen, Jeffrey\n267-670-1876\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:15.333-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667159, 'noteValue': '#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch confirmation SMS sent to +17542223314\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:17.147-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667160, 'noteValue': '#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\nDispatch confirmation SMS tech sent to +12676701876\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:18.037-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667273, 'noteValue': '#*Automation Engine*# IGZTqSAzuvj2wehMXzqYxixxd\nThe Field Engineer assigned to this dispatch has changed.\nReference: 4746812\n\nField Engineer\nBerge, Keith\n651-302-4429\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:48:05.32-04:00', 'creator': 'api_1@bruin.com'}]  # noqa
+
+
+@pytest.fixture(scope='function')
+def cts_filtered_tickets_2():
+    igz_id_2 = 'IGZWtpGZCJopULhsiUhbWjUYf'
+    return [{'noteId': 72666100, 'noteValue': '#*Automation Engine*# IGZWtpGZCJopULhsiUhbWjUYf\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZWtpGZCJopULhsiUhbWjUYf|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZWtpGZCJopULhsiUhbWjUYf] \nDate of Dispatch: 2020-08-24\nTime of Dispatch (Local): 2.00PM\nTime Zone (Local): Eastern Time\nSLA Level: Pre-planned\n\nLocation Owner/Name: Marine Max\nAddress: 750 Federal Hwy, Pompano Beach, Florida, 33062\nOn-Site Contact: Paul \nPhone: 754-222-3314\n\nIssues Experienced:\nsite is still experiencing speed issues on the wireless. And sometimes service even bounces.  \nArrival Instructions: call into the bridge (872)-240-3311 Bridge 341801069 access code 151 audio pin\nMaterials Needed:\nlaptop (supporting both 2.4GHz & 5GHz on their laptops would be ideal)\nserial console cable \nDB9 Male to DB9 Female Null Modem Cable\nputty\nteamviewer \nt1/ethernet cable and loop back \ntuner (wire tracer) \npunch down tool \nbutt set (test dial tone) \ninternet hotspot or phone as hotspot \ncrimp tool \nCAT5/6 cable and heads\n\nRequester\nName: Michael\nPhone: 8775206829\nEmail: holmdelnoc@mettel.net\nDepartment: Holmdel Network Engineering', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T18:15:38.997-04:00', 'creator': 'api_1@bruin.com'}, {'noteId': 72667158, 'noteValue': '#*Automation Engine*# IGZWtpGZCJopULhsiUhbWjUYf\nDispatch Management - Dispatch Confirmed\nDispatch scheduled for 2020-08-24T18:00:00.000+0000\n\nField Engineer\nGreen, Jeffrey\n267-670-1876\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:15.333-04:00', 'creator': 'api_1@bruin.com'}]  # noqa
+
+
+@pytest.fixture(scope='function')
+def cts_filtered_tickets_2_no_requested_note():
+    igz_id_2 = 'IGZWtpGZCJopULhsiUhbWjUYf'
+    return [{'noteId': 72667158, 'noteValue': '#*Automation Engine*# IGZWtpGZCJopULhsiUhbWjUYf\nDispatch Management - Dispatch Confirmed\nDispatch scheduled for 2020-08-24T18:00:00.000+0000\n\nField Engineer\nGreen, Jeffrey\n267-670-1876\n', 'serviceNumber': ['16.RBCB.126453', '20302019050959'], 'createdDate': '2020-08-21T19:34:15.333-04:00', 'creator': 'api_1@bruin.com'}]  # noqa

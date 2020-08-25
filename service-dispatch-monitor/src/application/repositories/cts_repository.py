@@ -21,6 +21,7 @@ from phonenumbers import NumberParseException
 from shortuuid import uuid
 
 from application.repositories import nats_error_response
+from application.repositories.utils_repository import UtilsRepository
 
 
 class CtsRepository:
@@ -32,6 +33,11 @@ class CtsRepository:
         self._bruin_repository = bruin_repository
 
         self.DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+
+        # Dispatch Notes watermarks
+        self.MAIN_WATERMARK = '#*Automation Engine*#'
+        self.IGZ_DN_WATERMARK = 'IGZ'
+        self.DISPATCH_REQUESTED_WATERMARK = 'Dispatch Management - Dispatch Requested'
 
         # Dispatch Statuses
         self.DISPATCH_REQUESTED = 'Open'
@@ -104,6 +110,79 @@ class CtsRepository:
             return phonenumbers.format_number(sms_to, phonenumbers.PhoneNumberFormat.E164)
         except NumberParseException:
             return None
+
+    @staticmethod
+    def get_sms_to_from_note(note):
+        if not note:
+            return None
+        description_lines = note.splitlines()
+        sms_to = None
+        for line in description_lines:
+            if line and len(line) > 0 and 'Phone: ' in line:
+                sms_to = ''.join(ch for ch in line if ch.isdigit())
+                break
+        if sms_to is None or sms_to.strip() == '':
+            return None
+        try:
+            # TODO: check other countries
+            sms_to = phonenumbers.parse(sms_to, "US")
+            return phonenumbers.format_number(sms_to, phonenumbers.PhoneNumberFormat.E164)
+        except NumberParseException:
+            return None
+
+    @staticmethod
+    def get_onsite_contact(dispatch):
+        description = dispatch.get('Description__c')
+        description_lines = description.splitlines()
+        onsite_contact = None
+        for line in description_lines:
+            if line and len(line) > 0 and 'Onsite Contact:' in line:
+                onsite_contact = ''.join(ch for ch in line)
+                break
+        if onsite_contact is None or onsite_contact.strip() == '':
+            return None
+        return onsite_contact.strip().replace('Onsite Contact: ', '')
+
+    @staticmethod
+    def get_onsite_contact_from_note(note):
+        if not note:
+            return None
+        description_lines = note.splitlines()
+        onsite_contact = None
+        for line in description_lines:
+            if line and len(line) > 0 and 'On-Site Contact:' in line:
+                onsite_contact = ''.join(ch for ch in line)
+                break
+        if onsite_contact is None or onsite_contact.strip() == '':
+            return None
+        return onsite_contact.strip().replace('On-Site Contact: ', '')
+
+    @staticmethod
+    def get_location(dispatch):
+        description = dispatch.get('Description__c')
+        description_lines = description.splitlines()
+        location = None
+        for line in description_lines:
+            if line and len(line) > 0 and 'Location ID:' in line:
+                location = ''.join(ch for ch in line)
+                break
+        if location is None or location.strip() == '':
+            return None
+        return location.strip().replace('Location ID: ', '')
+
+    @staticmethod
+    def get_location_from_note(note):
+        if not note:
+            return None
+        description_lines = note.splitlines()
+        location = None
+        for line in description_lines:
+            if line and len(line) > 0 and 'Address:' in line:
+                location = ''.join(ch for ch in line)
+                break
+        if location is None or location.strip() == '':
+            return None
+        return location.strip().replace('Address: ', '')
 
     @staticmethod
     def get_sms_to_tech(dispatch):
@@ -714,3 +793,95 @@ class CtsRepository:
         self._logger.info(
             f"Updated tech Note appended. Response {append_note_response_body}")
         return True
+
+    def get_latest_tech_name_assigned_from_notes(self, updated_tech_notes, filtered_ticket_notes, watermark):
+        for ticket_note in filtered_ticket_notes:
+            if watermark in ticket_note.get('noteValue'):
+                updated_tech_notes.append(ticket_note)
+
+        tech_names = []
+        for note in updated_tech_notes:
+            note_data = note.get('noteValue').splitlines()
+            if note_data and 'The Field Engineer' in note_data and \
+                    (note_data.index('The Field Engineer') + 1) < len(note_data):
+                tech_names.append(note_data[note_data.index('The Field Engineer') + 1])
+            elif note_data and 'Field Engineer' in note_data and \
+                    (note_data.index('Field Engineer') + 1) < len(note_data):
+                tech_names.append(note_data[note_data.index('Field Engineer') + 1])
+
+        latest_tech_name_assigned = tech_names[-1] if len(tech_names) >= 1 else None
+        return latest_tech_name_assigned
+
+    def determine_final_igz_id_for_dispatch(self, dispatch, dispatch_number, ticket_id,
+                                            filtered_ticket_notes_by_igz_id, watermark):
+        final_igz_id = None
+        counters = {}
+
+        if len(filtered_ticket_notes_by_igz_id.keys()) == 0:
+            return final_igz_id
+        if len(filtered_ticket_notes_by_igz_id.keys()) == 1:
+            return [*filtered_ticket_notes_by_igz_id.keys()][0]
+
+        for igz_id, ticket_notes in filtered_ticket_notes_by_igz_id.items():
+            sms_to = CtsRepository.get_sms_to(dispatch)
+            onsite_contact = self.get_onsite_contact(dispatch)
+            location = self.get_location(dispatch)
+
+            requested_watermark_found = UtilsRepository.find_note(ticket_notes, watermark)
+            if requested_watermark_found is None:
+                continue
+            requested_note = requested_watermark_found.get('noteValue', '')
+            sms_to_from_note = CtsRepository.get_sms_to_from_note(requested_note)
+            onsite_contact_from_note = self.get_onsite_contact_from_note(requested_note)
+            location_from_note = self.get_location_from_note(requested_note)
+            self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                              f"From dispatch: {sms_to, onsite_contact, location} - "
+                              f"From note: {sms_to_from_note, onsite_contact_from_note, location_from_note}")
+            igz_id_counter = 0
+            if onsite_contact in onsite_contact_from_note or onsite_contact_from_note in onsite_contact:
+                igz_id_counter = igz_id_counter + 1
+            if sms_to in sms_to_from_note or sms_to_from_note in sms_to:
+                igz_id_counter = igz_id_counter + 1
+            if location in location_from_note or location_from_note in location:
+                igz_id_counter = igz_id_counter + 1
+            if igz_id_counter >= 1:
+                final_igz_id = igz_id
+                counters[igz_id] = igz_id_counter
+
+        if final_igz_id is None or len(counters.keys()) == 0:
+            return None
+
+        final_igz_id, _ = max(counters.items(), key=lambda v: v[1])
+        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                          f"Match with igz dispatch number: {final_igz_id}")
+        return final_igz_id
+
+    def filter_ticket_notes_by_dispatch_number(self, ticket_notes, dispatch_number):
+        filtered_ticket_notes = []
+        for note in ticket_notes:
+            note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(note,
+                                                                                  dispatch_number,
+                                                                                  self.MAIN_WATERMARK)
+            if len(note_dispatch_number) == 0:
+                continue
+            filtered_ticket_notes.append(note)
+
+        return filtered_ticket_notes
+
+    def split_ticket_notes_by_igz_dispatch_num(self, filtered_ticket_notes):
+        igz_dispatch_numbers = set()
+        splitted_ticket_notes = {}
+
+        for ticket_note in filtered_ticket_notes:
+            if ticket_note and ticket_note.get('noteValue') and \
+                    self.DISPATCH_REQUESTED_WATERMARK in ticket_note.get('noteValue'):
+                _igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(ticket_note,
+                                                                                      self.IGZ_DN_WATERMARK,
+                                                                                      self.MAIN_WATERMARK)
+                if _igz_dispatch_number and _igz_dispatch_number not in splitted_ticket_notes:
+                    splitted_ticket_notes[_igz_dispatch_number] = []
+                    igz_dispatch_numbers.add(_igz_dispatch_number)
+                    splitted_ticket_notes[_igz_dispatch_number] = \
+                        self.filter_ticket_notes_by_dispatch_number(filtered_ticket_notes, _igz_dispatch_number)
+
+        return splitted_ticket_notes

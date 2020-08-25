@@ -1,4 +1,6 @@
 import json
+from collections import defaultdict
+import copy
 
 import asyncio
 from datetime import datetime
@@ -75,7 +77,7 @@ class CtsDispatchMonitor:
                 self._logger.error("Error getting all dispatches from CTS")
                 err_msg = f'An error occurred retrieving all dispatches in the request status from CTS.'
                 await self._notifications_repository.send_slack_message(err_msg)
-                raise
+                return
 
             if response_cts_dispatches_body is None \
                     or response_cts_dispatches_body['done'] is not True \
@@ -88,46 +90,36 @@ class CtsDispatchMonitor:
                 return
 
             cts_dispatches = response_cts_dispatches_body.get('records', [])
+            self._logger.info(f"Length of dispatches: {len(cts_dispatches)}")
 
-            self._logger.info("Filtering dispatches to only be igz created dispatches")
-            self._logger.info(f"Length of dispatches before filter: {len(cts_dispatches)}")
-
-            igz_dispatches = await self._filter_dispatches_by_watermark(cts_dispatches)
-            self._logger.info(f"Length of dispatches after filter: {len(igz_dispatches)}")
-
-            dispatches_splitted_by_status = self._cts_repository.get_dispatches_splitted_by_status(igz_dispatches)
-
-            self._logger.info(f"Splitted by status: {list(dispatches_splitted_by_status.keys())}")
-
-            monitor_tasks = [
-                self._monitor_confirmed_dispatches(
-                    dispatches_splitted_by_status[self._cts_repository.DISPATCH_CONFIRMED]),
-                self._monitor_tech_on_site_dispatches(
-                    dispatches_splitted_by_status[self._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE]),
-                self._monitor_cancelled_dispatches(
-                    dispatches_splitted_by_status[self._cts_repository.DISPATCH_CANCELLED])
-            ]
-
-            start_monitor_tasks = perf_counter()
-            await asyncio.gather(*monitor_tasks, return_exceptions=True)
-            stop_monitor_tasks = perf_counter()
-            self._logger.info(f"[CTS] All monitor tasks finished: "
-                              f"{(stop_monitor_tasks - start_monitor_tasks) / 60} minutes")
+            await self._distribute_and_process_dispatches(cts_dispatches)
 
             stop = perf_counter()
             self._logger.info(f"[CTS] Elapsed time processing all dispatches: {(stop - start) / 60} minutes")
         except Exception as ex:
-            self._logger.error(f"[CTS] Error: {ex}")
+            err_msg = f"[CTS] Error: {ex}"
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
 
-    async def _filter_dispatches_by_watermark(self, confirmed_dispatches):
-        filtered_dispatches = []
-        for dispatch in confirmed_dispatches:
+    def _get_process_dispatch(self, dispatch):
+        switcher = {
+            self._cts_repository.DISPATCH_CONFIRMED: self._process_confirmed_dispatch,
+            self._cts_repository.DISPATCH_FIELD_ENGINEER_ON_SITE: self._process_tech_on_site_dispatch,
+            self._cts_repository.DISPATCH_CANCELLED: self._process_canceled_dispatch
+        }
+        return switcher.get(dispatch.get('Status__c'), None)
+
+    async def _process_generic_dispatch(self, dispatch):
+        try:
             dispatch_number = dispatch.get('Name', None)
             ticket_id = dispatch.get('Ext_Ref_Num__c', None)
 
+            self._logger.info(f"Processing generic Dispatch: "
+                              f"[{dispatch_number}] for ticket_id: {ticket_id}")
+
             if ticket_id is None or not BruinRepository.is_valid_ticket_id(ticket_id) or dispatch_number is None:
                 self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
-                continue
+                return False
 
             response = await self._bruin_repository.get_ticket_details(ticket_id)
             response_status = response['status']
@@ -139,723 +131,616 @@ class CtsDispatchMonitor:
                 err_msg = f"An error occurred retrieve getting ticket details from bruin " \
                           f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
                 await self._notifications_repository.send_slack_message(err_msg)
-                continue
+                return False
             ticket_notes = response_body.get('ticketNotes', [])
             ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
-            filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
-                                                                                self.IGZ_DN_WATERMARK,
-                                                                                ticket_id)
-            if len(filtered_ticket_notes) == 0:
-                continue
+            all_igz_notes = self._cts_repository.filter_ticket_notes_by_dispatch_number(
+                ticket_notes, self.IGZ_DN_WATERMARK)
+            filtered_ticket_notes_by_igz_id = self._cts_repository.split_ticket_notes_by_igz_dispatch_num(
+                all_igz_notes)
+
+            final_igz_id = self._cts_repository.determine_final_igz_id_for_dispatch(dispatch,
+                                                                                    dispatch_number,
+                                                                                    ticket_id,
+                                                                                    filtered_ticket_notes_by_igz_id,
+                                                                                    self.DISPATCH_REQUESTED_WATERMARK)
+            if final_igz_id is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                  f"discarded matching igz dispatch number")
+                return False
+
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"matches with IGZ id: {final_igz_id}")
+
+            process_dispatch = self._get_process_dispatch(dispatch)
+
+            if process_dispatch:
+                func_args = [dispatch, final_igz_id, filtered_ticket_notes_by_igz_id[final_igz_id]]
+                self._scheduler.add_job(process_dispatch, 'date', next_run_time=undefined, replace_existing=False,
+                                        id=f"_process_dispatch_{dispatch_number}", args=func_args)
+                if self._redis_client.get(dispatch_number) is None:
+                    redis_data = {
+                        'ticket_id': ticket_id,
+                        'igz_dispatch_number': final_igz_id,
+                    }
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"Adding to redis cts dispatch. data: {redis_data}")
+                    self._redis_client.set(dispatch_number, json.dumps(redis_data),
+                                           ex=self._config.DISPATCH_MONITOR_CONFIG['redis_ttl'])
+                return True
+            else:
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"with IGZ id: {final_igz_id}"
+                                  f"couldn't be processes, current status: {dispatch.get('Status__c')}")
+                return False
+        except Exception as ex:
+            self._logger.error(f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id}. ex: {ex}")
+            return False
+
+    async def _distribute_and_process_dispatches(self, all_dispatches):
+        for dispatch in all_dispatches:
+            await self._process_generic_dispatch(dispatch)
+
+    async def _process_confirmed_dispatch(self, dispatch, igz_dispatch_number, ticket_notes):
+        try:
+            if not dispatch:
+                err_msg = f"Error: Dispatch [{dispatch}] - {igz_dispatch_number} - Not valid dispatch"
+                self._logger.error(f"{err_msg}")
+                await self._notifications_repository.send_slack_message(err_msg)
+                return
+
+            dispatch_number = dispatch.get('Name', None)
+            ticket_id = dispatch.get('Ext_Ref_Num__c', None)
+            tech_name = dispatch.get('API_Resource_Name__c')
+            dispatch_status = dispatch.get('Status__c')
+
+            self._logger.info(f"Processing confirmed dispatch: {dispatch.get('Name')} in ticket_id: {ticket_id} "
+                              f"with IGZ id: {igz_dispatch_number} and {len(ticket_notes)} notes")
+
+            if ticket_id is None or not BruinRepository.is_valid_ticket_id(ticket_id) \
+                    or dispatch_number is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
+                return
+
+            if not self._cts_repository.is_dispatch_confirmed(dispatch=dispatch):
+                self._logger.info(f"Dispatch not confirmed: {dispatch.get('Name')} in ticket_id: {ticket_id} "
+                                  f"with IGZ id: {igz_dispatch_number} and status: {dispatch_status}")
+                return
+
+            date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
+            if date_time_of_dispatch is None:
+                self._logger.error(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                   f"Could not determine date time of dispatch: {dispatch}")
+                return
+
+            date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+            # Get datetime formatted string
+            DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+            datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
+
+            sms_to = CtsRepository.get_sms_to(dispatch)
+            if sms_to is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                  f"- Error: we could not retrieve 'sms_to' number from: "
+                                  f"{dispatch.get('Description__c')}")
+                return
+
+            # Tech phonenumber
+            sms_to_tech = CtsRepository.get_sms_to_tech(dispatch)
+            if sms_to_tech is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                  f"- Error: we could not retrieve 'sms_to_tech' number from: "
+                                  f"{dispatch.get('Tech_Mobile_Number')}")
+                return
+
+            filtered_ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
+            self._logger.info(f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
 
             requested_watermark_found = UtilsRepository.find_note(
                 filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
-            if requested_watermark_found is None:
-                continue
+            confirmed_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.DISPATCH_CONFIRMED_WATERMARK)
+            confirmed_sms_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.DISPATCH_CONFIRMED_SMS_WATERMARK)
+            confirmed_sms_tech_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.DISPATCH_CONFIRMED_SMS_TECH_WATERMARK)
+            tech_12_hours_before_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_WATERMARK)
+            tech_12_hours_before_tech_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_TECH_WATERMARK)
+            tech_2_hours_before_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
+            tech_2_hours_before_tech_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_TECH_WATERMARK)
 
-            igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
-                requested_watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"requested_watermark_found: {requested_watermark_found} "
+                              f"confirmed_note_found: {confirmed_note_found} "
+                              f"confirmed_sms_tech_note_found: {confirmed_sms_tech_note_found} "
+                              f"confirmed_sms_note_found: {confirmed_sms_note_found} "
+                              f"tech_12_hours_before_note_found: {tech_12_hours_before_note_found} "
+                              f"tech_12_hours_before_tech_note_found: {tech_12_hours_before_tech_note_found} "
+                              f"tech_2_hours_before_note_found: {tech_2_hours_before_note_found} "
+                              f"tech_2_hours_before_tech_note_found: {tech_2_hours_before_tech_note_found} ")
 
-            if self._redis_client.get(dispatch_number) is None:
-                redis_data = {
-                    'ticket_id': ticket_id,
-                    'igz_dispatch_number': igz_dispatch_number,
-                }
+            # Check if dispatch has a confirmed note
+            if confirmed_note_found is None:
+                result_append_confirmed_note = await self._cts_repository.append_confirmed_note(
+                    dispatch_number, igz_dispatch_number, ticket_id, dispatch)
+                if not result_append_confirmed_note:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id}" \
+                          f" Confirmed Note not appended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    return
+                msg = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                      f"Confirmed Note appended"
+                await self._notifications_repository.send_slack_message(msg)
+
+                self._logger.info(f"Dispatch: {dispatch_number} "
+                                  f"Ticket_id: {ticket_id} - Sending confirmed SMS")
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"- already has a confirmed note")
+
+            # Check if dispatch has a sms confirmed note
+            if confirmed_sms_note_found is None:
+                self._logger.info(f"Dispatch: {dispatch_number} "
+                                  f"Ticket_id: {ticket_id} - Sending confirmed SMS")
+                sms_sended = await self._cts_repository.send_confirmed_sms(
+                    dispatch_number, ticket_id, datetime_formatted_str, sms_to, tech_name)
+                if not sms_sended:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"SMS could not be sent to {sms_to}."
+                else:
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"- Confirm SMS note not found")
+
+                    result_append_confirmed_sms_note = await self._cts_repository.append_confirmed_sms_note(
+                        dispatch_number, igz_dispatch_number, ticket_id, sms_to)
+
+                    if not result_append_confirmed_sms_note:
+                        msg = f"[service-dispatch-monitor] [CTS] " \
+                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id}" \
+                              f" Confirmed SMS Note not appended"
+                    else:
+                        msg = f"[service-dispatch-monitor] [CTS] " \
+                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                              f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
+
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"- already has a sms confirmed note")
+
+            if confirmed_sms_tech_note_found is None:
+                self._logger.info(f"Dispatch: {dispatch_number} "
+                                  f"Ticket_id: {ticket_id} - Sending confirmed SMS Tech")
+                sms_sended = await self._cts_repository.send_confirmed_sms_tech(
+                    dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
+                if not sms_sended:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"SMS Tech could not be sent to {sms_to_tech}."
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    return
+
                 self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                  f"Adding to redis cts dispatch")
-                self._redis_client.set(
-                    dispatch_number, json.dumps(redis_data), ex=self._config.DISPATCH_MONITOR_CONFIG['redis_ttl'])
-            filtered_dispatches.append(dispatch)
-        return filtered_dispatches
+                                  f"- Confirm SMS tech note not found")
 
-    async def _monitor_confirmed_dispatches(self, confirmed_dispatches):
-        try:
-            start = perf_counter()
-            self._logger.info(f"Dispatches to process before filter {len(confirmed_dispatches)}")
-            confirmed_dispatches = list(filter(self._cts_repository.is_dispatch_confirmed, confirmed_dispatches))
-            self._logger.info(f"Total confirmed dispatches after filter: {len(confirmed_dispatches)}")
+                result_append_confirmed_sms_note = await self._cts_repository.append_confirmed_sms_tech_note(
+                    dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
 
-            for dispatch in confirmed_dispatches:
-                try:
-                    dispatch_number = dispatch.get('Name', None)
-                    ticket_id = dispatch.get('Ext_Ref_Num__c', None)
-                    tech_name = dispatch.get('API_Resource_Name__c')
+                if not result_append_confirmed_sms_note:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"Confirmed SMS tech note not appended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    return
+                msg = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                      f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
+                return
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"- already has a sms tech confirmed note")
 
-                    self._logger.info(f"Processing Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - {dispatch}")
+            # Check for Tech updates
+            # First retrieve original tech name from confirmed note
+            updated_tech_notes = [confirmed_note_found]
+            latest_tech_name_assigned = self._cts_repository.get_latest_tech_name_assigned_from_notes(
+                updated_tech_notes, filtered_ticket_notes, self.DISPATCH_UPDATED_TECH_WATERMARK)
+            self._logger.info(f"[service-dispatch-monitor] [CTS] "
+                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} - "
+                              f"Tech Name Actual: {tech_name} latest: {latest_tech_name_assigned}")
+            if latest_tech_name_assigned is not None and latest_tech_name_assigned != tech_name:
+                # Latest tech in notes is different than the actual tech
+                self._logger.info(f"[service-dispatch-monitor] [CTS] "
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} - "
+                                  f"The tech has changed. "
+                                  f"Actual: {tech_name} latest: {latest_tech_name_assigned}")
+                # Append update tech note
+                result_append_updated_tech_note = await self._cts_repository.append_updated_tech_note(
+                    igz_dispatch_number, ticket_id, dispatch)
+                msg = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                      f"- A updated tech note appended"
+                if not result_append_updated_tech_note:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"- An updated tech note not appended"
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
 
-                    if ticket_id is None or not BruinRepository.is_valid_ticket_id(ticket_id) \
-                            or dispatch_number is None:
-                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
-                        continue
+                # Send sms client
+                result_sms_update_tech_sended = await self._cts_repository.send_updated_tech_sms(
+                    dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to, tech_name
+                )
+                msg = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                      f"- A updated tech sms sent"
+                if not result_sms_update_tech_sended:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"- An updated tech sms not sent"
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
 
-                    date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
-                    if date_time_of_dispatch is None:
-                        self._logger.error(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                           f"Could not determine date time of dispatch: {dispatch}")
-                        continue
+                # Send sms tech
+                result_sms_tech_update_tech_sended = await self._cts_repository.send_updated_tech_sms_tech(
+                    dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech
+                )
+                msg = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                      f"- A updated tech sms tech sent"
+                if not result_sms_tech_update_tech_sended:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"- An updated tech sms tech not sent"
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
 
-                    date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
-                    # Get datetime formatted string
-                    DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
-                    datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
-
-                    sms_to = CtsRepository.get_sms_to(dispatch)
-                    if sms_to is None:
-                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                          f"- Error: we could not retrieve 'sms_to' number from: "
-                                          f"{dispatch.get('Description__c')}")
-                        continue
-
-                    # Tech phonenumber
-                    sms_to_tech = CtsRepository.get_sms_to_tech(dispatch)
-                    if sms_to_tech is None:
-                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                          f"- Error: we could not retrieve 'sms_to_tech' number from: "
-                                          f"{dispatch.get('Tech_Mobile_Number')}")
-                        continue
-
-                    response = await self._bruin_repository.get_ticket_details(ticket_id)
-                    response_status = response['status']
-                    response_body = response['body']
-                    if response_status not in range(200, 300):
-                        self._logger.error(f"Error: Dispatch [{dispatch_number}] "
-                                           f"Get ticket details for ticket {ticket_id}: "
-                                           f"{response_body}")
-                        err_msg = f"An error occurred retrieve getting ticket details from bruin " \
-                                  f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
-                        await self._notifications_repository.send_slack_message(err_msg)
-                        continue
-                    ticket_notes = response_body.get('ticketNotes', [])
-                    ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
-
-                    self._logger.info(ticket_notes)
-
-                    self._logger.info(f"Filtering ticket notes to contain only notes for the "
-                                      f"IGZ CTS Dispatch numbers only")
-                    self._logger.info(f"Length of notes before filter: {len(ticket_notes)}")
-
-                    filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
-                                                                                        self.IGZ_DN_WATERMARK,
-                                                                                        ticket_id)
-                    self._logger.info(f"Length of notes after filter: {len(filtered_ticket_notes)}")
-
-                    self._logger.info(filtered_ticket_notes)
-
-                    self._logger.info(
-                        f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
-
-                    watermark_found = UtilsRepository.find_note(filtered_ticket_notes, self.MAIN_WATERMARK)
-
-                    igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
-                        watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
-
+            # Check if dispatch has a sms 12 hours note
+            if tech_12_hours_before_note_found is None:
+                just_now = datetime.now(pytz.utc)
+                hours_diff = UtilsRepository.get_diff_hours_between_datetimes(date_time_of_dispatch_localized,
+                                                                              just_now)
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} UTC - "
+                                  f"dt: {date_time_of_dispatch_localized} - now: {just_now} - "
+                                  f"diff: {hours_diff}")
+                if hours_diff > self.HOURS_12:
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"IGZ dispatch number found: {igz_dispatch_number}")
-
-                    requested_watermark_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
-                    confirmed_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.DISPATCH_CONFIRMED_WATERMARK)
-                    confirmed_sms_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.DISPATCH_CONFIRMED_SMS_WATERMARK)
-                    confirmed_sms_tech_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.DISPATCH_CONFIRMED_SMS_TECH_WATERMARK)
-                    tech_12_hours_before_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_WATERMARK)
-                    tech_12_hours_before_tech_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_TECH_WATERMARK)
-                    tech_2_hours_before_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
-                    tech_2_hours_before_tech_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_TECH_WATERMARK)
-
+                                      f"SMS 12h note not needed to send now")
+                else:
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"requested_watermark_found: {requested_watermark_found} "
-                                      f"confirmed_note_found: {confirmed_note_found} "
-                                      f"confirmed_sms_tech_note_found: {confirmed_sms_tech_note_found} "
-                                      f"confirmed_sms_note_found: {confirmed_sms_note_found} "
-                                      f"tech_12_hours_before_note_found: {tech_12_hours_before_note_found} "
-                                      f"tech_12_hours_before_tech_note_found: {tech_12_hours_before_tech_note_found} "
-                                      f"tech_2_hours_before_note_found: {tech_2_hours_before_note_found} "
-                                      f"tech_2_hours_before_tech_note_found: {tech_2_hours_before_tech_note_found} ")
-
-                    # Check if dispatch has a confirmed note
-                    if confirmed_note_found is None:
-                        result_append_confirmed_note = await self._cts_repository.append_confirmed_note(
-                            dispatch_number, igz_dispatch_number, ticket_id, dispatch)
-                        if not result_append_confirmed_note:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id}" \
-                                  f" Confirmed Note not appended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
+                                      f"Sending SMS 12h note")
+                    result_sms_12_sended = await self._cts_repository.send_tech_12_sms(
+                        dispatch_number, ticket_id, datetime_formatted_str, sms_to)
+                    if not result_sms_12_sended:
                         msg = f"[service-dispatch-monitor] [CTS] " \
                               f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"Confirmed Note appended"
-                        await self._notifications_repository.send_slack_message(msg)
-
-                        self._logger.info(f"Dispatch: {dispatch_number} "
-                                          f"Ticket_id: {ticket_id} - Sending confirmed SMS")
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- already has a confirmed note")
-
-                    # Check if dispatch has a sms confirmed note
-                    if confirmed_sms_note_found is None:
-                        self._logger.info(f"Dispatch: {dispatch_number} "
-                                          f"Ticket_id: {ticket_id} - Sending confirmed SMS")
-                        sms_sended = await self._cts_repository.send_confirmed_sms(
-                            dispatch_number, ticket_id, datetime_formatted_str, sms_to, tech_name)
-                        if not sms_sended:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"SMS could not be sent to {sms_to}."
-                        else:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"- Confirm SMS note not found")
-
-                            result_append_confirmed_sms_note = await self._cts_repository.append_confirmed_sms_note(
-                                dispatch_number, igz_dispatch_number, ticket_id, sms_to)
-
-                            if not result_append_confirmed_sms_note:
-                                msg = f"[service-dispatch-monitor] [CTS] " \
-                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id}" \
-                                      f" Confirmed SMS Note not appended"
-                            else:
-                                msg = f"[service-dispatch-monitor] [CTS] " \
-                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                      f"Confirmed Note, SMS send and Confirmed SMS note sent OK."
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- already has a sms confirmed note")
-
-                    if confirmed_sms_tech_note_found is None:
-                        self._logger.info(f"Dispatch: {dispatch_number} "
-                                          f"Ticket_id: {ticket_id} - Sending confirmed SMS Tech")
-                        sms_sended = await self._cts_repository.send_confirmed_sms_tech(
-                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
-                        if not sms_sended:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"SMS Tech could not be sent to {sms_to_tech}."
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
-
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"- Confirm SMS tech note not found")
-
-                        result_append_confirmed_sms_note = await self._cts_repository.append_confirmed_sms_tech_note(
-                            dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
-
-                        if not result_append_confirmed_sms_note:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"Confirmed SMS tech note not appended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
-                        msg = f"[service-dispatch-monitor] [CTS] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-                        continue
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- already has a sms tech confirmed note")
-
-                    # Check for Tech updates
-                    # First retrieve original tech name from confirmed note
-                    updated_tech_notes = [confirmed_note_found]
-                    for ticket_note in filtered_ticket_notes:
-                        if self.DISPATCH_UPDATED_TECH_WATERMARK in ticket_note.get('noteValue'):
-                            updated_tech_notes.append(ticket_note)
-
-                    tech_names = []
-                    for note in updated_tech_notes:
-                        note_data = note.get('noteValue').splitlines()
-                        if (note_data.index('Field Engineer') + 1) < len(note_data):
-                            tech_names.append(note_data[note_data.index('Field Engineer') + 1])
-                    latest_tech_name_assigned = tech_names[-1] if len(tech_names) >= 1 else None
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"Latest tech name assigned: {latest_tech_name_assigned}")
-                    if latest_tech_name_assigned is not None and latest_tech_name_assigned != tech_name:
-                        # Latest tech in notes is different than the actual tech
-                        self._logger.info(f"[service-dispatch-monitor] [CTS] "
-                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} - "
-                                          f"The tech has changed. "
-                                          f"Actual: {tech_name} latest: {latest_tech_name_assigned}")
-                        # Append update tech note
-                        result_append_updated_tech_note = await self._cts_repository.append_updated_tech_note(
-                            igz_dispatch_number, ticket_id, dispatch)
-                        msg = f"[service-dispatch-monitor] [CTS] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A updated tech note appended"
-                        if not result_append_updated_tech_note:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- An updated tech note not appended"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-
-                        # Send sms client
-                        result_sms_update_tech_sended = await self._cts_repository.send_updated_tech_sms(
-                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to, tech_name
-                        )
-                        msg = f"[service-dispatch-monitor] [CTS] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A updated tech sms sent"
-                        if not result_sms_update_tech_sended:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- An updated tech sms not sent"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-
-                        # Send sms tech
-                        result_sms_tech_update_tech_sended = await self._cts_repository.send_updated_tech_sms_tech(
-                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech
-                        )
-                        msg = f"[service-dispatch-monitor] [CTS] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A updated tech sms tech sent"
-                        if not result_sms_tech_update_tech_sended:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- An updated tech sms tech not sent"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-
-                    # Check if dispatch has a sms 12 hours note
-                    if tech_12_hours_before_note_found is None:
-                        just_now = datetime.now(pytz.utc)
-                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(date_time_of_dispatch_localized,
-                                                                                      just_now)
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} UTC - "
-                                          f"dt: {date_time_of_dispatch_localized} - now: {just_now} - "
-                                          f"diff: {hours_diff}")
-                        if hours_diff > self.HOURS_12:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"SMS 12h note not needed to send now")
-                            # continue
-                        else:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"Sending SMS 12h note")
-                            result_sms_12_sended = await self._cts_repository.send_tech_12_sms(
-                                dispatch_number, ticket_id, datetime_formatted_str, sms_to)
-                            if not result_sms_12_sended:
-                                msg = f"[service-dispatch-monitor] [CTS] " \
-                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                      f"- SMS 12h not sended"
-                            else:
-                                result_append_tech_12_sms_note = await self._cts_repository.append_tech_12_sms_note(
-                                    dispatch_number, igz_dispatch_number, ticket_id, sms_to)
-                                if not result_append_tech_12_sms_note:
-                                    msg = f"[service-dispatch-monitor] [CTS] " \
-                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                          f"- A sms tech 12 hours before note not appended"
-                                else:
-                                    msg = f"[service-dispatch-monitor] [CTS] " \
-                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                          f"- A sms tech 12 hours before note appended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- Already has a sms tech 12 hours before note")
-
-                    if tech_12_hours_before_tech_note_found is None:
-                        just_now = datetime.now(pytz.utc)
-                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(date_time_of_dispatch_localized,
-                                                                                      just_now)
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} UTC - "
-                                          f"dt: {date_time_of_dispatch_localized} - now: {just_now} - "
-                                          f"diff: {hours_diff}")
-                        if hours_diff > self.HOURS_12:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"SMS tech 12h note not needed to send now")
-                            continue
-
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"Sending SMS tech 12h note")
-                        result_sms_12_sended = await self._cts_repository.send_tech_12_sms_tech(
-                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
-                        if not result_sms_12_sended:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- SMS tech 12h not sended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
-
-                        result_append_tech_12_sms_note = await self._cts_repository.append_tech_12_sms_tech_note(
-                            dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
+                              f"- SMS 12h not sended"
+                    else:
+                        result_append_tech_12_sms_note = await self._cts_repository.append_tech_12_sms_note(
+                            dispatch_number, igz_dispatch_number, ticket_id, sms_to)
                         if not result_append_tech_12_sms_note:
                             msg = f"[service-dispatch-monitor] [CTS] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- A sms tech 12 hours before tech note not appended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
-                        msg = f"[service-dispatch-monitor] [CTS] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A sms tech 12 hours before tech note appended"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-                        continue
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- Already has a sms tech 12 hours before tech note")
-
-                    # Check if dispatch has a sms 2 hours note
-                    if tech_2_hours_before_note_found is None:
-                        just_now = datetime.now(pytz.utc)
-                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(date_time_of_dispatch_localized,
-                                                                                      just_now)
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} UTC - "
-                                          f"dt: {date_time_of_dispatch_localized} - now: {just_now} - "
-                                          f"diff: {hours_diff}")
-                        if hours_diff > self.HOURS_2:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"SMS 2h note not needed to send now")
-                            # continue
+                                  f"- A sms tech 12 hours before note not appended"
                         else:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"Sending SMS 2h note")
-                            result_sms_2_sended = await self._cts_repository.send_tech_2_sms(
-                                dispatch_number, ticket_id, datetime_formatted_str, sms_to)
-                            if not result_sms_2_sended:
-                                msg = f"[service-dispatch-monitor] [CTS] " \
-                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                      f"- SMS 2h not sent"
-                            else:
-                                result_append_tech_2_sms_note = await self._cts_repository.append_tech_2_sms_note(
-                                    dispatch_number, igz_dispatch_number, ticket_id, sms_to)
-                                if not result_append_tech_2_sms_note:
-                                    msg = f"[service-dispatch-monitor] [CTS] " \
-                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                          f"- A sms tech 2 hours before note not appended"
-                                else:
-                                    msg = f"[service-dispatch-monitor] [CTS] " \
-                                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                          f"- A sms tech 2 hours before note appended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- already has a sms tech 2 hours before note")
-
-                    if tech_2_hours_before_tech_note_found is None:
-                        just_now = datetime.now(pytz.utc)
-                        hours_diff = UtilsRepository.get_diff_hours_between_datetimes(date_time_of_dispatch_localized,
-                                                                                      just_now)
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} UTC - "
-                                          f"dt: {date_time_of_dispatch_localized} - now: {just_now} - "
-                                          f"diff: {hours_diff}")
-                        if hours_diff > self.HOURS_2:
-                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"SMS tech 2h note not needed to send now")
-                            continue
-
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"Sending SMS tech 2h note")
-                        result_sms_2_sended = await self._cts_repository.send_tech_2_sms_tech(
-                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
-                        if not result_sms_2_sended:
                             msg = f"[service-dispatch-monitor] [CTS] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- SMS tech 2h not sended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
+                                  f"- A sms tech 12 hours before note appended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"- Already has a sms tech 12 hours before note")
 
-                        result_append_tech_2_sms_note = await self._cts_repository.append_tech_2_sms_tech_note(
-                            dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
+            if tech_12_hours_before_tech_note_found is None:
+                just_now = datetime.now(pytz.utc)
+                hours_diff = UtilsRepository.get_diff_hours_between_datetimes(date_time_of_dispatch_localized,
+                                                                              just_now)
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} UTC - "
+                                  f"dt: {date_time_of_dispatch_localized} - now: {just_now} - "
+                                  f"diff: {hours_diff}")
+                if hours_diff > self.HOURS_12:
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"SMS tech 12h note not needed to send now")
+                    return
+
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"Sending SMS tech 12h note")
+                result_sms_12_sended = await self._cts_repository.send_tech_12_sms_tech(
+                    dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
+                if not result_sms_12_sended:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"- SMS tech 12h not sended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    return
+
+                result_append_tech_12_sms_note = await self._cts_repository.append_tech_12_sms_tech_note(
+                    dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
+                if not result_append_tech_12_sms_note:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"- A sms tech 12 hours before tech note not appended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    return
+                msg = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                      f"- A sms tech 12 hours before tech note appended"
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
+                return
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"- Already has a sms tech 12 hours before tech note")
+
+            # Check if dispatch has a sms 2 hours note
+            if tech_2_hours_before_note_found is None:
+                just_now = datetime.now(pytz.utc)
+                hours_diff = UtilsRepository.get_diff_hours_between_datetimes(date_time_of_dispatch_localized,
+                                                                              just_now)
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} UTC - "
+                                  f"dt: {date_time_of_dispatch_localized} - now: {just_now} - "
+                                  f"diff: {hours_diff}")
+                if hours_diff > self.HOURS_2:
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"SMS 2h note not needed to send now")
+                else:
+                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                      f"Sending SMS 2h note")
+                    result_sms_2_sended = await self._cts_repository.send_tech_2_sms(
+                        dispatch_number, ticket_id, datetime_formatted_str, sms_to)
+                    if not result_sms_2_sended:
+                        msg = f"[service-dispatch-monitor] [CTS] " \
+                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                              f"- SMS 2h not sent"
+                    else:
+                        result_append_tech_2_sms_note = await self._cts_repository.append_tech_2_sms_note(
+                            dispatch_number, igz_dispatch_number, ticket_id, sms_to)
                         if not result_append_tech_2_sms_note:
                             msg = f"[service-dispatch-monitor] [CTS] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- A sms tech 2 hours before tech note not appended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
-                        msg = f"[service-dispatch-monitor] [CTS] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A sms tech 2 hours before tech note appended"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
+                                  f"- A sms tech 2 hours before note not appended"
+                        else:
+                            msg = f"[service-dispatch-monitor] [CTS] " \
+                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                  f"- A sms tech 2 hours before note appended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"- already has a sms tech 2 hours before note")
 
+            if tech_2_hours_before_tech_note_found is None:
+                just_now = datetime.now(pytz.utc)
+                hours_diff = UtilsRepository.get_diff_hours_between_datetimes(date_time_of_dispatch_localized,
+                                                                              just_now)
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} UTC - "
+                                  f"dt: {date_time_of_dispatch_localized} - now: {just_now} - "
+                                  f"diff: {hours_diff}")
+                if hours_diff > self.HOURS_2:
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- already has a sms tech 2 hours before tech note")
+                                      f"SMS tech 2h note not needed to send now")
+                    return
 
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- This ticket should never be again in Dispatch Confirmed, "
-                                      f"at some point it has to change to tech on site")
+                self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                  f"Sending SMS tech 2h note")
+                result_sms_2_sended = await self._cts_repository.send_tech_2_sms_tech(
+                    dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
+                if not result_sms_2_sended:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"- SMS tech 2h not sended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    return
 
-                except Exception as ex:
-                    err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} - {dispatch}"
-                    self._logger.error(f"{err_msg} - {ex}")
-                    await self._notifications_repository.send_slack_message(err_msg)
-                    continue
+                result_append_tech_2_sms_note = await self._cts_repository.append_tech_2_sms_tech_note(
+                    dispatch_number, igz_dispatch_number, ticket_id, sms_to_tech)
+                if not result_append_tech_2_sms_note:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"- A sms tech 2 hours before tech note not appended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    return
+                msg = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                      f"- A sms tech 2 hours before tech note appended"
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
+
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"- already has a sms tech 2 hours before tech note")
+
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"- This ticket should never be again in Dispatch Confirmed, "
+                              f"at some point it has to change to tech on site")
+
         except Exception as ex:
-            err_msg = f"Error: _monitor_confirmed_dispatches - {ex}"
-            self._logger.error(f"Error: {ex}")
+            err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} - {dispatch}"
+            self._logger.error(f"{err_msg} - {ex}")
             await self._notifications_repository.send_slack_message(err_msg)
-        stop = perf_counter()
-        self._logger.info(f"Monitor Confirmed Dispatches took: {(stop - start) / 60} minutes")
+        finally:
+            self._logger.info(f"Processed confirmed dispatch: {dispatch} "
+                              f"with IGZ id: {igz_dispatch_number}")
 
-    async def _monitor_tech_on_site_dispatches(self, tech_on_site_dispatches):
+    async def _process_tech_on_site_dispatch(self, dispatch, igz_dispatch_number, ticket_notes):
         try:
-            start = perf_counter()
-            self._logger.info(f"Dispatches to process before filter {len(tech_on_site_dispatches)}")
-            tech_on_site_dispatches = list(filter(self._cts_repository.is_tech_on_site, tech_on_site_dispatches))
-            self._logger.info(f"Dispatches to process after filter {len(tech_on_site_dispatches)}")
+            if not dispatch:
+                err_msg = f"Error: Dispatch [{dispatch}] - {igz_dispatch_number} - Not valid dispatch"
+                self._logger.error(f"{err_msg}")
+                await self._notifications_repository.send_slack_message(err_msg)
+                return
 
-            for dispatch in tech_on_site_dispatches:
-                try:
-                    dispatch_number = dispatch.get('Name', None)
-                    ticket_id = dispatch.get('Ext_Ref_Num__c', None)
+            dispatch_number = dispatch.get('Name', None)
+            ticket_id = dispatch.get('Ext_Ref_Num__c', None)
+            dispatch_status = dispatch.get('Status__c')
 
-                    self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id}")
-                    if ticket_id is None or not BruinRepository.is_valid_ticket_id(ticket_id) \
-                            or dispatch_number is None:
-                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
-                        continue
+            self._logger.info(f"Processing tech on site dispatch: {dispatch.get('Name')} in ticket_id: {ticket_id} "
+                              f"with IGZ id: {igz_dispatch_number} and {len(ticket_notes)} notes")
+            if ticket_id is None or not BruinRepository.is_valid_ticket_id(ticket_id) \
+                    or dispatch_number is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
+                return
+            if not self._cts_repository.is_tech_on_site(dispatch=dispatch):
+                self._logger.info(f"Dispatch not tech on site: {dispatch.get('Name')} in ticket_id: {ticket_id} "
+                                  f"with IGZ id: {igz_dispatch_number} and status: {dispatch_status}")
+                return
 
-                    date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
+            date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
+            if date_time_of_dispatch is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                  f"Could not determine date time of dispatch: {dispatch}")
+                return
 
-                    if date_time_of_dispatch is None:
-                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                          f"Could not determine date time of dispatch: {dispatch}")
-                        continue
+            sms_to = CtsRepository.get_sms_to(dispatch)
+            if sms_to is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                  f"- Error: we could not retrieve 'sms_to' number from: "
+                                  f"{dispatch.get('Description__c')}")
+                return
 
-                    sms_to = CtsRepository.get_sms_to(dispatch)
+            self._logger.info(f"Getting details for ticket [{ticket_id}]")
+            filtered_ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
+            self._logger.info(ticket_notes)
+            self._logger.info(f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
 
-                    if sms_to is None:
-                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                          f"- Error: we could not retrieve 'sms_to' number from: "
-                                          f"{dispatch.get('Description__c')}")
-                        continue
+            requested_watermark_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
+            confirmed_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.DISPATCH_CONFIRMED_WATERMARK)
+            confirmed_sms_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.DISPATCH_CONFIRMED_SMS_WATERMARK)
+            tech_12_hours_before_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_WATERMARK)
+            tech_2_hours_before_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
+            tech_on_site_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.DISPATCH_FIELD_ENGINEER_ON_SITE_WATERMARK)
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"requested_watermark_found: {requested_watermark_found} "
+                              f"confirmed_note_found: {confirmed_note_found} "
+                              f"confirmed_sms_note_found: {confirmed_sms_note_found} "
+                              f"tech_12_hours_before_note_found: {tech_12_hours_before_note_found} "
+                              f"tech_2_hours_before_note_found: {tech_2_hours_before_note_found} "
+                              f"tech_on_site_note_found: {tech_on_site_note_found}")
 
-                    self._logger.info(f"Getting details for ticket [{ticket_id}]")
+            if tech_on_site_note_found is None:
+                result_sms_tech_on_site_sended = await self._cts_repository.send_tech_on_site_sms(
+                    dispatch_number, ticket_id, dispatch, sms_to)
+                if not result_sms_tech_on_site_sended:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"- SMS tech on site not sended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    return
 
-                    response = await self._bruin_repository.get_ticket_details(ticket_id)
-                    response_status = response['status']
-                    response_body = response['body']
-
-                    if response_status not in range(200, 300):
-                        self._logger.error(f"Error: Dispatch [{dispatch_number}] "
-                                           f"Get ticket details for ticket {ticket_id}: "
-                                           f"{response_body}")
-                        err_msg = f"An error occurred retrieve getting ticket details from bruin " \
-                                  f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
-                        await self._notifications_repository.send_slack_message(err_msg)
-                        continue
-                    ticket_notes = response_body.get('ticketNotes', [])
-                    ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
-                    self._logger.info(ticket_notes)
-
-                    self._logger.info(f"Filtering ticket notes to contain only notes for the "
-                                      f"IGZ CTS Dispatch numbers only")
-                    self._logger.info(f"Length of notes before filter: {len(ticket_notes)}")
-
-                    filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
-                                                                                        self.IGZ_DN_WATERMARK,
-                                                                                        ticket_id)
-                    self._logger.info(f"Length of notes after filter: {len(filtered_ticket_notes)}")
-
-                    self._logger.info(filtered_ticket_notes)
-
-                    self._logger.info(
-                        f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
-
-                    watermark_found = UtilsRepository.find_note(filtered_ticket_notes, self.MAIN_WATERMARK)
-
-                    igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
-                        watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
-
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"IGZ dispatch number found: {igz_dispatch_number}")
-
-                    requested_watermark_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
-                    confirmed_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.DISPATCH_CONFIRMED_WATERMARK)
-                    confirmed_sms_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.DISPATCH_CONFIRMED_SMS_WATERMARK)
-                    tech_12_hours_before_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.TECH_12_HOURS_BEFORE_SMS_WATERMARK)
-                    tech_2_hours_before_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.TECH_2_HOURS_BEFORE_SMS_WATERMARK)
-                    tech_on_site_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.DISPATCH_FIELD_ENGINEER_ON_SITE_WATERMARK)
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"requested_watermark_found: {requested_watermark_found} "
-                                      f"confirmed_note_found: {confirmed_note_found} "
-                                      f"confirmed_sms_note_found: {confirmed_sms_note_found} "
-                                      f"tech_12_hours_before_note_found: {tech_12_hours_before_note_found} "
-                                      f"tech_2_hours_before_note_found: {tech_2_hours_before_note_found} "
-                                      f"tech_on_site_note_found: {tech_on_site_note_found}")
-
-                    if tech_on_site_note_found is None:
-                        result_sms_tech_on_site_sended = await self._cts_repository.send_tech_on_site_sms(
-                            dispatch_number, ticket_id, dispatch, sms_to)
-                        if not result_sms_tech_on_site_sended:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- SMS tech on site not sended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
-
-                        result_append_tech_on_site_sms_note = await self._cts_repository.append_tech_on_site_sms_note(
-                            dispatch_number, igz_dispatch_number, ticket_id, sms_to,
-                            dispatch.get('API_Resource_Name__c'))
-                        if not result_append_tech_on_site_sms_note:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- A sms tech on site note not appended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
-                        msg = f"[service-dispatch-monitor] [CTS] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A sms tech on site note appended"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- already has a sms tech tech on site note")
-                except Exception as ex:
-                    err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "\
-                              f"- {dispatch}"
-                    self._logger.error(f"{err_msg} - {ex}")
-                    await self._notifications_repository.send_slack_message(err_msg)
-                    continue
+                result_append_tech_on_site_sms_note = await self._cts_repository.append_tech_on_site_sms_note(
+                    dispatch_number, igz_dispatch_number, ticket_id, sms_to,
+                    dispatch.get('API_Resource_Name__c'))
+                if not result_append_tech_on_site_sms_note:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"- A sms tech on site note not appended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    return
+                msg = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                      f"- A sms tech on site note appended"
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"- already has a sms tech tech on site note")
         except Exception as ex:
-            err_msg = f"Error: _monitor_tech_on_site_dispatches - {ex}"
-            self._logger.error(f"Error: {ex}")
+            err_msg = f"Error: Dispatch [{dispatch}] in igz_id: {igz_dispatch_number}"
+            self._logger.error(f"{err_msg} - {ex}")
             await self._notifications_repository.send_slack_message(err_msg)
+        finally:
+            self._logger.info(f"Processed tech on site  dispatch: {dispatch} "
+                              f"with IGZ id: {igz_dispatch_number}")
 
-        stop = perf_counter()
-        self._logger.info(f"Monitor Tech on Site Dispatches took: {(stop - start) / 60} minutes")
-
-    async def _monitor_cancelled_dispatches(self, cancelled_dispatches):
+    async def _process_canceled_dispatch(self, dispatch, igz_dispatch_number, ticket_notes):
         try:
-            start = perf_counter()
-            self._logger.info("Monitor cancelled dispatches")
-            self._logger.info(f"Dispatches to process before filter {len(cancelled_dispatches)}")
-            cancelled_dispatches = list(filter(self._cts_repository.is_dispatch_cancelled, cancelled_dispatches))
-            self._logger.info(f"Dispatches to process after filter {len(cancelled_dispatches)}")
+            if not dispatch or len(ticket_notes) == 0:
+                err_msg = f"Error: Dispatch [{dispatch}] - {igz_dispatch_number} - Not valid dispatch"
+                self._logger.error(f"{err_msg}")
+                await self._notifications_repository.send_slack_message(err_msg)
+                return
+            dispatch_number = dispatch.get('Name', None)
+            ticket_id = dispatch.get('Ext_Ref_Num__c', None)
+            dispatch_status = dispatch.get('Status__c')
 
-            for dispatch in cancelled_dispatches:
-                try:
-                    dispatch_number = dispatch.get('Name', None)
-                    ticket_id = dispatch.get('Ext_Ref_Num__c', None)
+            self._logger.info(f"Processing canceled dispatch: {dispatch_number} in ticket_id: {ticket_id} "
+                              f"with IGZ id: {igz_dispatch_number}")
 
-                    self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id}")
-                    if ticket_id is None or not BruinRepository.is_valid_ticket_id(ticket_id) \
-                            or dispatch_number is None:
-                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
-                        continue
+            if ticket_id is None or not BruinRepository.is_valid_ticket_id(ticket_id) \
+                    or dispatch_number is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} discarded.")
+                return
 
-                    date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
+            if not self._cts_repository.is_dispatch_cancelled(dispatch=dispatch):
+                self._logger.info(f"Dispatch is not canceled: {dispatch.get('Name')} in ticket_id: {ticket_id} "
+                                  f"with IGZ id: {igz_dispatch_number} and status: {dispatch_status}")
+                return
 
-                    if date_time_of_dispatch is None:
-                        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                                          f"Could not determine date time of dispatch: {dispatch}")
-                        continue
+            date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
+            if date_time_of_dispatch is None:
+                self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                                  f"Could not determine date time of dispatch: {dispatch}")
+                return
 
-                    date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
-                    # Get datetime formatted string
-                    DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
-                    datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
+            date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+            # Get datetime formatted string
+            DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
+            datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
 
-                    self._logger.info(f"Getting details for ticket [{ticket_id}]")
+            self._logger.info(f"Getting details for ticket [{ticket_id}]")
+            filtered_ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
+            self._logger.info(ticket_notes)
+            self._logger.info(
+                f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
 
-                    response = await self._bruin_repository.get_ticket_details(ticket_id)
-                    response_status = response['status']
-                    response_body = response['body']
+            requested_watermark_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
+            cancelled_watermark_note_found = UtilsRepository.find_note(
+                filtered_ticket_notes, self.DISPATCH_CANCELLED_WATERMARK)
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"requested_watermark_found: {requested_watermark_found} "
+                              f"cancelled_watermark_note_found: {cancelled_watermark_note_found}")
 
-                    if response_status not in range(200, 300):
-                        self._logger.error(f"Error: Dispatch [{dispatch_number}] "
-                                           f"Get ticket details for ticket {ticket_id}: "
-                                           f"{response_body}")
-                        err_msg = f"An error occurred retrieve getting ticket details from bruin " \
-                                  f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id}"
-                        await self._notifications_repository.send_slack_message(err_msg)
-                        continue
-                    ticket_notes = response_body.get('ticketNotes', [])
-                    ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)
-                    self._logger.info(ticket_notes)
+            if cancelled_watermark_note_found is None:
+                result_append_cancelled_note = await self._cts_repository.append_dispatch_cancelled_note(
+                    dispatch_number, igz_dispatch_number, ticket_id, datetime_formatted_str)
+                if not result_append_cancelled_note:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                          f"- A cancelled dispatch note not appended"
+                    self._logger.info(msg)
+                    await self._notifications_repository.send_slack_message(msg)
+                    return
+                msg = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                      f"- A cancelled dispatch note appended"
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
 
-                    self._logger.info(f"Filtering ticket notes to contain only notes for the "
-                                      f"IGZ CTS Dispatch numbers only")
-                    self._logger.info(f"Length of notes before filter: {len(ticket_notes)}")
-
-                    filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
-                                                                                        self.IGZ_DN_WATERMARK,
-                                                                                        ticket_id)
-                    self._logger.info(f"Length of notes after filter: {len(filtered_ticket_notes)}")
-
-                    self._logger.info(filtered_ticket_notes)
-
-                    self._logger.info(
-                        f"Checking watermarks for Dispatch [{dispatch_number}] in ticket_id: {ticket_id}")
-
-                    watermark_found = UtilsRepository.find_note(filtered_ticket_notes, self.MAIN_WATERMARK)
-
-                    igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
-                        watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
-
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"IGZ dispatch number found: {igz_dispatch_number}")
-
-                    requested_watermark_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.DISPATCH_REQUESTED_WATERMARK)
-                    cancelled_watermark_note_found = UtilsRepository.find_note(
-                        filtered_ticket_notes, self.DISPATCH_CANCELLED_WATERMARK)
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"requested_watermark_found: {requested_watermark_found} "
-                                      f"cancelled_watermark_note_found: {cancelled_watermark_note_found}")
-
-                    if cancelled_watermark_note_found is None:
-                        result_append_cancelled_note = await self._cts_repository.append_dispatch_cancelled_note(
-                            dispatch_number, igz_dispatch_number, ticket_id, datetime_formatted_str)
-                        if not result_append_cancelled_note:
-                            msg = f"[service-dispatch-monitor] [CTS] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- A cancelled dispatch note not appended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
-                        msg = f"[service-dispatch-monitor] [CTS] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A cancelled dispatch note appended"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-
-                    self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                      f"- already has a cancelled dispatch note")
-                except Exception as ex:
-                    err_msg = f"Error: Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "\
-                              f"- {dispatch}"
-                    self._logger.error(f"{err_msg} - {ex}")
-                    await self._notifications_repository.send_slack_message(err_msg)
-                    continue
+            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                              f"- already has a cancelled dispatch note")
         except Exception as ex:
-            err_msg = f"Error: _monitor_cancelled_dispatches - {ex}"
-            self._logger.error(f"Error: {ex}")
+            err_msg = f"Error: Dispatch [{dispatch}] in igz_id: {igz_dispatch_number}"
+            self._logger.error(f"{err_msg} - {ex}")
             await self._notifications_repository.send_slack_message(err_msg)
-
-        stop = perf_counter()
-        self._logger.info(f"Monitor Cancelled Dispatches took: {(stop - start) / 60} minutes")
-
-    def _filter_ticket_note_by_dispatch_number(self, ticket_notes, dispatch_number, ticket_id):
-        filtered_ticket_notes = []
-        for note in ticket_notes:
-            note_dispatch_number = UtilsRepository.find_dispatch_number_watermark(note,
-                                                                                  dispatch_number,
-                                                                                  self.MAIN_WATERMARK)
-            if len(note_dispatch_number) == 0:
-                continue
-            filtered_ticket_notes.append(note)
-
-        return filtered_ticket_notes
+        finally:
+            self._logger.info(f"Processed canceled dispatch: {dispatch} "
+                              f"with IGZ id: {igz_dispatch_number}")

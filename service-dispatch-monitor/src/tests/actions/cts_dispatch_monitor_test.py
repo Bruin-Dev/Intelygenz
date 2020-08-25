@@ -58,13 +58,13 @@ class TestCtsDispatchMonitor:
             with patch.object(cts_dispatch_monitor_module, 'timezone', new=Mock()):
                 await cts_dispatch_monitor.start_monitoring_job(exec_on_start=True)
 
-        cts_dispatch_monitor._scheduler.add_job.assert_called_once_with(
-            cts_dispatch_monitor._cts_dispatch_monitoring_process, 'interval',
-            minutes=config.DISPATCH_MONITOR_CONFIG["jobs_intervals"]["cts_dispatch_monitor"],
-            next_run_time=next_run_time,
-            replace_existing=False,
-            id='_service_dispatch_monitor_cts_process',
-        )
+        cts_dispatch_monitor._scheduler.add_job.assert_has_calls([
+            call(cts_dispatch_monitor._cts_dispatch_monitoring_process, 'interval',
+                 minutes=config.DISPATCH_MONITOR_CONFIG["jobs_intervals"]["cts_dispatch_monitor"],
+                 next_run_time=next_run_time,
+                 replace_existing=False,
+                 id='_service_dispatch_monitor_cts_process')
+        ], any_order=False)
 
     @pytest.mark.asyncio
     async def start_dispatch_monitor_job_with_no_exec_on_start_test(self, cts_dispatch_monitor):
@@ -72,13 +72,24 @@ class TestCtsDispatchMonitor:
 
         await cts_dispatch_monitor.start_monitoring_job(exec_on_start=False)
 
-        cts_dispatch_monitor._scheduler.add_job.assert_called_once_with(
-            cts_dispatch_monitor._cts_dispatch_monitoring_process, 'interval',
-            minutes=config.DISPATCH_MONITOR_CONFIG["jobs_intervals"]["cts_dispatch_monitor"],
-            next_run_time=undefined,
-            replace_existing=False,
-            id='_service_dispatch_monitor_cts_process',
-        )
+        cts_dispatch_monitor._scheduler.add_job.assert_has_calls([
+            call(cts_dispatch_monitor._cts_dispatch_monitoring_process, 'interval',
+                 minutes=config.DISPATCH_MONITOR_CONFIG["jobs_intervals"]["cts_dispatch_monitor"],
+                 next_run_time=undefined,
+                 replace_existing=False,
+                 id='_service_dispatch_monitor_cts_process')
+        ], any_order=False)
+
+    def get_process_dispatch_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_tech_on_site,
+                                  cts_dispatch_cancelled):
+        expected_processes = [
+            (cts_dispatch_monitor._process_confirmed_dispatch, cts_dispatch_confirmed, ),
+            (cts_dispatch_monitor._process_tech_on_site_dispatch, cts_dispatch_tech_on_site, ),
+            (cts_dispatch_monitor._process_canceled_dispatch, cts_dispatch_cancelled, )
+        ]
+        for expected_process, dispatch in expected_processes:
+            result = cts_dispatch_monitor._get_process_dispatch(dispatch)
+            assert result == expected_process
 
     @pytest.mark.asyncio
     async def cts_dispatch_monitoring_process_test(self, cts_dispatch_monitor, cts_dispatch, cts_dispatch_confirmed):
@@ -87,37 +98,215 @@ class TestCtsDispatchMonitor:
             'status': 200,
             'body': {
                 'done': True,
-                'records': []
+                'records': dispatches
             }
         }
-        splitted_dispatches = {}
-        for ds in cts_dispatch_monitor._cts_repository._dispatch_statuses:
-            splitted_dispatches[ds] = []
-        splitted_dispatches[str(cts_dispatch_monitor._cts_repository.DISPATCH_REQUESTED)] = [cts_dispatch]
-        splitted_dispatches[str(cts_dispatch_monitor._cts_repository.DISPATCH_CONFIRMED)] = [cts_dispatch_confirmed]
 
-        confirmed_dispatches = [cts_dispatch_confirmed]
         cts_dispatch_monitor._cts_repository.get_all_dispatches = CoroutineMock(return_value=dispatches_response)
-        cts_dispatch_monitor._cts_repository.get_dispatches_splitted_by_status = Mock(return_value=splitted_dispatches)
-        cts_dispatch_monitor._monitor_confirmed_dispatches = CoroutineMock()
+        cts_dispatch_monitor._distribute_and_process_dispatches = CoroutineMock()
 
         await cts_dispatch_monitor._cts_dispatch_monitoring_process()
 
-        cts_dispatch_monitor._monitor_confirmed_dispatches.assert_awaited_once()
-        cts_dispatch_monitor._monitor_confirmed_dispatches.assert_awaited_with(confirmed_dispatches)
+        cts_dispatch_monitor._distribute_and_process_dispatches.assert_awaited_with(dispatches)
+
+    def split_ticket_notes_by_igz_dispatch_num_test(self, cts_dispatch_monitor, cts_ticket_notes_with_2_dispatches,
+                                                    cts_filtered_tickets_1, cts_filtered_tickets_2):
+        igz_id_1 = 'IGZTqSAzuvj2wehMXzqYxixxd'
+        igz_id_2 = 'IGZWtpGZCJopULhsiUhbWjUYf'
+        expected = {
+            igz_id_1: cts_filtered_tickets_1,
+            igz_id_2: cts_filtered_tickets_2
+        }
+        ticket_notes = cts_ticket_notes_with_2_dispatches.get('ticketNotes')
+        result = cts_dispatch_monitor._cts_repository.split_ticket_notes_by_igz_dispatch_num(ticket_notes)
+
+        assert result == expected
 
     @pytest.mark.asyncio
-    async def cts_dispatch_monitoring_process_error_exception_test(
-            self, cts_dispatch_monitor):
-        cts_dispatch_monitor._cts_dispatch_monitoring_process = CoroutineMock(side_effect=Exception)
-        cts_dispatch_monitor._monitor_confirmed_dispatches = CoroutineMock(side_effect=Exception)
-        cts_dispatch_monitor._cts_repository.get_all_dispatches = CoroutineMock(side_effect=Exception)
-        cts_dispatch_monitor._cts_repository.get_dispatches_splitted_by_status = CoroutineMock()
+    async def process_generic_dispatch_test(self, cts_dispatch_monitor,
+                                            cts_dispatch_confirmed, cts_dispatch_confirmed_2,
+                                            cts_dispatch_confirmed_no_main_watermark,
+                                            cts_dispatch_confirmed_skipped,
+                                            cts_dispatch_tech_on_site, cts_dispatch_cancelled,
+                                            cts_ticket_details_1, cts_ticket_details_2,
+                                            cts_ticket_details_2_error,
+                                            cts_ticket_details_2_no_requested_watermark,
+                                            cts_ticket_details_no_watermark):
+        dispatch_number_1 = cts_dispatch_confirmed.get('Name')
+        igz_dispatch_number_1 = 'IGZ_0001'
+        ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
+        redis_data_1 = {
+            "ticket_id": ticket_id_1,
+            "igz_dispatch_number": igz_dispatch_number_1
+        }
+        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
+        igz_dispatch_number_2 = 'IGZ_0002'
+        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
+        redis_data_2 = {
+            "ticket_id": ticket_id_2,
+            "igz_dispatch_number": igz_dispatch_number_2
+        }
+        dispatches = [
+            cts_dispatch_confirmed,
+            cts_dispatch_confirmed_2,
+            cts_dispatch_confirmed_no_main_watermark,
+            cts_dispatch_confirmed_skipped,
+            # cts_dispatch_tech_on_site,
+            # cts_dispatch_cancelled
+        ]
+        responses_details_mock = [
+            cts_ticket_details_1,
+            cts_ticket_details_2,
+            cts_ticket_details_2_error,
+            cts_ticket_details_2_no_requested_watermark,
+            cts_ticket_details_no_watermark
+        ]
+
+        get_process_dispatch_mock = [
+            cts_dispatch_monitor._process_confirmed_dispatch,
+            cts_dispatch_monitor._process_confirmed_dispatch,
+        ]
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        cts_dispatch_monitor._get_process_dispatch = Mock(side_effect=get_process_dispatch_mock)
+        cts_dispatch_monitor._scheduler.add_job = Mock()
+        cts_dispatch_monitor._redis_client.get = Mock(side_effect=[None, redis_data_2])
+        cts_dispatch_monitor._redis_client.set = Mock()
+
+        ticket_notes_1 = [{'noteId': 70805300,
+                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
+                           'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
+                           'creator': None}]
+        ticket_notes_2 = [{'noteId': 70805300,
+                           'noteValue': '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
+                           'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
+                           'creator': None}]  # noqa
+
+        func_args_1 = [cts_dispatch_confirmed, igz_dispatch_number_1, ticket_notes_1]
+        func_args_2 = [cts_dispatch_confirmed_2, igz_dispatch_number_2, ticket_notes_2]
+
+        for _dispatch in dispatches:
+            await cts_dispatch_monitor._process_generic_dispatch(_dispatch)
+
+        cts_dispatch_monitor._get_process_dispatch.assert_has_calls([
+            call(cts_dispatch_confirmed),
+            call(cts_dispatch_confirmed_2),
+        ])
+        cts_dispatch_monitor._scheduler.add_job.assert_has_calls([
+            call(get_process_dispatch_mock[0], 'date', next_run_time=undefined, replace_existing=False,
+                 id=f"_process_dispatch_{dispatch_number_1}", args=func_args_1),
+            call(get_process_dispatch_mock[0], 'date', next_run_time=undefined, replace_existing=False,
+                 id=f"_process_dispatch_{dispatch_number_2}", args=func_args_2),
+        ])
+
+    @pytest.mark.asyncio
+    async def process_generic_dispatch_with_general_exception_test(self, cts_dispatch_monitor, cts_dispatch_confirmed):
+        dispatch_number_1 = cts_dispatch_confirmed.get('Name')
+        igz_dispatch_number_1 = 'IGZ_0001'
+        ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
+        redis_data_1 = {
+            "ticket_id": ticket_id_1,
+            "igz_dispatch_number": igz_dispatch_number_1
+        }
+        cts_dispatch_monitor._bruin_repository_get_ticket_details = CoroutineMock(side_effect=Exception)
         with pytest.raises(Exception):
-            await cts_dispatch_monitor._cts_dispatch_monitoring_process()
+            await cts_dispatch_monitor._process_generic_dispatch(cts_dispatch_confirmed)
+            cts_dispatch_monitor._bruin_repository_get_ticket_details.assert_called_once_with(ticket_id_1)
             cts_dispatch_monitor._logger.error.assert_called_once()
-            cts_dispatch_monitor._cts_repository.get_dispatches_splitted_by_status.assert_not_awaited()
-            cts_dispatch_monitor._monitor_confirmed_dispatches.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def process_generic_dispatch_with_not_valid_dispatches_test(
+            self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_confirmed_2,
+            cts_dispatch_confirmed_no_main_watermark, cts_dispatch_confirmed_skipped,
+            cts_dispatch_tech_on_site, cts_dispatch_cancelled, cts_ticket_details_1, cts_ticket_details_2,
+            cts_ticket_details_2_error,
+            cts_ticket_details_2_no_requested_watermark, cts_ticket_details_no_watermark_1):
+        dispatch_number_1 = cts_dispatch_confirmed.get('Name')
+        igz_dispatch_number_1 = 'IGZ_0001'
+        ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
+        redis_data_1 = {
+            "ticket_id": ticket_id_1,
+            "igz_dispatch_number": igz_dispatch_number_1
+        }
+        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
+        igz_dispatch_number_2 = 'IGZ_0002'
+        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
+        redis_data_2 = {
+            "ticket_id": ticket_id_2,
+            "igz_dispatch_number": igz_dispatch_number_2
+        }
+        dispatches = [
+            cts_dispatch_confirmed,
+            cts_dispatch_confirmed_no_main_watermark,
+            cts_dispatch_confirmed_skipped,
+            cts_dispatch_confirmed_2,
+            # cts_dispatch_tech_on_site,
+            # cts_dispatch_cancelled
+        ]
+        responses_details_mock = [
+            cts_ticket_details_1,
+            cts_ticket_details_no_watermark_1,
+            cts_ticket_details_2,
+            cts_ticket_details_2_error,
+        ]
+
+        get_process_dispatch_mock = [
+            cts_dispatch_monitor._process_confirmed_dispatch,
+            None,
+            None,
+        ]
+
+        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        cts_dispatch_monitor._get_process_dispatch = Mock(side_effect=get_process_dispatch_mock)
+        cts_dispatch_monitor._scheduler.add_job = Mock()
+        cts_dispatch_monitor._redis_client.get = Mock(side_effect=[None, None, None])
+        cts_dispatch_monitor._redis_client.set = Mock()
+        cts_dispatch_monitor._cts_repository.determine_final_igz_id_for_dispatch = \
+            Mock(side_effect=[igz_dispatch_number_1, None, igz_dispatch_number_2])
+
+        ticket_notes_1 = [{'noteId': 70805300,
+                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
+                           'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
+                           'creator': None}]
+        ticket_notes_2 = [{'noteId': 70805300,
+                           'noteValue': '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
+                           'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
+                           'creator': None}]
+
+        func_args_1 = [cts_dispatch_confirmed, igz_dispatch_number_1, ticket_notes_1]
+        func_args_2 = [cts_dispatch_confirmed_2, igz_dispatch_number_2, ticket_notes_2]
+
+        for _dispatch in dispatches:
+            await cts_dispatch_monitor._process_generic_dispatch(dispatch=_dispatch)
+
+        cts_dispatch_monitor._get_process_dispatch.assert_has_calls([
+            call(cts_dispatch_confirmed),
+        ])
+        cts_dispatch_monitor._scheduler.add_job.assert_has_calls([
+            call(get_process_dispatch_mock[0], 'date', next_run_time=undefined, replace_existing=False,
+                 id=f"_process_dispatch_{dispatch_number_1}", args=func_args_1)
+        ])
+
+    @pytest.mark.asyncio
+    async def cts_dispatch_monitoring_process_general_error_getting_dispatches_test(
+            self, cts_dispatch_monitor, cts_dispatch, cts_dispatch_confirmed):
+        dispatches = [cts_dispatch, cts_dispatch_confirmed]
+        dispatches_response = {
+            'status': 200,
+            'body': {
+                'done': False,
+                'records': []
+            }
+        }
+        err_msg = f'[CTS] Error: '
+        cts_dispatch_monitor._cts_repository.get_all_dispatches = CoroutineMock(side_effect=Exception)
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+
+        await cts_dispatch_monitor._cts_dispatch_monitoring_process()
+
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def cts_dispatch_monitoring_process_error_getting_dispatches_test(
@@ -132,13 +321,11 @@ class TestCtsDispatchMonitor:
         }
         err_msg = f'An error occurred retrieving all dispatches in the request status from CTS.'
         cts_dispatch_monitor._cts_repository.get_all_dispatches = CoroutineMock(return_value=dispatches_response)
-        cts_dispatch_monitor._monitor_confirmed_dispatches = CoroutineMock()
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
         await cts_dispatch_monitor._cts_dispatch_monitoring_process()
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
-        cts_dispatch_monitor._monitor_confirmed_dispatches.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def cts_dispatch_monitoring_process_error_getting_dispatches_invalid_body_test(
@@ -163,13 +350,15 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._monitor_confirmed_dispatches.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def filter_dispatches_by_watermark_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
-                                                  cts_dispatch_confirmed_2, cts_dispatch_confirmed_no_main_watermark,
-                                                  cts_ticket_details_1,
-                                                  cts_ticket_details_2_error,
-                                                  cts_ticket_details_2_no_requested_watermark,
-                                                  cts_dispatch_confirmed_skipped,
-                                                  cts_ticket_details_no_watermark):
+    async def cts_distribute_and_process_dispatches_test(self, cts_dispatch_monitor,
+                                                         cts_dispatch_not_confirmed,
+                                                         cts_dispatch_confirmed,
+                                                         cts_dispatch_confirmed_2,
+                                                         cts_dispatch_confirmed_no_main_watermark,
+                                                         cts_ticket_details_1, cts_ticket_details_2_error,
+                                                         cts_ticket_details_2_no_requested_watermark,
+                                                         cts_dispatch_confirmed_skipped,
+                                                         cts_ticket_details_no_watermark):
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         redis_data_1 = {
@@ -183,36 +372,44 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed_2,
             cts_dispatch_confirmed_2,
             cts_dispatch_confirmed_no_main_watermark,
-            cts_dispatch_confirmed_skipped
+            cts_dispatch_confirmed_skipped,
+            cts_dispatch_not_confirmed
         ]
         responses_details_mock = [
             cts_ticket_details_1,
             cts_ticket_details_1,
             cts_ticket_details_2_error,
             cts_ticket_details_2_no_requested_watermark,
-            cts_ticket_details_no_watermark
+            cts_ticket_details_no_watermark,
+            cts_ticket_details_1
         ]
         cts_dispatch_monitor._redis_client.get = Mock(side_effect=[None, redis_data_1])
         cts_dispatch_monitor._redis_client.set = Mock()
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        cts_dispatch_monitor._process_generic_dispatch = CoroutineMock()
 
-        filtered_confirmed_dispatches = await cts_dispatch_monitor._filter_dispatches_by_watermark(confirmed_dispatches)
+        await cts_dispatch_monitor._distribute_and_process_dispatches(confirmed_dispatches)
 
-        assert filtered_confirmed_dispatches == [cts_dispatch_confirmed, cts_dispatch_confirmed]
-        cts_dispatch_monitor._redis_client.get.assert_has_calls([call(dispatch_number_1), call(dispatch_number_1)],
-                                                                any_order=False)
-        cts_dispatch_monitor._redis_client.set.assert_called_once_with(
-            dispatch_number_1, json.dumps(redis_data_1), ex=redis_expire_ttl)
+        # cts_dispatch_monitor._redis_client.get.assert_has_calls([call(dispatch_number_1), call(dispatch_number_1)],
+        #                                                         any_order=False)
+        cts_dispatch_monitor._process_generic_dispatch.assert_has_awaits([
+            call(cts_dispatch_confirmed),
+            call(cts_dispatch_confirmed)
+        ])
+        # cts_dispatch_monitor._redis_client.set.assert_called_once_with(
+        #     dispatch_number_1, json.dumps(redis_data_1), ex=redis_expire_ttl)
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_test(self, cts_dispatch_monitor, cts_dispatch_confirmed,
+                                                cts_dispatch_not_confirmed,
                                                 cts_dispatch_confirmed_2, cts_dispatch_confirmed_no_main_watermark,
                                                 cts_ticket_details_1,
                                                 append_note_response, append_note_response_2,
                                                 sms_success_response, sms_success_response_2):
         confirmed_dispatches = [
             cts_dispatch_confirmed,
+            cts_dispatch_not_confirmed
         ]
 
         response_append_note_1 = {
@@ -334,7 +531,6 @@ class TestCtsDispatchMonitor:
                                 f"Confirmed SMS tech note not appended"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -342,11 +538,17 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms_tech)
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            []
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
@@ -492,7 +694,6 @@ class TestCtsDispatchMonitor:
                                 f"Confirmed SMS tech note not appended"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -500,12 +701,17 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms_tech)
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            cts_ticket_details_2['body'].get('ticketNotes', []),
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
@@ -665,8 +871,6 @@ class TestCtsDispatchMonitor:
                                 f"Confirmed SMS tech note not appended"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -674,12 +878,17 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms_tech)
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            []
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
@@ -709,11 +918,11 @@ class TestCtsDispatchMonitor:
 
     @pytest.mark.asyncio
     async def monitor_confirmed_dispatches_with_general_exception_test(self, cts_dispatch_monitor):
-        confirmed_dispatches = 0  # Non valid list for filter
-        err_msg = f"Error: _monitor_confirmed_dispatches - object of type 'int' has no len()"
+        confirmed_dispatch = 0  # Non valid list for filter
+        err_msg = f"Error: Dispatch [0] - IGZ_0001 - Not valid dispatch"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches)
+        await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch, 'IGZ_0001', [])
 
         cts_dispatch_monitor._logger.error.assert_called_once()
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -732,7 +941,8 @@ class TestCtsDispatchMonitor:
                   f"{cts_dispatch_confirmed_skipped_datetime.get('Local_Site_Time__c')}"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches)
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch, 'IGZ_0001', [])
 
         cts_dispatch_monitor._logger.error.assert_called_once()
         # cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -750,7 +960,13 @@ class TestCtsDispatchMonitor:
                   f"- {cts_dispatch_confirmed_bad_date}"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches)
+        igz_dispatch_numbers = ['IGZ_0001', 'IGZ_0002']
+        ticket_notes = [
+            []
+        ]
+        await cts_dispatch_monitor._process_confirmed_dispatch(cts_dispatch_confirmed_bad_date,
+                                                               igz_dispatch_numbers[0],
+                                                               ticket_notes[0])
 
         cts_dispatch_monitor._logger.error.assert_called_once()
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -824,8 +1040,6 @@ class TestCtsDispatchMonitor:
                                 f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -833,11 +1047,17 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms_tech)
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            []
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
@@ -916,7 +1136,6 @@ class TestCtsDispatchMonitor:
         err_msg = f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2} - " \
                   f"An error occurred retrieve datetime of dispatch: " \
                   f"{cts_dispatch_confirmed_skipped_datetime.get('Local_Site_Time__c', None)}"
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -925,11 +1144,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_confirmed_sms_tech)
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            []
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
@@ -1010,7 +1235,6 @@ class TestCtsDispatchMonitor:
                   f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2} - " \
                   f"from: {cts_dispatch_confirmed_skipped_bad_phone.get('Description__c')}"
 
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -1019,11 +1243,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_confirmed_sms_tech)
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(sideffect=[])
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            []
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
@@ -1102,7 +1332,6 @@ class TestCtsDispatchMonitor:
                   f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2} - " \
                   f"from: {cts_dispatch_confirmed_skipped_bad_phone_tech.get('Resource_Phone_Number__c')}"
 
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -1111,11 +1340,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_confirmed_sms_tech)
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(sideffect=[])
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            []
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
@@ -1218,14 +1453,10 @@ class TestCtsDispatchMonitor:
         slack_msg_note_2 = f"[service-dispatch-monitor] [CTS] " \
                            f"Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} " \
                            f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
-        err_msg = f"An error occurred retrieve getting ticket details from bruin " \
-                  f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2}"
+        err_msg = f"Error: Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} - {cts_dispatch_confirmed_2}"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
 
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
-        # cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
-        #     side_effect=responses_send_to_slack_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -1233,12 +1464,17 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_confirmed_sms_tech = CoroutineMock(
             side_effect=responses_confirmed_sms_tech)
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            []
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
@@ -1268,7 +1504,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
         ]
-
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
         time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
@@ -1337,7 +1574,6 @@ class TestCtsDispatchMonitor:
                                 f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_note_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -1349,12 +1585,17 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_confirmed_sms_tech_note = CoroutineMock(
             side_effect=responses_append_confirmed_sms_tech_note_mock)
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            cts_ticket_details_2['body'].get('ticketNotes', [])
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, datetime_1_str, sms_to, tech_name)
@@ -1485,7 +1726,6 @@ class TestCtsDispatchMonitor:
                   f"SMS could not be sent to {sms_to_2}."
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -1495,12 +1735,17 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_confirmed_sms_note = CoroutineMock(
             side_effect=responses_append_confirmed_sms_note_mock)
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            cts_ticket_details_2['body'].get('ticketNotes', [])
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
@@ -1647,7 +1892,6 @@ class TestCtsDispatchMonitor:
                                 f"Confirmed Note, SMS tech send and Confirmed SMS note sent OK."
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -1657,12 +1901,17 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_confirmed_sms_note = CoroutineMock(
             side_effect=responses_append_confirmed_sms_note_mock)
 
-        await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            cts_ticket_details_2['body'].get('ticketNotes', [])
+        ]
+        for confirmed_dispatch in confirmed_dispatches:
+            await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                   igz_dispatch_numbers[i],
+                                                                   ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_has_awaits([
             call(ticket_id_1, confirmed_note_1),
@@ -1703,6 +1952,7 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed
         ]
+        igz_dispatch_number_1 = 'IGZ_0001'
         cts_dispatch_confirmed['Name'] = 'IGZ_0001'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
@@ -1804,11 +2054,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_send_tech_12_sms_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_1]
+            ticket_notes = [
+                cts_ticket_details_1_with_confirmation_and_outdated_tech_note['body'].get('ticketNotes', []),
+                cts_ticket_details_1_with_confirmation_and_multiple_outdated_tech_note['body'].get('ticketNotes', [])
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -1845,6 +2101,8 @@ class TestCtsDispatchMonitor:
             cts_dispatch_confirmed,
             cts_dispatch_confirmed_2
         ]
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
         cts_dispatch_confirmed['Name'] = 'IGZ_0001'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
@@ -1931,8 +2189,6 @@ class TestCtsDispatchMonitor:
                            f"- A sms tech 12 hours before note tech appended"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
-            side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -1955,12 +2211,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_send_tech_12_sms_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2),
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_confirmation_and_outdated_tech_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_confirmation_and_outdated_tech_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -2101,8 +2362,6 @@ class TestCtsDispatchMonitor:
                 f'- A sms tech 12 hours before note appended'
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -2117,12 +2376,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_send_tech_12_sms_tech_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_confirmation_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_confirmation_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -2216,7 +2480,6 @@ class TestCtsDispatchMonitor:
                 f'- A sms tech 12 hours before note appended'
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -2231,12 +2494,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_send_tech_12_sms_tech_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_confirmation_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_confirmation_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -2341,7 +2609,6 @@ class TestCtsDispatchMonitor:
                      f'- SMS tech 12h not sended'
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -2356,12 +2623,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_send_tech_12_sms_tech_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_confirmation_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_confirmation_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -2500,7 +2772,6 @@ class TestCtsDispatchMonitor:
                           f'- A sms tech 2 hours before tech note appended'
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -2523,12 +2794,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_send_tech_2_sms_tech_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_12h_sms_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_12h_sms_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -2665,7 +2941,6 @@ class TestCtsDispatchMonitor:
                           f'- A sms tech 2 hours before tech note appended'
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -2686,12 +2961,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_send_tech_2_sms_tech_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_12h_sms_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_12h_sms_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -2840,7 +3120,6 @@ class TestCtsDispatchMonitor:
 
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -2863,12 +3142,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_send_tech_2_sms_tech_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_12h_sms_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_12h_sms_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -3009,7 +3293,6 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
 
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -3032,12 +3315,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_send_tech_2_sms_tech_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_12h_sms_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_12h_sms_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -3175,7 +3463,6 @@ class TestCtsDispatchMonitor:
                       f'- A sms tech 2 hours before note appended'
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -3198,12 +3485,17 @@ class TestCtsDispatchMonitor:
             side_effect=responses_send_tech_2_sms_tech_note_mock)
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_12h_sms_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_12h_sms_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -3311,7 +3603,6 @@ class TestCtsDispatchMonitor:
                       f'- A sms tech 2 hours before tech note appended'
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -3330,12 +3621,17 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note = CoroutineMock()
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_2h_sms_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_2h_sms_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -3455,7 +3751,6 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
 
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.append_confirmed_note = CoroutineMock(
             side_effect=responses_append_confirmed_notes_mock)
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock(
@@ -3480,12 +3775,17 @@ class TestCtsDispatchMonitor:
         )
 
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_2h_sms_note['body'].get('ticketNotes', []),
+                cts_ticket_details_2_with_2h_sms_note['body'].get('ticketNotes', []),
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_confirmed_note.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_not_awaited()
@@ -3605,7 +3905,16 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech = CoroutineMock()
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note = CoroutineMock()
         with patch.object(UtilsRepository, 'get_diff_hours_between_datetimes', side_effect=responses_get_diff_hours):
-            await cts_dispatch_monitor._monitor_confirmed_dispatches(confirmed_dispatches=confirmed_dispatches)
+            i = 0
+            igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+            ticket_notes = [
+                cts_ticket_details_1_with_2h_sms_tech_note['body'].get('ticketNotes', [])
+            ]
+            for confirmed_dispatch in confirmed_dispatches:
+                await cts_dispatch_monitor._process_confirmed_dispatch(confirmed_dispatch,
+                                                                       igz_dispatch_numbers[i],
+                                                                       ticket_notes[i])
+                i = i + 1
 
         cts_dispatch_monitor._cts_repository.send_tech_2_sms_tech.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.append_tech_2_sms_tech_note.assert_not_awaited()
@@ -3656,20 +3965,25 @@ class TestCtsDispatchMonitor:
             True
         ]
 
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
-            side_effect=responses_details_mock)
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms = CoroutineMock(
             side_effect=responses_sms_tech_on_site_mock)
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note = CoroutineMock(
             side_effect=responses_append_tech_on_site_sms_note_mock)
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2, '', '']
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            cts_ticket_details_2['body'].get('ticketNotes', []),
+            [],
+            [],
+        ]
+        for tech_on_site_dispatch in tech_on_site_dispatches:
+            await cts_dispatch_monitor._process_tech_on_site_dispatch(tech_on_site_dispatch,
+                                                                      igz_dispatch_numbers[i],
+                                                                      ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_tech_on_site, sms_to),
@@ -3688,11 +4002,11 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_with_general_exception_test(
             self, cts_dispatch_monitor):
-        tech_on_site_dispatches = 0  # Non valid list for filter
-        err_msg = f"Error: _monitor_tech_on_site_dispatches - object of type 'int' has no len()"
+        tech_on_site_dispatch = 0  # Non valid list for filter
+        err_msg = f"Error: Dispatch [0] - IGZ_0001 - Not valid dispatch"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches)
+        await cts_dispatch_monitor._process_tech_on_site_dispatch(tech_on_site_dispatch, 'IGZ_0001', [])
 
         cts_dispatch_monitor._logger.error.assert_called_once()
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -3700,31 +4014,30 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_with_exception_test(
             self, cts_dispatch_monitor, cts_dispatch_tech_on_site):
-        tech_on_site_dispatches = [
-            cts_dispatch_tech_on_site
-        ]
-        err_msg = f"Error: Dispatch [{cts_dispatch_tech_on_site.get('Name')}] " \
-                  f"in ticket_id: {cts_dispatch_tech_on_site.get('Ext_Ref_Num__c')} " \
-                  f"- {cts_dispatch_tech_on_site}"
+        igz_id_1 = 'IGZ_0001'
+        err_msg = f"Error: Dispatch [{cts_dispatch_tech_on_site}] in igz_id: {igz_id_1}"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches)
+        await cts_dispatch_monitor._process_tech_on_site_dispatch(cts_dispatch_tech_on_site, 'IGZ_0001', [])
 
         cts_dispatch_monitor._logger.error.assert_called_once()
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_tech_on_site_dispatches_skipping_one_invalid_ticket_id_test(self, cts_dispatch_monitor,
-                                                                                  cts_dispatch_tech_on_site_skipped):
+                                                                                  cts_dispatch_tech_on_site_skipped,
+                                                                                  cts_dispatch_confirmed):
         tech_on_site_dispatches = [
-            cts_dispatch_tech_on_site_skipped
+            cts_dispatch_tech_on_site_skipped,
+            cts_dispatch_confirmed
         ]
 
         cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock()
         cts_dispatch_monitor._bruin_repository.append_note_to_ticket = CoroutineMock()
         cts_dispatch_monitor._cts_repository.send_confirmed_sms = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
+        for tech_on_site_dispatch in tech_on_site_dispatches:
+            await cts_dispatch_monitor._process_tech_on_site_dispatch(tech_on_site_dispatch, 'IGZ_0001', [])
 
         cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_not_awaited()
         cts_dispatch_monitor._bruin_repository.append_note_to_ticket.assert_not_awaited()
@@ -3745,9 +4058,10 @@ class TestCtsDispatchMonitor:
                   f"Dispatch: {dispatch_number_1} - Ticket_id: {ticket_id_1} - " \
                   f"from: {cts_dispatch_tech_on_site_skipped_bad_phone.get('Description__c')}"
 
-        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(return_value=err_msg)
+        # cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(return_value=err_msg)
 
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
+        for tech_on_site_dispatch in tech_on_site_dispatches:
+            await cts_dispatch_monitor._process_tech_on_site_dispatch(tech_on_site_dispatch, 'IGZ_0001', [])
 
         # cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
@@ -3782,8 +4096,6 @@ class TestCtsDispatchMonitor:
             True
         ]
 
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
-
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms = CoroutineMock(
             side_effect=responses_sms_tech_on_site_mock)
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note = CoroutineMock(
@@ -3794,12 +4106,17 @@ class TestCtsDispatchMonitor:
 
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(return_value=err_msg)
 
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            [],
+        ]
+        for tech_on_site_dispatch in tech_on_site_dispatches:
+            await cts_dispatch_monitor._process_tech_on_site_dispatch(tech_on_site_dispatch,
+                                                                      igz_dispatch_numbers[i],
+                                                                      ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_tech_on_site, sms_to)
@@ -3859,19 +4176,23 @@ class TestCtsDispatchMonitor:
                       f"- SMS tech on site not sended"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
 
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms = CoroutineMock(
             side_effect=responses_sms_tech_on_site_mock)
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note = CoroutineMock(
             side_effect=responses_append_tech_on_site_sms_note_mock)
 
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            cts_ticket_details_2['body'].get('ticketNotes', []),
+        ]
+        for tech_on_site_dispatch in tech_on_site_dispatches:
+            await cts_dispatch_monitor._process_tech_on_site_dispatch(tech_on_site_dispatch,
+                                                                      igz_dispatch_numbers[i],
+                                                                      ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_tech_on_site, sms_to),
@@ -3935,19 +4256,23 @@ class TestCtsDispatchMonitor:
                       f"- A sms tech on site note not appended"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
 
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms = CoroutineMock(
             side_effect=responses_sms_tech_on_site_mock)
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note = CoroutineMock(
             side_effect=responses_append_tech_on_site_sms_note_mock)
 
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1['body'].get('ticketNotes', []),
+            cts_ticket_details_2['body'].get('ticketNotes', []),
+        ]
+        for tech_on_site_dispatch in tech_on_site_dispatches:
+            await cts_dispatch_monitor._process_tech_on_site_dispatch(tech_on_site_dispatch,
+                                                                      igz_dispatch_numbers[i],
+                                                                      ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms.assert_has_awaits([
             call(dispatch_number_1, ticket_id_1, cts_dispatch_tech_on_site, sms_to),
@@ -3978,6 +4303,8 @@ class TestCtsDispatchMonitor:
         dispatch_number_2 = cts_dispatch_tech_on_site_2.get('Name')
         ticket_id_1 = cts_dispatch_tech_on_site.get('Ext_Ref_Num__c')
         ticket_id_2 = cts_dispatch_tech_on_site_2.get('Ext_Ref_Num__c')
+        igz_dispatch_number_1 = 'IGZ_0001'
+        igz_dispatch_number_2 = 'IGZ_0002'
 
         sms_to = '+12027723610'
         sms_to_2 = '+12027723611'
@@ -3997,17 +4324,20 @@ class TestCtsDispatchMonitor:
             True
         ]
 
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(side_effect=responses_details_mock)
-
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms = CoroutineMock()
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_tech_on_site_dispatches(tech_on_site_dispatches=tech_on_site_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [
+            cts_ticket_details_1_with_tech_on_site_sms_note['body'].get('ticketNotes', []),
+            cts_ticket_details_2_with_tech_on_site_sms_note['body'].get('ticketNotes', []),
+        ]
+        for tech_on_site_dispatch in tech_on_site_dispatches:
+            await cts_dispatch_monitor._process_tech_on_site_dispatch(tech_on_site_dispatch,
+                                                                      igz_dispatch_numbers[i],
+                                                                      ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository.send_tech_on_site_sms.assert_not_awaited()
         cts_dispatch_monitor._cts_repository.append_tech_on_site_sms_note.assert_not_awaited()
@@ -4044,18 +4374,15 @@ class TestCtsDispatchMonitor:
         slack_msg = f"[service-dispatch-monitor] [CTS] " \
                     f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
                     f"- A cancelled dispatch note appended"
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
-            side_effect=responses_details_mock)
+        ticket_notes_1 = cts_ticket_details_1['body'].get('ticketNotes', [])
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note = CoroutineMock(
             side_effect=responses_append_dispatch_cancelled_note_mock)
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches=cancelled_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1)
-        ])
+        for canceled_dispatch in cancelled_dispatches:
+            await cts_dispatch_monitor._process_canceled_dispatch(
+                canceled_dispatch, 'IGZ_0001', ticket_notes_1)
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, datetime_of_dispatch_1)
@@ -4065,27 +4392,31 @@ class TestCtsDispatchMonitor:
     @pytest.mark.asyncio
     async def monitor_cancelled_dispatches_with_general_exception_test(
             self, cts_dispatch_monitor):
-        cancelled_dispatches = 0  # Non valid list for filter
-        err_msg = f"Error: _monitor_cancelled_dispatches - object of type 'int' has no len()"
+        canceled_dispatch = 0  # Non valid list for filter
+        err_msg = f"Error: Dispatch [0] - IGZ_XXXX - Not valid dispatch"
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches)
+        await cts_dispatch_monitor._process_canceled_dispatch(canceled_dispatch, 'IGZ_XXXX', [])
 
         cts_dispatch_monitor._logger.error.assert_called_once()
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
 
     @pytest.mark.asyncio
     async def monitor_cancelled_dispatches_with_exception_test(
-            self, cts_dispatch_monitor, cts_dispatch_cancelled):
+            self, cts_dispatch_monitor, cts_dispatch_cancelled, cts_ticket_details_1):
         cancelled_dispatches = [
             cts_dispatch_cancelled,
         ]
-        err_msg = f"Error: Dispatch [{cts_dispatch_cancelled.get('Name')}] " \
-                  f"in ticket_id: {cts_dispatch_cancelled.get('Ext_Ref_Num__c')} " \
-                  f"- {cts_dispatch_cancelled}"
+        igz_ticket_id_1 = 'IGZ_0001'
+        err_msg = f"Error: Dispatch [{cts_dispatch_cancelled}] " \
+                  f"in igz_id: {igz_ticket_id_1}"
+        ticket_notes_1 = cts_ticket_details_1['body'].get('ticketNotes', [])
+
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches)
+        for canceled_dispatch in cancelled_dispatches:
+            await cts_dispatch_monitor._process_canceled_dispatch(
+                canceled_dispatch, igz_ticket_id_1, ticket_notes_1)
 
         cts_dispatch_monitor._logger.error.assert_called_once()
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
@@ -4121,35 +4452,36 @@ class TestCtsDispatchMonitor:
         ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
         ticket_id_2 = cts_dispatch_cancelled_2.get('Ext_Ref_Num__c')
 
+        ticket_notes_1 = cts_ticket_details_1['body'].get('ticketNotes', [])
+        ticket_notes_2 = []
+
         datetime_of_dispatch_1 = 'Jun 23, 2020 @ 01:00 PM UTC'
 
         responses_append_dispatch_cancelled_note_mock = [
             True
         ]
-        slack_msg = f"[service-dispatch-monitor] [CTS] " \
-                    f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
-                    f"- A cancelled dispatch note appended"
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
-            side_effect=responses_details_mock)
+        slack_msg_1 = f"[service-dispatch-monitor] [CTS] " \
+                      f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
+                      f"- A cancelled dispatch note appended"
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note = CoroutineMock(
             side_effect=responses_append_dispatch_cancelled_note_mock)
-        err_msg = f"An error occurred retrieve getting ticket details from bruin " \
-                  f"Dispatch: {dispatch_number_2} - Ticket_id: {ticket_id_2}"
+        err_msg = f"Error: Dispatch [{cts_dispatch_cancelled_2}] - {igz_dispatch_number_2} - Not valid dispatch"
 
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches=cancelled_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1),
-            call(ticket_id_2)
-        ])
+        i = 0
+        igz_dispatch_numbers = [igz_dispatch_number_1, igz_dispatch_number_2]
+        ticket_notes = [ticket_notes_1, ticket_notes_2]
+        for canceled_dispatch in cancelled_dispatches:
+            await cts_dispatch_monitor._process_canceled_dispatch(
+                canceled_dispatch, igz_dispatch_numbers[i], ticket_notes[i])
+            i = i + 1
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, datetime_of_dispatch_1)
         ])
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([call(slack_msg),
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([call(slack_msg_1),
                                                                                              call(err_msg)])
 
     @pytest.mark.asyncio
@@ -4163,6 +4495,9 @@ class TestCtsDispatchMonitor:
             cts_ticket_details_1_with_cancelled_note
         ]
 
+        igz_dispatch_number_1 = 'IGZ_0001'
+        ticket_notes_1 = cts_ticket_details_1_with_cancelled_note['body'].get('ticketNotes', [])
+
         dispatch_number_1 = cts_dispatch_cancelled.get('Name')
         ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
 
@@ -4172,27 +4507,24 @@ class TestCtsDispatchMonitor:
         slack_msg = f"[service-dispatch-monitor] [CTS] " \
                     f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
                     f"- A cancelled dispatch note appended"
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
-            side_effect=responses_details_mock)
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note = CoroutineMock(
             side_effect=responses_append_dispatch_cancelled_note_mock)
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches=cancelled_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1)
-        ])
+        for canceled_dispatch in cancelled_dispatches:
+            await cts_dispatch_monitor._process_canceled_dispatch(
+                canceled_dispatch, igz_dispatch_number_1, ticket_notes_1)
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_not_awaited()
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def monitor_cancelled_dispatches_not_appended_test(self, cts_dispatch_monitor, cts_dispatch_cancelled,
-                                                             cts_ticket_details_1):
+                                                             cts_ticket_details_1, cts_dispatch_confirmed_2):
         cancelled_dispatches = [
             cts_dispatch_cancelled,
+            cts_dispatch_confirmed_2
         ]
 
         responses_details_mock = [
@@ -4203,6 +4535,7 @@ class TestCtsDispatchMonitor:
         dispatch_number_1 = cts_dispatch_cancelled.get('Name')
         ticket_id_1 = cts_dispatch_cancelled.get('Ext_Ref_Num__c')
         datetime_of_dispatch_1 = 'Jun 23, 2020 @ 01:00 PM UTC'
+        ticket_notes_1 = cts_ticket_details_1['body'].get('ticketNotes', [])
 
         responses_append_dispatch_cancelled_note_mock = [
             False
@@ -4210,18 +4543,14 @@ class TestCtsDispatchMonitor:
         slack_msg = f"[service-dispatch-monitor] [CTS] " \
                     f"Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} " \
                     f"- A cancelled dispatch note not appended"
-        cts_dispatch_monitor._bruin_repository.get_ticket_details = CoroutineMock(
-            side_effect=responses_details_mock)
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note = CoroutineMock(
             side_effect=responses_append_dispatch_cancelled_note_mock)
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
 
-        await cts_dispatch_monitor._monitor_cancelled_dispatches(cancelled_dispatches=cancelled_dispatches)
-
-        cts_dispatch_monitor._bruin_repository.get_ticket_details.assert_has_awaits([
-            call(ticket_id_1)
-        ])
+        for canceled_dispatch in cancelled_dispatches:
+            await cts_dispatch_monitor._process_canceled_dispatch(
+                canceled_dispatch, igz_dispatch_number_1, ticket_notes_1)
 
         cts_dispatch_monitor._cts_repository.append_dispatch_cancelled_note.assert_has_awaits([
             call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, datetime_of_dispatch_1)
