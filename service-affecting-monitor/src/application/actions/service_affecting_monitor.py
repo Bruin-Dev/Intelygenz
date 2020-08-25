@@ -199,7 +199,7 @@ class ServiceAffectingMonitor:
                                 "category": "VAS",
                                 "services": [
                                     {
-                                        "serviceNumber": device['serial']
+                                        "serviceNumber": edge_status['edge_info']['edges']['serialNumber']
                                     }
                                 ],
                                 "contacts": [
