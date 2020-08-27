@@ -20,7 +20,7 @@ TNBA_NOTE_APPENDED_SUCCESS_MSG = (
 
 class TNBAMonitor:
     def __init__(self, event_bus, logger, scheduler, config, t7_repository, ticket_repository,
-                 monitoring_map_repository, bruin_repository, velocloud_repository, prediction_repository,
+                 customer_cache_repository, bruin_repository, velocloud_repository, prediction_repository,
                  notifications_repository):
         self._event_bus = event_bus
         self._logger = logger
@@ -28,17 +28,17 @@ class TNBAMonitor:
         self._config = config
         self._t7_repository = t7_repository
         self._ticket_repository = ticket_repository
-        self._monitoring_map_repository = monitoring_map_repository
+        self._customer_cache_repository = customer_cache_repository
         self._bruin_repository = bruin_repository
         self._velocloud_repository = velocloud_repository
         self._prediction_repository = prediction_repository
         self._notifications_repository = notifications_repository
 
-        self._monitoring_mapping = {}
+        self.__reset_customer_cache()
         self._semaphore = asyncio.BoundedSemaphore(self._config.MONITOR_CONFIG['semaphore'])
 
-    def __refresh_monitoring_mapping(self):
-        self._monitoring_mapping = self._monitoring_map_repository.get_monitoring_map_cache()
+    def __reset_customer_cache(self):
+        self._customer_cache = []
 
     async def start_tnba_automated_process(self, exec_on_start=False):
         self._logger.info('Scheduling TNBA automated process job...')
@@ -58,16 +58,17 @@ class TNBAMonitor:
             self._logger.info(f'Skipping start of TNBA automated process job. Reason: {conflict}')
 
     async def _run_tickets_polling(self):
+        self.__reset_customer_cache()
+
         self._logger.info('Starting TNBA process...')
-        if not self._monitoring_mapping:
-            self._logger.info('Creating map with all customers and all their devices...')
-            await self._monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
-            await self._monitoring_map_repository.start_create_monitoring_map_job(exec_on_start=False)
-            self._logger.info('Map of devices by customer created')
+
+        customer_cache_response = await self._customer_cache_repository.get_cache_for_tnba_monitoring()
+        if customer_cache_response['status'] not in range(200, 300) or customer_cache_response['status'] == 202:
+            return
+
+        self._customer_cache = customer_cache_response['body']
 
         start_time = time.time()
-
-        self.__refresh_monitoring_mapping()
 
         self._logger.info('Getting all open tickets for all customers...')
         open_tickets = await self._get_all_open_tickets_with_details_for_monitored_companies()
@@ -99,7 +100,7 @@ class TNBAMonitor:
     async def _get_all_open_tickets_with_details_for_monitored_companies(self):
         open_tickets = []
 
-        bruin_clients_ids: Set[int] = set(self._monitoring_mapping.keys())
+        bruin_clients_ids: Set[int] = set(elem['bruin_client_info']['client_id'] for elem in self._customer_cache)
         tasks = [
             self._get_open_tickets_with_details_by_client_id(client_id, open_tickets)
             for client_id in bruin_clients_ids
@@ -165,13 +166,7 @@ class TNBAMonitor:
             )
 
     def _filter_tickets_and_details_related_to_edges_under_monitoring(self, tickets):
-        serials_under_monitoring: Set[str] = set(sum(
-            (
-                list(edge_status_by_serial_dict.keys())
-                for edge_status_by_serial_dict in self._monitoring_mapping.values()
-            ),
-            []
-        ))
+        serials_under_monitoring: Set[str] = set(elem['serial_number'] for elem in self._customer_cache)
 
         relevant_tickets = []
         for ticket in tickets:
