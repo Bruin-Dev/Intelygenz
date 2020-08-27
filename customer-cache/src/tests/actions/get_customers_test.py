@@ -120,7 +120,7 @@ class TestGetCustomers:
         instance_request_message["status"] = 200
         instance_response_message[
             "body"] = "Cache is still being built for host(s): " \
-                      "['mettel.velocloud.net', 'metvco02.mettel.net', 'metvco03.mettel.net', 'metvco04.mettel.net']"
+                      "mettel.velocloud.net, metvco02.mettel.net, metvco03.mettel.net, metvco04.mettel.net"
         await instance_get_customer_with_empty_cache.get_customers(instance_request_message)
 
         instance_get_customer_with_empty_cache._storage_repository.get_cache.assert_called()

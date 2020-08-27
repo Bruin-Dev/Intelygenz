@@ -31,7 +31,7 @@ class GetCustomers:
             return
         body = msg["body"]
         if "filter" not in body.keys():
-            self._logger.error(f'Cannot get bruin client info using {json.dumps(body)}. Need "filter"')
+            self._logger.error(f'Cannot get customer cache info using {json.dumps(body)}. Need "filter"')
             response["status"] = 400
             response["body"] = 'You must specify "filter" in the body'
             await self._event_bus.publish_message(response_topic, response)
@@ -41,10 +41,7 @@ class GetCustomers:
         last_contact_filter = body["last_contact_filter"] if "last_contact_filter" in body else None
         caches = self._storage_repository.get_host_cache(filters=filters)
         if len(caches) == 0:
-            list_velo = []
-            for k in body["filter"].keys():
-                list_velo.append(k)
-            response["body"] = f'Cache is still being built for host(s): {list_velo}'
+            response["body"] = f'Cache is still being built for host(s): {", ".join(body["filter"].keys())}'
             response["status"] = 202
             await self._event_bus.publish_message(msg['response_topic'], response)
             return

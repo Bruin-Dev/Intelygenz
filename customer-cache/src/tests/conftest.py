@@ -99,7 +99,7 @@ def instance_request_message_without_topic():
 def instance_response_message():
     return {
         'request_id': '1111',
-        'body': "Cache is still being built for host(s): ['mettel.velocloud.com']",
+        'body': "Cache is still being built for host(s): mettel.velocloud.com",
         'status': 202
     }
 
