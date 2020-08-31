@@ -138,7 +138,40 @@ In the following [diagram](https://www.draw.io/#G1TJksbMyHCN-wStHoQQw6wG95oKN2nb
 
 #### Service-dispatch-monitor microservice
 
-*TODO*: Document this section
+This microservice monitor dispatches statuses for different vendors, at the time of writting this document LIT and CTS. Both processes are pretty much the same in concept but with differences in the implementation.
+
+A dispatch is general terms can have the following statuses:
+
+- Requested
+- Confirmed
+- Tech on site
+- Canceled
+- Completed
+
+The main use is to monitor:
+
+- Dispatch status changed
+- Updates in the dispatch like the technician
+- Send sms prior 2 and 12 hours before
+- Send sms tech on site
+- Cancel dispatch
+
+The basic algorithm behaves like this:
+
+- Get all dispatches for a vendor
+- Filter dispatches that are created through the `dispatch-portal`
+- Discard invalid ticket ids or dispatches with not proper fields
+- Split the dispatches by status and then send them to the function to proccess them, there are 3 general functions
+    * Confirmed dispatch:
+        - Send sms and append note to bruin when a dispatch is confirmed
+        - Send sms and append note to bruin 12 or 2 hours prior the dispatch
+        - Send sms and append note to bruin when a tech has changed
+    * Tech on site dispatch:
+        - Send sms and append note to bruin when tech on site
+    * Canceled dispatch:
+        - Append note to bruin when a dispatch is canceled
+
+Each vendor has it's own details like how to retrieve some fields or how we identify the tickets with the dispatches, all explained in the `service-dispatch-monitor`.
 
 In the following [diagram](https://www.draw.io/#G1BH1c57HfqXE-jn5BVtgU3j5b8CILgC3V) it's possible see the relationships between this microservice and the others.
 

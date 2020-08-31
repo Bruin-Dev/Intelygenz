@@ -2847,6 +2847,7 @@ class TestApiServer:
         uuid_ = 'UUID1'
         igz_dispatch_id = f"IGZ{uuid_}"
         ticket_id = new_dispatch['mettel_bruin_ticket_id']
+        new_dispatch["igz_dispatch_number"] = igz_dispatch_id
         api_server_test._config.ENVIRONMENT_NAME = 'production'
         payload = {"request_id": uuid_, "body": {}}
         cts_expected_response = {}
@@ -2944,6 +2945,8 @@ class TestApiServer:
         uuid_ = 'UUID1'
         igz_dispatch_id = f"IGZ{uuid_}"
         ticket_id = new_dispatch['mettel_bruin_ticket_id']
+        new_dispatch["igz_dispatch_number"] = igz_dispatch_id
+
         api_server_test._config.ENVIRONMENT_NAME = 'production'
         cts_expected_response = {
             'code': 400,
@@ -3036,6 +3039,8 @@ class TestApiServer:
         slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email " \
                     f"[{dispatch_number}] [{igz_dispatch_number}] " \
                     f"with ticket id: {ticket_id}"
+        redis_data = {"igz_dispatch_number": igz_dispatch_number}
+        api_server_test._redis_client.get = Mock(return_value=json.dumps(redis_data))
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -3211,6 +3216,9 @@ class TestApiServer:
         }
         api_server_test._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=[response_send_slack_message_mock])
+        igz_dispatch_number = 'IGZ_0001'
+        redis_data = {"igz_dispatch_number": igz_dispatch_number}
+        api_server_test._redis_client.get = Mock(return_value=json.dumps(redis_data))
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -3256,6 +3264,10 @@ class TestApiServer:
         }
         api_server_test._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=[response_send_slack_message_mock])
+
+        igz_dispatch_number = 'IGZ_0001'
+        redis_data = {"igz_dispatch_number": igz_dispatch_number}
+        api_server_test._redis_client.get = Mock(return_value=json.dumps(redis_data))
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -3319,6 +3331,10 @@ class TestApiServer:
             side_effect=[response_send_slack_message_mock])
         slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Cancel Requested by email [{dispatch_number}] " \
                     f"with ticket id: {ticket_id}"
+
+        igz_dispatch_number = 'IGZ_0001'
+        redis_data = {"igz_dispatch_number": igz_dispatch_number}
+        api_server_test._redis_client.get = Mock(return_value=json.dumps(redis_data))
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()

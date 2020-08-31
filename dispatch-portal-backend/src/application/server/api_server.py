@@ -650,6 +650,8 @@ class DispatchServer:
         igz_dispatch_id = f"IGZ{uuid()}"
         ticket_id = body.get('mettel_bruin_ticket_id')
 
+        body['igz_dispatch_number'] = igz_dispatch_id
+
         # Check if already exists in bruin
         pre_existing_ticket_notes_response = await self._bruin_repository.get_ticket_details(ticket_id)
         pre_existing_ticket_notes_status = pre_existing_ticket_notes_response['status']
@@ -728,7 +730,9 @@ class DispatchServer:
                 'code': response['status'], 'message': response['body']
             }
             return jsonify(error_response), response['status'], None
+        redis_data = json.loads(self._redis_client.get(dispatch_number))
 
+        igz_dispatch_number = redis_data['igz_dispatch_number']
         self._logger.info(f"[CTS] Dispatch [{dispatch_number}] - {response['body']} "
                           f"- took {time.time() - start_time}")
         dispatch = response['body']['records'][0]
@@ -750,7 +754,7 @@ class DispatchServer:
         ticket_notes = [tn for tn in ticket_notes if tn.get('noteValue')]
 
         filtered_ticket_notes = self._filter_ticket_note_by_dispatch_number(ticket_notes,
-                                                                            self.IGZ_DN_WATERMARK,
+                                                                            igz_dispatch_number,
                                                                             ticket_id)
 
         requested_watermark_found = UtilsRepository.get_first_element_matching(
@@ -762,14 +766,6 @@ class DispatchServer:
             self._logger.info(f"[CTS] Dispatch: [{dispatch_number}] Ticket: {ticket_id} "
                               f"already has a requested cancel dispatch note")
         else:
-
-            requested_watermark_found = UtilsRepository.get_first_element_matching(
-                iterable=filtered_ticket_notes,
-                condition=lambda note: self.MAIN_WATERMARK in note.get('noteValue')
-            )
-
-            igz_dispatch_number = UtilsRepository.find_dispatch_number_watermark(
-                requested_watermark_found, self.IGZ_DN_WATERMARK, self.MAIN_WATERMARK)
 
             date_time_of_dispatch = dispatch.get("Local_Site_Time__c")
             date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)

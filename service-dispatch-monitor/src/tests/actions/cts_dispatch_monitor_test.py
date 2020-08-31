@@ -173,6 +173,8 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._scheduler.add_job = Mock()
         cts_dispatch_monitor._redis_client.get = Mock(side_effect=[None, redis_data_2])
         cts_dispatch_monitor._redis_client.set = Mock()
+        cts_dispatch_monitor._cts_repository.get_igz_dispatch_number = \
+            Mock(side_effect=[igz_dispatch_number_1, igz_dispatch_number_2, None, None])
 
         ticket_notes_1 = [{'noteId': 70805300,
                            'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
@@ -263,7 +265,7 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._scheduler.add_job = Mock()
         cts_dispatch_monitor._redis_client.get = Mock(side_effect=[None, None, None])
         cts_dispatch_monitor._redis_client.set = Mock()
-        cts_dispatch_monitor._cts_repository.determine_final_igz_id_for_dispatch = \
+        cts_dispatch_monitor._cts_repository.get_igz_dispatch_number = \
             Mock(side_effect=[igz_dispatch_number_1, None, igz_dispatch_number_2])
 
         ticket_notes_1 = [{'noteId': 70805300,

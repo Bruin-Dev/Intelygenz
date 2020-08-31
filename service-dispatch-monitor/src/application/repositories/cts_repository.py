@@ -812,49 +812,18 @@ class CtsRepository:
         latest_tech_name_assigned = tech_names[-1] if len(tech_names) >= 1 else None
         return latest_tech_name_assigned
 
-    def determine_final_igz_id_for_dispatch(self, dispatch, dispatch_number, ticket_id,
-                                            filtered_ticket_notes_by_igz_id, watermark):
-        final_igz_id = None
-        counters = {}
-
-        if len(filtered_ticket_notes_by_igz_id.keys()) == 0:
-            return final_igz_id
-        if len(filtered_ticket_notes_by_igz_id.keys()) == 1:
-            return [*filtered_ticket_notes_by_igz_id.keys()][0]
-
-        for igz_id, ticket_notes in filtered_ticket_notes_by_igz_id.items():
-            sms_to = CtsRepository.get_sms_to(dispatch)
-            onsite_contact = self.get_onsite_contact(dispatch)
-            location = self.get_location(dispatch)
-
-            requested_watermark_found = UtilsRepository.find_note(ticket_notes, watermark)
-            if requested_watermark_found is None:
-                continue
-            requested_note = requested_watermark_found.get('noteValue', '')
-            sms_to_from_note = CtsRepository.get_sms_to_from_note(requested_note)
-            onsite_contact_from_note = self.get_onsite_contact_from_note(requested_note)
-            location_from_note = self.get_location_from_note(requested_note)
-            self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                              f"From dispatch: {sms_to, onsite_contact, location} - "
-                              f"From note: {sms_to_from_note, onsite_contact_from_note, location_from_note}")
-            igz_id_counter = 0
-            if onsite_contact in onsite_contact_from_note or onsite_contact_from_note in onsite_contact:
-                igz_id_counter = igz_id_counter + 1
-            if sms_to in sms_to_from_note or sms_to_from_note in sms_to:
-                igz_id_counter = igz_id_counter + 1
-            if location in location_from_note or location_from_note in location:
-                igz_id_counter = igz_id_counter + 1
-            if igz_id_counter >= 1:
-                final_igz_id = igz_id
-                counters[igz_id] = igz_id_counter
-
-        if final_igz_id is None or len(counters.keys()) == 0:
+    @staticmethod
+    def get_igz_dispatch_number(dispatch):
+        description = dispatch.get('Description__c')
+        description_lines = description.splitlines()
+        igz_dispatch_number = None
+        for line in description_lines:
+            if line and len(line) > 0 and 'IGZ Dispatch Number:' in line:
+                igz_dispatch_number = ''.join(ch for ch in line)
+                break
+        if igz_dispatch_number is None or igz_dispatch_number.strip() == '':
             return None
-
-        final_igz_id, _ = max(counters.items(), key=lambda v: v[1])
-        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
-                          f"Match with igz dispatch number: {final_igz_id}")
-        return final_igz_id
+        return igz_dispatch_number.strip().replace('IGZ Dispatch Number: ', '')
 
     def filter_ticket_notes_by_dispatch_number(self, ticket_notes, dispatch_number):
         filtered_ticket_notes = []

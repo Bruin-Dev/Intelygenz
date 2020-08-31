@@ -24,10 +24,12 @@ expected_dispatch_request_mail = """
 <p>Name: Karen Doe</p>
 <p>Phone: +1 666 6666 666</p>
 <p>Email: karen.doe@mettel.net</p>
+<p>IGZ Dispatch Number: IGZ_0001</p>
 """
 
 
 def get_dispatch_request_mail_test(new_dispatch):
+    new_dispatch["igz_dispatch_number"] = 'IGZ_0001'
     cts_body_mapped = cts_mapper.map_create_dispatch(new_dispatch)
     dispatch_request_mail = render_email_template(cts_body_mapped)
     assert dispatch_request_mail == expected_dispatch_request_mail

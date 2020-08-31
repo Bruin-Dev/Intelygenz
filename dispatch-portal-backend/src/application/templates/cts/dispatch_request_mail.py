@@ -21,6 +21,7 @@ CTS_DISPATCH_REQUEST_MAIL = """
 <p>Name: {name} {lastname}</p>
 <p>Phone: {phone_number}</p>
 <p>Email: {email}</p>
+<p>IGZ Dispatch Number: {igz_dispatch_number}</p>
 """
 
 
@@ -47,5 +48,6 @@ def render_email_template(payload):
         name=payload.get('name', ''),
         lastname=payload.get('lastname', ''),
         phone_number=payload.get('phone_number', ''),
-        email=payload.get('email', '')
+        email=payload.get('email', ''),
+        igz_dispatch_number=payload.get('igz_dispatch_number', '')
     )

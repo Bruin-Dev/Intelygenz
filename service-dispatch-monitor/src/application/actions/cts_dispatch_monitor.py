@@ -139,11 +139,8 @@ class CtsDispatchMonitor:
             filtered_ticket_notes_by_igz_id = self._cts_repository.split_ticket_notes_by_igz_dispatch_num(
                 all_igz_notes)
 
-            final_igz_id = self._cts_repository.determine_final_igz_id_for_dispatch(dispatch,
-                                                                                    dispatch_number,
-                                                                                    ticket_id,
-                                                                                    filtered_ticket_notes_by_igz_id,
-                                                                                    self.DISPATCH_REQUESTED_WATERMARK)
+            final_igz_id = self._cts_repository.get_igz_dispatch_number(dispatch)
+
             if final_igz_id is None:
                 self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
                                   f"discarded matching igz dispatch number")

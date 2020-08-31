@@ -45,7 +45,8 @@ def map_create_dispatch(body):
         "lastname": body["lastname_of_mettel_requester"],
         "phone_number": body["mettel_department_phone_number"],
         "email": body["mettel_requester_email"],
-        "mettel_department": body["mettel_department"]
+        "mettel_department": body["mettel_department"],
+        "igz_dispatch_number": body["igz_dispatch_number"]
     }
 
     return dispatch_request
