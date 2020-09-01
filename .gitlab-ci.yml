@@ -37,7 +37,7 @@ variables:
   sites_monitor_desired_tasks: 1
   tnba_monitor_desired_tasks: 1
   t7_bridge_desired_tasks: 1
-  velocloud_bridge_desired_tasks: 2
+  velocloud_bridge_desired_tasks: 1
 
 include:
   # Templates used in Gitlab-CI jobs
