@@ -23,6 +23,8 @@ TNBA_FEEDBACK_CONFIG = {
     'environment': "dev",
     'timezone': "US/Eastern",
     'semaphore': 1,
+    # 7 days in seconds
+    'redis_ttl': 604800,
     'velo_filter': {"mettel.velocloud.net": []},
 }
 

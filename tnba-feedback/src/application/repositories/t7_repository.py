@@ -47,8 +47,8 @@ class T7Repository:
         return response
 
     def tnba_note_in_task_history(self, task_history):
-        task_history_tnba_filter = [task for task in task_history if "TNBA" in task["Notes"]]
-
+        task_history_tnba_filter = [task for task in task_history if task["Notes"] is not None
+                                    if "TNBA" in task["Notes"]]
         if len(task_history_tnba_filter) > 0:
             return True
 

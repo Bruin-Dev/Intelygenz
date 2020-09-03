@@ -14,7 +14,7 @@ from tenacity import retry, wait_exponential, stop_after_delay
 
 class TNBAFeedback:
     def __init__(self, event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                 bruin_repository, notifications_repository):
+                 bruin_repository, notifications_repository, redis_client):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -23,6 +23,7 @@ class TNBAFeedback:
         self._customer_cache_repository = customer_cache_repository
         self._bruin_repository = bruin_repository
         self._notifications_repository = notifications_repository
+        self._redis_client = redis_client
         self._semaphore = asyncio.BoundedSemaphore(self._config.TNBA_FEEDBACK_CONFIG['semaphore'])
 
     async def start_tnba_automated_process(self, exec_on_start=False):
@@ -124,10 +125,24 @@ class TNBAFeedback:
                 if ticket_task_history_tnba_check is False:
                     self._logger.info(f"No TNBA note found in task history of ticket id {ticket_id}. Skipping ...")
                     return
+                if self._redis_client.get(ticket_id) is not None:
+                    self._logger.info(f"Task history of ticket id {ticket_id} has already been sent to T7. "
+                                      f"Skipping ...")
+                    return
+
                 self._logger.info(f"TNBA note found in task history of ticket id {ticket_id}")
                 self._logger.info("Sending data to T7")
 
-                await self._t7_repository.post_metrics(ticket_id, ticket_task_history_body)
+                post_metrics = await self._t7_repository.post_metrics(ticket_id, ticket_task_history_body)
+                post_metrics_body = post_metrics["body"]
+                post_metrics_status = post_metrics["status"]
+
+                if post_metrics_status not in range(200, 300):
+                    self._logger.info(f"Posting metrics to T7 status returned {post_metrics_status}"
+                                      f" and posting metrics to T7 body returned {post_metrics_body}")
+                    return
+                self._redis_client.set(ticket_id, '', ex=self._config.TNBA_FEEDBACK_CONFIG['redis_ttl'])
+
         try:
             await send_ticket_task_history_to_t7()
         except Exception as e:

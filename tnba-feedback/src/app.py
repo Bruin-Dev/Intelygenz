@@ -51,7 +51,8 @@ class Container:
                                            notifications_repository=self._notifications_repository)
         # ACTIONS
         self._tnba_feedback = TNBAFeedback(self._event_bus, self._logger, self._scheduler, config, self._t7_repository,
-                                           self._customer_cache, self._bruin_repository, self._notifications_repository)
+                                           self._customer_cache, self._bruin_repository, self._notifications_repository,
+                                           self._redis_client)
 
     async def _start(self):
         await self._event_bus.connect()
