@@ -34,7 +34,7 @@ MONITOR_MAP_CONFIG = {
         # Federal edge that is inside a non-federal Velocloud instance
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
     ],
-    'semaphore': 10,
+    'semaphore': 5,
     'velo_filter': {},
     'environment': os.environ["CURRENT_ENVIRONMENT"],
 
@@ -71,9 +71,9 @@ MONITOR_CONFIG = {
         {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
     ],
     'autoresolve_ticket_creation_seconds': 60 * 60,
-    'semaphore': 10,
-    'process_semaphore': 10,
-    'process_errors_semaphore': 10
+    'semaphore': 3,
+    'process_semaphore': 3,
+    'process_errors_semaphore': 1
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
