@@ -53,3 +53,7 @@ QUART_CONFIG = {
 REDIS = {
     "host": os.environ["REDIS_HOSTNAME"]
 }
+
+REDIS_TNBA_FEEDBACK = {
+    "host": os.environ["REDIS_TNBA_FEEDBACK_HOSTNAME"]
+}

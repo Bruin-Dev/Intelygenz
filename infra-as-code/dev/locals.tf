@@ -26,6 +26,14 @@ locals {
   automation-redis-customer-cache-security_group-tag-Name = "${var.ENVIRONMENT}-customer-cache-redis"
   automation-redis-customer-cache-hostname = aws_elasticache_cluster.automation-redis-customer-cache[0].cache_nodes[0].address
 
+  // automation-redis-tnba-feedback-cache local vars
+  automation-redis-tnba-feedback-cluster_id = "${var.ENVIRONMENT}-tnba-feedback-cache-redis"
+  automation-redis-tnba-feedback-elasticache_cluster-tag-Name = "${var.ENVIRONMENT}-tnba-feedback-redis"
+  automation-redis-tnba-feedback-subnet_group-name = "${var.ENVIRONMENT}-tnba-feedback-redis-subnet"
+  automation-redis-tnba-feedback-security_group-name = "${var.ENVIRONMENT}-tnba-feedback-redis-sg"
+  automation-redis-tnba-feedback-security_group-tag-Name = "${var.ENVIRONMENT}-tnba-feedback-redis"
+  automation-redis-tnba-feedback-hostname = aws_elasticache_cluster.automation-redis-tnba-feedback[0].cache_nodes[0].address
+
   // automation-bruin-brige local vars
   automation-bruin-bridge-image = "${data.aws_ecr_repository.automation-bruin-bridge.repository_url}:${data.external.bruin-bridge-build_number.result["image_tag"]}"
   automation-bruin-bridge-papertrail_prefix = "bruin-bridge-${element(split("-", data.external.bruin-bridge-build_number.result["image_tag"]),2)}"
@@ -36,7 +44,7 @@ locals {
   automation-bruin-bridge-task_definition = "${aws_ecs_task_definition.automation-bruin-bridge.family}:${aws_ecs_task_definition.automation-bruin-bridge.revision}"
   automation-bruin-bridge-service_discovery_service-name = "bruin-bridge-${var.ENVIRONMENT}"
 
-  // cts-brige local vars
+  // automation-cts-bridge local vars
   automation-cts-bridge-image = "${data.aws_ecr_repository.automation-cts-bridge.repository_url}:${data.external.cts-bridge-build_number.result["image_tag"]}"
   automation-cts-bridge-papertrail_prefix = "cts-bridge-${element(split("-", data.external.cts-bridge-build_number.result["image_tag"]),2)}"
   automation-cts-bridge-ecs_task_definition-family = "${var.ENVIRONMENT}-cts-bridge"

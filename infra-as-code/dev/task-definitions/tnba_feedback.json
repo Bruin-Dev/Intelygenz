@@ -63,7 +63,12 @@
       {
         "name": "ENVIRONMENT_NAME",
         "value": "${ENVIRONMENT_NAME}"
+      },
+      {
+        "name": "REDIS_TNBA_FEEDBACK_HOSTNAME",
+        "value": "${REDIS_TNBA_FEEDBACK_HOSTNAME}"
       }
+
     ]
   }
 ]

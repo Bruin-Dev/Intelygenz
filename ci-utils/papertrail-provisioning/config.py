@@ -105,6 +105,10 @@ PAPERTRAIL_PROVISIONING = {
                     "search_name": f"[tnba-monitor] - logs"
                 },
                 {
+                    "query": f"tnba-feedback AND {ENVIRONMENT_ID} AND {BUILD_NUMBER}",
+                    "search_name": f"[tnba-feedback] - logs"
+                },
+                {
                     "query": f"velocloud-bridge AND {ENVIRONMENT_ID} AND {BUILD_NUMBER}",
                     "search_name": f"[velocloud-bridge] - logs"
                 },
@@ -149,6 +153,11 @@ PAPERTRAIL_PROVISIONING = {
                     "query": f"service-outage-monitor AND {ENVIRONMENT_ID} AND "
                              f"\"Successfully created outage ticket for edge\"",
                     "search_name": f"[service-outage-monitor] - ticket creation"
+                },
+                {
+                    "query": f"velocloud-bridge AND {ENVIRONMENT_ID} AND "
+                             f"\"ERROR:\"",
+                    "search_name": f"[velocloud-bridge] - ERROR messages"
                 }
             ]
         }

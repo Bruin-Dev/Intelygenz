@@ -23,6 +23,7 @@ data "template_file" "automation-tnba-feedback" {
     PYTHONUNBUFFERED = var.PYTHONUNBUFFERED
     NATS_SERVER1 = local.nats_server1
     REDIS_HOSTNAME = local.redis-hostname
+    REDIS_TNBA_FEEDBACK_HOSTNAME = local.automation-redis-tnba-feedback-hostname
     CURRENT_ENVIRONMENT = var.CURRENT_ENVIRONMENT
     PAPERTRAIL_ACTIVE = var.CURRENT_ENVIRONMENT == "production" ? true : false
     PAPERTRAIL_PREFIX = local.automation-tnba-feedback-papertrail_prefix
@@ -128,8 +129,10 @@ resource "aws_ecs_service" "automation-tnba-feedback" {
   }
 
   depends_on = [ null_resource.bruin-bridge-healthcheck,
-                 null_resource.velocloud-bridge-healthcheck,
-                 null_resource.t7-bridge-healthcheck,
+                 null_resource.cts-bridge-healthcheck,
+                 null_resource.lit-bridge-healthcheck,
+                 null_resource.metrics-prometheus-healthcheck,
                  null_resource.notifier-healthcheck,
-                 null_resource.metrics-prometheus-healthcheck ]
+                 null_resource.velocloud-bridge-healthcheck,
+                 null_resource.t7-bridge-healthcheck]
 }

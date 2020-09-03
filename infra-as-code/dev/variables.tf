@@ -266,7 +266,7 @@ variable PAPERTRAIL_PORT {
 variable "redis_node_type" {
   type = "map"
   default = {
-    "production"  = "cache.t2.medium"
+    "production"  = "cache.m4.large"
     "dev"         = "cache.t2.micro"
   }
 }
