@@ -76,6 +76,11 @@ MONITOR_CONFIG = {
     'process_errors_semaphore': 1
 }
 
+# TODO: remove at some point
+if velocloud_hosts == ['metvco02.mettel.net']:
+    MONITOR_CONFIG['semaphore'] = 10
+    MONITOR_CONFIG['process_semaphore'] = 10
+
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
 
 LOG_CONFIG = {
