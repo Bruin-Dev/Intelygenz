@@ -1997,9 +1997,18 @@ class TestServiceAffectingMonitor:
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
             "edge_id": 1651,
-            "email": "fake@gmail.com",
-            "phone": "111-111-1111",
-            "name": "Fake Guy"
+            "contacts": {
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                }
+            }
         }
         edge_status = {
             "edge_id": {
@@ -2065,9 +2074,18 @@ class TestServiceAffectingMonitor:
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
             "edge_id": 1651,
-            "email": "fake@gmail.com",
-            "phone": "111-111-1111",
-            "name": "Fake Guy"
+            "contacts": {
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                }
+            }
         }
         edge_status = {
             "edge_id": {
@@ -2135,9 +2153,18 @@ class TestServiceAffectingMonitor:
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
             "edge_id": 1651,
-            "email": "fake@gmail.com",
-            "phone": "111-111-1111",
-            "name": "Fake Guy"
+            "contacts": {
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                }
+            }
         }
 
         config = testconfig
@@ -2232,9 +2259,18 @@ class TestServiceAffectingMonitor:
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
             "edge_id": 1651,
-            "email": "fake@gmail.com",
-            "phone": "111-111-1111",
-            "name": "Fake Guy"
+            "contacts": {
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                }
+            }
         }
 
         client_id = '85940'
@@ -2309,9 +2345,18 @@ class TestServiceAffectingMonitor:
             "host": "mettel.velocloud.net",
             "enterprise_id": 137,
             "edge_id": 1651,
-            "email": "fake@gmail.com",
-            "phone": "111-111-1111",
-            "name": "Fake Guy"
+            "contacts": {
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                }
+            }
         }
 
         config = testconfig

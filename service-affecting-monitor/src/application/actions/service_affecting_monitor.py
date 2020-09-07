@@ -204,15 +204,15 @@ class ServiceAffectingMonitor:
                                 ],
                                 "contacts": [
                                     {
-                                        "email": device['email'],
-                                        "phone": device['phone'],
-                                        "name": device['name'],
+                                        "email": device['contacts']['site']['email'],
+                                        "phone": device['contacts']['site']['phone'],
+                                        "name": device['contacts']['site']['name'],
                                         "type": "site"
                                     },
                                     {
-                                        "email": device['email'],
-                                        "phone": device['phone'],
-                                        "name": device['name'],
+                                        "email": device['contacts']['ticket']['email'],
+                                        "phone": device['contacts']['ticket']['phone'],
+                                        "name": device['contacts']['ticket']['name'],
                                         "type": "ticket"
                                     }
                                 ]
