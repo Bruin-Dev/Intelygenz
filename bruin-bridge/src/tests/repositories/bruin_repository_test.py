@@ -149,7 +149,7 @@ class TestBruinRepository:
         filtered_tickets = await bruin_repository.get_all_filtered_tickets(
             params=params,
             ticket_status=[ticket_status_1, ticket_status_2],
-            )
+        )
 
         bruin_repository._bruin_client.get_all_tickets.assert_awaited()
         assert filtered_tickets['body'] == []
@@ -385,6 +385,7 @@ class TestBruinRepository:
         ticket_details_by_edge = await bruin_repository.get_ticket_details_by_edge_serial(
             edge_serial=edge_serial, params=params,
             ticket_statuses=ticket_statuses,
+            stop_on_find=True
         )
 
         bruin_repository.get_all_filtered_tickets.assert_awaited_once_with(
@@ -475,16 +476,15 @@ class TestBruinRepository:
         assert ticket_details_by_edge['status'] == 200
 
     @pytest.mark.asyncio
-    async def get_affecting_ticket_details_by_edge_serial_test(self):
+    async def get_affecting_ticket_details_by_edge_serial_all_status_test(self):
         logger = Mock()
         bruin_client = Mock()
 
         edge_serial = 'VC05200026138'
         client_id = 123
 
-        ticket_status_1 = "New"
-        ticket_status_2 = "In-Progress"
-        ticket_statuses = [ticket_status_1, ticket_status_2]
+        all_ticket_status = ['New', 'InProgress', 'Draft']
+        ticket_statuses = None
         category = 'SD-WAN'
         ticket_topic = 'VAS'
 
@@ -506,14 +506,25 @@ class TestBruinRepository:
         }]
 
         bruin_repository = BruinRepository(logger, bruin_client)
-        bruin_repository.search_ticket_details_for_serial = CoroutineMock()
+        bruin_repository.get_ticket_details_by_edge_serial = CoroutineMock(return_value=dict(body=ticket_details,
+                                                                                             status=200))
 
         affecting_ticket_details_by_edge = await bruin_repository.get_affecting_ticket_details_by_edge_serial(
             edge_serial=edge_serial, client_id=client_id,
             category=category, ticket_statuses=ticket_statuses,
         )
 
-        bruin_repository.search_ticket_details_for_serial.ase
+        bruin_repository.get_ticket_details_by_edge_serial.awaited_once_with(
+            edge_serial=edge_serial,
+            params=dict(
+                ticket_topic=ticket_topic,
+                client_id=client_id,
+                category=category),
+            ticket_statuses=ticket_statuses,
+        )
+
+        assert affecting_ticket_details_by_edge["body"] == ticket_details
+        assert affecting_ticket_details_by_edge["status"] == 200
 
     @pytest.mark.asyncio
     async def get_affecting_ticket_details_by_edge_serial_test(self):
@@ -678,9 +689,8 @@ class TestBruinRepository:
         edge_serial = 'VC05200026138'
         client_id = 123
 
-        ticket_status_1 = "New"
-        ticket_status_2 = "In-Progress"
-        ticket_statuses = [ticket_status_1, ticket_status_2]
+        all_ticket_status = ['New', 'InProgress', 'Draft']
+        ticket_statuses = None
         category = 'SD-WAN'
         ticket_topic = 'VOO'
 
@@ -716,7 +726,7 @@ class TestBruinRepository:
                 ticket_topic=ticket_topic,
                 client_id=client_id,
                 category=category),
-            ticket_statuses=ticket_statuses,
+            ticket_statuses=all_ticket_status,
             stop_on_find=True
         )
         assert outage_ticket_details_by_edge["body"] == 'Failed'
@@ -817,6 +827,29 @@ class TestBruinRepository:
         management_status = response["body"]
         bruin_client.get_management_status.assert_awaited_once_with(filters)
         assert "Active – Platinum Monitoring" in management_status
+
+    @pytest.mark.asyncio
+    async def get_management_status_no_attributes_test(self):
+        logger = Mock()
+        filters = {
+            "client_id": 9994,
+            "status": "A",
+            "service_number": "VC05400009999"
+        }
+        response = {
+            "body":
+                {
+                    "inventoryId": "12796795",
+                    "serviceNumber": "VC05400002265",
+                },
+            "status": 200,
+        }
+        bruin_client = Mock()
+        bruin_client.get_management_status = CoroutineMock(return_value=response)
+        bruin_repository = BruinRepository(logger, bruin_client)
+        response_management = await bruin_repository.get_management_status(filters)
+        bruin_client.get_management_status.assert_awaited_once_with(filters)
+        assert response_management == response
 
     @pytest.mark.asyncio
     async def get_management_status_ok_no_management_key_test(self):
@@ -1684,22 +1717,22 @@ class TestBruinRepository:
         }
 
         note_1_from_client_response = {
-          "noteID": 70646090,
-          "noteType": "ADN",
-          "noteValue": "Test note 1",
-          "actionID": None,
-          "detailID": 5002307,
-          "enteredBy": 442301,
-          "enteredDate": "2020-05-20T06:00:38.803-04:00",
-          "lastViewedBy": None,
-          "lastViewedDate": None,
-          "refNoteID": None,
-          "noteStatus": None,
-          "noteText": None,
-          "childNotes": None,
-          "documents": None,
-          "alerts": None,
-          "taggedUserDirIDs": None,
+            "noteID": 70646090,
+            "noteType": "ADN",
+            "noteValue": "Test note 1",
+            "actionID": None,
+            "detailID": 5002307,
+            "enteredBy": 442301,
+            "enteredDate": "2020-05-20T06:00:38.803-04:00",
+            "lastViewedBy": None,
+            "lastViewedDate": None,
+            "refNoteID": None,
+            "noteStatus": None,
+            "noteText": None,
+            "childNotes": None,
+            "documents": None,
+            "alerts": None,
+            "taggedUserDirIDs": None,
         }
         note_2_from_client_response = {
             "noteID": 70646091,
@@ -1790,7 +1823,6 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def get_ticket_task_history_ok_test(self):
-
         ticket_id = 4503440
 
         results = ['List of task history']
@@ -1817,7 +1849,6 @@ class TestBruinRepository:
 
     @pytest.mark.asyncio
     async def get_ticket_task_history_ko_non_2xx_return_test(self):
-
         ticket_id = 4503440
 
         return_body = 'Failed'
@@ -1840,3 +1871,127 @@ class TestBruinRepository:
 
         bruin_client.get_ticket_task_history.assert_awaited_once_with(filter)
         assert result == {"body": return_body, "status": return_status}
+
+    @pytest.mark.asyncio
+    async def get_ticket_overview_test(self):
+        ticket_id = '4503440'
+        return_status = 200
+
+        logger = Mock()
+        ticket_123 = {
+            'ticketID': 123,
+            "clientName": "Sam &amp; Su's Retail Shop 5",
+            "category": "",
+            "topic": "Add Cloud PBX User License",
+            "referenceTicketNumber": 0,
+            "ticketStatus": "Resolved",
+            "address": {
+                "address": "69 Blanchard St",
+                "city": "Newark",
+                "state": "NJ",
+                "zip": "07105-4701",
+                "country": "USA"
+            },
+            "createDate": "4/23/2019 7:59:50 PM",
+            "createdBy": "Amulya Bidar Nataraj 113",
+            "creationNote": 'null',
+            "resolveDate": "4/23/2019 8:00:35 PM",
+            "resolvedby": 'null',
+            "closeDate": 'null',
+            "closedBy": 'null',
+            "lastUpdate": 'null',
+            "updatedBy": 'null',
+            "mostRecentNote": " ",
+            "nextScheduledDate": "4/23/2019 4:00:00 AM",
+            "flags": "",
+            "severity": "100"
+        }
+        ticket_321 = ticket_123
+        ticket_321['ticketID'] = 321
+        bruin_client = Mock()
+        bruin_client.get_all_tickets = CoroutineMock(side_effect=[
+            {'body': [ticket_123, ticket_123], 'status': 200},
+            {'body': [ticket_321], 'status': 200}
+        ])
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_ticket_overview(ticket_id)
+
+        assert result == {"body": ticket_123, "status": return_status}
+
+    @pytest.mark.asyncio
+    async def get_ticket_overview_none_ticket_id_test(self):
+        ticket_id = None
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_ticket_overview(ticket_id)
+
+        assert result == {'body': 'not ticket id found', 'status': 404}
+
+    @pytest.mark.asyncio
+    async def get_ticket_overview_empty_ticket_id_test(self):
+        ticket_id = '4503440'
+        return_status = 200
+
+        logger = Mock()
+
+        bruin_client = Mock()
+        bruin_client.get_all_tickets = CoroutineMock(side_effect=[
+            {'body': [], 'status': 200},
+        ])
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_ticket_overview(ticket_id)
+
+        assert result == {"body": [], "status": return_status}
+
+    @pytest.mark.asyncio
+    async def get_ticket_overview_4xx_test(self):
+        ticket_id = '4503440'
+        return_status = 400
+
+        logger = Mock()
+        ticket_123 = {
+            'ticketID': 123,
+            "clientName": "Sam &amp; Su's Retail Shop 5",
+            "category": "",
+            "topic": "Add Cloud PBX User License",
+            "referenceTicketNumber": 0,
+            "ticketStatus": "Resolved",
+            "address": {
+                "address": "69 Blanchard St",
+                "city": "Newark",
+                "state": "NJ",
+                "zip": "07105-4701",
+                "country": "USA"
+            },
+            "createDate": "4/23/2019 7:59:50 PM",
+            "createdBy": "Amulya Bidar Nataraj 113",
+            "creationNote": 'null',
+            "resolveDate": "4/23/2019 8:00:35 PM",
+            "resolvedby": 'null',
+            "closeDate": 'null',
+            "closedBy": 'null',
+            "lastUpdate": 'null',
+            "updatedBy": 'null',
+            "mostRecentNote": " ",
+            "nextScheduledDate": "4/23/2019 4:00:00 AM",
+            "flags": "",
+            "severity": "100"
+        }
+        ticket_321 = ticket_123
+        ticket_321['ticketID'] = 321
+        bruin_client = Mock()
+        bruin_client.get_all_tickets = CoroutineMock(side_effect=[
+            {'body': [ticket_123, ticket_123], 'status': 400},
+            {'body': [ticket_321], 'status': 400}
+        ])
+        bruin_repository = BruinRepository(logger, bruin_client)
+
+        result = await bruin_repository.get_ticket_overview(ticket_id)
+
+        assert result == {"body": [ticket_123, ticket_123], "status": return_status}

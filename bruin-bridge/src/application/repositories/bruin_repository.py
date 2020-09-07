@@ -293,3 +293,15 @@ class BruinRepository:
         if ticket_current_task["status"] in range(200, 300):
             ticket_current_task["body"] = ticket_current_task["body"]["result"]
         return ticket_current_task
+
+    async def get_ticket_overview(self, ticket_id):
+        if not ticket_id or not ticket_id.isdigit():
+            return {'body': 'not ticket id found', 'status': 404}
+        params = {'ticket_id': int(ticket_id)}
+        self._logger.info(f'Getting ticket overview: {ticket_id} from Bruin...')
+        ticket_response = await self._bruin_client.get_all_tickets(params)
+        if ticket_response["status"] not in range(200, 300):
+            return ticket_response
+        if len(ticket_response['body']) > 0:
+            ticket_response['body'] = ticket_response['body'][0]
+        return ticket_response

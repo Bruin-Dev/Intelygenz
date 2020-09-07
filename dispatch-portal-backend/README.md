@@ -15,6 +15,7 @@ This microservice will unify the dispatch operations over N remote APIs:
 - [Vendors](#vendors)
   * [LIT](#vendor--lit)
   * [CTS](#vendor--cts)
+- [Bruin](#bruin-bridge)
 - [Technologies used](#technologies-used)
 - [Useful documentation](#useful-documentation)
 
@@ -154,6 +155,27 @@ The endpoints this vendor accept are the following:
 - Cancel single dispatch - DELETE - `/cts/dispatch/<dispatch_number>`
     - we send an email with the dispatch we want to cancel to the same email as create.
 
+# Bruin
+
+To fill the address fields and client name during creating a new dispatch
+
+- **GET /bruin/ticket_address/{ticket_id}**
+
+Response:
+
+```json
+# GET /bruin/ticket_address/{ticket_id}
+{
+  'client_name': "Red Rose",
+  'client_address': {
+    'address': '123 Fake Street',
+    'city': 'Pleasantown',
+    'state': 'CA',
+    'zip': '99088',
+    'country': 'United States'
+  }
+}
+```
 
 # Technologies used
 

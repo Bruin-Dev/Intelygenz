@@ -44,6 +44,41 @@ class BruinRepository:
 
         return response
 
+    async def get_ticket_overview(self, ticket_id: int):
+        err_msg = None
+
+        request = {
+            'request_id': uuid(),
+            'body': {
+                'ticket_id': ticket_id,
+            },
+        }
+
+        try:
+            self._logger.info(f'Getting ticket {ticket_id} from Bruin...')
+            response = await self._event_bus.rpc_request("bruin.ticket.overview.request", request, timeout=15)
+
+            self._logger.info(f'Got ticket {ticket_id} from Bruin!')
+        except Exception as e:
+            err_msg = f'An error occurred when requesting ticket from Bruin API for ticket {ticket_id} -> {e}'
+            response = nats_error_response
+        else:
+            response_body = response['body']
+            response_status = response['status']
+
+            if response_status not in range(200, 300):
+                err_msg = (
+                    f'Error while retrieving ticket {ticket_id} in '
+                    f'{self._config.ENVIRONMENT_NAME.upper()} environment: '
+                    f'Error {response_status} - {response_body}'
+                )
+
+        if err_msg:
+            self._logger.error(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
+
+        return response
+
     async def append_note_to_ticket(self, ticket_id: int, note: str, is_private: bool = False):
         err_msg = None
 

@@ -14,11 +14,41 @@ info:
 servers:
   - url: http://127.0.0.1:5000
 tags:
+  - name: bruin
+    description: Bruin API
   - name: lit
     description: Lit API
   - name: cts
     description: CTS API
 paths:
+  /bruin/ticket_address/{ticket_id}:
+    get:
+      description: Returns address for ticket id
+      tags:
+        - bruin
+      operationId: ticket_address
+      parameters:
+        - name: ticket_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The ticket id
+
+      responses:
+        '200':
+          description: Ticket address response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ticket_address_response'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
   /lit/dispatch/{dispatch_number}:
     get:
       description: Returns dispatch from LIT that match a filter
@@ -266,75 +296,75 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
   /cts/dispatch:
-      get:
-        description: Returns all dispatches from CTS that match a filter
-        tags:
-          - cts
-        operationId: get_all_dispatch_cts
-        parameters:
+    get:
+      description: Returns all dispatches from CTS that match a filter
+      tags:
+        - cts
+      operationId: get_all_dispatch_cts
+      parameters:
 
-          - name: offset
-            in: query
-            schema:
-              type: integer
-            description: The number of items to skip before starting to collect the result set
-          - name: limit
-            in: query
-            schema:
-              type: integer
-            description: The numbers of items to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+          description: The number of items to skip before starting to collect the result set
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          description: The numbers of items to return
 
-        responses:
-          '200':
-            description: Dispatches response
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/list_dispatch_cts'
-          default:
-            description: unexpected error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/error'
-      post:
-        description: Creates a new dispatch for LIT
-        tags:
-          - cts
-        operationId: add_dispatch_cts
-        requestBody:
-          description: New dispatch to add to a vendor
-          required: true
+      responses:
+        '200':
+          description: Dispatches response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/new_dispatch_cts'
-        responses:
-          '200':
-            description: New dispatch response
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/new_dispatch_response'
-          default:
-            description: unexpected error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/list_dispatch_cts'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      description: Creates a new dispatch for LIT
+      tags:
+        - cts
+      operationId: add_dispatch_cts
+      requestBody:
+        description: New dispatch to add to a vendor
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/new_dispatch_cts'
+      responses:
+        '200':
+          description: New dispatch response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/new_dispatch_response'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 
 
 components:
   schemas:
     new_dispatch_response:
-            type: object
-            required:
-              - id
-              - vendor
-            properties:
-              id:
-                type: string
-                example: "DS1208"
+      type: object
+      required:
+        - id
+        - vendor
+      properties:
+        id:
+          type: string
+          example: "DS1208"
     cancel_dispatch_response:
       type: object
       required:
@@ -375,7 +405,42 @@ components:
         file_id:
           type: string
           example: "00P0v000004ti3AEAQ"
-
+    ticket_address_response:
+      type: object
+      required:
+        - client_name
+        - client_address
+      properties:
+        client_name:
+          type: string
+          example: "Red Rose"
+        client_address:
+          type: object
+          $ref: '#/components/schemas/ticket_address'
+    ticket_address:
+      type: object
+      required:
+        - address
+        - city
+        - state
+        - zip
+        - country
+      properties:
+        address:
+          type: string
+          example: "123 Fake Street"
+        city:
+          type: string
+          example: "Pleasantown"
+        state:
+          type: string
+          example: "NY"
+        zip:
+          type: string
+          example: "99085"
+        country:
+          type: string
+          example: "United States"
     dispatch_lit:
       type: object
       required:
@@ -408,11 +473,6 @@ components:
         - time_of_dispatch
         - time_zone
         - mettel_bruin_ticket_id
-        - job_site
-        - job_site_street
-        - job_site_city
-        - job_site_state
-        - job_site_zip_code
         - job_site_contact_name
         - job_site_contact_number
         - materials_needed_for_dispatch
@@ -435,25 +495,10 @@ components:
           description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
           example: "6PM-8PM"
         time_zone:
-          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time"]
+          enum: [ "Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time" ]
           type: string
         mettel_bruin_ticket_id:
           type: string
-        job_site:
-          type: string
-          example: "Red Rose Inn"
-        job_site_street:
-          type: string
-          example: "123 Fake Street"
-        job_site_city:
-          type: string
-          example: "Pleasantown"
-        job_site_state:
-          type: string
-          example: "CA"
-        job_site_zip_code:
-          type: string
-          example: "99088"
         job_site_contact_name:
           type: string
           example: "Jane Doe"
@@ -473,7 +518,7 @@ components:
           type: string
           example: "Karen Doe"
         mettel_department:
-          enum: ["Customer Care","DSL","T1 Repair","POTs Repair","Provisioning","Advanced Services Engineering", "Wireless", "Holmdel Network Engineering","Advanced Services Implementations","Other"]
+          enum: [ "Customer Care","DSL","T1 Repair","POTs Repair","Provisioning","Advanced Services Engineering", "Wireless", "Holmdel Network Engineering","Advanced Services Implementations","Other" ]
           type: string
         mettel_requester_email:
           type: string
@@ -501,7 +546,7 @@ components:
           description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
           example: "6PM-8PM"
         time_zone:
-          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time"]
+          enum: [ "Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time" ]
           type: string
         mettel_bruin_ticket_id:
           type: string
@@ -539,7 +584,7 @@ components:
           type: string
           example: "Karen Doe"
         mettel_department:
-          enum: ["Customer Care","DSL","T1 Repair","POTs Repair","Provisioning","Advanced Services Engineering", "Wireless", "Holmdel Network Engineering","Advanced Services Implementations","Other"]
+          enum: [ "Customer Care","DSL","T1 Repair","POTs Repair","Provisioning","Advanced Services Engineering", "Wireless", "Holmdel Network Engineering","Advanced Services Implementations","Other" ]
           type: string
         mettel_requester_email:
           type: string
@@ -592,12 +637,6 @@ components:
         - time_zone
         - mettel_bruin_ticket_id
         - sla_level
-        - location_country
-        - job_site
-        - job_site_street_1
-        - job_site_city
-        - job_site_state
-        - job_site_zip_code
         - job_site_contact_name
         - job_site_contact_lastname
         - job_site_contact_number
@@ -622,34 +661,13 @@ components:
           description: "Time of dispatch accepts intervals of 2 hours starting from 6AM-8AM being the next valid interval 7AM-9AM and so on"
           example: "6PM-8PM"
         time_zone:
-          enum: ["Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time"]
+          enum: [ "Pacific Time", "Eastern Time","Mountain Time","Hawaii Time", "Alaska Time", "Central Time" ]
           type: string
         mettel_bruin_ticket_id:
           type: string
         sla_level:
-          enum: ["Pre-planned", "Next bussiness day"]
+          enum: [ "Pre-planned", "Next bussiness day" ]
           type: string
-        location_country:
-          type: string
-          example: United States
-        job_site:
-          type: string
-          example: "Red Rose Inn"
-        job_site_street_1:
-          type: string
-          example: "123 Fake Street"
-        job_site_street_2:
-          type: string
-          example: "123 Fake Street"
-        job_site_city:
-          type: string
-          example: "Pleasantown"
-        job_site_state:
-          type: string
-          example: "CA"
-        job_site_zip_code:
-          type: string
-          example: "99088"
         job_site_contact_name:
           type: string
           example: "Jane"
@@ -678,7 +696,7 @@ components:
           type: string
           example: "Doe"
         mettel_department:
-          enum: ["Customer Care","DSL","T1 Repair","POTs Repair","Provisioning","Advanced Services Engineering", "Wireless", "Holmdel Network Engineering","Advanced Services Implementations","Other"]
+          enum: [ "Customer Care","DSL","T1 Repair","POTs Repair","Provisioning","Advanced Services Engineering", "Wireless", "Holmdel Network Engineering","Advanced Services Implementations","Other" ]
           type: string
         mettel_requester_email:
           type: string

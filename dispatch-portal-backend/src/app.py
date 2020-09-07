@@ -6,6 +6,7 @@ from pytz import timezone
 
 from application.repositories.bruin_repository import BruinRepository
 from application.repositories.lit_repository import LitRepository
+from application.repositories.cts_repository import CtsRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.server.api_server import DispatchServer
 from config import config
@@ -38,8 +39,9 @@ class Container:
         self._bruin_repository = BruinRepository(self._event_bus, self._logger, config, self._notifications_repository)
         self._lit_repository = LitRepository(self._logger, config, self._event_bus, self._notifications_repository,
                                              self._bruin_repository)
+        self._cts_repository = CtsRepository(self._logger, config, self._event_bus, self._notifications_repository,)
         self._dispatch_api_server = DispatchServer(config, self._redis_client, self._event_bus, self._logger,
-                                                   self._bruin_repository, self._lit_repository,
+                                                   self._bruin_repository, self._lit_repository, self._cts_repository,
                                                    self._notifications_repository)
 
         self._logger.info("Container created")

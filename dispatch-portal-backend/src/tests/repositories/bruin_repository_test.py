@@ -12,7 +12,6 @@ from application.repositories import nats_error_response
 from application.repositories.bruin_repository import BruinRepository
 from config import testconfig
 
-
 uuid_ = uuid()
 uuid_mock = patch.object(bruin_repository_module, 'uuid', return_value=uuid_)
 
@@ -284,3 +283,76 @@ class TestBruinRepository:
         notifications_repository.send_slack_message.assert_awaited_once()
         logger.error.assert_called_once()
         assert result == response
+
+    @pytest.mark.asyncio
+    async def get_ticket_overview_2xx_test(self):
+        ticket_id = 11111
+
+        logger = Mock()
+        config = testconfig
+
+        event_bus = Mock()
+        ticket_data = {
+            'body': {'clientID': 80571, 'clientName': 'Red Rose Inn', 'ticketID': 4796193, 'category': 'SD-WAN',
+                     'topic': 'Service Outage Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                     'address': {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                                 'country': 'USA'}, 'createDate': '9/6/2020 3:16:07 PM', 'createdBy': 'Intelygenz Ai',
+                     'creationNote': None, 'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                     'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
+                     'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
+            'status': 200}
+        event_bus.rpc_request = CoroutineMock(return_value=ticket_data)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        result = await bruin_repository.get_ticket_overview(ticket_id)
+
+        assert ticket_data == result
+
+    @pytest.mark.asyncio
+    async def get_ticket_overview_exception_test(self):
+        ticket_id = 11111
+
+        logger = Mock()
+        config = testconfig
+        event_bus = Mock()
+        event_bus.rpc_request = CoroutineMock(side_effect=Exception)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        result = await bruin_repository.get_ticket_overview(ticket_id)
+
+        notifications_repository.send_slack_message.assert_awaited_once()
+        logger.error.assert_called_once()
+        assert result == nats_error_response
+
+    @pytest.mark.asyncio
+    async def get_ticket_overview_404_test(self):
+        ticket_id = 11111
+
+        logger = Mock()
+        config = testconfig
+        event_bus = Mock()
+        ticket_data = {
+            'body': {},
+            'status': 404
+        }
+
+        event_bus.rpc_request = CoroutineMock(return_value=ticket_data)
+
+        notifications_repository = Mock()
+        notifications_repository.send_slack_message = CoroutineMock()
+
+        bruin_repository = BruinRepository(event_bus, logger, config, notifications_repository)
+
+        result = await bruin_repository.get_ticket_overview(ticket_id)
+
+        notifications_repository.send_slack_message.assert_awaited_once()
+        logger.error.assert_called_once()
+        assert result == ticket_data

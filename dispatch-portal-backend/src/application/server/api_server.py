@@ -34,7 +34,7 @@ class DispatchServer:
     _hypercorn_config = None
     _new_bind = None
 
-    def __init__(self, config, redis_client, event_bus, logger, bruin_repository, lit_repository,
+    def __init__(self, config, redis_client, event_bus, logger, bruin_repository, lit_repository, cts_repository,
                  notifications_repository):
         self._config = config
         self._redis_client = redis_client
@@ -62,6 +62,7 @@ class DispatchServer:
         self._app.config['MAX_CONTENT_LENGTH'] = self._max_content_length
         self._bruin_repository = bruin_repository
         self._lit_repository = lit_repository
+        self._cts_repository = cts_repository
         self._notifications_repository = notifications_repository
         self.attach_swagger()
         self.register_endpoints()
@@ -85,6 +86,8 @@ class DispatchServer:
 
     def register_endpoints(self):
         self._app.add_url_rule("/_health", None, self._health)
+        self._app.add_url_rule("/bruin/ticket_address/<ticket_id>", None, self.get_ticket_address, methods=['GET'],
+                               strict_slashes=False)
         self._app.add_url_rule("/lit/dispatch", None, self.lit_get_all_dispatches,
                                methods=['GET'], strict_slashes=False)
         self._app.add_url_rule("/lit/dispatch/<dispatch_number>", None, self.lit_get_dispatch,
@@ -393,6 +396,22 @@ class DispatchServer:
             error_response = {'code': HTTPStatus.BAD_REQUEST, 'message': ve.message}
             return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
         self._logger.info(f"[LIT] payload: {body}")
+
+        ticket_id = body.get("mettel_bruin_ticket_id")
+        if not ticket_id:
+            error_response = {'code': HTTPStatus.BAD_REQUEST,
+                              'message': 'Error: Not mettel_bruin_ticket_id included in the '
+                                         'request to create lit dispatch'}
+            return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
+        ticket_address_response = await self._bruin_repository.get_ticket_overview(ticket_id)
+        if ticket_address_response['status'] not in range(200, 300):
+            error_response = {
+                'code': ticket_address_response['status'],
+                'message': f"We couldn't determine the address for the ticket id: {ticket_id}"
+            }
+            return jsonify(error_response), ticket_address_response['status'], None
+        body = self._lit_repository.update_body_with_client_address(body, ticket_address_response['body'])
+
         dispatch_request = lit_mapper.map_create_dispatch(body)
         request_body = dict()
         request_body['RequestDispatch'] = dispatch_request
@@ -416,7 +435,6 @@ class DispatchServer:
             response_dispatch['vendor'] = 'LIT'
             self._logger.info(
                 f"[LIT] Dispatch retrieved: {dispatch_num} - took {time.time() - start_time}")
-            ticket_id = body.get("mettel_bruin_ticket_id")
             slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Created [{dispatch_num}] with ticket id: " \
                         f"{ticket_id}"
             self._logger.info(slack_msg)
@@ -644,11 +662,26 @@ class DispatchServer:
             error_response = {'code': HTTPStatus.BAD_REQUEST, 'message': ve.message}
             return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
 
+        ticket_id = body.get("mettel_bruin_ticket_id")
+        if not ticket_id:
+            error_response = {'code': HTTPStatus.BAD_REQUEST,
+                              'message': 'Error: Not mettel_bruin_ticket_id included in the '
+                                         'request to create cts dispatch'}
+            return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
+
+        ticket_address_response = await self._bruin_repository.get_ticket_overview(ticket_id)
+        if ticket_address_response['status'] not in range(200, 300):
+            error_response = {
+                'code': ticket_address_response['status'],
+                'message': f"We couldn't determine the address for the ticket id: {ticket_id}"
+            }
+            return jsonify(error_response), ticket_address_response['status'], None
+        body = self._cts_repository.update_body_with_client_address(body, ticket_address_response['body'])
+
         self._logger.info(f"payload: {body}")
 
         return_response = dict.fromkeys(["body", "status"])
         igz_dispatch_id = f"IGZ{uuid()}"
-        ticket_id = body.get('mettel_bruin_ticket_id')
 
         body['igz_dispatch_number'] = igz_dispatch_id
 
@@ -860,3 +893,16 @@ class DispatchServer:
             filtered_ticket_notes.append(note)
 
         return filtered_ticket_notes
+
+    async def get_ticket_address(self, ticket_id):
+        status = 200
+        response = await self._bruin_repository.get_ticket_overview(ticket_id)
+        if response['status'] not in range(200, 300):
+            err_msg = f"Error: could not retrieve ticket overview from ticket id: [{ticket_id}]"
+            self._logger.error(err_msg)
+            status = response['status']
+            return_response = err_msg
+            return jsonify(return_response), status, None
+        return_response = {'client_name': response['body']['clientName'],
+                           'client_address': response['body']['address']}
+        return jsonify(return_response), status, None

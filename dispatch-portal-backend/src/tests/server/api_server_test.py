@@ -32,10 +32,11 @@ class TestApiServer:
 
         bruin_repository = Mock()
         lit_repository = Mock()
+        cts_repository = Mock()
         notifications_repository = Mock()
 
         api_server_test = DispatchServer(config, redis_client, event_bus, logger, bruin_repository,
-                                         lit_repository, notifications_repository)
+                                         lit_repository, cts_repository, notifications_repository)
 
         assert api_server_test._logger is logger
         assert api_server_test._redis_client is redis_client
@@ -584,6 +585,16 @@ class TestApiServer:
             expected_response_bruin_append_note
         ])
 
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {'clientID': 80571, 'clientName': 'Red Rose Inn', 'ticketID': 4796193, 'category': 'SD-WAN',
+                     'topic': 'Service Outage Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                     'address': {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                                 'country': 'USA'}, 'createDate': '9/6/2020 3:16:07 PM', 'createdBy': 'Intelygenz Ai',
+                     'creationNote': None, 'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                     'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
+                     'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
+            'status': 200})
+
         payload_lit = {
             "date_of_dispatch": "2019-11-14",
             "site_survey_quote_required": False,
@@ -868,6 +879,15 @@ class TestApiServer:
             side_effect=[response_send_slack_message_mock])
         slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Created [{dispatch_number}] " \
                     f"with ticket id: T-12345"
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {'clientID': 80571, 'clientName': 'Red Rose Inn', 'ticketID': 4796193, 'category': 'SD-WAN',
+                     'topic': 'Service Outage Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                     'address': {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                                 'country': 'USA'}, 'createDate': '9/6/2020 3:16:07 PM', 'createdBy': 'Intelygenz Ai',
+                     'creationNote': None, 'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                     'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
+                     'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
+            'status': 200})
         # api_server_test._notifications_repository.send_slack_message.assert_awaited_with(slack_msg)
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
@@ -1067,6 +1087,15 @@ class TestApiServer:
             side_effect=[response_send_slack_message_mock])
         slack_msg = f"[dispatch-portal-backend] [LIT] Dispatch Created [{dispatch_number}] " \
                     f"with ticket id: {ticket_id}"
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {'clientID': 80571, 'clientName': 'Red Rose Inn', 'ticketID': 4796193, 'category': 'SD-WAN',
+                     'topic': 'Service Outage Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                     'address': {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                                 'country': 'USA'}, 'createDate': '9/6/2020 3:16:07 PM', 'createdBy': 'Intelygenz Ai',
+                     'creationNote': None, 'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                     'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
+                     'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
+            'status': 200})
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -1316,6 +1345,16 @@ class TestApiServer:
             'code': 500, 'message': [{'errorCode': 'APEX_ERROR', 'message': ''}]
         }
 
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {'clientID': 80571, 'clientName': 'Red Rose Inn', 'ticketID': 4796193, 'category': 'SD-WAN',
+                     'topic': 'Service Outage Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                     'address': {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                                 'country': 'USA'}, 'createDate': '9/6/2020 3:16:07 PM', 'createdBy': 'Intelygenz Ai',
+                     'creationNote': None, 'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                     'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
+                     'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
+            'status': 200})
+
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/lit/dispatch', json=payload_lit)
@@ -1406,6 +1445,16 @@ class TestApiServer:
                 'Status': 'error'
             }
         }
+
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {'clientID': 80571, 'clientName': 'Red Rose Inn', 'ticketID': 4796193, 'category': 'SD-WAN',
+                     'topic': 'Service Outage Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                     'address': {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                                 'country': 'USA'}, 'createDate': '9/6/2020 3:16:07 PM', 'createdBy': 'Intelygenz Ai',
+                     'creationNote': None, 'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                     'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
+                     'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
+            'status': 200})
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -2884,6 +2933,17 @@ class TestApiServer:
         slack_msg = f"[dispatch-portal-backend] [CTS] Dispatch Requested by email [{igz_dispatch_id}] " \
                     f"with ticket id: {ticket_id}"
 
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {'clientID': 80571, 'clientName': 'Red Rose Inn', 'ticketID': 4796193, 'category': 'SD-WAN',
+                     'topic': 'Service Outage Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                     'address': {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                                 'country': 'United States'}, 'createDate': '9/6/2020 3:16:07 PM',
+                     'createdBy': 'Intelygenz Ai',
+                     'creationNote': None, 'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                     'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
+                     'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
+            'status': 200})
+
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
             response = await client.post(f'/cts/dispatch/', json=new_dispatch)
@@ -2930,6 +2990,15 @@ class TestApiServer:
 
         api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
             side_effect=[response_get_ticket_details_mock])
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {'clientID': 80571, 'clientName': 'Red Rose Inn', 'ticketID': 4796193, 'category': 'SD-WAN',
+                     'topic': 'Service Outage Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                     'address': {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                                 'country': 'USA'}, 'createDate': '9/6/2020 3:16:07 PM', 'createdBy': 'Intelygenz Ai',
+                     'creationNote': None, 'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                     'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
+                     'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
+            'status': 200})
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -2975,6 +3044,17 @@ class TestApiServer:
             'status': 400
         }
         api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {'clientID': 80571, 'clientName': 'Red Rose Inn', 'ticketID': 4796193, 'category': 'SD-WAN',
+                     'topic': 'Service Outage Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                     'address': {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                                 'country': 'United States'}, 'createDate': '9/6/2020 3:16:07 PM',
+                     'createdBy': 'Intelygenz Ai',
+                     'creationNote': None, 'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                     'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
+                     'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
+            'status': 200})
 
         with patch.object(api_server_module, 'uuid', return_value=uuid_):
             client = api_server_test._app.test_client()
@@ -3377,3 +3457,274 @@ class TestApiServer:
             call(ticket_id, note_1),
             call(ticket_id, note_2)
         ])
+
+    @pytest.mark.asyncio
+    async def get_ticket_200_address_test(self, api_server_test):
+        uuid_ = 'UUID1'
+        status_code = 200
+        ticket_id = '1234'
+        client_name = 'test_client_name'
+        address = {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                   'country': 'United States'}
+        response_expected = {'client_name': client_name,
+                             'client_address': address}
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {'clientName': client_name,
+                     'address': address},
+            'status': status_code})
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/bruin/ticket_address/{ticket_id}')
+            data = await response.get_json()
+
+            assert data == response_expected
+            assert response.status_code == HTTPStatus.OK
+
+    @pytest.mark.asyncio
+    async def get_ticket_address_4xx_test(self, api_server_test):
+        uuid_ = 'UUID1'
+        request = {
+            'body': {},
+            'status': 400
+        }
+        ticket_id = None
+        error_msg = f'Error: could not retrieve ticket overview from ticket id: [{ticket_id}]'
+
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {},
+            'status': 400})
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/bruin/ticket_address/{ticket_id}')
+            data = await response.get_json()
+
+            assert response.status_code == HTTPStatus.BAD_REQUEST
+            assert data == error_msg
+
+    @pytest.mark.asyncio
+    async def bad_ticket_values_on_create_lit_dispatch_test(self, api_server_test):
+        uuid_ = 'UUID1'
+
+        expected_response = {
+            "Status": "error",
+            "Message": None,
+            "Dispatch": None,
+            "APIRequestID": "a130v000001U6iTAAS"
+        }
+        expected_response_lit = {
+            "request_id": uuid_,
+            "body": expected_response,
+            "status": 400
+        }
+
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+
+        payload_lit = {
+            "date_of_dispatch": "2019-11-14",
+            "site_survey_quote_required": False,
+            "time_of_dispatch": "6PM-8PM",
+            "time_zone": "Pacific Time",
+            "mettel_bruin_ticket_id": '',
+            "job_site": "Red Rose Inn",
+            "job_site_street": "123 Fake Street",
+            "job_site_city": "Pleasantown",
+            "job_site_state": "CA",
+            "job_site_zip_code": "99088",
+            "job_site_contact_name": "Jane Doe",
+            "job_site_contact_number": "+1 666 6666 666",
+            "materials_needed_for_dispatch": "Laptop, cable, tuner, ladder,internet hotspot",
+            "scope_of_work": "Device is bouncing constantly",
+            "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
+            "name_of_mettel_requester": "Karen Doe",
+            "mettel_department": "Customer Care",
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
+        }
+
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {},
+            'status': 400
+        })
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.post(f'/lit/dispatch', json=payload_lit)
+
+            assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    @pytest.mark.asyncio
+    async def bad_ticket_id_on_create_cts_dispatch_test(self, new_dispatch, ticket_details_1_no_requested_watermark,
+                                                        api_server_test):
+        uuid_ = 'UUID1'
+        igz_dispatch_id = f"IGZ{uuid_}"
+        new_dispatch['mettel_bruin_ticket_id'] = ''
+
+        new_dispatch["igz_dispatch_number"] = igz_dispatch_id
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        cts_expected_response = {}
+        cts_expected_response['id'] = igz_dispatch_id
+        cts_expected_response['vendor'] = 'CTS'
+        response_get_ticket_details_mock = ticket_details_1_no_requested_watermark
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            side_effect=[response_get_ticket_details_mock])
+        response_send_email_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {'clientID': 80571, 'clientName': 'Red Rose Inn', 'ticketID': 4796193, 'category': 'SD-WAN',
+                     'topic': 'Service Outage Trouble', 'referenceTicketNumber': 0, 'ticketStatus': 'In-Progress',
+                     'address': {'address': '123 Fake Street', 'city': 'Pleasantown', 'state': 'CA', 'zip': '99088',
+                                 'country': 'United States'}, 'createDate': '9/6/2020 3:16:07 PM',
+                     'createdBy': 'Intelygenz Ai',
+                     'creationNote': None, 'resolveDate': '', 'resolvedby': None, 'closeDate': None, 'closedBy': None,
+                     'lastUpdate': None, 'updatedBy': None, 'mostRecentNote': '9/7/2020 3:02:27 PM Intelygenz Ai',
+                     'nextScheduledDate': '9/14/2020 7:14:02 AM', 'flags': 'Alert,Frozen', 'severity': '2'},
+            'status': 200})
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.post(f'/cts/dispatch/', json=new_dispatch)
+
+            assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    @pytest.mark.asyncio
+    async def create_cts_dispatch_with_get_ticket_ko_test(self, new_dispatch, ticket_details_1_no_requested_watermark,
+                                                          api_server_test):
+        uuid_ = 'UUID1'
+        igz_dispatch_id = f"IGZ{uuid_}"
+
+        new_dispatch["igz_dispatch_number"] = igz_dispatch_id
+        api_server_test._config.ENVIRONMENT_NAME = 'production'
+        cts_expected_response = {}
+        cts_expected_response['id'] = igz_dispatch_id
+        cts_expected_response['vendor'] = 'CTS'
+        response_get_ticket_details_mock = ticket_details_1_no_requested_watermark
+
+        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
+            side_effect=[response_get_ticket_details_mock])
+        response_send_email_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
+        api_server_test._append_note_to_ticket = CoroutineMock()
+        response_send_slack_message_mock = {
+            'status': 200
+        }
+        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
+            side_effect=[response_send_slack_message_mock])
+
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {},
+            'status': 400})
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.post(f'/cts/dispatch/', json=new_dispatch)
+
+            assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    @pytest.mark.asyncio
+    async def bad_response_on_ticket_values_on_create_dispatch_test(self, api_server_test):
+        uuid_ = 'UUID1'
+
+        expected_response = {
+            "Status": "error",
+            "Message": None,
+            "Dispatch": None,
+            "APIRequestID": "a130v000001U6iTAAS"
+        }
+        expected_response_lit = {
+            "request_id": uuid_,
+            "body": expected_response,
+            "status": 400
+        }
+
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_lit)
+
+        payload_lit = {
+            "date_of_dispatch": "2019-11-14",
+            "site_survey_quote_required": False,
+            "time_of_dispatch": "6PM-8PM",
+            "time_zone": "Pacific Time",
+            "mettel_bruin_ticket_id": 'Ticket-id-test',
+            "job_site": "Red Rose Inn",
+            "job_site_street": "123 Fake Street",
+            "job_site_city": "Pleasantown",
+            "job_site_state": "CA",
+            "job_site_zip_code": "99088",
+            "job_site_contact_name": "Jane Doe",
+            "job_site_contact_number": "+1 666 6666 666",
+            "materials_needed_for_dispatch": "Laptop, cable, tuner, ladder,internet hotspot",
+            "scope_of_work": "Device is bouncing constantly",
+            "mettel_tech_call_in_instructions": "When arriving to the site call HOLMDEL NOC for telematic assistance",
+            "name_of_mettel_requester": "Karen Doe",
+            "mettel_department": "Customer Care",
+            "mettel_requester_email": "karen.doe@mettel.net",
+            "mettel_department_phone_number": "+1 666 6666 666"
+        }
+
+        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
+            'body': {},
+            'status': 400
+        })
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.post(f'/lit/dispatch', json=payload_lit)
+
+            assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    @pytest.mark.asyncio
+    async def lit_get_dispatch_bad_date_time_of_dispatch_test(self, api_server_test, cts_dispatch):
+        uuid_ = 'UUID1'
+        dispatch_number = 'S-147735'
+        cts_dispatch['records'][0]['Local_Site_Time__c'] = ''
+        expected_response_cts = {
+            "request_id": uuid_,
+            "body": cts_dispatch,
+            "status": 200
+        }
+
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/{dispatch_number}')
+            data = await response.get_json()
+            api_server_test._event_bus.rpc_request.assert_awaited_once_with("cts.dispatch.get", payload, timeout=30)
+
+            assert response.status_code == HTTPStatus.OK
+
+    @pytest.mark.asyncio
+    async def lit_get_dispatch_all_bad_date_time_of_dispatch_test(self, api_server_test, cts_dispatch):
+        uuid_ = 'UUID1'
+        dispatch_number = 'S-147735'
+        cts_dispatch['records'][0]['Local_Site_Time__c'] = ''
+        expected_response_cts = {
+            "request_id": uuid_,
+            "body": cts_dispatch,
+            "status": 200
+        }
+
+        api_server_test._event_bus.rpc_request = CoroutineMock(return_value=expected_response_cts)
+
+        payload = {"request_id": uuid_, "body": {"dispatch_number": dispatch_number}}
+
+        with patch.object(api_server_module, 'uuid', return_value=uuid_):
+            client = api_server_test._app.test_client()
+            response = await client.get(f'/cts/dispatch/')
+            data = await response.get_json()
+
+            assert response.status_code == HTTPStatus.OK

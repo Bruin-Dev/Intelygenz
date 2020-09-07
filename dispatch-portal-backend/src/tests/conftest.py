@@ -5,6 +5,7 @@ from unittest import mock
 from asynctest import CoroutineMock
 
 from application.repositories.lit_repository import LitRepository
+from application.repositories.cts_repository import CtsRepository
 from application.server.api_server import DispatchServer
 from config import testconfig as config
 
@@ -46,50 +47,56 @@ def lit_repository(logger, event_bus, bruin_repository, notifications_repository
 
 
 @pytest.fixture(scope='function')
-def api_server_test(logger, event_bus, redis_client, bruin_repository, lit_repository, notifications_repository):
+def cts_repository(logger, event_bus, bruin_repository, notifications_repository):
+    return CtsRepository(logger, config, event_bus, notifications_repository)
+
+
+@pytest.fixture(scope='function')
+def api_server_test(logger, event_bus, redis_client, bruin_repository, lit_repository, cts_repository,
+                    notifications_repository):
     return DispatchServer(config, redis_client, event_bus, logger,
-                          bruin_repository, lit_repository, notifications_repository)
+                          bruin_repository, lit_repository, cts_repository, notifications_repository)
 
 
 @pytest.fixture(scope='function')
 def dispatch():
     return {
-            "turn_up": "False",
-            "Time_Zone_Local": "Pacific Time",
-            "Time_of_Check_Out": None,
-            "Time_of_Check_In": None,
-            "Tech_Off_Site": False,
-            "Tech_Mobile_Number": None,
-            "Tech_First_Name": None,
-            "Tech_Arrived_On_Site": False,
-            "Special_Materials_Needed_for_Dispatch": "1,2,6",
-            "Special_Dispatch_Notes": "none",
-            "Site_Survey_Quote_Required": True,
-            "Scope_of_Work": "test",
-            "Name_of_MetTel_Requester": "Michael J. Fox",
-            "MetTel_Tech_Call_In_Instructions": "test",
-            "MetTel_Requester_Email": None,
-            "MetTel_Note_Updates": None,
-            "MetTel_Group_Email": "test@test.net",
-            "MetTel_Department_Phone_Number": "+11234567890",
-            "MetTel_Department": "Advanced Services Engineering",
-            "MetTel_Bruin_TicketID": "3544800",
-            "Local_Time_of_Dispatch": None,
-            "Job_Site_Zip_Code": "10038-4201",
-            "Job_Site_Street": "160 Broadway",
-            "Job_Site_State": "NY",
-            "Job_Site_Contact_Name_and_Phone_Number": None,
-            "Job_Site_City": "New York",
-            "Job_Site": "me test",
-            "Information_for_Tech": "test",
-            "Hard_Time_of_Dispatch_Time_Zone_Local": None,
-            "Hard_Time_of_Dispatch_Local": None,
-            "Dispatch_Status": "New Dispatch",
-            "Dispatch_Number": "DIS37405",
-            "Date_of_Dispatch": "2020-03-16",
-            "Close_Out_Notes": None,
-            "Backup_MetTel_Department_Phone_Number": "+1 (212) 359-5129"
-        }
+        "turn_up": "False",
+        "Time_Zone_Local": "Pacific Time",
+        "Time_of_Check_Out": None,
+        "Time_of_Check_In": None,
+        "Tech_Off_Site": False,
+        "Tech_Mobile_Number": None,
+        "Tech_First_Name": None,
+        "Tech_Arrived_On_Site": False,
+        "Special_Materials_Needed_for_Dispatch": "1,2,6",
+        "Special_Dispatch_Notes": "none",
+        "Site_Survey_Quote_Required": True,
+        "Scope_of_Work": "test",
+        "Name_of_MetTel_Requester": "Michael J. Fox",
+        "MetTel_Tech_Call_In_Instructions": "test",
+        "MetTel_Requester_Email": None,
+        "MetTel_Note_Updates": None,
+        "MetTel_Group_Email": "test@test.net",
+        "MetTel_Department_Phone_Number": "+11234567890",
+        "MetTel_Department": "Advanced Services Engineering",
+        "MetTel_Bruin_TicketID": "3544800",
+        "Local_Time_of_Dispatch": None,
+        "Job_Site_Zip_Code": "10038-4201",
+        "Job_Site_Street": "160 Broadway",
+        "Job_Site_State": "NY",
+        "Job_Site_Contact_Name_and_Phone_Number": None,
+        "Job_Site_City": "New York",
+        "Job_Site": "me test",
+        "Information_for_Tech": "test",
+        "Hard_Time_of_Dispatch_Time_Zone_Local": None,
+        "Hard_Time_of_Dispatch_Local": None,
+        "Dispatch_Status": "New Dispatch",
+        "Dispatch_Number": "DIS37405",
+        "Date_of_Dispatch": "2020-03-16",
+        "Close_Out_Notes": None,
+        "Backup_MetTel_Department_Phone_Number": "+1 (212) 359-5129"
+    }
 
 
 @pytest.fixture(scope='function')
