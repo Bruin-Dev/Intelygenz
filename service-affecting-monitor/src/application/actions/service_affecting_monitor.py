@@ -257,7 +257,7 @@ class ServiceAffectingMonitor:
                                           'client_id': client_id,
                                           'category': 'SD-WAN',
                                           'ticket_topic': 'VAS',
-                                          'ticket_status': ['New', 'InProgress', 'Draft']}}
+                                          'ticket_status': ['New', 'InProgress', 'Draft', 'Resolved']}}
         all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg, timeout=200)
         for ticket in all_tickets['body']:
             ticket_detail_msg = {'request_id': uuid(),
