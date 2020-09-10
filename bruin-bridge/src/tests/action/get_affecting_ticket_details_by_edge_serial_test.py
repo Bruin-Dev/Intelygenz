@@ -223,7 +223,7 @@ class TestGetAffectingTicketDetailsByEdgeSerial:
         await ticket_details.send_affecting_ticket_details_by_edge_serial(msg)
 
         ticket_details._bruin_repository.get_affecting_ticket_details_by_edge_serial.assert_awaited_once_with(
-            edge_serial=edge_serial, client_id=client_id,
+            edge_serial=edge_serial, client_id=client_id, ticket_statuses=None
         )
         ticket_details._event_bus.publish_message.assert_awaited_once_with(
             response_topic, get_ticket_details_response

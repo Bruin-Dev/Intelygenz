@@ -24,6 +24,7 @@ class GetAffectingTicketDetailsByEdgeSerial:
 
         edge_serial = body.get("edge_serial")
         client_id = body.get('client_id')
+        ticket_statuses = body.get('ticket_statuses', None)
         if not edge_serial or not client_id:
             self._logger.error(f'Cannot get outage ticket details using {json.dumps(msg)}. JSON malformed')
             response["body"] = 'You must specify "client_id", "edge_serial", in the request'
@@ -37,7 +38,7 @@ class GetAffectingTicketDetailsByEdgeSerial:
         )
 
         ticket_details_list = await self._bruin_repository.get_affecting_ticket_details_by_edge_serial(
-            edge_serial=edge_serial, client_id=client_id,
+            edge_serial=edge_serial, client_id=client_id, ticket_statuses=ticket_statuses
         )
 
         response["body"] = ticket_details_list["body"]

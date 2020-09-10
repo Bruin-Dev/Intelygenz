@@ -11,10 +11,14 @@ from shortuuid import uuid
 
 from igz.packages.eventbus.eventbus import EventBus
 
+from application.repositories import EdgeIdentifier
+from application.repositories.bruin_repository import BruinRepository
+
 
 class ServiceAffectingMonitor:
 
-    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, metrics_repository):
+    def __init__(self, event_bus: EventBus, logger, scheduler, config, template_renderer, metrics_repository,
+                 bruin_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
@@ -22,6 +26,7 @@ class ServiceAffectingMonitor:
         self._monitoring_minutes = config.MONITOR_CONFIG["monitoring_minutes"]
         self._template_renderer = template_renderer
         self._metrics_repository = metrics_repository
+        self._bruin_repository = bruin_repository
 
     async def start_service_affecting_monitor_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service affecting')
@@ -69,6 +74,9 @@ class ServiceAffectingMonitor:
 
     def _is_management_status_active(self, management_status) -> bool:
         return management_status in self._config.MONITOR_CONFIG["management_status_filter"]
+
+    def _is_ticket_resolved(self, ticket_detail: dict) -> bool:
+        return ticket_detail['detailStatus'] == 'R'
 
     async def _service_affecting_monitor_process(self, device):
         edge_id = {"host": device['host'], "enterprise_id": device['enterprise_id'], "edge_id": device['edge_id']}
@@ -186,9 +194,11 @@ class ServiceAffectingMonitor:
         self._logger.info(f'Service affecting trouble {trouble} detected in edge with data {edge_status}')
         if self._config.MONITOR_CONFIG['environment'] == 'production':
             client_id = edge_status['edge_info']['enterprise_name'].split('|')[1]
-            ticket_exists = await self._ticket_existence(client_id, edge_status['edge_info']['edges']['serialNumber'],
-                                                         trouble)
-            if ticket_exists is False:
+
+            edge_serial_number = edge_status['edge_info']['edges']['serialNumber']
+            ticket = await self._get_affecting_ticket_by_trouble(client_id, edge_serial_number, trouble)
+
+            if not ticket:
                 # TODO contact is hardcoded. When Mettel provides us with a service to retrieve the contact change here
                 ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
                 ticket_note = self._ticket_object_to_string(ticket_dict)
@@ -250,28 +260,56 @@ class ServiceAffectingMonitor:
                 await self._event_bus.rpc_request("notification.slack.request", slack_message, timeout=10)
 
                 self._logger.info(f'Ticket created with ticket id: {ticket_id["body"]["ticketIds"][0]}')
+                return
+            else:
+                ticket_details = BruinRepository.find_detail_by_serial(ticket, edge_serial_number)
+                if ticket_details and self._is_ticket_resolved(ticket_details):
+                    edge_identifier = EdgeIdentifier(**edge_status['edge_id'])
+                    self._logger.info(f'[service-affecting-monitor] ticket with trouble {trouble} '
+                                      f'detected in edge with data {edge_identifier}. '
+                                      f'Ticket: {ticket}. Re-opening ticket..')
+                    ticket_id = ticket['ticketID']
+                    detail_id = ticket_details['detailID']
+                    open_ticket_response = await self._bruin_repository.open_ticket(ticket_id, detail_id)
+                    if open_ticket_response['status'] not in range(200, 300):
+                        err_msg = f'[service-affecting-monitor] Error: Could not reopen ticket: {ticket}'
+                        self._logger.error(err_msg)
+                        await self._bruin_repository._notifications_repository.send_slack_message(err_msg)
+                        return
 
-    async def _ticket_existence(self, client_id, serial, trouble):
-        ticket_request_msg = {'request_id': uuid(),
-                              'body': {
-                                          'client_id': client_id,
-                                          'category': 'SD-WAN',
-                                          'ticket_topic': 'VAS',
-                                          'ticket_status': ['New', 'InProgress', 'Draft', 'Resolved']}}
-        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request", ticket_request_msg, timeout=200)
+                    ticket_dict = self._compose_ticket_dict(edge_status, link, input, output, trouble, threshold)
+                    ticket_note = self._ticket_object_to_string_without_watermark(ticket_dict)
+                    slack_message = (
+                        f'Affecting ticket {ticket_id} reopened. Ticket details at '
+                        f'https://app.bruin.com/helpdesk?clientId={client_id}&ticketId={ticket_id}.'
+                    )
+                    await self._bruin_repository._notifications_repository.send_slack_message(slack_message)
+                    await self._bruin_repository.append_reopening_note_to_ticket(ticket_id, ticket_note)
+                    self._metrics_repository.increment_tickets_reopened()
+
+    async def _get_affecting_ticket_by_trouble(self, client_id, serial, trouble):
+        ticket_statuses = ['New', 'InProgress', 'Draft', 'Resolved']
+        ticket_request_msg = {
+            'request_id': uuid(),
+            'body': {
+                'client_id': client_id,
+                'edge_serial': serial,
+                'ticket_statuses': ticket_statuses
+            }
+        }
+        self._logger.info(f"Retrieving affecting tickets by serial with trouble {trouble}: {ticket_request_msg}")
+        all_tickets = await self._event_bus.rpc_request("bruin.ticket.affecting.details.by_edge_serial.request",
+                                                        ticket_request_msg,
+                                                        timeout=200)
+        if all_tickets['status'] not in range(200, 300):
+            self._logger.error(f"Error: an error ocurred retrieving affecting tickets details by serial")
+            return None
+
         for ticket in all_tickets['body']:
-            ticket_detail_msg = {'request_id': uuid(),
-                                 'body': {'ticket_id': ticket['ticketID']}}
-            ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request", ticket_detail_msg,
-                                                               timeout=15)
-            for ticket_detail in ticket_details['body']['ticketDetails']:
-                if 'detailValue' in ticket_detail.keys():
-                    if ticket_detail['detailValue'] == serial:
-                        for ticket_note in (ticket_details['body']['ticketNotes']):
-                            if ticket_note['noteValue'] is not None:
-                                if trouble in ticket_note['noteValue']:
-                                    return True
-        return False
+            for ticket_note in ticket['ticketNotes']:
+                if ticket_note['noteValue'] and trouble in ticket_note['noteValue']:
+                    return ticket
+        return None
 
     def _compose_ticket_dict(self, edges_status_to_report, link, input, output, trouble, threshold):
         edge_overview = OrderedDict()
@@ -299,9 +337,14 @@ class ServiceAffectingMonitor:
 
         return edge_overview
 
-    def _ticket_object_to_string(self, ticket_dict):
+    def _ticket_object_to_string(self, ticket_dict, watermark=None):
         edge_triage_str = "#*Automation Engine*# \n"
+        if watermark is not None:
+            edge_triage_str = f"{watermark} \n"
         for key in ticket_dict.keys():
             parsed_key = re.sub(r" LABELMARK(.)*", "", key)
             edge_triage_str = edge_triage_str + f'{parsed_key}: {ticket_dict[key]} \n'
         return edge_triage_str
+
+    def _ticket_object_to_string_without_watermark(self, ticket_dict):
+        return self._ticket_object_to_string(ticket_dict, "")

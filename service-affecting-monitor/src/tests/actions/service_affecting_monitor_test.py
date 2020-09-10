@@ -26,15 +26,16 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
 
         assert service_affecting_monitor._event_bus is event_bus
         assert service_affecting_monitor._logger is logger
         assert service_affecting_monitor._scheduler is scheduler
         assert service_affecting_monitor._config is config
         assert service_affecting_monitor._metrics_repository is metrics_repository
+        assert service_affecting_monitor._bruin_repository is bruin_repository
 
     @pytest.mark.asyncio
     async def start_service_affecting_monitor_job_with_exec_on_start_test(self):
@@ -44,9 +45,9 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         next_run_time = datetime.now()
         datetime_mock = Mock()
         datetime_mock.now = Mock(return_value=next_run_time)
@@ -70,9 +71,9 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         await service_affecting_monitor.start_service_affecting_monitor_job(exec_on_start=False)
 
         scheduler.add_job.assert_called_once_with(
@@ -91,9 +92,9 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._service_affecting_monitor_process = CoroutineMock(return_value=None)
 
         await service_affecting_monitor._monitor_each_edge()
@@ -169,9 +170,9 @@ class TestServiceAffectingMonitor:
             management_status_response
         ])
         template_renderer = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._get_bruin_client_info_by_serial = CoroutineMock(
             return_value=bruin_client_info_response)
         service_affecting_monitor._get_management_status = CoroutineMock(
@@ -264,9 +265,9 @@ class TestServiceAffectingMonitor:
             bruin_client_info_response
         ])
         template_renderer = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._get_bruin_client_info_by_serial = CoroutineMock(
             return_value=bruin_client_info_response)
         service_affecting_monitor._get_management_status = CoroutineMock()
@@ -345,9 +346,9 @@ class TestServiceAffectingMonitor:
             bruin_client_info_response
         ])
         template_renderer = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._get_bruin_client_info_by_serial = CoroutineMock(
             return_value=bruin_client_info_response)
         service_affecting_monitor._get_management_status = CoroutineMock()
@@ -434,9 +435,9 @@ class TestServiceAffectingMonitor:
             management_status_response
         ])
         template_renderer = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._get_bruin_client_info_by_serial = CoroutineMock(
             return_value=bruin_client_info_response)
         service_affecting_monitor._get_management_status = CoroutineMock(
@@ -476,9 +477,9 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
 
         management_status_response = await service_affecting_monitor._get_management_status(client_id, serial_number)
         expected = {
@@ -510,9 +511,9 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
 
         bruin_info_response = await service_affecting_monitor._get_bruin_client_info_by_serial(serial_number)
 
@@ -546,10 +547,10 @@ class TestServiceAffectingMonitor:
         event_bus.rpc_request = CoroutineMock(side_effect=[edges_to_report, slack_sent])
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler,
                                                             config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._latency_check = CoroutineMock()
         service_affecting_monitor._packet_loss_check = CoroutineMock()
         service_affecting_monitor._jitter_check = CoroutineMock()
@@ -651,10 +652,10 @@ class TestServiceAffectingMonitor:
         ])
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler,
                                                             config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._get_bruin_client_info_by_serial = CoroutineMock(
             return_value=bruin_client_info_response)
         service_affecting_monitor._get_management_status = CoroutineMock(
@@ -731,9 +732,9 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link_1)
@@ -784,9 +785,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -838,9 +839,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -890,9 +891,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -941,9 +942,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -995,9 +996,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -1047,9 +1048,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -1098,9 +1099,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -1164,9 +1165,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -1216,9 +1217,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -1265,9 +1266,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._latency_check(device=device, edge_status=edges_to_report, link=link)
@@ -1328,9 +1329,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link_1)
@@ -1381,9 +1382,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1435,9 +1436,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1487,9 +1488,9 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1538,9 +1539,9 @@ class TestServiceAffectingMonitor:
         }
         logger = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1592,9 +1593,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1644,9 +1645,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1695,9 +1696,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1749,9 +1750,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1801,9 +1802,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1851,9 +1852,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._packet_loss_check(device=device, edge_status=edges_to_report, link=link)
@@ -1909,9 +1910,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._jitter_check(device=device, edge_status=edges_to_report, link=link_1)
@@ -1971,9 +1972,9 @@ class TestServiceAffectingMonitor:
             }
         }
         logger = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._notify_trouble = CoroutineMock()
 
         await service_affecting_monitor._jitter_check(device=device, edge_status=edges_to_report, link=link_1)
@@ -2049,17 +2050,161 @@ class TestServiceAffectingMonitor:
         config = testconfig
         custom_monitor_config = config.MONITOR_CONFIG.copy()
         custom_monitor_config["environment"] = 'production'
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
-        service_affecting_monitor._ticket_existence = CoroutineMock(return_value=True)
+                                                            metrics_repository, bruin_repository)
+        ticket_mock = {
+            "ticketID": 3521039,
+            "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "R"}],
+            "ticketNotes": [
+                {
+                    "noteValue": '#*Automation Engine*# \n '
+                                 'Trouble: LATENCY\n '
+                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                    'createdDate': '2019-09-10 10:34:00-04:00'
+                }
+            ]
+        }
+        open_ticket_response_mock = {
+            'status': 200,
+            'body': {}
+        }
+        client_id = 85940
+        slack_message_mock = (
+            f'Affecting ticket {ticket_mock["ticketID"]} reopened. Ticket details at '
+            f'https://app.bruin.com/helpdesk?clientId={client_id}&ticketId={ticket_mock["ticketID"]}.'
+        )
+        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
+        service_affecting_monitor._ticket_object_to_string_without_watermark = Mock()
+        service_affecting_monitor._bruin_repository.open_ticket = CoroutineMock(side_effect=[open_ticket_response_mock])
+        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
+        service_affecting_monitor._metrics_repository.increment_tickets_reopened = Mock()
+
+        link_info = {
+            'bestLatencyMsRx': 14,
+            'bestLatencyMsTx': 20,
+            "link": {
+                "interface": "GE1",
+                "displayName": "Test1",
+                "state": "DISCONNECTED",
+            }
+        }
+        service_affecting_monitor._compose_ticket_dict = Mock(return_value={})
+        with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
+            await service_affecting_monitor._notify_trouble(device, edge_status, link_info, 'Input results',
+                                                            'Output results', 'LATENCY', 120)
+
+        service_affecting_monitor._ticket_object_to_string_without_watermark.assert_called_once()
+        service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once_with(
+            ticket_mock['ticketID'], ticket_mock['ticketDetails'][0]['detailID'])
+        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message.\
+            assert_awaited_once_with(slack_message_mock)
+        service_affecting_monitor._metrics_repository.increment_tickets_reopened.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def notify_trouble_with_ticket_already_existing_with_error_open_ticket_test(self):
+        event_bus = Mock()
+        logger = Mock()
+        scheduler = Mock()
+        template_renderer = Mock()
+        metrics_repository = Mock()
+
+        device = {
+            "serial": 'VC05200033383',
+            "host": "mettel.velocloud.net",
+            "enterprise_id": 137,
+            "edge_id": 1651,
+            "contacts": {
+                "ticket": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                },
+                "site": {
+                    "email": "fake@gmail.com",
+                    "phone": "111-111-1111",
+                    "name": "Fake Guy",
+                }
+            }
+        }
+        edge_status = {
+            "edge_id": {
+                "host": "mettel.velocloud.net",
+                "enterprise_id": 137,
+                "edge_id": 1602
+            },
+            "edge_info": {
+                "enterprise_name": "Titan America|85940|",
+                "edges": {
+                    "name": "TEST",
+                    "edgeState": "OFFLINE",
+                    "serialNumber": "VC05200028729",
+                },
+                "links": [
+                    {
+                        'bestLatencyMsRx': 14,
+                        'bestLatencyMsTx': 20,
+                        "link": {
+                            "interface": "GE1",
+                            "displayName": "Test1",
+                            "state": "DISCONNECTED",
+                        }
+                    },
+                    {
+                        'bestLatencyMsRx': 14,
+                        'bestLatencyMsTx': 20,
+                        "link": {
+                            "interface": "GE2",
+                            "displayName": "Test2",
+                            "state": "DISCONNECTED",
+                        }
+                    }
+                ]
+            }
+        }
+
+        config = testconfig
+        custom_monitor_config = config.MONITOR_CONFIG.copy()
+        custom_monitor_config["environment"] = 'production'
+        bruin_repository = Mock()
+        service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
+                                                            metrics_repository, bruin_repository)
+        ticket_mock = {
+            "ticketID": 3521039,
+            "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200028729', "detailStatus": "R"}],
+            "ticketNotes": [
+                {
+                    "noteValue": '#*Automation Engine*# \n '
+                                 'Trouble: LATENCY\n '
+                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                    'createdDate': '2019-09-10 10:34:00-04:00'
+                }
+            ]
+        }
+        open_ticket_response_mock = {
+            'status': 400,
+            'body': {}
+        }
+        client_id = 85940
+        err_message_mock = (
+            f'[service-affecting-monitor] Error: Could not reopen ticket: {ticket_mock}'
+        )
+        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._ticket_object_to_string = Mock()
+        service_affecting_monitor._bruin_repository.open_ticket = CoroutineMock(side_effect=[open_ticket_response_mock])
+        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message = CoroutineMock()
+        service_affecting_monitor._bruin_repository.append_reopening_note_to_ticket = CoroutineMock()
 
         with patch.dict(config.MONITOR_CONFIG, custom_monitor_config):
             await service_affecting_monitor._notify_trouble(device, edge_status, 'Some Link Info', 'Input results',
                                                             'Output results', 'LATENCY', 120)
 
         service_affecting_monitor._ticket_object_to_string.assert_not_called()
+        service_affecting_monitor._bruin_repository.open_ticket.assert_awaited_once_with(
+            ticket_mock['ticketID'], ticket_mock['ticketDetails'][0]['detailID'])
+        service_affecting_monitor._bruin_repository._notifications_repository.send_slack_message. \
+            assert_awaited_once_with(err_message_mock)
 
     @pytest.mark.asyncio
     async def notify_trouble_with_no_existing_ticket_and_dev_environment_test(self):
@@ -2124,10 +2269,11 @@ class TestServiceAffectingMonitor:
         }
 
         config = testconfig
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
-        service_affecting_monitor._ticket_existence = CoroutineMock(return_value=False)
+                                                            metrics_repository, bruin_repository)
+        ticket_mock = None
+        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._ticket_object_to_string = Mock()
 
         await service_affecting_monitor._notify_trouble(device, edge_status, 'Some Link Info', 'Input results',
@@ -2142,6 +2288,7 @@ class TestServiceAffectingMonitor:
         template_renderer = Mock()
         metrics_repository = Mock()
         metrics_repository.increment_tickets_created = Mock()
+        bruin_repository = Mock()
 
         event_bus = Mock()
         event_bus.rpc_request = CoroutineMock(side_effect=[{'body': 'Failed', 'status': 400},
@@ -2218,8 +2365,9 @@ class TestServiceAffectingMonitor:
             'message': err_msg
         }
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
-        service_affecting_monitor._ticket_existence = CoroutineMock(return_value=False)
+                                                            metrics_repository, bruin_repository)
+        ticket_mock = None
+        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
 
@@ -2227,9 +2375,8 @@ class TestServiceAffectingMonitor:
             await service_affecting_monitor._notify_trouble(device, edges_to_report, 'Some Link Info', 'Input results',
                                                             'Output results', trouble, 120)
 
-        service_affecting_monitor._ticket_existence.assert_awaited_once_with(client_id,
-                                                                             edges_to_report['edge_info']['edges'][
-                                                                                 'serialNumber'], trouble)
+        service_affecting_monitor._get_affecting_ticket_by_trouble.assert_awaited_once_with(
+            client_id, edges_to_report['edge_info']['edges']['serialNumber'], trouble)
 
         service_affecting_monitor._compose_ticket_dict.assert_called_once()
         service_affecting_monitor._ticket_object_to_string.assert_called_once()
@@ -2311,18 +2458,19 @@ class TestServiceAffectingMonitor:
                 ]
             }
         }
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
-        service_affecting_monitor._ticket_existence = CoroutineMock(return_value=False)
+                                                            metrics_repository, bruin_repository)
+        ticket_mock = None
+        service_affecting_monitor._get_affecting_ticket_by_trouble = CoroutineMock(return_value=ticket_mock)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._ticket_object_to_string = Mock(return_value='Some string object')
 
         await service_affecting_monitor._notify_trouble(device, edges_to_report, 'Some Link Info', 'Input results',
                                                         'Output results', trouble, 120)
 
-        service_affecting_monitor._ticket_existence.assert_awaited_once_with(client_id,
-                                                                             edges_to_report['edge_info']['edges'][
-                                                                                 'serialNumber'], trouble)
+        service_affecting_monitor._get_affecting_ticket_by_trouble.assert_awaited_once_with(
+            client_id, edges_to_report['edge_info']['edges']['serialNumber'], trouble)
 
         service_affecting_monitor._compose_ticket_dict.assert_called_once()
         service_affecting_monitor._ticket_object_to_string.assert_called_with('Some ordered dict object')
@@ -2361,9 +2509,9 @@ class TestServiceAffectingMonitor:
 
         config = testconfig
         config.MONITOR_CONFIG['environment'] = None
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         service_affecting_monitor._compose_ticket_dict = Mock(return_value='Some ordered dict object')
         service_affecting_monitor._template_renderer.compose_email_object = Mock(return_value='Some email object')
 
@@ -2374,110 +2522,159 @@ class TestServiceAffectingMonitor:
         event_bus.rpc_request.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def ticket_existence_ok_test(self):
+    async def get_affecting_ticket_by_trouble_ok_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         template_renderer = Mock()
         config = testconfig
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
-        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'body': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
-                                   "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
-                                                                 'Trouble: LATENCY\n '
-                                                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
-                                                    'createdDate': '2019-09-10 10:34:00-04:00'}]}}
-        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details])
-        ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'LATENCY')
-        assert ticket_exists is True
+                                                            metrics_repository, bruin_repository)
+        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}], 'status': 200}
+        affecting_ticket_mock = {
+            "ticketID": 3521039,
+            "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200026138'}],
+            "ticketNotes": [
+                {
+                    "noteValue": '#*Automation Engine*# \n '
+                                 'Trouble: LATENCY\n '
+                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                    'createdDate': '2019-09-10 10:34:00-04:00'
+                }
+            ]
+        }
+        ticket_details = {
+            'body': [affecting_ticket_mock],
+            'status': 200
+        }
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_details])
+
+        affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(85940, 'VC05200026138',
+                                                                                            'LATENCY')
+        assert affecting_ticket == ticket_details['body'][0]
         assert event_bus.rpc_request.called
 
     @pytest.mark.asyncio
-    async def ticket_existence_wrong_trouble_test(self):
+    async def get_affecting_ticket_by_trouble_error_get_ticket_details_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
-        config = testconfig
         template_renderer = Mock()
+        config = testconfig
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
-        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'body': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
-                                   "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
-                                                    'Trouble: LATENCY\n '
-                                                    'TimeStamp: 2019-09-10 10:34:00-04:00 ',
-                                                    'createdDate': '2019-09-10 10:34:00-04:00'}]}}
-        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details, 'Slack Sent'])
-        ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'PACKET_LOSS')
-        assert ticket_exists is False
+                                                            metrics_repository, bruin_repository)
+        ticket_details = {
+            'body': None,
+            'status': 400
+        }
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_details])
+
+        affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(85940, 'VC05200026138',
+                                                                                            'LATENCY')
+        assert affecting_ticket is None
         assert event_bus.rpc_request.called
 
     @pytest.mark.asyncio
-    async def ticket_existence_wrong_serial_test(self):
+    async def get_affecting_ticket_by_trouble_wrong_trouble_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
-        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'body': {"ticketDetails": [{"detailValue": 'VC05200026137'}],
-                                   "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
-                                                                 'Trouble: LATENCY\n '
-                                                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
-                                                    'createdDate': '2019-09-10 10:34:00-04:00'}]}}
-        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details])
-        ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'LATENCY')
-        assert ticket_exists is False
+                                                            metrics_repository, bruin_repository)
+        affecting_ticket_mock = {
+            "ticketID": 3521039,
+            "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200026137'}],
+            "ticketNotes": [
+                {
+                    "noteValue": '#*Automation Engine*# \n '
+                                 'Trouble: LATENCY\n '
+                                 'TimeStamp: 2019-09-10 10:34:00-04:00 ',
+                    'createdDate': '2019-09-10 10:34:00-04:00'
+                }
+            ]
+        }
+        ticket_details = {
+            'body': [affecting_ticket_mock],
+            'status': 200
+        }
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_details, 'Slack Sent'])
+
+        affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(85940, 'VC05200026138',
+                                                                                            'PACKET_LOSS')
+        assert affecting_ticket is None
         assert event_bus.rpc_request.called
 
     @pytest.mark.asyncio
-    async def ticket_existence_no_details_test(self):
+    async def get_affecting_ticket_by_trouble_wrong_serial_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
-        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'body': {"ticketDetails": [{'otherDetails': None}],
-                                   "ticketNotes": [{"noteValue": '#*Automation Engine*# \n '
-                                                    'Trouble: LATENCY\n '
-                                                    'TimeStamp: 2019-09-10 10:34:00-04:00 ',
-                                                    'createdDate': '2019-09-10 10:34:00-04:00'}]}}
-        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details])
-        ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'LATENCY')
-        assert ticket_exists is False
+                                                            metrics_repository, bruin_repository)
+        affecting_ticket_mock = {
+            "ticketID": 3521039,
+            "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200026137'}],
+            "ticketNotes": [
+                {
+                    "noteValue": None,
+                    'createdDate': '2019-09-10 10:34:00-04:00'
+                }
+            ]
+        }
+        ticket_details = {
+            'body': [affecting_ticket_mock],
+            'status': 200
+        }
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_details])
+
+        affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(85940, 'VC05200026138',
+                                                                                            'LATENCY')
+        assert affecting_ticket is None
         assert event_bus.rpc_request.called
 
     @pytest.mark.asyncio
-    async def ticket_existence_no_notes_test(self):
+    async def get_affecting_ticket_by_trouble_no_notes_test(self):
         event_bus = Mock()
         logger = Mock()
         scheduler = Mock()
         template_renderer = Mock()
         config = testconfig
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
-        tickets = {'body': [{'ticketID': 3521039, 'serial': 'VC05200026138'}]}
-        ticket_details = {'body': {"ticketDetails": [{"detailValue": 'VC05200026138'}],
-                                   "ticketNotes": [{"noteValue": None}]}}
-        event_bus.rpc_request = CoroutineMock(side_effect=[tickets, ticket_details])
-        ticket_exists = await service_affecting_monitor._ticket_existence(85940, 'VC05200026138', 'LATENCY')
-        assert ticket_exists is False
+                                                            metrics_repository, bruin_repository)
+        affecting_ticket_mock = {
+            "ticketID": 3521039,
+            "ticketDetails": [{"detailID": 5217537, "detailValue": 'VC05200026138'}],
+            "ticketNotes": [
+                {
+                    "noteValue": None,
+                    'createdDate': '2019-09-10 10:34:00-04:00'
+                }
+            ]
+        }
+        ticket_details = {
+            'body': [affecting_ticket_mock],
+            'status': 200
+        }
+        event_bus.rpc_request = CoroutineMock(side_effect=[ticket_details])
+
+        affecting_ticket = await service_affecting_monitor._get_affecting_ticket_by_trouble(
+            85940, 'VC05200026138', 'LATENCY')
+
+        assert affecting_ticket is None
         assert event_bus.rpc_request.called
 
     def compose_ticket_dict_test(self):
@@ -2487,9 +2684,9 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         edges_to_report = {
             "request_id": "E4irhhgzqTxmSMFudJSF5Z",
             "edge_id": {
@@ -2579,9 +2776,9 @@ class TestServiceAffectingMonitor:
         config = testconfig
         template_renderer = Mock()
         metrics_repository = Mock()
-
+        bruin_repository = Mock()
         test_dict = {'EdgeName': 'Test', 'Edge Status': 'ok'}
         service_affecting_monitor = ServiceAffectingMonitor(event_bus, logger, scheduler, config, template_renderer,
-                                                            metrics_repository)
+                                                            metrics_repository, bruin_repository)
         ticket_note = service_affecting_monitor._ticket_object_to_string(test_dict)
         assert ticket_note == '#*Automation Engine*# \nEdgeName: Test \nEdge Status: ok \n'
