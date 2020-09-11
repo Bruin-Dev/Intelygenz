@@ -632,7 +632,7 @@ class OutageMonitor:
         ticket_id = outage_ticket_info["ticketID"]
         outage_ticket_creation_date_utc = datetime.strptime(outage_ticket_info["createDate"], "%m/%d/%Y %I:%M:%S %p")
         now = datetime.utcnow()
-        seconds_from_creation = (now - outage_ticket_creation_date_utc).seconds
+        seconds_from_creation = (now - outage_ticket_creation_date_utc).total_seconds()
         max_ticket_age_seconds = self._config.MONITOR_CONFIG['autoresolve_ticket_creation_seconds']
         self._logger.info(f'It has been {int(seconds_from_creation / 60)} minutes '
                           f'since ticket creation for ticket {ticket_id}')
