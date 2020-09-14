@@ -13,7 +13,7 @@ resource "aws_elasticache_cluster" "automation-redis-customer-cache" {
   cluster_id = local.automation-redis-customer-cache-cluster_id
   engine = "redis"
   engine_version = "5.0.4"
-  node_type = var.redis_node_type[var.CURRENT_ENVIRONMENT]
+  node_type = var.redis_node_type_cache_for_microservices[var.CURRENT_ENVIRONMENT]
   num_cache_nodes = 1
   parameter_group_name = "default.redis5.0"
   port = 6379

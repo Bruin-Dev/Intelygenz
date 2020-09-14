@@ -271,6 +271,14 @@ variable "redis_node_type" {
   }
 }
 
+variable "redis_node_type_cache_for_microservices" {
+  type = "map"
+  default = {
+    "production" = "cache.t2.small"
+    "dev"        = "cache.t2.micro"
+  }
+}
+
 // service-outage-monitor-1 environment variables
 
 variable "SERVICE_OUTAGE_MONITOR_1_HOSTS" {
