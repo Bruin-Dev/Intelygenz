@@ -3665,7 +3665,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3683,7 +3683,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3701,7 +3701,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3719,7 +3719,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3737,7 +3737,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3755,7 +3755,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3773,7 +3773,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3791,7 +3791,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3809,7 +3809,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3827,7 +3827,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3845,7 +3845,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3863,7 +3863,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3881,7 +3881,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3899,7 +3899,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3917,7 +3917,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3935,7 +3935,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3953,7 +3953,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3971,7 +3971,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -3989,7 +3989,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4007,7 +4007,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4025,7 +4025,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4043,7 +4043,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4061,7 +4061,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4079,7 +4079,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4097,7 +4097,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4115,7 +4115,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4133,7 +4133,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4151,7 +4151,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4169,7 +4169,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4187,7 +4187,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4205,7 +4205,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4223,7 +4223,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4241,7 +4241,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4259,7 +4259,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4277,7 +4277,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4295,7 +4295,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4313,7 +4313,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4331,7 +4331,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4349,7 +4349,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4367,7 +4367,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4385,7 +4385,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4403,7 +4403,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4421,7 +4421,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4439,7 +4439,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4457,7 +4457,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4475,7 +4475,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4493,7 +4493,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4511,7 +4511,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4529,7 +4529,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4547,7 +4547,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4565,7 +4565,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4583,7 +4583,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4601,7 +4601,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4619,7 +4619,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4637,7 +4637,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4655,7 +4655,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4673,7 +4673,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4691,7 +4691,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4709,7 +4709,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4727,7 +4727,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4745,7 +4745,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4763,7 +4763,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4781,7 +4781,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4799,7 +4799,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4817,7 +4817,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4835,7 +4835,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4853,7 +4853,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4871,7 +4871,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4889,7 +4889,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4907,7 +4907,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4925,7 +4925,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4943,7 +4943,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4961,7 +4961,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4979,7 +4979,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -4997,7 +4997,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5015,7 +5015,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5033,7 +5033,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5051,7 +5051,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5069,7 +5069,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5087,7 +5087,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5105,7 +5105,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5123,7 +5123,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5141,7 +5141,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5159,7 +5159,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5177,7 +5177,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5195,7 +5195,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5213,7 +5213,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5231,7 +5231,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5249,7 +5249,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5267,7 +5267,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5285,7 +5285,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5303,7 +5303,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5321,7 +5321,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5339,7 +5339,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5357,7 +5357,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5375,7 +5375,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5393,7 +5393,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5411,7 +5411,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5429,7 +5429,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5447,7 +5447,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5465,7 +5465,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5483,7 +5483,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5501,7 +5501,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5519,7 +5519,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5537,7 +5537,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5555,7 +5555,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5573,7 +5573,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5591,7 +5591,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5609,7 +5609,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5627,7 +5627,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5645,7 +5645,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5663,7 +5663,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5681,7 +5681,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5699,7 +5699,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5717,7 +5717,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5735,7 +5735,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5753,7 +5753,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5771,7 +5771,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5789,7 +5789,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5807,7 +5807,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5825,7 +5825,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5843,7 +5843,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5861,7 +5861,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5879,7 +5879,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5897,7 +5897,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5915,7 +5915,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5933,7 +5933,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5951,7 +5951,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5969,7 +5969,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -5987,7 +5987,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6005,7 +6005,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6023,7 +6023,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6041,7 +6041,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6059,7 +6059,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6077,7 +6077,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6095,7 +6095,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6113,7 +6113,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6131,7 +6131,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6149,7 +6149,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6167,7 +6167,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6185,7 +6185,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6203,7 +6203,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6221,7 +6221,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6239,7 +6239,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6257,7 +6257,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6275,7 +6275,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6293,7 +6293,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6311,7 +6311,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6329,7 +6329,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6347,7 +6347,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6365,7 +6365,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6383,7 +6383,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6401,7 +6401,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6419,7 +6419,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6437,7 +6437,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6455,7 +6455,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6473,7 +6473,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6491,7 +6491,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6509,7 +6509,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6527,7 +6527,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6545,7 +6545,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6563,7 +6563,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6581,7 +6581,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6599,7 +6599,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6617,7 +6617,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6635,7 +6635,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6653,7 +6653,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6671,7 +6671,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6689,7 +6689,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6707,7 +6707,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6725,7 +6725,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6743,7 +6743,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6761,7 +6761,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6779,7 +6779,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6797,7 +6797,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6815,7 +6815,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6833,7 +6833,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6851,7 +6851,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6869,7 +6869,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6887,7 +6887,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6905,7 +6905,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6923,7 +6923,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6941,7 +6941,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6959,7 +6959,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6977,7 +6977,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -6995,7 +6995,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7013,7 +7013,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7031,7 +7031,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7049,7 +7049,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7067,7 +7067,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7085,7 +7085,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7103,7 +7103,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7121,7 +7121,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7139,7 +7139,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7157,7 +7157,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7175,7 +7175,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7193,7 +7193,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7211,7 +7211,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7229,7 +7229,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7247,7 +7247,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7265,7 +7265,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7283,7 +7283,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7301,7 +7301,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7319,7 +7319,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7337,7 +7337,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7355,7 +7355,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7373,7 +7373,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7391,7 +7391,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7409,7 +7409,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7427,7 +7427,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7445,7 +7445,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7463,7 +7463,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7481,7 +7481,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7499,7 +7499,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7517,7 +7517,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7535,7 +7535,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7553,7 +7553,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7571,7 +7571,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7589,7 +7589,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7607,7 +7607,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7625,7 +7625,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7643,7 +7643,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7661,7 +7661,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7679,7 +7679,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7697,7 +7697,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7715,7 +7715,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7733,7 +7733,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7751,7 +7751,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7769,7 +7769,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7787,7 +7787,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7805,7 +7805,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7823,7 +7823,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7841,7 +7841,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7859,7 +7859,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7877,7 +7877,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7895,7 +7895,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7913,7 +7913,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7931,7 +7931,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7949,7 +7949,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7967,7 +7967,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -7985,7 +7985,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8003,7 +8003,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8021,7 +8021,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8039,7 +8039,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8057,7 +8057,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8075,7 +8075,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8093,7 +8093,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8111,7 +8111,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8129,7 +8129,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8147,7 +8147,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8165,7 +8165,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8183,7 +8183,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8201,7 +8201,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8219,7 +8219,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8237,7 +8237,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8255,7 +8255,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8273,7 +8273,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8291,7 +8291,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8309,7 +8309,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8327,7 +8327,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8345,7 +8345,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8363,7 +8363,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8381,7 +8381,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8399,7 +8399,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8417,7 +8417,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8435,7 +8435,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8453,7 +8453,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8471,7 +8471,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8489,7 +8489,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8507,7 +8507,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8525,7 +8525,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8543,7 +8543,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8561,7 +8561,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8579,7 +8579,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8597,7 +8597,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8615,7 +8615,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8633,7 +8633,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8651,7 +8651,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8669,7 +8669,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8687,7 +8687,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8705,7 +8705,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8723,7 +8723,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8741,7 +8741,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8759,7 +8759,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8777,7 +8777,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8795,7 +8795,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8813,7 +8813,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8831,7 +8831,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8849,7 +8849,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8867,7 +8867,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8885,7 +8885,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8903,7 +8903,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8921,7 +8921,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8939,7 +8939,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8957,7 +8957,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8975,7 +8975,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -8993,7 +8993,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9011,7 +9011,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9029,7 +9029,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9047,7 +9047,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9065,7 +9065,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9083,7 +9083,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9101,7 +9101,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9119,7 +9119,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9137,7 +9137,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9155,7 +9155,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9173,7 +9173,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9191,7 +9191,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9209,7 +9209,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9227,7 +9227,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9245,7 +9245,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9263,7 +9263,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9281,7 +9281,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9299,7 +9299,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9317,7 +9317,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9335,7 +9335,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9353,7 +9353,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9371,7 +9371,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9389,7 +9389,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9407,7 +9407,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9425,7 +9425,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9443,7 +9443,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9461,7 +9461,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9479,7 +9479,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9497,7 +9497,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9515,7 +9515,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9533,7 +9533,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9551,7 +9551,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9569,7 +9569,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9587,7 +9587,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9605,7 +9605,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9623,7 +9623,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9641,7 +9641,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9659,7 +9659,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9677,7 +9677,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9695,7 +9695,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9713,7 +9713,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9731,7 +9731,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9749,7 +9749,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9767,7 +9767,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9785,7 +9785,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9803,7 +9803,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9821,7 +9821,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9839,7 +9839,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9857,7 +9857,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9875,7 +9875,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9893,7 +9893,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9911,7 +9911,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9929,7 +9929,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9947,7 +9947,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9965,7 +9965,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -9983,7 +9983,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10001,7 +10001,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10019,7 +10019,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10037,7 +10037,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10055,7 +10055,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10073,7 +10073,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10091,7 +10091,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10109,7 +10109,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10127,7 +10127,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10145,7 +10145,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10163,7 +10163,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10181,7 +10181,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10199,7 +10199,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10217,7 +10217,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10235,7 +10235,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10253,7 +10253,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10271,7 +10271,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10289,7 +10289,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10307,7 +10307,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10325,7 +10325,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10343,7 +10343,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10361,7 +10361,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10379,7 +10379,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10397,7 +10397,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10415,7 +10415,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10433,7 +10433,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10451,7 +10451,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10469,7 +10469,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10487,7 +10487,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10505,7 +10505,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10523,7 +10523,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10541,7 +10541,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10559,7 +10559,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10577,7 +10577,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10595,7 +10595,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10613,7 +10613,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10631,7 +10631,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10649,7 +10649,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10667,7 +10667,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10685,7 +10685,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10703,7 +10703,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10721,7 +10721,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10739,7 +10739,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10757,7 +10757,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10775,7 +10775,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10793,7 +10793,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10811,7 +10811,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10829,7 +10829,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10847,7 +10847,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10865,7 +10865,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10883,7 +10883,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10901,7 +10901,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10919,7 +10919,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10937,7 +10937,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10955,7 +10955,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10973,7 +10973,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -10991,7 +10991,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11009,7 +11009,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11027,7 +11027,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11045,7 +11045,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11063,7 +11063,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11081,7 +11081,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11099,7 +11099,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11117,7 +11117,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11135,7 +11135,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11153,7 +11153,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11171,7 +11171,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11189,7 +11189,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11207,7 +11207,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11225,7 +11225,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11243,7 +11243,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11261,7 +11261,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11279,7 +11279,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11297,7 +11297,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11315,7 +11315,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11333,7 +11333,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11351,7 +11351,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11369,7 +11369,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11387,7 +11387,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11405,7 +11405,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11423,7 +11423,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11441,7 +11441,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11459,7 +11459,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11477,7 +11477,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11495,7 +11495,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11513,7 +11513,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11531,7 +11531,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11549,7 +11549,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11567,7 +11567,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11585,7 +11585,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11603,7 +11603,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11621,7 +11621,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11639,7 +11639,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11657,7 +11657,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11675,7 +11675,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11693,7 +11693,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11711,7 +11711,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11729,7 +11729,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11747,7 +11747,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11765,7 +11765,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11783,7 +11783,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11801,7 +11801,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11819,7 +11819,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11837,7 +11837,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11855,7 +11855,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11873,7 +11873,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11891,7 +11891,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11909,7 +11909,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11927,7 +11927,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11945,7 +11945,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
@@ -11963,7 +11963,7 @@ devices_by_id = [
         "enterprise_id": 124,
         "contacts": {
             "ticket": {
-                "email": "EmailDLITCoreNetwork@republicservices.com",
+                "email": "DLITCoreNetwork@republicservices.com",
                 "phone": "No Contact Phone Available",
                 "name": "Dlit CoreNetwork"
             },
