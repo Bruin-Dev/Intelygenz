@@ -134,6 +134,43 @@ class TestVelocloudClient:
                 assert header == expected_header
 
     @pytest.mark.asyncio
+    async def relogin_client_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        host = 'someurl'
+        client = {'host': 'someurl', 'headers': 'new header'}
+        initial_clients = [{'host': 'some_host2', 'headers': 'some header dict'},
+                           {'host': 'someurl', 'headers': 'some header dict'}]
+        final_clients = [{'host': 'some_host2', 'headers': 'some header dict'},
+                         client]
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client._create_and_connect_client = CoroutineMock(return_value=client)
+        velocloud_client._clients = initial_clients
+
+        await velocloud_client._relogin_client(host)
+
+        assert velocloud_client._clients == final_clients
+
+    @pytest.mark.asyncio
+    async def relogin_client_host_not_in_initial_clients_list_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        host = 'someurl'
+        client = {'host': 'someurl', 'headers': 'new header'}
+        initial_clients = [{'host': 'some_host2', 'headers': 'some header dict'}]
+        final_clients = [{'host': 'some_host2', 'headers': 'some header dict'},
+                         client]
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client._create_and_connect_client = CoroutineMock(return_value=client)
+        velocloud_client._clients = initial_clients
+
+        await velocloud_client._relogin_client(host)
+
+        assert velocloud_client._clients == final_clients
+
+    @pytest.mark.asyncio
     async def _get_header_by_host_test(self):
         configs = Mock()
         logger = Mock()
@@ -148,6 +185,22 @@ class TestVelocloudClient:
         client = velocloud_client._get_header_by_host(host)
 
         assert client == clients[1]
+
+    @pytest.mark.asyncio
+    async def _get_header_by_host_no_client_found_test(self):
+        configs = Mock()
+        logger = Mock()
+
+        clients = [{'host': 'some_host2', 'headers': 'some header dict'},
+                   {'host': 'some_host', 'headers': 'some header dict'}]
+
+        host = 'some_host3'
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client._clients = clients
+
+        client = velocloud_client._get_header_by_host(host)
+
+        assert client is None
 
     @pytest.mark.asyncio
     async def get_edge_information_test(self):
@@ -202,6 +255,32 @@ class TestVelocloudClient:
             assert edge_info == {"body": edge_status, "status": 400}
 
     @pytest.mark.asyncio
+    async def get_edge_information_error_404_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        edge_status = "Some Edge Information"
+
+        response_mock = Mock()
+        response_mock.json = CoroutineMock(return_value=edge_status)
+        response_mock.status = 400
+
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client._relogin_client = CoroutineMock()
+        velocloud_client._get_header_by_host = Mock(return_value=None)
+        velocloud_client._json_return = Mock(return_value=response_mock.json())
+
+        with patch.object(velocloud_client._session, 'post',
+                          new=CoroutineMock(return_value=response_mock)) as mock_post:
+            edge_info = await velocloud_client.get_edge_information(edge_id)
+
+            mock_post.assert_not_called()
+            velocloud_client._relogin_client.assert_awaited_once()
+            assert edge_info["body"] == f'Cannot find a client to connect to {edge_id["host"]}'
+            assert edge_info["status"] == 404
+
+    @pytest.mark.asyncio
     async def get_edge_information_error_500_test(self):
         configs = testconfig
         logger = Mock()
@@ -212,7 +291,7 @@ class TestVelocloudClient:
         response_mock.status = 500
         response_mock.json = CoroutineMock(return_value={})
         velocloud_client = VelocloudClient(configs, logger)
-        velocloud_client.instantiate_and_connect_clients = Mock()
+        velocloud_client._relogin_client = CoroutineMock()
         velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
 
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
@@ -274,6 +353,32 @@ class TestVelocloudClient:
 
             assert link_info["status"] == 400
             assert link_info["body"] == link_status
+
+    @pytest.mark.asyncio
+    async def get_link_information_error_404_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        interval = "Some interval"
+        link_status = "error"
+
+        response_mock = Mock()
+        response_mock.json = CoroutineMock(return_value=link_status)
+        response_mock.status = 400
+
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client._get_header_by_host = Mock(return_value=None)
+        velocloud_client._relogin_client = CoroutineMock()
+
+        with patch.object(velocloud_client._session, 'post',
+                          new=CoroutineMock(return_value=response_mock)) as mock_post:
+            link_info = await velocloud_client.get_link_information(edge_id, interval)
+            mock_post.assert_not_called()
+            velocloud_client._relogin_client.assert_awaited_once()
+
+            assert link_info["status"] == 404
+            assert link_info["body"] == f'Cannot find a client to connect to {edge_id["host"]}'
 
     @pytest.mark.asyncio
     async def get_link_information_error_500_test(self):
@@ -377,6 +482,35 @@ class TestVelocloudClient:
             assert link_service_group_info == {"body": edge_status, "status": 400}
 
     @pytest.mark.asyncio
+    async def get_link_service_groups_information_error_404_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        interval = "Some interval"
+        edge_status = "Some Edge Information"
+        header = {'host': 'some_host', 'headers': 'some header dict'}
+
+        response_mock = Mock()
+        response_mock.json = CoroutineMock(return_value=edge_status)
+        response_mock.status = 400
+
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client._get_header_by_host = Mock(return_value=None)
+        velocloud_client._json_return = Mock(return_value=response_mock.json())
+        velocloud_client._relogin_client = CoroutineMock()
+
+        with patch.object(velocloud_client._session, 'post',
+                          new=CoroutineMock(return_value=response_mock)) as mock_post:
+            link_service_group_info = await velocloud_client.get_link_service_groups_information(edge_id, interval)
+
+            mock_post.assert_not_called()
+            velocloud_client._relogin_client.assert_awaited_once()
+
+            assert link_service_group_info["status"] == 404
+            assert link_service_group_info["body"] == f'Cannot find a client to connect to {edge_id["host"]}'
+
+    @pytest.mark.asyncio
     async def get_link_service_groups_information_error_500_test(self):
         configs = testconfig
         logger = Mock()
@@ -388,7 +522,7 @@ class TestVelocloudClient:
         response_mock.status = 500
         response_mock.json = CoroutineMock(return_value={})
         velocloud_client = VelocloudClient(configs, logger)
-        velocloud_client.instantiate_and_connect_clients = Mock()
+        velocloud_client._relogin_client = CoroutineMock()
         velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
             link_service_group_info = await velocloud_client.get_link_service_groups_information(edge_id, interval)
@@ -470,6 +604,34 @@ class TestVelocloudClient:
             assert edge_info == {"body": edge_status, "status": 400}
 
     @pytest.mark.asyncio
+    async def get_enterprise_information_error_404_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        edge_status = "Some Edge Information"
+        header = {'host': 'some_host', 'headers': 'some header dict'}
+
+        response_mock = Mock()
+        response_mock.json = CoroutineMock(return_value=edge_status)
+        response_mock.status = 400
+
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client._get_header_by_host = Mock(return_value=None)
+        velocloud_client._json_return = Mock(return_value=response_mock.json())
+        velocloud_client._relogin_client = CoroutineMock()
+
+        with patch.object(velocloud_client._session, 'post',
+                          new=CoroutineMock(return_value=response_mock)) as mock_post:
+            edge_info = await velocloud_client.get_enterprise_information(edge_id)
+
+            mock_post.assert_not_called()
+            velocloud_client._relogin_client.assert_awaited_once()
+
+            assert edge_info["status"] == 404
+            assert edge_info["body"] == f'Cannot find a client to connect to {edge_id["host"]}'
+
+    @pytest.mark.asyncio
     async def get_enterprise_information_error_500_test(self):
         configs = testconfig
         logger = Mock()
@@ -480,7 +642,7 @@ class TestVelocloudClient:
         response_mock.status = 500
         response_mock.json = CoroutineMock(return_value={})
         velocloud_client = VelocloudClient(configs, logger)
-        velocloud_client.instantiate_and_connect_clients = Mock()
+        velocloud_client._relogin_client = CoroutineMock()
         velocloud_client._get_header_by_host = Mock(return_value={"headers": ""})
         with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
             edge_information = await velocloud_client.get_enterprise_information(edge_id)
@@ -545,6 +707,37 @@ class TestVelocloudClient:
 
             mock_post.assert_called_once()
             assert events["body"] == events_status
+
+    @pytest.mark.asyncio
+    async def get_all_event_information_error_404_test(self):
+        configs = testconfig
+        logger = Mock()
+
+        edge_id = {"host": 'some_host', "enterprise_id": 19, "edge_id": 99}
+        interval_start = "Some interval start time"
+        interval_end = "Some interval end time"
+        limit = "some_limit"
+        events_status = "Some Enterprise Information"
+        header = {'host': 'some_host', 'headers': 'some header dict'}
+
+        response_mock = Mock()
+        response_mock.json = CoroutineMock(return_value=events_status)
+        response_mock.status = 400
+
+        velocloud_client = VelocloudClient(configs, logger)
+        velocloud_client._get_header_by_host = Mock(return_value=None)
+        velocloud_client._json_return = Mock(return_value=response_mock.json())
+        velocloud_client._relogin_client = CoroutineMock()
+
+        with patch.object(velocloud_client._session, 'post',
+                          new=CoroutineMock(return_value=response_mock)) as mock_post:
+            events = await velocloud_client.get_all_edge_events(edge_id, interval_start, interval_end, limit)
+
+            mock_post.assert_not_called()
+            velocloud_client._relogin_client.assert_awaited_once()
+
+            assert events["status"] == 404
+            assert events["body"] == f'Cannot find a client to connect to {edge_id["host"]}'
 
     @pytest.mark.asyncio
     async def get_get_all_event_information_error_500_test(self):
@@ -898,14 +1091,15 @@ class TestVelocloudClient:
         logger.info = Mock()
         logger.error = Mock()
 
+        host = 'some_host'
         response = {'error': {'message': 'tokenError [expired session cookie]'}}
         velocloud_client = VelocloudClient(configs, logger)
-        velocloud_client.instantiate_and_connect_clients = Mock()
+        velocloud_client._relogin_client = CoroutineMock()
 
         with raises(Exception):
-            json_return = await velocloud_client._json_return(response)
+            json_return = await velocloud_client._json_return(response, host)
             logger.info.assert_called_once()
-            velocloud_client.instantiate_and_connect_clients.assert_called_once()
+            velocloud_client._relogin_client.assert_called_once()
             assert json_return == ''
 
     @pytest.mark.asyncio
@@ -915,10 +1109,11 @@ class TestVelocloudClient:
         logger.info = Mock()
         logger.error = Mock()
 
+        host = 'some_host'
         response = {'error': {'message': 'another_error'}}
         velocloud_client = VelocloudClient(configs, logger)
-        velocloud_client.instantiate_and_connect_clients = Mock()
-        json_return = await velocloud_client._json_return(response)
+        velocloud_client._relogin_client = CoroutineMock()
+        json_return = await velocloud_client._json_return(response, host)
         logger.error.assert_called_once()
         assert json_return == response
 
@@ -929,10 +1124,11 @@ class TestVelocloudClient:
         logger.info = Mock()
         logger.error = Mock()
 
+        host = 'some_host'
         response = {'edge_status': 'ok'}
         velocloud_client = VelocloudClient(configs, logger)
-        velocloud_client.instantiate_and_connect_clients = Mock()
-        json_return = await velocloud_client._json_return(response)
+        velocloud_client._relogin_client = CoroutineMock()
+        json_return = await velocloud_client._json_return(response, host)
         assert json_return == response
 
     @pytest.mark.asyncio
@@ -940,8 +1136,9 @@ class TestVelocloudClient:
         configs = testconfig
         logger = Mock()
 
+        host = 'some_host'
         response = ['List']
         velocloud_client = VelocloudClient(configs, logger)
-        velocloud_client.instantiate_and_connect_clients = Mock()
-        json_return = await velocloud_client._json_return(response)
+        velocloud_client._relogin_client = CoroutineMock()
+        json_return = await velocloud_client._json_return(response, host)
         assert json_return == response

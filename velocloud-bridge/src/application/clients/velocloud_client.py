@@ -18,6 +18,18 @@ class VelocloudClient:
             await self._create_and_connect_client(cred_block['url'], cred_block['username'], cred_block['password']) for
             cred_block in self._config['servers']]
 
+    async def _relogin_client(self, host):
+        for client in self._clients:
+            if host == client['host']:
+                self._clients.remove(client)
+
+        for cred_block in self._config['servers']:
+            if host == cred_block['url']:
+                connected_client = await self._create_and_connect_client(host,
+                                                                         cred_block['username'],
+                                                                         cred_block['password'])
+                self._clients.append(connected_client)
+
     async def _create_and_connect_client(self, host, user, password):
         self._logger.info(f'Logging in host: {host} to velocloud')
 
@@ -77,23 +89,34 @@ class VelocloudClient:
     def _get_header_by_host(self, host):
         host_client = [client
                        for client in self._clients
-                       if host == client['host']][0]
-        return host_client
+                       if host == client['host']]
+        if len(host_client) > 0:
+            self._logger.info(f"Found host: {host} in client array")
+            return host_client[0]
+        self._logger.info(f"Host: {host} not found in client array")
+        return None
 
     async def get_edge_information(self, edge):
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']), reraise=True)
         async def get_edge_information():
+            return_response = dict.fromkeys(["body", "status"])
             target_host_client = self._get_header_by_host(edge["host"])
+            if target_host_client is None:
+                self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
+                return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
+                return_response["status"] = 404
+                await self._relogin_client(edge["host"])
+                return return_response
+
             response = await self._session.post(f"https://{edge['host']}/portal/rest/edge/getEdge",
                                                 json={"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"]},
                                                 headers=target_host_client['headers'],
                                                 ssl=self._config['verify_ssl'])
-            return_response = dict.fromkeys(["body", "status"])
 
             if response.status in range(200, 300):
                 response_json = await response.json()
-                return_response["body"] = await self._json_return(response_json)
+                return_response["body"] = await self._json_return(response_json, edge["host"])
                 return_response["status"] = response.status
                 return return_response
             if response.status == 400:
@@ -118,17 +141,25 @@ class VelocloudClient:
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']), reraise=True)
         async def get_link_information():
+            return_response = dict.fromkeys(["body", "status"])
             target_host_client = self._get_header_by_host(edge["host"])
+
+            if target_host_client is None:
+                self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
+                return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
+                return_response["status"] = 404
+                await self._relogin_client(edge["host"])
+                return return_response
+
             edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"], "interval": interval}
             response = await self._session.post(f"https://{edge['host']}/portal/rest/metrics/getEdgeLinkMetrics",
                                                 json=edgeids,
                                                 headers=target_host_client['headers'],
                                                 ssl=self._config['verify_ssl'])
 
-            return_response = dict.fromkeys(["body", "status"])
             if response.status in range(200, 300):
                 response_json = await response.json()
-                return_response["body"] = await self._json_return(response_json)
+                return_response["body"] = await self._json_return(response_json, edge["host"])
                 return_response["status"] = response.status
                 return return_response
             if response.status == 400:
@@ -153,17 +184,25 @@ class VelocloudClient:
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']), reraise=True)
         async def get_link_service_groups_information():
+            return_response = dict.fromkeys(["body", "status"])
             target_host_client = self._get_header_by_host(edge["host"])
+
+            if target_host_client is None:
+                self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
+                return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
+                return_response["status"] = 404
+                await self._relogin_client(edge["host"])
+                return return_response
+
             edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"], "interval": interval}
             response = await self._session.post(f"https://{edge['host']}/portal/rest/metrics/getEdgeAppLinkMetrics",
                                                 json=edgeids,
                                                 headers=target_host_client['headers'],
                                                 ssl=self._config['verify_ssl'])
 
-            return_response = dict.fromkeys(["body", "status"])
             if response.status in range(200, 300):
                 response_json = await response.json()
-                return_response["body"] = await self._json_return(response_json)
+                return_response["body"] = await self._json_return(response_json, edge["host"])
                 return_response["status"] = response.status
                 return return_response
             if response.status == 400:
@@ -188,17 +227,25 @@ class VelocloudClient:
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']), reraise=True)
         async def get_enterprise_information():
+            return_response = dict.fromkeys(["body", "status"])
             target_host_client = self._get_header_by_host(edge["host"])
+
+            if target_host_client is None:
+                self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
+                return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
+                return_response["status"] = 404
+                await self._relogin_client(edge["host"])
+                return return_response
+
             body = {"enterpriseId": edge["enterprise_id"]}
             response = await self._session.post(f"https://{edge['host']}/portal/rest/enterprise/getEnterprise",
                                                 json=body,
                                                 headers=target_host_client['headers'],
                                                 ssl=self._config['verify_ssl'])
 
-            return_response = dict.fromkeys(["body", "status"])
             if response.status in range(200, 300):
                 response_json = await response.json()
-                return_response["body"] = await self._json_return(response_json)
+                return_response["body"] = await self._json_return(response_json, edge["host"])
                 return_response["status"] = response.status
                 return return_response
             if response.status == 400:
@@ -223,7 +270,16 @@ class VelocloudClient:
         @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
                stop=stop_after_delay(self._config['stop_delay']), reraise=True)
         async def get_all_edge_events():
+            return_response = dict.fromkeys(["body", "status"])
             target_host_client = self._get_header_by_host(edge["host"])
+
+            if target_host_client is None:
+                self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
+                return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
+                return_response["status"] = 404
+                await self._relogin_client(edge["host"])
+                return return_response
+
             body = {"enterpriseId": edge["enterprise_id"],
                     "interval": {"start": start, "end": end},
                     "filter": {"limit": limit},
@@ -234,10 +290,9 @@ class VelocloudClient:
                                                 headers=target_host_client['headers'],
                                                 ssl=self._config['verify_ssl'])
 
-            return_response = dict.fromkeys(["body", "status"])
             if response.status in range(200, 300):
                 response_json = await response.json()
-                return_response["body"] = await self._json_return(response_json)
+                return_response["body"] = await self._json_return(response_json, edge["host"])
                 return_response["status"] = response.status
                 return return_response
             if response.status == 400:
@@ -266,7 +321,8 @@ class VelocloudClient:
             clients = []
             for host in filter.keys():
                 target_host_client = self._get_header_by_host(host)
-                clients.append(target_host_client)
+                if target_host_client is not None:
+                    clients.append(target_host_client)
         else:
             filter = defaultdict(dict)
 
@@ -350,7 +406,7 @@ class VelocloudClient:
             return_response = dict.fromkeys(["body", "status"])
             if response.status in range(200, 300):
                 response_json = await response.json()
-                return_response["body"] = await self._json_return(response_json)
+                return_response["body"] = await self._json_return(response_json, client['host'])
                 return_response["status"] = response.status
                 return return_response
             if response.status == 400:
@@ -383,7 +439,7 @@ class VelocloudClient:
             return_response = dict.fromkeys(["body", "status"])
             if response.status in range(200, 300):
                 response_json = await response.json()
-                return_response["body"] = await self._json_return(response_json)
+                return_response["body"] = await self._json_return(response_json, client['host'])
                 return_response["status"] = response.status
                 return return_response
             if response.status == 400:
@@ -423,12 +479,12 @@ class VelocloudClient:
         response['body'] = enterprise_names
         return response
 
-    async def _json_return(self, response):
+    async def _json_return(self, response, host):
         if isinstance(response, dict):
             if 'error' in response.keys():
                 if 'tokenError' in response['error']['message']:
                     self._logger.info(f'Response returned: {response}. Attempting to relogin')
-                    await self.instantiate_and_connect_clients()
+                    await self._relogin_client(host)
                     raise Exception
                 else:
                     self._logger.error(f'Error response returned: {response}')
