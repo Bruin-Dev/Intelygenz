@@ -27,3 +27,78 @@ dependencies:
   - name: nats
     version: 0.7.2
     repository: https://nats-io.github.io/k8s/helm/charts/
+  - name: bruin-bridge
+    version: '*.*.*'
+    condition: bruin-bridge.enabled
+  - name: cts-bridge
+    version: '*.*.*'
+    condition: cts-bridge.enabled
+  - name: customer-cache
+    version: '*.*.*'
+    condition: customer-cache.enabled
+  - name: digi-bridge
+    version: '*.*.*'
+    condition: digi-bridge.enabled
+  - name: dispatch-portal-backend
+    version: '*.*.*'
+    condition: dispatch-portal-backend.enabled
+  - name: dispatch-portal-frontend
+    version: '*.*.*'
+    condition: dispatch-portal-frontend.enabled
+  - name: ecr-cred-helper
+    version: '*.*.*'
+    condition: ecr-cred-helper.enabled
+  - name: hawkeye-bridge
+    version: '*.*.*'
+    condition: hawkeye-bridge.enabled
+  - name: hawkeye-customer-cache
+    version: '*.*.*'
+    condition: hawkeye-customer-cache.enabled
+  - name: hawkeye-outage-monitor
+    version: '*.*.*'
+    condition: hawkeye-outage-monitor.enabled
+  - name: last-contact-report
+    version: '*.*.*'
+    condition: last-contact-report.enabled
+  - name: lit-bridge
+    version: '*.*.*'
+    condition: lit-bridge.enabled
+  - name: lumin-billing-report
+    version: '*.*.*'
+    condition: lumin-billing-report.enabled
+  - name: notifier
+    version: '*.*.*'
+    condition: notifier.enabled
+  - name: service-dispatch-monitor
+    version: '*.*.*'
+    condition: service-dispatch-monitor.enabled
+  - name: service-outage-monitor-1
+    version: '*.*.*'
+    condition: service-outage-monitor-1.enabled
+  - name: service-outage-monitor-2
+    version: '*.*.*'
+    condition: service-outage-monitor-2.enabled
+  - name: service-outage-monitor-3
+    version: '*.*.*'
+    condition: service-outage-monitor-3.enabled
+  - name: service-outage-monitor-4
+    version: '*.*.*'
+    condition: service-outage-monitor-4.enabled
+  - name: service-outage-monitor-triage
+    version: '*.*.*'
+    condition: service-outage-monitor-triage.enabled
+  - name: sites-monitor
+    version: '*.*.*'
+    condition: sites-monitor.enabled
+  - name: t7-bridge
+    version: '*.*.*'
+    condition: t7-bridge.enabled
+  - name: tnba-monitor
+    version: '*.*.*'
+    condition: tnba-monitor.enabled
+  - name: tnba-feedback
+    version: '*.*.*'
+    condition: tnba-feedback.enabled
+  - name: velocloud-bridge
+    version: '*.*.*'
+    condition: velocloud-bridge.enabled

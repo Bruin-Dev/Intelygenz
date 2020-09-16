@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tnba-feedback.fullname" . }}-configmap
+  labels:
+    {{- include "tnba-feedback.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  CURRENT_ENVIRONMENT: {{ .Values.global.current_environment }}
+  ENVIRONMENT_NAME: {{ .Values.global.environment }}
+  NATS_SERVER1: {{ .Values.global.nats_server }}
+  REDIS_HOSTNAME: {{ .Values.global.redis_hostname }}
+  REDIS_TNBA_FEEDBACK_HOSTNAME: {{ .Values.global.redis_tnba_feedback_hostname }}
+  PAPERTRAIL_ACTIVE: "{{ .Values.global.papertrail_active }}"
+  PAPERTRAIL_HOST: {{ .Values.global.papertrail_host }}
+  PAPERTRAIL_PORT: "{{ .Values.global.papertrail_port }}"

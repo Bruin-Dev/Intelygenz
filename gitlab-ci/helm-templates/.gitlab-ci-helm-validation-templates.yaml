@@ -1,8 +1,0 @@
-.helm_template_lint_chart: &.helm_template_lint_chart
-  image:
-    name: gitlab.intelygenz.com:5001/mettel/docker_images/python3.6_alpine_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  script:
-    - helm lint ./${HELM_CHART_DIR}

@@ -1,0 +1,11 @@
+provider: aws
+aws:
+  zoneType: public
+policy: upsert-only
+registry: txt
+interval: 3m
+serviceAccount:
+  create: true
+  name: external-dns
+  annotations:
+    eks.amazonaws.com/role-arn: ""

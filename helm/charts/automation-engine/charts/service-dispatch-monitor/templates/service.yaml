@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "service-dispatch-monitor.fullname" . }}
+  labels:
+    {{- include "service-dispatch-monitor.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      protocol: TCP
+  selector:
+    {{- include "service-dispatch-monitor.selectorLabels" . | nindent 4 }}

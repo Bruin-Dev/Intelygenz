@@ -30,3 +30,24 @@
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
   tags:
     - kubernetes
+
+.terraform_dirs_validate_template: &terraform_dirs_validate_template
+  image:
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    - cd ${MODULE} || exit 1
+    - >
+      for i in $(ls -d */ | cut -d " " -f10); do
+          (
+              cd "${i}" || exit
+              echo "The current Workdir is $i"
+              terraform init -backend=true -get=true -input=false
+              terraform validate
+              cd ..
+          )
+      done
+  tags:
+    - kubernetes

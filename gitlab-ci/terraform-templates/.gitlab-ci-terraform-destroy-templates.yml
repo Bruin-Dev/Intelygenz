@@ -4,47 +4,54 @@
 
 .terraform_template_destroy_environment: &terraform_template_destroy_environment
   image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.12.7_awscli:${DOCKER_IMAGE_UTILS_VERSION}
+    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.14_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
     entrypoint:
       - '/usr/bin/env'
       - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   script:
-    - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-v${ECS_CLI_VERSION}
-    - chmod +x /usr/local/bin/ecs-cli
     - export TF_VAR_ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
     - export ENVIRONMENT_VAR=${TF_VAR_ENVIRONMENT}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS=${VELOCLOUD_HOST_1}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_1_HOSTS_FILTER=${VELOCLOUD_HOST_1_FILTER}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_2_HOSTS=${VELOCLOUD_HOST_2}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_2_HOSTS_FILTER=${VELOCLOUD_HOST_2_FILTER}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS=${VELOCLOUD_HOST_3}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_3_HOSTS_FILTER=${VELOCLOUD_HOST_3_FILTER}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS=${VELOCLOUD_HOST_4}
-    - export TF_VAR_SERVICE_OUTAGE_MONITOR_4_HOSTS_FILTER=${VELOCLOUD_HOST_4_FILTER}
-    - envsubst < infra-as-code/dev/init.tf > temp.tf
-    - envsubst < infra-as-code/dev/variables.tf > temp_vars.tf
-    - mv temp.tf infra-as-code/dev/init.tf
-    - mv temp_vars.tf infra-as-code/dev/variables.tf
-    - terraform init infra-as-code/dev
-    - terraform refresh infra-as-code/dev
-    - terraform destroy -auto-approve infra-as-code/dev
-    - python3 ci-utils/delete-environments-aws-resources/main.py -e ${TF_VAR_ENVIRONMENT} -z -b
-    - pip3 install -r ci-utils/ecr/requirements.txt
-    - python3 ci-utils/ecr/manage_ecr_docker_images.py -d -e ${TF_VAR_ENVIRONMENT} -a -p
-  tags:
-    - kubernetes
-
-.terraform_template_destroy_network-resources: &terraform_template_destroy_network-resources
-  image:
-    name: ${CI_REGISTRY}/mettel/docker_images/terraform_0.12.7_awscli:${DOCKER_IMAGE_UTILS_VERSION}
-    entrypoint:
-      - '/usr/bin/env'
-      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  script:
-    - envsubst < infra-as-code/network-resources/init.tf > temp_network_resources_init.tf
-    - mv temp_network_resources_init.tf infra-as-code/network-resources/init.tf
-    - terraform init infra-as-code/network-resources
-    - terraform refresh infra-as-code/network-resources
-    - terraform destroy -auto-approve infra-as-code/network-resources
+    - cd "${MODULE}" || exit 1
+    - >
+      for i in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
+          (
+              echo "Terraform directory $i"
+              if [[ ${i} == "0-elasticaches" ]]; then
+                cd "${i}" || exit 1
+                for j in $(find . -mindepth 1 -maxdepth 1 -type d | sort | sed 's|^./||' || exit 1); do
+                    (
+                      cd "${j}" || exit
+                      echo "Terraform module subdirectory ${j}"
+                      terraform init -backend=true -get=true -input=false
+                      terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+                      terraform refresh
+                      terraform destroy -auto-approve
+                    )
+                done
+              else
+                echo "Module without subdirectories, terraform workspace ${i}"
+                terraform init -backend=true -get=true -input=false
+                terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+                terraform refresh
+                terraform destroy -auto-approve
+              fi
+          )
+      done
+    - >
+      if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "production" ]; then
+        apk add zip unzip
+        export TF_VAR_REST_API_DATA_COLLECTOR_AUTH_TOKEN=${REST_API_DATA_COLLECTOR_AUTH_TOKEN}
+        export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_COLLECTION=${REST_API_DATA_COLLECTOR_MONGODB_COLLECTION}
+        export TF_VAR_REST_API_DATA_COLLECTOR_MONGODB_DATABASE=${REST_API_DATA_COLLECTOR_MONGODB_DATABASE}
+        envsubst < infra-as-code/data-collector/init.tf > temp_dc.tf
+        envsubst < infra-as-code/data-collector/variables.tf > temp_vars_dc.tf
+        mv temp_dc.tf infra-as-code/data-collector/init.tf
+        mv temp_vars_dc.tf infra-as-code/data-collector/variables.tf
+        cd infra-as-code/data-collector
+        terraform init
+        terraform destroy -auto-approve
+        cd ${CI_PROJECT_DIR}
+      fi
+    - python3 ci-utils/ecr/ecr_images_util.py -d True -e ${TF_VAR_ENVIRONMENT} -a True -p True
   tags:
     - kubernetes

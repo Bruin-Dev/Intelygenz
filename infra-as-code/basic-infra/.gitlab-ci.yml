@@ -1,30 +1,47 @@
 # ===========================================================
 # Linter validation jobs for infra-as-code/basic-infra module
-# ============================================================
-terraform-validate-basic-infra:
+# ===========================================================
+
+terraform-valite-basic-infra:
   stage: validation
-  extends: .terraform_basic_template
-  script:
-    - terraform init infra-as-code/basic-infra
-    - terraform validate infra-as-code/basic-infra
+  extends: .terraform_dirs_validate_template
+  variables:
+    MODULE: "infra-as-code/basic-infra"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
   rules:
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
       changes:
         - infra-as-code/basic-infra/**/*
-    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "web"'
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
 
 # ==============================================================
 # Terraform deployment jobs for infra-as-code/basic-infra module
 # ==============================================================
-basic-infra:
+basic-infra-dev:
   stage: basic_infra
-  extends: .terraform_basic_template
-  script:
-    - terraform init infra-as-code/basic-infra
-    - terraform refresh infra-as-code/basic-infra
-    - terraform apply -auto-approve infra-as-code/basic-infra
+  extends: .terraform_template_deploy_basic_infra
+  variables:
+    MODULE: "infra-as-code/basic-infra"
+    IAM_TO_EKS_ROLES: developer, devops
+    KUBERNETES_METRICS_SERVER_V: ${KUBERNETES_METRICS_SERVER_DEV}
+    EXTERNAL_DNS_CHART_V: ${EXTERNAL_DNS_CHART_V_DEV}
+    INGRESS_NGINX_CHART_V: ${INGRESS_NGINX_CHART_V_DEV}
+    LOAD_BALANCER_WHITELIST: ${LOAD_BALANCER_WHITELIST_DEV}
+    RELOADER_CHART_V: ${RELOADER_CHART_V_DEV}
+    HOSTPATH_CHART_V: ${HOSTPATH_CHART_V_DEV}
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - source ci-utils/environments/environment_assign.sh
+    - export EKS_CLUSTER_NAME="mettel-automation-${TF_VAR_CURRENT_ENVIRONMENT}"
+    - export TF_VAR_EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+    - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       when: manual
       allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: never
 
+# ===========================================================
+# Terraform destroy jobs for infra-as-code/basic-infra module
+# ===========================================================

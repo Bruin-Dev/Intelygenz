@@ -1,0 +1,84 @@
+# Default values for digi-bridge.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of bruin-bridge pods to do calls to Bruin API.
+# Do not set this below 2 unless is going to deploy in dev or local environment.
+replicaCount: 1
+
+enabled: true
+
+# -- Global configuration
+global:
+  # -- Name of environment for EKS cluster and network resources
+  current_environment: "dev"
+  # -- Name of environment for helm charts and
+  # redis elasticaches used
+  environment: "automation-test"
+  # -- NATS cluster endpoint used by bruin-bridge
+  nats_server: "nats://nats:4222"
+  # -- Redis Hostname used to store heavy NATS messages (>1MB)
+  redis_hostname: "redis"
+  # -- Indicates if the logs will be sent to papertrail or not.
+  papertrail_active: "False"
+  # -- Papertrail host to which the logs will be sent
+  papertrail_host: "logs.papertrailapp.com"
+  # -- Papertrail port to which the logs will be sent
+  papertrail_port: "0"
+  # -- Indicates if the helm chart will be displayed in an aws or local environment,
+  # in case it is local, a specific imagePullSecret will be used to access the images stored in ECR.
+  mode: "aws"
+  ecr_registry:
+    # -- Name of the imagePullSecret created to access the images stored in ECR.
+    name: "ecr-registry"
+
+config:
+  # -- Client ID credentials for Digi API
+  digi_client_id: ""
+  # -- Client Secret credentials for Digi API
+  digi_client_secret: ""
+  # -- Base URL for Digi API
+  digi_base_url: ""
+  # -- IP for Digi Production Environment
+  digi_ip_pro: ""
+  # -- Record name for Digi Production Environment
+  digi_record_name_pro: ""
+  # -- IP for Digi Dev Environment
+  digi_ip_dev: ""
+  # -- Record name for Digi Dev Environment
+  digi_record_name_dev: ""
+  # -- IP for Digi Test Environment
+  digi_ip_test: ""
+  # -- Record name for Digi Test Environment
+  digi_record_name_test: ""
+
+image:
+  repository: 374050862540.dkr.ecr.us-east-1.amazonaws.com/digi-bridge
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+service:
+  type: ClusterIP
+  port: 5000
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

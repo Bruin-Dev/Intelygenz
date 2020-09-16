@@ -35,8 +35,10 @@ bruin-bridge-build:
     MODULE_VERSION: ${CI_PIPELINE_ID}
   rules:
     - if: '($CI_COMMIT_BRANCH =~ /^(feature|fix)\/.+$/ || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $bruin_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "push"'
-      changes:
-        - bruin-bridge/**/*
+#      changes:
+#        - bruin-bridge/**/*
+      when: manual
+      allow_failure: true
     - if: '$CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $bruin_bridge_desired_tasks != "0" && $CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_COMMIT_TAG =~ /^bruin-bridge-v\d*.\d*.\d*$/'
   extends: .build_app_image

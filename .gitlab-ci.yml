@@ -59,13 +59,17 @@ variables:
   VELOCLOUD_BRIDGE_DESIRED_TASKS: "2"
 
 include:
-  # Templates used in Gitlab-CI jobs
-  - local: 'gitlab-ci/basic-templates/.gitlab-ci-build-image-templates.yml'
-  - local: 'gitlab-ci/basic-templates/.gitlab-ci-unit_test-templates.yml'
-  - local: 'gitlab-ci/basic-templates/.gitlab-ci-utils-templates.yml'
+  # Templates used in Gitlab-CI jobs for validation jobs
   - local: 'gitlab-ci/basic-templates/.gitlab-ci-validation-templates.yml'
+  # Templates used in Gitlab-CI jobs for unit tests jobs
+  - local: 'gitlab-ci/basic-templates/.gitlab-ci-unit_test-templates.yml'
+  # Templates used in Gitlab-CI jobs for build jobs
+  - local: 'gitlab-ci/basic-templates/.gitlab-ci-build-image-templates.yml'
+  # Templates used in Gitlab-CI jobs for jobs that uses specific tools
+  - local: 'gitlab-ci/basic-templates/.gitlab-ci-utils-templates.yml'
+  # Templates used in Gitlab-CI jobs for helm jobs
   - local: 'gitlab-ci/helm-templates/.gitlab-ci-helm-templates.yml'
-  - local: 'gitlab-ci/helm-templates/.gitlab-ci-helm-validation-templates.yml'
+  # Templates used in Gitlab-CI jobs for terraform jobs
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-basic-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-deploy-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-destroy-templates.yml'
@@ -90,7 +94,6 @@ include:
   - local: 'hawkeye-customer-cache/.gitlab-ci.yml'
   - local: 'hawkeye-outage-monitor/.gitlab-ci.yml'
   - local: 'helm/.gitlab-ci.yml'
-  - local: 'infra-as-code/.gitlab-ci.yml'
   - local: 'infra-as-code/basic-infra/.gitlab-ci.yml'
   - local: 'infra-as-code/dev/.gitlab-ci.yml'
   - local: 'infra-as-code/kre/.gitlab-ci.yml'
