@@ -1,16 +1,20 @@
 from collections import defaultdict
+from datetime import datetime
 
 import aiohttp
 import asyncio
+from apscheduler.jobstores.base import ConflictingIdError
+from pytz import timezone
 from tenacity import retry, wait_exponential, stop_after_delay
 
 
 class VelocloudClient:
 
-    def __init__(self, config, logger):
+    def __init__(self, config, logger, scheduler):
         self._config = config.VELOCLOUD_CONFIG
         self._clients = list()
         self._logger = logger
+        self._scheduler = scheduler
         self._session = aiohttp.ClientSession()
 
     async def instantiate_and_connect_clients(self):
@@ -18,7 +22,27 @@ class VelocloudClient:
             await self._create_and_connect_client(cred_block['url'], cred_block['username'], cred_block['password']) for
             cred_block in self._config['servers']]
 
+    async def _start_relogin_job(self, host):
+        self._logger.info(f'Scheduling relogin job for host {host}...')
+
+        tz = timezone(self._config['timezone'])
+        run_date = datetime.now(tz)
+
+        try:
+            params = {
+                'host': host,
+            }
+            self._scheduler.add_job(self._relogin_client, 'date', run_date=run_date,
+                                    replace_existing=False, misfire_grace_time=9999,
+                                    id=f'_relogin_client{host}',
+                                    kwargs=params)
+            self._logger.info(f"Relogin job for host {host} has been scheduled")
+
+        except ConflictingIdError as conflict:
+            self._logger.info(f'Skipping start of relogin job for host {host}. Reason: {conflict}')
+
     async def _relogin_client(self, host):
+        self._logger.info(f"Relogging in host: {host} to velocloud")
         for client in self._clients:
             if host == client['host']:
                 self._clients.remove(client)
@@ -106,7 +130,7 @@ class VelocloudClient:
                 self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
                 return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
                 return_response["status"] = 404
-                await self._relogin_client(edge["host"])
+                await self._start_relogin_job(edge["host"])
                 return return_response
 
             response = await self._session.post(f"https://{edge['host']}/portal/rest/edge/getEdge",
@@ -148,7 +172,7 @@ class VelocloudClient:
                 self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
                 return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
                 return_response["status"] = 404
-                await self._relogin_client(edge["host"])
+                await self._start_relogin_job(edge["host"])
                 return return_response
 
             edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"], "interval": interval}
@@ -191,7 +215,7 @@ class VelocloudClient:
                 self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
                 return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
                 return_response["status"] = 404
-                await self._relogin_client(edge["host"])
+                await self._start_relogin_job(edge["host"])
                 return return_response
 
             edgeids = {"enterpriseId": edge["enterprise_id"], "id": edge["edge_id"], "interval": interval}
@@ -234,7 +258,7 @@ class VelocloudClient:
                 self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
                 return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
                 return_response["status"] = 404
-                await self._relogin_client(edge["host"])
+                await self._start_relogin_job(edge["host"])
                 return return_response
 
             body = {"enterpriseId": edge["enterprise_id"]}
@@ -277,7 +301,7 @@ class VelocloudClient:
                 self._logger.error(f'Cannot find a client to connect to {edge["host"]}')
                 return_response["body"] = f'Cannot find a client to connect to {edge["host"]}'
                 return_response["status"] = 404
-                await self._relogin_client(edge["host"])
+                await self._start_relogin_job(edge["host"])
                 return return_response
 
             body = {"enterpriseId": edge["enterprise_id"],
@@ -484,7 +508,7 @@ class VelocloudClient:
             if 'error' in response.keys():
                 if 'tokenError' in response['error']['message']:
                     self._logger.info(f'Response returned: {response}. Attempting to relogin')
-                    await self._relogin_client(host)
+                    await self._start_relogin_job(host)
                     raise Exception
                 else:
                     self._logger.error(f'Error response returned: {response}')

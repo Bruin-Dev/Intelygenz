@@ -32,7 +32,7 @@ class Container:
 
         self._scheduler = AsyncIOScheduler(timezone=config.VELOCLOUD_CONFIG['timezone'])
 
-        self._velocloud_client = VelocloudClient(config, self._logger)
+        self._velocloud_client = VelocloudClient(config, self._logger, self._scheduler)
         self._velocloud_repository = VelocloudRepository(config, self._logger, self._velocloud_client)
 
         self._message_storage_manager = RedisStorageManager(self._logger, self._redis_client)
