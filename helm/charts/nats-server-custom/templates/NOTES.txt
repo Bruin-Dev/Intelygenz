@@ -1,1 +1,0 @@
-Nats server version: {{ .Chart.AppVersion }}

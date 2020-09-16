@@ -1,3 +1,0 @@
-nats:
-  cluster:
-    enabled: true

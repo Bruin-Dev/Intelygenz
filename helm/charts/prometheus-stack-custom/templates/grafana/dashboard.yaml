@@ -1,0 +1,17 @@
+{{ if .Values.kubeprometheusstack.grafana.grafanaDashboards }}
+{{- range $nameDashboard := .Values.kubeprometheusstack.grafana.grafanaDashboards }}
+{{- $pathDasboard := printf "grafana_dashboards/%s.json" . }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-{{ $nameDashboard }}
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "/tmp/dashboards/{{ regexFind "^.*?-" $nameDashboard | replace "-" "" }}"
+data:
+  "{{ $nameDashboard }}.json": |-
+  {{- $.Files.Get $pathDasboard | nindent 6 -}}
+{{ end }}
+{{ end }}

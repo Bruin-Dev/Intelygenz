@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "digi-bridge.fullname" . }}
+  labels:
+    {{- include "digi-bridge.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "digi-bridge.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "digi-bridge.labels" . | nindent 8 }}
+    spec:
+      initContainers:
+        - name: wait-nats-server
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://nats:8222/varz; do echo waiting for nats-server; sleep 2; done']
+          envFrom:
+            - configMapRef:
+                name: {{ include "digi-bridge.configmapName" . }}
+        - name: wait-redis
+          image: busybox:1.28
+          command: ['sh', '-c', 'until printf "PING\r\n" | nc ${REDIS_HOSTNAME} 6379; do echo waiting for redis; sleep 2; done']
+          envFrom:
+            - configMapRef:
+                name: {{ include "digi-bridge.configmapName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "digi-bridge.configmapName" . }}
+            - secretRef:
+                name: {{ include "digi-bridge.secretName" . }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 15
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if eq .Values.global.mode "local" }}
+      imagePullSecrets:
+        - name: {{ .Values.global.ecr_registry.name }}
+      {{- end }}

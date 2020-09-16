@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "service-outage-monitor-3.fullname" . }}
+  labels:
+    {{- include "service-outage-monitor-3.labels" . | nindent 4 }}
+  annotations:
+    reloader.stakater.com/search: "true"
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "service-outage-monitor-3.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "service-outage-monitor-3.labels" . | nindent 8 }}
+    spec:
+      initContainers:
+        {{- if .Values.config.capabilities_enabled.bruin_bridge }}
+        - name: wait-bruin-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://bruin-bridge:5000/_health; do echo waiting for bruin-bridge; sleep 2; done']
+        {{- end }}
+        {{- if .Values.config.capabilities_enabled.cts_bridge }}
+        - name: wait-cts-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://cts-bridge:5000/_health; do echo waiting for cts-bridge; sleep 2; done']
+        {{- end }}
+        {{- if .Values.config.capabilities_enabled.hawkeye_bridge }}
+        - name: wait-hawkeye-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://hawkeye-bridge:5000/_health; do echo waiting for hawkeye-bridge-bridge; sleep 2; done']
+        {{- end }}
+        {{- if .Values.config.capabilities_enabled.lit_bridge }}
+        - name: wait-lit-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://lit-bridge:5000/_health; do echo waiting for lit-bridge; sleep 2; done']
+        {{- end }}
+        {{- if .Values.config.capabilities_enabled.notifier }}
+        - name: wait-notifier
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://notifier:5000/_health; do echo waiting for notifier; sleep 2; done']
+        {{- end }}
+        {{- if .Values.config.capabilities_enabled.t7_bridge }}
+        - name: wait-t7-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://t7-bridge:5000/_health; do echo waiting for t7-bridge; sleep 2; done']
+        {{- end }}
+        {{- if  .Values.config.capabilities_enabled.velocloud_bridge }}
+        - name: wait-velocloud-bridge
+          image: busybox:1.28
+          command: ['sh', '-c', 'until wget --spider -S http://velocloud-bridge:5000/_health; do echo waiting for velocloud-bridge; sleep 2; done']
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "automation-master-latest" }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "service-outage-monitor-3.configmapName" . }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            {{- if .Values.config.metrics.enabled }}
+            - name: {{ .Values.config.metrics.svc.name }}
+              containerPort: {{ .Values.config.metrics.svc.port }}
+              protocol: TCP
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 15
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if eq .Values.global.mode "local" }}
+      imagePullSecrets:
+        - name: {{ .Values.global.ecr_registry.name }}
+      {{- end }}
