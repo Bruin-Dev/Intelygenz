@@ -1,4 +1,5 @@
 import base64
+import math
 import json
 import textwrap
 import time
@@ -839,20 +840,40 @@ class DispatchServer:
 
     async def _append_note_to_ticket(self, dispatch_number, ticket_id, ticket_note):
         # Split the note if needed
-        ticket_notes = textwrap.wrap(ticket_note, self.MAX_TICKET_NOTE, replace_whitespace=False)
-        for i, note in enumerate(ticket_notes):
-            self._logger.info(f"Appending note_{i} to ticket {ticket_id}")
-            append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, note)
+        if len(ticket_note) < self.MAX_TICKET_NOTE:
+            append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, ticket_note)
             append_note_response_status = append_note_response['status']
             append_note_response_body = append_note_response['body']
             if append_note_response_status not in range(200, 300):
-                self._logger.error(f"[process_note] Error appending note: `{note}` "
+                self._logger.error(f"[process_note] Error appending note: `{ticket_note}` "
                                    f"Dispatch: {dispatch_number} "
                                    f"Ticket_id: {ticket_id} - Not appended")
-                continue
-            self._logger.info(f"[process_note] Note: `{note}` Dispatch: {dispatch_number} "
+            self._logger.info(f"[process_note] Note: `{ticket_note}` Dispatch: {dispatch_number} "
                               f"Ticket_id: {ticket_id} - Appended")
             self._logger.info(f"[process_note] Note appended. Response {append_note_response_body}")
+        else:
+            lines = ticket_note.split('\n')
+            accumulator = ""
+            counter = 1
+            total_notes = math.ceil(len(ticket_note) / 1000)
+
+            for line in lines:
+                accumulator = accumulator + line + '\n'
+                is_last_index = lines.index(line) == (len(lines) - 1)
+                if len(accumulator) > 1000 or is_last_index:
+
+                    note_page = f'Triage note: {counter}/{total_notes}'
+                    accumulator = accumulator + note_page
+                    append_note_response = await self._bruin_repository.append_note_to_ticket(ticket_id, accumulator)
+                    if append_note_response['status'] not in range(200, 300):
+                        self._logger.error(f"[process_note] Error appending note: `{accumulator}` "
+                                           f"Dispatch: {dispatch_number} "
+                                           f"Ticket_id: {ticket_id} - Not appended. "
+                                           f"Status: {append_note_response['status']}")
+
+                    counter = counter + 1
+                    accumulator = "#*Automation Engine*#\n" \
+                                  "Triage\n"
 
     async def _process_note(self, dispatch_number, body):
         try:

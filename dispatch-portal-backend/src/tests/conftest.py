@@ -402,8 +402,13 @@ def simple_ticket_note():
 
 
 @pytest.fixture(scope='function')
+def small_ticket_note(simple_ticket_note):
+    return 'A' * 150 + '\n' + 'B' * 150 + '\n' + 'C' * 150 + '\n' + 'D' * 150
+
+
+@pytest.fixture(scope='function')
 def big_ticket_note(simple_ticket_note):
-    return 'A' * 1500 + 'B' * 1500
+    return 'A' * 1200 + '\n' + 'B' * 1200 + '\n' + 'C' * 500 + '\n' + 'D' * 600
 
 
 @pytest.fixture(scope='function')

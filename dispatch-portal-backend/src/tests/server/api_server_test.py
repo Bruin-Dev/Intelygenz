@@ -3428,12 +3428,64 @@ class TestApiServer:
             api_server_test._notifications_repository.send_slack_message.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def append_note_to_ticket_test(self, api_server_test, big_ticket_note):
+    async def append_note_to_ticket_less_1500_chars_test(self, api_server_test, small_ticket_note):
         igz_dispatch_id = 'IGZ_XXX'
         ticket_id = '12345'
 
-        note_1 = 'A' * 1500
-        note_2 = 'B' * 1500
+        note_1 = 'A' * 150 + '\n' + 'B' * 150 + '\n' + 'C' * 150 + '\n' + 'D' * 150
+
+        response_note_1_mock = {
+            'body': note_1,
+            'status': 200
+        }
+
+        api_server_test._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[
+                response_note_1_mock,
+            ]
+        )
+
+        await api_server_test._append_note_to_ticket(igz_dispatch_id, ticket_id, small_ticket_note)
+
+        api_server_test._bruin_repository.append_note_to_ticket.assert_has_awaits([
+            call(ticket_id, note_1),
+        ])
+
+    @pytest.mark.asyncio
+    async def append_note_to_ticket_less_1500_chars_ko_test(self, api_server_test, small_ticket_note):
+        igz_dispatch_id = 'IGZ_XXX'
+        ticket_id = '12345'
+
+        note_1 = 'A' * 150 + '\n' + 'B' * 150 + '\n' + 'C' * 150 + '\n' + 'D' * 150
+
+        response_note_1_mock = {
+            'body': note_1,
+            'status': 400
+        }
+
+        api_server_test._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[
+                response_note_1_mock,
+            ]
+        )
+
+        await api_server_test._append_note_to_ticket(igz_dispatch_id, ticket_id, small_ticket_note)
+
+        api_server_test._logger.error.assert_called()
+
+        api_server_test._bruin_repository.append_note_to_ticket.assert_has_awaits([
+            call(ticket_id, note_1),
+        ])
+
+    @pytest.mark.asyncio
+    async def append_note_to_ticket_more_1500_chars_test(self, api_server_test, big_ticket_note):
+        igz_dispatch_id = 'IGZ_XXX'
+        ticket_id = '12345'
+
+        note_1 = 'A' * 1200 + '\n'
+        note_2 = 'B' * 1200 + '\n'
+        note_3 = 'C' * 500 + '\n'
+        note_4 = 'D' * 600
 
         response_note_1_mock = {
             'body': note_1,
@@ -3442,20 +3494,83 @@ class TestApiServer:
 
         response_note_2_mock = {
             'body': note_2,
-            'status': 400
+            'status': 200
         }
+
+        response_note_3_mock = {
+            'body': note_3,
+            'status': 200
+        }
+
+        response_note_4_mock = {
+            'body': note_4,
+            'status': 200
+        }
+
         api_server_test._bruin_repository.append_note_to_ticket = CoroutineMock(
             side_effect=[
                 response_note_1_mock,
                 response_note_2_mock,
+                response_note_3_mock,
+                response_note_4_mock
             ]
         )
 
         await api_server_test._append_note_to_ticket(igz_dispatch_id, ticket_id, big_ticket_note)
 
         api_server_test._bruin_repository.append_note_to_ticket.assert_has_awaits([
-            call(ticket_id, note_1),
-            call(ticket_id, note_2)
+            call(ticket_id, f"{note_1}Triage note: 1/4"),
+            call(ticket_id, f"#*Automation Engine*#\nTriage\n{note_2}Triage note: 2/4"),
+            call(ticket_id, f"#*Automation Engine*#\nTriage\n{note_3}{note_4}\nTriage note: 3/4"),
+        ])
+
+    @pytest.mark.asyncio
+    async def append_note_to_ticket_more_1500_chars_ko_test(self, api_server_test, big_ticket_note):
+        igz_dispatch_id = 'IGZ_XXX'
+        ticket_id = '12345'
+
+        note_1 = 'A' * 1200 + '\n'
+        note_2 = 'B' * 1200 + '\n'
+        note_3 = 'C' * 500 + '\n'
+        note_4 = 'D' * 600
+
+        response_note_1_mock = {
+            'body': note_1,
+            'status': 400
+        }
+
+        response_note_2_mock = {
+            'body': note_2,
+            'status': 400
+        }
+
+        response_note_3_mock = {
+            'body': note_3,
+            'status': 400
+        }
+
+        response_note_4_mock = {
+            'body': note_4,
+            'status': 400
+        }
+
+        api_server_test._bruin_repository.append_note_to_ticket = CoroutineMock(
+            side_effect=[
+                response_note_1_mock,
+                response_note_2_mock,
+                response_note_3_mock,
+                response_note_4_mock
+            ]
+        )
+
+        await api_server_test._append_note_to_ticket(igz_dispatch_id, ticket_id, big_ticket_note)
+
+        api_server_test._logger.error.assert_called()
+
+        api_server_test._bruin_repository.append_note_to_ticket.assert_has_awaits([
+            call(ticket_id, f"{note_1}Triage note: 1/4"),
+            call(ticket_id, f"#*Automation Engine*#\nTriage\n{note_2}Triage note: 2/4"),
+            call(ticket_id, f"#*Automation Engine*#\nTriage\n{note_3}{note_4}\nTriage note: 3/4"),
         ])
 
     @pytest.mark.asyncio
