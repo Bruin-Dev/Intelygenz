@@ -13,7 +13,7 @@ from prometheus_client import start_http_server
 from application.actions.outage_monitoring import OutageMonitor
 from application.actions.triage import Triage
 from application.repositories.bruin_repository import BruinRepository
-from application.repositories.monitoring_map_repository import MonitoringMapRepository
+from application.repositories.customer_cache_repository import CustomerCacheRepository
 from application.repositories.notifications_repository import NotificationsRepository
 from application.repositories.outage_monitoring_metrics_repository import OutageMonitoringMetricsRepository
 from application.repositories.outage_repository import OutageRepository
@@ -61,11 +61,10 @@ class Container:
                                                  notifications_repository=self._notifications_repository)
         self._utils_repository = UtilsRepository()
         self._triage_repository = TriageRepository(config, self._utils_repository)
-        self._monitoring_map_repository = MonitoringMapRepository(config=config, scheduler=self._scheduler,
-                                                                  event_bus=self._event_bus, logger=self._logger,
-                                                                  velocloud_repository=self._velocloud_repository,
-                                                                  bruin_repository=self._bruin_repository,
-                                                                  metrics_repository=self._triage_metrics_repository)
+        self._customer_cache_repository = CustomerCacheRepository(
+            event_bus=self._event_bus, logger=self._logger, config=config,
+            notifications_repository=self._notifications_repository,
+        )
 
         # OUTAGE UTILS
         self._outage_repository = OutageRepository(self._logger)
@@ -73,7 +72,7 @@ class Container:
         # ACTIONS
         self._triage = Triage(self._event_bus, self._logger, self._scheduler,
                               config, self._outage_repository,
-                              self._monitoring_map_repository, self._bruin_repository,
+                              self._customer_cache_repository, self._bruin_repository,
                               self._velocloud_repository, self._notifications_repository,
                               self._triage_repository, self._triage_metrics_repository)
         self._outage_monitor = OutageMonitor(self._event_bus, self._logger, self._scheduler,

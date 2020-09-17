@@ -20,22 +20,6 @@ NATS_CONFIG = {
 
 quarantine_time = 5
 
-MONITOR_MAP_CONFIG = {
-    'timezone': 'US/Eastern',
-    'multiplier': 5,
-    'min': 5,
-    'stop_delay': 300,
-    'refresh_map_time': 60 * 4,
-    'blacklisted_edges': [
-        # Federal edge that is inside a non-federal Velocloud instance
-        {'host': 'mettel.velocloud.net', 'enterprise_id': 170, 'edge_id': 3195}
-    ],
-    'semaphore': 5,
-    'velo_filter': {},
-    'environment': os.environ["CURRENT_ENVIRONMENT"],
-
-}
-
 try:
     velocloud_hosts = os.environ["VELOCLOUD_HOSTS"].replace(' ', '').split(':')
     velocloud_hosts_filter = os.environ["VELOCLOUD_HOSTS_FILTER"].replace(' ', '').split(':')

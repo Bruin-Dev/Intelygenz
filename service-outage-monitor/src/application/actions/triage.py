@@ -2,7 +2,6 @@ import asyncio
 import re
 import time
 
-from collections import ChainMap
 from datetime import datetime
 from datetime import timedelta
 from typing import NoReturn
@@ -23,25 +22,25 @@ class Triage:
     __triage_note_regex = re.compile(r'#\*Automation Engine\*#\nTriage')
 
     def __init__(self, event_bus: EventBus, logger, scheduler, config, outage_repository,
-                 monitoring_map_repository, bruin_repository, velocloud_repository, notifications_repository,
+                 customer_cache_repository, bruin_repository, velocloud_repository, notifications_repository,
                  triage_repository, metrics_repository):
         self._event_bus = event_bus
         self._logger = logger
         self._scheduler = scheduler
         self._config = config
         self._outage_repository = outage_repository
-        self._monitoring_map_repository = monitoring_map_repository
+        self._customer_cache_repository = customer_cache_repository
         self._bruin_repository = bruin_repository
         self._velocloud_repository = velocloud_repository
         self._notifications_repository = notifications_repository
         self._triage_repository = triage_repository
         self._metrics_repository = metrics_repository
 
-        self._monitoring_mapping = {}
+        self.__reset_customer_cache()
         self._semaphore = asyncio.BoundedSemaphore(self._config.TRIAGE_CONFIG['semaphore'])
 
-    def __refresh_monitoring_mapping(self):
-        self._monitoring_mapping = self._monitoring_map_repository.get_monitoring_map_cache()
+    def __reset_customer_cache(self):
+        self._customer_cache = []
 
     async def start_triage_job(self, exec_on_start=False):
         self._logger.info(f'Scheduled task: service outage triage configured to run every '
@@ -56,16 +55,16 @@ class Triage:
                                 replace_existing=True, id='_triage_process')
 
     async def _run_tickets_polling(self):
+        self.__reset_customer_cache()
+
         total_start_time = time.time()
         self._logger.info(f'Starting triage process...')
 
-        if not self._monitoring_mapping:
-            self._logger.info('Creating map with all customers and all their devices...')
-            await self._monitoring_map_repository.map_bruin_client_ids_to_edges_serials_and_statuses()
-            await self._monitoring_map_repository.start_create_monitoring_map_job(exec_on_start=False)
-            self._logger.info('Map of devices by customer created')
+        customer_cache_response = await self._customer_cache_repository.get_cache_for_triage_monitoring()
+        if customer_cache_response['status'] not in range(200, 300) or customer_cache_response['status'] == 202:
+            return
 
-        self.__refresh_monitoring_mapping()
+        self._customer_cache = customer_cache_response['body']
 
         self._logger.info('Getting all open tickets for all customers...')
         open_tickets = await self._get_all_open_tickets_with_details_for_monitored_companies()
@@ -83,7 +82,10 @@ class Triage:
                           f'Tickets with triage: {len(tickets_with_triage)}. '
                           f'Tickets without triage: {len(tickets_without_triage)}. '
                           'Processing both ticket sets...')
-        edges_data_by_serial = ChainMap(*self._monitoring_mapping.values())
+        edges_data_by_serial: dict = {
+            elem['serial_number']: {'edge_id': elem['edge']}
+            for elem in self._customer_cache
+        }
         await asyncio.gather(
             self._process_tickets_with_triage(tickets_with_triage, edges_data_by_serial),
             self._process_tickets_without_triage(tickets_without_triage, edges_data_by_serial),
@@ -93,7 +95,7 @@ class Triage:
     async def _get_all_open_tickets_with_details_for_monitored_companies(self):
         open_tickets = []
 
-        bruin_clients_ids: Set[int] = set(self._monitoring_mapping.keys())
+        bruin_clients_ids: Set[int] = set(elem['bruin_client_info']['client_id'] for elem in self._customer_cache)
         tasks = [
             self._get_open_tickets_with_details_by_client_id(client_id, open_tickets)
             for client_id in bruin_clients_ids
@@ -154,13 +156,7 @@ class Triage:
             )
 
     def _filter_tickets_related_to_edges_under_monitoring(self, tickets):
-        serials_under_monitoring: Set[str] = set(sum(
-            (
-                list(edge_status_by_serial_dict.keys())
-                for edge_status_by_serial_dict in self._monitoring_mapping.values()
-            ),
-            []
-        ))
+        serials_under_monitoring: Set[str] = set(elem['serial_number'] for elem in self._customer_cache)
 
         return [
             ticket
@@ -301,8 +297,7 @@ class Triage:
             notes_were_appended = True
 
         if notes_were_appended:
-            client_id = edge_data['edge_status']['bruin_client_info']['client_id']
-            await self._notify_triage_note_was_appended_to_ticket(ticket_id, client_id)
+            await self._notify_triage_note_was_appended_to_ticket(ticket_id)
 
     def _get_events_chunked(self, events):
         events_per_chunk: int = self._config.TRIAGE_CONFIG['event_limit']
@@ -315,10 +310,8 @@ class Triage:
         for chunk in chunks:
             yield chunk
 
-    async def _notify_triage_note_was_appended_to_ticket(self, ticket_id, bruin_client_id):
-        message = (f'Triage appended to ticket {ticket_id} in '
-                   f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment. Details at '
-                   f'https://app.bruin.com/helpdesk?clientId={bruin_client_id}&ticketId={ticket_id}')
+    async def _notify_triage_note_was_appended_to_ticket(self, ticket_id):
+        message = f'Triage appended to ticket {ticket_id}. Details at https://app.bruin.com/t/{ticket_id}'
 
         self._logger.info(message)
         await self._notifications_repository.send_slack_message(message)
