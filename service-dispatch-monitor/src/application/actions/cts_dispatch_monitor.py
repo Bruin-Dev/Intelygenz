@@ -33,9 +33,9 @@ class CtsDispatchMonitor:
         self.HOURS_12 = 12
         self.HOURS_6 = 6
         self.HOURS_2 = 2
-        self._range_12 = range(self.HOURS_12 - 1, self.HOURS_12 + 1)
-        self._range_6 = range(self.HOURS_6 - 1, self.HOURS_6 + 1)
-        self._range_2 = range(self.HOURS_2 - 1, self.HOURS_2 + 1)
+        self._range_12 = range(self.HOURS_12 - 1, self.HOURS_12)
+        self._range_6 = range(self.HOURS_6 - 1, self.HOURS_6)
+        self._range_2 = range(self.HOURS_2 - 1, self.HOURS_2)
 
         # Dispatch Notes watermarks
         self.MAIN_WATERMARK = '#*Automation Engine*#'
