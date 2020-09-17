@@ -34,9 +34,9 @@ REFRESH_CONFIG = {
     'semaphore': 10,
     'velo_servers': [
         {"mettel.velocloud.net": []},
-        # {"metvco02.mettel.net": []},
-        # {"metvco03.mettel.net": []},
-        # {"metvco04.mettel.net": []},
+        {"metvco02.mettel.net": []},
+        {"metvco03.mettel.net": []},
+        {"metvco04.mettel.net": []},
     ],
     'environment': ENVIRONMENT_NAME,
     'monitorable_management_statuses': {"Pending", "Active – Gold Monitoring", "Active – Platinum Monitoring"},
