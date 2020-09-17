@@ -24,7 +24,11 @@ class LitDispatchMonitor:
         self._notifications_repository = notifications_repository
 
         self.HOURS_12 = 12
+        self.HOURS_6 = 6
         self.HOURS_2 = 2
+        self._range_12 = range(self.HOURS_12 - 1, self.HOURS_12 + 1)
+        self._range_6 = range(self.HOURS_6 - 1, self.HOURS_6 + 1)
+        self._range_2 = range(self.HOURS_2 - 1, self.HOURS_2 + 1)
 
         # Dispatch Notes watermarks
         self.MAIN_WATERMARK = '#*Automation Engine*#'
@@ -418,7 +422,8 @@ class LitDispatchMonitor:
                     if tech_12_hours_before_note_found is None:
                         hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                       date_time_of_dispatch)
-                        if hours_diff > self.HOURS_12:
+                        should_send_12_hours_info = hours_diff in self._range_12
+                        if not should_send_12_hours_info:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"SMS 12h note not needed to send now")
                         else:
@@ -431,7 +436,6 @@ class LitDispatchMonitor:
                                       f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
                                       f"- SMS 12h not sended"
                             else:
-
                                 result_append_tech_12_sms_note = await self._lit_repository.append_tech_12_sms_note(
                                     dispatch_number, ticket_id, sms_to)
                                 if not result_append_tech_12_sms_note:
@@ -451,11 +455,11 @@ class LitDispatchMonitor:
                     if tech_12_hours_before_tech_note_found is None:
                         hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                       date_time_of_dispatch)
-                        if hours_diff > self.HOURS_12:
+                        should_send_12_hours_info = hours_diff in self._range_12
+                        if not should_send_12_hours_info:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"SMS tech 12h note not needed to send now")
+                                              f"Not needed to send SMS tech 12h note due to time")
                             continue
-
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"Sending SMS tech 12h note")
                         result_sms_12_sended = await self._lit_repository.send_tech_12_sms_tech(
@@ -477,6 +481,7 @@ class LitDispatchMonitor:
                             self._logger.info(msg)
                             await self._notifications_repository.send_slack_message(msg)
                             continue
+
                         msg = f"[service-dispatch-monitor] [LIT] " \
                               f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
                               f"- A sms tech 12 hours before note tech appended"
@@ -490,7 +495,8 @@ class LitDispatchMonitor:
                     if tech_2_hours_before_note_found is None:
                         hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                       date_time_of_dispatch)
-                        if hours_diff > self.HOURS_2:
+                        should_send_2_hours_info = hours_diff in self._range_2
+                        if not should_send_2_hours_info:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"SMS 2h note not needed to send now")
                         else:
@@ -522,11 +528,11 @@ class LitDispatchMonitor:
                     if tech_2_hours_before_tech_note_found is None:
                         hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                       date_time_of_dispatch)
-                        if hours_diff > self.HOURS_2:
+                        should_send_2_hours_info = hours_diff in self._range_2
+                        if not should_send_2_hours_info:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                              f"SMS tech 2h note not needed to send now")
+                                              f"Not needed to send SMS tech 2h note due to time")
                             continue
-
                         self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                           f"Sending SMS tech 2h note")
                         result_sms_2_sended = await self._lit_repository.send_tech_2_sms_tech(
