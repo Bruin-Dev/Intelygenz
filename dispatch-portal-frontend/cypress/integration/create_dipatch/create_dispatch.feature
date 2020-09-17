@@ -12,3 +12,15 @@ Feature: Create dispatch
     When I introduce valid fields for new dispatch
     And I click to submit new dispatch
     Then I navigate to Dashboard page
+
+  Scenario: Go to new dispatch form and check if get location button is disabled
+    Given I navigate to new dispatch
+    When I introduce valid field for ticket id
+    And I delete the ticket id itself
+    Then The button should be disabled
+
+  Scenario: Go to new dispatch form and get location details by ticket id
+    Given I navigate to new dispatch
+    When I introduce valid field for ticket id
+    And I click to the get location button
+    Then The location form should be filled

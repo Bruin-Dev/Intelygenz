@@ -19,7 +19,7 @@ When('I introduce valid fields for new dispatch', function() {
   cy.get('input[name=address1]').type(dataE2e.dispatch.job_site_street);
   cy.get('input[name=address2]').type(dataE2e.dispatch.job_site_street2);
   cy.get('input[name=city]').type(dataE2e.dispatch.job_site_city);
-  cy.get('select[name=state]').select(dataE2e.dispatch.job_site_state);
+  cy.get('input[name=state]').type(dataE2e.dispatch.job_site_state);
   cy.get('input[name=zip]').type(dataE2e.dispatch.job_site_zip_code);
   cy.get('input[name=firstName]').type(dataE2e.dispatch.job_site_contact_name);
   cy.get('input[name=lastName]').type(
@@ -53,6 +53,30 @@ When('I introduce valid fields for new dispatch', function() {
 
 And('I click to submit new dispatch', function() {
   cy.get('[data-test-id="new-dispatch-submit"]').click();
+});
+
+When('I introduce valid field for ticket id', () => {
+  cy.get('input[name=mettelId]').type(dataE2e.dispatch.mettel_bruin_ticket_id);
+});
+
+And('I delete the ticket id itself', () => {
+  cy.get('input[name=mettelId]').clear();
+});
+
+Then('The button should be disabled', () => {
+  cy.get('[data-testid="get-location-button"]').should('be.disabled');
+});
+
+When('I click to the get location button', () => {
+  cy.get('[data-testid="get-location-button"]').click();
+});
+
+Then('The location form should be filled', () => {
+  cy.get('input[name=owner]').invoke('val').should('not.be.empty');
+  cy.get('input[name=address1]').invoke('val').should('not.be.empty');
+  cy.get('input[name=city]').invoke('val').should('not.be.empty');
+  cy.get('input[name=state]').invoke('val').should('not.be.empty');
+  cy.get('input[name=zip]').invoke('val').should('not.be.empty');
 });
 
 // Then ==> I navigate to Dashboard page

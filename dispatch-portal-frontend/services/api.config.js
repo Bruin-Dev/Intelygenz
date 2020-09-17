@@ -4,7 +4,8 @@ export const API_URLS = {
   LOGIN: '/login',
   DISPATCH_LIT: '/lit/dispatch',
   DISPATCH_CTS: '/cts/dispatch',
-  UPLOAD_FILES: '/upload'
+  UPLOAD_FILES: '/upload',
+  GET_LOCATION_BY_TICKET_ID: '/bruin/ticket_address'
 };
 
 export const baseConfig = {

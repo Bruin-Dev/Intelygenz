@@ -5,6 +5,7 @@ import { API_URLS, baseConfig } from '../api.config';
 import { mockLitSingleDispatch } from './data/lit/single-dispatch.mock';
 import { dispatchCtsList } from './data/cts/list-dispatch.mock';
 import { mockCtsSingleDispatch } from './data/cts/single-dispatch.mock';
+import { getLocationByTicketIdMock } from './data/location/location.mock';
 
 const axiosInstanceMocks = axios.create(baseConfig);
 const mockadapter = new MockAdapter(axiosInstanceMocks, {
@@ -68,4 +69,8 @@ mockadapter.onPatch(new RegExp(`${API_URLS.DISPATCH_CTS}/*`)).reply(204, {
     status__c: 'Cancelled'
   }
 });
+
+mockadapter
+  .onGet(new RegExp(`${API_URLS.GET_LOCATION_BY_TICKET_ID}/*`))
+  .reply(200, getLocationByTicketIdMock);
 export default axiosInstanceMocks;

@@ -6,6 +6,7 @@ import { privateRoute } from '../components/privateRoute/PrivateRoute';
 import Menu from '../components/menu/Menu';
 import Loading from '../components/loading/Loading';
 import { DispatchService } from '../services/dispatch/dispatch.service';
+import { LocationService } from '../services/location/location.service';
 import { Routes } from '../config/routes';
 import {
   statesCanada,
@@ -28,7 +29,14 @@ import VendorDispatchLink from '../ui/components/vendorDispatchLink/VendorDispat
 
 function NewDispatch({ authToken }) {
   const router = useRouter();
-  const { register, handleSubmit, errors } = useForm();
+  const {
+    register,
+    handleSubmit,
+    errors,
+    setValue,
+    getValues,
+    watch
+  } = useForm();
   const [response, setResponse] = useState({
     data: [],
     errors: []
@@ -37,7 +45,9 @@ function NewDispatch({ authToken }) {
   const [blockedVendors, setBlockedVendors] = useState([]);
   const [statesOptions, setStatesOptions] = useState(statesUSA);
   const [selectedVendor, setSelectedVendor] = useState([]); // Note: ['CTS'] ['LIT'] ['CTS', 'LIT']
+  const isTicketIdValid = !!watch('mettelId');
   const dispatchService = new DispatchService();
+  const locationService = new LocationService();
 
   const onSubmit = async formData => {
     setIsLoading(true);
@@ -117,6 +127,24 @@ function NewDispatch({ authToken }) {
   };
 
   const showFieldByVendor = vendor => selectedVendor.includes(vendor);
+
+  const handleGetLocationButtonClick = async () => {
+    const ticketId = getValues('mettelId');
+    setIsLoading(true);
+    const res = await locationService.getLocationByTicketId(ticketId);
+    const { owner, address1, country, city, state, zip } = res;
+    setValue('owner', owner);
+    setValue('address1', address1);
+
+    setValue('city', city);
+    setValue('state', state);
+    setValue('zip', zip);
+
+    if (showFieldByVendor(config.VENDORS.CTS)) {
+      setValue('country', country);
+    }
+    setIsLoading(false);
+  };
 
   return (
     <div data-testid="newDispatch-page-component">
@@ -323,6 +351,21 @@ function NewDispatch({ authToken }) {
                     </p>
                   )}
                 </label>
+                <div>
+                  <button
+                    data-testid="get-location-button"
+                    type="button"
+                    className={
+                      errors.mettelId || !isTicketIdValid
+                        ? 'mb-2 bg-teal-500 text-white center py-2 px-4 rounded opacity-50 cursor-not-allowed'
+                        : `mb-2 bg-teal-500 hover:bg-teal-700 text-white center py-2 px-4 rounded`
+                    }
+                    disabled={errors.mettelId || !isTicketIdValid}
+                    onClick={handleGetLocationButtonClick}
+                  >
+                    Get Location
+                  </button>
+                </div>
               </div>
 
               {showFieldByVendor(config.VENDORS.CTS) && (
@@ -538,37 +581,19 @@ function NewDispatch({ authToken }) {
                       htmlFor="state"
                     >
                       State
-                      <div className="relative">
-                        <select
-                          name="state"
-                          data-testid="state"
-                          id="state"
-                          ref={register({ required: true })}
-                          className={
-                            errors.state
-                              ? 'block appearance-none w-full bg-grey-lighter border border-red-300 text-grey-darker py-3 px-4 pr-8 rounded'
-                              : 'block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded'
-                          }
-                        >
-                          {statesOptions.map(state => (
-                            <option value={state.name} key={state.abbreviation}>
-                              {state.name}
-                            </option>
-                          ))}
-                        </select>
-                        <div
-                          className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker"
-                          style={{ top: '13px', right: '0px' }}
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                          </svg>
-                        </div>
-                      </div>
+                      <input
+                        className={
+                          errors.state
+                            ? 'appearance-none block w-full bg-grey-lighter text-red-300 border border-red-500 rounded py-3 px-4 mb-1'
+                            : 'appearance-none block w-full bg-grey-lighter text-grey-darker border rounded py-3 px-4 mb-1'
+                        }
+                        type="text"
+                        name="state"
+                        data-testid="state"
+                        id="state"
+                        ref={register({ required: true })}
+                        placeholder="NY"
+                      />
                       {errors.state && (
                         <p className="text-red-500 text-xs italic">
                           This field is required
