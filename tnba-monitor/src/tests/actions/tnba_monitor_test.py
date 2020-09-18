@@ -111,8 +111,8 @@ class TestTNBAMonitor:
     @pytest.mark.asyncio
     async def run_tickets_polling_with_get_cache_request_having_202_status_test(self):
         get_cache_response = {
-            'body': None,
-            'status': 503,
+            'body': 'Cache is still being built for host(s): mettel_velocloud.net, metvco03.mettel.net',
+            'status': 202,
         }
 
         event_bus = Mock()
@@ -145,8 +145,8 @@ class TestTNBAMonitor:
     @pytest.mark.asyncio
     async def run_tickets_polling_with_get_cache_request_having_non_2xx_status_and_different_from_202_test(self):
         get_cache_response = {
-            'body': 'Cache is still being built for host(s): mettel_velocloud.net, metvco03.mettel.net',
-            'status': 202,
+            'body': 'No edges were found for the specified filters',
+            'status': 404,
         }
 
         event_bus = Mock()
