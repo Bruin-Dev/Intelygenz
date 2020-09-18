@@ -1,3 +1,5 @@
+from datetime import datetime
+from datetime import timedelta
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -30,13 +32,15 @@ class TestCustomerCacheRepository:
         assert customer_cache_repository._notifications_repository is notifications_repository
 
     @pytest.mark.asyncio
-    async def get_cache_with_no_filter_specified_test(self):
-        filter_ = {}
+    async def get_cache_with_no_filters_specified_test(self):
+        velo_filter = {}
+        last_contact_filter = None
 
         request = {
             'request_id': uuid_,
             'body': {
-                'filter': filter_,
+                'filter': velo_filter,
+                'last_contact_filter': last_contact_filter,
             },
         }
         response = {
@@ -64,13 +68,15 @@ class TestCustomerCacheRepository:
         assert result == response
 
     @pytest.mark.asyncio
-    async def get_cache_with_custom_filter_specified_test(self):
-        filter_ = {'mettel.velocloud.net': []}
+    async def get_cache_with_custom_filters_specified_test(self):
+        velo_filter = {'mettel.velocloud.net': []}
+        last_contact_filter = '2020-01-16T14:59:56.245Z'
 
         request = {
             'request_id': uuid_,
             'body': {
-                'filter': filter_,
+                'filter': velo_filter,
+                'last_contact_filter': last_contact_filter,
             },
         }
         response = {
@@ -92,19 +98,22 @@ class TestCustomerCacheRepository:
         customer_cache_repository = CustomerCacheRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await customer_cache_repository.get_cache(filter_)
+            result = await customer_cache_repository.get_cache(
+                velo_filter=velo_filter, last_contact_filter=last_contact_filter
+            )
 
         event_bus.rpc_request.assert_awaited_once_with("customer.cache.get", request, timeout=60)
         assert result == response
 
     @pytest.mark.asyncio
     async def get_cache_with_rpc_request_failing_test(self):
-        filter_ = {'mettel.velocloud.net': []}
+        velo_filter = {'mettel.velocloud.net': []}
 
         request = {
             'request_id': uuid_,
             'body': {
-                'filter': filter_,
+                'filter': velo_filter,
+                'last_contact_filter': None,
             },
         }
 
@@ -120,7 +129,7 @@ class TestCustomerCacheRepository:
         customer_cache_repository = CustomerCacheRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await customer_cache_repository.get_cache(filter_)
+            result = await customer_cache_repository.get_cache(velo_filter=velo_filter)
 
         event_bus.rpc_request.assert_awaited_once_with("customer.cache.get", request, timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
@@ -129,7 +138,7 @@ class TestCustomerCacheRepository:
 
     @pytest.mark.asyncio
     async def get_cache_with_rpc_request_returning_202_status_test(self):
-        filter_ = {
+        velo_filter = {
             'mettel.velocloud.net': [],
             'metvco03.mettel.net': [],
         }
@@ -137,7 +146,8 @@ class TestCustomerCacheRepository:
         request = {
             'request_id': uuid_,
             'body': {
-                'filter': filter_,
+                'filter': velo_filter,
+                'last_contact_filter': None,
             },
         }
 
@@ -160,7 +170,7 @@ class TestCustomerCacheRepository:
         customer_cache_repository = CustomerCacheRepository(event_bus, logger, config, notifications_repository)
 
         with uuid_mock:
-            result = await customer_cache_repository.get_cache(filter_)
+            result = await customer_cache_repository.get_cache(velo_filter=velo_filter)
 
         event_bus.rpc_request.assert_awaited_once_with("customer.cache.get", request, timeout=60)
         notifications_repository.send_slack_message.assert_awaited_once()
@@ -174,7 +184,7 @@ class TestCustomerCacheRepository:
         config = testconfig
         notifications_repository = Mock()
 
-        filter_ = config.TRIAGE_CONFIG['velo_filter']
+        velo_filter = config.TRIAGE_CONFIG['velo_filter']
 
         customer_cache_repository = CustomerCacheRepository(event_bus, logger, config, notifications_repository)
         customer_cache_repository.get_cache = CoroutineMock()
@@ -182,4 +192,29 @@ class TestCustomerCacheRepository:
         with uuid_mock:
             await customer_cache_repository.get_cache_for_triage_monitoring()
 
-        customer_cache_repository.get_cache.assert_awaited_once_with(filter_=filter_)
+        customer_cache_repository.get_cache.assert_awaited_once_with(velo_filter=velo_filter)
+
+    @pytest.mark.asyncio
+    async def get_cache_for_outage_monitoring_test(self):
+        current_datetime = datetime.now()
+        last_contact_filter = str(current_datetime - timedelta(days=7))
+
+        event_bus = Mock()
+        logger = Mock()
+        config = testconfig
+        notifications_repository = Mock()
+
+        velo_filter = config.MONITOR_CONFIG['velocloud_instances_filter']
+
+        customer_cache_repository = CustomerCacheRepository(event_bus, logger, config, notifications_repository)
+        customer_cache_repository.get_cache = CoroutineMock()
+
+        datetime_mock = Mock()
+        datetime_mock.now = Mock(return_value=current_datetime)
+        with patch.object(customer_cache_repository_module, 'datetime', new=datetime_mock):
+            with uuid_mock:
+                await customer_cache_repository.get_cache_for_outage_monitoring()
+
+        customer_cache_repository.get_cache.assert_awaited_once_with(
+            velo_filter=velo_filter, last_contact_filter=last_contact_filter
+        )

@@ -1,3 +1,6 @@
+from datetime import datetime
+from datetime import timedelta
+
 from shortuuid import uuid
 
 from application.repositories import nats_error_response
@@ -10,22 +13,23 @@ class CustomerCacheRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def get_cache(self, filter_: dict = None):
+    async def get_cache(self, *, velo_filter: dict = None, last_contact_filter: str = None):
         err_msg = None
 
-        if not filter_:
-            filter_ = {}
+        if not velo_filter:
+            velo_filter = {}
 
         request = {
             "request_id": uuid(),
             "body": {
-                'filter': filter_,
+                'filter': velo_filter,
+                'last_contact_filter': last_contact_filter,
             },
         }
 
         try:
-            if filter_:
-                self._logger.info(f"Getting customer cache for Velocloud host(s) {', '.join(filter_.keys())}...")
+            if velo_filter:
+                self._logger.info(f"Getting customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}...")
             else:
                 self._logger.info(f"Getting customer cache for all Velocloud hosts...")
             response = await self._event_bus.rpc_request("customer.cache.get", request, timeout=60)
@@ -39,8 +43,8 @@ class CustomerCacheRepository:
             if response_status == 202:
                 err_msg = response_body
             else:
-                if filter_:
-                    self._logger.info(f"Got customer cache for Velocloud host(s) {', '.join(filter_.keys())}!")
+                if velo_filter:
+                    self._logger.info(f"Got customer cache for Velocloud host(s) {', '.join(velo_filter.keys())}!")
                 else:
                     self._logger.info(f"Got customer cache for all Velocloud hosts!")
 
@@ -53,4 +57,10 @@ class CustomerCacheRepository:
     async def get_cache_for_triage_monitoring(self):
         monitoring_filter = self._config.TRIAGE_CONFIG['velo_filter']
 
-        return await self.get_cache(filter_=monitoring_filter)
+        return await self.get_cache(velo_filter=monitoring_filter)
+
+    async def get_cache_for_outage_monitoring(self):
+        monitoring_filter = self._config.MONITOR_CONFIG['velocloud_instances_filter']
+        last_contact_filter = str(datetime.now() - timedelta(days=7))
+
+        return await self.get_cache(velo_filter=monitoring_filter, last_contact_filter=last_contact_filter)
