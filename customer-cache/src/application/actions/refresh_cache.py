@@ -54,9 +54,11 @@ class RefreshCache:
                 split_host_dict[edge_with_serial['edge']['host']].append(edge_with_serial)
 
             self._logger.info("Refreshing cache for each of the hosts...")
-            # TODO: replace loop with asyncio.gather
-            for host in split_host_dict:
-                await self._partial_refresh_cache(host, split_host_dict[host])
+            tasks = [
+                self._partial_refresh_cache(host, split_host_dict[host])
+                for host in split_host_dict
+            ]
+            await asyncio.gather(*tasks, return_exceptions=True)
             self._logger.info("Finished refreshing cache!")
 
         try:
@@ -86,16 +88,13 @@ class RefreshCache:
 
     async def _partial_refresh_cache(self, host, edge_list):
         self._logger.info(f"Filtering the list of edges for host {host}")
-
-        # TODO: replace loop with asyncio.gather
-        edges_filtered = []
-        for edge in edge_list:
-            edge_filtered = await self._bruin_repository.filter_edge_list(edge)
-            edges_filtered.append(edge_filtered)
-
+        tasks = [
+            self._bruin_repository.filter_edge_list(edge)
+            for edge in edge_list
+        ]
         cache = [
             edge
-            for edge in edges_filtered
+            for edge in await asyncio.gather(*tasks)
             if edge is not None
         ]
         self._logger.info(f"Finished filtering edges for host {host}")

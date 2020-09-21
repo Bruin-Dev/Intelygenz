@@ -6,8 +6,7 @@ from config import contact_info
 NATS_CONFIG = {
     'servers': 'nats://nats-server:4222',
     'subscriber': {
-        'max_inflight': 6000,
-        'pending_limits': 6000
+        'pending_limits': 65536
     },
     'publisher': {
         'max_pub_acks_inflight': 6000

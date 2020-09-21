@@ -201,64 +201,6 @@ class TestTNBAMonitor:
         tnba_feedback._get_closed_tickets_by_client_id.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def get_all_closed_tickets_for_monitored_companies_with_customer_cache_still_building_test(self):
-        customer_cache_response = {
-            'body': 'Cache is still being built for host(s): mettel_velocloud.net, metvco03.mettel.net',
-            'status': 202,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        t7_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-
-        customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_feedback_process = CoroutineMock(return_value=customer_cache_response)
-
-        redis_client = Mock()
-
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
-
-        tnba_feedback._get_closed_tickets_by_client_id = CoroutineMock()
-
-        await tnba_feedback._get_all_closed_tickets_for_monitored_companies()
-        customer_cache_repository.get_cache_for_feedback_process.assert_awaited_once()
-        tnba_feedback._get_closed_tickets_by_client_id.assert_not_awaited()
-
-    @pytest.mark.asyncio
-    async def get_all_closed_tickets_for_monitored_companies_with_customer_cache_having_non_2xx_status_test(self):
-        customer_cache_response = {
-            'body': 'No edges were found for the specified filters',
-            'status': 404,
-        }
-
-        event_bus = Mock()
-        logger = Mock()
-        scheduler = Mock()
-        config = testconfig
-        t7_repository = Mock()
-        bruin_repository = Mock()
-        notifications_repository = Mock()
-
-        customer_cache_repository = Mock()
-        customer_cache_repository.get_cache_for_feedback_process = CoroutineMock(return_value=customer_cache_response)
-
-        redis_client = Mock()
-
-        tnba_feedback = TNBAFeedback(event_bus, logger, scheduler, config, t7_repository, customer_cache_repository,
-                                     bruin_repository, notifications_repository, redis_client)
-
-        tnba_feedback._get_closed_tickets_by_client_id = CoroutineMock()
-
-        await tnba_feedback._get_all_closed_tickets_for_monitored_companies()
-        customer_cache_repository.get_cache_for_feedback_process.assert_awaited_once()
-        tnba_feedback._get_closed_tickets_by_client_id.assert_not_awaited()
-
-    @pytest.mark.asyncio
     async def get_closed_tickets_by_client_id_test(self):
         closed_ticket_ids = []
         client_id = 85940

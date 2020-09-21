@@ -35,8 +35,8 @@ class VelocloudRepository:
     async def _get_all_edge_lists_parallel(self, velo_servers):
         edge_list = []
 
-        # TODO: replace loop with asyncio.gather
-        responses = []
+        tasks = [self.__get_edge_status_with_semaphore(edge) for edge in edge_list]
+        responses = await asyncio.gather(*tasks)
         for velo_server in velo_servers:
             response = await self.get_edges(velo_server)
             responses.append(response)
@@ -59,11 +59,8 @@ class VelocloudRepository:
     async def _get_all_serials_in_parallel(self, edge_list):
         edges_with_serials = []
 
-        # TODO: replace loop with asyncio.gather
-        responses = []
-        for edge in edge_list:
-            edge_status_response = await self.__get_edge_status_with_semaphore(edge)
-            responses.append(edge_status_response)
+        tasks = [self.__get_edge_status_with_semaphore(edge) for edge in edge_list]
+        responses = await asyncio.gather(*tasks)
 
         for response in responses:
             if response['status'] not in range(200, 300):

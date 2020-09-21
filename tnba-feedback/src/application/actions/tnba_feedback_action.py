@@ -54,9 +54,11 @@ class TNBAFeedback:
             f'Got {len(closed_ticket_ids)} closed ticket ids for all customers. '
             f'Going through them to find TNBA notes and sending metrics back to T7')
 
-        # TODO: replace loop with asyncio.gather
-        for ticket_id in closed_ticket_ids:
-            await self._send_ticket_task_history_to_t7(ticket_id)
+        tasks = [
+            self._send_ticket_task_history_to_t7(ticket_id)
+            for ticket_id in closed_ticket_ids
+        ]
+        await asyncio.gather(*tasks, return_exceptions=True)
         end_time = time.time()
         self._logger.info(f'TNBA feedback process finished! Took {(end_time - start_time) // 60} minutes.')
 
@@ -71,9 +73,11 @@ class TNBAFeedback:
         customer_cache: list = customer_cache_response['body']
         bruin_clients_ids: Set[int] = set(elem['bruin_client_info']['client_id'] for elem in customer_cache)
 
-        # TODO: replace loop with asyncio.gather
-        for client_id in bruin_clients_ids:
-            await self._get_closed_tickets_by_client_id(client_id, closed_ticket_ids)
+        tasks = [
+            self._get_closed_tickets_by_client_id(client_id, closed_ticket_ids)
+            for client_id in bruin_clients_ids
+        ]
+        await asyncio.gather(*tasks, return_exceptions=True)
 
         return closed_ticket_ids
 

@@ -8,11 +8,7 @@ import sys
 NATS_CONFIG = {
     'servers': 'nats://nats-server:4222',
     'subscriber': {
-        'max_inflight': 1,
-        'pending_limits': 1
-    },
-    'publisher': {
-        'max_pub_acks_inflight': 1
+        'pending_limits': 65536
     },
     'multiplier': 1,
     'min': 1,
