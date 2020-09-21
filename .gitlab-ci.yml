@@ -47,9 +47,11 @@ include:
   - local: 'gitlab-ci/basic-templates/.gitlab-ci-unit_test-templates.yml'
   - local: 'gitlab-ci/basic-templates/.gitlab-ci-utils-templates.yml'
   - local: 'gitlab-ci/basic-templates/.gitlab-ci-validation-templates.yml'
+  - local: 'gitlab-ci/helm-templates/.gitlab-ci-helm-kre-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-basic-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-deploy-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-destroy-templates.yml'
+  - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-validate-templates.yml'
   # Gitlab-CI jobs declaration for each microservice/module
   - local: 'bruin-bridge/.gitlab-ci.yml'
   - local: 'cts-bridge/.gitlab-ci.yml'

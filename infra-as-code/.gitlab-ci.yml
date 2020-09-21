@@ -44,7 +44,35 @@ terraform-validate-dev:
     - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - infra-as-code/dev/**/*
-    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/ && $CI_PIPELINE_SOURCE == "web"
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+
+terraform-validate-kre:
+  stage: validation
+  extends: .terraform_basic_template_kre
+  variables:
+    MODULE: infra-as-code/kre
+  script:
+    - export ENVIRONMENT_SLUG=$(echo -n "${CI_COMMIT_REF_SLUG}" | sha256sum | cut -c1-8)
+    - export TF_VAR_ENVIRONMENT=automation-${ENVIRONMENT_SLUG}
+    - export TF_VAR_CURRENT_ENVIRONMENT="dev"
+    - envsubst < infra-as-code/kre/1-create-eks-cluster/data.tf > temp_data.tf
+    - mv temp_data.tf infra-as-code/kre/1-create-eks-cluster/data.tf
+    - cd ${MODULE} || exit 1
+    - >
+      for i in $(ls -d */ | cut -d " " -f10); do
+        echo "Terraform directory basic code: $i"
+      done
+    - >
+      for i in $(ls -d */ | cut -d " " -f10); do
+        echo "The current Workdir is $i"
+        terraform init -backend=false $i
+        terraform validate
+      done
+  rules:
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - infra-as-code/kre/**/*
+    - if: '($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/) && $CI_PIPELINE_SOURCE == "push"'
 
 # ==================================================
 # Terraform deployment jobs for infra-as-code module
@@ -207,6 +235,30 @@ deploy-master:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
 
+deploy-kre-dev:
+  stage: deploy
+  extends: .terraform_template_deploy_kre
+  variables:
+    MODULE: infra-as-code/kre
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    KRE_RECORD_ALIAS_NAME: "*.kre-dev.mettel-automation.net."
+    BASE_DOMAIN_URL: "kre-dev.mettel-automation.net"
+    HOSTED_ZONE_NAME: "kre-dev.mettel-automation.net."
+    NGINX_INGRESS_CHART_V: 1.40.2
+    EFS_FILESYSTEM_CHART_V: 0.13.0
+    HOSTPATH_CHART_V: 0.2.9
+    KUBE2IAM_CHART_V: 2.5.1
+    CERT_MANAGER_CHART_V: 0.15.0
+    LOAD_BALANCER_WHITELIST: "18.211.9.147/32, 3.222.14.80/32, 52.51.50.68/32, 85.58.149.25/32"
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
+      when: manual
+      allow_failure: true
+
 
 # ===============================================
 # Terraform destroy jobs for infra-as-code module
@@ -259,5 +311,23 @@ destroy-master:
     action: stop
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+      allow_failure: true
+
+destroy-kre-dev:
+  stage: deploy
+  extends: .terraform_template_destroy_kre
+  variables:
+    MODULE: infra-as-code/kre
+    EKS_CLUSTER_NAME: mettel-automation-kre-dev
+    KRE_RECORD_ALIAS_NAME: "*.kre-dev.mettel-automation.net."
+    BASE_DOMAIN_URL: "kre-dev.mettel-automation.net"
+    HOSTED_ZONE_NAME: "kre-dev.mettel-automation.net."
+  before_script:
+    - export TF_VAR_CURRENT_ENVIRONMENT=dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
       when: manual
       allow_failure: true

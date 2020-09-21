@@ -1,0 +1,12 @@
+.helm_template_kre: &helm_template_kre
+  image:
+    name: gitlab.intelygenz.com:5001/mettel/docker_images/terraform_0.13_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  before_script:
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # INITIALIZE HELM
+    - helm repo add ${HELM_CHART_NAME} ${HELM_CHART_URL}
+    - helm repo update

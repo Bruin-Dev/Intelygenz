@@ -67,3 +67,34 @@
     - terraform destroy -auto-approve infra-as-code/network-resources
   tags:
     - kubernetes
+
+.terraform_template_destroy_kre: &terraform_template_destroy_kre
+  image:
+    name: gitlab.intelygenz.com:5001/mettel/docker_images/terraform_0.13_common_utils:${DOCKER_IMAGE_UTILS_VERSION}
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+    - export TF_VAR_ENVIRONMENT_NAME=${ENVIRONMENT_SLUG}
+    - envsubst < ${MODULE}/1-create-eks-cluster/data.tf > temp_data.tf
+    - mv temp_data.tf ${MODULE}/1-create-eks-cluster/data.tf
+    # INSTALL KUBE CONFIG
+    - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # UNINSTALL INGRESS CONTROLLER
+    - helm uninstall nginx-ingress -n kube-system
+    - /bin/bash ci-utils/route53/update_route53_elb_alias.sh ${KRE_RECORD_ALIAS_NAME} ${HOSTED_ZONE_NAME} -d
+    - cd ${MODULE} || exit 1
+    - >
+      for i in $(ls -d */ | sort -r | cut -d " " -f10); do
+        (
+          echo "The current Workdir is $i"
+          cd "${i}" || exit
+          terraform init -backend=true -get=true -input=false
+          if [ "$i" != "2-smtp/" ]; then
+            terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
+          fi
+          terraform refresh
+          terraform destroy -auto-approve
+          cd ..
+        )
+      done
