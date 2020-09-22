@@ -5,7 +5,6 @@ import aiohttp
 import asyncio
 from apscheduler.jobstores.base import ConflictingIdError
 from pytz import timezone
-from tenacity import retry, wait_exponential, stop_after_delay
 
 
 class VelocloudClient:
@@ -70,10 +69,7 @@ class VelocloudClient:
             return
 
     async def _create_headers_by_host(self, host, user, password):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'],
-                                     min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
-        async def _create_headers_by_host():
+        try:
             post = {
                 'headers': {"Content-Type": "application/json"},
                 'json': {
@@ -98,17 +94,16 @@ class VelocloudClient:
                 return_response["body"] = headers
                 return_response["status"] = response.status
             if response.status == 302:
-                self._logger.error(f"Got 302 from Bruin, re-login with credentials and retrying get headers")
-                return_response["body"] = f"Maximum retries while relogin"
+                self._logger.error(f"Got 302 from velocloud")
+                return_response["body"] = f"Got an error trying to login"
                 return_response["status"] = 302
-                raise Exception(return_response)
 
             return return_response
-
-        try:
-            return await _create_headers_by_host()
         except Exception as e:
-            return e.args[0]
+            return {
+                    'body': e.args[0],
+                    'status': 500
+            }
 
     def _get_header_by_host(self, host):
         host_client = [client
@@ -121,9 +116,7 @@ class VelocloudClient:
         return None
 
     async def get_edge_information(self, edge):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
-        async def get_edge_information():
+        try:
             return_response = dict.fromkeys(["body", "status"])
             target_host_client = self._get_header_by_host(edge["host"])
             if target_host_client is None:
@@ -149,22 +142,19 @@ class VelocloudClient:
                 return_response["status"] = response.status
                 self._logger.error(f"Got error from Velocloud {response_json}")
             if response.status in range(500, 513):
-                self._logger.error(f"Got {response.status}. Retrying...")
+                self._logger.error(f"Got {response.status}")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
-                raise Exception(return_response)
 
             return return_response
-
-        try:
-            return await get_edge_information()
         except Exception as e:
-            return e.args[0]
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
 
     async def get_link_information(self, edge, interval):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
-        async def get_link_information():
+        try:
             return_response = dict.fromkeys(["body", "status"])
             target_host_client = self._get_header_by_host(edge["host"])
 
@@ -192,22 +182,19 @@ class VelocloudClient:
                 return_response["status"] = response.status
                 self._logger.error(f"Got error from Velocloud {response_json}")
             if response.status in range(500, 513):
-                self._logger.error(f"Got {response.status}. Retrying...")
+                self._logger.error(f"Got {response.status}")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
-                raise Exception(return_response)
 
             return return_response
-
-        try:
-            return await get_link_information()
         except Exception as e:
-            return e.args[0]
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
 
     async def get_link_service_groups_information(self, edge, interval):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
-        async def get_link_service_groups_information():
+        try:
             return_response = dict.fromkeys(["body", "status"])
             target_host_client = self._get_header_by_host(edge["host"])
 
@@ -235,22 +222,19 @@ class VelocloudClient:
                 return_response["status"] = response.status
                 self._logger.error(f"Got error from Velocloud {response_json}")
             if response.status in range(500, 513):
-                self._logger.error(f"Got {response.status}. Retrying...")
+                self._logger.error(f"Got {response.status}")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
-                raise Exception(return_response)
 
             return return_response
-
-        try:
-            return await get_link_service_groups_information()
         except Exception as e:
-            return e.args[0]
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
 
     async def get_enterprise_information(self, edge):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
-        async def get_enterprise_information():
+        try:
             return_response = dict.fromkeys(["body", "status"])
             target_host_client = self._get_header_by_host(edge["host"])
 
@@ -278,22 +262,19 @@ class VelocloudClient:
                 return_response["status"] = response.status
                 self._logger.error(f"Got error from Velocloud {response_json}")
             if response.status in range(500, 513):
-                self._logger.error(f"Got {response.status}. Retrying...")
+                self._logger.error(f"Got {response.status}")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
-                raise Exception(return_response)
 
             return return_response
-
-        try:
-            return await get_enterprise_information()
         except Exception as e:
-            return e.args[0]
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
 
     async def get_all_edge_events(self, edge, start, end, limit):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
-        async def get_all_edge_events():
+        try:
             return_response = dict.fromkeys(["body", "status"])
             target_host_client = self._get_header_by_host(edge["host"])
 
@@ -325,17 +306,16 @@ class VelocloudClient:
                 return_response["status"] = response.status
                 self._logger.error(f"Got error from Velocloud {response_json}")
             if response.status in range(500, 513):
-                self._logger.error(f"Got {response.status}. Retrying...")
+                self._logger.error(f"Got {response.status}")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
-                raise Exception(return_response)
 
             return return_response
-
-        try:
-            return await get_all_edge_events()
         except Exception as e:
-            return e.args[0]
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
 
     async def get_all_enterprises_edges_with_host(self, filter):
         edges_by_enterprise_and_host = list()
@@ -419,9 +399,7 @@ class VelocloudClient:
         return sum
 
     async def get_monitoring_aggregates(self, client):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
-        async def get_monitoring_aggregates():
+        try:
             response = await self._session.post(f"https://{client['host']}/portal/rest/monitoring/getAggregates",
                                                 json={},
                                                 headers=client['headers'],
@@ -439,22 +417,19 @@ class VelocloudClient:
                 return_response["status"] = response.status
                 self._logger.error(f"Got error from Velocloud {response_json}")
             if response.status in range(500, 513):
-                self._logger.error(f"Got {response.status}. Retrying...")
+                self._logger.error(f"Got {response.status}")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
-                raise Exception(return_response)
 
             return return_response
-
-        try:
-            return await get_monitoring_aggregates()
         except Exception as e:
-            return e.args[0]
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
 
     async def get_all_enterprises_edges_by_id(self, client, enterprise_id):
-        @retry(wait=wait_exponential(multiplier=self._config['multiplier'], min=self._config['min']),
-               stop=stop_after_delay(self._config['stop_delay']), reraise=True)
-        async def get_all_enterprises_edges_by_id():
+        try:
             body = {"enterpriseId": enterprise_id}
             response = await self._session.post(f"https://{client['host']}/portal/rest/enterprise/getEnterpriseEdges",
                                                 json=body,
@@ -472,17 +447,16 @@ class VelocloudClient:
                 return_response["status"] = response.status
                 self._logger.error(f"Got error from Velocloud {response.json()}")
             if response.status in range(500, 513):
-                self._logger.error(f"Got {response.status}. Retrying...")
+                self._logger.error(f"Got {response.status}.")
                 return_response["body"] = f"Got internal error from Velocloud"
                 return_response["status"] = 500
-                raise Exception(return_response)
 
             return return_response
-
-        try:
-            return await get_all_enterprises_edges_by_id()
         except Exception as e:
-            return e.args[0]
+            return {
+                'body': e.args[0],
+                'status': 500
+            }
 
     async def get_all_enterprise_names(self):
         enterprise_names = list()
@@ -509,7 +483,6 @@ class VelocloudClient:
                 if 'tokenError' in response['error']['message']:
                     self._logger.info(f'Response returned: {response}. Attempting to relogin')
                     await self._start_relogin_job(host)
-                    raise Exception
                 else:
                     self._logger.error(f'Error response returned: {response}')
         return response

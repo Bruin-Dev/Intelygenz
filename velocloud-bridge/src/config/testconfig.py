@@ -22,9 +22,6 @@ VELOCLOUD_CONFIG = {
 
         }
     ],
-    'multiplier': 0.1,
-    'min': 0,
-    'stop_delay': 0.4,
     'timezone': 'US/Eastern',
     'ids_by_serial_cache_ttl': 86400
 

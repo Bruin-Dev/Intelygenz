@@ -31,9 +31,6 @@ def parse_velocloud_config():
 VELOCLOUD_CONFIG = {
     'verify_ssl': True,
     'servers': parse_velocloud_config(),
-    'multiplier': 5,
-    'min': 5,
-    'stop_delay': 18000,
     'timezone': 'US/Eastern',
     'ids_by_serial_cache_ttl': 86400
 }
