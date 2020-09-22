@@ -459,35 +459,35 @@ class LitDispatchMonitor:
                         if not should_send_12_hours_info:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"Not needed to send SMS tech 12h note due to time")
-                            continue
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"Sending SMS tech 12h note")
-                        result_sms_12_sended = await self._lit_repository.send_tech_12_sms_tech(
-                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
-                        if not result_sms_12_sended:
+                        else:
+                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                              f"Sending SMS tech 12h note")
+                            result_sms_12_sended = await self._lit_repository.send_tech_12_sms_tech(
+                                dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
+                            if not result_sms_12_sended:
+                                msg = f"[service-dispatch-monitor] [LIT] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"- SMS tech 12h not sended"
+                                self._logger.info(msg)
+                                await self._notifications_repository.send_slack_message(msg)
+                                continue
+
+                            result_append_tech_12_sms_note = await self._lit_repository.append_tech_12_sms_tech_note(
+                                dispatch_number, ticket_id, sms_to_tech)
+                            if not result_append_tech_12_sms_note:
+                                msg = f"[service-dispatch-monitor] [LIT] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"- A sms tech 12 hours before note tech not appended"
+                                self._logger.info(msg)
+                                await self._notifications_repository.send_slack_message(msg)
+                                continue
+
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- SMS tech 12h not sended"
+                                  f"- A sms tech 12 hours before note tech appended"
                             self._logger.info(msg)
                             await self._notifications_repository.send_slack_message(msg)
                             continue
-
-                        result_append_tech_12_sms_note = await self._lit_repository.append_tech_12_sms_tech_note(
-                            dispatch_number, ticket_id, sms_to_tech)
-                        if not result_append_tech_12_sms_note:
-                            msg = f"[service-dispatch-monitor] [LIT] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- A sms tech 12 hours before note tech not appended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
-
-                        msg = f"[service-dispatch-monitor] [LIT] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A sms tech 12 hours before note tech appended"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
-                        continue
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- Already has a sms tech 12 hours before note tech")
 
@@ -532,33 +532,33 @@ class LitDispatchMonitor:
                         if not should_send_2_hours_info:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"Not needed to send SMS tech 2h note due to time")
-                            continue
-                        self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
-                                          f"Sending SMS tech 2h note")
-                        result_sms_2_sended = await self._lit_repository.send_tech_2_sms_tech(
-                            dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
-                        if not result_sms_2_sended:
-                            msg = f"[service-dispatch-monitor] [LIT] " \
-                                  f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- SMS tech 2h not sended"
-                            self._logger.info(msg)
-                            await self._notifications_repository.send_slack_message(msg)
-                            continue
+                        else:
+                            self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
+                                              f"Sending SMS tech 2h note")
+                            result_sms_2_sended = await self._lit_repository.send_tech_2_sms_tech(
+                                dispatch_number, ticket_id, dispatch, datetime_formatted_str, sms_to_tech)
+                            if not result_sms_2_sended:
+                                msg = f"[service-dispatch-monitor] [LIT] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"- SMS tech 2h not sended"
+                                self._logger.info(msg)
+                                await self._notifications_repository.send_slack_message(msg)
+                                continue
 
-                        result_append_tech_2_sms_note = await self._lit_repository.append_tech_2_sms_tech_note(
-                            dispatch_number, ticket_id, sms_to_tech)
-                        if not result_append_tech_2_sms_note:
+                            result_append_tech_2_sms_note = await self._lit_repository.append_tech_2_sms_tech_note(
+                                dispatch_number, ticket_id, sms_to_tech)
+                            if not result_append_tech_2_sms_note:
+                                msg = f"[service-dispatch-monitor] [LIT] " \
+                                      f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
+                                      f"- A sms tech 2 hours before note tech not appended"
+                                self._logger.info(msg)
+                                await self._notifications_repository.send_slack_message(msg)
+                                continue
                             msg = f"[service-dispatch-monitor] [LIT] " \
                                   f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                                  f"- A sms tech 2 hours before note tech not appended"
+                                  f"- A sms tech 2 hours before note tech appended"
                             self._logger.info(msg)
                             await self._notifications_repository.send_slack_message(msg)
-                            continue
-                        msg = f"[service-dispatch-monitor] [LIT] " \
-                              f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} " \
-                              f"- A sms tech 2 hours before note tech appended"
-                        self._logger.info(msg)
-                        await self._notifications_repository.send_slack_message(msg)
                     self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                       f"- already has a sms tech 2 hours before note")
 
