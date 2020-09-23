@@ -403,14 +403,6 @@ class DispatchServer:
                               'message': 'Error: Not mettel_bruin_ticket_id included in the '
                                          'request to create lit dispatch'}
             return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
-        ticket_address_response = await self._bruin_repository.get_ticket_overview(ticket_id)
-        if ticket_address_response['status'] not in range(200, 300):
-            error_response = {
-                'code': ticket_address_response['status'],
-                'message': f"We couldn't determine the address for the ticket id: {ticket_id}"
-            }
-            return jsonify(error_response), ticket_address_response['status'], None
-        body = self._lit_repository.update_body_with_client_address(body, ticket_address_response['body'])
 
         dispatch_request = lit_mapper.map_create_dispatch(body)
         request_body = dict()
@@ -668,15 +660,6 @@ class DispatchServer:
                               'message': 'Error: Not mettel_bruin_ticket_id included in the '
                                          'request to create cts dispatch'}
             return jsonify(error_response), HTTPStatus.BAD_REQUEST, None
-
-        ticket_address_response = await self._bruin_repository.get_ticket_overview(ticket_id)
-        if ticket_address_response['status'] not in range(200, 300):
-            error_response = {
-                'code': ticket_address_response['status'],
-                'message': f"We couldn't determine the address for the ticket id: {ticket_id}"
-            }
-            return jsonify(error_response), ticket_address_response['status'], None
-        body = self._cts_repository.update_body_with_client_address(body, ticket_address_response['body'])
 
         self._logger.info(f"payload: {body}")
 

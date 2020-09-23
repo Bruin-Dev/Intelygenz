@@ -3598,42 +3598,6 @@ class TestApiServer:
             assert response.status_code == HTTPStatus.BAD_REQUEST
 
     @pytest.mark.asyncio
-    async def create_cts_dispatch_with_get_ticket_ko_test(self, new_dispatch, ticket_details_1_no_requested_watermark,
-                                                          api_server_test):
-        uuid_ = 'UUID1'
-        igz_dispatch_id = f"IGZ{uuid_}"
-
-        new_dispatch["igz_dispatch_number"] = igz_dispatch_id
-        api_server_test._config.ENVIRONMENT_NAME = 'production'
-        cts_expected_response = {}
-        cts_expected_response['id'] = igz_dispatch_id
-        cts_expected_response['vendor'] = 'CTS'
-        response_get_ticket_details_mock = ticket_details_1_no_requested_watermark
-
-        api_server_test._bruin_repository.get_ticket_details = CoroutineMock(
-            side_effect=[response_get_ticket_details_mock])
-        response_send_email_mock = {
-            'status': 200
-        }
-        api_server_test._notifications_repository.send_email = CoroutineMock(side_effect=[response_send_email_mock])
-        api_server_test._append_note_to_ticket = CoroutineMock()
-        response_send_slack_message_mock = {
-            'status': 200
-        }
-        api_server_test._notifications_repository.send_slack_message = CoroutineMock(
-            side_effect=[response_send_slack_message_mock])
-
-        api_server_test._bruin_repository.get_ticket_overview = CoroutineMock(return_value={
-            'body': {},
-            'status': 400})
-
-        with patch.object(api_server_module, 'uuid', return_value=uuid_):
-            client = api_server_test._app.test_client()
-            response = await client.post(f'/cts/dispatch/', json=new_dispatch)
-
-            assert response.status_code == HTTPStatus.BAD_REQUEST
-
-    @pytest.mark.asyncio
     async def bad_response_on_ticket_values_on_create_dispatch_test(self, api_server_test):
         uuid_ = 'UUID1'
 

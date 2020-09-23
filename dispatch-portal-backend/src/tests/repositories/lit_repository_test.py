@@ -2,16 +2,11 @@ import copy
 from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import patch
-import pytest
 
-from asynctest import CoroutineMock
 from pytz import timezone
 from shortuuid import uuid
 
 from application.repositories import lit_repository as lit_repository_module
-from application.repositories import nats_error_response
-
-from application.repositories.utils_repository import UtilsRepository
 from config import testconfig
 from application.repositories.lit_repository import LitRepository
 

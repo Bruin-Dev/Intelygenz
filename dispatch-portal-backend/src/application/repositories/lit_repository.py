@@ -95,11 +95,3 @@ class LitRepository:
             'datetime_formatted_str': return_datetime_localized.strftime(
                 self.DATETIME_FORMAT.format(time_zone_of_dispatch=time_zone_of_dispatch))
         }
-
-    def update_body_with_client_address(self, body, ticket_address_response):
-        body['job_site'] = ticket_address_response['clientName']
-        body['job_site_street'] = ticket_address_response['address']['address']
-        body['job_site_city'] = ticket_address_response['address']['city']
-        body['job_site_state'] = ticket_address_response['address']['state']
-        body['job_site_zip_code'] = ticket_address_response['address']['zip']
-        return body

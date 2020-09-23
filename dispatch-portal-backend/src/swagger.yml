@@ -473,6 +473,11 @@ components:
         - time_of_dispatch
         - time_zone
         - mettel_bruin_ticket_id
+        - job_site
+        - job_site_street
+        - job_site_city
+        - job_site_state
+        - job_site_zip_code
         - job_site_contact_name
         - job_site_contact_number
         - materials_needed_for_dispatch
@@ -499,6 +504,21 @@ components:
           type: string
         mettel_bruin_ticket_id:
           type: string
+        job_site:
+          type: string
+          example: "Red Rose Inn"
+        job_site_street:
+          type: string
+          example: "123 Fake Street"
+        job_site_city:
+          type: string
+          example: "Pleasantown"
+        job_site_state:
+          type: string
+          example: "CA"
+        job_site_zip_code:
+          type: string
+          example: "99088"
         job_site_contact_name:
           type: string
           example: "Jane Doe"
@@ -636,6 +656,12 @@ components:
         - time_of_dispatch
         - time_zone
         - mettel_bruin_ticket_id
+        - location_country
+        - job_site
+        - job_site_street_1
+        - job_site_city
+        - job_site_state
+        - job_site_zip_code
         - sla_level
         - job_site_contact_name
         - job_site_contact_lastname
@@ -668,9 +694,30 @@ components:
         sla_level:
           enum: [ "Pre-planned", "Next bussiness day" ]
           type: string
+        location_country:
+          type: string
+          example: United States
+        job_site:
+          type: string
+          example: "Red Rose Inn"
+        job_site_street_1:
+          type: string
+          example: "123 Fake Street"
+        job_site_street_2:
+          type: string
+          example: "123 Fake Street"
+        job_site_city:
+          type: string
+          example: "Pleasantown"
+        job_site_state:
+          type: string
+          example: "CA"
         job_site_contact_name:
           type: string
           example: "Jane"
+        job_site_zip_code:
+          type: string
+          example: "99088"
         job_site_contact_lastname:
           type: string
           example: "Doe"
