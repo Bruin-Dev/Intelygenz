@@ -7,7 +7,6 @@ from application.repositories.bruin_repository import BruinRepository
 from application.repositories.lit_repository import LitRepository
 from application.repositories.utils_repository import UtilsRepository
 from apscheduler.util import undefined
-import iso8601
 from pytz import timezone
 
 
@@ -23,12 +22,9 @@ class LitDispatchMonitor:
         self._bruin_repository = bruin_repository
         self._notifications_repository = notifications_repository
 
-        self.HOURS_12 = 12
-        self.HOURS_6 = 6
-        self.HOURS_2 = 2
-        self._range_12 = range(self.HOURS_12 - 1, self.HOURS_12)
-        self._range_6 = range(self.HOURS_6 - 1, self.HOURS_6)
-        self._range_2 = range(self.HOURS_2 - 1, self.HOURS_2)
+        self.HOURS_12 = 12.0
+        self.HOURS_6 = 6.0
+        self.HOURS_2 = 2.0
 
         # Dispatch Notes watermarks
         self.MAIN_WATERMARK = '#*Automation Engine*#'
@@ -422,7 +418,8 @@ class LitDispatchMonitor:
                     if tech_12_hours_before_note_found is None:
                         hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                       date_time_of_dispatch)
-                        should_send_12_hours_info = hours_diff in self._range_12
+                        should_send_12_hours_info = \
+                            UtilsRepository.in_range(hours_diff, self.HOURS_12 - 1, self.HOURS_12)
                         if not should_send_12_hours_info:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"SMS 12h note not needed to send now")
@@ -455,7 +452,8 @@ class LitDispatchMonitor:
                     if tech_12_hours_before_tech_note_found is None:
                         hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                       date_time_of_dispatch)
-                        should_send_12_hours_info = hours_diff in self._range_12
+                        should_send_12_hours_info = \
+                            UtilsRepository.in_range(hours_diff, self.HOURS_12 - 1, self.HOURS_12)
                         if not should_send_12_hours_info:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"Not needed to send SMS tech 12h note due to time")
@@ -495,7 +493,7 @@ class LitDispatchMonitor:
                     if tech_2_hours_before_note_found is None:
                         hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                       date_time_of_dispatch)
-                        should_send_2_hours_info = hours_diff in self._range_2
+                        should_send_2_hours_info = UtilsRepository.in_range(hours_diff, self.HOURS_2 - 1, self.HOURS_2)
                         if not should_send_2_hours_info:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"SMS 2h note not needed to send now")
@@ -528,7 +526,7 @@ class LitDispatchMonitor:
                     if tech_2_hours_before_tech_note_found is None:
                         hours_diff = UtilsRepository.get_diff_hours_between_datetimes(datetime.now(tz),
                                                                                       date_time_of_dispatch)
-                        should_send_2_hours_info = hours_diff in self._range_2
+                        should_send_2_hours_info = UtilsRepository.in_range(hours_diff, self.HOURS_2 - 1, self.HOURS_2)
                         if not should_send_2_hours_info:
                             self._logger.info(f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} "
                                               f"Not needed to send SMS tech 2h note due to time")

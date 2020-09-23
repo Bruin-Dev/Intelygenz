@@ -22,9 +22,13 @@ class UtilsRepository:
             td = datetime_1 - datetime_2
         else:
             td = datetime_2 - datetime_1
-        td_mins = int(round(td.total_seconds() / 60))
+        td_mins = float(round(td.total_seconds() / 60, 2))
         td_hours = td_mins / 60
-        return td_hours
+        return round(td_hours, 2)
+
+    @staticmethod
+    def in_range(number: float, start: float, end: float):
+        return start <= number < end
 
     @staticmethod
     def find_note(ticket_notes, watermark):

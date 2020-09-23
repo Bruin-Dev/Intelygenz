@@ -1504,10 +1504,10 @@ class TestLitDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 + 1,
-            lit_dispatch_monitor.HOURS_12 + 1
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 + 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 + 1
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -1671,10 +1671,10 @@ class TestLitDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 + 1,
-            lit_dispatch_monitor.HOURS_12 + 1
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 + 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 + 1
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -1886,10 +1886,10 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 + 1,
-            lit_dispatch_monitor.HOURS_12 + 1
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 + 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 + 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -2018,10 +2018,10 @@ class TestLitDispatchMonitor:
         ]
 
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 - 1
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -2170,10 +2170,10 @@ class TestLitDispatchMonitor:
         ]
 
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 - 1,
-            lit_dispatch_monitor.HOURS_12 - 2,
-            lit_dispatch_monitor.HOURS_12 - 2
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 2,
+            lit_dispatch_monitor.HOURS_12 * 1.0 - 2
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -2316,10 +2316,10 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 + 1,
-            lit_dispatch_monitor.HOURS_2 + 1
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 + 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 + 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -2487,10 +2487,10 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 + 2,
-            lit_dispatch_monitor.HOURS_2 + 2
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 + 2,
+            lit_dispatch_monitor.HOURS_2 * 1.0 + 2
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -2659,10 +2659,10 @@ class TestLitDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -2834,10 +2834,10 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -3010,10 +3010,10 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 - 1
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -3186,8 +3186,8 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 + 1
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 + 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -3329,8 +3329,8 @@ class TestLitDispatchMonitor:
         ]
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            lit_dispatch_monitor.HOURS_2 - 1,
-            lit_dispatch_monitor.HOURS_2 + 1
+            lit_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            lit_dispatch_monitor.HOURS_2 * 1.0 + 1
         ]
 
         responses_send_tech_12_sms_mock = [

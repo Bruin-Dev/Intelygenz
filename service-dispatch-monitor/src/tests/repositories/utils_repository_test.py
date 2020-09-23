@@ -76,21 +76,36 @@ class TestUtilsRepository:
     def get_diff_hours_between_datetimes_test(self):
         data1 = datetime.datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
         data2 = datetime.datetime.strptime('2020-03-16 6:00PM', '%Y-%m-%d %I:%M%p')
-
         data3 = datetime.datetime.strptime('2020-03-16 4:00PM', '%Y-%m-%d %I:%M%p')
         data4 = datetime.datetime.strptime('2020-03-17 4:00PM', '%Y-%m-%d %I:%M%p')
 
         hours_2 = UtilsRepository.get_diff_hours_between_datetimes(data2, data1)
         hours_24 = UtilsRepository.get_diff_hours_between_datetimes(data4, data3)
-
-        assert hours_2 == 2
-        assert hours_24 == 24
+        assert hours_2 == 2.0
+        assert hours_24 == 24.0
 
         hours_2 = UtilsRepository.get_diff_hours_between_datetimes(data1, data2)
         hours_24 = UtilsRepository.get_diff_hours_between_datetimes(data3, data4)
+        assert hours_2 == 2.0
+        assert hours_24 == 24.0
 
-        assert hours_2 == 2
-        assert hours_24 == 24
+        data5 = datetime.datetime.strptime('2020-03-16 10:00AM', '%Y-%m-%d %I:%M%p')
+        data6 = datetime.datetime.strptime('2020-03-16 10:30AM', '%Y-%m-%d %I:%M%p')
+
+        hours_30_min = UtilsRepository.get_diff_hours_between_datetimes(data5, data6)
+        assert hours_30_min == 0.5
+
+        data7 = datetime.datetime.strptime('2020-03-16 10:00AM', '%Y-%m-%d %I:%M%p')
+        data8 = datetime.datetime.strptime('2020-03-16 9:30PM', '%Y-%m-%d %I:%M%p')
+
+        hours_11h_30_min = UtilsRepository.get_diff_hours_between_datetimes(data7, data8)
+        assert hours_11h_30_min == 11.5
+
+        data9 = datetime.datetime.strptime('2020-03-16 10:00AM', '%Y-%m-%d %I:%M%p')
+        data10 = datetime.datetime.strptime('2020-03-16 8:55PM', '%Y-%m-%d %I:%M%p')
+
+        hours_10h_55_min = UtilsRepository.get_diff_hours_between_datetimes(data9, data10)
+        assert hours_10h_55_min == 10.92
 
     def find_note_test(self, lit_dispatch_monitor, ticket_details):
         expected_note_found = {
