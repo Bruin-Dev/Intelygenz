@@ -207,10 +207,10 @@ class CtsDispatchMonitor:
                                    f"Could not determine date time of dispatch: {dispatch}")
                 return
 
-            date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
-            # Get datetime formatted string
-            DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
-            datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
+            datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(
+                dispatch, dispatch_number, ticket_id)
+            date_time_of_dispatch_localized = datetime_tz_response['date_time_of_dispatch_localized']
+            datetime_formatted_str = datetime_tz_response['datetime_formatted_str']
 
             sms_to = CtsRepository.get_sms_to(dispatch)
             if sms_to is None:
@@ -704,10 +704,9 @@ class CtsDispatchMonitor:
                                   f"Could not determine date time of dispatch: {dispatch}")
                 return
 
-            date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
-            # Get datetime formatted string
-            DATETIME_FORMAT = '%b %d, %Y @ %I:%M %p UTC'
-            datetime_formatted_str = date_time_of_dispatch_localized.strftime(DATETIME_FORMAT)
+            datetime_tz_response = self._cts_repository.get_dispatch_confirmed_date_time_localized(
+                dispatch, dispatch_number, ticket_id)
+            datetime_formatted_str = datetime_tz_response['datetime_formatted_str']
 
             self._logger.info(f"Getting details for ticket [{ticket_id}]")
             filtered_ticket_notes = BruinRepository.sort_ticket_notes_by_created_date(ticket_notes)

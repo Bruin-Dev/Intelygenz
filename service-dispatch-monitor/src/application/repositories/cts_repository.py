@@ -1,4 +1,9 @@
 import phonenumbers
+import iso8601
+import pytz
+from phonenumbers import NumberParseException
+from shortuuid import uuid
+
 from application.templates.cts.cts_dispatch_cancel import cts_get_dispatch_cancel_note
 from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_note
 from application.templates.cts.cts_dispatch_confirmed import cts_get_dispatch_confirmed_sms_note
@@ -17,8 +22,6 @@ from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_2_hour
 from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_2_hours_before_sms_tech
 from application.templates.cts.sms.tech_on_site import cts_get_tech_on_site_sms
 from application.templates.cts.sms.updated_tech import cts_get_updated_tech_sms, cts_get_updated_tech_sms_tech
-from phonenumbers import NumberParseException
-from shortuuid import uuid
 
 from application.repositories import nats_error_response
 from application.repositories.utils_repository import UtilsRepository
@@ -854,3 +857,18 @@ class CtsRepository:
                         self.filter_ticket_notes_by_dispatch_number(filtered_ticket_notes, _igz_dispatch_number)
 
         return splitted_ticket_notes
+
+    def get_dispatch_confirmed_date_time_localized(self, dispatch, dispatch_number, ticket_id):
+        # Convert date to UTC
+        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                          f"- Converting: {dispatch.get('Local_Site_Time__c')} to UTC")
+        date_time_of_dispatch = dispatch.get('Local_Site_Time__c')
+        date_time_of_dispatch_localized = iso8601.parse_date(date_time_of_dispatch, pytz.utc)
+        datetime_formatted_str = date_time_of_dispatch_localized.strftime(self.DATETIME_FORMAT)
+        response = {
+            'date_time_of_dispatch_localized': date_time_of_dispatch_localized,
+            'datetime_formatted_str': datetime_formatted_str
+        }
+        self._logger.info(f"Dispatch: [{dispatch_number}] for ticket_id: {ticket_id} "
+                          f"- Converted: {response}")
+        return response
