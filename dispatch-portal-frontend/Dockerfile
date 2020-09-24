@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 
 # Installing dependencies
 COPY dispatch-portal-frontend/package*.json ./
-RUN npm install
+RUN npm install --only=prod
 
 # Copying source files
 COPY dispatch-portal-frontend/ .
