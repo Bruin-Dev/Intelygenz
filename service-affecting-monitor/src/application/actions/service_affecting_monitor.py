@@ -426,22 +426,38 @@ class ServiceAffectingMonitor:
             'request_id': uuid(),
             'body': {
                 'client_id': client_id,
-                'edge_serial': serial,
-                'ticket_statuses': ticket_statuses
+                'category': 'SD-WAN',
+                'ticket_topic': 'VAS',
+                'service_number': serial,
+                'ticket_status': ticket_statuses
             }
         }
         self._logger.info(f"Retrieving affecting tickets by serial with trouble {trouble}: {ticket_request_msg}")
-        all_tickets = await self._event_bus.rpc_request("bruin.ticket.affecting.details.by_edge_serial.request",
+        all_tickets = await self._event_bus.rpc_request("bruin.ticket.request",
                                                         ticket_request_msg,
-                                                        timeout=200)
+                                                        timeout=90)
         if all_tickets['status'] not in range(200, 300):
-            self._logger.error(f"Error: an error ocurred retrieving affecting tickets details by serial")
+            self._logger.error(f"Error: an error ocurred retrieving affecting tickets by serial")
             return None
 
         for ticket in all_tickets['body']:
-            for ticket_note in ticket['ticketNotes']:
+            ticket_id = ticket['ticketID']
+            ticket_details_request = {'request_id': uuid(), 'body': {'ticket_id': ticket_id}}
+            ticket_details = await self._event_bus.rpc_request("bruin.ticket.details.request",
+                                                               ticket_details_request,
+                                                               timeout=15)
+
+            if ticket_details['status'] not in range(200, 300):
+                self._logger.error(f"Error: an error ocurred retrieving ticket details for ticket {ticket_id}")
+                return None
+
+            ticket_details_body = ticket_details['body']
+            for ticket_note in ticket_details_body['ticketNotes']:
                 if ticket_note['noteValue'] and trouble in ticket_note['noteValue']:
-                    return ticket
+                    return {
+                        'ticketID': ticket['ticketID'],
+                        **ticket_details_body,
+                    }
         return None
 
     def _compose_ticket_dict(self, link_info, input, output, trouble, threshold):
