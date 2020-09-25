@@ -24,7 +24,7 @@ class TestGetTicket:
     @pytest.mark.asyncio
     async def get_all_tickets_with_ticket_id_defined_in_msg_200_test(self):
         logger = Mock()
-        filtered_tickets_list = [{'ticketID': 123}, {'ticketID': 321}]
+        filtered_tickets_list = [{'ticketID': 123}]
         request_id = "123"
         response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
 
@@ -72,6 +72,62 @@ class TestGetTicket:
         )
 
     @pytest.mark.asyncio
+    async def get_all_tickets_with_service_number_defined_test(self):
+        request_id = "123"
+        response_topic = "_INBOX.2007314fe0fcb2cdc2a2914c1"
+
+        client_id = 123
+        service_number = 'VC1234567'
+        category = 'SD-WAN'
+        ticket_topic = 'VOO'
+        ticket_status_list = ['New', 'In-Progress']
+
+        repository_params = {
+            'client_id': client_id,
+            'service_number': service_number,
+            'category': category,
+            'ticket_topic': ticket_topic,
+        }
+        request_params = {
+            **repository_params,
+            'ticket_status': ticket_status_list,
+        }
+
+        filtered_tickets_list = [
+            {'ticketID': 123},
+        ]
+
+        request_msg = {
+            'request_id': request_id,
+            'response_topic': response_topic,
+            'body': request_params,
+        }
+        repository_response = {
+            'body': filtered_tickets_list,
+            'status': 200
+        }
+        response_msg = {
+            'request_id': request_id,
+            **repository_response,
+        }
+
+        logger = Mock()
+
+        event_bus = Mock()
+        event_bus.publish_message = CoroutineMock()
+
+        bruin_repository = Mock()
+        bruin_repository.get_all_filtered_tickets = CoroutineMock(return_value=repository_response)
+
+        bruin_ticket_response = GetTicket(logger, config.BRUIN_CONFIG, event_bus, bruin_repository)
+        await bruin_ticket_response.get_all_tickets(request_msg)
+
+        bruin_ticket_response._bruin_repository.get_all_filtered_tickets.assert_awaited_once_with(
+            repository_params, ticket_status_list
+        )
+        bruin_ticket_response._event_bus.publish_message.assert_awaited_once_with(response_topic, response_msg)
+
+    @pytest.mark.asyncio
     async def get_all_tickets_with_no_ticket_id_test(self):
         logger = Mock()
         filtered_tickets_list = [{'ticketID': 123}, {'ticketID': 321}]
@@ -96,7 +152,6 @@ class TestGetTicket:
         }
         param_copy = msg['body'].copy()
         del [param_copy['ticket_status']]
-        param_copy['ticket_id'] = ''
         response_to_publish_in_topic = {
             'request_id': request_id,
             'body': filtered_tickets_list,
@@ -161,7 +216,6 @@ class TestGetTicket:
         }
         param_copy = msg['body'].copy()
         del [param_copy['ticket_status']]
-        param_copy['ticket_id'] = ''
         response_to_publish_in_topic = {
             'request_id': request_id,
             'body': filtered_tickets_list,

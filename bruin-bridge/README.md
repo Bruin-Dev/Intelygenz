@@ -58,7 +58,7 @@ https://app.bruin.com
 ### Description
 When the bruin bridge receives a request with a request message from topic `bruin.ticket.request` it makes a callback
 to function `get_all_tickets`.  The request message, contains all of the fields needed to filter the tickets and
-receive only relevant tickets. These fields include `ticket_id`, `client_id`,  `ticket_status`, and `category`. 
+receive only relevant tickets. These fields include `ticket_id`, `client_id`, `service_number`, `ticket_status`, and `category`. 
 Once all of the fields are extracted from the request message, a call to the bruin repository is made.
 
 In the bruin repository, it loops through the `ticket_status` field which should be a list. Each time it will make
@@ -69,13 +69,13 @@ function. If any of the tickets received from bruin client return `None` then th
 And with that list, we format it into a response message and publish it to the response topic that was built by NATS under
 the hood.
 
-
 ### Request message
 ```
 {
     "request_id": "kNxC7FxXpg5ApdgGaX7otC",  # UUID
     "body": {
         "ticket_id": 123,  # Optional
+        "service_number": "VC05400002265",  # Optional
         "client_id": 85940,
         "category": "SD-WAN",
         "ticket_topic": "VOO",

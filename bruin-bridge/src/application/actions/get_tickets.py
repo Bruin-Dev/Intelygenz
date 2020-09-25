@@ -32,16 +32,19 @@ class GetTicket:
 
         ticket_status = body['ticket_status']
 
-        ticket_id = ''
-        if 'ticket_id' in body.keys():
-            ticket_id = body['ticket_id']
-
         params = {
-            "ticket_id": ticket_id,
             "client_id": body["client_id"],
             "category": body["category"],
             "ticket_topic": body["ticket_topic"]
         }
+
+        ticket_id = body.get('ticket_id')
+        if ticket_id:
+            params['ticket_id'] = ticket_id
+
+        service_number = body.get('service_number')
+        if service_number:
+            params['service_number'] = service_number
 
         # Valid date format: datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         start_date = body.get("start_date")
