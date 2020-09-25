@@ -6,9 +6,7 @@ from application.repositories.bruin_repository import BruinRepository
 from application.actions.get_tickets import GetTicket
 from application.actions.get_ticket_details import GetTicketDetails
 from application.actions.get_ticket_overview import GetTicketOverview
-from application.actions.get_affecting_ticket_details_by_edge_serial import GetAffectingTicketDetailsByEdgeSerial
 from application.actions.get_next_results_for_ticket_detail import GetNextResultsForTicketDetail
-from application.actions.get_outage_ticket_details_by_edge_serial import GetOutageTicketDetailsByEdgeSerial
 from application.actions.get_ticket_task_history import GetTicketTaskHistory
 from application.actions.change_detail_work_queue import ChangeDetailWorkQueue
 from application.actions.get_management_status import GetManagementStatus
@@ -96,12 +94,6 @@ class Container:
         self._get_ticket_overview = GetTicketOverview(self._logger, config.BRUIN_CONFIG, self._event_bus,
                                                       self._bruin_repository)
         self._get_ticket_details = GetTicketDetails(self._logger, self._event_bus, self._bruin_repository)
-        self._get_affecting_ticket_details_by_edge_serial = GetAffectingTicketDetailsByEdgeSerial(
-            self._logger, self._event_bus, self._bruin_repository
-        )
-        self._get_outage_ticket_details_by_edge_serial = GetOutageTicketDetailsByEdgeSerial(
-            self._logger, self._event_bus, self._bruin_repository
-        )
         self._post_note = PostNote(self._logger, self._event_bus, self._bruin_repository)
         self._post_multiple_notes = PostMultipleNotes(self._logger, self._event_bus, self._bruin_repository)
         self._post_ticket = PostTicket(self._logger, self._event_bus, self._bruin_repository)
@@ -122,14 +114,6 @@ class Container:
                                                        is_async=True, logger=self._logger)
         self._action_get_ticket_overview = ActionWrapper(self._get_ticket_overview, "get_ticket_overview",
                                                          is_async=True, logger=self._logger)
-        self._action_get_affecting_ticket_detail_by_edge_serial = ActionWrapper(
-            self._get_affecting_ticket_details_by_edge_serial, "send_affecting_ticket_details_by_edge_serial",
-            is_async=True, logger=self._logger,
-        )
-        self._action_get_outage_ticket_detail_by_edge_serial = ActionWrapper(
-            self._get_outage_ticket_details_by_edge_serial, "send_outage_ticket_details_by_edge_serial",
-            is_async=True, logger=self._logger,
-        )
         self._action_post_note = ActionWrapper(self._post_note, "post_note",
                                                is_async=True, logger=self._logger)
         self._action_post_multiple_notes = ActionWrapper(self._post_multiple_notes, "post_multiple_notes",
@@ -174,14 +158,6 @@ class Container:
                                                  queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="ticket_overview", topic="bruin.ticket.overview.request",
                                                  action_wrapper=self._action_get_ticket_overview,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="affecting_ticket_details_by_edge_serial",
-                                                 topic="bruin.ticket.affecting.details.by_edge_serial.request",
-                                                 action_wrapper=self._action_get_affecting_ticket_detail_by_edge_serial,
-                                                 queue="bruin_bridge")
-        await self._event_bus.subscribe_consumer(consumer_name="outage_ticket_details_by_edge_serial",
-                                                 topic="bruin.ticket.outage.details.by_edge_serial.request",
-                                                 action_wrapper=self._action_get_outage_ticket_detail_by_edge_serial,
                                                  queue="bruin_bridge")
         await self._event_bus.subscribe_consumer(consumer_name="post_note", topic="bruin.ticket.note.append.request",
                                                  action_wrapper=self._action_post_note,

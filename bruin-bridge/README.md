@@ -121,38 +121,7 @@ and publish it to the response topic that was built by NATS under the hood.
     'status': 200
 }
 ```
-# Get Tickets Details by edge serial
-### Description
-When the bruin bridge receives a request with a request message from topic 
-`bruin.ticket.affecting.details.by_edge_serial.request` or  `bruin.ticket.outage.details.by_edge_serial.request`
-it makes a callback to either the function `send_affecting_ticket_details_by_edge_serial` or 
-`send_outage_ticket_details_by_edge_serial`.  From the request message we obtain the `edge_serial` and `client_id` 
-of the edge that we want the ticket details from. 
 
-Using that `edge_serial` and `client_id`  as a parameter we make a call to the bruin repository which calls to the bruin client to receive 
-a list of details pertaining to the associated `edge_serial` and `client_id` . Now that we have the list we format it into a response message 
-and publish it to the response topic that was built by NATS under the hood.
-
-
-### Request message
-```
-{
-    'request_id': 123,
-    'body': {
-             'client_id': 123,
-              'edge_serial': "VC0123"
-              'ticket_statuses':[List of statuses] //optional parameter for bruin.ticket.outage.details.by_edge_serial.request
-            }
-}
-```
-### Response message
-```
-{
-    'request_id': msg_dict['request_id'],
-    'body': List of ticket details,
-    'status': 200
-}
-```
 # Post notes to Ticket
 ### Description
 When the bruin bridge receives a request with a request message from topic `bruin.ticket.note.append.request` it makes a callback
