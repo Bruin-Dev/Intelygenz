@@ -198,8 +198,8 @@ class OutageMonitor:
                 return
 
             client_id = edge['cached_info']['bruin_client_info']['client_id']
-            outage_ticket_response = await self._bruin_repository.get_outage_ticket_details_by_service_number(
-                client_id, serial_number
+            outage_ticket_response = await self._bruin_repository.get_open_outage_tickets(
+                client_id, service_number=serial_number
             )
             outage_ticket_response_body = outage_ticket_response['body']
             outage_ticket_response_status = outage_ticket_response['status']
@@ -211,17 +211,18 @@ class OutageMonitor:
                                   f'Skipping autoresolve...')
                 return
 
-            outage_ticket_id = outage_ticket_response_body['ticketID']
-            outage_ticket_info = await self._bruin_repository.get_ticket_info(client_id, outage_ticket_id)
-            if not outage_ticket_info:
-                self._logger.error(f"Can't get creation date for outage ticket {outage_ticket_id}. "
-                                   f"Can't proceed with autoresolve")
+            outage_ticket: dict = outage_ticket_response_body[0]
+            if not self._can_autoresolve_ticket_by_age(outage_ticket):
                 return
 
-            if not self._can_autoresolve_ticket_by_age(outage_ticket_info):
+            outage_ticket_id = outage_ticket['ticketID']
+            ticket_details_response = await self._bruin_repository.get_ticket_details(outage_ticket_id)
+            ticket_details_response_body = ticket_details_response['body']
+            ticket_details_response_status = ticket_details_response['status']
+            if ticket_details_response_status not in range(200, 300):
                 return
 
-            notes_from_outage_ticket = outage_ticket_response_body['ticketNotes']
+            notes_from_outage_ticket = ticket_details_response_body['ticketNotes']
             can_ticket_be_autoresolved_one_more_time = self._outage_repository.is_outage_ticket_auto_resolvable(
                 notes_from_outage_ticket, max_autoresolves=3
             )
@@ -230,7 +231,7 @@ class OutageMonitor:
                                   f'{edge_identifier} has been maxed out already. Skipping autoresolve...')
                 return
 
-            details_from_ticket = outage_ticket_response_body['ticketDetails']
+            details_from_ticket = ticket_details_response_body['ticketDetails']
             detail_for_ticket_resolution = self._get_first_element_matching(
                 details_from_ticket,
                 lambda detail: detail['detailValue'] == serial_number,

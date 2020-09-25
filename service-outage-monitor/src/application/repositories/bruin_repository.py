@@ -15,46 +15,8 @@ class BruinRepository:
         self._config = config
         self._notifications_repository = notifications_repository
 
-    async def get_ticket_info(self, client_id, ticket_id):
-        try:
-            self._logger.info(
-                f'Getting ticket info for app.bruin.com/t/{ticket_id} that belongs to client: {client_id}')
-            request_msg = {
-                "request_id": uuid(),
-                "body": {"client_id": client_id,
-                         "category": "SD-WAN",
-                         "ticket_topic": "VOO",
-                         "ticket_status": ['New', 'InProgress', 'Draft'],
-                         "ticket_id": ticket_id
-                         }
-            }
-            response = await self._event_bus.rpc_request("bruin.ticket.request", request_msg, timeout=60)
-            response_body = response['body']
-            response_status = response['status']
-
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f'[service-outage-monitor]Error trying to get ticket info for ticket {ticket_id} '
-                    f'that belongs to customer: {client_id}. Response: {response_body}'
-                )
-                self._logger.error(err_msg)
-                await self._notifications_repository.send_slack_message(err_msg)
-                return None
-
-            if response_body:
-                self._logger.info(f'Got ticket info for {ticket_id} (client {client_id}): {response_body[0]}')
-                return response_body[0]
-
-            self._logger.info(f'Could not claim any info for {ticket_id} (client {client_id})')
-            return None
-        except Exception as e:
-            err_msg = (f'[service-outage-monitor]Error trying to get ticket info for ticket {ticket_id} '
-                       f'that belongs to customer: {client_id}. Error: {e}')
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
-            return None
-
-    async def get_tickets(self, client_id: int, ticket_topic: str, ticket_statuses: list):
+    async def get_tickets(self, client_id: int, ticket_topic: str, ticket_statuses: list, *,
+                          service_number: str = None):
         err_msg = None
 
         request = {
@@ -67,16 +29,22 @@ class BruinRepository:
             },
         }
 
+        if service_number:
+            request['body']['service_number'] = service_number
+
         try:
-            self._logger.info(
-                f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
-                f'{ticket_topic} and belonging to client {client_id} from Bruin...'
-            )
+            if not service_number:
+                self._logger.info(
+                    f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
+                    f'{ticket_topic} and belonging to client {client_id} from Bruin...'
+                )
+            else:
+                self._logger.info(
+                    f'Getting all tickets with any status of {ticket_statuses}, with ticket topic '
+                    f'{ticket_topic}, service number {service_number} and belonging to client {client_id} from Bruin...'
+                )
+
             response = await self._event_bus.rpc_request("bruin.ticket.request", request, timeout=90)
-            self._logger.info(
-                f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
-                f'{ticket_topic} and belonging to client {client_id} from Bruin!'
-            )
         except Exception as e:
             err_msg = (
                 f'An error occurred when requesting tickets from Bruin API with any status of {ticket_statuses}, '
@@ -87,13 +55,33 @@ class BruinRepository:
             response_body = response['body']
             response_status = response['status']
 
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
-                    f'{ticket_topic} and belonging to client {client_id} in '
-                    f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
-                    f'Error {response_status} - {response_body}'
-                )
+            if response_status in range(200, 300):
+                if not service_number:
+                    self._logger.info(
+                        f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic} and belonging to client {client_id} from Bruin!'
+                    )
+                else:
+                    self._logger.info(
+                        f'Got all tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic}, service number {service_number} and belonging to client '
+                        f'{client_id} from Bruin!'
+                    )
+            else:
+                if not service_number:
+                    err_msg = (
+                        f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic} and belonging to client {client_id} in '
+                        f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                        f'Error {response_status} - {response_body}'
+                    )
+                else:
+                    err_msg = (
+                        f'Error while retrieving tickets with any status of {ticket_statuses}, with ticket topic '
+                        f'{ticket_topic}, service number {service_number} and belonging to client {client_id} in '
+                        f'{self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
+                        f'Error {response_status} - {response_body}'
+                    )
 
         if err_msg:
             self._logger.error(err_msg)
@@ -258,57 +246,6 @@ class BruinRepository:
 
         return response
 
-    async def get_outage_ticket_details_by_service_number(self, client_id: int, service_number: str,
-                                                          ticket_status_filter: list = None):
-        err_msg = None
-
-        request = {
-            'request_id': uuid(),
-            'body': {
-                "client_id": client_id,
-                "edge_serial": service_number,
-                "ticket_statuses": ticket_status_filter,
-            },
-        }
-
-        try:
-            if not ticket_status_filter:
-                self._logger.info(
-                    f'Claiming outage ticket details for service number {service_number} and client {client_id} '
-                    'applying no ticket status filters...'
-                )
-            else:
-                self._logger.info(
-                    f'Claiming outage ticket details for service number {service_number} and client {client_id} '
-                    f'applying ticket status filters {ticket_status_filter}...'
-                )
-
-            response = await self._event_bus.rpc_request("bruin.ticket.outage.details.by_edge_serial.request",
-                                                         request, timeout=180)
-            self._logger.info(f'Got outage ticket details for service number {service_number} and client {client_id}!')
-        except Exception as e:
-            err_msg = (
-                f'An error occurred when claiming outage ticket details for service number {service_number} and '
-                f'client {client_id} -> {e}'
-            )
-            response = nats_error_response
-        else:
-            response_body = response['body']
-            response_status = response['status']
-
-            if response_status not in range(200, 300):
-                err_msg = (
-                    f'Error while claiming outage ticket details for service number {service_number} and '
-                    f'client {client_id} in {self._config.TRIAGE_CONFIG["environment"].upper()} environment: '
-                    f'Error {response_status} - {response_body}'
-                )
-
-        if err_msg:
-            self._logger.error(err_msg)
-            await self._notifications_repository.send_slack_message(err_msg)
-
-        return response
-
     async def resolve_ticket(self, ticket_id: int, detail_id: int):
         err_msg = None
 
@@ -438,16 +375,15 @@ class BruinRepository:
 
         return await self.append_note_to_ticket(ticket_id, reopening_note)
 
-    async def get_outage_tickets(self, client_id: int, ticket_statuses: list):
+    async def get_outage_tickets(self, client_id: int, ticket_statuses: list, *, service_number: str = None):
         ticket_topic = 'VOO'
 
-        return await self.get_tickets(client_id, ticket_topic, ticket_statuses)
+        return await self.get_tickets(client_id, ticket_topic, ticket_statuses, service_number=service_number)
 
-    async def get_open_outage_tickets(self, client_id: int):
-        ticket_topic = 'VOO'
+    async def get_open_outage_tickets(self, client_id: int, *, service_number: str = None):
         ticket_statuses = ['New', 'InProgress', 'Draft']
 
-        return await self.get_tickets(client_id, ticket_topic, ticket_statuses)
+        return await self.get_outage_tickets(client_id, ticket_statuses, service_number=service_number)
 
     @staticmethod
     def is_management_status_active(management_status: str):
