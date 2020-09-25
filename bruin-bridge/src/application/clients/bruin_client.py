@@ -213,7 +213,7 @@ class BruinClient:
 
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin, re-login and retrying posting ticket note")
-                self.login()
+                await self.login()
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
@@ -278,7 +278,7 @@ class BruinClient:
 
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin, re-login and retrying posting several ticket notes")
-                self.login()
+                await self.login()
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
@@ -338,7 +338,7 @@ class BruinClient:
 
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin, re-login and retrying posting ticket")
-                self.login()
+                await self.login()
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
@@ -397,7 +397,7 @@ class BruinClient:
 
             if response.status == 401:
                 self._logger.error(f"Got 401 from Bruin, re-login and retrying updating ticket status")
-                self.login()
+                await self.login()
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
@@ -462,7 +462,7 @@ class BruinClient:
 
             if response.status == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying get management status")
-                self.login()
+                await self.login()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
@@ -555,7 +555,7 @@ class BruinClient:
                     "Got HTTP 401 from Bruin. Re-login and trying to post outage ticket again with payload "
                     f"{json.dumps(payload)}"
                 )
-                self.login()
+                await self.login()
                 return_response["body"] = "Maximum retries reached while re-login"
                 return_response["status"] = status_code
                 raise Exception(return_response)
@@ -627,8 +627,7 @@ class BruinClient:
 
             if response.status == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying")
-                self.login()
-
+                await self.login()
                 return_response["body"] = f"Got Unauthorized from Bruin"
                 return_response["status"] = 401
                 raise Exception(return_response)
@@ -671,7 +670,7 @@ class BruinClient:
 
             if response.status == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying get management status")
-                self.login()
+                await self.login()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
@@ -717,7 +716,7 @@ class BruinClient:
 
             if response.status == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying get management status")
-                self.login()
+                await self.login()
                 return_response["body"] = f"Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)
@@ -768,7 +767,7 @@ class BruinClient:
 
             if response.status == 401:
                 self._logger.info(f"Got 401 from Bruin, re-login and retrying get ticket current task")
-                self.login()
+                await self.login()
                 return_response["body"] = "Maximum retries while relogin"
                 return_response["status"] = 401
                 raise Exception(return_response)

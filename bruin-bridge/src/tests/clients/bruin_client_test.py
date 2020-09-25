@@ -271,7 +271,7 @@ class TestBruinClient:
 
         with patch.object(bruin_client._session, 'get', new=CoroutineMock(return_value=response_mock)):
             ticket_details = await bruin_client.get_ticket_details(ticket_id)
-            bruin_client.login.assert_called()
+            bruin_client.login.assert_awaited()
             logger.error.assert_called()
 
             assert ticket_details['body'] == "Maximum retries while relogin"
@@ -405,7 +405,7 @@ class TestBruinClient:
         with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
             post_response = await bruin_client.post_ticket_note(ticket_id, note_contents)
 
-            bruin_client.login.assert_called()
+            bruin_client.login.assert_awaited()
             logger.error.assert_called()
 
             assert post_response["body"] == "Maximum retries while relogin"
@@ -543,7 +543,7 @@ class TestBruinClient:
         with patch.object(bruin_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
             post_ticket = await bruin_client.post_ticket(payload)
             logger.error.assert_called()
-            bruin_client.login.assert_called()
+            bruin_client.login.assert_awaited()
             assert post_ticket["body"] == "Maximum retries while relogin"
             assert post_ticket["status"] == 401
 
@@ -686,7 +686,7 @@ class TestBruinClient:
             update_ticket_status = await bruin_client.update_ticket_status(ticket_id, detail_id, ticket_status)
 
             logger.error.assert_called()
-            bruin_client.login.assert_called()
+            bruin_client.login.assert_awaited()
 
             assert update_ticket_status["body"] == "Maximum retries while relogin"
             assert update_ticket_status["status"] == 401
@@ -848,7 +848,7 @@ class TestBruinClient:
                     ssl=False
                 )
                 self.assertRaises(Exception, await bruin_client.get_management_status)
-                bruin_client.login.assert_called()
+                bruin_client.login.assert_awaited()
 
     @pytest.mark.asyncio
     async def get_management_status_with_ko_400_test(self):
@@ -1126,7 +1126,7 @@ class TestBruinClient:
                     ssl=False
                 )
                 self.assertRaises(Exception, bruin_client.get_possible_detail_next_result)
-                bruin_client.login.assert_called()
+                bruin_client.login.assert_awaited()
 
     @pytest.mark.asyncio
     async def get_possible_detail_next_result_500_test(self):
@@ -1161,7 +1161,7 @@ class TestBruinClient:
                     ssl=False
                 )
                 self.assertRaises(Exception, bruin_client.get_possible_detail_next_result)
-                bruin_client.login.assert_called()
+                bruin_client.login.assert_awaited()
 
     @pytest.mark.asyncio
     async def change_work_queue_200_test(self):
@@ -1299,7 +1299,7 @@ class TestBruinClient:
                     ssl=False
                 )
                 self.assertRaises(Exception, bruin_client.change_detail_work_queue)
-                bruin_client.login.assert_called()
+                bruin_client.login.assert_awaited()
 
     @pytest.mark.asyncio
     async def change_work_queue_500_test(self):
@@ -1337,7 +1337,7 @@ class TestBruinClient:
                     ssl=False
                 )
                 self.assertRaises(Exception, bruin_client.change_detail_work_queue)
-                bruin_client.login.assert_called()
+                bruin_client.login.assert_awaited()
 
 
 class TestPostOutageTicket:
@@ -1606,7 +1606,7 @@ class TestPostOutageTicket:
             )
             assert post_outage_ticket_call in bruin_client._session.post.mock_calls
 
-        bruin_client.login.assert_called()
+        bruin_client.login.assert_awaited()
 
         expected = {
             "body": "Maximum retries reached while re-login",
@@ -1942,7 +1942,7 @@ class TestGetClientInfo:
                     ssl=False
                 )
                 self.assertRaises(Exception, bruin_client.get_client_info)
-                bruin_client.login.assert_called()
+                bruin_client.login.assert_awaited()
 
     @pytest.mark.asyncio
     async def get_client_info_with_ko_5XX_test(self):
