@@ -23,9 +23,9 @@ MONITOR_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
     "latency_wireless": 120,
-    "latency_wired": 50,
+    "latency_wired": 120,
     "packet_loss_wireless": 8,
-    "packet_loss_wired": 5,
+    "packet_loss_wired": 8,
     "jitter": 30,
     'monitoring_minutes': 10,
     "management_status_filter": {
