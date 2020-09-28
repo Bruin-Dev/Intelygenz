@@ -21,9 +21,6 @@ BRUIN_CONFIG = {
     'client_id': os.environ["BRUIN_CLIENT_ID"],
     'client_secret': os.environ["BRUIN_CLIENT_SECRET"],
     'login_url': os.environ["BRUIN_LOGIN_URL"],
-    'multiplier': 5,
-    'min': 5,
-    'stop_delay': 18000
 }
 
 ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')

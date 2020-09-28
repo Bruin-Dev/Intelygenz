@@ -22,9 +22,6 @@ BRUIN_CONFIG = {
     'client_id': "client_id",
     'client_secret': "client_secret",
     'login_url': "some.login.url",
-    'multiplier': 0.1,
-    'min': 0,
-    'stop_delay': 0.4
 }
 
 LOG_CONFIG = {

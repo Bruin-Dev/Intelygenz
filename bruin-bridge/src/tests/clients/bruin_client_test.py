@@ -144,7 +144,7 @@ class TestBruinClient:
             tickets = await bruin_client.get_all_tickets(params)
             logger.error.assert_called()
 
-            assert tickets['body'] == f"Maximum retries while relogin"
+            assert tickets['body'] == "Got 401 from Bruin"
             assert tickets['status'] == 401
 
     @pytest.mark.asyncio
@@ -274,7 +274,7 @@ class TestBruinClient:
             bruin_client.login.assert_awaited()
             logger.error.assert_called()
 
-            assert ticket_details['body'] == "Maximum retries while relogin"
+            assert ticket_details['body'] == "Got 401 from Bruin"
             assert ticket_details['status'] == 401
 
     @pytest.mark.asyncio
@@ -408,7 +408,7 @@ class TestBruinClient:
             bruin_client.login.assert_awaited()
             logger.error.assert_called()
 
-            assert post_response["body"] == "Maximum retries while relogin"
+            assert post_response["body"] == "Got 401 from Bruin"
             assert post_response["status"] == 401
 
     @pytest.mark.asyncio
@@ -544,7 +544,7 @@ class TestBruinClient:
             post_ticket = await bruin_client.post_ticket(payload)
             logger.error.assert_called()
             bruin_client.login.assert_awaited()
-            assert post_ticket["body"] == "Maximum retries while relogin"
+            assert post_ticket["body"] == "Got 401 from Bruin"
             assert post_ticket["status"] == 401
 
     @pytest.mark.asyncio
@@ -688,7 +688,7 @@ class TestBruinClient:
             logger.error.assert_called()
             bruin_client.login.assert_awaited()
 
-            assert update_ticket_status["body"] == "Maximum retries while relogin"
+            assert update_ticket_status["body"] == "Got 401 from Bruin"
             assert update_ticket_status["status"] == 401
 
     @pytest.mark.asyncio
@@ -1609,7 +1609,7 @@ class TestPostOutageTicket:
         bruin_client.login.assert_awaited()
 
         expected = {
-            "body": "Maximum retries reached while re-login",
+            "body": "Got 401 from Bruin",
             "status": bruin_response_status,
         }
         assert result == expected
@@ -2161,7 +2161,7 @@ class TestPostMultipleTicketNotes:
             ],
         }
 
-        bruin_response_body = 'Maximum retries while relogin'
+        bruin_response_body = "Got 401 from Bruin"
         bruin_response_status = 401
 
         bruin_response = Mock()
@@ -2383,7 +2383,7 @@ class TestPostMultipleTicketNotes:
         ticket_id = 12345
         filter = {'ticket_id': ticket_id}
 
-        bruin_response_body = f"Maximum retries while relogin"
+        bruin_response_body = "Got 401 from Bruin"
         bruin_response_status = 401
 
         bruin_response = Mock()
