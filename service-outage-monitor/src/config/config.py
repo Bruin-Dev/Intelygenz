@@ -57,7 +57,7 @@ MONITOR_CONFIG = {
     'environment': os.environ["CURRENT_ENVIRONMENT"],
     'timezone': 'US/Eastern',
     'jobs_intervals': {
-        'outage_monitor': 60 * 3,
+        'outage_monitor': 60 * 10,
         'quarantine': quarantine_time,
         'build_cache': 60 * 240
     },
