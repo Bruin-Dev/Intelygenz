@@ -122,7 +122,7 @@
           fi
           terraform plan && terraform apply -auto-approve
           if [ "$i" == "1-create-eks-cluster/" ]; then
-            export AWS_EFS_ID=$(terraform output efs_filesystem_id)
+            terraform output efs_filesystem_id > /tmp/efs_filesystem_id.txt
           fi
           cd ..
         )
@@ -142,13 +142,8 @@
     - helm upgrade --install --set controller.service.loadBalancerSourceRanges="{$LOAD_BALANCER_WHITELIST}" --namespace kube-system --version ${NGINX_INGRESS_CHART_V} nginx-ingress
         stable/nginx-ingress --values helm/kre/ingress-values.yaml
     - /bin/bash ci-utils/route53/update_route53_elb_alias.sh ${KRE_RECORD_ALIAS_NAME} ${HOSTED_ZONE_NAME} -u
-    # EFS STORAGE
-    - echo "AWS_EFS_ID is ${AWS_EFS_ID}"
-    - helm upgrade --install --set efsProvisioner.efsFileSystemId="${AWS_EFS_ID}" --namespace kube-system
-      --set efsProvisioner.awsRegion=${AWS_REGION} --set efsProvisioner.storageClass.name=mettel-automation-kre-storage
-      --version ${EFS_FILESYSTEM_CHART_V} efs-provisioner stable/efs-provisioner
     # HOSTPATH PROVISIONER
-    - helm upgrade --install --version ${HOSTPATH_CHART_V} hostpath-provisioner --namespace kube-system rimusz/hostpath-provisioner
+    - helm upgrade --install --version ${HOSTPATH_CHART_V} --set NodeHostPath="/mnt/efs/${EKS_CLUSTER_NAME}" hostpath-provisioner --namespace kube-system rimusz/hostpath-provisioner
     # INSTALL KUBE2IAM
     - helm upgrade --install --namespace kube-system --values helm/kre/kube2iam-values.yml --version ${KUBE2IAM_CHART_V} kube2iam stable/kube2iam
     # INSTALL CERT-MANAGER

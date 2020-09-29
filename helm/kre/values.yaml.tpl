@@ -1,8 +1,8 @@
 config:
   smtp:
     enabled: true
-    sender: ${SMTP_USER_EMAIL}
-    senderName: kre
+    sender: ${SMTP_USER_EMAIL_SENDER}
+    senderName: kre-mettel-automation
     user: ${AWS_USERNAME_SES_KRE}
     pass: ${AWS_SES_KRE_SMTP_PASSWORD}
     host: ${SMTP_HOST_URL_KRE}
@@ -13,7 +13,7 @@ config:
     frontendBaseURL: https://admin.${BASE_DOMAIN_URL}
     # IMPORTANT: userEmail is used as the system admin user.
     # Use this for first login and create new users.
-    userEmail: ${SMTP_USER_EMAIL}
+    userEmail: ${SMTP_ADMIN_USER_EMAIL}
   runtime:
     sharedStorageClass: hostpath
     # Uncomment this if you use a big dataset
@@ -57,7 +57,6 @@ adminUI:
   host: admin.${BASE_DOMAIN_URL}
 
 mongodb:
-  mongodbDatabase: "${MONGODB_DATABASE}"
   mongodbUsername: "${MONGODB_USERNAME}"
   mongodbPassword: "${MONGODB_PASSWORD}"
   rootCredentials:

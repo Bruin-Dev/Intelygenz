@@ -8,6 +8,8 @@ variable "igz_users_email" {
 //    "juancarlos.gomez@intelygenz.com",
 //    "julia.hossu@intelygenz.com",
 //    "sancho.munoz@intelygenz.com",
+    "mettel@intelygenz.com",
+    "francisco.capllonch@intelygenz.com",
     "xoan.mallon@intelygenz.com"
   ]
 }

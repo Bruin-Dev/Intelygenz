@@ -249,7 +249,7 @@ deploy-kre-dev:
     HOSTPATH_CHART_V: 0.2.9
     KUBE2IAM_CHART_V: 2.5.1
     CERT_MANAGER_CHART_V: 0.15.0
-    LOAD_BALANCER_WHITELIST: "18.211.9.147/32, 3.222.14.80/32, 52.51.50.68/32, 85.58.149.25/32"
+    LOAD_BALANCER_WHITELIST: "18.211.9.147/32, 3.222.14.80/32, 52.51.50.68/32, 85.58.149.25/32, 46.27.217.76/32"
   before_script:
     - export TF_VAR_CURRENT_ENVIRONMENT=dev
   rules:
@@ -258,7 +258,6 @@ deploy-kre-dev:
     - if: $CI_COMMIT_BRANCH =~ /^dev\/(feature|fix)\/.+$/
       when: manual
       allow_failure: true
-
 
 # ===============================================
 # Terraform destroy jobs for infra-as-code module
