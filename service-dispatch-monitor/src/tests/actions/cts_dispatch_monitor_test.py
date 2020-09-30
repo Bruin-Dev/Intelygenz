@@ -1970,10 +1970,10 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -2127,18 +2127,18 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1
         ]
 
         responses_append_confirmed_notes_mock = [
@@ -2335,10 +2335,10 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1
         ]
 
         responses_send_slack_message_mock = [
@@ -2474,18 +2474,18 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 + 1
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 + 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -2593,18 +2593,18 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_12 * 1.0 - 1
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_12 * 1.0 - 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -2723,14 +2723,14 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -2866,14 +2866,14 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1
         ]
 
         responses_send_slack_message_mock = [
@@ -2978,14 +2978,14 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -3128,14 +3128,14 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1
         ]
 
         responses_send_slack_message_mock = [
@@ -3240,18 +3240,18 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
         ]
 
         responses_send_slack_message_mock = [
@@ -3346,18 +3346,18 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
         ]
 
         responses_send_slack_message_mock = [
@@ -3456,16 +3456,16 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1
         ]
 
         responses_send_tech_12_sms_mock = [
@@ -3577,14 +3577,14 @@ class TestCtsDispatchMonitor:
 
         # First not skipped, Second skipped
         responses_get_diff_hours = [
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor.HOURS_2 * 1.0 + 1
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1
         ]
 
         responses_send_tech_12_sms_mock = [

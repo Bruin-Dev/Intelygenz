@@ -1,3 +1,4 @@
+from datetime import datetime
 import phonenumbers
 import iso8601
 import pytz
@@ -18,6 +19,12 @@ from application.templates.cts.sms.dispatch_confirmed import cts_get_dispatch_co
 from application.templates.cts.sms.tech_on_site import cts_get_tech_on_site_sms
 from application.templates.cts.sms.updated_tech import cts_get_updated_tech_sms, cts_get_updated_tech_sms_tech
 
+from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_x_hours_before_sms_note
+from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_x_hours_before_sms_tech_note
+from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_x_hours_before_sms_tech
+from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_x_hours_before_sms
+
+
 from application.repositories import nats_error_response
 from application.repositories.utils_repository import UtilsRepository
 
@@ -37,6 +44,10 @@ class CtsRepository:
         self.IGZ_DN_WATERMARK = 'IGZ'
         self.DISPATCH_REQUESTED_WATERMARK = 'Dispatch Management - Dispatch Requested'
 
+        self.HOURS_12 = 12.0
+        self.HOURS_6 = 6.0
+        self.HOURS_2 = 2.0
+
         # Dispatch Statuses
         self.DISPATCH_REQUESTED = 'Open'
         self.DISPATCH_CONFIRMED = 'Scheduled'
@@ -55,6 +66,46 @@ class CtsRepository:
             self.DISPATCH_REPAIR_COMPLETED,
             self.DISPATCH_REPAIR_COMPLETED_PENDING_COLLATERAL,
             self.DISPATCH_CANCELLED
+        ]
+
+        # Reminders
+        self.TECH_12_HOURS_BEFORE_SMS_WATERMARK = 'Dispatch 12h prior reminder SMS'
+        self.TECH_12_HOURS_BEFORE_SMS_TECH_WATERMARK = 'Dispatch 12h prior reminder tech SMS'
+        self.TECH_6_HOURS_BEFORE_SMS_WATERMARK = 'Dispatch 6h prior reminder SMS'
+        self.TECH_6_HOURS_BEFORE_SMS_TECH_WATERMARK = 'Dispatch 6h prior reminder tech SMS'
+        self.TECH_2_HOURS_BEFORE_SMS_WATERMARK = 'Dispatch 2h prior reminder SMS'
+        self.TECH_2_HOURS_BEFORE_SMS_TECH_WATERMARK = 'Dispatch 2h prior reminder tech SMS'
+        self._reminders = [
+            {
+                "hour": self.HOURS_12,
+                "type": "client",
+                "watermark": self.TECH_12_HOURS_BEFORE_SMS_WATERMARK
+            },
+            {
+                "hour": self.HOURS_12,
+                "type": "tech",
+                "watermark": self.TECH_12_HOURS_BEFORE_SMS_TECH_WATERMARK
+            },
+            {
+                "hour": self.HOURS_6,
+                "type": "client",
+                "watermark": self.TECH_6_HOURS_BEFORE_SMS_WATERMARK
+            },
+            {
+                "hour": self.HOURS_6,
+                "type": "tech",
+                "watermark": self.TECH_6_HOURS_BEFORE_SMS_TECH_WATERMARK
+            },
+            {
+                "hour": self.HOURS_2,
+                "type": "client",
+                "watermark": self.TECH_2_HOURS_BEFORE_SMS_WATERMARK
+            },
+            {
+                "hour": self.HOURS_2,
+                "type": "tech",
+                "watermark": self.TECH_2_HOURS_BEFORE_SMS_TECH_WATERMARK
+            }
         ]
 
     async def get_all_dispatches(self):
@@ -723,3 +774,85 @@ class CtsRepository:
                           f"- Converted: {response}")
 
         return response
+
+    async def check_reminders(self, dispatch, igz_dispatch_number, filtered_ticket_notes,
+                              date_time_of_dispatch_localized, datetime_formatted_str, sms_to, sms_to_tech):
+        dispatch_number = dispatch.get('Name', None)
+        ticket_id = dispatch.get('Ext_Ref_Num__c', None)
+        self._logger.info("[service-dispatch-monitor] [CTS] Checking reminders")
+
+        for reminder in self._reminders:
+            current_hour = reminder['hour']
+            pre_log = f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} - IGZ: {igz_dispatch_number} - " \
+                      f"Reminder {int(current_hour)} hours for {reminder['type']}"
+            try:
+                self._logger.info(pre_log)
+
+                reminder_note_found = UtilsRepository.find_note(filtered_ticket_notes, reminder['watermark'])
+                if reminder_note_found:
+                    self._logger.info(f"{pre_log} - Has already the reminder note")
+                    continue
+                self._logger.info(f"{pre_log} - Dispatch has no notes for this reminder, "
+                                  f"checking if it is needed to send sms and note")
+
+                just_now = datetime.now(pytz.utc)
+                hours_diff = UtilsRepository.get_diff_hours_between_datetimes(just_now, date_time_of_dispatch_localized)
+
+                should_send = UtilsRepository.in_range(hours_diff, current_hour - 1, current_hour)
+                self._logger.info(f"{pre_log} - UTC - dt: {date_time_of_dispatch_localized} - "
+                                  f"now: {just_now} - diff: {hours_diff}")
+                if not should_send:
+                    self._logger.info(f"{pre_log} - SMS note not needed to send now")
+                    continue
+
+                self._logger.info(f"{pre_log} - Sending SMS and appending note")
+
+                if reminder['type'] == 'client':
+                    current_sms_to = sms_to
+                    sms_data_payload = {
+                        'date_of_dispatch': datetime_formatted_str,
+                        'phone_number': current_sms_to,
+                        'hours': int(current_hour)
+                    }
+                    sms_data = cts_get_tech_x_hours_before_sms(sms_data_payload)
+                else:
+                    current_sms_to = sms_to_tech
+                    sms_data_payload = {
+                        'date_of_dispatch': datetime_formatted_str,
+                        'phone_number': current_sms_to,
+                        'site': dispatch.get('Lookup_Location_Owner__c'),
+                        'street': dispatch.get('Street__c'),
+                        'hours': int(current_hour)
+                    }
+                    sms_data = cts_get_tech_x_hours_before_sms_tech(sms_data_payload)
+
+                sms_payload = {
+                    'sms_to': sms_to.replace('+', ''),
+                    'sms_data': sms_data
+                }
+                result_sms_sended = await self.send_sms(
+                    dispatch_number, ticket_id, current_sms_to, current_hour, sms_data_payload, sms_payload)
+                if not result_sms_sended:
+                    msg = f"[service-dispatch-monitor] [CTS] " \
+                          f"{pre_log} - SMS {current_hour}h not sended"
+                else:
+                    sms_note_data = {
+                        'dispatch_number': igz_dispatch_number,
+                        'phone_number': current_sms_to,
+                        'hours': int(current_hour)
+                    }
+                    if reminder['type'] == 'client':
+                        sms_note = cts_get_tech_x_hours_before_sms_note(sms_note_data)
+                    else:
+                        sms_note = cts_get_tech_x_hours_before_sms_tech_note(sms_note_data)
+
+                    result_append_sms_note = await self.append_note(
+                        dispatch_number, igz_dispatch_number, ticket_id, current_sms_to, current_hour, sms_note)
+                    if not result_append_sms_note:
+                        msg = f"[service-dispatch-monitor] [CTS] {pre_log} - A sms before note not appended"
+                    else:
+                        msg = f"[service-dispatch-monitor] [CTS] {pre_log} - A sms before note appended"
+                self._logger.info(msg)
+                await self._notifications_repository.send_slack_message(msg)
+            except Exception as ex:
+                self._logger.error(f"ERROR: {pre_log} --> {ex}")
