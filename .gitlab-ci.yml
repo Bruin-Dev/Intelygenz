@@ -4,6 +4,7 @@ stages:
   - basic_infra
   - build
   - deploy
+  - destroy
 
 variables:
   NATS_SERVER1: "nats://nats-server:4222"
@@ -47,7 +48,6 @@ include:
   - local: 'gitlab-ci/basic-templates/.gitlab-ci-unit_test-templates.yml'
   - local: 'gitlab-ci/basic-templates/.gitlab-ci-utils-templates.yml'
   - local: 'gitlab-ci/basic-templates/.gitlab-ci-validation-templates.yml'
-  - local: 'gitlab-ci/helm-templates/.gitlab-ci-helm-kre-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-basic-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-deploy-templates.yml'
   - local: 'gitlab-ci/terraform-templates/.gitlab-ci-terraform-destroy-templates.yml'

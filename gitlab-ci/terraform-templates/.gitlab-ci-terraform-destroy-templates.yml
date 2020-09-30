@@ -80,9 +80,10 @@
     - mv temp_data.tf ${MODULE}/1-create-eks-cluster/data.tf
     # INSTALL KUBE CONFIG
     - aws eks update-kubeconfig --name ${EKS_CLUSTER_NAME}
+    # DELETE KRE RECORD FOR NGINX INGRESS ELB
+    - /bin/bash ci-utils/route53/update_route53_elb_alias.sh ${KRE_RECORD_ALIAS_NAME} ${HOSTED_ZONE_NAME} -d
     # UNINSTALL INGRESS CONTROLLER
     - helm uninstall nginx-ingress -n kube-system
-    - /bin/bash ci-utils/route53/update_route53_elb_alias.sh ${KRE_RECORD_ALIAS_NAME} ${HOSTED_ZONE_NAME} -d
     - cd ${MODULE} || exit 1
     - >
       for i in $(ls -d */ | sort -r | cut -d " " -f10); do
@@ -98,3 +99,5 @@
           cd ..
         )
       done
+  tags:
+    - kubernetes

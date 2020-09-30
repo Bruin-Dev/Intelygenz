@@ -47,7 +47,7 @@
     - kubernetes
 
 .destroy_environment_aws_nuke_template: &destroy_environment_aws_nuke_template
-  stage: deploy
+  stage: destroy
   image: python:3.8.0-alpine3.10
   variables:
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID

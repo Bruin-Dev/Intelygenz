@@ -15,6 +15,8 @@ config:
     # Use this for first login and create new users.
     userEmail: ${SMTP_ADMIN_USER_EMAIL}
   runtime:
+    entrypoint:
+      tls: true
     sharedStorageClass: hostpath
     # Uncomment this if you use a big dataset
     sharedStorageSize: 10Gi

@@ -9,7 +9,7 @@ module "mettel-automation-eks-cluster" {
     {
       name = "worker_node"
       instance_type = local.worker_nodes_instance_type
-      asg_min_size  = 3
+      asg_min_size  = 4
       asg_max_size  = 5
       key_name = aws_key_pair.aws_key_pair.key_name
       userdata_template_file = local.eks-node-userdata

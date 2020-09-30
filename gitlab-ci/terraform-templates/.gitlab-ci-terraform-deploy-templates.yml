@@ -121,9 +121,6 @@
             terraform workspace new ${TF_VAR_CURRENT_ENVIRONMENT} || terraform workspace select ${TF_VAR_CURRENT_ENVIRONMENT}
           fi
           terraform plan && terraform apply -auto-approve
-          if [ "$i" == "1-create-eks-cluster/" ]; then
-            terraform output efs_filesystem_id > /tmp/efs_filesystem_id.txt
-          fi
           cd ..
         )
       done
@@ -148,16 +145,16 @@
     - helm upgrade --install --namespace kube-system --values helm/kre/kube2iam-values.yml --version ${KUBE2IAM_CHART_V} kube2iam stable/kube2iam
     # INSTALL CERT-MANAGER
     - kubectl create namespace cert-manager --dry-run -o yaml | kubectl apply -f -
-    - helm upgrade --install --namespace cert-manager --set installCRDs=true --version ${CERT_MANAGER_CHART_V} cert-manager jetstack/cert-manager
+    - helm upgrade --install --namespace cert-manager --set installCRDs=true --set extraArgs="{--cluster-resource-namespace=kre}" --version ${CERT_MANAGER_CHART_V} cert-manager jetstack/cert-manager
     # INSTALL KRE
     - kubectl create namespace kre --dry-run -o yaml | kubectl apply -f -
     - export HOSTED_ZONE_ID=$(aws route53 list-hosted-zones  | jq --arg HOSTED_ZONE_NAME $HOSTED_ZONE_NAME -r '.HostedZones | .[] | select(.Name==$HOSTED_ZONE_NAME) | .Id' |  cut -d "/" -f3)
     - envsubst < helm/kre/values.yaml.tpl > values.yaml
     - >
       if [ "$TF_VAR_CURRENT_ENVIRONMENT" == "dev" ]; then
-        helm upgrade --install kre --set certManager.acme.server="https://acme-staging-v02.api.letsencrypt.org/directory" --namespace kre --values values.yaml konstellation-io/kre
+        helm upgrade --install kre --set certManager.acme.server="https://acme-staging-v02.api.letsencrypt.org/directory" --namespace kre --values values.yaml --version ${KRE_CHART_V} konstellation-io/kre
       else
-        helm upgrade --install kre --namespace kre --values values.yaml konstellation-io/kre
+        helm upgrade --install kre --namespace kre --values values.yaml --version ${KRE_CHART_V} konstellation-io/kre
       fi
   tags:
     - kubernetes

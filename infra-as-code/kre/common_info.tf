@@ -1,5 +1,5 @@
 # Global Tags
-## mettel-automation project
+## kre infrastructure for mettel-automation project
 variable "common_info" {
   type = map(string)
   default = {

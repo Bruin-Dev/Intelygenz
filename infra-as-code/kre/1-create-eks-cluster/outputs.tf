@@ -52,7 +52,3 @@ export AWS_EFS_ID="${aws_efs_file_system.efs_file_system.id}"
 export AWS_DEFAULT_REGION="${local.aws_default_region}"
 ENVSFILE
 }
-
-output "efs_filesystem_id" {
-  value = aws_efs_file_system.efs_file_system.id
-}
