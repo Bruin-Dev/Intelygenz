@@ -24,7 +24,6 @@ from application.templates.cts.cts_dispatch_confirmed import cts_get_tech_x_hour
 from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_x_hours_before_sms_tech
 from application.templates.cts.sms.dispatch_confirmed import cts_get_tech_x_hours_before_sms
 
-
 from application.repositories import nats_error_response
 from application.repositories.utils_repository import UtilsRepository
 
@@ -164,9 +163,8 @@ class CtsRepository:
     def get_sms_to_from_note(note):
         if not note:
             return None
-        description_lines = note.splitlines()
         sms_to = None
-        for line in description_lines:
+        for line in note.splitlines():
             if line and len(line) > 0 and 'Phone: ' in line:
                 sms_to = ''.join(ch for ch in line if ch.isdigit())
                 break
@@ -462,7 +460,7 @@ class CtsRepository:
             f"SMS tech sent Response {sms_response_body}")
         return True
 
-    async def append_note(self, dispatch_number, igz_dispatch_number, ticket_id, sms_to, current_hour, sms_note):
+    async def append_note(self, dispatch_number, ticket_id, current_hour, sms_note):
         append_sms_note_response = await self._bruin_repository.append_note_to_ticket(
             ticket_id, sms_note)
         append_sms_note_response_status = append_sms_note_response['status']
@@ -555,7 +553,7 @@ class CtsRepository:
                               f"Ticket_id: {ticket_id} - Tech SMS Confirmed note not appended")
             err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
                       f"- Tech SMS Confirmed note not appended"
-            # await self._notifications_repository.send_slack_message(err_msg)
+            await self._notifications_repository.send_slack_message(err_msg)
             return False
         self._logger.info(f"Note: `{sms_note}` "
                           f"Dispatch: {dispatch_number} "
@@ -667,9 +665,8 @@ class CtsRepository:
     @staticmethod
     def get_igz_dispatch_number(dispatch):
         description = dispatch.get('Description__c')
-        description_lines = description.splitlines()
         igz_dispatch_number = None
-        for line in description_lines:
+        for line in description.splitlines():
             if line and len(line) > 0 and 'IGZ Dispatch Number:' in line:
                 igz_dispatch_number = ''.join(ch for ch in line)
                 break
@@ -782,19 +779,12 @@ class CtsRepository:
         self._logger.info("[service-dispatch-monitor] [CTS] Checking reminders")
 
         for reminder in self._reminders:
-            current_hour = reminder['hour']
-            pre_log = f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} - IGZ: {igz_dispatch_number} - " \
-                      f"Reminder {int(current_hour)} hours for {reminder['type']}"
             try:
+                current_hour = reminder['hour']
+                pre_log = f"Dispatch [{dispatch_number}] in ticket_id: {ticket_id} - IGZ: {igz_dispatch_number} - " \
+                          f"Reminder {int(current_hour)} hours for {reminder['type']}"
+
                 self._logger.info(pre_log)
-
-                reminder_note_found = UtilsRepository.find_note(filtered_ticket_notes, reminder['watermark'])
-                if reminder_note_found:
-                    self._logger.info(f"{pre_log} - Has already the reminder note")
-                    continue
-                self._logger.info(f"{pre_log} - Dispatch has no notes for this reminder, "
-                                  f"checking if it is needed to send sms and note")
-
                 just_now = datetime.now(pytz.utc)
                 hours_diff = UtilsRepository.get_diff_hours_between_datetimes(just_now, date_time_of_dispatch_localized)
 
@@ -804,6 +794,13 @@ class CtsRepository:
                 if not should_send:
                     self._logger.info(f"{pre_log} - SMS note not needed to send now")
                     continue
+
+                reminder_note_found = UtilsRepository.find_note(filtered_ticket_notes, reminder['watermark'])
+                if reminder_note_found:
+                    self._logger.info(f"{pre_log} - Has already the reminder note")
+                    continue
+                self._logger.info(f"{pre_log} - Dispatch has no notes for this reminder, "
+                                  f"checking if it is needed to send sms and note")
 
                 self._logger.info(f"{pre_log} - Sending SMS and appending note")
 
@@ -847,7 +844,7 @@ class CtsRepository:
                         sms_note = cts_get_tech_x_hours_before_sms_tech_note(sms_note_data)
 
                     result_append_sms_note = await self.append_note(
-                        dispatch_number, igz_dispatch_number, ticket_id, current_sms_to, current_hour, sms_note)
+                        dispatch_number, ticket_id, current_hour, sms_note)
                     if not result_append_sms_note:
                         msg = f"[service-dispatch-monitor] [CTS] {pre_log} - A sms before note not appended"
                     else:

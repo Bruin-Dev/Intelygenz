@@ -2,6 +2,7 @@ import copy
 from datetime import datetime
 from unittest.mock import Mock
 from unittest.mock import patch
+from unittest.mock import call
 
 import iso8601
 import pytest
@@ -24,7 +25,6 @@ from application.templates.cts.sms.tech_on_site import cts_get_tech_on_site_sms
 
 from application.templates.cts.sms.updated_tech import cts_get_updated_tech_sms, cts_get_updated_tech_sms_tech
 from config import testconfig
-
 
 uuid_ = uuid()
 uuid_mock = patch.object(cts_repository_module, 'uuid', return_value=uuid_)
@@ -126,7 +126,7 @@ class TestCtsRepository:
         assert CtsRepository.get_sms_to(updated_dispatch) == expected_phone
 
     def get_sms_to_from_note_test(self):
-        note = "#*Automation Engine*# DIS57079\n" \
+        note = "#*Automation Engine*# IGZ57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -150,7 +150,7 @@ class TestCtsRepository:
         assert CtsRepository.get_sms_to_from_note(note) == expected_phone
 
     def get_sms_to_from_note_error_no_contact_test(self):
-        note = "#*Automation Engine*# DIS57079\n" \
+        note = "#*Automation Engine*# IGZ57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -174,7 +174,7 @@ class TestCtsRepository:
         assert CtsRepository.get_sms_to_from_note(note) == expected_phone
 
     def get_sms_to_from_note_error_number_test(self):
-        note = "#*Automation Engine*# DIS57079\n" \
+        note = "#*Automation Engine*# IGZ57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
                "Dispatch Number: " \
@@ -192,6 +192,29 @@ class TestCtsRepository:
                "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, " \
                "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n" \
                "Requester\nName: Holmdel  NOC\nPhone: 8775206829\n" \
+               "Email: holmdelnoc@mettel.net\n" \
+               "Department: Holmdel Network Engineering"
+        expected_phone = None
+        assert CtsRepository.get_sms_to_from_note(note) == expected_phone
+
+    def get_sms_to_from_note_error_not_phone_lines_test(self):
+        note = "#*Automation Engine*# IGZ57079\n" \
+               "Dispatch Management - Dispatch Requested\n\n" \
+               "Please see the summary below.\n--\n" \
+               "Dispatch Number: " \
+               "[DIS57079|https://master.mettel-automation.net/dispatch_portal/dispatch/DIS57079] \n" \
+               "Date of Dispatch: 2020-08-07\n" \
+               "Time of Dispatch (Local): 10.00AM\n" \
+               "Time Zone (Local): Eastern Time\n\n" \
+               "Location Owner/Name: Marine Max\n" \
+               "Location ID: 750 S Federal Hwy , Pompano Beach, Florida, 33062\n" \
+               "On-Site Contact: MOD manager\n" \
+               "Issues Experienced:\n" \
+               "Please check their Wifi Network and other equipment as per the customer\n" \
+               "Arrival Instructions: Please call HNOC and work with engineer\n" \
+               "Materials Needed:\nButt set, extra CAT5 cable, punch down tool, laptop with TeamViewer, " \
+               "multi-meter, crimper, DB9 console cable, Spare cable, Putty, wireless access\n\n" \
+               "Requester\nName: Holmdel  NOC\n" \
                "Email: holmdelnoc@mettel.net\n" \
                "Department: Holmdel Network Engineering"
         expected_phone = None
@@ -275,7 +298,7 @@ class TestCtsRepository:
         expected_phone = None
         assert CtsRepository.get_location(updated_dispatch) == expected_phone
 
-    def get_location_from_note_test(self):
+    def get_location_from_note_with_address_test(self):
         note = "#*Automation Engine*# DIS57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
@@ -304,7 +327,7 @@ class TestCtsRepository:
         expected = None
         assert CtsRepository.get_location_from_note(note) == expected
 
-    def get_location_from_note_test(self):
+    def get_location_from_note_with_address_test(self):
         note = "#*Automation Engine*# DIS57079\n" \
                "Dispatch Management - Dispatch Requested\n\n" \
                "Please see the summary below.\n--\n" \
@@ -530,7 +553,7 @@ class TestCtsRepository:
 
         cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
             ticket_id, sms_note)
-        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_not_awaited()
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
         assert response is False
 
     @pytest.mark.asyncio
@@ -1243,6 +1266,15 @@ class TestCtsRepository:
             updated_notes, cts_filtered_tickets_2, cts_dispatch_monitor.DISPATCH_UPDATED_TECH_WATERMARK
         )
         assert result == expected
+        expected = 'Berge, Keith'
+        cts_filtered_tickets_1[4]['noteValue'] = cts_filtered_tickets_1[4]['noteValue'].replace('Field Engineer',
+                                                                                                'The Field Engineer')
+        updated_notes = [cts_filtered_tickets_1[4]]
+
+        result = cts_dispatch_monitor._cts_repository.get_latest_tech_name_assigned_from_notes(
+            updated_notes, cts_filtered_tickets_1, cts_dispatch_monitor.DISPATCH_UPDATED_TECH_WATERMARK
+        )
+        assert result == expected
 
     def filter_ticket_notes_by_dispatch_number_test(self, cts_dispatch_monitor, cts_ticket_notes_with_2_dispatches):
         igz_id_2 = 'IGZWtpGZCJopULhsiUhbWjUYf'
@@ -1254,3 +1286,133 @@ class TestCtsRepository:
         result = cts_dispatch_monitor._cts_repository.filter_ticket_notes_by_dispatch_number(ticket_notes, igz_id_2)
         assert expected == result
         assert len(result) == 2
+
+    def get_igz_dispatch_number_ok_test(self, cts_dispatch_monitor, cts_dispatch):
+        dispatch_number = 'IGZ 1234'
+        cts_dispatch['Description__c'] = (f"IGZ Dispatch Number: {dispatch_number}\n{cts_dispatch['Description__c']}")
+
+        result = cts_dispatch_monitor._cts_repository.get_igz_dispatch_number(cts_dispatch)
+        assert dispatch_number == result
+
+    def get_igz_dispatch_number_not_id_test(self, cts_dispatch_monitor, cts_dispatch):
+        dispatch_number = None
+
+        result = cts_dispatch_monitor._cts_repository.get_igz_dispatch_number(cts_dispatch)
+        assert dispatch_number == result
+
+    @pytest.mark.asyncio
+    async def append_note_ok_test(self, cts_dispatch_monitor, cts_dispatch_confirmed):
+        ticket_id = '12345'
+        dispatch_number = cts_dispatch_confirmed.get('Dispatch_Number')
+        igz_dispatch_number = 'IGZ_0001'
+        sms_to = '+1987654327'
+        sms_note_data = {
+            'dispatch_number': igz_dispatch_number,
+            'phone_number': sms_to
+        }
+        response_append_note_to_ticket_mock = {
+            'body': '',
+            'status': 200
+        }
+        sms_note = cts_get_dispatch_confirmed_sms_note(sms_note_data)
+        date_of_dispatch = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
+            return_value=response_append_note_to_ticket_mock)
+        result = await cts_dispatch_monitor._cts_repository.append_note(dispatch_number, ticket_id, date_of_dispatch,
+                                                                        sms_note)
+        cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket.assert_awaited_once_with(
+            ticket_id, sms_note
+        )
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def append_note_ko_test(self, cts_dispatch_monitor, cts_dispatch_confirmed):
+        ticket_id = '12345'
+        dispatch_number = cts_dispatch_confirmed.get('Dispatch_Number')
+        igz_dispatch_number = 'IGZ_0001'
+        sms_to = '+1987654327'
+        sms_note_data = {
+            'dispatch_number': igz_dispatch_number,
+            'phone_number': sms_to
+        }
+        response_append_note_to_ticket_mock = {
+            'body': '',
+            'status': 400
+        }
+        sms_note = cts_get_dispatch_confirmed_sms_note(sms_note_data)
+        date_of_dispatch = cts_dispatch_confirmed.get('Local_Site_Time__c')
+        err_msg = f"Dispatch: {dispatch_number} Ticket_id: {ticket_id} Note: `{sms_note}` " \
+                  f"- SMS {date_of_dispatch} hours note not appended"
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        cts_dispatch_monitor._cts_repository._bruin_repository.append_note_to_ticket = CoroutineMock(
+            return_value=response_append_note_to_ticket_mock)
+        result = await cts_dispatch_monitor._cts_repository.append_note(dispatch_number, ticket_id, date_of_dispatch,
+                                                                        sms_note)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def filter_send_sms_ok_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, sms_success_response):
+        dispatch_number = cts_dispatch_confirmed['Name']
+        ticket_id = cts_dispatch_confirmed['Ext_Ref_Num__c']
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        sms_to = '+1987654327'
+        dispatch_datetime = '2020-03-16 16:00:00 PDT'
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'phone_number': sms_to,
+            'tech_name': tech_name
+        }
+        send_sms_response = {
+            'request_id': uuid_,
+            'body': sms_success_response,
+            'status': 200
+        }
+
+        sms_data = cts_get_dispatch_confirmed_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+        cts_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
+        result = await cts_dispatch_monitor._cts_repository.send_sms(dispatch_number, ticket_id, sms_to,
+                                                                     dispatch_datetime,
+                                                                     '', sms_payload)
+        cts_dispatch_monitor._notifications_repository.send_sms.assert_awaited_once_with(sms_payload)
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def filter_send_sms_ko_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, sms_success_response):
+        dispatch_number = cts_dispatch_confirmed['Name']
+        ticket_id = cts_dispatch_confirmed['Ext_Ref_Num__c']
+        tech_name = cts_dispatch_confirmed.get('API_Resource_Name__c')
+        sms_to = '+1987654327'
+        dispatch_datetime = '2020-03-16 16:00:00 PDT'
+        sms_data_payload = {
+            'date_of_dispatch': dispatch_datetime,
+            'phone_number': sms_to,
+            'tech_name': tech_name
+        }
+        send_sms_response = {
+            'request_id': uuid_,
+            'body': sms_success_response,
+            'status': 400
+        }
+
+        sms_data = cts_get_dispatch_confirmed_sms(sms_data_payload)
+
+        sms_payload = {
+            'sms_to': sms_to.replace('+', ''),
+            'sms_data': sms_data
+        }
+        err_msg = f"Dispatch: {dispatch_number} - Ticket_id: {ticket_id} - " \
+                  f'An error occurred when sending a tech {dispatch_datetime} hours SMS with notifier client. ' \
+                  f'payload: {sms_payload}'
+        cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock()
+        cts_dispatch_monitor._notifications_repository.send_sms = CoroutineMock(return_value=send_sms_response)
+        result = await cts_dispatch_monitor._cts_repository.send_sms(dispatch_number, ticket_id, sms_to,
+                                                                     dispatch_datetime,
+                                                                     '', sms_payload)
+        cts_dispatch_monitor._notifications_repository.send_slack_message.assert_awaited_once_with(err_msg)
+        assert result is False

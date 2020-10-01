@@ -18,7 +18,6 @@ from application.actions import cts_dispatch_monitor as cts_dispatch_monitor_mod
 from application.repositories.utils_repository import UtilsRepository
 from config import testconfig
 
-
 uuid_ = uuid()
 uuid_mock = patch.object(cts_dispatch_monitor_module, 'uuid', return_value=uuid_)
 
@@ -83,9 +82,9 @@ class TestCtsDispatchMonitor:
     def get_process_dispatch_test(self, cts_dispatch_monitor, cts_dispatch_confirmed, cts_dispatch_tech_on_site,
                                   cts_dispatch_cancelled):
         expected_processes = [
-            (cts_dispatch_monitor._process_confirmed_dispatch, cts_dispatch_confirmed, ),
-            (cts_dispatch_monitor._process_tech_on_site_dispatch, cts_dispatch_tech_on_site, ),
-            (cts_dispatch_monitor._process_canceled_dispatch, cts_dispatch_cancelled, )
+            (cts_dispatch_monitor._process_confirmed_dispatch, cts_dispatch_confirmed,),
+            (cts_dispatch_monitor._process_tech_on_site_dispatch, cts_dispatch_tech_on_site,),
+            (cts_dispatch_monitor._process_canceled_dispatch, cts_dispatch_cancelled,)
         ]
         for expected_process, dispatch in expected_processes:
             result = cts_dispatch_monitor._get_process_dispatch(dispatch)
@@ -177,11 +176,13 @@ class TestCtsDispatchMonitor:
             Mock(side_effect=[igz_dispatch_number_1, igz_dispatch_number_2, None, None])
 
         ticket_notes_1 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
+                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',
+                           # noqa
                            'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
                            'creator': None}]
         ticket_notes_2 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
+                           'noteValue': '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',
+                           # noqa
                            'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
                            'creator': None}]  # noqa
 
@@ -269,11 +270,13 @@ class TestCtsDispatchMonitor:
             Mock(side_effect=[igz_dispatch_number_1, None, igz_dispatch_number_2])
 
         ticket_notes_1 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
+                           'noteValue': '#*Automation Engine*# IGZ_0001\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0001|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0001] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',
+                           # noqa
                            'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
                            'creator': None}]
         ticket_notes_2 = [{'noteId': 70805300,
-                           'noteValue': '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',  # noqa
+                           'noteValue': '#*Automation Engine*# IGZ_0002\nDispatch Management - Dispatch Requested\n\nPlease see the summary below.\n--\nDispatch Number:  [IGZ_0002|https://master.mettel-automation.net/dispatch_portal/dispatch/IGZ_0002] \nDate of Dispatch: 2019-11-14\nTime of Dispatch (Local): 6PM-8PM\nTime Zone (Local): Pacific Time\n\nLocation Owner/Name: Red Rose Inn\nAddress: 123 Fake Street, Pleasantown, CA, 99088\nOn-Site Contact: Jane Doe\nPhone: +1 666 6666 666\n\nIssues Experienced:\nDevice is bouncing constantly TEST LUNES\nArrival Instructions: When arriving to the site call HOLMDEL NOC for telematic assistance\nMaterials Needed:\nLaptop, cable, tuner, ladder,internet hotspot\n\nRequester\nName: Karen Doe\nPhone: +1 666 6666 666\nEmail: karen.doe@mettel.net\nDepartment: Customer Care',
+                           # noqa
                            'serviceNumber': ['4664325'], 'createdDate': '2020-05-28T06:06:40.27-04:00',
                            'creator': None}]
 
@@ -898,7 +901,6 @@ class TestCtsDispatchMonitor:
             call(ticket_id_1, sms_tech_note_1),
             call(ticket_id_2, confirmed_note_2),
             call(ticket_id_2, sms_note_2),
-            # call(ticket_id_2, sms_tech_note_2)
         ])
 
         cts_dispatch_monitor._cts_repository.send_confirmed_sms.assert_has_awaits([
@@ -915,6 +917,7 @@ class TestCtsDispatchMonitor:
             call(slack_msg_tech_note_1),
             call(slack_msg_2),
             call(slack_msg_note_2),
+            call(err_msg),
             call(slack_msg_tech_note_2),
         ])
 
@@ -2304,25 +2307,11 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
-        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
-        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
-        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
-        time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
 
         sms_to = '+12027723610'
-        sms_to_2 = '+12027723611'
         sms_to_tech = '+12123595129'
-        sms_to_2_tech = '+12123595129'
-        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
-        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
         # Get datetime formatted string
         datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-
-        responses_details_mock = [
-            cts_ticket_details_1_with_confirmation_note,
-            cts_ticket_details_2_with_confirmation_note
-        ]
 
         responses_append_confirmed_notes_mock = [
             True,
@@ -2422,8 +2411,8 @@ class TestCtsDispatchMonitor:
             call(dispatch_number_1, ticket_id_1, sms_to_tech, 12.0, sms_payload_tech, sms_data_payload_tech),
         ])
         cts_dispatch_monitor._cts_repository.append_note.assert_has_awaits([
-            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to, 12.0, sms_note),
-            call(dispatch_number_1, igz_dispatch_number_1, ticket_id_1, sms_to_tech, 12.0, sms_note_tech),
+            call(dispatch_number_1, ticket_id_1, 12.0, sms_note),
+            call(dispatch_number_1, ticket_id_1, 12.0, sms_note_tech),
         ])
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
@@ -2692,25 +2681,6 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
-        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
-        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
-        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
-        time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
-
-        sms_to = '+12027723610'
-        sms_to_2 = '+12027723611'
-        sms_to_tech = '+12123595129'
-        sms_to_2_tech = '+12123595129'
-        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
-        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
-        # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-
-        responses_details_mock = [
-            cts_ticket_details_1_with_12h_sms_note,
-            cts_ticket_details_2_with_12h_sms_note
-        ]
 
         responses_append_confirmed_notes_mock = [
             True,
@@ -2721,57 +2691,17 @@ class TestCtsDispatchMonitor:
             True
         ]
 
-        # First not skipped, Second skipped
         responses_get_diff_hours = [
             cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
             cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
             cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
             cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
-            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1,
-            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
+            cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1
         ]
 
-        responses_send_tech_12_sms_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_12_sms_note_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_12_sms_tech_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_12_sms_tech_note_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_2_sms_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_2_sms_note_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_2_sms_tech_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_2_sms_tech_note_mock = [
-            True,
-            True
-        ]
         responses_send_slack_message_mock = [
             {'status': 200},
             {'status': 200},
@@ -2835,25 +2765,6 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
-        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
-        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
-        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
-        time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
-
-        sms_to = '+12027723610'
-        sms_to_2 = '+12027723611'
-        sms_to_tech = '+12123595129'
-        sms_to_2_tech = '+12123595129'
-        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
-        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
-        # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-
-        responses_details_mock = [
-            cts_ticket_details_1_with_12h_sms_note,
-            cts_ticket_details_2_with_12h_sms_note
-        ]
 
         responses_append_confirmed_notes_mock = [
             True,
@@ -2887,14 +2798,8 @@ class TestCtsDispatchMonitor:
         slack_msg_1 = f'[service-dispatch-monitor] [CTS] ' \
                       f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} - IGZ: IGZ_0001 ' \
                       f'- Reminder 2 hours for client - A sms before note appended'
-        slack_msg_2 = f'[service-dispatch-monitor] [CTS] ' \
-                      f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} - IGZ: IGZ_0002 ' \
-                      f'- Reminder 2 hours for client - SMS 2.0h not sended'
         slack_msg_sms_1 = f'[service-dispatch-monitor] [CTS] ' \
                           f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} - IGZ: IGZ_0001 ' \
-                          f'- Reminder 2 hours for tech - A sms before note appended'
-        slack_msg_sms_2 = f'[service-dispatch-monitor] [CTS] ' \
-                          f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} - IGZ: IGZ_0002 ' \
                           f'- Reminder 2 hours for tech - A sms before note appended'
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
@@ -2931,8 +2836,6 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_sms_1),
-            call(slack_msg_2),
-            call(slack_msg_sms_2),
         ])
 
     @pytest.mark.asyncio
@@ -2947,25 +2850,6 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
-        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
-        dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
-        ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
-        time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
-
-        sms_to = '+12027723610'
-        sms_to_2 = '+12027723611'
-        sms_to_tech = '+12123595129'
-        sms_to_2_tech = '+12123595129'
-        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
-        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
-        # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-
-        responses_details_mock = [
-            cts_ticket_details_1_with_12h_sms_note,
-            cts_ticket_details_2_with_12h_sms_note
-        ]
 
         responses_append_confirmed_notes_mock = [
             True,
@@ -2988,44 +2872,6 @@ class TestCtsDispatchMonitor:
             cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1
         ]
 
-        responses_send_tech_12_sms_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_12_sms_note_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_12_sms_tech_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_12_sms_tech_note_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_2_sms_mock = [
-            True,
-            False
-        ]
-
-        responses_send_tech_2_sms_note_mock = [
-            False
-        ]
-
-        responses_send_tech_2_sms_tech_mock = [
-            True,
-            True
-        ]
-
-        responses_send_tech_2_sms_tech_note_mock = [
-            True,
-            True
-        ]
         responses_send_slack_message_mock = [
             {'status': 200},
             {'status': 200},
@@ -3040,12 +2886,6 @@ class TestCtsDispatchMonitor:
         slack_msg_sms_1 = f'[service-dispatch-monitor] [CTS] ' \
                           f'Dispatch [{dispatch_number_1}] in ticket_id: {ticket_id_1} - IGZ: IGZ_0001 ' \
                           f'- Reminder 2 hours for tech - A sms before note not appended'
-        slack_msg_2 = f'[service-dispatch-monitor] [CTS] ' \
-                      f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} - IGZ: IGZ_0002 ' \
-                      f'- Reminder 2 hours for client - A sms before note appended'
-        slack_msg_sms_2 = f'[service-dispatch-monitor] [CTS] ' \
-                          f'Dispatch [{dispatch_number_2}] in ticket_id: {ticket_id_2} - IGZ: IGZ_0002 ' \
-                          f'- Reminder 2 hours for tech - A sms before note appended'
 
         cts_dispatch_monitor._notifications_repository.send_slack_message = CoroutineMock(
             side_effect=responses_send_slack_message_mock)
@@ -3081,8 +2921,6 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_sms_1),
-            call(slack_msg_2),
-            call(slack_msg_sms_2),
         ])
 
     @pytest.mark.asyncio
@@ -3097,25 +2935,8 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
-        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
-        time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
-
-        sms_to = '+12027723610'
-        sms_to_2 = '+12027723611'
-        sms_to_tech = '+12123595129'
-        sms_to_2_tech = '+12123595129'
-        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
-        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
-        # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-
-        responses_details_mock = [
-            cts_ticket_details_1_with_12h_sms_note,
-            cts_ticket_details_2_with_12h_sms_note
-        ]
 
         responses_append_confirmed_notes_mock = [
             True,
@@ -3193,8 +3014,6 @@ class TestCtsDispatchMonitor:
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
             call(slack_msg_sms_1),
-            call(slack_msg_2),
-            call(slack_msg_sms_2),
         ])
 
     @pytest.mark.asyncio
@@ -3423,27 +3242,9 @@ class TestCtsDispatchMonitor:
         igz_dispatch_number_2 = 'IGZ_0002'
         dispatch_number_1 = cts_dispatch_confirmed.get('Name')
         ticket_id_1 = cts_dispatch_confirmed.get('Ext_Ref_Num__c')
-        time_1 = cts_dispatch_confirmed.get('Local_Site_Time__c')
 
         dispatch_number_2 = cts_dispatch_confirmed_2.get('Name')
         ticket_id_2 = cts_dispatch_confirmed_2.get('Ext_Ref_Num__c')
-        time_2 = cts_dispatch_confirmed_2.get('Local_Site_Time__c')
-
-        sms_to = '+12027723610'
-        sms_to_2 = '+12027723611'
-        sms_to_tech = '+12123595129'
-        sms_to_2_tech = '+12123595129'
-
-        datetime_1_localized = iso8601.parse_date(time_1, pytz.utc)
-        datetime_2_localized = iso8601.parse_date(time_2, pytz.utc)
-        # Get datetime formatted string
-        datetime_1_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-        datetime_2_str = 'Jun 23, 2020 @ 01:00 PM UTC'
-
-        responses_details_mock = [
-            cts_ticket_details_1_with_2h_sms_note,
-            cts_ticket_details_2_with_2h_sms_note
-        ]
 
         responses_append_confirmed_notes_mock = [
             True,
@@ -3466,26 +3267,6 @@ class TestCtsDispatchMonitor:
             cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
             cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 - 1,
             cts_dispatch_monitor._cts_repository.HOURS_2 * 1.0 + 1
-        ]
-
-        responses_send_tech_12_sms_mock = [
-            True,
-            False
-        ]
-
-        responses_send_tech_12_sms_note_mock = [
-            True,
-            False
-        ]
-
-        responses_send_tech_2_sms_mock = [
-            True,
-            False
-        ]
-
-        responses_send_tech_2_sms_note_mock = [
-            False,
-            False
         ]
 
         responses_send_slack_message_mock = [
@@ -3537,7 +3318,6 @@ class TestCtsDispatchMonitor:
 
         cts_dispatch_monitor._notifications_repository.send_slack_message.assert_has_awaits([
             call(slack_msg_1),
-            call(slack_msg_2),
         ])
 
     @pytest.mark.asyncio
