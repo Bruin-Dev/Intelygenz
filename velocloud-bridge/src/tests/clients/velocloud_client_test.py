@@ -4,12 +4,14 @@ from unittest.mock import call
 from unittest.mock import patch
 
 import pytest
-from application.clients.velocloud_client import VelocloudClient
+
+from aiohttp import ClientConnectionError
 from apscheduler.jobstores.base import ConflictingIdError
 from asynctest import CoroutineMock
 from pytest import raises
 
 from application.clients import velocloud_client as velocloud_client_module
+from application.clients.velocloud_client import VelocloudClient
 from config import testconfig
 
 
@@ -1231,3 +1233,243 @@ class TestVelocloudClient:
         velocloud_client._start_relogin_job = CoroutineMock()
         json_return = await velocloud_client._json_return(response, host)
         assert json_return == response
+
+    @pytest.mark.asyncio
+    async def get_links_with_edge_info_ok_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+        velocloud_headers = {
+            'some': 'header',
+        }
+        clients_by_host = [
+            {'host': velocloud_host, 'headers': velocloud_headers}
+        ]
+
+        links_status: list = [
+            {
+                'enterpriseName': 'Militaires Sans Frontières',
+                'enterpriseId': 2,
+                'enterpriseProxyId': None,
+                'enterpriseProxyName': None,
+                'edgeName': 'Big Boss',
+                'edgeState': 'CONNECTED',
+                'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+                'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+                'edgeLastContact': '2020-09-29T04:48:55.000Z',
+                'edgeId': 4206,
+                'edgeSerialNumber': 'VC05200048223',
+                'edgeHASerialNumber': None,
+                'edgeModelNumber': 'edge520',
+                'edgeLatitude': None,
+                'edgeLongitude': None,
+                'displayName': '70.59.5.185',
+                'isp': None,
+                'interface': 'REX',
+                'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+                'linkState': 'STABLE',
+                'linkLastActive': '2020-09-29T04:45:15.000Z',
+                'linkVpnState': 'STABLE',
+                'linkId': 5293,
+                'linkIpAddress': '70.59.5.185',
+            }
+        ]
+        http_status_code = 200
+
+        expected_result = {
+            'body': links_status,
+            'status': http_status_code,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        response_mock = Mock()
+        response_mock.json = CoroutineMock(return_value=links_status)
+        response_mock.status = http_status_code
+
+        velocloud_client = VelocloudClient(config, logger, scheduler)
+        velocloud_client._clients = clients_by_host
+
+        with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            result = await velocloud_client.get_links_with_edge_info(velocloud_host)
+
+        assert result == expected_result
+
+    @pytest.mark.asyncio
+    async def get_links_with_edge_info_with_response_having_status_400_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+        velocloud_headers = {
+            'some': 'header',
+        }
+        clients_by_host = [
+            {'host': velocloud_host, 'headers': velocloud_headers}
+        ]
+
+        response_body = {
+            "error": {
+                "code": -32600,
+                "message": "An error occurred while processing your request"
+            }
+        }
+        http_status_code = 400
+
+        expected_result = {
+            'body': response_body,
+            'status': http_status_code,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        response_mock = Mock()
+        response_mock.json = CoroutineMock(return_value=response_body)
+        response_mock.status = http_status_code
+
+        velocloud_client = VelocloudClient(config, logger, scheduler)
+        velocloud_client._clients = clients_by_host
+
+        with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            result = await velocloud_client.get_links_with_edge_info(velocloud_host)
+
+        assert result == expected_result
+
+    @pytest.mark.asyncio
+    async def get_links_with_edge_info_with_response_having_status_5xx_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+        velocloud_headers = {
+            'some': 'header',
+        }
+        clients_by_host = [
+            {'host': velocloud_host, 'headers': velocloud_headers}
+        ]
+
+        response_body = {
+            "error": {
+                "code": -32600,
+                "message": "An error occurred while processing your request"
+            }
+        }
+        http_status_code = 500
+
+        expected_result = {
+            'body': 'Got internal error from Velocloud',
+            'status': http_status_code,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        response_mock = Mock()
+        response_mock.json = CoroutineMock(return_value=response_body)
+        response_mock.status = http_status_code
+
+        velocloud_client = VelocloudClient(config, logger, scheduler)
+        velocloud_client._clients = clients_by_host
+
+        with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            result = await velocloud_client.get_links_with_edge_info(velocloud_host)
+
+        assert result == expected_result
+
+    @pytest.mark.asyncio
+    async def get_links_with_edge_info_with_response_having_status_200_and_pointing_out_token_expiration_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+        velocloud_headers = {
+            'some': 'header',
+        }
+        clients_by_host = [
+            {'host': velocloud_host, 'headers': velocloud_headers}
+        ]
+
+        response_body = {
+            'error': {
+                'code': -32000,
+                'message': 'tokenError [expired session cookie]'
+            }
+        }
+        http_status_code = 200
+
+        token_expired_msg = f'Auth token expired for host {velocloud_host}'
+        expected_result = {
+            'body': token_expired_msg,
+            'status': 401,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        response_mock = Mock()
+        response_mock.json = CoroutineMock(return_value=token_expired_msg)
+        response_mock.status = http_status_code
+        response_mock.headers = {
+            'Expires': '0',
+        }
+
+        velocloud_client = VelocloudClient(config, logger, scheduler)
+        velocloud_client._clients = clients_by_host
+        velocloud_client._start_relogin_job = CoroutineMock()
+
+        with patch.object(velocloud_client._session, 'post', new=CoroutineMock(return_value=response_mock)):
+            result = await velocloud_client.get_links_with_edge_info(velocloud_host)
+
+        velocloud_client._start_relogin_job.assert_awaited_once_with(velocloud_host)
+        assert result == expected_result
+
+    @pytest.mark.asyncio
+    async def get_links_with_edge_info_with_headers_missing_for_target_host_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+        velocloud_headers = {
+            'some': 'header',
+        }
+        clients_by_host = [
+            {'host': 'some-host', 'headers': velocloud_headers}
+        ]
+
+        expected_result = {
+            'body': f'Cannot find a client to connect to host {velocloud_host}',
+            'status': 404,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        velocloud_client = VelocloudClient(config, logger, scheduler)
+        velocloud_client._clients = clients_by_host
+        velocloud_client._start_relogin_job = CoroutineMock()
+
+        with patch.object(velocloud_client._session, 'post', new=CoroutineMock(side_effect=ClientConnectionError)):
+            result = await velocloud_client.get_links_with_edge_info(velocloud_host)
+
+        velocloud_client._start_relogin_job.assert_awaited_once_with(velocloud_host)
+        assert result == expected_result
+
+    @pytest.mark.asyncio
+    async def get_links_with_edge_info_with_connection_raising_exception_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+        velocloud_headers = {
+            'some': 'header',
+        }
+        clients_by_host = [
+            {'host': velocloud_host, 'headers': velocloud_headers}
+        ]
+
+        expected_result = {
+            'body': 'Error while connecting to Velocloud API',
+            'status': 500,
+        }
+
+        logger = Mock()
+        scheduler = Mock()
+        config = testconfig
+
+        velocloud_client = VelocloudClient(config, logger, scheduler)
+        velocloud_client._clients = clients_by_host
+
+        with patch.object(velocloud_client._session, 'post', new=CoroutineMock(side_effect=ClientConnectionError)):
+            result = await velocloud_client.get_links_with_edge_info(velocloud_host)
+
+        assert result == expected_result

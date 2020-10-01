@@ -490,3 +490,74 @@ class VelocloudClient:
                 else:
                     self._logger.error(f'Error response returned: {response}')
         return response
+
+    async def get_links_with_edge_info(self, velocloud_host: str):
+        result = dict.fromkeys(["body", "status"])
+
+        request_body = {}
+        target_host_client = self._get_header_by_host(velocloud_host)
+
+        if target_host_client is None:
+            await self._start_relogin_job(velocloud_host)
+
+            result["body"] = f'Cannot find a client to connect to host {velocloud_host}'
+            result["status"] = 404
+            self.__log_result(result)
+
+            return result
+
+        try:
+            self._logger.info(f'Getting links with edge info from Velocloud host "{velocloud_host}"...')
+
+            response = await self._session.post(
+                f"https://{velocloud_host}/portal/rest/monitoring/getEnterpriseEdgeLinkStatus",
+                json=request_body,
+                headers=target_host_client['headers'],
+                ssl=self._config['verify_ssl']
+            )
+        except aiohttp.ClientConnectionError:
+            result["body"] = 'Error while connecting to Velocloud API'
+            result["status"] = 500
+            self.__log_result(result)
+            return result
+
+        if response.status in range(500, 513):
+            result["body"] = "Got internal error from Velocloud"
+            result["status"] = 500
+            self.__log_result(result)
+            return result
+
+        await self.__schedule_relogin_job_if_needed(velocloud_host, response)
+
+        self._logger.info(
+            f'Got HTTP {response.status} from Velocloud after claiming links with edge info for host {velocloud_host}'
+        )
+
+        result['body'] = await response.json()
+        result['status'] = response.status
+
+        self.__log_result(result)
+
+        return result
+
+    async def __schedule_relogin_job_if_needed(self, velocloud_host: str, response: aiohttp.client.ClientResponse):
+        if self.__token_expired(response):
+            self._logger.info(f'Auth token expired for host {velocloud_host}. Scheduling re-login job...')
+            await self._start_relogin_job(velocloud_host)
+
+            response._body = f'Auth token expired for host {velocloud_host}'
+            response.status = 401
+
+    @staticmethod
+    def __token_expired(response: aiohttp.client.ClientResponse) -> bool:
+        return response.headers.get('Expires') == '0'
+
+    def __log_result(self, result: dict):
+        body, status = result['body'], result['status']
+
+        if status == 400:
+            self._logger.error(f"Got error from Velocloud -> {body}")
+        if status == 401:
+            self._logger.error(f'Authentication error -> {body}')
+        if status in range(500, 513):
+            self._logger.error(f"Got {status} from Velocloud")

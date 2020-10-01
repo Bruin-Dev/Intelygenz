@@ -349,3 +349,83 @@ class TestVelocloudRepository:
 
         assert test_velocloud_client.get_all_enterprise_names.called
         assert enterprise_names["body"] == ["The Name"]
+
+    @pytest.mark.asyncio
+    async def get_links_with_edge_info_ok_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+
+        link_1 = {
+            'enterpriseName': 'Militaires Sans Frontières',
+            'enterpriseId': 2,
+            'enterpriseProxyId': None,
+            'enterpriseProxyName': None,
+            'edgeName': 'Big Boss',
+            'edgeState': 'CONNECTED',
+            'edgeSystemUpSince': '2020-09-14T05:07:40.000Z',
+            'edgeServiceUpSince': '2020-09-14T05:08:22.000Z',
+            'edgeLastContact': '2020-09-29T04:48:55.000Z',
+            'edgeId': 4206,
+            'edgeSerialNumber': 'VC05200048223',
+            'edgeHASerialNumber': None,
+            'edgeModelNumber': 'edge520',
+            'edgeLatitude': None,
+            'edgeLongitude': None,
+            'displayName': '70.59.5.185',
+            'isp': None,
+            'interface': 'REX',
+            'internalId': '00000001-ac48-47a0-81a7-80c8c320f486',
+            'linkState': 'STABLE',
+            'linkLastActive': '2020-09-29T04:45:15.000Z',
+            'linkVpnState': 'STABLE',
+            'linkId': 5293,
+            'linkIpAddress': '70.59.5.185',
+        }
+        client_result = {
+            'body': [
+                link_1
+            ],
+            'status': 200,
+        }
+
+        expected_result = {
+            'body': [
+                {
+                    'host': velocloud_host,
+                    **link_1,
+                },
+            ],
+            'status': 200,
+        }
+
+        logger = Mock()
+
+        velocloud_client = Mock()
+        velocloud_client.get_links_with_edge_info = CoroutineMock(return_value=client_result)
+
+        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+
+        result = await velocloud_repository.get_links_with_edge_info(velocloud_host)
+
+        velocloud_client.get_links_with_edge_info.assert_awaited_once_with(velocloud_host)
+        assert result == expected_result
+
+    @pytest.mark.asyncio
+    async def get_links_with_edge_info_with_response_having_non_2xx_status_test(self):
+        velocloud_host = 'mettel.velocloud.net'
+
+        client_result = {
+            'body': 'Got internal error from Velocloud',
+            'status': 500,
+        }
+
+        logger = Mock()
+
+        velocloud_client = Mock()
+        velocloud_client.get_links_with_edge_info = CoroutineMock(return_value=client_result)
+
+        velocloud_repository = VelocloudRepository(config, logger, velocloud_client)
+
+        result = await velocloud_repository.get_links_with_edge_info(velocloud_host)
+
+        velocloud_client.get_links_with_edge_info.assert_awaited_once_with(velocloud_host)
+        assert result == client_result

@@ -96,3 +96,14 @@ class VelocloudRepository:
             ]
 
         return {"body": enterprise_names, "status": enterprises["status"]}
+
+    async def get_links_with_edge_info(self, velocloud_host: str):
+        links_with_edge_info_response = await self._velocloud_client.get_links_with_edge_info(velocloud_host)
+
+        if links_with_edge_info_response['status'] not in range(200, 300):
+            return links_with_edge_info_response
+
+        for elem in links_with_edge_info_response['body']:
+            elem['host'] = velocloud_host
+
+        return links_with_edge_info_response
